@@ -63,6 +63,7 @@ debug.log
 *.swo
 .vim/
 .emacs.d/
+.claude/
 
 
 # OS
