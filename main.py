@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-
+from mangum import Mangum
 from app.api.routes import router
 from app.config import settings
 
@@ -11,6 +11,7 @@ app = FastAPI(
 
 app.include_router(router)
 
+handler = Mangum(app)
 
 @app.get("/health")
 async def health_check():
