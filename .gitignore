@@ -70,3 +70,12 @@ debug.log
 .DS_Store?
 ._*
 Thumbs.db
+
+# Alembic
+alembic/__pycache__/
+alembic/*.pyc
+alembic/*.pyo
+
+# If you ever create local-only migration experiments
+alembic/versions/*.tmp
+alembic/versions/*.bak
