@@ -5,11 +5,6 @@ from enum import Enum
 from pydantic import BaseModel, Field
 
 
-class UserRole(str, Enum):
-    USER = "user"
-    ADMIN = "admin"
-
-
 class UserStatus(str, Enum):
     ACTIVE = "active"
     INACTIVE = "inactive"
@@ -17,18 +12,69 @@ class UserStatus(str, Enum):
     DELETED = "deleted"
 
 
+class AgeGroup(str, Enum):
+    CHILD = "child"
+    TEEN = "teen"
+    ADULT = "adult"
+    SENIOR = "senior"
+
+
+class Gender(str, Enum):
+    MALE = "male"
+    FEMALE = "female"
+
+
+class EducationLevel(str, Enum):
+    NO_FORMAL_EDUCATION = "no_formal_education"
+    ELEMENTARY_LEVEL = "elementary_level"
+    ELEMENTARY_GRADUATE = "elementary_graduate"
+    JUNIOR_HIGH_SCHOOL_LEVEL = "junior_high_school_level"
+    JUNIOR_HIGH_SCHOOL_GRADUATE = "junior_high_school_graduate"
+    SENIOR_HIGH_SCHOOL_LEVEL = "senior_high_school_level"
+    SENIOR_HIGH_SCHOOL_GRADUATE = "senior_high_school_graduate"
+    VOCATIONAL_TRADE_CERTIFICATE = "vocational_trade_certificate"
+    COLLEGE_LEVEL_UNDERGRADUATE = "college_level_undergraduate"
+    ASSOCIATE_DEGREE = "associate_degree"
+    BACHELORS_DEGREE = "bachelors_degree"
+    MASTERS_DEGREE = "masters_degree"
+    DOCTORATE_DEGREE = "doctorate_degree"
+
+
 class User(BaseModel):
     id: uuid.UUID = Field(default_factory=uuid.uuid4)
     email: str
     password: str
-    role: UserRole = UserRole.USER
+    role: str
     status: UserStatus = UserStatus.ACTIVE
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
 
     class Config:
         orm_mode = True
-        
+
+
+class UserProfile(BaseModel):
+    user_id: uuid.UUID
+    alias: str
+    first_name: str
+    last_name: str
+    image_file_id: str | None = None
+    age_group: AgeGroup
+    gender: Gender
+    education_level: EducationLevel
+    bio: str | None = None
+    preferences: dict | None = None
+    
+    class Config:
+        orm_mode = True
+
+
+class UserRole(BaseModel):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4)
+    role: str
+
+    class Config:
+        orm_mode = True
+
+
 class UserSecurity(BaseModel):
     user_id: uuid.UUID
     email_verified: bool = False
@@ -39,7 +85,8 @@ class UserSecurity(BaseModel):
 
     class Config:
         orm_mode = True
-        
+
+
 class UserActivity(BaseModel):
     user_id: uuid.UUID
     last_login_at: datetime | None = None
