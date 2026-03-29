@@ -11,6 +11,8 @@ from app.core.security import hash_string, verify_hash
 from app.infrastructure.database.models.token import Token
 from app.infrastructure.database.repositories.refresh_token_respository import RefreshTokenRepository
 
+from app.core.entities.user import UserProfile
+
 
 class TokenPayload(BaseModel):
     sub: str          # user_id
@@ -20,12 +22,13 @@ class TokenPayload(BaseModel):
     exp: datetime
     iat: datetime
 
+
 repo = RefreshTokenRepository()
 
 # Access token
 
 
-def create_access_token(user_id: uuid.UUID, role_id: str, user: User) -> str:
+def create_access_token(user_id: uuid.UUID, role_id: str, user: UserProfile) -> str:
     now = datetime.now(timezone.utc)
     payload = {
         "sub": str(user_id),
@@ -33,6 +36,9 @@ def create_access_token(user_id: uuid.UUID, role_id: str, user: User) -> str:
         "role_id": role_id,
         "first_name": user.first_name,
         "last_name": user.last_name,
+        "age_group": user.age_group,
+        "gender": user.gender,
+        "education_level": user.education_level,
         "type": "access",
         "jti": str(uuid.uuid4()),
         "iat": now,

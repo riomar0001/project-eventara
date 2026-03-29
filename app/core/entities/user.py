@@ -59,10 +59,11 @@ class UserProfile(BaseModel):
     image_file_id: str | None = None
     age_group: AgeGroup
     gender: Gender
+    occupation: str | None = None
     education_level: EducationLevel
     bio: str | None = None
     preferences: dict | None = None
-    
+
     class Config:
         orm_mode = True
 
