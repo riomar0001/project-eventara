@@ -2,8 +2,6 @@
 
 This project follows **Clean Architecture** (Robert C. Martin), organizing code into concentric dependency layers where inner layers have zero knowledge of outer ones. Dependencies always point **inward**.
 
-![Clean Architecture](https://cdn-images-1.medium.com/max/1600/1*B7LkQDyDqLN3rRSrNYkETA.jpeg)
-
 ---
 
 ## Layer Breakdown
@@ -12,39 +10,46 @@ This project follows **Clean Architecture** (Robert C. Martin), organizing code 
 
 The innermost circle. Pure Python — no framework imports, no I/O.
 
-- **Entities**: Pydantic models or dataclasses representing core business objects (events, attendees, tickets, etc.)
-- **Rules**: Invariants and business logic that live on the entity itself
+- **`user_entities.py`**: Pydantic models for `User`, `UserProfile`, `UserSecurity`, `UserActivity`, `UserRole` plus enums (`UserStatus`, `AgeGroup`, `Gender`, `EducationLevel`)
+- **`jwt_entities.py`**: Token payload models
 - Has **no dependencies** on any other layer
 
 ### 2. Application — `app/core/use_cases/` & `app/core/interfaces/`
 
-Orchestrates entities to fulfill a single business goal (e.g. `CreateEvent`, `RegisterAttendee`).
+Orchestrates entities to fulfill a single business goal.
 
-- **Use Cases**: One class / function per use case; coordinates entities and calls repository/service interfaces
-- **Interfaces** (`app/core/interfaces/`): Abstract base classes defining contracts that the infrastructure must fulfill (repository protocols, messaging ports, cache ports)
+- **`use_cases/user.py`**: `register_user`, `login_user` — coordinate repos and domain logic
+- **Input DTOs**: `RegisterUserInput`, `LoginUserInput` — plain Python classes, no HTTP coupling
+- **`interfaces/`**: Abstract contracts (repository protocols) that infrastructure must fulfill
+- **`hash_utils.py`**: Password hashing utility (no I/O, no framework)
+- **`jwt_utils.py`**: JWT encode/decode helpers
+- **`exceptions/`**: Domain exception types (`EmailAlreadyTakenError`, etc.)
 - Depends only on the **Domain** layer
 
-### 3. Interface Adapters — `app/api/routes/`
+### 3. Interface Adapters — `app/api/`
 
-Translates between the outside world and use cases.
+Translates between HTTP and use cases.
 
-- **Route handlers**: FastAPI `APIRouter` endpoints that parse HTTP requests, call the appropriate use case, and serialize the response
-- **Request/Response schemas**: Pydantic schemas for HTTP payloads (kept separate from domain entities)
+- **`routes/auth.py`**: FastAPI `APIRouter` — parses requests, calls use cases, serializes responses
+- **`schemas/auth.py`**: Pydantic request/response schemas (`RegisterRequest`, `RegisterResponse`, `LoginRequest`, `LoginResponse`) — separate from domain entities
+- **`dependencies/`**: FastAPI `Depends` factories (e.g. `get_db`)
 - Depends on the **Application** layer; never imports infrastructure directly
 
-### 4. Frameworks & Drivers — `app/infrastructure/` + `main.py`
+### 4. Frameworks & Drivers — `app/infrastructure/` + `app/main.py`
 
 The outermost circle. All framework coupling lives here and is replaceable.
 
 | Sub-package | Responsibility |
 |---|---|
-| `app/infrastructure/database/models/` | SQLAlchemy ORM table definitions |
-| `app/infrastructure/database/repositories/` | Concrete repository implementations (SQL) |
-| `app/infrastructure/cache/repositories/` | Concrete repository implementations (Redis / in-memory) |
-| `app/infrastructure/messaging/publishers/` | RabbitMQ event publishers (aio-pika) |
-| `app/infrastructure/messaging/consumers/` | RabbitMQ event consumers |
-| `app/config/` | Settings loaded from environment variables (Pydantic `BaseSettings`) |
-| `main.py` | Application entry point — wires FastAPI, routers, and DI together |
+| `infrastructure/database/models/` | SQLAlchemy ORM table definitions (`User`, `UserProfile`, `UserSecurity`, `UserActivity`, `Token`) |
+| `infrastructure/database/repositories/` | `UserRepository`, `RefreshTokenRepository` — concrete SQL implementations |
+| `infrastructure/database/session.py` | Async SQLAlchemy session factory and `get_db` dependency |
+| `infrastructure/database/base.py` | Declarative base shared by all ORM models |
+| `infrastructure/cache/repositories/` | Concrete cache implementations (Redis / in-memory) |
+| `infrastructure/messaging/publishers/` | RabbitMQ event publishers (aio-pika) |
+| `infrastructure/messaging/consumers/` | RabbitMQ event consumers |
+| `app/config/` | `Settings` loaded from `.env` via Pydantic `BaseSettings` |
+| `app/main.py` | App entry point — wires FastAPI, registers routers |
 
 ---
 
@@ -68,8 +73,12 @@ Infrastructure **implements** the interfaces defined in `core/interfaces/`. Use 
 | Web framework | FastAPI 0.135 |
 | Validation / serialization | Pydantic v2 |
 | ORM | SQLAlchemy 2.0 (async) |
+| Database driver | asyncpg |
+| Migrations | Alembic |
+| Auth | PyJWT + passlib (bcrypt) |
 | Message broker | RabbitMQ via aio-pika |
 | ASGI server | Uvicorn |
+| Runtime | Python 3.11 |
 
 ---
 
@@ -77,28 +86,42 @@ Infrastructure **implements** the interfaces defined in `core/interfaces/`. Use 
 
 ```plaintext
 eventara/
-├── main.py                          # App entry point, router registration
-├── requirements.txt
 ├── app/
-│   ├── config/                      # Environment-based settings
+│   ├── main.py                          # App entry point, router registration
+│   ├── config/                          # Pydantic BaseSettings (env-based)
 │   ├── core/
-│   │   ├── entities/                # Domain models (pure Python)
-│   │   ├── interfaces/              # Abstract contracts (repository, messaging)
-│   │   └── use_cases/               # Business operations
+│   │   ├── entities/
+│   │   │   ├── user_entities.py         # User, UserProfile, UserSecurity, UserActivity
+│   │   │   └── jwt_entities.py          # Token payload models
+│   │   ├── exceptions/
+│   │   │   └── user_exceptions.py       # EmailAlreadyTakenError, etc.
+│   │   ├── interfaces/                  # Abstract repository / service contracts
+│   │   ├── use_cases/
+│   │   │   └── user.py                  # register_user, login_user
+│   │   ├── hash_utils.py                # Password hashing
+│   │   └── jwt_utils.py                 # JWT encode / decode
 │   ├── api/
-│   │   └── routes/                  # FastAPI routers (HTTP interface adapters)
+│   │   ├── routes/
+│   │   │   └── auth.py                  # POST /auth/register, POST /auth/login
+│   │   ├── schemas/
+│   │   │   └── auth.py                  # HTTP request / response schemas
+│   │   └── dependencies/                # FastAPI Depends factories
 │   └── infrastructure/
 │       ├── database/
-│       │   ├── models/              # SQLAlchemy ORM models
-│       │   └── repositories/        # Concrete DB repository implementations
+│       │   ├── base.py                  # SQLAlchemy declarative base
+│       │   ├── session.py               # Async session factory
+│       │   ├── models/                  # ORM table definitions
+│       │   └── repositories/            # UserRepository, RefreshTokenRepository
 │       ├── cache/
-│       │   └── repositories/        # Concrete cache implementations
+│       │   └── repositories/            # Cache implementations
 │       └── messaging/
-│           ├── publishers/          # RabbitMQ event publishers
-│           └── consumers/           # RabbitMQ event consumers
-└── tests/
-    ├── unit/                        # Tests for entities & use cases (no I/O)
-    └── integration/                 # Tests against real DB / broker
+│           ├── publishers/              # RabbitMQ event publishers
+│           └── consumers/               # RabbitMQ event consumers
+├── tests/
+│   ├── unit/                            # Entity & use-case tests (no I/O)
+│   └── integration/                     # Tests against real DB / broker
+├── .env.example
+└── requirements.txt
 ```
 
 ---
@@ -107,5 +130,5 @@ eventara/
 
 - **Dependency Inversion**: Use cases depend on abstractions (`core/interfaces/`), not concrete infrastructure classes.
 - **Single Responsibility**: One use case per file; one router per resource.
-- **Testability**: The domain and use-case layers are fully testable without standing up a database or broker — mock the interface, not the implementation.
-- **Replaceability**: Swap PostgreSQL for a different DB, or RabbitMQ for Kafka, by writing a new `infrastructure/` class that satisfies the existing interface — zero changes to business logic.
+- **Testability**: Domain and use-case layers are fully testable without a database or broker — mock the interface, not the implementation.
+- **Replaceability**: Swap PostgreSQL for another DB, or RabbitMQ for Kafka, by writing a new `infrastructure/` class that satisfies the existing interface — zero changes to business logic.

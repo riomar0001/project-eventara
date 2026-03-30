@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.schemas.auth import RegisterRequest, RegisterResponse
+from app.api.schemas.auth import RegisterRequest, RegisterResponse, LoginRequest, LoginResponse
 from app.core.exceptions import EmailAlreadyTakenError
-from app.core.use_cases.user import RegisterUserInput, register_user
+from app.core.use_cases.user import RegisterUserInput, register_user, LoginUserInput
 from app.infrastructure.database.session import get_db
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
@@ -35,7 +35,18 @@ async def register(
             ),
             db,
         )
-    except EmailAlreadyTakenError as e:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
+    except EmailAlreadyTakenError as error:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail=str(error))
 
     return RegisterResponse(user_id=user.id, email=user.email)
+
+
+@router.post("/login", response_model=LoginResponse, status_code=status.HTTP_200_OK)
+async def login(body: LoginRequest,
+                db: AsyncSession = Depends(get_db),) -> RegisterResponse:
+    try:
+        pass
+    except:
+        pass
+        

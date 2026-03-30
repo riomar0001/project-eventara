@@ -5,4 +5,7 @@ from app.config import settings
 
 app = FastAPI(title=settings.APP_NAME, version=settings.APP_VERSION, debug=settings.DEBUG)
 
-app.include_router(auth.router, prefix="/api/v1")
+api_prefix = "/api/v1"
+
+
+app.include_router(auth.router, prefix=api_prefix)
