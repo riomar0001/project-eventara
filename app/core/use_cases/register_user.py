@@ -2,13 +2,10 @@ import uuid
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.security import hash_string
+from app.core.exceptions import EmailAlreadyTakenError
+from app.core.hash_utils import hash_string
 from app.infrastructure.database.models.user import User, UserActivity, UserProfile, UserSecurity
 from app.infrastructure.database.repositories.user_repository import UserRepository
-
-
-class EmailAlreadyTakenError(Exception):
-    pass
 
 
 class RegisterUserInput:

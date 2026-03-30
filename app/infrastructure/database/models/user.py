@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 from sqlalchemy import DateTime, Enum, ForeignKey, Integer, JSON, String, Text, Index, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.core.entities.user import AgeGroup, EducationLevel, Gender, UserStatus
+from app.core.entities.user_entities import AgeGroup, EducationLevel, Gender, UserStatus
 from app.infrastructure.database.base import Base
 
 if TYPE_CHECKING:

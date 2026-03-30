@@ -2,7 +2,7 @@ import uuid
 
 from pydantic import BaseModel, EmailStr, field_validator
 
-from app.core.entities.user import AgeGroup, EducationLevel, Gender
+from app.core.entities.user_entities import AgeGroup, EducationLevel, Gender
 
 
 class RegisterRequest(BaseModel):
