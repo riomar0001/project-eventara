@@ -1,39 +1,44 @@
 import uuid
 
-from pydantic import BaseModel, EmailStr, field_validator
+from pydantic import BaseModel, EmailStr, field_validator, Field
+from typing import Optional
 
 from app.core.entities.user_entities import AgeGroup, EducationLevel, Gender
 
 
 class RegisterRequest(BaseModel):
     email: EmailStr
-    password: str
+    password: str = Field(min_length=8)
     role: str = "user"
-    alias: str
-    first_name: str
-    last_name: str
+    alias: str = Field(min_length=3, max_length=30)
+    first_name: str = Field(min_length=2, max_length=50)
+    last_name: str = Field(min_length=2, max_length=50)
     age_group: AgeGroup
     gender: Gender
     education_level: EducationLevel
-    occupation: str | None = None
-    bio: str | None = None
-
-    @field_validator("password")
-    @classmethod
-    def password_strength(cls, v: str) -> str:
-        if len(v) < 8:
-            raise ValueError("Password must be at least 8 characters")
-        return v
+    occupation: Optional[str] = None
+    bio: Optional[str] = None
 
     @field_validator("alias")
     @classmethod
-    def alias_no_spaces(cls, v: str) -> str:
-        if " " in v:
+    def alias_no_spaces(cls, value: str) -> str:
+        if " " in value:
             raise ValueError("Alias must not contain spaces")
-        return v.lower()
+        return value.lower()
 
 
 class RegisterResponse(BaseModel):
     user_id: uuid.UUID
     email: str
     message: str = "Registration successful. Please verify your email."
+
+
+class LoginRequest(BaseModel):
+    email: EmailStr
+    password: str
+
+
+class LoginResponse(BaseModel):
+    access_token: str
+    refresh_token: str
+    message: str = "Login successful."
