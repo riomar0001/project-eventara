@@ -6,7 +6,7 @@ from app.core.exceptions import EmailAlreadyTakenError
 from app.core.use_cases.user import RegisterUserInput, register_user
 from app.infrastructure.database.session import get_db
 
-router = APIRouter(prefix="/auth", tags=["auth"])
+router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 
 @router.post(
