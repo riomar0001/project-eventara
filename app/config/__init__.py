@@ -24,8 +24,10 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str = "HS256"
     JWT_ACCESS_TOKEN_SECRET: str
     JWT_REFRESH_TOKEN_SECRET: str
+    JWT_VERIFICATION_TOKEN_SECRET: str
     ACCESS_TOKEN_EXPIRATION: timedelta = timedelta(minutes=30)
     REFRESH_TOKEN_EXPIRATION: timedelta = timedelta(days=7)
+    VERIFICATION_TOKEN_EXPIRATION: timedelta = timedelta(hours=24)
 
     @field_validator("ACCESS_TOKEN_EXPIRATION", "REFRESH_TOKEN_EXPIRATION", mode="before")
     @classmethod

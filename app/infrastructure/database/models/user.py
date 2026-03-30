@@ -3,10 +3,10 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import DateTime, Enum, ForeignKey, Integer, String, Text, Index, text
+from sqlalchemy import DateTime, Enum, ForeignKey, Integer, JSON, String, Text, Index, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.core.entities.user import UserRole, UserStatus
+from app.core.entities.user import AgeGroup, EducationLevel, Gender, UserStatus
 from app.infrastructure.database.base import Base
 
 if TYPE_CHECKING:
@@ -27,7 +27,7 @@ class User(Base):
     delete_at: Mapped[datetime | None] = mapped_column(DateTime)
 
     # Relationships
-    role_rel: Mapped["UserRoles"] = relationship(
+    profile: Mapped["UserProfile"] = relationship(
         back_populates="user", uselist=False)
     security: Mapped["UserSecurity"] = relationship(
         back_populates="user", uselist=False)
@@ -42,18 +42,33 @@ class User(Base):
             "id",
             postgresql_where=text("delete_at IS NULL"),
         ),
-
         Index("idx_users_status", "status"),
-
         Index("idx_users_role", "role"),
     )
 
 
-class UserRoles(Base):
-    __tablename__ = "user_roles"
-    user_id: Mapped[int] = mapped_column(ForeignKey(
-        "users.id", ondelete="CASCADE"), unique=True)
-    role: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
+class UserProfile(Base):
+    __tablename__ = "user_profiles"
+
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), unique=True)
+
+    alias: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
+    first_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    last_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    image_file_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
+
+    age_group: Mapped[str] = mapped_column(
+        Enum(AgeGroup, name="age_group"), nullable=False)
+    gender: Mapped[str] = mapped_column(
+        Enum(Gender, name="gender"), nullable=False)
+    occupation: Mapped[str | None] = mapped_column(String(150), nullable=True)
+    education_level: Mapped[str] = mapped_column(
+        Enum(EducationLevel, name="education_level"), nullable=False)
+    bio: Mapped[str | None] = mapped_column(Text, nullable=True)
+    preferences: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+
+    user: Mapped["User"] = relationship(back_populates="profile")
 
 
 class UserSecurity(Base):

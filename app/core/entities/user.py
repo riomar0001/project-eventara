@@ -74,7 +74,7 @@ class UserRole(BaseModel):
 
     class Config:
         orm_mode = True
-
+    
 
 class UserSecurity(BaseModel):
     user_id: uuid.UUID
