@@ -48,7 +48,7 @@ class User(BaseModel):
     status: UserStatus = UserStatus.ACTIVE
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class UserProfile(BaseModel):
@@ -65,7 +65,7 @@ class UserProfile(BaseModel):
     preferences: dict | None = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class UserRole(BaseModel):
@@ -73,7 +73,7 @@ class UserRole(BaseModel):
     role: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
     
 
 class UserSecurity(BaseModel):
@@ -85,7 +85,7 @@ class UserSecurity(BaseModel):
     locked_until: datetime | None = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class UserActivity(BaseModel):
@@ -95,4 +95,4 @@ class UserActivity(BaseModel):
     login_count: int = 0
 
     class Config:
-        orm_mode = True
+        from_attributes = True

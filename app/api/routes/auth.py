@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.schemas.auth import RegisterRequest, RegisterResponse
 from app.core.exceptions import EmailAlreadyTakenError
-from app.core.use_cases.register_user import RegisterUserInput, register_user
+from app.core.use_cases.user import RegisterUserInput, register_user
 from app.infrastructure.database.session import get_db
 
 router = APIRouter(prefix="/auth", tags=["auth"])

@@ -29,7 +29,7 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRATION: timedelta = timedelta(days=7)
     VERIFICATION_TOKEN_EXPIRATION: timedelta = timedelta(hours=24)
 
-    @field_validator("ACCESS_TOKEN_EXPIRATION", "REFRESH_TOKEN_EXPIRATION", mode="before")
+    @field_validator("ACCESS_TOKEN_EXPIRATION", "REFRESH_TOKEN_EXPIRATION","VERIFICATION_TOKEN_EXPIRATION", mode="before")
     @classmethod
     def parse_duration(cls, v: str) -> timedelta:
         if isinstance(v, timedelta):

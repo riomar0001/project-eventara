@@ -82,7 +82,8 @@ class UserSecurity(Base):
     password_change_at: Mapped[datetime | None] = mapped_column(DateTime)
 
     failed_login_attempts: Mapped[int] = mapped_column(Integer, default=0)
-    locked_until: Mapped[datetime | None] = mapped_column(DateTime)
+    locked_until: Mapped[datetime | None
+                         ] = mapped_column(DateTime)
 
     # Relationship
     user: Mapped["User"] = relationship(back_populates="security")

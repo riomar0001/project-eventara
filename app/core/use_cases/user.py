@@ -36,12 +36,19 @@ class RegisterUserInput:
         self.bio = bio
 
 
+class LoginUserInput:
+    def __init__(self, email: str, password: str) -> None:
+        self.email = email
+        self.password = password
+
+
 async def register_user(data: RegisterUserInput, db: AsyncSession) -> User:
     repo = UserRepository(db)
 
     existing = await repo.get_by_email(data.email)
     if existing:
-        raise EmailAlreadyTakenError(f"Email '{data.email}' is already registered")
+        raise EmailAlreadyTakenError(
+            f"Email '{data.email}' is already registered")
 
     user_id = uuid.uuid4()
 
@@ -66,3 +73,16 @@ async def register_user(data: RegisterUserInput, db: AsyncSession) -> User:
     )
 
     return await repo.create(user, security, activity, profile)
+
+
+async def login_user(data: LoginUserInput, db: AsyncSession) -> User:
+    repo = UserRepository(db)
+
+    user = await repo.get_by_email(data.email)
+    if not user:
+        return None
+
+    if user.password != hash_string(data.password):
+        return None
+    
+    return user
