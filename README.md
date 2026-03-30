@@ -86,7 +86,7 @@ A backend API for an event management platform, built with FastAPI and Clean Arc
 
 See [ARCHITECTURE.md](./ARCHITECTURE.md) for a full breakdown of the layer design and dependency rules.
 
-```
+```plaintext
 app/
 ├── main.py               # Entry point
 ├── config/               # Environment settings
