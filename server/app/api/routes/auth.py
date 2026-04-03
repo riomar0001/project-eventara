@@ -1,4 +1,7 @@
+import random
+import string
 import uuid
+from datetime import datetime, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -6,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.schemas.auth import (
     EmailVerifyRequest,
     EmailVerifyResponse,
+    LoginInitResponse,
     LoginRequest,
     LoginResponse,
     LoginVerifyRequest,
@@ -16,21 +20,25 @@ from app.api.schemas.auth import (
 )
 from app.core.entities.user_entities import AgeGroup, EducationLevel, Gender, UserProfile as UserProfileEntity
 from app.core.exceptions import EmailAlreadyTakenError
+from app.core.hash_utils import hash_string, verify_hash
 from app.core.jwt_utils import (
     create_access_token,
     create_refresh_token,
+    verification_token,
     verify_refresh_token,
     verify_verification_token,
 )
 from app.core.use_cases.user import LoginUserInput, RegisterUserInput, UserUseCase
-from app.core.hash_utils import verify_hash
-from app.infrastructure.database.models.user import User
+from app.infrastructure.database.models.user import User, UserOneTimeCode
 from app.infrastructure.database.repositories.one_time_code_repository import OneTimeCodeRepository
 from app.infrastructure.database.repositories.refresh_token_respository import RefreshTokenRepository
 from app.infrastructure.database.repositories.user_repository import UserRepository
 from app.infrastructure.database.session import get_db
+from app.infrastructure.messaging.email import otp_email_html, send_email, verification_email_html
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
+
+_OTP_TTL_MINUTES = 10
 
 
 def get_user_use_case(db: AsyncSession = Depends(get_db)) -> UserUseCase:
@@ -50,6 +58,10 @@ def _build_profile_entity(user: User) -> UserProfileEntity:
         occupation=user.profile.occupation,
         bio=user.profile.bio,
     )
+
+
+def _generate_otp(length: int = 6) -> str:
+    return "".join(random.choices(string.digits, k=length))
 
 
 @router.post("/register", response_model=RegisterResponse, status_code=status.HTTP_201_CREATED)
@@ -75,6 +87,13 @@ async def register(
         )
     except EmailAlreadyTakenError as error:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error))
+
+    verify_token = verification_token(user.id, user.email)
+    await send_email(
+        to=user.email,
+        subject="Verify your Eventara email",
+        html=verification_email_html(verify_token),
+    )
 
     return RegisterResponse(user_id=user.id, email=user.email)
 
@@ -103,12 +122,12 @@ async def email_verify(
     return EmailVerifyResponse(access_token=access_token, refresh_token=refresh_token)
 
 
-@router.post("/login", response_model=LoginResponse, status_code=status.HTTP_200_OK)
+@router.post("/login", response_model=LoginInitResponse, status_code=status.HTTP_200_OK)
 async def login(
     body: LoginRequest,
     use_case: UserUseCase = Depends(get_user_use_case),
     db: AsyncSession = Depends(get_db),
-) -> LoginResponse:
+) -> LoginInitResponse:
     user = await use_case.login(LoginUserInput(email=body.email, password=body.password))
     if not user:
         raise HTTPException(
@@ -116,11 +135,23 @@ async def login(
             detail="Invalid email or password",
         )
 
-    profile_entity = _build_profile_entity(user)
-    access_token = create_access_token(user.id, "", profile_entity)
-    refresh_token = await create_refresh_token(user.id, db)
+    code = _generate_otp()
+    otc_repo = OneTimeCodeRepository(db)
+    await otc_repo.delete_for_user(user.id)
+    await otc_repo.create(UserOneTimeCode(
+        user_id=user.id,
+        code_hash=hash_string(code),
+        expires_at=datetime.utcnow() + timedelta(minutes=_OTP_TTL_MINUTES),
+    ))
 
-    return LoginResponse(access_token=access_token, refresh_token=refresh_token)
+    verify_token = verification_token(user.id, user.email)
+    await send_email(
+        to=user.email,
+        subject="Your Eventara login code",
+        html=otp_email_html(code),
+    )
+
+    return LoginInitResponse(verification_token=verify_token)
 
 
 @router.post("/login/verify", response_model=LoginResponse, status_code=status.HTTP_200_OK)

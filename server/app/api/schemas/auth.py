@@ -56,6 +56,11 @@ class LoginResponse(BaseModel):
     message: str = "Login successful."
 
 
+class LoginInitResponse(BaseModel):
+    verification_token: str
+    message: str = "OTP sent to your email."
+
+
 class LoginVerifyRequest(BaseModel):
     token: str
     code: str
