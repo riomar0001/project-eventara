@@ -20,7 +20,11 @@ class Settings(BaseSettings):
     PORT: int = 8000
 
     DATABASE_URL: str
-    REDIS_URL: str = "redis://localhost:6379"
+
+    REDIS_HOST: str = "localhost"
+    REDIS_PORT: int = 6379
+    REDIS_USERNAME: str = ""
+    REDIS_PASSWORD: str = ""
 
     JWT_ALGORITHM: str = "HS256"
     JWT_ACCESS_TOKEN_SECRET: str
@@ -29,6 +33,15 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRATION: timedelta = timedelta(minutes=30)
     REFRESH_TOKEN_EXPIRATION: timedelta = timedelta(days=7)
     VERIFICATION_TOKEN_EXPIRATION: timedelta = timedelta(hours=24)
+
+    MAIL_HOST: str = "smtp.gmail.com"
+    MAIL_PORT: int = 587
+    MAIL_SECURE: bool = False
+    MAIL_USER: str
+    MAIL_PASS: str
+
+    CORS_ORIGIN: str
+    ALLOWED_ORIGINS: str = "*"
 
     @field_validator("ACCESS_TOKEN_EXPIRATION", "REFRESH_TOKEN_EXPIRATION","VERIFICATION_TOKEN_EXPIRATION", mode="before")
     @classmethod
@@ -40,4 +53,4 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 
-settings = Settings()
+settings = Settings()  # type: ignore[call-arg]
