@@ -7,8 +7,9 @@
 | Python | 3.11+ | |
 | uv | latest | Python package manager |
 | Node.js | 20+ | |
-| PostgreSQL | 14+ | |
-| Redis | 7+ | Required for ARQ job queue |
+| PostgreSQL | 14+ | via Docker (see below) |
+| Redis | 7+ | via Docker (see below) |
+| Docker | latest | for running PostgreSQL and Redis |
 
 ## Server Setup
 
@@ -32,7 +33,7 @@ APP_NAME=Eventara
 APP_VERSION=0.1.0
 DEBUG=false
 
-DATABASE_URL=postgresql+asyncpg://postgres:password@localhost:5432/eventara
+DATABASE_URL=postgresql+asyncpg://postgres:password@localhost:5432/eventara_db
 
 REDIS_URL=redis://localhost:6379
 
@@ -120,10 +121,25 @@ cd client && npm run dev
 
 ---
 
-## Database Setup (PostgreSQL)
+## Database Setup (PostgreSQL + Redis)
 
-```sql
-CREATE DATABASE eventara;
+Start both services via Docker:
+
+```bash
+cd server
+docker compose -f docker-compose.database.yml up -d
+```
+
+To stop:
+
+```bash
+docker compose -f docker-compose.database.yml down
+```
+
+To stop and delete all data:
+
+```bash
+docker compose -f docker-compose.database.yml down -v
 ```
 
 Then run migrations:
