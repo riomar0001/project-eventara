@@ -25,7 +25,7 @@ class User(Base):
     tokens: Mapped[list["Token"]] = relationship(back_populates="user", foreign_keys="Token.user_id")
     roles: Mapped[list["UserRole"]] = relationship(back_populates="user", foreign_keys="UserRole.user_id")
     grants: Mapped[list["UserGrant"]] = relationship(back_populates="user", foreign_keys="UserGrant.user_id")
-    login_history: Mapped[list["LoginHistory"]] = relationship(back_populates="user", foreign_keys="LoginHistory.user_id")
+    login_history: Mapped[list["UserLoginHistory"]] = relationship(back_populates="user", foreign_keys="UserLoginHistory.user_id")
 
     __table_args__ = (
         Index(
@@ -222,7 +222,7 @@ class Token(Base):
     user: Mapped["User"] = relationship(back_populates="tokens", foreign_keys=[user_id])
 
 
-class LoginHistory(Base):
+class UserLoginHistory(Base):
     __tablename__ = "login_history"
 
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
@@ -243,4 +243,20 @@ class LoginHistory(Base):
     __table_args__ = (
         Index("idx_login_history_user_id", "user_id"),
         Index("idx_login_history_successful", "successful"),
+    )
+
+class UserOneTimeCode(Base):
+    __tablename__ = "one_time_codes"
+
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    code_hash: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
+    expires_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    used_at: Mapped[datetime | None] = mapped_column(DateTime)
+
+    # Relationships
+    user: Mapped["User"] = relationship(back_populates="one_time_codes")
+    
+    __table_args__ = (
+        Index("idx_one_time_codes_user_id", "user_id"),
+        Index("idx_one_time_codes_expires_at", "expires_at"),
     )

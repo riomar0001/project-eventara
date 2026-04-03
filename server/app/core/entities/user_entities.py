@@ -203,3 +203,13 @@ class LoginHistory(BaseModel):
     model_config = {
         "from_attributes": True
     }
+    
+class UserOneTimeCode(BaseModel):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4)
+    user_id: uuid.UUID
+    code_hash: str
+    expires_at: datetime
+
+    model_config = {
+        "from_attributes": True
+    }
