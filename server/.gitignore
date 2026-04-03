@@ -1,0 +1,81 @@
+
+# FastAPI Specific
+.env
+.env.local
+.env.test
+app.log
+openapi.json
+redoc-static.html
+
+# Async
+*.asyncio
+async_test.db
+
+# Auto-generated docs
+docs/build/
+
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+build/
+dist/
+*.egg-info/
+
+# Virtual Environment
+venv/
+.venv/
+ENV/
+env/
+.conda/
+
+# Testing
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+test_*.db
+test_results/
+coverage.xml
+pytest.xml
+
+
+# Database
+*.db
+*.sqlite3
+test.sqlite3
+
+
+# Logs
+*.log
+uvicorn.log
+debug.log
+
+
+# IDE / Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+.vim/
+.emacs.d/
+.claude/
+
+
+# OS
+.DS_Store?
+._*
+Thumbs.db
+
+# Alembic
+alembic/__pycache__/
+alembic/*.pyc
+alembic/*.pyo
+
+# If you ever create local-only migration experiments
+alembic/versions/*.tmp
+alembic/versions/*.bak
