@@ -1,88 +1,72 @@
 import uuid
-
-from sqlalchemy.ext.asyncio import AsyncSession
+from dataclasses import dataclass
 
 from app.core.exceptions import EmailAlreadyTakenError
 from app.core.hash_utils import hash_string
+from app.core.interfaces import IUserRepository
 from app.infrastructure.database.models.user import User, UserActivity, UserProfile, UserSecurity
-from app.infrastructure.database.repositories.user_repository import UserRepository
 
 
+@dataclass
 class RegisterUserInput:
-    def __init__(
-        self,
-        email: str,
-        password: str,
-        role: str,
-        alias: str,
-        first_name: str,
-        last_name: str,
-        age_group: str,
-        gender: str,
-        education_level: str,
-        occupation: str | None = None,
-        bio: str | None = None,
-    ) -> None:
-        self.email = email
-        self.password = password
-        self.role = role
-        self.alias = alias
-        self.first_name = first_name
-        self.last_name = last_name
-        self.age_group = age_group
-        self.gender = gender
-        self.education_level = education_level
-        self.occupation = occupation
-        self.bio = bio
+    email: str
+    password: str
+    role: str
+    alias: str
+    first_name: str
+    last_name: str
+    age_group: str
+    gender: str
+    education_level: str
+    occupation: str | None = None
+    bio: str | None = None
 
 
+@dataclass
 class LoginUserInput:
-    def __init__(self, email: str, password: str) -> None:
-        self.email = email
-        self.password = password
+    email: str
+    password: str
 
 
-async def register_user(data: RegisterUserInput, db: AsyncSession) -> User:
-    repo = UserRepository(db)
+class UserUseCase:
+    def __init__(self, repo: IUserRepository) -> None:
+        self.repo = repo
 
-    existing = await repo.get_by_email(data.email)
-    if existing:
-        raise EmailAlreadyTakenError(
-            f"Email '{data.email}' is already registered")
+    async def register(self, data: RegisterUserInput) -> User:
+        existing = await self.repo.get_by_email(data.email)
+        if existing:
+            raise EmailAlreadyTakenError(f"Email '{data.email}' is already registered")
 
-    user_id = uuid.uuid4()
+        user_id = uuid.uuid4()
 
-    user = User(
-        id=user_id,
-        email=data.email,
-        password=hash_string(data.password),
-        role=data.role,
-    )
-    security = UserSecurity(user_id=user_id)
-    activity = UserActivity(user_id=user_id)
-    profile = UserProfile(
-        user_id=user_id,
-        alias=data.alias,
-        first_name=data.first_name,
-        last_name=data.last_name,
-        age_group=data.age_group,
-        gender=data.gender,
-        education_level=data.education_level,
-        occupation=data.occupation,
-        bio=data.bio,
-    )
+        user = User(
+            id=user_id,
+            email=data.email,
+            password=hash_string(data.password),
+            role=data.role,
+        )
+        security = UserSecurity(user_id=user_id)
+        activity = UserActivity(user_id=user_id)
+        profile = UserProfile(
+            user_id=user_id,
+            alias=data.alias,
+            first_name=data.first_name,
+            last_name=data.last_name,
+            age_group=data.age_group,
+            gender=data.gender,
+            education_level=data.education_level,
+            occupation=data.occupation,
+            bio=data.bio,
+        )
 
-    return await repo.create(user, security, activity, profile)
+        return await self.repo.create(user, security, activity, profile)
 
+    async def login(self, data: LoginUserInput) -> User | None:
+        user = await self.repo.get_by_email(data.email)
+        if not user:
+            return None
 
-async def login_user(data: LoginUserInput, db: AsyncSession) -> User:
-    repo = UserRepository(db)
+        if user.password != hash_string(data.password):
+            return None
 
-    user = await repo.get_by_email(data.email)
-    if not user:
-        return None
-
-    if user.password != hash_string(data.password):
-        return None
-    
-    return user
+        return user
