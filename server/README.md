@@ -9,7 +9,7 @@ A backend API for an event management platform, built with FastAPI and Clean Arc
 - **Alembic** — database migrations
 - **Pydantic v2** — validation and settings
 - **PyJWT** + **passlib (bcrypt)** — authentication
-- **aio-pika** — RabbitMQ messaging
+- **arq** + **redis** — async job queue (Redis-backed)
 - **Uvicorn** — ASGI server
 - **Python** 3.11
 
@@ -19,7 +19,7 @@ A backend API for an event management platform, built with FastAPI and Clean Arc
 
 - Python 3.11
 - PostgreSQL
-- RabbitMQ (optional for messaging features)
+- Redis (for ARQ job queue)
 
 ### Setup
 
@@ -35,7 +35,7 @@ A backend API for an event management platform, built with FastAPI and Clean Arc
 2. **Install dependencies**
 
    ```bash
-   pip install -r requirements.txt
+   uv sync
    ```
 
 3. **Configure environment**

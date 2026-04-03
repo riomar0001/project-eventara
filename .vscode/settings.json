@@ -1,0 +1,4 @@
+{
+  "python.analysis.extraPaths": ["./server"],
+  "python.defaultInterpreterPath": "./server/.venv/Scripts/python.exe"
+}

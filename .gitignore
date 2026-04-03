@@ -1,21 +1,19 @@
+# =============================================================================
+# Eventara — Monorepo .gitignore
+# =============================================================================
 
-# FastAPI Specific
+# -----------------------------------------------------------------------------
+# Environment
+# -----------------------------------------------------------------------------
 .env
 .env.local
 .env.test
-app.log
-openapi.json
-redoc-static.html
+.env.production
+.env.*.local
 
-# Async
-*.asyncio
-async_test.db
-
-# Auto-generated docs
-docs/build/
-
-
-# Python
+# -----------------------------------------------------------------------------
+# Python / FastAPI (server/)
+# -----------------------------------------------------------------------------
 __pycache__/
 *.py[cod]
 *$py.class
@@ -23,8 +21,9 @@ __pycache__/
 build/
 dist/
 *.egg-info/
+.eggs/
 
-# Virtual Environment
+# Virtual environments
 venv/
 .venv/
 ENV/
@@ -38,44 +37,85 @@ env/
 htmlcov/
 .tox/
 .nox/
-test_*.db
 test_results/
 coverage.xml
 pytest.xml
-
-
-# Database
-*.db
-*.sqlite3
-test.sqlite3
-
-
-# Logs
-*.log
-uvicorn.log
-debug.log
-
-
-# IDE / Editors
-.vscode/
-.idea/
-*.swp
-*.swo
-.vim/
-.emacs.d/
-.claude/
-
-
-# OS
-.DS_Store?
-._*
-Thumbs.db
+test_*.db
 
 # Alembic
 alembic/__pycache__/
 alembic/*.pyc
 alembic/*.pyo
-
-# If you ever create local-only migration experiments
 alembic/versions/*.tmp
 alembic/versions/*.bak
+
+# FastAPI generated
+openapi.json
+redoc-static.html
+
+# Database
+*.db
+*.sqlite3
+
+# uv
+.python-version
+
+# -----------------------------------------------------------------------------
+# Node.js / Next.js (client/)
+# -----------------------------------------------------------------------------
+node_modules/
+.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# Next.js
+.next/
+out/
+
+# Build output
+/client/build
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Vercel
+.vercel
+
+# -----------------------------------------------------------------------------
+# Logs
+# -----------------------------------------------------------------------------
+*.log
+logs/
+uvicorn.log
+debug.log
+app.log
+
+# -----------------------------------------------------------------------------
+# IDE / Editors
+# -----------------------------------------------------------------------------
+.idea/
+*.swp
+*.swo
+.vim/
+.emacs.d/
+
+# -----------------------------------------------------------------------------
+# OS
+# -----------------------------------------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+desktop.ini
+.claude/

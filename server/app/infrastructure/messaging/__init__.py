@@ -1,1 +1,1 @@
-# RabbitMQ messaging — connection and channel management
+# ARQ job queue — Redis-backed async task processing

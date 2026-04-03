@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     PORT: int = 8000
 
     DATABASE_URL: str
+    REDIS_URL: str = "redis://localhost:6379"
 
     JWT_ALGORITHM: str = "HS256"
     JWT_ACCESS_TOKEN_SECRET: str
