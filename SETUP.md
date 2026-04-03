@@ -142,6 +142,25 @@ To stop and delete all data:
 docker compose -f docker-compose.database.yml down -v
 ```
 
+**PostgreSQL**
+
+| Field | Value |
+|---|---|
+| Host | `localhost` |
+| Port | `5432` |
+| User | `postgres` |
+| Password | `password` |
+| Database | `eventara_db` |
+| Connection string | `postgresql+asyncpg://postgres:password@localhost:5432/eventara_db` |
+
+**Redis**
+
+| Field | Value |
+|---|---|
+| Host | `localhost` |
+| Port | `6379` |
+| Connection string | `redis://localhost:6379` |
+
 Then run migrations:
 
 ```bash
