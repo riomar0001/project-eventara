@@ -34,9 +34,9 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRATION: timedelta = timedelta(days=7)
     VERIFICATION_TOKEN_EXPIRATION: timedelta = timedelta(hours=24)
 
-    MAIL_HOST: str = "smtp.gmail.com"
-    MAIL_PORT: int = 587
-    MAIL_SECURE: bool = False
+    MAIL_HOST: str
+    MAIL_PORT: int
+    MAIL_SECURE: bool
     MAIL_USER: str
     MAIL_PASS: str
 
