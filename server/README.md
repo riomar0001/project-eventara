@@ -60,8 +60,21 @@ A backend API for an event management platform, built with FastAPI and Clean Arc
 
 4. **Run migrations**
 
+   Generate a migration from your current model changes, then apply it:
+
    ```bash
+   alembic revision --autogenerate -m "your description here"
    alembic upgrade head
+   ```
+
+   Other useful migration commands:
+
+   ```bash
+   alembic current            # show current revision
+   alembic history --verbose  # list all revisions
+   alembic upgrade +1         # apply only the next migration
+   alembic downgrade -1       # roll back one step
+   alembic downgrade <id>     # roll back to a specific revision
    ```
 
 5. **Start the server**
@@ -80,7 +93,10 @@ A backend API for an event management platform, built with FastAPI and Clean Arc
 | Method | Path | Description |
 |--------|------|-------------|
 | `POST` | `/api/v1/auth/register` | Register a new user |
-| `POST` | `/api/v1/auth/login` | Login and receive tokens |
+| `POST` | `/api/v1/auth/email/verify` | Verify email address |
+| `POST` | `/api/v1/auth/login` | Login with email + password → tokens |
+| `POST` | `/api/v1/auth/login/verify` | Verify OTP code → tokens |
+| `POST` | `/api/v1/auth/logout` | Revoke refresh token |
 
 ## Project Structure
 

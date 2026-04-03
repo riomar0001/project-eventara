@@ -1,7 +1,7 @@
 import uuid
+from typing import Optional
 
 from pydantic import BaseModel, EmailStr, field_validator, Field
-from typing import Optional
 
 from app.core.entities.user_entities import AgeGroup, EducationLevel, Gender
 
@@ -33,6 +33,17 @@ class RegisterResponse(BaseModel):
     message: str = "Registration successful. Please verify your email."
 
 
+class EmailVerifyRequest(BaseModel):
+    token: str
+
+
+class EmailVerifyResponse(BaseModel):
+    access_token: str
+    refresh_token: str
+    token_type: str = "bearer"
+    message: str = "Email verified successfully."
+
+
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str
@@ -41,4 +52,18 @@ class LoginRequest(BaseModel):
 class LoginResponse(BaseModel):
     access_token: str
     refresh_token: str
+    token_type: str = "bearer"
     message: str = "Login successful."
+
+
+class LoginVerifyRequest(BaseModel):
+    token: str
+    code: str
+
+
+class LogoutRequest(BaseModel):
+    refresh_token: str
+
+
+class LogoutResponse(BaseModel):
+    message: str = "Logged out successfully."

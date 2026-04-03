@@ -26,6 +26,7 @@ class User(Base):
     roles: Mapped[list["UserRole"]] = relationship(back_populates="user", foreign_keys="UserRole.user_id")
     grants: Mapped[list["UserGrant"]] = relationship(back_populates="user", foreign_keys="UserGrant.user_id")
     login_history: Mapped[list["UserLoginHistory"]] = relationship(back_populates="user", foreign_keys="UserLoginHistory.user_id")
+    one_time_codes: Mapped[list["UserOneTimeCode"]] = relationship(back_populates="user", foreign_keys="UserOneTimeCode.user_id")
 
     __table_args__ = (
         Index(

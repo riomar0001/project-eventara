@@ -2,7 +2,7 @@ import uuid
 from dataclasses import dataclass
 
 from app.core.exceptions import EmailAlreadyTakenError
-from app.core.hash_utils import hash_string
+from app.core.hash_utils import hash_string, verify_hash
 from app.core.interfaces import IUserRepository
 from app.infrastructure.database.models.user import User, UserActivity, UserProfile, UserSecurity
 
@@ -43,7 +43,6 @@ class UserUseCase:
             id=user_id,
             email=data.email,
             password=hash_string(data.password),
-            role=data.role,
         )
         security = UserSecurity(user_id=user_id)
         activity = UserActivity(user_id=user_id)
@@ -66,7 +65,7 @@ class UserUseCase:
         if not user:
             return None
 
-        if user.password != hash_string(data.password):
+        if not verify_hash(data.password, user.password):
             return None
 
         return user

@@ -2,9 +2,10 @@ import uuid
 from datetime import datetime, timezone
 
 from sqlalchemy import select, update
+from sqlalchemy.engine import CursorResult
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.infrastructure.database.models.token import Token
+from app.infrastructure.database.models.user import Token
 
 
 class RefreshTokenRepository:
@@ -43,7 +44,7 @@ class RefreshTokenRepository:
     async def revoke_all_for_user(self, user_id: uuid.UUID) -> int:
         """Revoke all active tokens for a user. Returns the number of tokens revoked."""
         now = datetime.now(timezone.utc)
-        result = await self.db.execute(
+        result: CursorResult = await self.db.execute(  # type: ignore[assignment]
             update(Token)
             .where(Token.user_id == user_id, Token.is_active == True)
             .values(is_active=False, revoked_at=now)
