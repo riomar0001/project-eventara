@@ -63,6 +63,7 @@ class User(BaseModel):
 
 class UserProfile(BaseModel):
     user_id: uuid.UUID
+    email: str
     alias: str
     first_name: str
     last_name: str
