@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from enum import Enum
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, IPvAnyAddress, model_validator
 
 
 class UserStatus(str, Enum):
@@ -22,7 +22,16 @@ class AgeGroup(str, Enum):
 class Gender(str, Enum):
     MALE = "male"
     FEMALE = "female"
+    
+class GrantEffect(str, Enum):
+    ALLOW = "allow"
+    DENY = "deny"
 
+class RoleAction(str, Enum):
+    CREATE = "create"
+    READ = "read"
+    UPDATE = "update"
+    DELETE = "delete"
 
 class EducationLevel(str, Enum):
     NO_FORMAL_EDUCATION = "no_formal_education"
@@ -47,8 +56,9 @@ class User(BaseModel):
     role: str
     status: UserStatus = UserStatus.ACTIVE
 
-    class Config:
-        from_attributes = True
+    model_config = {
+        "from_attributes": True
+    }
 
 
 class UserProfile(BaseModel):
@@ -64,16 +74,9 @@ class UserProfile(BaseModel):
     bio: str | None = None
     preferences: dict | None = None
 
-    class Config:
-        from_attributes = True
-
-
-class UserRole(BaseModel):
-    id: uuid.UUID = Field(default_factory=uuid.uuid4)
-    role: str
-
-    class Config:
-        from_attributes = True
+    model_config = {
+        "from_attributes": True
+    }
     
 
 class UserSecurity(BaseModel):
@@ -84,8 +87,9 @@ class UserSecurity(BaseModel):
     failed_login_attempts: int = 0
     locked_until: datetime | None = None
 
-    class Config:
-        from_attributes = True
+    model_config = {
+        "from_attributes": True
+    }
 
 
 class UserActivity(BaseModel):
@@ -94,5 +98,107 @@ class UserActivity(BaseModel):
     last_activity_at: datetime | None = None
     login_count: int = 0
 
-    class Config:
-        from_attributes = True
+    model_config = {
+        "from_attributes": True
+    }
+
+
+class Feature(BaseModel):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4)
+    slug: str
+    name: str
+    description: str | None = None
+    is_enabled: bool = True
+    
+    model_config = {
+        "from_attributes": True
+    }
+
+class Role(BaseModel):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4)
+    name: str
+    description: str | None = None
+    is_default: bool = False
+    is_system: bool = False
+    
+    model_config = {
+        "from_attributes": True
+    }
+        
+class RolePermission(BaseModel):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4)
+    role_id: uuid.UUID
+    feature_id: uuid.UUID
+    action: RoleAction
+    effect: GrantEffect
+
+    model_config = {
+        "from_attributes": True
+    }
+         
+class UserRole(BaseModel):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4)
+    user_id: uuid.UUID
+    role_id: uuid.UUID
+    expires_at: datetime | None = None
+    assigned_by: uuid.UUID | None = None
+    assigned_at: datetime = Field(default_factory=datetime.utcnow)
+
+    model_config = {
+        "from_attributes": True
+    }
+        
+class UserGrant(BaseModel):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4)
+    user_id: uuid.UUID
+    feature_id: uuid.UUID
+    role_id: uuid.UUID
+    action: RoleAction
+    effect: GrantEffect
+    reason: str | None = None
+    expires_at: datetime | None = None
+    granted_by: uuid.UUID | None = None
+
+    model_config = {
+        "from_attributes": True
+    }
+        
+class Token(BaseModel):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4)
+    user_id: uuid.UUID
+    token_hash: str
+
+    # Token lifecycle
+    is_active: bool = True
+    revoked_at: datetime | None = None
+    expires_at: datetime
+    last_used_at: datetime | None = None
+
+
+    model_config = {
+        "from_attributes": True
+    }
+
+    @model_validator(mode="after")
+    def check_revoked(self):
+        if self.revoked_at and self.is_active:
+            raise ValueError("Revoked token cannot be active")
+        return self
+
+
+class LoginHistory(BaseModel):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4)
+    user_id: uuid.UUID
+    ip_address: IPvAnyAddress | None = None
+    user_agent: str | None = None
+    browser: str | None = None
+    os: str | None = None
+    device_type: str | None = None
+    city: str | None = None
+    region: str | None = None
+    country: str | None = None
+    successful: bool
+
+    model_config = {
+        "from_attributes": True
+    }
