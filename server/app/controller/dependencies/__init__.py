@@ -17,7 +17,7 @@ from app.core.security.constants import (
 from app.core.security.token_service import verify_access_token
 from app.infrastructure.cache.repositories.otp_repository import OTPRepository
 from app.infrastructure.cache.repositories.rate_limit_repository import RateLimitRepository
-from app.infrastructure.repositories.user_repository import UserRepository
+from app.infrastructure.database.repositories.user_repository import UserRepository
 from app.infrastructure.database.session import get_db
 
 _bearer = HTTPBearer()
