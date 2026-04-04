@@ -36,3 +36,63 @@ EMAIL_CONFLICT = {
         },
     }
 }
+
+INVALID_TOKEN = {
+    400: {
+        "description": "Invalid or malformed token",
+        "model": ErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "message": "Invalid or malformed token",
+                }
+            }
+        },
+    }
+}
+
+TOKEN_EXPIRED = {
+    401: {
+        "description": "Token has expired",
+        "model": ErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "message": "Token has expired",
+                }
+            }
+        },
+    }
+}
+
+USER_NOT_FOUND = {
+    404: {
+        "description": "User not found",
+        "model": ErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "message": "User not found",
+                }
+            }
+        },
+    }
+}
+
+EMAIL_ALREADY_VERIFIED = {
+    409: {
+        "description": "Email is already verified",
+        "model": ErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "message": "Email is already verified",
+                }
+            }
+        },
+    }
+}

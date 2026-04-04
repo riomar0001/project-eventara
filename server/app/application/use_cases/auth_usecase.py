@@ -1,39 +1,39 @@
-from typing import Dict
 import uuid
-from dataclasses import dataclass
 
-from app.domain.entities.user_entity import PublicUser, User, UserActivity, UserProfile, UserSecurity, AgeGroup, Gender, EducationLevel
-from app.domain.exceptions import EmailAlreadyTakenError
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.domain.entities.user_entity import PublicUser, User, UserActivity, UserSecurity
+from app.application.dto.auth_dto import (
+    RegisterUserInput,
+    LoginUserInput,
+    RegisteredUserOutput,
+    VerifiedEmailOutput,
+)
+from app.domain.exceptions import (
+    EmailAlreadyTakenError,
+    EmailAlreadyVerifiedError,
+    InvalidTokenError,
+    TokenExpiredError,
+)
+from app.domain.exceptions.user_exceptions import UserNotFoundError
 from app.application.interfaces.user_interface import IUserRepository
-from app.infrastructure.repositories.user_repository import UserRepository
-from app.core.security.hashing import hash_string, verify_hash
-from app.core.security.token_service import verification_token
+from app.core.security.hashing import hash_string
+from app.core.security.token_service import (
+    create_access_token,
+    create_refresh_token,
+    verification_token,
+    verify_verification_token,
+)
 
-from app.infrastructure.messaging.email import otp_email_html, send_email, verification_email_html
-
-@dataclass
-class RegisterUserInput:
-    email: str
-    password: str
-
-
-@dataclass
-class LoginUserInput:
-    email: str
-    password: str
-    
-
-@dataclass
-class RegisteredUserOutput:
-    user: PublicUser
-    verification_token: str
+from app.infrastructure.messaging.email import send_email, verification_email_html
 
 
 class AuthUseCase:
-    def __init__(self, repo: IUserRepository, ) -> None:
+    def __init__(self, repo: IUserRepository, db: AsyncSession) -> None:
         self.repo = repo
+        self.db = db
 
-    async def register(self, data: RegisterUserInput) -> RegisteredUserOutput:
+    async def register_user(self, data: RegisterUserInput) -> RegisteredUserOutput:
         existing = await self.repo.get_by_email(data.email)
 
         if existing:
@@ -44,28 +44,47 @@ class AuthUseCase:
         user = User(email=data.email, password=hash_string(data.password))
         security = UserSecurity(user_id=user_id)
         activity = UserActivity(user_id=user_id)
-        
+
         new_user = await self.repo.create(user, security, activity)
-        
-        verify_token = verification_token(user_id, data.email)   
-        
+
+        verify_token = verification_token(user_id, data.email)
+
         await send_email(
             to=user.email,
             subject="Verify your Eventara email",
             html=verification_email_html(verify_token),
         )
-        
+
         return RegisteredUserOutput(
             user=PublicUser.model_validate(new_user),
-            verification_token=verify_token
+            verification_token=verify_token,
         )
 
-    async def login(self, data: LoginUserInput) -> User | None:
-        user = await self.repo.get_by_email(data.email)
+    async def verify_email(self, token: str) -> VerifiedEmailOutput:
+        try:
+            payload = verify_verification_token(token)
+        except ValueError as exc:
+            message = str(exc)
+            if "expired" in message.lower():
+                raise TokenExpiredError() from exc
+            raise InvalidTokenError(message) from exc
+
+        user_id = uuid.UUID(payload.sub)
+
+        user = await self.repo.get_by_id(user_id)
         if not user:
-            return None
+            raise UserNotFoundError()
 
-        if not verify_hash(data.password, user.password):
-            return None
+        security = await self.repo.get_security_by_user_id(user_id)
+        if security and security.email_verified:
+            raise EmailAlreadyVerifiedError()
 
-        return user
+        await self.repo.update_verification_status(user_id, verified=True)
+
+        access_token = create_access_token(user_id, user.email)
+        refresh_token = await create_refresh_token(user_id, self.db)
+
+        return VerifiedEmailOutput(
+            access_token=access_token,
+            refresh_token=refresh_token,
+        )

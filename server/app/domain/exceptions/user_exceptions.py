@@ -16,3 +16,8 @@ class UserLockedError(Exception):
 class UserInactiveError(Exception):
     def __init__(self) -> None:
         super().__init__("Account is inactive or has been deleted")
+
+
+class EmailAlreadyVerifiedError(Exception):
+    def __init__(self) -> None:
+        super().__init__("Email is already verified")

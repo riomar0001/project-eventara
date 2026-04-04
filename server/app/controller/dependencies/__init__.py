@@ -10,4 +10,4 @@ from app.infrastructure.database.session import get_db
 
 
 def get_auth_use_case(db: AsyncSession = Depends(get_db)) -> AuthUseCase:
-    return AuthUseCase(UserRepository(db))
+    return AuthUseCase(UserRepository(db), db)

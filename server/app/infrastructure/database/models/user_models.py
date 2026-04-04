@@ -44,7 +44,7 @@ class User(Base):
 class UserProfile(Base):
     __tablename__ = "user_profiles"
 
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), unique=True)
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), unique=True)
 
     alias: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
     first_name: Mapped[str] = mapped_column(String(100), nullable=False)
@@ -64,7 +64,7 @@ class UserProfile(Base):
 class UserSecurity(Base):
     __tablename__ = "user_security"
 
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), unique=True)
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), unique=True)
 
     email_verified: Mapped[bool] = mapped_column(default=False)
     email_verified_at: Mapped[datetime | None] = mapped_column(DateTime)
@@ -85,7 +85,7 @@ class UserSecurity(Base):
 class UserActivity(Base):
     __tablename__ = "user_activity"
 
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), unique=True)
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), unique=True)
 
     last_login_at: Mapped[datetime | None] = mapped_column(DateTime)
     last_activity_at: Mapped[datetime | None] = mapped_column(DateTime)
@@ -141,8 +141,8 @@ class Role(Base):
 class RolePermission(Base):
     __tablename__ = "role_permissions"
 
-    role_id: Mapped[int] = mapped_column(ForeignKey("roles.id", ondelete="CASCADE"))
-    feature_id: Mapped[int] = mapped_column(ForeignKey("features.id", ondelete="CASCADE"))
+    role_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("roles.id", ondelete="CASCADE"))
+    feature_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("features.id", ondelete="CASCADE"))
     action: Mapped[str] = mapped_column(Enum(RoleAction, name="role_action"), nullable=False)
     effect: Mapped[str] = mapped_column(Enum(GrantEffect, name="grant_effect"), nullable=False)
 
@@ -158,10 +158,10 @@ class RolePermission(Base):
 class UserRole(Base):
     __tablename__ = "user_roles"
 
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
-    role_id: Mapped[int] = mapped_column(ForeignKey("roles.id", ondelete="CASCADE"))
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    role_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("roles.id", ondelete="CASCADE"))
     expires_at: Mapped[datetime | None] = mapped_column(DateTime)
-    assigned_by: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    assigned_by: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("users.id"), nullable=True)
     assigned_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     # Relationships
@@ -178,14 +178,14 @@ class UserRole(Base):
 class UserGrant(Base):
     __tablename__ = "user_grants"
 
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
-    role_id: Mapped[int] = mapped_column(ForeignKey("roles.id", ondelete="CASCADE"))
-    feature_id: Mapped[int] = mapped_column(ForeignKey("features.id", ondelete="CASCADE"))
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    role_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("roles.id", ondelete="CASCADE"))
+    feature_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("features.id", ondelete="CASCADE"))
     action: Mapped[str] = mapped_column(Enum(RoleAction, name="role_action"), nullable=False)
     effect: Mapped[str] = mapped_column(Enum(GrantEffect, name="grant_effect"), nullable=False)
     reason: Mapped[str | None] = mapped_column(Text, nullable=True)
     expires_at: Mapped[datetime | None] = mapped_column(DateTime)
-    granted_by: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    granted_by: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("users.id"), nullable=True)
 
     # Relationships
     user: Mapped["User"] = relationship(back_populates="grants", foreign_keys=[user_id])
@@ -207,7 +207,7 @@ class Token(Base):
         default=uuid4
     )
 
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
 
     token_hash: Mapped[str] = mapped_column(
         String(255),
@@ -229,7 +229,7 @@ class Token(Base):
 class UserLoginHistory(Base):
     __tablename__ = "login_history"
 
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
 
     ip_address: Mapped[str | None] = mapped_column(String(45), nullable=True)
     user_agent: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -252,7 +252,7 @@ class UserLoginHistory(Base):
 class UserOneTimeCode(Base):
     __tablename__ = "one_time_codes"
 
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
     code_hash: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
     expires_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     used_at: Mapped[datetime | None] = mapped_column(DateTime)

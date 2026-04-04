@@ -13,24 +13,41 @@ from app.infrastructure.repositories.refresh_token_repository import RefreshToke
 from app.core.security.hashing import hash_string, verify_hash
 
 
-def create_access_token(user_id: uuid.UUID, role_id: str, user: UserProfile) -> str:
+def create_access_token(
+    user_id: uuid.UUID,
+    email: str,
+    role_id: str | None = None,
+    user: UserProfile | None = None,
+) -> str:
     now = datetime.now(timezone.utc)
+
     payload = {
         "sub": str(user_id),
-        "email": user.email,
-        "role_id": role_id,
-        "first_name": user.first_name,
-        "last_name": user.last_name,
-        "age_group": user.age_group,
-        "gender": user.gender,
-        "education_level": user.education_level,
+        "email": email,
         "type": "access",
         "jti": str(uuid.uuid4()),
         "iat": now,
         "exp": now + settings.ACCESS_TOKEN_EXPIRATION,
     }
-    return jwt.encode(payload, settings.JWT_ACCESS_TOKEN_SECRET, algorithm=settings.JWT_ALGORITHM)
 
+    # Optional fields
+    if role_id:
+        payload["role_id"] = role_id
+
+    if user:
+        payload.update({
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "age_group": user.age_group,
+            "gender": user.gender,
+            "education_level": user.education_level,
+        })
+
+    return jwt.encode(
+        payload,
+        settings.JWT_ACCESS_TOKEN_SECRET,
+        algorithm=settings.JWT_ALGORITHM,
+    )
 
 def verify_access_token(token: str) -> TokenPayload:
     payload = _decode(token, secret=settings.JWT_ACCESS_TOKEN_SECRET, expected_type="access")
@@ -99,12 +116,6 @@ def verification_token(user_id: uuid.UUID, email: str) -> str:
 def verify_verification_token(token: str) -> TokenPayload:
     payload = _decode(token, secret=settings.JWT_VERIFICATION_TOKEN_SECRET, expected_type="verification")
     return TokenPayload(**payload)
-
-
-async def issue_tokens(user_id: uuid.UUID, profile: UserProfile, db: AsyncSession) -> tuple[str, str]:
-    access_token = create_access_token(user_id, "", profile)
-    refresh_token = await create_refresh_token(user_id, db)
-    return access_token, refresh_token
 
 
 def _decode(token: str, secret: str, expected_type: str) -> dict:
