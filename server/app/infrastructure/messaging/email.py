@@ -4,7 +4,7 @@ import ssl
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-from app.config import settings
+from app.core.config import settings
 from app.infrastructure.messaging.email_templates import otp_email_html, verification_email_html
 
 __all__ = ["send_email", "verification_email_html", "otp_email_html"]

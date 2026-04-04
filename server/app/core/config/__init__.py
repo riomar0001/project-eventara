@@ -15,7 +15,7 @@ def _parse_duration(value: str) -> timedelta:
 class Settings(BaseSettings):
     APP_NAME: str = "Eventara"
     APP_VERSION: str = "0.1.0"
-    DEBUG: bool = False
+    DEBUG: bool = True
     HOST: str = "0.0.0.0"
     PORT: int = 8000
 

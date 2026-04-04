@@ -5,12 +5,12 @@ from typing import Literal
 import jwt
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.config import settings
-from app.domain.entities.token import Token, TokenPayload
-from app.domain.entities.user import UserProfile
+from app.core.config import settings
+from app.domain.entities.token import TokenPayload
+from app.domain.entities.user_entity import UserProfile
 from app.infrastructure.database.models.user import Token as TokenORM
-from app.infrastructure.database.repositories.refresh_token_repository import RefreshTokenRepository
-from app.infrastructure.security.hashing import hash_string, verify_hash
+from app.infrastructure.repositories.refresh_token_repository import RefreshTokenRepository
+from app.core.security.hashing import hash_string, verify_hash
 
 
 def create_access_token(user_id: uuid.UUID, role_id: str, user: UserProfile) -> str:
@@ -99,6 +99,12 @@ def verification_token(user_id: uuid.UUID, email: str) -> str:
 def verify_verification_token(token: str) -> TokenPayload:
     payload = _decode(token, secret=settings.JWT_VERIFICATION_TOKEN_SECRET, expected_type="verification")
     return TokenPayload(**payload)
+
+
+async def issue_tokens(user_id: uuid.UUID, profile: UserProfile, db: AsyncSession) -> tuple[str, str]:
+    access_token = create_access_token(user_id, "", profile)
+    refresh_token = await create_refresh_token(user_id, db)
+    return access_token, refresh_token
 
 
 def _decode(token: str, secret: str, expected_type: str) -> dict:

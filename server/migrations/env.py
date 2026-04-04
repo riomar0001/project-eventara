@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
 
-from app.config import settings
+from app.core.config import settings
 import app.infrastructure.database.models  # noqa: F401 — registers all ORM models
 from app.infrastructure.database.base import Base
 

@@ -1,34 +1,37 @@
 import uuid
 from pydantic import BaseModel, EmailStr, field_validator, Field
 
-from app.domain.entities.user import AgeGroup, EducationLevel, Gender
+from app.domain.entities.user_entity import AgeGroup, EducationLevel, Gender
+
+
+
+class ErrorResponse(BaseModel):
+    success: bool = False
+    message: str
+
+
+class ValidationErrorResponse(BaseModel):
+    success: bool = False
+    detail: list
 
 
 class RegisterRequest(BaseModel):
     email: EmailStr
     password: str = Field(min_length=8)
-    role: str = "user"
-    alias: str = Field(min_length=3, max_length=30)
-    first_name: str = Field(min_length=2, max_length=50)
-    last_name: str = Field(min_length=2, max_length=50)
-    age_group: AgeGroup
-    gender: Gender
-    education_level: EducationLevel
-    occupation: str | None = None
-    bio: str | None = None
-
-    @field_validator("alias")
-    @classmethod
-    def alias_no_spaces(cls, value: str) -> str:
-        if " " in value:
-            raise ValueError("Alias must not contain spaces")
-        return value.lower()
 
 
 class RegisterResponse(BaseModel):
+    success: bool = True
     user_id: uuid.UUID
     email: str
     message: str = "Registration successful. Please verify your email."
+    verification_token: str | None = Field(
+        default=None,
+        description="Only included in DEBUG mode"
+    )
+
+    class Config:
+        from_attributes = True
 
 
 class EmailVerifyRequest(BaseModel):
@@ -36,6 +39,7 @@ class EmailVerifyRequest(BaseModel):
 
 
 class EmailVerifyResponse(BaseModel):
+    success: bool = True
     access_token: str
     refresh_token: str
     token_type: str = "bearer"
@@ -55,6 +59,7 @@ class LoginResponse(BaseModel):
 
 
 class LoginInitResponse(BaseModel):
+    success: bool = True
     verification_token: str
     message: str = "OTP sent to your email."
 
@@ -69,4 +74,5 @@ class LogoutRequest(BaseModel):
 
 
 class LogoutResponse(BaseModel):
+    success: bool = True
     message: str = "Logged out successfully."

@@ -80,7 +80,7 @@ A backend API for an event management platform, built with FastAPI and Clean Arc
 5. **Start the server**
 
    ```bash
-   uvicorn app.main:app --reload
+   uvicorn main:app --reload
    ```
 
    API available at `http://localhost:8000`

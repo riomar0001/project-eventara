@@ -50,6 +50,15 @@ class User(BaseModel):
         "from_attributes": True
     }
 
+class PublicUser(BaseModel):
+    id: uuid.UUID
+    email: str
+    status: UserStatus
+
+    model_config = {
+        "from_attributes": True
+    }
+
 
 class UserProfile(BaseModel):
     user_id: uuid.UUID

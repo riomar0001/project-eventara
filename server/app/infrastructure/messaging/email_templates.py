@@ -1,4 +1,4 @@
-from app.config import settings
+from app.core.config import settings
 
 
 def _base_template(title: str, preview: str, body: str) -> str:

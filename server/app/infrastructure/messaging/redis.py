@@ -1,7 +1,7 @@
 from arq import create_pool
 from arq.connections import ArqRedis, RedisSettings
 
-from app.config import settings
+from app.core.config import settings
 
 
 def get_redis_settings() -> RedisSettings:

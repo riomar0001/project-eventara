@@ -1,6 +1,6 @@
 from arq.connections import RedisSettings
 
-from app.config import settings
+from app.core.config import settings
 from app.infrastructure.messaging.redis import get_redis_settings
 
 # Import job functions to register them with the worker
