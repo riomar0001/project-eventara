@@ -28,10 +28,18 @@ from app.infrastructure.database.models.user_models import (
 
 
 class UserRepository:
+    """Data-access layer for users and their related sub-records.
+
+    Covers the ``users``, ``user_security``, ``user_activity``, and
+    ``user_profiles`` tables.  All writes use atomic SQL statements where
+    concurrent access is a concern; see individual method docstrings for details.
+    """
+
     def __init__(self, db: AsyncSession) -> None:
         self.db = db
 
     async def get_by_email(self, email: str) -> DomainUser | None:
+        """Return the user with the given email address, or None if not found."""
         result = await self.db.execute(
             select(User)
             .options(selectinload(User.profile), selectinload(User.security))
@@ -50,6 +58,7 @@ class UserRepository:
         )
         
     async def get_by_id(self, user_id: uuid.UUID) -> DomainUser | None:
+        """Return the user with the given ID, or None if not found."""
         result = await self.db.execute(
             select(User)
             .options(selectinload(User.profile), selectinload(User.security))
@@ -70,6 +79,7 @@ class UserRepository:
         )
 
     async def get_security_by_user_id(self, user_id: uuid.UUID) -> DomainUserSecurity | None:
+        """Return the security record for a user (verification status, failed attempts, lock), or None."""
         result = await self.db.execute(
             select(UserSecurity).where(UserSecurity.user_id == user_id)
         )
@@ -93,6 +103,11 @@ class UserRepository:
         security: DomainUserSecurity,
         activity: DomainUserActivity,
     ) -> PublicUser:
+        """Insert a new user together with its security and activity rows in one commit.
+
+        Returns:
+            A ``PublicUser`` containing only the fields safe to expose externally.
+        """
         orm_user = User(id=user.id, email=user.email, password=user.password, status=user.status)
         orm_security = UserSecurity(user_id=security.user_id)
         orm_activity = UserActivity(user_id=activity.user_id)
@@ -106,6 +121,7 @@ class UserRepository:
         )
         
     async def get_profile_by_user_id(self, user_id: uuid.UUID) -> DomainUserProfile | None:
+        """Return the profile (alias, name, demographics) for a user, or None if not yet created."""
         result = await self.db.execute(
             select(UserProfile).where(UserProfile.user_id == user_id)
         )
@@ -130,6 +146,7 @@ class UserRepository:
         )
 
     async def get_by_alias(self, alias: str) -> DomainUser | None:
+        """Return the user who owns the given profile alias, or None if unclaimed."""
         result = await self.db.execute(
             select(User)
             .join(UserProfile, User.id == UserProfile.user_id)
@@ -148,6 +165,7 @@ class UserRepository:
         )
 
     async def create_profile(self, profile: DomainUserProfile) -> DomainUserProfile:
+        """Insert a new user profile row and return the persisted record."""
         orm_profile = UserProfile(
             user_id=profile.user_id,
             alias=profile.alias,

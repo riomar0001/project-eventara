@@ -21,6 +21,11 @@ class Token(BaseModel):
 
     @model_validator(mode="after")
     def check_revoked(self):
+        """Enforce the invariant that a revoked token cannot also be marked active.
+
+        Prevents accidentally constructing a ``Token`` in a contradictory state
+        where ``revoked_at`` is set but ``is_active`` is still ``True``.
+        """
         if self.revoked_at and self.is_active:
             raise ValueError("Revoked token cannot be active")
         return self

@@ -1,3 +1,19 @@
+"""JWT token creation and verification for all token types used by the API.
+
+Three token types are in use:
+
+- **access** — short-lived JWT sent in the ``Authorization: Bearer`` header to
+  authenticate API requests.  Signed with ``JWT_ACCESS_TOKEN_SECRET``.
+- **refresh** — long-lived JWT used to obtain new access tokens.  The hash of
+  the plaintext token is persisted in the ``refresh_tokens`` table so it can
+  be revoked server-side.  Signed with ``JWT_REFRESH_TOKEN_SECRET``.
+- **verification** — one-time JWT emailed to users after registration to confirm
+  ownership of the email address.  Signed with ``JWT_VERIFICATION_TOKEN_SECRET``.
+
+All three types are decoded through the shared ``_decode`` helper, which
+enforces signature, expiry, and the ``type`` claim in one place.
+"""
+
 import uuid
 from datetime import datetime, timezone
 from typing import Literal
@@ -6,7 +22,7 @@ import jwt
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
-from app.domain.entities.token import TokenPayload
+from app.domain.entities.token_entities import TokenPayload
 from app.domain.entities.user_entity import UserProfile
 from app.infrastructure.database.models.user_models import Token as TokenORM
 from app.infrastructure.repositories.refresh_token_repository import RefreshTokenRepository
@@ -19,6 +35,22 @@ def create_access_token(
     role_id: str | None = None,
     user: UserProfile | None = None,
 ) -> str:
+    """Build and sign a short-lived access token for the given user.
+
+    The token always includes ``sub``, ``email``, ``type``, ``jti``, ``iat``,
+    and ``exp`` claims.  ``role_id`` and profile fields are embedded only when
+    provided so the token payload stays compact for unenriched sessions.
+
+    Args:
+        user_id:  The user's UUID, stored in the ``sub`` claim.
+        email:    The user's email address, embedded for convenience.
+        role_id:  Optional role identifier to include in the payload.
+        user:     Optional full profile; when supplied, name and demographic
+                  fields are embedded so clients avoid a separate profile fetch.
+
+    Returns:
+        A signed JWT string ready to be sent in the ``Authorization: Bearer`` header.
+    """
     now = datetime.now(timezone.utc)
 
     payload = {
@@ -50,11 +82,36 @@ def create_access_token(
     )
 
 def verify_access_token(token: str) -> TokenPayload:
+    """Decode and validate an access token.
+
+    Args:
+        token: The raw JWT string from the ``Authorization: Bearer`` header.
+
+    Returns:
+        A ``TokenPayload`` with the claims from the verified token.
+
+    Raises:
+        ValueError: The token is expired, has an invalid signature, or is not
+            of type ``access``.
+    """
     payload = _decode(token, secret=settings.JWT_ACCESS_TOKEN_SECRET, expected_type="access")
     return TokenPayload(**payload)
 
 
 async def create_refresh_token(user_id: uuid.UUID, db: AsyncSession) -> str:
+    """Build, sign, and persist a long-lived refresh token.
+
+    The plaintext token is returned to the caller (to be sent to the client)
+    but only its bcrypt hash is stored in the database.  This means a database
+    breach does not expose usable refresh tokens.
+
+    Args:
+        user_id: The user the token belongs to.
+        db:      An active async database session used to persist the token record.
+
+    Returns:
+        The plaintext signed JWT to be delivered to the client.
+    """
     now = datetime.now(timezone.utc)
     token_id = uuid.uuid4()
     payload = {
@@ -101,6 +158,19 @@ async def verify_refresh_token(raw_token: str, db: AsyncSession) -> tuple[TokenP
 
 
 def verification_token(user_id: uuid.UUID, email: str) -> str:
+    """Build and sign a one-time email verification token.
+
+    The token is sent to the user's email address after registration.
+    It encodes the user's ID and email so the verification endpoint can
+    look up and confirm the correct account without any additional state.
+
+    Args:
+        user_id: The registering user's UUID, stored in the ``sub`` claim.
+        email:   The email address being verified, embedded for traceability.
+
+    Returns:
+        A signed JWT string to be included in the verification link.
+    """
     now = datetime.now(timezone.utc)
     payload = {
         "sub": str(user_id),
@@ -114,11 +184,42 @@ def verification_token(user_id: uuid.UUID, email: str) -> str:
 
 
 def verify_verification_token(token: str) -> TokenPayload:
+    """Decode and validate an email verification token.
+
+    Args:
+        token: The raw JWT string extracted from the verification link.
+
+    Returns:
+        A ``TokenPayload`` containing the ``sub`` (user ID) and ``email`` claims.
+
+    Raises:
+        ValueError: The token is expired, has an invalid signature, or is not
+            of type ``verification``.
+    """
     payload = _decode(token, secret=settings.JWT_VERIFICATION_TOKEN_SECRET, expected_type="verification")
     return TokenPayload(**payload)
 
 
 def _decode(token: str, secret: str, expected_type: str) -> dict:
+    """Decode a JWT and enforce signature, expiry, and token-type claims.
+
+    Centralises all PyJWT error handling so every public verify function gets
+    consistent ``ValueError`` messages regardless of which token type failed.
+
+    Args:
+        token:         The raw JWT string to decode.
+        secret:        The HMAC secret that was used to sign the token.
+        expected_type: The value the ``type`` claim must equal (e.g. ``"access"``).
+
+    Returns:
+        The decoded payload dictionary if all checks pass.
+
+    Raises:
+        ValueError: Raised for any of the following:
+            - The token has expired (``jwt.ExpiredSignatureError``).
+            - The signature or structure is invalid (``jwt.InvalidTokenError``).
+            - The ``type`` claim does not match ``expected_type``.
+    """
     try:
         payload = jwt.decode(
             token,

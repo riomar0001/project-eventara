@@ -31,6 +31,10 @@ class EmailNotVerifiedError(Exception):
 class OnboardingAlreadyCompletedError(Exception):
     def __init__(self) -> None:
         super().__init__("Onboarding has already been completed")
+        
+class CompletedOnboardingRequiredError(Exception):
+    def __init__(self) -> None:
+        super().__init__("Onboarding must be completed to proceed")
 
 
 class AliasAlreadyTakenError(Exception):

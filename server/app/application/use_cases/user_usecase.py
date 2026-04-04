@@ -15,11 +15,38 @@ from app.domain.exceptions.user_exceptions import (
 
 
 class OnboardingUseCase:
+    """Handles user onboarding after email verification.
+
+    Onboarding collects the user's profile details (alias, name, demographics)
+    and marks the account as fully set up. It can only be completed once.
+    """
+
     def __init__(self, repo: IUserRepository, db: AsyncSession) -> None:
         self.repo = repo
         self.db = db
 
     async def complete_onboarding(self, data: UserOnboardingInput) -> UserOnboardingOutput:
+        """Create the user's profile and mark onboarding as complete.
+
+        Concurrency note:
+            Alias uniqueness is checked optimistically before the INSERT, and the
+            database unique constraint acts as the final guard.  ``complete_onboarding``
+            uses a conditional UPDATE (``WHERE onboarding_completed = FALSE``) so
+            concurrent requests for the same user cannot both succeed.
+
+        Args:
+            data: A ``UserOnboardingInput`` with the user ID and all profile fields.
+
+        Returns:
+            A ``UserOnboardingOutput`` containing the newly created profile.
+
+        Raises:
+            UserNotFoundError: No user exists for the given ID.
+            EmailNotVerifiedError: The user has not yet verified their email address.
+            OnboardingAlreadyCompletedError: Onboarding was already completed, or a
+                concurrent request completed it just before this one.
+            AliasAlreadyTakenError: The requested alias is already in use by another user.
+        """
         user = await self.repo.get_by_id(data.user_id)
         if not user:
             raise UserNotFoundError()

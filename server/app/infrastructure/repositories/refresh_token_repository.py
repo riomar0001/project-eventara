@@ -10,28 +10,39 @@ from app.infrastructure.database.models.user_models import Token
 
 
 class RefreshTokenRepository:
+    """Manages long-lived refresh tokens used to obtain new access tokens.
+
+    Tokens are stored as bcrypt hashes; the plaintext is never persisted.
+    A token is considered valid only when ``is_active=True`` and ``expires_at``
+    is in the future.
+    """
+
     def __init__(self, db: AsyncSession) -> None:
         self.db = db
 
     async def create(self, token: Token) -> Token:
+        """Persist a new refresh token record and return it with DB fields populated."""
         self.db.add(token)
         await self.db.commit()
         await self.db.refresh(token)
         return token
 
     async def get_by_id(self, token_id: uuid.UUID) -> Token | None:
+        """Return the token record matching ``token_id``, or None if not found."""
         result = await self.db.execute(
             select(Token).where(Token.id == token_id)
         )
         return result.scalar_one_or_none()
 
     async def get_active_by_id(self, token_id: uuid.UUID) -> Token | None:
+        """Return the token only if it exists and has not been revoked."""
         result = await self.db.execute(
             select(Token).where(Token.id == token_id, Token.is_active == True)
         )
         return result.scalar_one_or_none()
 
     async def get_active_tokens_for_user(self, user_id: uuid.UUID) -> list[Token]:
+        """Return all non-revoked tokens belonging to a user."""
         result = await self.db.execute(
             select(Token).where(Token.user_id == user_id, Token.is_active == True)
         )
@@ -60,6 +71,7 @@ class RefreshTokenRepository:
         return cast(CursorResult, result).rowcount
 
     async def update_last_used(self, token: Token) -> None:
+        """Stamp ``last_used_at`` on the token record for audit purposes."""
         now = datetime.now(timezone.utc)
         await self.db.execute(
             update(Token)

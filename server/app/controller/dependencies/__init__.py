@@ -18,6 +18,14 @@ _bearer = HTTPBearer()
 def get_current_user_id(
     credentials: HTTPAuthorizationCredentials = Depends(_bearer),
 ) -> uuid.UUID:
+    """FastAPI dependency that extracts and validates the caller's user ID.
+
+    Decodes the Bearer token from the ``Authorization`` header and returns the
+    ``sub`` claim as a ``UUID``.  Any ``ValueError`` raised by
+    ``verify_access_token`` (expired, invalid signature, wrong type) is mapped
+    to a 401 response with a ``WWW-Authenticate: Bearer`` header as required
+    by RFC 6750.
+    """
     try:
         payload = verify_access_token(credentials.credentials)
     except ValueError as exc:

@@ -17,5 +17,11 @@ AsyncSessionLocal = async_sessionmaker(
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
+    """FastAPI dependency that provides a request-scoped async database session.
+
+    ``expire_on_commit=False`` is set on the session factory so ORM objects
+    remain accessible after a commit without triggering implicit lazy-loads —
+    important in async contexts where lazy loading is not supported.
+    """
     async with AsyncSessionLocal() as session:
         yield session

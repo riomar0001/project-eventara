@@ -12,4 +12,9 @@ def verify_hash(plain: str, hashed: str) -> bool:
 
 
 def generate_otp(length: int = 6) -> str:
+    """Generate a cryptographically secure numeric OTP.
+
+    Uses ``secrets.choice`` (backed by the OS CSPRNG) instead of ``random``
+    so the output cannot be predicted from previous values.
+    """
     return "".join(secrets.choice("0123456789") for _ in range(length))
