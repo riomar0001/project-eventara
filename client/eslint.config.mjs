@@ -12,7 +12,35 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    "node_modules/**",
+    "public/**",
+    "dist/**",
+    "components/ui/**",
   ]),
+  {
+    rules: {
+      "@typescript-eslint/ban-ts-comment": [
+        "warn",
+        {
+          "ts-expect-error": true,
+          "ts-ignore": true,
+          "ts-nocheck": true,
+        },
+      ],
+    },
+  },
+  {
+    files: ["src/api/**/*.{ts,tsx,js,jsx}"],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "on",
+      "@typescript-eslint/ban-ts-comment": [
+        "off",
+        {
+          "ts-expect-error": false,
+        },
+      ],
+    },
+  },
 ]);
 
 export default eslintConfig;
