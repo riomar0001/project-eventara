@@ -34,7 +34,7 @@ class RegisterResponse(BaseModel):
         from_attributes = True
 
 
-class EmailVerifyResponse(BaseModel):
+class VerifyEmailResponse(BaseModel):
     success: bool = True
     access_token: str
     refresh_token: str

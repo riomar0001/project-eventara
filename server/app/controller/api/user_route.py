@@ -2,12 +2,12 @@ import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from app.application.dto.user_dto import CompleteOnboardingInput
+from app.application.dto.user_dto import UserOnboardingInput
 from app.application.use_cases.user_usecase import OnboardingUseCase
 from app.controller.dependencies import get_current_user_id, get_onboarding_use_case
 from app.controller.schemas.user_schema import (
-    CompleteOnboardingRequest,
-    CompleteOnboardingResponse,
+    UserOnboardingRequest,
+    UserOnboardingResponse,
 )
 from app.controller.docs.user_docs import (
     ALIAS_CONFLICT,
@@ -31,8 +31,7 @@ router = APIRouter(prefix="/user", tags=["User"])
 
 @router.post(
     "/onboard",
-    summary="User Onboarding",
-    response_model=CompleteOnboardingResponse,
+    response_model=UserOnboardingResponse,
     status_code=status.HTTP_200_OK,
     responses={
         **UNAUTHORIZED,
@@ -43,14 +42,14 @@ router = APIRouter(prefix="/user", tags=["User"])
         **ONBOARDING_VALIDATION_ERROR,
     },
 )
-async def complete_onboarding(
-    body: CompleteOnboardingRequest,
+async def user_onboarding(
+    body: UserOnboardingRequest,
     user_id: uuid.UUID = Depends(get_current_user_id),
     use_case: OnboardingUseCase = Depends(get_onboarding_use_case),
-) -> CompleteOnboardingResponse:
+) -> UserOnboardingResponse:
     try:
         result = await use_case.complete_onboarding(
-            CompleteOnboardingInput(
+            UserOnboardingInput(
                 user_id=user_id,
                 alias=body.alias,
                 first_name=body.first_name,
@@ -71,7 +70,7 @@ async def complete_onboarding(
     except AliasAlreadyTakenError as error:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error))
 
-    return CompleteOnboardingResponse(
+    return UserOnboardingResponse(
         user_id=result.profile.user_id,
         alias=result.profile.alias,
         first_name=result.profile.first_name,

@@ -5,7 +5,7 @@ from app.domain.entities.user_entity import AgeGroup, EducationLevel, Gender, Us
 
 
 @dataclass
-class CompleteOnboardingInput:
+class UserOnboardingInput:
     user_id: uuid.UUID
     alias: str
     first_name: str
@@ -18,5 +18,5 @@ class CompleteOnboardingInput:
 
 
 @dataclass
-class CompleteOnboardingOutput:
+class UserOnboardingOutput:
     profile: UserProfile

@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field, field_validator
 from app.domain.entities.user_entity import AgeGroup, EducationLevel, Gender
 
 
-class CompleteOnboardingRequest(BaseModel):
+class UserOnboardingRequest(BaseModel):
     alias: str = Field(min_length=3, max_length=100)
     first_name: str = Field(min_length=1, max_length=100)
     last_name: str = Field(min_length=1, max_length=100)
@@ -22,7 +22,7 @@ class CompleteOnboardingRequest(BaseModel):
         return v.lower()
 
 
-class CompleteOnboardingResponse(BaseModel):
+class UserOnboardingResponse(BaseModel):
     success: bool = True
     user_id: uuid.UUID
     alias: str

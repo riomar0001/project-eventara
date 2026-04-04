@@ -4,7 +4,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.entities.user_entity import UserProfile
-from app.application.dto.user_dto import CompleteOnboardingInput, CompleteOnboardingOutput
+from app.application.dto.user_dto import UserOnboardingInput, UserOnboardingOutput
 from app.application.interfaces.user_interface import IUserRepository
 from app.domain.exceptions.user_exceptions import (
     AliasAlreadyTakenError,
@@ -19,7 +19,7 @@ class OnboardingUseCase:
         self.repo = repo
         self.db = db
 
-    async def complete_onboarding(self, data: CompleteOnboardingInput) -> CompleteOnboardingOutput:
+    async def complete_onboarding(self, data: UserOnboardingInput) -> UserOnboardingOutput:
         user = await self.repo.get_by_id(data.user_id)
         if not user:
             raise UserNotFoundError()
@@ -62,4 +62,4 @@ class OnboardingUseCase:
             await self.db.rollback()
             raise OnboardingAlreadyCompletedError()
 
-        return CompleteOnboardingOutput(profile=created_profile)
+        return UserOnboardingOutput(profile=created_profile)

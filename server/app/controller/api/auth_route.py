@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Path, status
 
 from app.controller.dependencies import get_auth_use_case
 from app.controller.schemas.auth_schema import (
-    EmailVerifyResponse,
+    VerifyEmailResponse,
     RegisterRequest,
     RegisterResponse,
 )
@@ -38,7 +38,7 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
     status_code=status.HTTP_201_CREATED,
     responses={**EMAIL_CONFLICT, **REGISTER_VALIDATION_ERROR},
 )
-async def register(
+async def register_user(
     body: RegisterRequest,
     use_case: AuthUseCase = Depends(get_auth_use_case),
 ) -> RegisterResponse:
@@ -61,14 +61,14 @@ async def register(
 
 @router.post(
     "/verify/{token}",
-    response_model=EmailVerifyResponse,
+    response_model=VerifyEmailResponse,
     status_code=status.HTTP_200_OK,
     responses={**INVALID_TOKEN, **TOKEN_EXPIRED, **USER_NOT_FOUND, **EMAIL_ALREADY_VERIFIED, **VERIFY_TOKEN_VALIDATION_ERROR},
 )
-async def email_verify(
+async def verify_email(
     token: str = Path(..., min_length=1),
     use_case: AuthUseCase = Depends(get_auth_use_case),
-) -> EmailVerifyResponse:
+) -> VerifyEmailResponse:
     try:
         result = await use_case.verify_email(token)
     except TokenExpiredError as error:
@@ -80,7 +80,7 @@ async def email_verify(
     except EmailAlreadyVerifiedError as error:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error))
 
-    return EmailVerifyResponse(
+    return VerifyEmailResponse(
         access_token=result.access_token,
         refresh_token=result.refresh_token,
     )
