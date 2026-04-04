@@ -4,6 +4,9 @@ from app.domain.exceptions.user_exceptions import (
     UserNotFoundError,
     UserLockedError,
     UserInactiveError,
+    EmailNotVerifiedError,
+    OnboardingAlreadyCompletedError,
+    AliasAlreadyTakenError,
 )
 from app.domain.exceptions.auth_exceptions import (
     InvalidTokenError,
@@ -17,6 +20,9 @@ __all__ = [
     "UserNotFoundError",
     "UserLockedError",
     "UserInactiveError",
+    "EmailNotVerifiedError",
+    "OnboardingAlreadyCompletedError",
+    "AliasAlreadyTakenError",
     "InvalidTokenError",
     "TokenExpiredError",
     "InvalidCredentialsError",

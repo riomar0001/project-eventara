@@ -1,0 +1,22 @@
+import uuid
+from dataclasses import dataclass
+
+from app.domain.entities.user_entity import AgeGroup, EducationLevel, Gender, UserProfile
+
+
+@dataclass
+class CompleteOnboardingInput:
+    user_id: uuid.UUID
+    alias: str
+    first_name: str
+    last_name: str
+    age_group: AgeGroup
+    gender: Gender
+    education_level: EducationLevel
+    occupation: str | None = None
+    bio: str | None = None
+
+
+@dataclass
+class CompleteOnboardingOutput:
+    profile: UserProfile

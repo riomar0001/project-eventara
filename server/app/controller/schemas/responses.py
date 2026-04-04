@@ -96,3 +96,63 @@ EMAIL_ALREADY_VERIFIED = {
         },
     }
 }
+
+EMAIL_NOT_VERIFIED = {
+    403: {
+        "description": "Email not verified",
+        "model": ErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "message": "Email must be verified before completing onboarding",
+                }
+            }
+        },
+    }
+}
+
+ONBOARDING_ALREADY_COMPLETED = {
+    409: {
+        "description": "Onboarding already completed",
+        "model": ErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "message": "Onboarding has already been completed",
+                }
+            }
+        },
+    }
+}
+
+ALIAS_CONFLICT = {
+    409: {
+        "description": "Alias already taken",
+        "model": ErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "message": "Alias 'johndoe' is already taken",
+                }
+            }
+        },
+    }
+}
+
+UNAUTHORIZED = {
+    401: {
+        "description": "Unauthorized",
+        "model": ErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "message": "Token has expired",
+                }
+            }
+        },
+    }
+}

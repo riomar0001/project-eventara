@@ -21,3 +21,18 @@ class UserInactiveError(Exception):
 class EmailAlreadyVerifiedError(Exception):
     def __init__(self) -> None:
         super().__init__("Email is already verified")
+
+
+class EmailNotVerifiedError(Exception):
+    def __init__(self) -> None:
+        super().__init__("Email must be verified before completing onboarding")
+
+
+class OnboardingAlreadyCompletedError(Exception):
+    def __init__(self) -> None:
+        super().__init__("Onboarding has already been completed")
+
+
+class AliasAlreadyTakenError(Exception):
+    def __init__(self, alias: str = "") -> None:
+        super().__init__(f"Alias '{alias}' is already taken" if alias else "Alias is already taken")

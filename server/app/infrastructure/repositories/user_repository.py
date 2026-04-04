@@ -1,4 +1,3 @@
-from unittest import result
 import uuid
 from datetime import datetime, timezone
 
@@ -13,12 +12,17 @@ from app.domain.entities.user_entity import (
     User as DomainUser,
     PublicUser,
     UserActivity as DomainUserActivity,
+    UserProfile as DomainUserProfile,
     UserSecurity as DomainUserSecurity,
     UserStatus,
+    AgeGroup,
+    EducationLevel,
+    Gender,
 )
 from app.infrastructure.database.models.user_models import (
     User,
     UserActivity,
+    UserProfile,
     UserSecurity,
 )
 
@@ -60,6 +64,8 @@ class UserRepository:
             id=orm_user.id,
             email=orm_user.email,
             password=orm_user.password,
+            onboarding_completed=orm_user.onboarding_completed,
+            onboarding_completed_at=orm_user.onboarding_completed_at,
             status=orm_user.status if isinstance(orm_user.status, UserStatus) else UserStatus(orm_user.status),
         )
 
@@ -99,6 +105,93 @@ class UserRepository:
             status=orm_user.status if isinstance(orm_user.status, UserStatus) else UserStatus(orm_user.status),
         )
         
+    async def get_profile_by_user_id(self, user_id: uuid.UUID) -> DomainUserProfile | None:
+        result = await self.db.execute(
+            select(UserProfile).where(UserProfile.user_id == user_id)
+        )
+        orm_profile = result.scalar_one_or_none()
+
+        if orm_profile is None:
+            return None
+
+        return DomainUserProfile(
+            user_id=orm_profile.user_id,
+            email="",
+            alias=orm_profile.alias,
+            first_name=orm_profile.first_name,
+            last_name=orm_profile.last_name,
+            image_file_id=orm_profile.image_file_id,
+            age_group=orm_profile.age_group if isinstance(orm_profile.age_group, AgeGroup) else AgeGroup(orm_profile.age_group),
+            gender=orm_profile.gender if isinstance(orm_profile.gender, Gender) else Gender(orm_profile.gender),
+            education_level=orm_profile.education_level if isinstance(orm_profile.education_level, EducationLevel) else EducationLevel(orm_profile.education_level),
+            occupation=orm_profile.occupation,
+            bio=orm_profile.bio,
+            preferences=orm_profile.preferences,
+        )
+
+    async def get_by_alias(self, alias: str) -> DomainUser | None:
+        result = await self.db.execute(
+            select(User)
+            .join(UserProfile, User.id == UserProfile.user_id)
+            .where(UserProfile.alias == alias)
+        )
+        orm_user = result.scalar_one_or_none()
+
+        if orm_user is None:
+            return None
+
+        return DomainUser(
+            id=orm_user.id,
+            email=orm_user.email,
+            password=orm_user.password,
+            status=orm_user.status if isinstance(orm_user.status, UserStatus) else UserStatus(orm_user.status),
+        )
+
+    async def create_profile(self, profile: DomainUserProfile) -> DomainUserProfile:
+        orm_profile = UserProfile(
+            user_id=profile.user_id,
+            alias=profile.alias,
+            first_name=profile.first_name,
+            last_name=profile.last_name,
+            age_group=profile.age_group,
+            gender=profile.gender,
+            education_level=profile.education_level,
+            occupation=profile.occupation,
+            bio=profile.bio,
+            preferences=profile.preferences,
+        )
+        self.db.add(orm_profile)
+        await self.db.flush()
+
+        return DomainUserProfile(
+            user_id=orm_profile.user_id,
+            email=profile.email,
+            alias=orm_profile.alias,
+            first_name=orm_profile.first_name,
+            last_name=orm_profile.last_name,
+            image_file_id=orm_profile.image_file_id,
+            age_group=orm_profile.age_group if isinstance(orm_profile.age_group, AgeGroup) else AgeGroup(orm_profile.age_group),
+            gender=orm_profile.gender if isinstance(orm_profile.gender, Gender) else Gender(orm_profile.gender),
+            education_level=orm_profile.education_level if isinstance(orm_profile.education_level, EducationLevel) else EducationLevel(orm_profile.education_level),
+            occupation=orm_profile.occupation,
+            bio=orm_profile.bio,
+            preferences=orm_profile.preferences,
+        )
+
+    async def complete_onboarding(self, user_id: uuid.UUID) -> bool:
+        """Atomically mark onboarding as completed.
+
+        Returns True if updated, False if already completed.
+        """
+        now = datetime.now(timezone.utc)
+        result = await self.db.execute(
+            update(User)
+            .where(User.id == user_id, User.onboarding_completed == False)  # noqa: E712
+            .values(onboarding_completed=True, onboarding_completed_at=now)
+        )
+        await self.db.commit()
+        return cast(CursorResult, result).rowcount > 0
+
     async def update_verification_status(self, user_id: uuid.UUID, verified: bool) -> bool:
         """Atomically update verification status.
 
