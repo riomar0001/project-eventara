@@ -142,7 +142,7 @@ To stop and delete all data:
 docker compose -f docker-compose.database.yml down -v
 ```
 
-**PostgreSQL**
+### PostgreSQL
 
 | Field | Value |
 |---|---|
@@ -153,7 +153,7 @@ docker compose -f docker-compose.database.yml down -v
 | Database | `eventara_db` |
 | Connection string | `postgresql+asyncpg://postgres:password@localhost:5432/eventara_db` |
 
-**Redis**
+### Redis
 
 | Field | Value |
 |---|---|
@@ -186,7 +186,7 @@ async def send_welcome_email(ctx: dict, user_id: str) -> None:
     ...
 ```
 
-2. Register it in `WorkerSettings.functions` inside `worker.py`:
+1. Register it in `WorkerSettings.functions` inside `worker.py`:
 
 ```python
 from app.infrastructure.messaging.jobs.email import send_welcome_email
@@ -195,7 +195,7 @@ class WorkerSettings:
     functions = [send_welcome_email]
 ```
 
-3. Enqueue it from a route via `request.app.state.arq`:
+1. Enqueue it from a route via `request.app.state.arq`:
 
 ```python
 await request.app.state.arq.enqueue_job("send_welcome_email", user_id)
