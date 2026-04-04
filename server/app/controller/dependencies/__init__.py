@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application.use_cases import auth_usecase
 from app.application.use_cases.auth_usecase import AuthUseCase
-from app.application.use_cases.onboarding_usecase import OnboardingUseCase
+from app.application.use_cases.user_usecase import OnboardingUseCase
 from app.core.security.token_service import verify_access_token
 from app.infrastructure.repositories.user_repository import UserRepository
 from app.infrastructure.database.session import get_db

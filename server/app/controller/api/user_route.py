@@ -2,8 +2,8 @@ import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from app.application.dto.onboarding_dto import CompleteOnboardingInput
-from app.application.use_cases.onboarding_usecase import OnboardingUseCase
+from app.application.dto.user_dto import CompleteOnboardingInput
+from app.application.use_cases.user_usecase import OnboardingUseCase
 from app.controller.dependencies import get_current_user_id, get_onboarding_use_case
 from app.controller.schemas.onboarding_schema import (
     CompleteOnboardingRequest,
