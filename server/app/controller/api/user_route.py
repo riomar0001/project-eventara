@@ -41,12 +41,30 @@ router = APIRouter(prefix="/user", tags=["User"])
         **ALIAS_CONFLICT,
         **ONBOARDING_VALIDATION_ERROR,
     },
+    summary="Complete user onboarding",
+    description=(
+        "Submit profile details to complete onboarding for the authenticated user. "
+        "Requires a verified email address. "
+        "Can only be completed once per account."
+    ),
 )
 async def user_onboarding(
     body: UserOnboardingRequest,
     user_id: uuid.UUID = Depends(get_current_user_id),
     use_case: OnboardingUseCase = Depends(get_onboarding_use_case),
 ) -> UserOnboardingResponse:
+    """Complete the onboarding profile for the currently authenticated user.
+
+    # Error mapping
+    - **401 Unauthorized** — missing, expired, or invalid Bearer token.
+    - **403 Forbidden** — email address has not been verified yet.
+    - **404 Not Found** — no user found for the ID encoded in the token.
+    - **409 Conflict** — onboarding already completed, or the chosen alias
+      is already taken by another user.
+    - **422 Unprocessable Entity** — request body failed schema validation
+      (e.g. alias contains spaces, required fields are missing, or an enum
+      value is not recognised).
+    """
     try:
         result = await use_case.complete_onboarding(
             UserOnboardingInput(

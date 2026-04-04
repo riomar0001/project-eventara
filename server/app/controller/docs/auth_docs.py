@@ -125,3 +125,91 @@ EMAIL_ALREADY_VERIFIED = {
         },
     }
 }
+
+
+# POST /auth/login
+LOGIN_VALIDATION_ERROR = {
+    422: {
+        "description": "Validation error — missing or malformed fields",
+        "model": ValidationErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "detail": [
+                        {
+                            "loc": ["body", "email"],
+                            "msg": "value is not a valid email address",
+                            "type": "value_error.email",
+                        },
+                        {
+                            "loc": ["body", "password"],
+                            "msg": "Field required",
+                            "type": "missing",
+                        },
+                    ],
+                }
+            }
+        },
+    }
+}
+
+INVALID_CREDENTIALS = {
+    401: {
+        "description": "Invalid email or password",
+        "model": ErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "message": "Invalid email or password",
+                }
+            }
+        },
+    }
+}
+
+USER_LOCKED = {
+    423: {
+        "description": "Account temporarily locked due to too many failed login attempts",
+        "model": ErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "message": "Account is temporarily locked due to too many failed login attempts",
+                }
+            }
+        },
+    }
+}
+
+USER_INACTIVE = {
+    403: {
+        "description": "Account is inactive or has been deleted",
+        "model": ErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "message": "Account is inactive or has been deleted",
+                }
+            }
+        },
+    }
+}
+
+EMAIL_NOT_VERIFIED = {
+    403: {
+        "description": "Email address has not been verified",
+        "model": ErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "message": "Email must be verified before completing onboarding",
+                }
+            }
+        },
+    }
+}

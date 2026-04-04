@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 
 from typing import cast
 
-from sqlalchemy import select, update
+from sqlalchemy import case, select, update
 from sqlalchemy.engine import CursorResult
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -209,3 +209,79 @@ class UserRepository:
         )
         await self.db.commit()
         return cast(CursorResult, result).rowcount > 0
+
+    async def record_failed_login(
+        self,
+        user_id: uuid.UUID,
+        max_attempts: int,
+        lockout_until: datetime,
+    ) -> int:
+        """Atomically increment failed_login_attempts and conditionally lock the account.
+
+        A single SQL UPDATE with a CASE expression is used so the increment and
+        the conditional lock are applied in one round-trip to the database.  This
+        prevents the TOCTOU race where two concurrent wrong-password requests
+        could both read failed_login_attempts = N, both write N+1, and together
+        count only one failure instead of two.
+
+        The account is locked by setting locked_until to ``lockout_until`` once
+        failed_login_attempts reaches ``max_attempts``.  If the account is already
+        locked the existing locked_until value is preserved (idempotent).
+
+        Args:
+            user_id:       The user whose counter should be incremented.
+            max_attempts:  Threshold at or above which locked_until is set.
+            lockout_until: The datetime until which the account should be locked
+                           when the threshold is first reached.
+
+        Returns:
+            The new value of failed_login_attempts after the increment.
+        """
+        result = await self.db.execute(
+            update(UserSecurity)
+            .where(UserSecurity.user_id == user_id)
+            .values(
+                failed_login_attempts=UserSecurity.failed_login_attempts + 1,
+                # Lock only when the new count first hits the threshold;
+                # once locked, keep the existing locked_until unchanged.
+                locked_until=case(
+                    (UserSecurity.failed_login_attempts + 1 >= max_attempts, lockout_until),
+                    else_=UserSecurity.locked_until,
+                ),
+            )
+            .returning(UserSecurity.failed_login_attempts)
+        )
+        await self.db.commit()
+        row = result.fetchone()
+        return int(row[0]) if row else 0
+
+    async def reset_failed_login(self, user_id: uuid.UUID) -> None:
+        """Atomically reset the failed-login counter and clear any active account lock.
+
+        Called immediately after a successful password verification so the next
+        genuine login failure starts from a clean baseline rather than an
+        accumulated count from previous failed attempts.
+        """
+        await self.db.execute(
+            update(UserSecurity)
+            .where(UserSecurity.user_id == user_id)
+            .values(failed_login_attempts=0, locked_until=None)
+        )
+        await self.db.commit()
+
+    async def record_login(self, user_id: uuid.UUID) -> None:
+        """Update last_login_at and increment login_count in one atomic statement.
+
+        Keeps UserActivity current for audit trails and analytics without
+        requiring a separate SELECT before the UPDATE.
+        """
+        now = datetime.now(timezone.utc)
+        await self.db.execute(
+            update(UserActivity)
+            .where(UserActivity.user_id == user_id)
+            .values(
+                last_login_at=now,
+                login_count=UserActivity.login_count + 1,
+            )
+        )
+        await self.db.commit()
