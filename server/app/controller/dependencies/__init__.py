@@ -8,7 +8,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.application.use_cases import auth_usecase
 from app.application.use_cases.auth_usecase import AuthUseCase
 from app.application.use_cases.user_usecase import OnboardingUseCase
-from app.core.security.constants import LOGIN_RATE_LIMIT_MAX_ATTEMPTS, LOGIN_RATE_LIMIT_WINDOW_SECONDS
+from app.core.security.constants import (
+    LOGIN_ACCOUNT_RATE_LIMIT_MAX_ATTEMPTS,
+    LOGIN_ACCOUNT_RATE_LIMIT_WINDOW_SECONDS,
+    LOGIN_IP_RATE_LIMIT_MAX_ATTEMPTS,
+    LOGIN_IP_RATE_LIMIT_WINDOW_SECONDS,
+)
 from app.core.security.token_service import verify_access_token
 from app.infrastructure.cache.repositories.rate_limit_repository import RateLimitRepository
 from app.infrastructure.repositories.user_repository import UserRepository
@@ -40,8 +45,8 @@ def get_current_user_id(
     return uuid.UUID(payload.sub)
 
 
-def get_auth_use_case(db: AsyncSession = Depends(get_db)) -> AuthUseCase:
-    return AuthUseCase(UserRepository(db), db)
+def get_auth_use_case(request: Request, db: AsyncSession = Depends(get_db)) -> AuthUseCase:
+    return AuthUseCase(UserRepository(db), db, request.app.state.arq)
 
 
 def get_onboarding_use_case(db: AsyncSession = Depends(get_db)) -> OnboardingUseCase:
@@ -49,25 +54,59 @@ def get_onboarding_use_case(db: AsyncSession = Depends(get_db)) -> OnboardingUse
 
 
 async def login_rate_limit(request: Request) -> None:
-    """FastAPI dependency that enforces a per-IP fixed-window rate limit on login.
+    """FastAPI dependency that enforces two independent Redis rate limits on login.
 
-    Reads the client IP from the request, increments its Redis counter, and
-    raises 429 if the limit is exceeded.  A ``Retry-After`` header is included
-    so clients know how long to wait before retrying.
+    Two fixed-window counters are checked in sequence:
 
-    The counter resets automatically when the window expires — no manual
-    cleanup is required.
+    1. **Per-IP** (``rate_limit:login:ip:{ip}``) — catches mass scanning where
+       one source address tries many different accounts.  Threshold is higher
+       because legitimate users often share an IP (office NAT, university Wi-Fi).
+
+    2. **Per-account** (``rate_limit:login:account:{email}``) — catches targeted
+       brute-force against a single account spread across many source IPs.
+       The email is read from the raw request body so the check runs before
+       any framework validation; if the body is missing or malformed the
+       per-account check is skipped and the route handler will return a 422.
+
+    Both checks include a ``Retry-After`` header on 429 responses so clients
+    know exactly how long to wait.  Counters expire automatically — no cleanup
+    is needed on success.
     """
-    ip = request.client.host if request.client else "unknown"
-    key = f"rate_limit:login:ip:{ip}"
-
     repo = RateLimitRepository(request.app.state.redis)
-    count = await repo.hit(key, LOGIN_RATE_LIMIT_WINDOW_SECONDS)
 
-    if count > LOGIN_RATE_LIMIT_MAX_ATTEMPTS:
-        ttl = await repo.get_ttl(key)
+    # --- 1. Per-IP check --------------------------------------------------
+    ip = request.client.host if request.client else "unknown"
+    ip_count = await repo.hit(
+        f"rate_limit:login:ip:{ip}",
+        LOGIN_IP_RATE_LIMIT_WINDOW_SECONDS,
+    )
+    if ip_count > LOGIN_IP_RATE_LIMIT_MAX_ATTEMPTS:
+        ttl = await repo.get_ttl(f"rate_limit:login:ip:{ip}")
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail=f"Too many login attempts. Try again in {ttl} second(s).",
+            detail=f"Too many login attempts from this network. Try again in {ttl} second(s).",
             headers={"Retry-After": str(ttl)},
         )
+
+    # --- 2. Per-account check ---------------------------------------------
+    # Read the raw body so we can extract the email before Pydantic validation.
+    # Starlette caches the body after the first read, so the route handler
+    # can still parse it normally afterwards.
+    try:
+        body = await request.json()
+        email = str(body.get("email", "")).lower().strip()
+    except Exception:
+        email = ""
+
+    if email:
+        account_count = await repo.hit(
+            f"rate_limit:login:account:{email}",
+            LOGIN_ACCOUNT_RATE_LIMIT_WINDOW_SECONDS,
+        )
+        if account_count > LOGIN_ACCOUNT_RATE_LIMIT_MAX_ATTEMPTS:
+            ttl = await repo.get_ttl(f"rate_limit:login:account:{email}")
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail=f"Too many login attempts for this account. Try again in {ttl} second(s).",
+                headers={"Retry-After": str(ttl)},
+            )

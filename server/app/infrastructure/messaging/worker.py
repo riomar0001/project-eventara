@@ -2,9 +2,7 @@ from arq.connections import RedisSettings
 
 from app.core.config import settings
 from app.infrastructure.messaging.redis import get_redis_settings
-
-# Import job functions to register them with the worker
-# from app.infrastructure.messaging.jobs.example import my_job
+from app.infrastructure.messaging.jobs.email_jobs import send_email_job
 
 
 async def startup(ctx: dict) -> None:
@@ -18,17 +16,21 @@ async def shutdown(ctx: dict) -> None:
 
 
 class WorkerSettings:
-    """
-    ARQ worker configuration.
+    """ARQ worker configuration.
 
     Run the worker with:
         uv run arq app.infrastructure.messaging.worker.WorkerSettings
+
+    Retry policy:
+        Failed jobs are retried up to ``max_tries`` times.  Email jobs benefit
+        from retries because transient SMTP errors (e.g. connection timeouts,
+        temporary service unavailability) are common and self-resolving.
     """
 
     redis_settings: RedisSettings = get_redis_settings()
     on_startup = startup
     on_shutdown = shutdown
+    max_tries: int = 3
     functions: list = [
-        # Register job functions here, e.g.:
-        # my_job,
+        send_email_job,
     ]

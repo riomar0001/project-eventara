@@ -19,14 +19,28 @@ LOCKOUT_DURATION: timedelta = timedelta(minutes=15)
 
 
 # ---------------------------------------------------------------------------
-# IP-based login rate limiting (Redis)
+# Login rate limiting (Redis)
+# Two independent counters run in parallel — both must pass for a request to
+# proceed.  Per-IP blocks mass scanning across many accounts; per-account
+# blocks targeted brute-force from many IPs against a single account.
 # ---------------------------------------------------------------------------
 
-LOGIN_RATE_LIMIT_MAX_ATTEMPTS: int = 10
+# Per-IP — network-level throttle, higher threshold because many users share
+# an IP (offices, universities, NAT gateways).
+LOGIN_IP_RATE_LIMIT_MAX_ATTEMPTS: int = 300
 """Maximum login requests allowed per IP within one rate-limit window."""
 
-LOGIN_RATE_LIMIT_WINDOW_SECONDS: int = 60
-"""Length of the rate-limit window in seconds."""
+LOGIN_IP_RATE_LIMIT_WINDOW_SECONDS: int = 60
+"""Length of the per-IP rate-limit window in seconds."""
+
+# Per-account — protects an individual account regardless of which IP the
+# requests come from.  Lower threshold than IP so targeted attacks are caught
+# even when spread across many source addresses.
+LOGIN_ACCOUNT_RATE_LIMIT_MAX_ATTEMPTS: int = 10
+"""Maximum login requests allowed per email address within one rate-limit window."""
+
+LOGIN_ACCOUNT_RATE_LIMIT_WINDOW_SECONDS: int = 60
+"""Length of the per-account rate-limit window in seconds."""
 
 
 # ---------------------------------------------------------------------------

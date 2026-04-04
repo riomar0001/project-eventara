@@ -4,20 +4,31 @@ import ssl
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
+from arq.connections import ArqRedis
+
 from app.core.config import settings
 from app.infrastructure.messaging.auth_email_templates import otp_email_html, verification_email_html
 
 __all__ = ["send_email", "verification_email_html", "otp_email_html"]
 
 
-async def send_email(to: str, subject: str, html: str) -> None:
-    """Send an HTML email without blocking the async event loop.
+async def send_email(arq: ArqRedis, to: str, subject: str, html: str) -> None:
+    """Enqueue an email delivery job onto the ARQ Redis queue.
 
-    ``smtplib`` is synchronous, so the call is offloaded to a thread via
-    ``asyncio.to_thread`` to avoid stalling the event loop during the SMTP
-    handshake and data transfer.
+    Returns immediately after the job is enqueued — the actual SMTP send
+    happens inside the ARQ worker process (``send_email_job``), decoupling
+    email delivery from the HTTP request lifecycle.
+
+    If the SMTP call fails inside the worker, ARQ will retry the job
+    automatically according to the worker's ``max_tries`` setting.
+
+    Args:
+        arq:     The ARQ connection pool used to enqueue the job.
+        to:      Recipient email address.
+        subject: Email subject line.
+        html:    HTML body of the email.
     """
-    await asyncio.to_thread(_send_smtp, to, subject, html)
+    await arq.enqueue_job("send_email_job", to=to, subject=subject, html=html)
 
 
 def _send_smtp(to: str, subject: str, html: str) -> None:

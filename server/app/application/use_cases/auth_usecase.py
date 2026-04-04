@@ -1,6 +1,7 @@
 import uuid
 from datetime import datetime, timezone
 
+from arq.connections import ArqRedis
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -40,9 +41,10 @@ from app.infrastructure.messaging.email import send_email, verification_email_ht
 class AuthUseCase:
     """Handles all authentication flows: registration, email verification, and login."""
 
-    def __init__(self, repo: IUserRepository, db: AsyncSession) -> None:
+    def __init__(self, repo: IUserRepository, db: AsyncSession, arq: ArqRedis) -> None:
         self.repo = repo
         self.db = db
+        self.arq = arq
 
     async def register_user(self, data: RegisterUserInput) -> RegisteredUserOutput:
         """Create a new user account and dispatch a verification email.
@@ -85,6 +87,7 @@ class AuthUseCase:
         verify_token = verification_token(user_id, data.email)
 
         await send_email(
+            self.arq,
             to=user.email,
             subject="Verify your Eventara email",
             html=verification_email_html(verify_token),

@@ -144,7 +144,8 @@ async def verify_email(
     description=(
         "Authenticate with a registered email and password. "
         "Returns a short-lived access token and a long-lived refresh token. "
-        "Rate limited to 10 requests per IP per 60 seconds. "
+        "Rate limited per IP (20 req / 60 s) and per account (10 req / 60 s) "
+        "so users on a shared network are not affected by others' attempts. "
         "Accounts are additionally locked after 5 consecutive failed attempts."
     ),
 )
@@ -160,8 +161,8 @@ async def login_user(
     - **403 Forbidden** — account is inactive/deleted, or email not yet verified.
     - **423 Locked** — account is temporarily locked after 5 consecutive failed
       attempts; the client should wait before retrying.
-    - **429 Too Many Requests** — IP rate limit exceeded (10 req / 60 s);
-      check the ``Retry-After`` response header for the remaining window.
+    - **429 Too Many Requests** — per-IP limit (20 req / 60 s) or per-account
+      limit (10 req / 60 s) exceeded; check ``Retry-After`` for remaining wait.
     - **422 Unprocessable Entity** — request body failed schema validation.
     """
     try:
