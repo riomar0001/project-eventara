@@ -5,10 +5,6 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from app.application.dto.user_dto import UserOnboardingInput
 from app.application.use_cases.user_usecase import OnboardingUseCase
 from app.controller.dependencies import get_current_user_id, get_onboarding_use_case
-from app.controller.schemas.user_schema import (
-    UserOnboardingRequest,
-    UserOnboardingResponse,
-)
 from app.controller.docs.user_docs import (
     ALIAS_CONFLICT,
     EMAIL_NOT_VERIFIED,
@@ -17,8 +13,10 @@ from app.controller.docs.user_docs import (
     UNAUTHORIZED,
     USER_NOT_FOUND,
 )
-
-
+from app.controller.schemas.user_schema import (
+    UserOnboardingRequest,
+    UserOnboardingResponse,
+)
 from app.domain.exceptions.user_exceptions import (
     AliasAlreadyTakenError,
     EmailNotVerifiedError,

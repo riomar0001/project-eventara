@@ -13,10 +13,9 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 
-from app.infrastructure.database.session import AsyncSessionLocal
-from app.infrastructure.database.models.user_models import Feature, Role, RolePermission
 from app.domain.entities.authorization import GrantEffect, RoleAction
-
+from app.infrastructure.database.models.user_models import Feature, Role, RolePermission
+from app.infrastructure.database.session import AsyncSessionLocal
 
 # ---------------------------------------------------------------------------
 # Seed data
@@ -81,26 +80,61 @@ ROLES: list[dict] = [
 # overrides and are not seeded at the role level.
 ROLE_PERMISSIONS: dict[str, dict[str, list[RoleAction]]] = {
     "super_admin": {
-        "user_management":        [RoleAction.CREATE, RoleAction.READ, RoleAction.UPDATE, RoleAction.DELETE],
-        "user_profile_management":[RoleAction.CREATE, RoleAction.READ, RoleAction.UPDATE, RoleAction.DELETE],
-        "user_role_management":   [RoleAction.CREATE, RoleAction.READ, RoleAction.UPDATE, RoleAction.DELETE],
-        "user_grant_management":  [RoleAction.CREATE, RoleAction.READ, RoleAction.UPDATE, RoleAction.DELETE],
+        "user_management": [
+            RoleAction.CREATE,
+            RoleAction.READ,
+            RoleAction.UPDATE,
+            RoleAction.DELETE,
+        ],
+        "user_profile_management": [
+            RoleAction.CREATE,
+            RoleAction.READ,
+            RoleAction.UPDATE,
+            RoleAction.DELETE,
+        ],
+        "user_role_management": [
+            RoleAction.CREATE,
+            RoleAction.READ,
+            RoleAction.UPDATE,
+            RoleAction.DELETE,
+        ],
+        "user_grant_management": [
+            RoleAction.CREATE,
+            RoleAction.READ,
+            RoleAction.UPDATE,
+            RoleAction.DELETE,
+        ],
     },
     "admin": {
-        "user_management":        [RoleAction.CREATE, RoleAction.READ, RoleAction.UPDATE, RoleAction.DELETE],
-        "user_profile_management":[RoleAction.READ,   RoleAction.UPDATE],
-        "user_role_management":   [RoleAction.CREATE, RoleAction.READ, RoleAction.UPDATE, RoleAction.DELETE],
-        "user_grant_management":  [RoleAction.CREATE, RoleAction.READ, RoleAction.UPDATE, RoleAction.DELETE],
+        "user_management": [
+            RoleAction.CREATE,
+            RoleAction.READ,
+            RoleAction.UPDATE,
+            RoleAction.DELETE,
+        ],
+        "user_profile_management": [RoleAction.READ, RoleAction.UPDATE],
+        "user_role_management": [
+            RoleAction.CREATE,
+            RoleAction.READ,
+            RoleAction.UPDATE,
+            RoleAction.DELETE,
+        ],
+        "user_grant_management": [
+            RoleAction.CREATE,
+            RoleAction.READ,
+            RoleAction.UPDATE,
+            RoleAction.DELETE,
+        ],
     },
     "moderator": {
-        "user_management":        [RoleAction.READ, RoleAction.UPDATE],
-        "user_profile_management":[RoleAction.READ, RoleAction.UPDATE],
-        "user_role_management":   [RoleAction.READ],
-        "user_grant_management":  [RoleAction.READ],
+        "user_management": [RoleAction.READ, RoleAction.UPDATE],
+        "user_profile_management": [RoleAction.READ, RoleAction.UPDATE],
+        "user_role_management": [RoleAction.READ],
+        "user_grant_management": [RoleAction.READ],
     },
     "member": {
-        "user_management":        [RoleAction.READ],
-        "user_profile_management":[RoleAction.READ, RoleAction.UPDATE],
+        "user_management": [RoleAction.READ],
+        "user_profile_management": [RoleAction.READ, RoleAction.UPDATE],
     },
 }
 
@@ -109,6 +143,7 @@ ROLE_PERMISSIONS: dict[str, dict[str, list[RoleAction]]] = {
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _log(msg: str) -> None:
     print(f"  {msg}", flush=True)
 
@@ -116,9 +151,7 @@ def _log(msg: str) -> None:
 async def _upsert_features(session) -> dict[str, UUID]:
     """Insert features, ignore conflicts on slug. Returns slug -> id map."""
     stmt = (
-        insert(Feature.__table__)
-        .values(FEATURES)
-        .on_conflict_do_nothing(index_elements=["slug"])
+        insert(Feature.__table__).values(FEATURES).on_conflict_do_nothing(index_elements=["slug"])
     )
     await session.execute(stmt)
 
@@ -128,11 +161,7 @@ async def _upsert_features(session) -> dict[str, UUID]:
 
 async def _upsert_roles(session) -> dict[str, UUID]:
     """Insert roles, ignore conflicts on name. Returns name -> id map."""
-    stmt = (
-        insert(Role.__table__)
-        .values(ROLES)
-        .on_conflict_do_nothing(index_elements=["name"])
-    )
+    stmt = insert(Role.__table__).values(ROLES).on_conflict_do_nothing(index_elements=["name"])
     await session.execute(stmt)
 
     rows = await session.execute(select(Role.id, Role.name))
@@ -168,13 +197,10 @@ async def _upsert_role_permissions(
     existing_rows = await session.execute(
         select(RolePermission.role_id, RolePermission.feature_id, RolePermission.action)
     )
-    existing: set[tuple] = {
-        (str(r), str(f), a) for r, f, a in existing_rows.all()
-    }
+    existing: set[tuple] = {(str(r), str(f), a) for r, f, a in existing_rows.all()}
 
     new_records = [
-        r for r in desired
-        if (str(r["role_id"]), str(r["feature_id"]), r["action"]) not in existing
+        r for r in desired if (str(r["role_id"]), str(r["feature_id"]), r["action"]) not in existing
     ]
 
     if not new_records:
@@ -187,6 +213,7 @@ async def _upsert_role_permissions(
 # ---------------------------------------------------------------------------
 # Entry point
 # ---------------------------------------------------------------------------
+
 
 async def run() -> None:
     print("\nRunning seed: RBAC - User Management\n" + "-" * 40)

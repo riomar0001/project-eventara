@@ -1,11 +1,9 @@
-import uuid
-
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.domain.entities.user_entity import UserProfile
 from app.application.dto.user_dto import UserOnboardingInput, UserOnboardingOutput
 from app.application.interfaces.user_interface import IUserRepository
+from app.domain.entities.user_entity import UserProfile
 from app.domain.exceptions.user_exceptions import (
     AliasAlreadyTakenError,
     EmailNotVerifiedError,

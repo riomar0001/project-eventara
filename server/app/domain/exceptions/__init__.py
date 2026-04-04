@@ -1,17 +1,17 @@
-from app.domain.exceptions.user_exceptions import (
-    EmailAlreadyTakenError,
-    EmailAlreadyVerifiedError,
-    UserNotFoundError,
-    UserLockedError,
-    UserInactiveError,
-    EmailNotVerifiedError,
-    OnboardingAlreadyCompletedError,
-    AliasAlreadyTakenError,
-)
 from app.domain.exceptions.auth_exceptions import (
+    InvalidCredentialsError,
     InvalidTokenError,
     TokenExpiredError,
-    InvalidCredentialsError,
+)
+from app.domain.exceptions.user_exceptions import (
+    AliasAlreadyTakenError,
+    EmailAlreadyTakenError,
+    EmailAlreadyVerifiedError,
+    EmailNotVerifiedError,
+    OnboardingAlreadyCompletedError,
+    UserInactiveError,
+    UserLockedError,
+    UserNotFoundError,
 )
 
 __all__ = [

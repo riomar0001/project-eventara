@@ -15,9 +15,7 @@ class Token(BaseModel):
     expires_at: datetime
     last_used_at: datetime | None = None
 
-    model_config = {
-        "from_attributes": True
-    }
+    model_config = {"from_attributes": True}
 
     @model_validator(mode="after")
     def check_revoked(self):
@@ -59,9 +57,7 @@ class LoginHistory(BaseModel):
     country: str | None = None
     successful: bool
 
-    model_config = {
-        "from_attributes": True
-    }
+    model_config = {"from_attributes": True}
 
 
 class UserOneTimeCode(BaseModel):
@@ -70,6 +66,4 @@ class UserOneTimeCode(BaseModel):
     code_hash: str
     expires_at: datetime
 
-    model_config = {
-        "from_attributes": True
-    }
+    model_config = {"from_attributes": True}

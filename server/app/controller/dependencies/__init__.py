@@ -1,11 +1,9 @@
 import uuid
-from typing import Any, cast
 
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.application.use_cases import auth_usecase
 from app.application.use_cases.auth_usecase import AuthUseCase
 from app.application.use_cases.user_usecase import OnboardingUseCase
 from app.core.security.constants import (
@@ -16,7 +14,9 @@ from app.core.security.constants import (
 )
 from app.core.security.token_service import verify_access_token
 from app.infrastructure.cache.repositories.otp_repository import OTPRepository
-from app.infrastructure.cache.repositories.rate_limit_repository import RateLimitRepository
+from app.infrastructure.cache.repositories.rate_limit_repository import (
+    RateLimitRepository,
+)
 from app.infrastructure.database.repositories.user_repository import UserRepository
 from app.infrastructure.database.session import get_db
 

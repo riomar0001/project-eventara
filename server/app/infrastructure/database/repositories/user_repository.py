@@ -1,6 +1,5 @@
 import uuid
-from datetime import datetime, timezone
-
+from datetime import UTC, datetime
 from typing import cast
 
 from sqlalchemy import case, select, update
@@ -9,15 +8,23 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.domain.entities.user_entity import (
-    User as DomainUser,
-    PublicUser,
-    UserActivity as DomainUserActivity,
-    UserProfile as DomainUserProfile,
-    UserSecurity as DomainUserSecurity,
-    UserStatus,
     AgeGroup,
     EducationLevel,
     Gender,
+    PublicUser,
+    UserStatus,
+)
+from app.domain.entities.user_entity import (
+    User as DomainUser,
+)
+from app.domain.entities.user_entity import (
+    UserActivity as DomainUserActivity,
+)
+from app.domain.entities.user_entity import (
+    UserProfile as DomainUserProfile,
+)
+from app.domain.entities.user_entity import (
+    UserSecurity as DomainUserSecurity,
 )
 from app.infrastructure.database.models.user_models import (
     User,
@@ -46,17 +53,19 @@ class UserRepository:
             .where(User.email == email)
         )
         orm_user = result.scalar_one_or_none()
-        
+
         if orm_user is None:
             return None
-        
+
         return DomainUser(
             id=orm_user.id,
             email=orm_user.email,
             password=orm_user.password,
-            status=orm_user.status if isinstance(orm_user.status, UserStatus) else UserStatus(orm_user.status),
+            status=orm_user.status
+            if isinstance(orm_user.status, UserStatus)
+            else UserStatus(orm_user.status),
         )
-        
+
     async def get_by_id(self, user_id: uuid.UUID) -> DomainUser | None:
         """Return the user with the given ID, or None if not found."""
         result = await self.db.execute(
@@ -75,14 +84,15 @@ class UserRepository:
             password=orm_user.password,
             onboarding_completed=orm_user.onboarding_completed,
             onboarding_completed_at=orm_user.onboarding_completed_at,
-            status=orm_user.status if isinstance(orm_user.status, UserStatus) else UserStatus(orm_user.status),
+            status=orm_user.status
+            if isinstance(orm_user.status, UserStatus)
+            else UserStatus(orm_user.status),
         )
 
     async def get_security_by_user_id(self, user_id: uuid.UUID) -> DomainUserSecurity | None:
-        """Return the security record for a user (verification status, failed attempts, lock), or None."""
-        result = await self.db.execute(
-            select(UserSecurity).where(UserSecurity.user_id == user_id)
-        )
+        """Return the security record for a user (verification status, failed attempts, lock),
+        or None."""
+        result = await self.db.execute(select(UserSecurity).where(UserSecurity.user_id == user_id))
         orm_security = result.scalar_one_or_none()
 
         if orm_security is None:
@@ -96,7 +106,7 @@ class UserRepository:
             failed_login_attempts=orm_security.failed_login_attempts,
             locked_until=orm_security.locked_until,
         )
-    
+
     async def create(
         self,
         user: DomainUser,
@@ -117,14 +127,14 @@ class UserRepository:
         return PublicUser(
             id=orm_user.id,
             email=orm_user.email,
-            status=orm_user.status if isinstance(orm_user.status, UserStatus) else UserStatus(orm_user.status),
+            status=orm_user.status
+            if isinstance(orm_user.status, UserStatus)
+            else UserStatus(orm_user.status),
         )
-        
+
     async def get_profile_by_user_id(self, user_id: uuid.UUID) -> DomainUserProfile | None:
         """Return the profile (alias, name, demographics) for a user, or None if not yet created."""
-        result = await self.db.execute(
-            select(UserProfile).where(UserProfile.user_id == user_id)
-        )
+        result = await self.db.execute(select(UserProfile).where(UserProfile.user_id == user_id))
         orm_profile = result.scalar_one_or_none()
 
         if orm_profile is None:
@@ -137,9 +147,15 @@ class UserRepository:
             first_name=orm_profile.first_name,
             last_name=orm_profile.last_name,
             image_file_id=orm_profile.image_file_id,
-            age_group=orm_profile.age_group if isinstance(orm_profile.age_group, AgeGroup) else AgeGroup(orm_profile.age_group),
-            gender=orm_profile.gender if isinstance(orm_profile.gender, Gender) else Gender(orm_profile.gender),
-            education_level=orm_profile.education_level if isinstance(orm_profile.education_level, EducationLevel) else EducationLevel(orm_profile.education_level),
+            age_group=orm_profile.age_group
+            if isinstance(orm_profile.age_group, AgeGroup)
+            else AgeGroup(orm_profile.age_group),
+            gender=orm_profile.gender
+            if isinstance(orm_profile.gender, Gender)
+            else Gender(orm_profile.gender),
+            education_level=orm_profile.education_level
+            if isinstance(orm_profile.education_level, EducationLevel)
+            else EducationLevel(orm_profile.education_level),
             occupation=orm_profile.occupation,
             bio=orm_profile.bio,
             preferences=orm_profile.preferences,
@@ -161,7 +177,9 @@ class UserRepository:
             id=orm_user.id,
             email=orm_user.email,
             password=orm_user.password,
-            status=orm_user.status if isinstance(orm_user.status, UserStatus) else UserStatus(orm_user.status),
+            status=orm_user.status
+            if isinstance(orm_user.status, UserStatus)
+            else UserStatus(orm_user.status),
         )
 
     async def create_profile(self, profile: DomainUserProfile) -> DomainUserProfile:
@@ -188,9 +206,15 @@ class UserRepository:
             first_name=orm_profile.first_name,
             last_name=orm_profile.last_name,
             image_file_id=orm_profile.image_file_id,
-            age_group=orm_profile.age_group if isinstance(orm_profile.age_group, AgeGroup) else AgeGroup(orm_profile.age_group),
-            gender=orm_profile.gender if isinstance(orm_profile.gender, Gender) else Gender(orm_profile.gender),
-            education_level=orm_profile.education_level if isinstance(orm_profile.education_level, EducationLevel) else EducationLevel(orm_profile.education_level),
+            age_group=orm_profile.age_group
+            if isinstance(orm_profile.age_group, AgeGroup)
+            else AgeGroup(orm_profile.age_group),
+            gender=orm_profile.gender
+            if isinstance(orm_profile.gender, Gender)
+            else Gender(orm_profile.gender),
+            education_level=orm_profile.education_level
+            if isinstance(orm_profile.education_level, EducationLevel)
+            else EducationLevel(orm_profile.education_level),
             occupation=orm_profile.occupation,
             bio=orm_profile.bio,
             preferences=orm_profile.preferences,
@@ -201,7 +225,7 @@ class UserRepository:
 
         Returns True if updated, False if already completed.
         """
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         result = await self.db.execute(
             update(User)
             .where(User.id == user_id, User.onboarding_completed == False)  # noqa: E712
@@ -216,7 +240,7 @@ class UserRepository:
         Returns True if the row was updated, False if it was already in the
         desired state (guards against concurrent double-verification).
         """
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         result = await self.db.execute(
             update(UserSecurity)
             .where(
@@ -293,7 +317,7 @@ class UserRepository:
         Keeps UserActivity current for audit trails and analytics without
         requiring a separate SELECT before the UPDATE.
         """
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         await self.db.execute(
             update(UserActivity)
             .where(UserActivity.user_id == user_id)

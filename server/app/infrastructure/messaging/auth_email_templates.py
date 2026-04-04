@@ -197,8 +197,8 @@ def account_locked_email_html(unlock_minutes: int = 30) -> str:
 def otp_email_html(code: str) -> str:
     digits = "".join(
         f'<span style="display:inline-block;width:44px;height:52px;line-height:52px;'
-        f'text-align:center;background-color:#f5f5f5;border:1px solid #e5e5e5;'
-        f'border-radius:8px;font-size:26px;font-weight:700;color:#171717;'
+        f"text-align:center;background-color:#f5f5f5;border:1px solid #e5e5e5;"
+        f"border-radius:8px;font-size:26px;font-weight:700;color:#171717;"
         f'margin:0 3px;">{d}</span>'
         for d in code
     )

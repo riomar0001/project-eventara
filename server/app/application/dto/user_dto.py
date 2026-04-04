@@ -1,7 +1,12 @@
 import uuid
 from dataclasses import dataclass
 
-from app.domain.entities.user_entity import AgeGroup, EducationLevel, Gender, UserProfile
+from app.domain.entities.user_entity import (
+    AgeGroup,
+    EducationLevel,
+    Gender,
+    UserProfile,
+)
 
 
 @dataclass

@@ -1,29 +1,17 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from arq.connections import ArqRedis
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.domain.entities.user_entity import PublicUser, User, UserActivity, UserSecurity, UserStatus
 from app.application.dto.auth_dto import (
-    RegisterUserInput,
+    LoginOutput,
     LoginUserInput,
     RegisteredUserOutput,
+    RegisterUserInput,
     VerifiedEmailOutput,
-    LoginOutput,
 )
-from app.domain.exceptions import (
-    EmailAlreadyTakenError,
-    EmailAlreadyVerifiedError,
-    InvalidCredentialsError,
-    InvalidTokenError,
-    TokenExpiredError,
-    UserInactiveError,
-    UserLockedError,
-    EmailNotVerifiedError,
-)
-from app.domain.exceptions.user_exceptions import CompletedOnboardingRequiredError, UserNotFoundError
 from app.application.interfaces.user_interface import IUserRepository
 from app.core.security.constants import LOCKOUT_DURATION, MAX_FAILED_LOGIN_ATTEMPTS
 from app.core.security.hashing import hash_string, verify_hash
@@ -33,9 +21,28 @@ from app.core.security.token_service import (
     verification_token,
     verify_verification_token,
 )
-
+from app.domain.entities.user_entity import (
+    PublicUser,
+    User,
+    UserActivity,
+    UserSecurity,
+    UserStatus,
+)
+from app.domain.exceptions import (
+    EmailAlreadyTakenError,
+    EmailAlreadyVerifiedError,
+    EmailNotVerifiedError,
+    InvalidCredentialsError,
+    InvalidTokenError,
+    TokenExpiredError,
+    UserInactiveError,
+    UserLockedError,
+)
+from app.domain.exceptions.user_exceptions import (
+    CompletedOnboardingRequiredError,
+    UserNotFoundError,
+)
 from app.infrastructure.messaging.email import send_email, verification_email_html
-
 
 
 class AuthUseCase:
@@ -192,7 +199,7 @@ class AuthUseCase:
         user = await self.repo.get_by_email(data.email)
         if not user:
             raise InvalidCredentialsError()
-        
+
         if not user.onboarding_completed:
             raise CompletedOnboardingRequiredError()
 
@@ -200,9 +207,9 @@ class AuthUseCase:
             raise UserInactiveError()
 
         security = await self.repo.get_security_by_user_id(user.id)
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         if security and security.locked_until:
-            locked_until_aware = security.locked_until.replace(tzinfo=timezone.utc)
+            locked_until_aware = security.locked_until.replace(tzinfo=UTC)
             if locked_until_aware > now:
                 raise UserLockedError()
 

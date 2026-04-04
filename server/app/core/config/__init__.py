@@ -43,7 +43,12 @@ class Settings(BaseSettings):
     CORS_ORIGIN: str
     ALLOWED_ORIGINS: str = "*"
 
-    @field_validator("ACCESS_TOKEN_EXPIRATION", "REFRESH_TOKEN_EXPIRATION","VERIFICATION_TOKEN_EXPIRATION", mode="before")
+    @field_validator(
+        "ACCESS_TOKEN_EXPIRATION",
+        "REFRESH_TOKEN_EXPIRATION",
+        "VERIFICATION_TOKEN_EXPIRATION",
+        mode="before",
+    )
     @classmethod
     def parse_duration(cls, v: str) -> timedelta:
         if isinstance(v, timedelta):

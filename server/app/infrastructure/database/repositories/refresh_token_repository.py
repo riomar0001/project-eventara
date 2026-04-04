@@ -1,6 +1,6 @@
 import uuid
+from datetime import UTC, datetime
 from typing import cast
-from datetime import datetime, timezone
 
 from sqlalchemy import select, update
 from sqlalchemy.engine import CursorResult
@@ -29,31 +29,29 @@ class RefreshTokenRepository:
 
     async def get_by_id(self, token_id: uuid.UUID) -> Token | None:
         """Return the token record matching ``token_id``, or None if not found."""
-        result = await self.db.execute(
-            select(Token).where(Token.id == token_id)
-        )
+        result = await self.db.execute(select(Token).where(Token.id == token_id))
         return result.scalar_one_or_none()
 
     async def get_active_by_id(self, token_id: uuid.UUID) -> Token | None:
         """Return the token only if it exists and has not been revoked."""
         result = await self.db.execute(
-            select(Token).where(Token.id == token_id, Token.is_active == True)
+            select(Token).where(Token.id == token_id, Token.is_active.is_(True))
         )
         return result.scalar_one_or_none()
 
     async def get_active_tokens_for_user(self, user_id: uuid.UUID) -> list[Token]:
         """Return all non-revoked tokens belonging to a user."""
         result = await self.db.execute(
-            select(Token).where(Token.user_id == user_id, Token.is_active == True)
+            select(Token).where(Token.user_id == user_id, Token.is_active.is_(True))
         )
         return list(result.scalars().all())
 
     async def revoke(self, token: Token) -> bool:
         """Atomically revoke a token. Returns False if already revoked."""
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         result = await self.db.execute(
             update(Token)
-            .where(Token.id == token.id, Token.is_active == True)
+            .where(Token.id == token.id, Token.is_active.is_(True))
             .values(is_active=False, revoked_at=now)
         )
         await self.db.commit()
@@ -61,10 +59,10 @@ class RefreshTokenRepository:
 
     async def revoke_all_for_user(self, user_id: uuid.UUID) -> int:
         """Revoke all active tokens for a user. Returns the number of tokens revoked."""
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         result = await self.db.execute(
             update(Token)
-            .where(Token.user_id == user_id, Token.is_active == True)
+            .where(Token.user_id == user_id, Token.is_active.is_(True))
             .values(is_active=False, revoked_at=now)
         )
         await self.db.commit()
@@ -72,10 +70,6 @@ class RefreshTokenRepository:
 
     async def update_last_used(self, token: Token) -> None:
         """Stamp ``last_used_at`` on the token record for audit purposes."""
-        now = datetime.now(timezone.utc)
-        await self.db.execute(
-            update(Token)
-            .where(Token.id == token.id)
-            .values(last_used_at=now)
-        )
+        now = datetime.now(UTC)
+        await self.db.execute(update(Token).where(Token.id == token.id).values(last_used_at=now))
         await self.db.commit()

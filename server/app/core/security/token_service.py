@@ -15,18 +15,19 @@ enforces signature, expiry, and the ``type`` claim in one place.
 """
 
 import uuid
-from datetime import datetime, timezone
-from typing import Literal
+from datetime import UTC, datetime
 
 import jwt
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
+from app.core.security.hashing import hash_string, verify_hash
 from app.domain.entities.token_entities import TokenPayload
 from app.domain.entities.user_entity import UserProfile
 from app.infrastructure.database.models.user_models import Token as TokenORM
-from app.infrastructure.database.repositories.refresh_token_repository import RefreshTokenRepository
-from app.core.security.hashing import hash_string, verify_hash
+from app.infrastructure.database.repositories.refresh_token_repository import (
+    RefreshTokenRepository,
+)
 
 
 def create_access_token(
@@ -53,7 +54,7 @@ def create_access_token(
     Returns:
         A signed JWT string ready to be sent in the ``Authorization: Bearer`` header.
     """
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
 
     payload = {
         "sub": str(user_id),
@@ -70,19 +71,22 @@ def create_access_token(
         payload["role_id"] = role_id
 
     if user:
-        payload.update({
-            "first_name": user.first_name,
-            "last_name": user.last_name,
-            "age_group": user.age_group,
-            "gender": user.gender,
-            "education_level": user.education_level,
-        })
+        payload.update(
+            {
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+                "age_group": user.age_group,
+                "gender": user.gender,
+                "education_level": user.education_level,
+            }
+        )
 
     return jwt.encode(
         payload,
         settings.JWT_ACCESS_TOKEN_SECRET,
         algorithm=settings.JWT_ALGORITHM,
     )
+
 
 def verify_access_token(token: str) -> TokenPayload:
     """Decode and validate an access token.
@@ -115,7 +119,7 @@ async def create_refresh_token(user_id: uuid.UUID, db: AsyncSession) -> str:
     Returns:
         The plaintext signed JWT to be delivered to the client.
     """
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     token_id = uuid.uuid4()
     payload = {
         "sub": str(user_id),
@@ -125,15 +129,19 @@ async def create_refresh_token(user_id: uuid.UUID, db: AsyncSession) -> str:
         "exp": now + settings.REFRESH_TOKEN_EXPIRATION,
     }
 
-    refresh_token = jwt.encode(payload, settings.JWT_REFRESH_TOKEN_SECRET, algorithm=settings.JWT_ALGORITHM)
+    refresh_token = jwt.encode(
+        payload, settings.JWT_REFRESH_TOKEN_SECRET, algorithm=settings.JWT_ALGORITHM
+    )
 
     repo = RefreshTokenRepository(db)
-    await repo.create(TokenORM(
-        id=token_id,
-        user_id=user_id,
-        token_hash=hash_string(refresh_token),
-        expires_at=payload["exp"],
-    ))
+    await repo.create(
+        TokenORM(
+            id=token_id,
+            user_id=user_id,
+            token_hash=hash_string(refresh_token),
+            expires_at=payload["exp"],
+        )
+    )
 
     return refresh_token
 
@@ -174,7 +182,7 @@ def verification_token(user_id: uuid.UUID, email: str) -> str:
     Returns:
         A signed JWT string to be included in the verification link.
     """
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     payload = {
         "sub": str(user_id),
         "email": email,
@@ -183,7 +191,9 @@ def verification_token(user_id: uuid.UUID, email: str) -> str:
         "iat": now,
         "exp": now + settings.VERIFICATION_TOKEN_EXPIRATION,
     }
-    return jwt.encode(payload, settings.JWT_VERIFICATION_TOKEN_SECRET, algorithm=settings.JWT_ALGORITHM)
+    return jwt.encode(
+        payload, settings.JWT_VERIFICATION_TOKEN_SECRET, algorithm=settings.JWT_ALGORITHM
+    )
 
 
 def verify_verification_token(token: str) -> TokenPayload:
@@ -199,7 +209,9 @@ def verify_verification_token(token: str) -> TokenPayload:
         ValueError: The token is expired, has an invalid signature, or is not
             of type ``verification``.
     """
-    payload = _decode(token, secret=settings.JWT_VERIFICATION_TOKEN_SECRET, expected_type="verification")
+    payload = _decode(
+        token, secret=settings.JWT_VERIFICATION_TOKEN_SECRET, expected_type="verification"
+    )
     return TokenPayload(**payload)
 
 

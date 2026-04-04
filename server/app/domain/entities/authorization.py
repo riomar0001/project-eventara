@@ -1,16 +1,16 @@
 import uuid
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 
 from pydantic import BaseModel, Field
 
 
-class GrantEffect(str, Enum):
+class GrantEffect(StrEnum):
     ALLOW = "allow"
     DENY = "deny"
 
 
-class RoleAction(str, Enum):
+class RoleAction(StrEnum):
     CREATE = "create"
     READ = "read"
     UPDATE = "update"
@@ -24,9 +24,7 @@ class Feature(BaseModel):
     description: str | None = None
     is_enabled: bool = True
 
-    model_config = {
-        "from_attributes": True
-    }
+    model_config = {"from_attributes": True}
 
 
 class Role(BaseModel):
@@ -36,9 +34,7 @@ class Role(BaseModel):
     is_default: bool = False
     is_system: bool = False
 
-    model_config = {
-        "from_attributes": True
-    }
+    model_config = {"from_attributes": True}
 
 
 class RolePermission(BaseModel):
@@ -48,9 +44,7 @@ class RolePermission(BaseModel):
     action: RoleAction
     effect: GrantEffect
 
-    model_config = {
-        "from_attributes": True
-    }
+    model_config = {"from_attributes": True}
 
 
 class UserRole(BaseModel):
@@ -61,9 +55,7 @@ class UserRole(BaseModel):
     assigned_by: uuid.UUID | None = None
     assigned_at: datetime = Field(default_factory=datetime.utcnow)
 
-    model_config = {
-        "from_attributes": True
-    }
+    model_config = {"from_attributes": True}
 
 
 class UserGrant(BaseModel):
@@ -77,6 +69,4 @@ class UserGrant(BaseModel):
     expires_at: datetime | None = None
     granted_by: uuid.UUID | None = None
 
-    model_config = {
-        "from_attributes": True
-    }
+    model_config = {"from_attributes": True}

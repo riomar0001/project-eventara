@@ -6,7 +6,6 @@ reviewed and adjusted in one place without touching business logic.
 
 from datetime import timedelta
 
-
 # ---------------------------------------------------------------------------
 # Brute-force / account lockout
 # ---------------------------------------------------------------------------

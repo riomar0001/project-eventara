@@ -1,4 +1,3 @@
-import uuid
 from dataclasses import dataclass
 
 from app.domain.entities.user_entity import PublicUser

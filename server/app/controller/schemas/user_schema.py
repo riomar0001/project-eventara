@@ -1,4 +1,5 @@
 import uuid
+
 from pydantic import BaseModel, Field, field_validator
 
 from app.domain.entities.user_entity import AgeGroup, EducationLevel, Gender

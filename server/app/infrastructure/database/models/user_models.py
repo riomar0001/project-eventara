@@ -1,14 +1,26 @@
 from __future__ import annotations
+
+import uuid
 from datetime import datetime
 from uuid import uuid4
-import uuid
-from sqlalchemy import DateTime, Enum, ForeignKey, Integer, JSON, String, Text, Index, text, UUID
+
+from sqlalchemy import (
+    JSON,
+    UUID,
+    DateTime,
+    Enum,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+    Text,
+    text,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.domain.entities.user_entity import AgeGroup, EducationLevel, Gender, UserStatus
 from app.domain.entities.authorization import GrantEffect, RoleAction
+from app.domain.entities.user_entity import AgeGroup, EducationLevel, Gender, UserStatus
 from app.infrastructure.database.base import Base
-
 
 
 class User(Base):
@@ -18,17 +30,25 @@ class User(Base):
     password: Mapped[str] = mapped_column(Text, nullable=False)
     onboarding_completed: Mapped[bool] = mapped_column(default=False)
     onboarding_completed_at: Mapped[datetime | None] = mapped_column(DateTime)
-    status: Mapped[str] = mapped_column(Enum(UserStatus, name="user_status"), nullable=False, default="active")
+    status: Mapped[str] = mapped_column(
+        Enum(UserStatus, name="user_status"), nullable=False, default="active"
+    )
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime)
 
     # Relationships
-    profile: Mapped["UserProfile"] = relationship(back_populates="user", uselist=False)
-    security: Mapped["UserSecurity"] = relationship(back_populates="user", uselist=False)
-    activity: Mapped["UserActivity"] = relationship(back_populates="user", uselist=False)
-    tokens: Mapped[list["Token"]] = relationship(back_populates="user", foreign_keys="Token.user_id")
-    roles: Mapped[list["UserRole"]] = relationship(back_populates="user", foreign_keys="UserRole.user_id")
-    grants: Mapped[list["UserGrant"]] = relationship(back_populates="user", foreign_keys="UserGrant.user_id")
-    login_history: Mapped[list["UserLoginHistory"]] = relationship(back_populates="user", foreign_keys="UserLoginHistory.user_id")
+    profile: Mapped[UserProfile] = relationship(back_populates="user", uselist=False)
+    security: Mapped[UserSecurity] = relationship(back_populates="user", uselist=False)
+    activity: Mapped[UserActivity] = relationship(back_populates="user", uselist=False)
+    tokens: Mapped[list[Token]] = relationship(back_populates="user", foreign_keys="Token.user_id")
+    roles: Mapped[list[UserRole]] = relationship(
+        back_populates="user", foreign_keys="UserRole.user_id"
+    )
+    grants: Mapped[list[UserGrant]] = relationship(
+        back_populates="user", foreign_keys="UserGrant.user_id"
+    )
+    login_history: Mapped[list[UserLoginHistory]] = relationship(
+        back_populates="user", foreign_keys="UserLoginHistory.user_id"
+    )
 
     __table_args__ = (
         Index(
@@ -43,7 +63,9 @@ class User(Base):
 class UserProfile(Base):
     __tablename__ = "user_profiles"
 
-    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), unique=True)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), unique=True
+    )
 
     alias: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
     first_name: Mapped[str] = mapped_column(String(100), nullable=False)
@@ -53,17 +75,21 @@ class UserProfile(Base):
     age_group: Mapped[str] = mapped_column(Enum(AgeGroup, name="age_group"), nullable=False)
     gender: Mapped[str] = mapped_column(Enum(Gender, name="gender"), nullable=False)
     occupation: Mapped[str | None] = mapped_column(String(150), nullable=True)
-    education_level: Mapped[str] = mapped_column(Enum(EducationLevel, name="education_level"), nullable=False)
+    education_level: Mapped[str] = mapped_column(
+        Enum(EducationLevel, name="education_level"), nullable=False
+    )
     bio: Mapped[str | None] = mapped_column(Text, nullable=True)
     preferences: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
-    user: Mapped["User"] = relationship(back_populates="profile")
+    user: Mapped[User] = relationship(back_populates="profile")
 
 
 class UserSecurity(Base):
     __tablename__ = "user_security"
 
-    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), unique=True)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), unique=True
+    )
 
     email_verified: Mapped[bool] = mapped_column(default=False)
     email_verified_at: Mapped[datetime | None] = mapped_column(DateTime)
@@ -73,7 +99,7 @@ class UserSecurity(Base):
     locked_until: Mapped[datetime | None] = mapped_column(DateTime)
 
     # Relationship
-    user: Mapped["User"] = relationship(back_populates="security")
+    user: Mapped[User] = relationship(back_populates="security")
 
     __table_args__ = (
         Index("idx_user_security_locked_until", "locked_until"),
@@ -84,14 +110,16 @@ class UserSecurity(Base):
 class UserActivity(Base):
     __tablename__ = "user_activity"
 
-    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), unique=True)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), unique=True
+    )
 
     last_login_at: Mapped[datetime | None] = mapped_column(DateTime)
     last_activity_at: Mapped[datetime | None] = mapped_column(DateTime)
     login_count: Mapped[int] = mapped_column(Integer, default=0)
 
     # Relationship
-    user: Mapped["User"] = relationship(back_populates="activity")
+    user: Mapped[User] = relationship(back_populates="activity")
 
     __table_args__ = (
         Index("idx_user_activity_last_activity", "last_activity_at"),
@@ -108,8 +136,8 @@ class Feature(Base):
     is_enabled: Mapped[bool] = mapped_column(default=True)
 
     # Relationships
-    permissions: Mapped[list["RolePermission"]] = relationship(back_populates="feature")
-    grants: Mapped[list["UserGrant"]] = relationship(back_populates="feature")
+    permissions: Mapped[list[RolePermission]] = relationship(back_populates="feature")
+    grants: Mapped[list[UserGrant]] = relationship(back_populates="feature")
 
     __table_args__ = (
         Index("idx_features_slug", "slug"),
@@ -126,9 +154,9 @@ class Role(Base):
     is_system: Mapped[bool] = mapped_column(default=False)
 
     # Relationships
-    permissions: Mapped[list["RolePermission"]] = relationship(back_populates="role")
-    user_roles: Mapped[list["UserRole"]] = relationship(back_populates="role")
-    user_grants: Mapped[list["UserGrant"]] = relationship(back_populates="role")
+    permissions: Mapped[list[RolePermission]] = relationship(back_populates="role")
+    user_roles: Mapped[list[UserRole]] = relationship(back_populates="role")
+    user_grants: Mapped[list[UserGrant]] = relationship(back_populates="role")
 
     __table_args__ = (
         Index("idx_roles_name", "name"),
@@ -146,8 +174,8 @@ class RolePermission(Base):
     effect: Mapped[str] = mapped_column(Enum(GrantEffect, name="grant_effect"), nullable=False)
 
     # Relationships
-    role: Mapped["Role"] = relationship(back_populates="permissions")
-    feature: Mapped["Feature"] = relationship(back_populates="permissions")
+    role: Mapped[Role] = relationship(back_populates="permissions")
+    feature: Mapped[Feature] = relationship(back_populates="permissions")
 
     __table_args__ = (
         Index("idx_role_permissions_role_feature_action", "role_id", "feature_id", "action"),
@@ -164,9 +192,9 @@ class UserRole(Base):
     assigned_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     # Relationships
-    user: Mapped["User"] = relationship(back_populates="roles", foreign_keys=[user_id])
-    role: Mapped["Role"] = relationship(back_populates="user_roles")
-    assigner: Mapped["User | None"] = relationship("User", foreign_keys=[assigned_by])
+    user: Mapped[User] = relationship(back_populates="roles", foreign_keys=[user_id])
+    role: Mapped[Role] = relationship(back_populates="user_roles")
+    assigner: Mapped[User | None] = relationship("User", foreign_keys=[assigned_by])
 
     __table_args__ = (
         Index("idx_user_roles_user_role", "user_id", "role_id"),
@@ -187,34 +215,32 @@ class UserGrant(Base):
     granted_by: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("users.id"), nullable=True)
 
     # Relationships
-    user: Mapped["User"] = relationship(back_populates="grants", foreign_keys=[user_id])
-    role: Mapped["Role"] = relationship(back_populates="user_grants")
-    feature: Mapped["Feature"] = relationship(back_populates="grants")
-    granter: Mapped["User | None"] = relationship("User", foreign_keys=[granted_by])
+    user: Mapped[User] = relationship(back_populates="grants", foreign_keys=[user_id])
+    role: Mapped[Role] = relationship(back_populates="user_grants")
+    feature: Mapped[Feature] = relationship(back_populates="grants")
+    granter: Mapped[User | None] = relationship("User", foreign_keys=[granted_by])
 
     __table_args__ = (
-        Index("idx_user_grants_user_role_feature_action", "user_id", "role_id", "feature_id", "action"),
+        Index(
+            "idx_user_grants_user_role_feature_action",
+            "user_id",
+            "role_id",
+            "feature_id",
+            "action",
+        ),
         Index("idx_user_grants_expires_at", "expires_at"),
     )
-    
+
+
 class Token(Base):
     __tablename__ = "refresh_tokens"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
-        primary_key=True,
-        default=uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid4)
 
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
 
-    token_hash: Mapped[str] = mapped_column(
-        String(255),
-        unique=True,
-        nullable=False,
-        index=True
-    )
-    
+    token_hash: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)
+
     is_active: Mapped[bool] = mapped_column(default=True)
     revoked_at: Mapped[datetime | None] = mapped_column(DateTime)
     expires_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
@@ -222,7 +248,7 @@ class Token(Base):
 
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
-    user: Mapped["User"] = relationship(back_populates="tokens", foreign_keys=[user_id])
+    user: Mapped[User] = relationship(back_populates="tokens", foreign_keys=[user_id])
 
 
 class UserLoginHistory(Base):
@@ -241,7 +267,7 @@ class UserLoginHistory(Base):
     successful: Mapped[bool] = mapped_column(default=True)
 
     # Relationships
-    user: Mapped["User"] = relationship(back_populates="login_history")
+    user: Mapped[User] = relationship(back_populates="login_history")
 
     __table_args__ = (
         Index("idx_login_history_user_id", "user_id"),

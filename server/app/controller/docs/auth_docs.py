@@ -1,6 +1,5 @@
 from app.controller.schemas.auth_schema import ErrorResponse, ValidationErrorResponse
 
-
 # POST /auth/register
 REGISTER_VALIDATION_ERROR = {
     422: {
@@ -177,7 +176,9 @@ USER_LOCKED = {
             "application/json": {
                 "example": {
                     "success": False,
-                    "message": "Account is temporarily locked due to too many failed login attempts",
+                    "message": (
+                        "Account is temporarily locked due to too many failed login attempts"
+                    ),
                 }
             }
         },
@@ -225,7 +226,9 @@ LOGIN_RATE_LIMITED = {
             "application/json": {
                 "example": {
                     "success": False,
-                    "message": "Too many login attempts for this account. Try again in 42 second(s).",
+                    "message": (
+                        "Too many login attempts for this account. Try again in 42 second(s)."
+                    ),
                 }
             }
         },

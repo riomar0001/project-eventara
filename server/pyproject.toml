@@ -39,3 +39,23 @@ dependencies = [
     "scalar-fastapi==1.8.1",
     "cryptography>=46.0.6",
 ]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
+ignore = []
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]
+
+[tool.ruff.lint.per-file-ignores]
+"migrations/*" = ["E501"]
+"seeds/*" = ["E501"]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.11.0",
+]

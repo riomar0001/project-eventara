@@ -5,7 +5,9 @@ class UserNotFoundError(Exception):
 
 class EmailAlreadyTakenError(Exception):
     def __init__(self, email: str = "") -> None:
-        super().__init__(f"Email '{email}' is already registered" if email else "Email is already registered")
+        super().__init__(
+            f"Email '{email}' is already registered" if email else "Email is already registered"
+        )
 
 
 class UserLockedError(Exception):
@@ -31,7 +33,8 @@ class EmailNotVerifiedError(Exception):
 class OnboardingAlreadyCompletedError(Exception):
     def __init__(self) -> None:
         super().__init__("Onboarding has already been completed")
-        
+
+
 class CompletedOnboardingRequiredError(Exception):
     def __init__(self) -> None:
         super().__init__("Onboarding must be completed to proceed")

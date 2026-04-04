@@ -1,6 +1,5 @@
 from app.controller.schemas.auth_schema import ErrorResponse, ValidationErrorResponse
 
-
 # POST /user/onboard
 ONBOARDING_VALIDATION_ERROR = {
     422: {

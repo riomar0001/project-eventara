@@ -1,8 +1,7 @@
 from arq.connections import RedisSettings
 
-from app.core.config import settings
-from app.infrastructure.messaging.redis import get_redis_settings
 from app.infrastructure.messaging.jobs.email_jobs import send_email_job
+from app.infrastructure.messaging.redis import get_redis_settings
 
 
 async def startup(ctx: dict) -> None:

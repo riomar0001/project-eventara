@@ -1,8 +1,6 @@
 import uuid
-from pydantic import BaseModel, EmailStr, field_validator, Field
 
-from app.domain.entities.user_entity import AgeGroup, EducationLevel, Gender
-
+from pydantic import BaseModel, EmailStr, Field
 
 
 class ErrorResponse(BaseModel):
@@ -25,10 +23,7 @@ class RegisterResponse(BaseModel):
     user_id: uuid.UUID
     email: str
     message: str = "Registration successful. Please verify your email."
-    verification_token: str | None = Field(
-        default=None,
-        description="Only included in DEBUG mode"
-    )
+    verification_token: str | None = Field(default=None, description="Only included in DEBUG mode")
 
     class Config:
         from_attributes = True

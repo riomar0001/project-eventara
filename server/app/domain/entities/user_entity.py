@@ -1,30 +1,30 @@
 import uuid
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 
 from pydantic import BaseModel, Field
 
 
-class UserStatus(str, Enum):
+class UserStatus(StrEnum):
     ACTIVE = "active"
     INACTIVE = "inactive"
     LOCKED = "locked"
     DELETED = "deleted"
 
 
-class AgeGroup(str, Enum):
+class AgeGroup(StrEnum):
     CHILD = "child"
     TEEN = "teen"
     ADULT = "adult"
     SENIOR = "senior"
 
 
-class Gender(str, Enum):
+class Gender(StrEnum):
     MALE = "male"
     FEMALE = "female"
 
 
-class EducationLevel(str, Enum):
+class EducationLevel(StrEnum):
     NO_FORMAL_EDUCATION = "no_formal_education"
     ELEMENTARY_LEVEL = "elementary_level"
     ELEMENTARY_GRADUATE = "elementary_graduate"
@@ -48,18 +48,15 @@ class User(BaseModel):
     onboarding_completed_at: datetime | None = None
     status: UserStatus = UserStatus.ACTIVE
     deleted_at: datetime | None = None
-    model_config = {
-        "from_attributes": True
-    }
+    model_config = {"from_attributes": True}
+
 
 class PublicUser(BaseModel):
     id: uuid.UUID
     email: str
     status: UserStatus
 
-    model_config = {
-        "from_attributes": True
-    }
+    model_config = {"from_attributes": True}
 
 
 class UserProfile(BaseModel):
@@ -76,9 +73,7 @@ class UserProfile(BaseModel):
     bio: str | None = None
     preferences: dict | None = None
 
-    model_config = {
-        "from_attributes": True
-    }
+    model_config = {"from_attributes": True}
 
 
 class UserSecurity(BaseModel):
@@ -89,9 +84,7 @@ class UserSecurity(BaseModel):
     failed_login_attempts: int = 0
     locked_until: datetime | None = None
 
-    model_config = {
-        "from_attributes": True
-    }
+    model_config = {"from_attributes": True}
 
 
 class UserActivity(BaseModel):
@@ -100,6 +93,4 @@ class UserActivity(BaseModel):
     last_activity_at: datetime | None = None
     login_count: int = 0
 
-    model_config = {
-        "from_attributes": True
-    }
+    model_config = {"from_attributes": True}

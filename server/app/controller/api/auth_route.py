@@ -1,13 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, Path, status
 
+from app.application.dto.auth_dto import LoginUserInput, RegisterUserInput
+from app.application.use_cases.auth_usecase import AuthUseCase
 from app.controller.dependencies import get_auth_use_case, login_rate_limit
-from app.controller.schemas.auth_schema import (
-    LoginRequest,
-    LoginResponse,
-    VerifyEmailResponse,
-    RegisterRequest,
-    RegisterResponse,
-)
 from app.controller.docs.auth_docs import (
     EMAIL_ALREADY_VERIFIED,
     EMAIL_CONFLICT,
@@ -23,10 +18,14 @@ from app.controller.docs.auth_docs import (
     USER_NOT_FOUND,
     VERIFY_TOKEN_VALIDATION_ERROR,
 )
-
-
-from app.application.use_cases.auth_usecase import AuthUseCase
-from app.application.dto.auth_dto import RegisterUserInput
+from app.controller.schemas.auth_schema import (
+    LoginRequest,
+    LoginResponse,
+    RegisterRequest,
+    RegisterResponse,
+    VerifyEmailResponse,
+)
+from app.core.config import settings
 from app.domain.exceptions import (
     EmailAlreadyTakenError,
     EmailAlreadyVerifiedError,
@@ -38,9 +37,6 @@ from app.domain.exceptions import (
     UserLockedError,
 )
 from app.domain.exceptions.user_exceptions import UserNotFoundError
-from app.application.dto.auth_dto import LoginUserInput
-from app.core.config import settings
-
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -89,7 +85,13 @@ async def register_user(
     "/verify/{token}",
     response_model=VerifyEmailResponse,
     status_code=status.HTTP_200_OK,
-    responses={**INVALID_TOKEN, **TOKEN_EXPIRED, **USER_NOT_FOUND, **EMAIL_ALREADY_VERIFIED, **VERIFY_TOKEN_VALIDATION_ERROR},
+    responses={
+        **INVALID_TOKEN,
+        **TOKEN_EXPIRED,
+        **USER_NOT_FOUND,
+        **EMAIL_ALREADY_VERIFIED,
+        **VERIFY_TOKEN_VALIDATION_ERROR,
+    },
     summary="Verify email address",
     description=(
         "Confirm a user's email address using the verification token sent after registration. "
@@ -166,9 +168,7 @@ async def login_user(
     - **422 Unprocessable Entity** — request body failed schema validation.
     """
     try:
-        result = await use_case.login(
-            LoginUserInput(email=body.email, password=body.password)
-        )
+        result = await use_case.login(LoginUserInput(email=body.email, password=body.password))
     except InvalidCredentialsError as error:
         # 401: wrong credentials — same response for "not found" and "wrong password"
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(error))
