@@ -9,14 +9,16 @@ from app.controller.schemas.user_schema import (
     CompleteOnboardingRequest,
     CompleteOnboardingResponse,
 )
-from app.controller.schemas.responses import (
+from app.controller.docs.user_docs import (
     ALIAS_CONFLICT,
     EMAIL_NOT_VERIFIED,
     ONBOARDING_ALREADY_COMPLETED,
+    ONBOARDING_VALIDATION_ERROR,
     UNAUTHORIZED,
     USER_NOT_FOUND,
-    VALIDATION_ERROR,
 )
+
+
 from app.domain.exceptions.user_exceptions import (
     AliasAlreadyTakenError,
     EmailNotVerifiedError,
@@ -29,6 +31,7 @@ router = APIRouter(prefix="/user", tags=["User"])
 
 @router.post(
     "/onboard",
+    summary="User Onboarding",
     response_model=CompleteOnboardingResponse,
     status_code=status.HTTP_200_OK,
     responses={
@@ -37,7 +40,7 @@ router = APIRouter(prefix="/user", tags=["User"])
         **EMAIL_NOT_VERIFIED,
         **ONBOARDING_ALREADY_COMPLETED,
         **ALIAS_CONFLICT,
-        **VALIDATION_ERROR,
+        **ONBOARDING_VALIDATION_ERROR,
     },
 )
 async def complete_onboarding(

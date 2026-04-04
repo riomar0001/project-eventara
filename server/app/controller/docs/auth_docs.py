@@ -1,7 +1,8 @@
 from app.controller.schemas.auth_schema import ErrorResponse, ValidationErrorResponse
 
 
-VALIDATION_ERROR = {
+# POST /auth/register
+REGISTER_VALIDATION_ERROR = {
     422: {
         "description": "Validation error",
         "model": ValidationErrorResponse,
@@ -13,8 +14,13 @@ VALIDATION_ERROR = {
                         {
                             "loc": ["body", "email"],
                             "msg": "value is not a valid email address",
-                            "type": "value_error",
-                        }
+                            "type": "value_error.email",
+                        },
+                        {
+                            "loc": ["body", "password"],
+                            "msg": "String should have at least 8 characters",
+                            "type": "string_too_short",
+                        },
                     ],
                 }
             }
@@ -31,6 +37,29 @@ EMAIL_CONFLICT = {
                 "example": {
                     "success": False,
                     "message": "Email 'user@example.com' is already registered",
+                }
+            }
+        },
+    }
+}
+
+
+# POST /auth/verify/{token}
+VERIFY_TOKEN_VALIDATION_ERROR = {
+    422: {
+        "description": "Validation error",
+        "model": ValidationErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "detail": [
+                        {
+                            "loc": ["path", "token"],
+                            "msg": "String should have at least 1 character",
+                            "type": "string_too_short",
+                        },
+                    ],
                 }
             }
         },
@@ -91,66 +120,6 @@ EMAIL_ALREADY_VERIFIED = {
                 "example": {
                     "success": False,
                     "message": "Email is already verified",
-                }
-            }
-        },
-    }
-}
-
-EMAIL_NOT_VERIFIED = {
-    403: {
-        "description": "Email not verified",
-        "model": ErrorResponse,
-        "content": {
-            "application/json": {
-                "example": {
-                    "success": False,
-                    "message": "Email must be verified before completing onboarding",
-                }
-            }
-        },
-    }
-}
-
-ONBOARDING_ALREADY_COMPLETED = {
-    409: {
-        "description": "Onboarding already completed",
-        "model": ErrorResponse,
-        "content": {
-            "application/json": {
-                "example": {
-                    "success": False,
-                    "message": "Onboarding has already been completed",
-                }
-            }
-        },
-    }
-}
-
-ALIAS_CONFLICT = {
-    409: {
-        "description": "Alias already taken",
-        "model": ErrorResponse,
-        "content": {
-            "application/json": {
-                "example": {
-                    "success": False,
-                    "message": "Alias 'johndoe' is already taken",
-                }
-            }
-        },
-    }
-}
-
-UNAUTHORIZED = {
-    401: {
-        "description": "Unauthorized",
-        "model": ErrorResponse,
-        "content": {
-            "application/json": {
-                "example": {
-                    "success": False,
-                    "message": "Token has expired",
                 }
             }
         },

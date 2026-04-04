@@ -6,14 +6,17 @@ from app.controller.schemas.auth_schema import (
     RegisterRequest,
     RegisterResponse,
 )
-from app.controller.schemas.responses import (
+from app.controller.docs.auth_docs import (
     EMAIL_ALREADY_VERIFIED,
     EMAIL_CONFLICT,
     INVALID_TOKEN,
+    REGISTER_VALIDATION_ERROR,
     TOKEN_EXPIRED,
     USER_NOT_FOUND,
-    VALIDATION_ERROR,
+    VERIFY_TOKEN_VALIDATION_ERROR,
 )
+
+
 from app.application.use_cases.auth_usecase import AuthUseCase
 from app.application.dto.auth_dto import RegisterUserInput
 from app.domain.exceptions import (
@@ -33,7 +36,7 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
     "/register",
     response_model=RegisterResponse,
     status_code=status.HTTP_201_CREATED,
-    responses={**EMAIL_CONFLICT, **VALIDATION_ERROR},
+    responses={**EMAIL_CONFLICT, **REGISTER_VALIDATION_ERROR},
 )
 async def register(
     body: RegisterRequest,
@@ -60,7 +63,7 @@ async def register(
     "/verify/{token}",
     response_model=EmailVerifyResponse,
     status_code=status.HTTP_200_OK,
-    responses={**INVALID_TOKEN, **TOKEN_EXPIRED, **USER_NOT_FOUND, **EMAIL_ALREADY_VERIFIED, **VALIDATION_ERROR},
+    responses={**INVALID_TOKEN, **TOKEN_EXPIRED, **USER_NOT_FOUND, **EMAIL_ALREADY_VERIFIED, **VERIFY_TOKEN_VALIDATION_ERROR},
 )
 async def email_verify(
     token: str = Path(..., min_length=1),
