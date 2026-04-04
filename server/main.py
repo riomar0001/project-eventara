@@ -8,14 +8,16 @@ from scalar_fastapi.scalar_fastapi import Theme
 
 from app.controller.router import router
 from app.core.config import settings
-from app.infrastructure.messaging.redis import create_arq_pool
+from app.infrastructure.messaging.redis import create_arq_pool, create_redis_client
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     app.state.arq = await create_arq_pool()
+    app.state.redis = await create_redis_client()
     yield
     await app.state.arq.aclose()
+    await app.state.redis.aclose()
 
 
 app = FastAPI(

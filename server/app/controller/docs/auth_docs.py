@@ -213,3 +213,18 @@ EMAIL_NOT_VERIFIED = {
         },
     }
 }
+
+LOGIN_RATE_LIMITED = {
+    429: {
+        "description": "Too many login attempts from this IP — rate limit exceeded",
+        "model": ErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "message": "Too many login attempts. Try again in 42 second(s).",
+                }
+            }
+        },
+    }
+}

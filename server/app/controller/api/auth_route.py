@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Path, status
 
-from app.controller.dependencies import get_auth_use_case
+from app.controller.dependencies import get_auth_use_case, login_rate_limit
 from app.controller.schemas.auth_schema import (
     LoginRequest,
     LoginResponse,
@@ -14,6 +14,7 @@ from app.controller.docs.auth_docs import (
     EMAIL_NOT_VERIFIED,
     INVALID_CREDENTIALS,
     INVALID_TOKEN,
+    LOGIN_RATE_LIMITED,
     LOGIN_VALIDATION_ERROR,
     REGISTER_VALIDATION_ERROR,
     TOKEN_EXPIRED,
@@ -130,18 +131,21 @@ async def verify_email(
     "/login",
     response_model=LoginResponse,
     status_code=status.HTTP_200_OK,
+    dependencies=[Depends(login_rate_limit)],
     responses={
         **INVALID_CREDENTIALS,
         **USER_INACTIVE,
         **USER_LOCKED,
         **EMAIL_NOT_VERIFIED,
+        **LOGIN_RATE_LIMITED,
         **LOGIN_VALIDATION_ERROR,
     },
     summary="User login",
     description=(
         "Authenticate with a registered email and password. "
         "Returns a short-lived access token and a long-lived refresh token. "
-        "Accounts are temporarily locked after 5 consecutive failed attempts."
+        "Rate limited to 10 requests per IP per 60 seconds. "
+        "Accounts are additionally locked after 5 consecutive failed attempts."
     ),
 )
 async def login_user(
@@ -154,8 +158,10 @@ async def login_user(
     - **401 Unauthorized** — wrong email or wrong password (combined to prevent
       email enumeration: callers cannot distinguish between the two cases).
     - **403 Forbidden** — account is inactive/deleted, or email not yet verified.
-    - **423 Locked** — account is temporarily locked due to too many failed
-      login attempts; the client should wait before retrying.
+    - **423 Locked** — account is temporarily locked after 5 consecutive failed
+      attempts; the client should wait before retrying.
+    - **429 Too Many Requests** — IP rate limit exceeded (10 req / 60 s);
+      check the ``Retry-After`` response header for the remaining window.
     - **422 Unprocessable Entity** — request body failed schema validation.
     """
     try:

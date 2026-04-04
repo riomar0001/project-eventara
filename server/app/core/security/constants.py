@@ -19,6 +19,17 @@ LOCKOUT_DURATION: timedelta = timedelta(minutes=15)
 
 
 # ---------------------------------------------------------------------------
+# IP-based login rate limiting (Redis)
+# ---------------------------------------------------------------------------
+
+LOGIN_RATE_LIMIT_MAX_ATTEMPTS: int = 10
+"""Maximum login requests allowed per IP within one rate-limit window."""
+
+LOGIN_RATE_LIMIT_WINDOW_SECONDS: int = 60
+"""Length of the rate-limit window in seconds."""
+
+
+# ---------------------------------------------------------------------------
 # One-time passcodes (OTP)
 # ---------------------------------------------------------------------------
 
