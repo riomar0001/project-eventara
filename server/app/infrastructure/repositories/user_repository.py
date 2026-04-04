@@ -16,7 +16,7 @@ from app.domain.entities.user_entity import (
     UserSecurity as DomainUserSecurity,
     UserStatus,
 )
-from app.infrastructure.database.models.user import (
+from app.infrastructure.database.models.user_models import (
     User,
     UserActivity,
     UserProfile,

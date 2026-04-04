@@ -16,8 +16,10 @@ class User(Base):
 
     email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
     password: Mapped[str] = mapped_column(Text, nullable=False)
+    onboarding_completed: Mapped[bool] = mapped_column(default=False)
+    onboarding_completed_at: Mapped[datetime | None] = mapped_column(DateTime)
     status: Mapped[str] = mapped_column(Enum(UserStatus, name="user_status"), nullable=False, default="active")
-    delete_at: Mapped[datetime | None] = mapped_column(DateTime)
+    deleted_at: Mapped[datetime | None] = mapped_column(DateTime)
 
     # Relationships
     profile: Mapped["UserProfile"] = relationship(back_populates="user", uselist=False)

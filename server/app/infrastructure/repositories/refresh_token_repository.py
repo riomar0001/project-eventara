@@ -5,7 +5,7 @@ from sqlalchemy import select, update
 from sqlalchemy.engine import CursorResult
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.infrastructure.database.models.user import Token
+from app.infrastructure.database.models.user_models import Token
 
 
 class RefreshTokenRepository:

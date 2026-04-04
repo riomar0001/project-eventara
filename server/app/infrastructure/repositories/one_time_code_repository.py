@@ -4,7 +4,7 @@ from datetime import datetime, timedelta, timezone
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.infrastructure.database.models.user import UserOneTimeCode
+from app.infrastructure.database.models.user_models import UserOneTimeCode
 from app.core.security.hashing import generate_otp, hash_string
 
 OTP_TTL_MINUTES = 10

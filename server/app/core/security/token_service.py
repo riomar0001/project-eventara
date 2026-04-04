@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import settings
 from app.domain.entities.token import TokenPayload
 from app.domain.entities.user_entity import UserProfile
-from app.infrastructure.database.models.user import Token as TokenORM
+from app.infrastructure.database.models.user_models import Token as TokenORM
 from app.infrastructure.repositories.refresh_token_repository import RefreshTokenRepository
 from app.core.security.hashing import hash_string, verify_hash
 
