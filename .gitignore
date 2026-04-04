@@ -119,3 +119,4 @@ app.log
 Thumbs.db
 desktop.ini
 .claude/
+.ruff_cache/
