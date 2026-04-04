@@ -139,7 +139,7 @@ class AuthUseCase:
         if not updated:
             raise EmailAlreadyVerifiedError()
 
-        access_token = create_access_token(user_id, user.email)
+        access_token = create_access_token(user_id, user.email, user.onboarding_completed)
         refresh_token = await create_refresh_token(user_id, self.db)
 
         return VerifiedEmailOutput(
@@ -217,7 +217,7 @@ class AuthUseCase:
         await self.repo.reset_failed_login(user.id)
         await self.repo.record_login(user.id)
 
-        access_token = create_access_token(user.id, user.email)
+        access_token = create_access_token(user.id, user.email, user.onboarding_completed)
         refresh_token = await create_refresh_token(user.id, self.db)
 
         return LoginOutput(

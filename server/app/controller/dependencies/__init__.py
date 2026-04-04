@@ -15,6 +15,7 @@ from app.core.security.constants import (
     LOGIN_IP_RATE_LIMIT_WINDOW_SECONDS,
 )
 from app.core.security.token_service import verify_access_token
+from app.infrastructure.cache.repositories.otp_repository import OTPRepository
 from app.infrastructure.cache.repositories.rate_limit_repository import RateLimitRepository
 from app.infrastructure.repositories.user_repository import UserRepository
 from app.infrastructure.database.session import get_db
@@ -51,6 +52,11 @@ def get_auth_use_case(request: Request, db: AsyncSession = Depends(get_db)) -> A
 
 def get_onboarding_use_case(db: AsyncSession = Depends(get_db)) -> OnboardingUseCase:
     return OnboardingUseCase(UserRepository(db), db)
+
+
+def get_otp_repository(request: Request) -> OTPRepository:
+    """FastAPI dependency that provides a request-scoped Redis OTP repository."""
+    return OTPRepository(request.app.state.redis)
 
 
 async def login_rate_limit(request: Request) -> None:

@@ -32,6 +32,7 @@ from app.core.security.hashing import hash_string, verify_hash
 def create_access_token(
     user_id: uuid.UUID,
     email: str,
+    done_onboarding: bool,
     role_id: str | None = None,
     user: UserProfile | None = None,
 ) -> str:
@@ -44,6 +45,7 @@ def create_access_token(
     Args:
         user_id:  The user's UUID, stored in the ``sub`` claim.
         email:    The user's email address, embedded for convenience.
+        done_onboarding:  Whether the user has completed the onboarding process.
         role_id:  Optional role identifier to include in the payload.
         user:     Optional full profile; when supplied, name and demographic
                   fields are embedded so clients avoid a separate profile fetch.
@@ -56,6 +58,7 @@ def create_access_token(
     payload = {
         "sub": str(user_id),
         "email": email,
+        "done_onboarding": done_onboarding,
         "type": "access",
         "jti": str(uuid.uuid4()),
         "iat": now,

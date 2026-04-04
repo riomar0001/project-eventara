@@ -47,5 +47,5 @@ LOGIN_ACCOUNT_RATE_LIMIT_WINDOW_SECONDS: int = 60
 # One-time passcodes (OTP)
 # ---------------------------------------------------------------------------
 
-OTP_TTL_MINUTES: int = 10
+OTP_TTL_MINUTES: int = 11
 """Minutes before a generated OTP expires and is no longer accepted."""
