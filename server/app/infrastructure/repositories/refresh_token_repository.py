@@ -1,4 +1,5 @@
 import uuid
+from typing import cast
 from datetime import datetime, timezone
 
 from sqlalchemy import select, update
@@ -36,22 +37,33 @@ class RefreshTokenRepository:
         )
         return list(result.scalars().all())
 
-    async def revoke(self, token: Token) -> None:
-        token.is_active = False
-        token.revoked_at = datetime.now(timezone.utc)
+    async def revoke(self, token: Token) -> bool:
+        """Atomically revoke a token. Returns False if already revoked."""
+        now = datetime.now(timezone.utc)
+        result = await self.db.execute(
+            update(Token)
+            .where(Token.id == token.id, Token.is_active == True)
+            .values(is_active=False, revoked_at=now)
+        )
         await self.db.commit()
+        return cast(CursorResult, result).rowcount > 0
 
     async def revoke_all_for_user(self, user_id: uuid.UUID) -> int:
         """Revoke all active tokens for a user. Returns the number of tokens revoked."""
         now = datetime.now(timezone.utc)
-        result: CursorResult = await self.db.execute(  # type: ignore[assignment]
+        result = await self.db.execute(
             update(Token)
             .where(Token.user_id == user_id, Token.is_active == True)
             .values(is_active=False, revoked_at=now)
         )
         await self.db.commit()
-        return result.rowcount
+        return cast(CursorResult, result).rowcount
 
     async def update_last_used(self, token: Token) -> None:
-        token.last_used_at = datetime.now(timezone.utc)
+        now = datetime.now(timezone.utc)
+        await self.db.execute(
+            update(Token)
+            .where(Token.id == token.id)
+            .values(last_used_at=now)
+        )
         await self.db.commit()

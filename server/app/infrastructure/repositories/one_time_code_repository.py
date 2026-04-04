@@ -1,7 +1,10 @@
 import uuid
 from datetime import datetime, timedelta, timezone
 
-from sqlalchemy import delete, select
+from typing import cast
+
+from sqlalchemy import delete, select, update
+from sqlalchemy.engine import CursorResult
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.infrastructure.database.models.user_models import UserOneTimeCode
@@ -44,9 +47,19 @@ class OneTimeCodeRepository:
         )
         return result.scalar_one_or_none()
 
-    async def mark_used(self, otc: UserOneTimeCode) -> None:
-        otc.used_at = datetime.now(timezone.utc)
+    async def mark_used(self, otc: UserOneTimeCode) -> bool:
+        """Atomically mark the code as used. Returns False if already used."""
+        now = datetime.now(timezone.utc)
+        result = await self.db.execute(
+            update(UserOneTimeCode)
+            .where(
+                UserOneTimeCode.id == otc.id,
+                UserOneTimeCode.used_at.is_(None),
+            )
+            .values(used_at=now)
+        )
         await self.db.commit()
+        return cast(CursorResult, result).rowcount > 0
 
     async def delete_for_user(self, user_id: uuid.UUID) -> None:
         await self.db.execute(

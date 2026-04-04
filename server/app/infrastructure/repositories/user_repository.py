@@ -2,7 +2,10 @@ from unittest import result
 import uuid
 from datetime import datetime, timezone
 
+from typing import cast
+
 from sqlalchemy import select, update
+from sqlalchemy.engine import CursorResult
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -96,16 +99,20 @@ class UserRepository:
             status=orm_user.status if isinstance(orm_user.status, UserStatus) else UserStatus(orm_user.status),
         )
         
-    async def update_verification_status(self, user_id: uuid.UUID, verified: bool) -> None:
+    async def update_verification_status(self, user_id: uuid.UUID, verified: bool) -> bool:
+        """Atomically update verification status.
+
+        Returns True if the row was updated, False if it was already in the
+        desired state (guards against concurrent double-verification).
+        """
         now = datetime.now(timezone.utc)
         result = await self.db.execute(
             update(UserSecurity)
-            .where(UserSecurity.user_id == user_id)
+            .where(
+                UserSecurity.user_id == user_id,
+                UserSecurity.email_verified != verified,
+            )
             .values(email_verified=verified, email_verified_at=now if verified else None)
-            .returning(UserSecurity.user_id)
         )
-        updated_user_id = result.scalar_one_or_none()
         await self.db.commit()
-
-        if updated_user_id is None:
-            raise RuntimeError("Invariant violated: user should exist")
+        return cast(CursorResult, result).rowcount > 0

@@ -1,5 +1,6 @@
 import uuid
 
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.entities.user_entity import PublicUser, User, UserActivity, UserSecurity
@@ -45,7 +46,11 @@ class AuthUseCase:
         security = UserSecurity(user_id=user_id)
         activity = UserActivity(user_id=user_id)
 
-        new_user = await self.repo.create(user, security, activity)
+        try:
+            new_user = await self.repo.create(user, security, activity)
+        except IntegrityError:
+            await self.db.rollback()
+            raise EmailAlreadyTakenError(data.email)
 
         verify_token = verification_token(user_id, data.email)
 
@@ -75,11 +80,9 @@ class AuthUseCase:
         if not user:
             raise UserNotFoundError()
 
-        security = await self.repo.get_security_by_user_id(user_id)
-        if security and security.email_verified:
+        updated = await self.repo.update_verification_status(user_id, verified=True)
+        if not updated:
             raise EmailAlreadyVerifiedError()
-
-        await self.repo.update_verification_status(user_id, verified=True)
 
         access_token = create_access_token(user_id, user.email)
         refresh_token = await create_refresh_token(user_id, self.db)
