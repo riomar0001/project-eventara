@@ -1,4 +1,4 @@
-from app.core.exceptions.user_exceptions import (
+from app.domain.exceptions.user_exceptions import (
     EmailAlreadyTakenError,
     UserNotFoundError,
     UserLockedError,

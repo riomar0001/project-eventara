@@ -1,9 +1,7 @@
 import uuid
-from typing import Optional
-
 from pydantic import BaseModel, EmailStr, field_validator, Field
 
-from app.core.entities.user_entities import AgeGroup, EducationLevel, Gender
+from app.domain.entities.user import AgeGroup, EducationLevel, Gender
 
 
 class RegisterRequest(BaseModel):
@@ -16,8 +14,8 @@ class RegisterRequest(BaseModel):
     age_group: AgeGroup
     gender: Gender
     education_level: EducationLevel
-    occupation: Optional[str] = None
-    bio: Optional[str] = None
+    occupation: str | None = None
+    bio: str | None = None
 
     @field_validator("alias")
     @classmethod

@@ -1,11 +1,9 @@
 import uuid
 from datetime import datetime
-from enum import Enum
 
 from pydantic import BaseModel, Field
 
-from app.core.entities.user_entities import RoleAction
-
+from app.domain.entities.authorization import RoleAction
 
 
 class AuditLog(BaseModel):

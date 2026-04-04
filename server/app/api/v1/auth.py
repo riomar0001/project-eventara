@@ -1,7 +1,7 @@
 import random
 import string
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -18,20 +18,20 @@ from app.api.schemas.auth import (
     RegisterRequest,
     RegisterResponse,
 )
-from app.core.entities.user_entities import AgeGroup, EducationLevel, Gender, UserProfile as UserProfileEntity
-from app.core.exceptions import EmailAlreadyTakenError
-from app.core.hash_utils import hash_string, verify_hash
-from app.core.jwt_utils import (
+from app.domain.entities.user import AgeGroup, EducationLevel, Gender, UserProfile as UserProfileEntity
+from app.domain.exceptions import EmailAlreadyTakenError
+from app.infrastructure.security.hashing import hash_string, verify_hash
+from app.infrastructure.security.token_service import (
     create_access_token,
     create_refresh_token,
     verification_token,
     verify_refresh_token,
     verify_verification_token,
 )
-from app.core.use_cases.user import LoginUserInput, RegisterUserInput, UserUseCase
-from app.infrastructure.database.models.user import User, UserOneTimeCode
+from app.application.use_cases.user import LoginUserInput, RegisterUserInput, UserUseCase
+from app.infrastructure.database.models.user import UserOneTimeCode
 from app.infrastructure.database.repositories.one_time_code_repository import OneTimeCodeRepository
-from app.infrastructure.database.repositories.refresh_token_respository import RefreshTokenRepository
+from app.infrastructure.database.repositories.refresh_token_repository import RefreshTokenRepository
 from app.infrastructure.database.repositories.user_repository import UserRepository
 from app.infrastructure.database.session import get_db
 from app.infrastructure.messaging.email import otp_email_html, send_email, verification_email_html
@@ -45,7 +45,7 @@ def get_user_use_case(db: AsyncSession = Depends(get_db)) -> UserUseCase:
     return UserUseCase(UserRepository(db))
 
 
-def _build_profile_entity(user: User) -> UserProfileEntity:
+def _build_profile_entity(user) -> UserProfileEntity:
     return UserProfileEntity(
         user_id=user.id,
         email=user.email,
@@ -64,6 +64,13 @@ def _generate_otp(length: int = 6) -> str:
     return "".join(random.choices(string.digits, k=length))
 
 
+async def _issue_tokens(user, db: AsyncSession) -> tuple[str, str]:
+    profile_entity = _build_profile_entity(user)
+    access_token = create_access_token(user.id, "", profile_entity)
+    refresh_token = await create_refresh_token(user.id, db)
+    return access_token, refresh_token
+
+
 @router.post("/register", response_model=RegisterResponse, status_code=status.HTTP_201_CREATED)
 async def register(
     body: RegisterRequest,
@@ -74,7 +81,6 @@ async def register(
             RegisterUserInput(
                 email=body.email,
                 password=body.password,
-                role=body.role,
                 alias=body.alias,
                 first_name=body.first_name,
                 last_name=body.last_name,
@@ -115,9 +121,7 @@ async def email_verify(
 
     await user_repo.update_email_verified(user.id)
 
-    profile_entity = _build_profile_entity(user)
-    access_token = create_access_token(user.id, "", profile_entity)
-    refresh_token = await create_refresh_token(user.id, db)
+    access_token, refresh_token = await _issue_tokens(user, db)
 
     return EmailVerifyResponse(access_token=access_token, refresh_token=refresh_token)
 
@@ -141,7 +145,7 @@ async def login(
     await otc_repo.create(UserOneTimeCode(
         user_id=user.id,
         code_hash=hash_string(code),
-        expires_at=datetime.utcnow() + timedelta(minutes=_OTP_TTL_MINUTES),
+        expires_at=datetime.now(timezone.utc) + timedelta(minutes=_OTP_TTL_MINUTES),
     ))
 
     verify_token = verification_token(user.id, user.email)
@@ -178,9 +182,7 @@ async def login_verify(
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
 
-    profile_entity = _build_profile_entity(user)
-    access_token = create_access_token(user.id, "", profile_entity)
-    refresh_token = await create_refresh_token(user.id, db)
+    access_token, refresh_token = await _issue_tokens(user, db)
 
     return LoginResponse(access_token=access_token, refresh_token=refresh_token)
 

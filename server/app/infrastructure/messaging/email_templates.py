@@ -12,11 +12,11 @@ def _base_template(title: str, preview: str, body: str) -> str:
   <noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript>
   <![endif]-->
 </head>
-<body style="margin:0;padding:0;background-color:#0a0a0a;font-family:'Segoe UI',Arial,sans-serif;">
+<body style="margin:0;padding:0;background-color:#f5f5f5;font-family:'Segoe UI',Arial,sans-serif;">
   <span style="display:none;max-height:0;overflow:hidden;">{preview}</span>
 
   <table width="100%" cellpadding="0" cellspacing="0" role="presentation"
-         style="background-color:#0a0a0a;padding:40px 16px;">
+         style="background-color:#f5f5f5;padding:40px 16px;">
     <tr>
       <td align="center">
         <table width="100%" cellpadding="0" cellspacing="0" role="presentation"
@@ -25,15 +25,15 @@ def _base_template(title: str, preview: str, body: str) -> str:
           <!-- Logo / wordmark -->
           <tr>
             <td align="center" style="padding-bottom:32px;">
-              <span style="font-size:22px;font-weight:700;letter-spacing:-0.5px;color:#ffffff;">
-                event<span style="color:#a3e635;">ara</span>
+              <span style="font-size:22px;font-weight:700;letter-spacing:-0.5px;color:#171717;">
+                event<span style="color:#65a30d;">ara</span>
               </span>
             </td>
           </tr>
 
           <!-- Card -->
           <tr>
-            <td style="background-color:#141414;border:1px solid #1f1f1f;
+            <td style="background-color:#ffffff;border:1px solid #e5e5e5;
                         border-radius:16px;padding:40px 36px;">
               {body}
             </td>
@@ -42,9 +42,9 @@ def _base_template(title: str, preview: str, body: str) -> str:
           <!-- Footer -->
           <tr>
             <td align="center" style="padding-top:28px;">
-              <p style="margin:0;font-size:12px;color:#525252;line-height:1.6;">
+              <p style="margin:0;font-size:12px;color:#a3a3a3;line-height:1.6;">
                 You received this email because an action was performed on your
-                <span style="color:#a3e635;">Eventara</span> account.<br/>
+                <span style="color:#65a30d;">Eventara</span> account.<br/>
                 If this wasn't you, you can safely ignore this message.
               </p>
             </td>
@@ -61,18 +61,18 @@ def _base_template(title: str, preview: str, body: str) -> str:
 def verification_email_html(token: str) -> str:
     link = f"{settings.CORS_ORIGIN}/auth/verify-email?token={token}"
     body = f"""
-      <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#ffffff;
+      <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#171717;
                   letter-spacing:-0.3px;">Verify your email</h1>
-      <p style="margin:0 0 32px;font-size:15px;color:#a3a3a3;line-height:1.6;">
+      <p style="margin:0 0 32px;font-size:15px;color:#737373;line-height:1.6;">
         Thanks for signing up. Confirm your email address to activate your account.
       </p>
 
       <table cellpadding="0" cellspacing="0" role="presentation" style="margin-bottom:32px;">
         <tr>
-          <td style="border-radius:10px;background-color:#a3e635;">
+          <td style="border-radius:10px;background-color:#65a30d;">
             <a href="{link}"
                style="display:inline-block;padding:14px 32px;font-size:15px;font-weight:600;
-                       color:#0a0a0a;text-decoration:none;border-radius:10px;
+                       color:#ffffff;text-decoration:none;border-radius:10px;
                        letter-spacing:0.1px;">
               Verify Email Address
             </a>
@@ -80,17 +80,17 @@ def verification_email_html(token: str) -> str:
         </tr>
       </table>
 
-      <hr style="border:none;border-top:1px solid #1f1f1f;margin:0 0 24px;" />
+      <hr style="border:none;border-top:1px solid #e5e5e5;margin:0 0 24px;" />
 
-      <p style="margin:0 0 8px;font-size:13px;color:#737373;">
+      <p style="margin:0 0 8px;font-size:13px;color:#a3a3a3;">
         Button not working? Copy and paste this link into your browser:
       </p>
       <p style="margin:0 0 24px;font-size:12px;word-break:break-all;">
-        <a href="{link}" style="color:#a3e635;text-decoration:none;">{link}</a>
+        <a href="{link}" style="color:#65a30d;text-decoration:none;">{link}</a>
       </p>
 
-      <p style="margin:0;font-size:13px;color:#525252;">
-        This link expires in <strong style="color:#fbbf24;">24 hours</strong>.
+      <p style="margin:0;font-size:13px;color:#a3a3a3;">
+        This link expires in <strong style="color:#d97706;">24 hours</strong>.
       </p>
     """
     return _base_template(
@@ -103,15 +103,15 @@ def verification_email_html(token: str) -> str:
 def otp_email_html(code: str) -> str:
     digits = "".join(
         f'<span style="display:inline-block;width:44px;height:52px;line-height:52px;'
-        f'text-align:center;background-color:#1a1a1a;border:1px solid #2a2a2a;'
-        f'border-radius:8px;font-size:26px;font-weight:700;color:#ffffff;'
+        f'text-align:center;background-color:#f5f5f5;border:1px solid #e5e5e5;'
+        f'border-radius:8px;font-size:26px;font-weight:700;color:#171717;'
         f'margin:0 3px;">{d}</span>'
         for d in code
     )
     body = f"""
-      <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#ffffff;
+      <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#171717;
                   letter-spacing:-0.3px;">Login verification</h1>
-      <p style="margin:0 0 32px;font-size:15px;color:#a3a3a3;line-height:1.6;">
+      <p style="margin:0 0 32px;font-size:15px;color:#737373;line-height:1.6;">
         Enter the code below to complete your sign-in.
       </p>
 
@@ -122,14 +122,14 @@ def otp_email_html(code: str) -> str:
         </tr>
       </table>
 
-      <hr style="border:none;border-top:1px solid #1f1f1f;margin:0 0 24px;" />
+      <hr style="border:none;border-top:1px solid #e5e5e5;margin:0 0 24px;" />
 
-      <p style="margin:0 0 8px;font-size:13px;color:#737373;">
+      <p style="margin:0 0 8px;font-size:13px;color:#a3a3a3;">
         This code expires in
-        <strong style="color:#fbbf24;">10 minutes</strong>.
+        <strong style="color:#d97706;">10 minutes</strong>.
         Do not share it with anyone.
       </p>
-      <p style="margin:0;font-size:13px;color:#525252;">
+      <p style="margin:0;font-size:13px;color:#a3a3a3;">
         If you didn't try to log in, reset your password immediately.
       </p>
     """

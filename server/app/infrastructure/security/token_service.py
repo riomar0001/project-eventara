@@ -1,35 +1,18 @@
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from typing import Literal
 
 import jwt
-from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
-from app.core.hash_utils import hash_string, verify_hash
-from app.infrastructure.database.models.user import Token
-from app.infrastructure.database.repositories.refresh_token_respository import RefreshTokenRepository
-
-from app.core.entities.user_entities import UserProfile
-
-
-class TokenPayload(BaseModel):
-    sub: str          # user_id
-    email: str | None = None
-    role_id: str | None = None
-    first_name: str | None = None
-    last_name: str | None = None
-    age_group: str | None = None
-    gender: str | None = None
-    education_level: str | None = None
-    type: Literal["access", "refresh", "verification"]
-    jti: str          # unique token ID — used to match refresh token in DB
-    exp: datetime
-    iat: datetime
+from app.domain.entities.token import Token, TokenPayload
+from app.domain.entities.user import UserProfile
+from app.infrastructure.database.models.user import Token as TokenORM
+from app.infrastructure.database.repositories.refresh_token_repository import RefreshTokenRepository
+from app.infrastructure.security.hashing import hash_string, verify_hash
 
 
-# Access token - contains user info, short-lived, no DB storage needed
 def create_access_token(user_id: uuid.UUID, role_id: str, user: UserProfile) -> str:
     now = datetime.now(timezone.utc)
     payload = {
@@ -50,19 +33,11 @@ def create_access_token(user_id: uuid.UUID, role_id: str, user: UserProfile) -> 
 
 
 def verify_access_token(token: str) -> TokenPayload:
-    payload = _decode(
-        token, secret=settings.JWT_ACCESS_TOKEN_SECRET, expected_type="access")
+    payload = _decode(token, secret=settings.JWT_ACCESS_TOKEN_SECRET, expected_type="access")
     return TokenPayload(**payload)
 
 
-# Refresh token - stored in DB with hashed value, only the raw token is sent to client
 async def create_refresh_token(user_id: uuid.UUID, db: AsyncSession) -> str:
-    """Returns a refresh token.
-
-    Store the token ID as Token.id and the hashed token as Token.token_hash.
-    Send the raw token to the client.
-    """
-
     now = datetime.now(timezone.utc)
     token_id = uuid.uuid4()
     payload = {
@@ -73,11 +48,10 @@ async def create_refresh_token(user_id: uuid.UUID, db: AsyncSession) -> str:
         "exp": now + settings.REFRESH_TOKEN_EXPIRATION,
     }
 
-    refresh_token = jwt.encode(payload, settings.JWT_REFRESH_TOKEN_SECRET,
-                               algorithm=settings.JWT_ALGORITHM)
+    refresh_token = jwt.encode(payload, settings.JWT_REFRESH_TOKEN_SECRET, algorithm=settings.JWT_ALGORITHM)
 
     repo = RefreshTokenRepository(db)
-    await repo.create(Token(
+    await repo.create(TokenORM(
         id=token_id,
         user_id=user_id,
         token_hash=hash_string(refresh_token),
@@ -87,14 +61,13 @@ async def create_refresh_token(user_id: uuid.UUID, db: AsyncSession) -> str:
     return refresh_token
 
 
-async def verify_refresh_token(raw_token: str, db: AsyncSession) -> tuple[TokenPayload, Token]:
+async def verify_refresh_token(raw_token: str, db: AsyncSession) -> tuple[TokenPayload, TokenORM]:
     """Decode the JWT, fetch the matching active token from DB, verify the hash.
 
     Returns (payload, token_record) so the caller can revoke or update it.
     Raises ValueError if the token is invalid, expired, not found, or revoked.
     """
-    payload = _decode(
-        raw_token, secret=settings.JWT_REFRESH_TOKEN_SECRET, expected_type="refresh")
+    payload = _decode(raw_token, secret=settings.JWT_REFRESH_TOKEN_SECRET, expected_type="refresh")
 
     token_id = uuid.UUID(payload["jti"])
 
@@ -110,7 +83,6 @@ async def verify_refresh_token(raw_token: str, db: AsyncSession) -> tuple[TokenP
     return TokenPayload(**payload), refresh_token
 
 
-# Verification token (for email verification, password reset, etc.)
 def verification_token(user_id: uuid.UUID, email: str) -> str:
     now = datetime.now(timezone.utc)
     payload = {
@@ -125,12 +97,10 @@ def verification_token(user_id: uuid.UUID, email: str) -> str:
 
 
 def verify_verification_token(token: str) -> TokenPayload:
-    payload = _decode(
-        token, secret=settings.JWT_VERIFICATION_TOKEN_SECRET, expected_type="verification")
+    payload = _decode(token, secret=settings.JWT_VERIFICATION_TOKEN_SECRET, expected_type="verification")
     return TokenPayload(**payload)
 
 
-# Internal function to decode and validate a token, used by both access and refresh token verification functions.
 def _decode(token: str, secret: str, expected_type: str) -> dict:
     try:
         payload = jwt.decode(
@@ -144,7 +114,6 @@ def _decode(token: str, secret: str, expected_type: str) -> dict:
         raise ValueError(f"Invalid token: {exc}")
 
     if payload.get("type") != expected_type:
-        raise ValueError(
-            f"Expected {expected_type} token, got {payload.get('type')!r}")
+        raise ValueError(f"Expected {expected_type} token, got {payload.get('type')!r}")
 
     return payload

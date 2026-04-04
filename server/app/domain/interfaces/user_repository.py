@@ -1,7 +1,7 @@
 import uuid
 from typing import Protocol
 
-from app.infrastructure.database.models.user import User, UserActivity, UserProfile, UserSecurity
+from app.domain.entities.user import User, UserActivity, UserProfile, UserSecurity
 
 
 class IUserRepository(Protocol):

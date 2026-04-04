@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 from scalar_fastapi import get_scalar_api_reference
 
-from app.api.routes import router
+from app.api.router import router
 from app.config import settings
 from app.infrastructure.messaging.redis import create_arq_pool
 
