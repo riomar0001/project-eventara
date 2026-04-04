@@ -114,49 +114,37 @@ Infrastructure **implements** the interfaces defined in `application/interfaces/
 
 ```plaintext
 eventara/server/
-├── main.py                                  # App entry point, router registration, exception handlers
+├── main.py
 ├── app/
 │   ├── domain/
 │   │   ├── entities/
-│   │   │   ├── user_entity.py               # User, PublicUser, UserProfile, UserSecurity, UserActivity
-│   │   │   ├── authorization.py             # Feature, Role, RolePermission, UserRole, UserGrant
-│   │   │   ├── token.py                     # TokenPayload, LoginHistory, UserOneTimeCode
-│   │   │   └── audit_log.py                 # Audit log entity
 │   │   └── exceptions/
-│   │       └── user_exceptions.py           # EmailAlreadyTakenError, etc.
 │   ├── application/
+│   │   ├── dto/
 │   │   ├── interfaces/
-│   │   │   └── user_interface.py            # IUserRepository protocol
 │   │   └── use_cases/
-│   │       └── auth_usecase.py              # AuthUseCase (register, login)
 │   ├── controller/
 │   │   ├── api/
-│   │   │   └── auth_route.py               # POST /auth/register, etc.
+│   │   ├── docs/
 │   │   ├── schemas/
-│   │   │   ├── auth_schema.py              # HTTP request/response schemas
-│   │   │   └── responses.py                # Reusable OpenAPI response docs
-│   │   ├── dependencies/                   # FastAPI Depends factories
-│   │   └── router.py                       # Top-level router aggregation
+│   │   ├── dependencies/
+│   │   └── router.py
 │   ├── core/
-│   │   ├── config/                         # Pydantic BaseSettings (env-based)
-│   │   └── security/                       # Hashing, JWT token service
+│   │   ├── config/
+│   │   └── security/
 │   └── infrastructure/
+│       ├── cache/
+│       │   └── repositories/
 │       ├── database/
-│       │   ├── base.py                     # SQLAlchemy declarative base
-│       │   ├── session.py                  # Async session factory
 │       │   └── models/
-│       │       └── user.py                 # ORM: User, UserProfile, UserSecurity, Token, etc.
-│       ├── repositories/
-│       │   ├── user_repository.py          # UserRepository
-│       │   ├── one_time_code_repository.py # OneTimeCodeRepository
-│       │   └── refresh_token_repository.py # RefreshTokenRepository
 │       ├── messaging/
-│       │   ├── email.py                    # SMTP email sending
-│       │   ├── auth_email_templates.py     # Verification & OTP HTML templates
-│       │   ├── redis.py                    # ARQ Redis pool
-│       │   └── worker.py                   # ARQ worker settings
-│       └── cache/                          # Cache repositories (placeholder)
-├── migrations/                             # Alembic migrations
+│       │   └── jobs/
+│       └── repositories/
+├── migrations/
+├── seeds/
+├── tests/
+│   ├── integration/
+│   └── unit/
 ├── .env.example
 └── requirements.txt
 ```

@@ -104,25 +104,37 @@ See [ARCHITECTURE.md](./ARCHITECTURE.md) for a full breakdown of the layer desig
 
 ```plaintext
 server/
-├── main.py                          # Entry point, exception handlers
+├── main.py
 ├── app/
-│   ├── domain/                      # Pure domain — no framework imports
-│   │   ├── entities/                # Pydantic models (<resource>_entities.py)
-│   │   └── exceptions/              # Domain exceptions (<resource>_exceptions.py)
-│   ├── application/                 # Business logic orchestration
-│   │   ├── interfaces/              # Repository protocols (<resource>_interface.py)
-│   │   └── use_cases/               # Use case classes (<resource>_usecase.py)
-│   ├── controller/                  # HTTP layer
-│   │   ├── api/                     # FastAPI routers (<resource>_route.py)
-│   │   ├── schemas/                 # Request/response schemas (<resource>_schema.py)
-│   │   ├── dependencies/            # FastAPI Depends factories
-│   │   └── router.py               # Top-level router aggregation
-│   ├── core/                        # Cross-cutting (config, security)
-│   └── infrastructure/              # Frameworks & drivers
-│       ├── database/models/         # SQLAlchemy ORM (<resource>_models.py)
-│       ├── repositories/            # SQL implementations (<resource>_repository.py)
-│       ├── messaging/               # Email, Redis/ARQ worker
-│       └── cache/                   # Cache repositories
-├── migrations/                      # Alembic migrations
-└── docker-compose.database.yml      # PostgreSQL + Redis
+│   ├── domain/
+│   │   ├── entities/
+│   │   └── exceptions/
+│   ├── application/
+│   │   ├── dto/
+│   │   ├── interfaces/
+│   │   └── use_cases/
+│   ├── controller/
+│   │   ├── api/
+│   │   ├── docs/
+│   │   ├── schemas/
+│   │   ├── dependencies/
+│   │   └── router.py
+│   ├── core/
+│   │   ├── config/
+│   │   └── security/
+│   └── infrastructure/
+│       ├── cache/
+│       │   └── repositories/
+│       ├── database/
+│       │   └── models/
+│       ├── messaging/
+│       │   └── jobs/
+│       └── repositories/
+├── migrations/
+├── seeds/
+├── tests/
+│   ├── integration/
+│   └── unit/
+├── .env.example
+└── requirements.txt
 ```
