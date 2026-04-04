@@ -11,8 +11,13 @@ This project follows **Clean Architecture** (Robert C. Martin), organizing code 
 The innermost circle. Pure Python — no framework imports, no I/O.
 
 - **`entities/user_entity.py`**: Pydantic models for `User`, `PublicUser`, `UserProfile`, `UserSecurity`, `UserActivity` plus enums (`UserStatus`, `AgeGroup`, `Gender`, `EducationLevel`)
+- **`entities/authorization.py`**: `Feature`, `Role`, `RolePermission`, `UserRole`, `UserGrant` plus enums (`RoleAction`, `GrantEffect`)
+- **`entities/token.py`**: `TokenPayload`, `LoginHistory`, `UserOneTimeCode`
+- **`entities/audit_log.py`**: Audit log entity
 - **`exceptions/user_exceptions.py`**: Domain exception types (`EmailAlreadyTakenError`, `UserNotFoundError`, `UserLockedError`, `UserInactiveError`)
 - Has **no dependencies** on any other layer
+
+**File naming**: `<resource>_entity.py` or `<resource>_entities.py` for entities, `<resource>_exceptions.py` for exceptions.
 
 ### 2. Application — `app/application/`
 
@@ -24,6 +29,8 @@ Orchestrates entities to fulfill a single business goal.
 - **`interfaces/user_interface.py`**: `IUserRepository` protocol — abstract contract that infrastructure must fulfill
 - Depends only on the **Domain** layer
 
+**File naming**: `<resource>_usecase.py` for use cases, `<resource>_interface.py` for interfaces.
+
 ### 3. Controller (Interface Adapters) — `app/controller/`
 
 Translates between HTTP and use cases.
@@ -33,6 +40,8 @@ Translates between HTTP and use cases.
 - **`schemas/responses.py`**: Reusable OpenAPI response definitions (`EMAIL_CONFLICT`, `VALIDATION_ERROR`)
 - **`dependencies/__init__.py`**: FastAPI `Depends` factories (`get_auth_use_case`)
 - Depends on the **Application** layer; never imports infrastructure directly
+
+**File naming**: `<resource>_route.py` for routes, `<resource>_schema.py` for schemas.
 
 ### 4. Core — `app/core/`
 
@@ -50,12 +59,14 @@ The outermost circle. All framework coupling lives here and is replaceable.
 
 | Sub-package | Responsibility |
 |---|---|
-| `infrastructure/database/models/` | SQLAlchemy ORM table definitions (`User`, `UserProfile`, `UserSecurity`, `UserActivity`) |
+| `infrastructure/database/models/user.py` | SQLAlchemy ORM table definitions (`User`, `UserProfile`, `UserSecurity`, `UserActivity`, `Token`, `UserLoginHistory`, `UserOneTimeCode`, authorization models) |
 | `infrastructure/database/session.py` | Async SQLAlchemy session factory and `get_db` dependency |
 | `infrastructure/database/base.py` | Declarative base shared by all ORM models |
 | `infrastructure/repositories/` | `UserRepository`, `OneTimeCodeRepository`, `RefreshTokenRepository` — concrete SQL implementations |
 | `infrastructure/messaging/` | Email sending, Redis/ARQ worker, email templates |
 | `main.py` | App entry point — wires FastAPI, registers routers, global exception handlers |
+
+**File naming**: `<resource>_models.py` for ORM models (e.g., `user.py` → `user_models.py`), `<resource>_repository.py` for repositories.
 
 ---
 
@@ -107,7 +118,10 @@ eventara/server/
 ├── app/
 │   ├── domain/
 │   │   ├── entities/
-│   │   │   └── user_entity.py               # User, PublicUser, UserProfile, UserSecurity, UserActivity
+│   │   │   ├── user_entity.py               # User, PublicUser, UserProfile, UserSecurity, UserActivity
+│   │   │   ├── authorization.py             # Feature, Role, RolePermission, UserRole, UserGrant
+│   │   │   ├── token.py                     # TokenPayload, LoginHistory, UserOneTimeCode
+│   │   │   └── audit_log.py                 # Audit log entity
 │   │   └── exceptions/
 │   │       └── user_exceptions.py           # EmailAlreadyTakenError, etc.
 │   ├── application/
@@ -130,13 +144,37 @@ eventara/server/
 │       ├── database/
 │       │   ├── base.py                     # SQLAlchemy declarative base
 │       │   ├── session.py                  # Async session factory
-│       │   └── models/                     # ORM table definitions
-│       ├── repositories/                   # UserRepository, OneTimeCodeRepository, RefreshTokenRepository
-│       └── messaging/                      # Email, Redis/ARQ worker
+│       │   └── models/
+│       │       └── user.py                 # ORM: User, UserProfile, UserSecurity, Token, etc.
+│       ├── repositories/
+│       │   ├── user_repository.py          # UserRepository
+│       │   ├── one_time_code_repository.py # OneTimeCodeRepository
+│       │   └── refresh_token_repository.py # RefreshTokenRepository
+│       ├── messaging/
+│       │   ├── email.py                    # SMTP email sending
+│       │   ├── auth_email_templates.py     # Verification & OTP HTML templates
+│       │   ├── redis.py                    # ARQ Redis pool
+│       │   └── worker.py                   # ARQ worker settings
+│       └── cache/                          # Cache repositories (placeholder)
 ├── migrations/                             # Alembic migrations
 ├── .env.example
 └── requirements.txt
 ```
+
+### File Naming Convention
+
+All files follow the `<resource>_<type>.py` pattern:
+
+| Layer | Pattern | Examples |
+|-------|---------|----------|
+| Domain entities | `<resource>_entities.py` | `event_entities.py`, `user_entity.py` |
+| Domain exceptions | `<resource>_exceptions.py` | `user_exceptions.py`, `event_exceptions.py` |
+| Application interfaces | `<resource>_interface.py` | `user_interface.py`, `event_interface.py` |
+| Application use cases | `<resource>_usecase.py` | `auth_usecase.py`, `event_usecase.py` |
+| Controller routes | `<resource>_route.py` | `auth_route.py`, `event_route.py` |
+| Controller schemas | `<resource>_schema.py` | `auth_schema.py`, `event_schema.py` |
+| Infrastructure models | `<resource>_models.py` | `user_models.py`, `event_models.py` |
+| Infrastructure repos | `<resource>_repository.py` | `user_repository.py`, `refresh_token_repository.py` |
 
 ---
 
