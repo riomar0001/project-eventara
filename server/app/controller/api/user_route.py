@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from app.application.dto.user_dto import CompleteOnboardingInput
 from app.application.use_cases.user_usecase import OnboardingUseCase
 from app.controller.dependencies import get_current_user_id, get_onboarding_use_case
-from app.controller.schemas.onboarding_schema import (
+from app.controller.schemas.user_schema import (
     CompleteOnboardingRequest,
     CompleteOnboardingResponse,
 )
@@ -24,11 +24,11 @@ from app.domain.exceptions.user_exceptions import (
     UserNotFoundError,
 )
 
-router = APIRouter(prefix="/onboarding", tags=["Onboarding"])
+router = APIRouter(prefix="/user", tags=["User"])
 
 
 @router.post(
-    "/complete",
+    "/onboard",
     response_model=CompleteOnboardingResponse,
     status_code=status.HTTP_200_OK,
     responses={

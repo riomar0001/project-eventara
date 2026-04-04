@@ -34,10 +34,6 @@ class RegisterResponse(BaseModel):
         from_attributes = True
 
 
-class EmailVerifyRequest(BaseModel):
-    token: str
-
-
 class EmailVerifyResponse(BaseModel):
     success: bool = True
     access_token: str

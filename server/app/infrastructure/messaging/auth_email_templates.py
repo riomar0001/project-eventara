@@ -59,7 +59,7 @@ def _base_template(title: str, preview: str, body: str) -> str:
 
 
 def verification_email_html(token: str) -> str:
-    link = f"{settings.CORS_ORIGIN}/auth/verify-email?token={token}"
+    link = f"{settings.CORS_ORIGIN}/auth/verify/{token}"
     body = f"""
       <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#171717;
                   letter-spacing:-0.3px;">Verify your email</h1>

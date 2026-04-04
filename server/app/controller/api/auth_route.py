@@ -1,8 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Path, status
 
 from app.controller.dependencies import get_auth_use_case
 from app.controller.schemas.auth_schema import (
-    EmailVerifyRequest,
     EmailVerifyResponse,
     RegisterRequest,
     RegisterResponse,
@@ -58,17 +57,17 @@ async def register(
 
 
 @router.post(
-    "/email/verify",
+    "/verify/{token}",
     response_model=EmailVerifyResponse,
     status_code=status.HTTP_200_OK,
-    responses={**INVALID_TOKEN, **TOKEN_EXPIRED, **USER_NOT_FOUND, **EMAIL_ALREADY_VERIFIED},
+    responses={**INVALID_TOKEN, **TOKEN_EXPIRED, **USER_NOT_FOUND, **EMAIL_ALREADY_VERIFIED, **VALIDATION_ERROR},
 )
 async def email_verify(
-    body: EmailVerifyRequest,
+    token: str = Path(..., min_length=1),
     use_case: AuthUseCase = Depends(get_auth_use_case),
 ) -> EmailVerifyResponse:
     try:
-        result = await use_case.verify_email(body.token)
+        result = await use_case.verify_email(token)
     except TokenExpiredError as error:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(error))
     except InvalidTokenError as error:
