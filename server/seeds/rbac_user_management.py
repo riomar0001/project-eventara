@@ -50,27 +50,33 @@ FEATURES: list[dict] = [
 
 ROLES: list[dict] = [
     {
-        "name": "super_admin",
-        "description": "Unrestricted system access. Owns all features and actions.",
-        "is_default": False,
-        "is_system": True,
-    },
-    {
-        "name": "admin",
-        "description": "Full user management access including account creation and role assignment.",
-        "is_default": False,
-        "is_system": True,
-    },
-    {
-        "name": "moderator",
-        "description": "Read and soft-edit access to users and profiles. Cannot manage roles or grants.",
-        "is_default": False,
-        "is_system": True,
-    },
-    {
-        "name": "member",
-        "description": "Default role assigned to every registered user.",
+        "name": "participant",
+        "description": "The baseline role for attendees. Can sign in/out, view their own profile, update/edit their own details, and delete their own account.",
         "is_default": True,
+        "is_system": False,
+    },
+    {
+        "name": "volunteer",
+        "description": "Users who assist on the ground during events. Standard member permissions plus access to event onboarding/check-in features and limited participant data viewing.",
+        "is_default": False,
+        "is_system": False,
+    },
+    {
+        "name": "event_organizer",
+        "description": "Users responsible for planning and executing specific events. Can create/manage events, venues, and view complete attendance and demographic data for events they manage.",
+        "is_default": False,
+        "is_system": False,
+    },
+    {
+        "name": "community_leader",
+        "description": "The Davao DeFi Community PH management team. Read-only or read/write access across all events with access to consolidated data, reporting, analytics, and participant demographics.",
+        "is_default": False,
+        "is_system": True,
+    },
+    {
+        "name": "system_administrator",
+        "description": "The IT personnel maintaining Eventara. Complete CRUD access to all entities including user profiles/accounts, features, roles, and permissions.",
+        "is_default": False,
         "is_system": True,
     },
 ]
@@ -79,7 +85,25 @@ ROLES: list[dict] = [
 # Effect is ALLOW for all entries below; DENY grants are added as user-level
 # overrides and are not seeded at the role level.
 ROLE_PERMISSIONS: dict[str, dict[str, list[RoleAction]]] = {
-    "super_admin": {
+    "participant": {
+        "user_management": [RoleAction.READ, RoleAction.DELETE],
+        "user_profile_management": [RoleAction.READ, RoleAction.UPDATE],
+    },
+    "volunteer": {
+        "user_management": [RoleAction.READ, RoleAction.DELETE],
+        "user_profile_management": [RoleAction.READ, RoleAction.UPDATE],
+    },
+    "event_organizer": {
+        "user_management": [RoleAction.READ, RoleAction.DELETE],
+        "user_profile_management": [RoleAction.READ, RoleAction.UPDATE],
+    },
+    "community_leader": {
+        "user_management": [RoleAction.READ],
+        "user_profile_management": [RoleAction.READ],
+        "user_role_management": [RoleAction.READ],
+        "user_grant_management": [RoleAction.READ],
+    },
+    "system_administrator": {
         "user_management": [
             RoleAction.CREATE,
             RoleAction.READ,
@@ -104,37 +128,6 @@ ROLE_PERMISSIONS: dict[str, dict[str, list[RoleAction]]] = {
             RoleAction.UPDATE,
             RoleAction.DELETE,
         ],
-    },
-    "admin": {
-        "user_management": [
-            RoleAction.CREATE,
-            RoleAction.READ,
-            RoleAction.UPDATE,
-            RoleAction.DELETE,
-        ],
-        "user_profile_management": [RoleAction.READ, RoleAction.UPDATE],
-        "user_role_management": [
-            RoleAction.CREATE,
-            RoleAction.READ,
-            RoleAction.UPDATE,
-            RoleAction.DELETE,
-        ],
-        "user_grant_management": [
-            RoleAction.CREATE,
-            RoleAction.READ,
-            RoleAction.UPDATE,
-            RoleAction.DELETE,
-        ],
-    },
-    "moderator": {
-        "user_management": [RoleAction.READ, RoleAction.UPDATE],
-        "user_profile_management": [RoleAction.READ, RoleAction.UPDATE],
-        "user_role_management": [RoleAction.READ],
-        "user_grant_management": [RoleAction.READ],
-    },
-    "member": {
-        "user_management": [RoleAction.READ],
-        "user_profile_management": [RoleAction.READ, RoleAction.UPDATE],
     },
 }
 
