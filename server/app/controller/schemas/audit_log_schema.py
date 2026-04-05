@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from app.domain.entities.audit_log import ActionType, AuditLogStatus
 
@@ -21,18 +21,15 @@ class AuditLogResponse(BaseModel):
     additional_context: dict | None
 
 
-class GetAuditLogsRequest(BaseModel):
-    limit: int | None = Field(default=100, ge=1, le=1000)
-    cursor: uuid.UUID | None = None
-    user_id: uuid.UUID | None = None
-    action_type: ActionType | None = None
-    resource_type: str | None = None
-    start_date: datetime | None = None
-    end_date: datetime | None = None
+class PaginationMeta(BaseModel):
+    limit: int
+    total_pages: int
+    next_cursor: str | None
+    prev_cursor: str | None
+    has_next: bool
 
 
 class GetAuditLogsResponse(BaseModel):
     success: bool = True
     data: list[AuditLogResponse]
-    next_cursor: uuid.UUID | None
-    has_more: bool
+    pagination: PaginationMeta

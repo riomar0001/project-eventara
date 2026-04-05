@@ -22,7 +22,7 @@ class CreateAuditLogInput:
 @dataclass
 class GetAuditLogsInput:
     limit: int
-    cursor: uuid.UUID | None
+    cursor: str | None
     user_id: uuid.UUID | None
     action_type: ActionType | None
     resource_type: str | None
@@ -33,5 +33,7 @@ class GetAuditLogsInput:
 @dataclass
 class GetAuditLogsOutput:
     logs: list[AuditLog]
-    next_cursor: uuid.UUID | None
-    has_more: bool
+    total_count: int
+    next_cursor: str | None
+    prev_cursor: str | None
+    has_next: bool

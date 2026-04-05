@@ -17,10 +17,19 @@ class IAuditLogRepository(Protocol):
     async def get_paginated(
         self,
         limit: int,
-        cursor: uuid.UUID | None,
+        cursor: str | None,
         user_id: uuid.UUID | None,
         action_type: ActionType | None,
         resource_type: str | None,
         start_date: datetime | None,
         end_date: datetime | None,
-    ) -> tuple[list[AuditLog], uuid.UUID | None]: ...
+    ) -> tuple[list[AuditLog], int, str | None, str | None]: ...
+
+    async def count_total(
+        self,
+        user_id: uuid.UUID | None,
+        action_type: ActionType | None,
+        resource_type: str | None,
+        start_date: datetime | None,
+        end_date: datetime | None,
+    ) -> int: ...

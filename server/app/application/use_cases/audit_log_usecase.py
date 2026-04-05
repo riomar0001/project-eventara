@@ -62,6 +62,7 @@ class GetAuditLogsUseCase:
     Validates pagination parameters and enforces reasonable limits to prevent
     resource exhaustion when querying potentially massive audit datasets.
     Uses cursor-based pagination for consistent results under concurrent writes.
+    Calculates total pages based on total count and limit.
     """
 
     MAX_LIMIT = 1000
@@ -73,7 +74,7 @@ class GetAuditLogsUseCase:
     async def execute(self, input_dto: GetAuditLogsInput) -> GetAuditLogsOutput:
         limit = min(input_dto.limit or self.DEFAULT_LIMIT, self.MAX_LIMIT)
 
-        logs, next_cursor = await self.repository.get_paginated(
+        logs, total_count, next_cursor, prev_cursor = await self.repository.get_paginated(
             limit=limit,
             cursor=input_dto.cursor,
             user_id=input_dto.user_id,
@@ -83,8 +84,12 @@ class GetAuditLogsUseCase:
             end_date=input_dto.end_date,
         )
 
+        has_next = next_cursor is not None
+
         return GetAuditLogsOutput(
             logs=logs,
+            total_count=total_count,
             next_cursor=next_cursor,
-            has_more=next_cursor is not None,
+            prev_cursor=prev_cursor,
+            has_next=has_next,
         )
