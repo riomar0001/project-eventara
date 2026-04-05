@@ -32,13 +32,14 @@ class Token(BaseModel):
 class TokenPayload(BaseModel):
     sub: str
     email: str | None = None
+    done_onboarding: bool = False
     role_id: str | None = None
     first_name: str | None = None
     last_name: str | None = None
     age_group: str | None = None
     gender: str | None = None
     education_level: str | None = None
-    type: Literal["access", "refresh", "verification"]
+    type: Literal["access", "refresh", "verification", "otp"]
     jti: str
     exp: datetime
     iat: datetime
