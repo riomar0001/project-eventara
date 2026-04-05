@@ -9,6 +9,7 @@ class EmailAlreadyTakenError(Exception):
             f"Email '{email}' is already registered" if email else "Email is already registered"
         )
 
+
 class UserLockedError(Exception):
     def __init__(self) -> None:
         super().__init__("Account is temporarily locked due to too many failed login attempts")

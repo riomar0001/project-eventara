@@ -24,7 +24,7 @@ class AuditLogStatus(StrEnum):
 
 class AuditLog(BaseModel):
     """Domain entity representing an immutable audit trail record.
-    
+
     Designed to meet ISO 27001 compliance requirements for security event logging.
     Each record captures complete context of an action including actor, event details,
     and state changes. Records are strictly append-only and never modified after creation.

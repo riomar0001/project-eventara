@@ -7,7 +7,7 @@ from app.domain.entities.audit_log import ActionType, AuditLog
 
 class IAuditLogRepository(Protocol):
     """Contract for audit log persistence operations.
-    
+
     Enforces append-only semantics - only creation and retrieval methods are exposed.
     No update or delete operations are permitted to maintain audit trail integrity.
     """

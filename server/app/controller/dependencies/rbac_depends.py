@@ -12,11 +12,11 @@ def require_admin_or_auditor_role(
     credentials: HTTPAuthorizationCredentials = Depends(_bearer),
 ) -> uuid.UUID:
     """FastAPI dependency enforcing Admin or Auditor role for audit log access.
-    
+
     Validates the Bearer token and checks the role_id claim. Restricts access
     to users with 'admin' or 'auditor' roles only, as required for ISO 27001
     compliance. Returns the validated user ID for use in the route handler.
-    
+
     Raises 401 if token is invalid/expired, 403 if user lacks required role.
     """
     try:

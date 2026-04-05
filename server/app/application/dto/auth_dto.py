@@ -9,7 +9,6 @@ class RegisterUserInput:
     password: str
 
 
-
 @dataclass
 class RegisteredUserOutput:
     user: PublicUser

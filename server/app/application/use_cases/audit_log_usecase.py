@@ -12,11 +12,11 @@ from app.domain.exceptions.audit_exceptions import AuditLogWriteError
 
 class CreateAuditLogUseCase:
     """Orchestrates the asynchronous creation of audit log entries.
-    
+
     Performance Strategy: Uses ARQ (Redis-backed task queue) to persist audit logs
     asynchronously without blocking business transactions. If the queue submission
     fails, logs are written synchronously as a fallback to ensure compliance.
-    
+
     Fail-Safe Strategy: Audit log failures do NOT rollback successful business
     operations. Instead, errors are logged to stderr and monitoring systems for
     investigation. This prevents audit system issues from disrupting core services
@@ -58,7 +58,7 @@ class CreateAuditLogUseCase:
 
 class GetAuditLogsUseCase:
     """Retrieves paginated audit logs with optional filtering.
-    
+
     Validates pagination parameters and enforces reasonable limits to prevent
     resource exhaustion when querying potentially massive audit datasets.
     Uses cursor-based pagination for consistent results under concurrent writes.

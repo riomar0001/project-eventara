@@ -10,7 +10,7 @@ from app.infrastructure.database.base import Base
 
 class AuditLog(Base):
     """SQLAlchemy model for immutable audit trail storage.
-    
+
     Table design enforces append-only semantics at the application layer.
     Indexes are optimized for common query patterns (user lookups, time ranges,
     action filtering) while maintaining write performance for high-volume logging.
@@ -22,9 +22,7 @@ class AuditLog(Base):
     ip_address: Mapped[str | None] = mapped_column(String(45), nullable=True)
     user_agent: Mapped[str | None] = mapped_column(Text, nullable=True)
     timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
-    action_type: Mapped[str] = mapped_column(
-        Enum(ActionType, name="action_type"), nullable=False
-    )
+    action_type: Mapped[str] = mapped_column(Enum(ActionType, name="action_type"), nullable=False)
     resource_type: Mapped[str] = mapped_column(String(255), nullable=False)
     resource_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
     status: Mapped[str] = mapped_column(

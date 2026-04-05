@@ -1,5 +1,5 @@
-import uuid
 import math
+import uuid
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -52,24 +52,24 @@ async def get_audit_logs(
     use_case: GetAuditLogsUseCase = Depends(get_audit_logs_use_case),
 ) -> GetAuditLogsResponse:
     """Retrieve paginated audit logs with comprehensive pagination metadata.
-    
+
     Security: Enforces RBAC via JWT token validation. Only users with 'admin' or
     'auditor' role_id can access this endpoint. Returns 403 for other roles.
-    
+
     Pagination: Uses base64-encoded cursor-based pagination for consistent results
     under concurrent writes. The response includes:
     - total_pages: Total number of pages based on filtered results and limit
     - next_cursor: Base64-encoded cursor for next page (null if last page)
     - prev_cursor: Base64-encoded cursor for previous page (null if first page)
     - has_next: Boolean indicating if more pages exist
-    
+
     Example:
         GET /audit-logs?limit=50
-        GET /audit-logs?cursor=eyJpZCI6IjEyMyIsInRpbWVzdGFtcCI6IjIwMjYtMDQtMDVUMTA6MDA6MDBaIn0=&limit=50
-    
+        GET /audit-logs?cursor=eyJpZ...=&limit=50
+
     Filters can be combined:
         GET /audit-logs?user_id=<uuid>&action_type=login&limit=25
-    
+
     Error mapping:
     - **401 Unauthorized** - Invalid or expired token
     - **403 Forbidden** - User lacks Admin or Auditor role

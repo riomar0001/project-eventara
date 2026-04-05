@@ -16,10 +16,10 @@ from app.infrastructure.database.session import AsyncSessionLocal
 
 async def persist_audit_log(ctx: dict, audit_log_data: dict) -> None:
     """ARQ job that persists an audit log entry to PostgreSQL.
-    
+
     Runs inside the ARQ worker process. Creates a new database session for each
     job execution to ensure transaction isolation from the main API request.
-    
+
     Args:
         ctx: ARQ worker context (injected by framework)
         audit_log_data: Serialized audit log dictionary from domain entity

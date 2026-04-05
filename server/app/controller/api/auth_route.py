@@ -151,7 +151,6 @@ async def verify_email(
     )
 
 
-
 @router.post(
     "/login",
     response_model=LoginInitResponse,
@@ -248,9 +247,7 @@ async def login_verify(
       6 digits.
     """
     try:
-        result = await use_case.login_verify(
-            LoginVerifyInput(token=body.token, code=body.code)
-        )
+        result = await use_case.login_verify(LoginVerifyInput(token=body.token, code=body.code))
     except TokenExpiredError as error:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(error))
     except InvalidTokenError as error:
