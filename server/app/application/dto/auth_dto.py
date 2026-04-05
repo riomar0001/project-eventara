@@ -48,3 +48,14 @@ class LoginVerifyOutput:
 @dataclass
 class LogoutInput:
     refresh_token: str
+
+
+@dataclass
+class RefreshTokenInput:
+    refresh_token: str
+
+
+@dataclass
+class RefreshTokenOutput:
+    access_token: str
+    refresh_token: str

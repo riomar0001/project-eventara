@@ -376,3 +376,59 @@ LOGOUT_INVALID_TOKEN = {
         },
     }
 }
+
+
+# POST /auth/refresh
+REFRESH_VALIDATION_ERROR = {
+    422: {
+        "description": "Validation error — refresh_token field is missing or empty",
+        "model": ValidationErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "detail": [
+                        {
+                            "loc": ["body", "refresh_token"],
+                            "msg": "Field required",
+                            "type": "missing",
+                        }
+                    ],
+                }
+            }
+        },
+    }
+}
+
+REFRESH_TOKEN_EXPIRED = {
+    401: {
+        "description": "The refresh token has expired — the user must log in again",
+        "model": ErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "message": "Token has expired",
+                }
+            }
+        },
+    }
+}
+
+REFRESH_TOKEN_INVALID = {
+    401: {
+        "description": (
+            "The refresh token is invalid, revoked, not found, or was already rotated "
+            "by a concurrent request"
+        ),
+        "model": ErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "message": "Invalid or malformed token",
+                }
+            }
+        },
+    }
+}

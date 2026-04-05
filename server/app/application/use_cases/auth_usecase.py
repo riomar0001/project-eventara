@@ -11,6 +11,8 @@ from app.application.dto.auth_dto import (
     LoginVerifyInput,
     LoginVerifyOutput,
     LogoutInput,
+    RefreshTokenInput,
+    RefreshTokenOutput,
     RegisteredUserOutput,
     RegisterUserInput,
     VerifiedEmailOutput,
@@ -400,3 +402,61 @@ class AuthUseCase:
 
         repo = RefreshTokenRepository(self.db)
         await repo.revoke(token_record)
+
+    async def refresh(self, data: RefreshTokenInput) -> RefreshTokenOutput:
+        """Rotate a refresh token and issue a fresh access token.
+
+        Implements refresh token rotation: the submitted token is revoked and
+        replaced with a newly generated pair.  Clients must store the new
+        refresh token and discard the old one after each successful call.
+
+        Concurrency note — rotation race:
+            ``RefreshTokenRepository.revoke`` executes a single atomic
+            ``UPDATE … WHERE is_active = TRUE``.  If two requests carry the
+            same refresh token simultaneously, only one will see ``rowcount = 1``
+            and proceed; the other will see ``rowcount = 0`` — meaning the token
+            was already rotated by the first request — and raises
+            ``InvalidTokenError``.  This also acts as a reuse-detection signal:
+            a revoked token being presented again may indicate theft, so the
+            caller receives the same opaque error rather than a hint about what
+            happened.
+
+        Args:
+            data: A ``RefreshTokenInput`` carrying the raw refresh token JWT.
+
+        Returns:
+            A ``RefreshTokenOutput`` with a fresh ``access_token`` and a new
+            ``refresh_token`` to replace the submitted one.
+
+        Raises:
+            TokenExpiredError: The refresh token JWT has passed its expiry.
+            InvalidTokenError: The token is malformed, has an invalid signature,
+                is not found in the database, is already revoked, or was
+                consumed by a concurrent rotation request.
+            UserNotFoundError: No user matches the token's subject claim.
+        """
+        try:
+            payload, token_record = await verify_refresh_token(data.refresh_token, self.db)
+        except ValueError as exc:
+            message = str(exc)
+            if "expired" in message.lower():
+                raise TokenExpiredError() from exc
+            raise InvalidTokenError(message) from exc
+
+        repo = RefreshTokenRepository(self.db)
+        revoked = await repo.revoke(token_record)
+        if not revoked:
+            raise InvalidTokenError()
+
+        user_id = uuid.UUID(payload.sub)
+        user = await self.repo.get_by_id(user_id)
+        if not user:
+            raise UserNotFoundError()
+
+        access_token = create_access_token(user.id, user.email, user.onboarding_completed)
+        new_refresh_token = await create_refresh_token(user.id, self.db)
+
+        return RefreshTokenOutput(
+            access_token=access_token,
+            refresh_token=new_refresh_token,
+        )

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Path, status
 
-from app.application.dto.auth_dto import LoginInput, LoginVerifyInput, LogoutInput, RegisterUserInput
+from app.application.dto.auth_dto import LoginInput, LoginVerifyInput, LogoutInput, RefreshTokenInput, RegisterUserInput
 from app.application.use_cases.auth_usecase import AuthUseCase
 from app.controller.dependencies import get_auth_use_case, login_rate_limit
 from app.controller.docs.auth_docs import (
@@ -17,6 +17,9 @@ from app.controller.docs.auth_docs import (
     LOGOUT_VALIDATION_ERROR,
     OTP_TOKEN_EXPIRED,
     OTP_TOKEN_INVALID,
+    REFRESH_TOKEN_EXPIRED,
+    REFRESH_TOKEN_INVALID,
+    REFRESH_VALIDATION_ERROR,
     REGISTER_VALIDATION_ERROR,
     TOKEN_EXPIRED,
     USER_INACTIVE,
@@ -31,6 +34,8 @@ from app.controller.schemas.auth_schema import (
     LoginVerifyResponse,
     LogoutRequest,
     LogoutResponse,
+    RefreshTokenRequest,
+    RefreshTokenResponse,
     RegisterRequest,
     RegisterResponse,
     VerifyEmailResponse,
@@ -291,3 +296,52 @@ async def logout(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error))
 
     return LogoutResponse()
+
+
+@router.post(
+    "/refresh",
+    response_model=RefreshTokenResponse,
+    status_code=status.HTTP_200_OK,
+    responses={
+        **REFRESH_TOKEN_EXPIRED,
+        **REFRESH_TOKEN_INVALID,
+        **USER_NOT_FOUND,
+        **REFRESH_VALIDATION_ERROR,
+    },
+    summary="Refresh access token",
+    description=(
+        "Exchange a valid refresh token for a new access token and a rotated refresh token. "
+        "The submitted refresh token is immediately revoked and replaced — clients must "
+        "store the new refresh token from the response. "
+        "If two requests arrive simultaneously with the same token, only one will succeed; "
+        "the other receives 401, preventing parallel rotation races. "
+        "Presenting an already-revoked token also returns 401 with the same opaque error "
+        "to avoid leaking rotation state to potential attackers."
+    ),
+)
+async def refresh_token(
+    body: RefreshTokenRequest,
+    use_case: AuthUseCase = Depends(get_auth_use_case),
+) -> RefreshTokenResponse:
+    """Rotate a refresh token and return a new access and refresh token pair.
+
+    # Error mapping
+    - **401 Unauthorized** — token is expired, invalid, revoked, not found,
+      or was already rotated by a concurrent request (all cases return the
+      same opaque response to avoid leaking rotation state).
+    - **404 Not Found** — no user matches the token's subject claim.
+    - **422 Unprocessable Entity** — ``refresh_token`` field is missing or empty.
+    """
+    try:
+        result = await use_case.refresh(RefreshTokenInput(refresh_token=body.refresh_token))
+    except TokenExpiredError as error:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(error))
+    except InvalidTokenError as error:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(error))
+    except UserNotFoundError as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error))
+
+    return RefreshTokenResponse(
+        access_token=result.access_token,
+        refresh_token=result.refresh_token,
+    )

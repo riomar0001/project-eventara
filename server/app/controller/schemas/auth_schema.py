@@ -74,3 +74,14 @@ class LogoutRequest(BaseModel):
 class LogoutResponse(BaseModel):
     success: bool = True
     message: str = "Logged out successfully."
+
+
+class RefreshTokenRequest(BaseModel):
+    refresh_token: str = Field(min_length=1)
+
+
+class RefreshTokenResponse(BaseModel):
+    access_token: str
+    refresh_token: str
+    token_type: str = "bearer"
+    message: str = "Token refreshed successfully."
