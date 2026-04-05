@@ -18,7 +18,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.domain.entities.authorization import GrantEffect, RoleAction
+from app.domain.entities.authorization_entities import GrantEffect, RoleAction
 from app.domain.entities.user_entity import AgeGroup, EducationLevel, Gender, UserStatus
 from app.infrastructure.database.base import Base
 

@@ -1,4 +1,5 @@
 # SQLAlchemy ORM models — map domain entities to database tables
+from app.infrastructure.database.models.audit_log_models import AuditLog
 from app.infrastructure.database.models.user_models import (
     Feature,
     Role,
@@ -25,4 +26,5 @@ __all__ = [
     "UserGrant",
     "Role",
     "RolePermission",
+    "AuditLog",
 ]

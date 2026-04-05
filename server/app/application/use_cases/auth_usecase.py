@@ -29,9 +29,6 @@ from app.core.security.token_service import (
     verify_refresh_token,
     verify_verification_token,
 )
-from app.infrastructure.database.repositories.refresh_token_repository import (
-    RefreshTokenRepository,
-)
 from app.domain.entities.user_entity import (
     PublicUser,
     User,
@@ -55,6 +52,9 @@ from app.domain.exceptions.user_exceptions import (
     UserNotFoundError,
 )
 from app.infrastructure.cache.repositories.otp_repository import OTPRepository
+from app.infrastructure.database.repositories.refresh_token_repository import (
+    RefreshTokenRepository,
+)
 from app.infrastructure.messaging.auth_email_templates import otp_email_html
 from app.infrastructure.messaging.email import send_email, verification_email_html
 

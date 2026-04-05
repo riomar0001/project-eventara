@@ -1,3 +1,7 @@
+from app.domain.exceptions.audit_exceptions import (
+    AuditLogWriteError,
+    UnauthorizedAuditAccessError,
+)
 from app.domain.exceptions.auth_exceptions import (
     InvalidCredentialsError,
     InvalidOTPError,
@@ -28,4 +32,6 @@ __all__ = [
     "TokenExpiredError",
     "InvalidCredentialsError",
     "InvalidOTPError",
+    "AuditLogWriteError",
+    "UnauthorizedAuditAccessError",
 ]

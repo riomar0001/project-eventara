@@ -1,6 +1,7 @@
 from arq import cron
 from arq.connections import RedisSettings
 
+from app.infrastructure.messaging.jobs.audit_log_jobs import persist_audit_log
 from app.infrastructure.messaging.jobs.email_jobs import send_email_job
 from app.infrastructure.messaging.jobs.token_jobs import revoke_expired_tokens_job
 from app.infrastructure.messaging.redis import get_redis_settings
@@ -43,6 +44,7 @@ class WorkerSettings:
     max_tries: int = 3
     functions: list = [
         send_email_job,
+        persist_audit_log,
     ]
     cron_jobs: list = [
         cron(revoke_expired_tokens_job, hour={0}, minute={0}),

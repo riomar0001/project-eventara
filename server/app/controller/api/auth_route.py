@@ -1,6 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, Path, status
 
-from app.application.dto.auth_dto import LoginInput, LoginVerifyInput, LogoutInput, RefreshTokenInput, RegisterUserInput
+from app.application.dto.auth_dto import (
+    LoginInput,
+    LoginVerifyInput,
+    LogoutInput,
+    RefreshTokenInput,
+    RegisterUserInput,
+)
 from app.application.use_cases.auth_usecase import AuthUseCase
 from app.controller.dependencies import get_auth_use_case, login_rate_limit
 from app.controller.docs.auth_docs import (

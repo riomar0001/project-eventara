@@ -1,9 +1,16 @@
 from fastapi import Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.application.use_cases.audit_log_usecase import (
+    CreateAuditLogUseCase,
+    GetAuditLogsUseCase,
+)
 from app.application.use_cases.auth_usecase import AuthUseCase
 from app.application.use_cases.user_usecase import OnboardingUseCase
 from app.infrastructure.cache.repositories.otp_repository import OTPRepository
+from app.infrastructure.database.repositories.audit_log_repository import (
+    AuditLogRepository,
+)
 from app.infrastructure.database.repositories.user_repository import UserRepository
 from app.infrastructure.database.session import get_db
 
@@ -31,3 +38,15 @@ def get_onboarding_use_case(db: AsyncSession = Depends(get_db)) -> OnboardingUse
 def get_otp_repository(request: Request) -> OTPRepository:
     """FastAPI dependency that provides a request-scoped Redis OTP repository."""
     return OTPRepository(request.app.state.redis)
+
+
+def get_create_audit_log_use_case(
+    request: Request, db: AsyncSession = Depends(get_db)
+) -> CreateAuditLogUseCase:
+    """Construct a ``CreateAuditLogUseCase`` with async queue support."""
+    return CreateAuditLogUseCase(AuditLogRepository(db), request.app.state.arq)
+
+
+def get_audit_logs_use_case(db: AsyncSession = Depends(get_db)) -> GetAuditLogsUseCase:
+    """Construct a ``GetAuditLogsUseCase`` for querying audit trail."""
+    return GetAuditLogsUseCase(AuditLogRepository(db))

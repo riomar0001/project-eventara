@@ -13,7 +13,7 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 
-from app.domain.entities.authorization import GrantEffect, RoleAction
+from app.domain.entities.authorization_entities import GrantEffect, RoleAction
 from app.infrastructure.database.models.user_models import Feature, Role, RolePermission
 from app.infrastructure.database.session import AsyncSessionLocal
 
