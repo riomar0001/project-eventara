@@ -56,8 +56,15 @@ class LoginInitResponse(BaseModel):
 
 
 class LoginVerifyRequest(BaseModel):
-    token: str
-    code: str
+    token: str = Field(min_length=1)
+    code: str = Field(min_length=6, max_length=6, pattern=r"^\d{6}$")
+
+
+class LoginVerifyResponse(BaseModel):
+    access_token: str
+    refresh_token: str
+    token_type: str = "bearer"
+    message: str = "Login verified successfully."
 
 
 class LogoutRequest(BaseModel):

@@ -6,8 +6,12 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application.dto.auth_dto import (
+    LoginInitInput,
+    LoginInitOutput,
     LoginOutput,
     LoginUserInput,
+    LoginVerifyInput,
+    LoginVerifyOutput,
     RegisteredUserOutput,
     RegisterUserInput,
     VerifiedEmailOutput,
@@ -17,8 +21,10 @@ from app.core.security.constants import LOCKOUT_DURATION, MAX_FAILED_LOGIN_ATTEM
 from app.core.security.hashing import hash_string, verify_hash
 from app.core.security.token_service import (
     create_access_token,
+    create_otp_token,
     create_refresh_token,
     verification_token,
+    verify_otp_token,
     verify_verification_token,
 )
 from app.domain.entities.user_entity import (
@@ -33,6 +39,7 @@ from app.domain.exceptions import (
     EmailAlreadyVerifiedError,
     EmailNotVerifiedError,
     InvalidCredentialsError,
+    InvalidOTPError,
     InvalidTokenError,
     TokenExpiredError,
     UserInactiveError,
@@ -42,16 +49,32 @@ from app.domain.exceptions.user_exceptions import (
     CompletedOnboardingRequiredError,
     UserNotFoundError,
 )
+from app.infrastructure.cache.repositories.otp_repository import OTPRepository
 from app.infrastructure.messaging.email import send_email, verification_email_html
+from app.infrastructure.messaging.auth_email_templates import otp_email_html
 
 
 class AuthUseCase:
-    """Handles all authentication flows: registration, email verification, and login."""
+    """Handles all authentication flows: registration, email verification, and login.
 
-    def __init__(self, repo: IUserRepository, db: AsyncSession, arq: ArqRedis) -> None:
+    Supports two login modes:
+    - **Direct login** (``login``): single-step credential validation returning tokens.
+    - **OTP login** (``login_init`` + ``login_verify``): two-step flow where
+      credentials are validated first and an OTP is sent, then the OTP is verified
+      before tokens are issued.
+    """
+
+    def __init__(
+        self,
+        repo: IUserRepository,
+        db: AsyncSession,
+        arq: ArqRedis,
+        otp_repo: OTPRepository | None = None,
+    ) -> None:
         self.repo = repo
         self.db = db
         self.arq = arq
+        self.otp_repo = otp_repo
 
     async def register_user(self, data: RegisterUserInput) -> RegisteredUserOutput:
         """Create a new user account and dispatch a verification email.
@@ -154,49 +177,40 @@ class AuthUseCase:
             refresh_token=refresh_token,
         )
 
-    async def login(self, data: LoginUserInput) -> LoginOutput:
-        """Authenticate a user by email and password and return JWT tokens.
+    async def _authenticate_user(self, email: str, password: str) -> User:
+        """Validate email and password and return the corresponding user entity.
+
+        This private helper centralises the credential-checking logic shared
+        by ``login`` and ``login_init``, keeping both callers DRY while
+        preserving a single place to update security policy.
+
+        Concurrency note — brute-force counter:
+            Failed-login incrementing is performed with a single atomic SQL
+            UPDATE (``UserRepository.record_failed_login``).  This prevents
+            the TOCTOU race where two concurrent bad-password requests both
+            read ``failed_login_attempts = N``, both write ``N + 1``, and end
+            up with ``N + 1`` instead of ``N + 2``.
 
         Security note — email enumeration prevention:
             Both "email not found" and "wrong password" raise the same
             ``InvalidCredentialsError`` so an unauthenticated caller cannot
-            determine whether a given email address is registered.
-
-        Concurrency note — brute-force counter:
-            Failed-login incrementing is performed with a single atomic SQL
-            UPDATE (see ``UserRepository.record_failed_login``). This prevents
-            the TOCTOU race where two concurrent bad-password requests could
-            both read failed_login_attempts = N, both write N + 1, and end up
-            with a total of N + 1 instead of N + 2.
-
-        Login flow:
-            1. Resolve the user by email.
-            2. Reject if onboarding is not completed.
-            3. Reject inactive / deleted accounts.
-            4. Reject currently locked accounts.
-            5. Verify the supplied password against the stored bcrypt hash.
-               On failure: atomically increment the failure counter and lock
-               the account if the threshold is reached.
-            6. Reject unverified email addresses.
-            7. Reset the failure counter and record the successful login.
-            8. Issue and return an access token + refresh token pair.
+            determine whether a given address is registered.
 
         Args:
-            data: A ``LoginUserInput`` carrying the candidate email and password.
+            email:    The candidate email address.
+            password: The candidate plaintext password.
 
         Returns:
-            A ``LoginOutput`` containing ``access_token`` and ``refresh_token``.
+            The authenticated ``User`` entity on success.
 
         Raises:
-            InvalidCredentialsError: The email was not found or the password
-            did not match (combined deliberately to prevent enumeration).
-            CompletedOnboardingRequiredError: The user has not completed onboarding.
-            UserInactiveError: The account has been deactivated or soft-deleted.
-            UserLockedError: Too many failed attempts; the account is locked.
-            EmailNotVerifiedError: The user has not yet verified their email.
+            InvalidCredentialsError: Email not registered or password incorrect.
+            CompletedOnboardingRequiredError: User has not completed onboarding.
+            UserInactiveError: Account is deactivated or soft-deleted.
+            UserLockedError: Account is temporarily locked after too many failures.
+            EmailNotVerifiedError: Email address has not been verified.
         """
-
-        user = await self.repo.get_by_email(data.email)
+        user = await self.repo.get_by_email(email)
         if not user:
             raise InvalidCredentialsError()
 
@@ -213,13 +227,41 @@ class AuthUseCase:
             if locked_until_aware > now:
                 raise UserLockedError()
 
-        if not verify_hash(data.password, user.password):
+        if not verify_hash(password, user.password):
             lockout_until = now + LOCKOUT_DURATION
             await self.repo.record_failed_login(user.id, MAX_FAILED_LOGIN_ATTEMPTS, lockout_until)
             raise InvalidCredentialsError()
 
         if not security or not security.email_verified:
             raise EmailNotVerifiedError()
+
+        return user
+
+    async def login(self, data: LoginUserInput) -> LoginOutput:
+        """Authenticate a user by email and password and return JWT tokens.
+
+        Delegates credential validation to ``_authenticate_user``, then resets
+        the brute-force counter, records the login event, and issues a token pair.
+
+        Login flow:
+            1–6. Credential validation — see ``_authenticate_user``.
+            7.   Reset failure counter and record the successful login.
+            8.   Issue and return an access token + refresh token pair.
+
+        Args:
+            data: A ``LoginUserInput`` carrying the candidate email and password.
+
+        Returns:
+            A ``LoginOutput`` containing ``access_token`` and ``refresh_token``.
+
+        Raises:
+            InvalidCredentialsError: Email not found or password incorrect.
+            CompletedOnboardingRequiredError: User has not completed onboarding.
+            UserInactiveError: Account is deactivated or soft-deleted.
+            UserLockedError: Account locked after too many failed attempts.
+            EmailNotVerifiedError: Email address has not been verified.
+        """
+        user = await self._authenticate_user(data.email, data.password)
 
         await self.repo.reset_failed_login(user.id)
         await self.repo.record_login(user.id)
@@ -228,6 +270,125 @@ class AuthUseCase:
         refresh_token = await create_refresh_token(user.id, self.db)
 
         return LoginOutput(
+            access_token=access_token,
+            refresh_token=refresh_token,
+        )
+
+    async def login_init(self, data: LoginInitInput) -> LoginInitOutput:
+        """Validate credentials, generate an OTP, and return an OTP session token.
+
+        This is the first step of the two-step OTP login flow.  On success a
+        6-digit code is emailed to the user and a short-lived ``verification_token``
+        (JWT) is returned.  The client must submit that token together with the
+        code to ``login_verify`` to complete sign-in.
+
+        Concurrency note:
+            OTP creation uses Redis ``SET``, which atomically overwrites any
+            previously active code for the same user.  At most one valid OTP
+            exists per user at any point in time.
+
+        Security note:
+            The brute-force failure counter is NOT reset here — it is only reset
+            after the full two-step flow completes in ``login_verify``.  This
+            prevents an attacker who knows the password from resetting the counter
+            without completing MFA.
+
+        Args:
+            data: A ``LoginInitInput`` with the candidate email and password.
+
+        Returns:
+            A ``LoginInitOutput`` containing the ``verification_token`` to submit
+            to ``login_verify``.
+
+        Raises:
+            InvalidCredentialsError: Email not found or password incorrect.
+            CompletedOnboardingRequiredError: User has not completed onboarding.
+            UserInactiveError: Account is deactivated or soft-deleted.
+            UserLockedError: Account locked after too many failed attempts.
+            EmailNotVerifiedError: Email address has not been verified.
+        """
+        user = await self._authenticate_user(data.email, data.password)
+
+        # Generate OTP and store its bcrypt hash in Redis (plaintext never persisted).
+        # Redis SET is atomic — any previous OTP for this user is overwritten.
+        code = await self.otp_repo.create_for_user(user.id)  # type: ignore[union-attr]
+
+        await send_email(
+            self.arq,
+            to=user.email,
+            subject="Your Eventara login code",
+            html=otp_email_html(code),
+        )
+
+        # Issue a short-lived JWT that encodes the user's identity.  The client
+        # treats this as opaque and submits it unchanged to /login/verify.
+        token = create_otp_token(user.id, user.email)
+
+        return LoginInitOutput(verification_token=token)
+
+    async def login_verify(self, data: LoginVerifyInput) -> LoginVerifyOutput:
+        """Verify the OTP code and issue JWT tokens to complete the OTP login flow.
+
+        This is the second step of the two-step OTP login flow.  The client
+        must supply the ``verification_token`` obtained from ``login_init`` plus
+        the 6-digit code delivered to the user's email.
+
+        Concurrency note:
+            OTP verification uses Redis ``GETDEL``, which atomically retrieves
+            and deletes the stored hash in a single round-trip.  If two requests
+            arrive simultaneously with the same code only one can succeed — the
+            second call receives ``None`` from ``GETDEL`` and is rejected.  This
+            makes the OTP single-use by design and prevents replay attacks.
+
+        Security note — unified error response:
+            A wrong code, an already-consumed code, and an expired code all raise
+            the same ``InvalidOTPError``.  Distinguishing these cases would let an
+            attacker probe the internal OTP state; a uniform response prevents that.
+
+        Args:
+            data: A ``LoginVerifyInput`` carrying the ``token`` (from
+                ``login_init``) and the plaintext 6-digit ``code``.
+
+        Returns:
+            A ``LoginVerifyOutput`` containing ``access_token`` and
+            ``refresh_token`` for the authenticated session.
+
+        Raises:
+            TokenExpiredError: The OTP session token has passed its expiry.
+            InvalidTokenError: The token is malformed or has an invalid signature.
+            InvalidOTPError: The code is wrong, expired, or already consumed.
+            UserNotFoundError: No user matches the token's subject claim.
+        """
+        # Decode and validate the OTP session token.
+        try:
+            payload = verify_otp_token(data.token)
+        except ValueError as exc:
+            message = str(exc)
+            if "expired" in message.lower():
+                raise TokenExpiredError() from exc
+            raise InvalidTokenError(message) from exc
+
+        user_id = uuid.UUID(payload.sub)
+
+        # Atomically consume the OTP.  GETDEL removes the hash from Redis
+        # regardless of whether the code matched, making the code single-use.
+        valid = await self.otp_repo.verify_and_consume(user_id, data.code)  # type: ignore[union-attr]
+        if not valid:
+            raise InvalidOTPError()
+
+        user = await self.repo.get_by_id(user_id)
+        if not user:
+            raise UserNotFoundError()
+
+        # Full authentication is complete — reset the failure counter and log
+        # the successful login, mirroring the behaviour of the direct login flow.
+        await self.repo.reset_failed_login(user_id)
+        await self.repo.record_login(user_id)
+
+        access_token = create_access_token(user.id, user.email, user.onboarding_completed)
+        refresh_token = await create_refresh_token(user.id, self.db)
+
+        return LoginVerifyOutput(
             access_token=access_token,
             refresh_token=refresh_token,
         )

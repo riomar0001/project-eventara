@@ -234,3 +234,104 @@ LOGIN_RATE_LIMITED = {
         },
     }
 }
+
+
+# POST /auth/login/init
+LOGIN_INIT_VALIDATION_ERROR = {
+    422: {
+        "description": "Validation error — missing or malformed fields",
+        "model": ValidationErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "detail": [
+                        {
+                            "loc": ["body", "email"],
+                            "msg": "value is not a valid email address",
+                            "type": "value_error.email",
+                        },
+                        {
+                            "loc": ["body", "password"],
+                            "msg": "Field required",
+                            "type": "missing",
+                        },
+                    ],
+                }
+            }
+        },
+    }
+}
+
+
+# POST /auth/login/verify
+LOGIN_VERIFY_VALIDATION_ERROR = {
+    422: {
+        "description": "Validation error — token is empty or code is not exactly 6 digits",
+        "model": ValidationErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "detail": [
+                        {
+                            "loc": ["body", "token"],
+                            "msg": "String should have at least 1 character",
+                            "type": "string_too_short",
+                        },
+                        {
+                            "loc": ["body", "code"],
+                            "msg": "String should match pattern '^\\d{6}$'",
+                            "type": "string_pattern_mismatch",
+                        },
+                    ],
+                }
+            }
+        },
+    }
+}
+
+INVALID_OTP = {
+    401: {
+        "description": "OTP code is incorrect, already consumed, or has expired",
+        "model": ErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "message": "Invalid or expired verification code",
+                }
+            }
+        },
+    }
+}
+
+OTP_TOKEN_EXPIRED = {
+    401: {
+        "description": "The OTP session token has expired — user must restart the login flow",
+        "model": ErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "message": "Token has expired",
+                }
+            }
+        },
+    }
+}
+
+OTP_TOKEN_INVALID = {
+    400: {
+        "description": "The OTP session token is malformed or has an invalid signature",
+        "model": ErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "message": "Invalid or malformed token",
+                }
+            }
+        },
+    }
+}

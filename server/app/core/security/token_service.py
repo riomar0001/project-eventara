@@ -1,6 +1,6 @@
 """JWT token creation and verification for all token types used by the API.
 
-Three token types are in use:
+Four token types are in use:
 
 - **access** — short-lived JWT sent in the ``Authorization: Bearer`` header to
   authenticate API requests.  Signed with ``JWT_ACCESS_TOKEN_SECRET``.
@@ -9,18 +9,24 @@ Three token types are in use:
   be revoked server-side.  Signed with ``JWT_REFRESH_TOKEN_SECRET``.
 - **verification** — one-time JWT emailed to users after registration to confirm
   ownership of the email address.  Signed with ``JWT_VERIFICATION_TOKEN_SECRET``.
+- **otp** — short-lived JWT issued after successful credential validation in the
+  OTP login flow.  It encodes the user's identity so the ``/login/verify``
+  endpoint can resolve the user without exposing the user ID in the request body.
+  Signed with ``JWT_VERIFICATION_TOKEN_SECRET`` (separate ``type`` claim prevents
+  cross-use).  Expires in ``OTP_TTL_MINUTES`` minutes.
 
-All three types are decoded through the shared ``_decode`` helper, which
-enforces signature, expiry, and the ``type`` claim in one place.
+All types are decoded through the shared ``_decode`` helper, which enforces
+signature, expiry, and the ``type`` claim in one place.
 """
 
 import uuid
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 import jwt
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
+from app.core.security.constants import OTP_TTL_MINUTES
 from app.core.security.hashing import hash_string, verify_hash
 from app.domain.entities.token_entities import TokenPayload
 from app.domain.entities.user_entity import UserProfile
@@ -212,6 +218,60 @@ def verify_verification_token(token: str) -> TokenPayload:
     payload = _decode(
         token, secret=settings.JWT_VERIFICATION_TOKEN_SECRET, expected_type="verification"
     )
+    return TokenPayload(**payload)
+
+
+def create_otp_token(user_id: uuid.UUID, email: str) -> str:
+    """Build and sign a short-lived OTP session token.
+
+    This token is issued after the user passes credential validation in
+    ``/auth/login/init``.  It acts as a tamper-proof, time-bounded claim
+    of the user's identity so the second step (``/auth/login/verify``)
+    can resolve the user without accepting a raw user ID in the request
+    body.
+
+    The token uses the same secret as the verification token but carries
+    ``type: "otp"``; the ``_decode`` helper enforces the type claim so
+    the two token types cannot be used interchangeably.
+
+    Args:
+        user_id: The authenticated user's UUID, stored in the ``sub`` claim.
+        email:   The user's email address, embedded for audit traceability.
+
+    Returns:
+        A signed JWT string to be returned to the client and submitted
+        alongside the OTP code at ``/auth/login/verify``.
+    """
+    now = datetime.now(UTC)
+    payload = {
+        "sub": str(user_id),
+        "email": email,
+        "type": "otp",
+        "jti": str(uuid.uuid4()),
+        "iat": now,
+        "exp": now + timedelta(minutes=OTP_TTL_MINUTES),
+    }
+    return jwt.encode(
+        payload,
+        settings.JWT_VERIFICATION_TOKEN_SECRET,
+        algorithm=settings.JWT_ALGORITHM,
+    )
+
+
+def verify_otp_token(token: str) -> TokenPayload:
+    """Decode and validate an OTP session token.
+
+    Args:
+        token: The raw JWT string returned by ``/auth/login/init``.
+
+    Returns:
+        A ``TokenPayload`` containing the ``sub`` (user ID) and ``email`` claims.
+
+    Raises:
+        ValueError: The token is expired, has an invalid signature, or is
+            not of type ``otp``.
+    """
+    payload = _decode(token, secret=settings.JWT_VERIFICATION_TOKEN_SECRET, expected_type="otp")
     return TokenPayload(**payload)
 
 

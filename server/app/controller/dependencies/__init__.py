@@ -47,7 +47,12 @@ def get_current_user_id(
 
 
 def get_auth_use_case(request: Request, db: AsyncSession = Depends(get_db)) -> AuthUseCase:
-    return AuthUseCase(UserRepository(db), db, request.app.state.arq)
+    return AuthUseCase(
+        UserRepository(db),
+        db,
+        request.app.state.arq,
+        OTPRepository(request.app.state.redis),
+    )
 
 
 def get_onboarding_use_case(db: AsyncSession = Depends(get_db)) -> OnboardingUseCase:

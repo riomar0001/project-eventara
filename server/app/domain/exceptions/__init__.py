@@ -1,5 +1,6 @@
 from app.domain.exceptions.auth_exceptions import (
     InvalidCredentialsError,
+    InvalidOTPError,
     InvalidTokenError,
     TokenExpiredError,
 )
@@ -26,4 +27,5 @@ __all__ = [
     "InvalidTokenError",
     "TokenExpiredError",
     "InvalidCredentialsError",
+    "InvalidOTPError",
 ]
