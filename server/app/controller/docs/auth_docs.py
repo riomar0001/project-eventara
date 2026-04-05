@@ -335,3 +335,44 @@ OTP_TOKEN_INVALID = {
         },
     }
 }
+
+
+# POST /auth/logout
+LOGOUT_VALIDATION_ERROR = {
+    422: {
+        "description": "Validation error — refresh_token field is missing",
+        "model": ValidationErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "detail": [
+                        {
+                            "loc": ["body", "refresh_token"],
+                            "msg": "Field required",
+                            "type": "missing",
+                        }
+                    ],
+                }
+            }
+        },
+    }
+}
+
+LOGOUT_INVALID_TOKEN = {
+    400: {
+        "description": (
+            "The refresh token is structurally invalid — bad signature, wrong type, "
+            "or unparseable JWT.  Expired and already-revoked tokens succeed silently."
+        ),
+        "model": ErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "message": "Invalid or malformed token",
+                }
+            }
+        },
+    }
+}

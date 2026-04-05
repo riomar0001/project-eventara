@@ -72,7 +72,6 @@ def create_access_token(
         "exp": now + settings.ACCESS_TOKEN_EXPIRATION,
     }
 
-    # Optional fields
     if role_id:
         payload["role_id"] = role_id
 

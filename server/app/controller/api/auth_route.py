@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Path, status
 
-from app.application.dto.auth_dto import LoginInput, LoginVerifyInput, RegisterUserInput
+from app.application.dto.auth_dto import LoginInput, LoginVerifyInput, LogoutInput, RegisterUserInput
 from app.application.use_cases.auth_usecase import AuthUseCase
 from app.controller.dependencies import get_auth_use_case, login_rate_limit
 from app.controller.docs.auth_docs import (
@@ -13,6 +13,8 @@ from app.controller.docs.auth_docs import (
     LOGIN_INIT_VALIDATION_ERROR,
     LOGIN_RATE_LIMITED,
     LOGIN_VERIFY_VALIDATION_ERROR,
+    LOGOUT_INVALID_TOKEN,
+    LOGOUT_VALIDATION_ERROR,
     OTP_TOKEN_EXPIRED,
     OTP_TOKEN_INVALID,
     REGISTER_VALIDATION_ERROR,
@@ -27,6 +29,8 @@ from app.controller.schemas.auth_schema import (
     LoginRequest,
     LoginVerifyRequest,
     LoginVerifyResponse,
+    LogoutRequest,
+    LogoutResponse,
     RegisterRequest,
     RegisterResponse,
     VerifyEmailResponse,
@@ -249,3 +253,41 @@ async def login_verify(
         access_token=result.access_token,
         refresh_token=result.refresh_token,
     )
+
+
+@router.post(
+    "/logout",
+    response_model=LogoutResponse,
+    status_code=status.HTTP_200_OK,
+    responses={
+        **LOGOUT_INVALID_TOKEN,
+        **LOGOUT_VALIDATION_ERROR,
+    },
+    summary="Log out",
+    description=(
+        "Revoke a refresh token, ending the associated session. "
+        "The refresh token authenticates the request — no access token is required, "
+        "so clients can log out even after the access token has expired. "
+        "Logout is idempotent: already-expired and already-revoked tokens return "
+        "200 OK, because the session is effectively dead regardless. "
+        "Only a structurally invalid token (bad signature, wrong type) returns an error."
+    ),
+)
+async def logout(
+    body: LogoutRequest,
+    use_case: AuthUseCase = Depends(get_auth_use_case),
+) -> LogoutResponse:
+    """Revoke a refresh token to end the user's session.
+
+    # Error mapping
+    - **400 Bad Request** — the refresh token is structurally invalid (bad
+      signature, wrong JWT type, or unparseable format).  This is the only
+      error case; expired and already-revoked tokens succeed silently.
+    - **422 Unprocessable Entity** — the ``refresh_token`` field is missing.
+    """
+    try:
+        await use_case.logout(LogoutInput(refresh_token=body.refresh_token))
+    except InvalidTokenError as error:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error))
+
+    return LogoutResponse()

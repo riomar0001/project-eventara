@@ -47,6 +47,12 @@ def get_current_user_id(
 
 
 def get_auth_use_case(request: Request, db: AsyncSession = Depends(get_db)) -> AuthUseCase:
+    """Construct a fully-wired ``AuthUseCase`` for the current request.
+
+    Injects the user repository, database session, ARQ job queue, and the
+    Redis-backed OTP repository so all auth flows are available from a
+    single dependency.
+    """
     return AuthUseCase(
         UserRepository(db),
         db,
@@ -56,6 +62,7 @@ def get_auth_use_case(request: Request, db: AsyncSession = Depends(get_db)) -> A
 
 
 def get_onboarding_use_case(db: AsyncSession = Depends(get_db)) -> OnboardingUseCase:
+    """Construct an ``OnboardingUseCase`` for the current request."""
     return OnboardingUseCase(UserRepository(db), db)
 
 
@@ -85,7 +92,6 @@ async def login_rate_limit(request: Request) -> None:
     """
     repo = RateLimitRepository(request.app.state.redis)
 
-    # --- 1. Per-IP check --------------------------------------------------
     ip = request.client.host if request.client else "unknown"
     ip_count = await repo.hit(
         f"rate_limit:login:ip:{ip}",
@@ -99,10 +105,6 @@ async def login_rate_limit(request: Request) -> None:
             headers={"Retry-After": str(ttl)},
         )
 
-    # --- 2. Per-account check ---------------------------------------------
-    # Read the raw body so we can extract the email before Pydantic validation.
-    # Starlette caches the body after the first read, so the route handler
-    # can still parse it normally afterwards.
     try:
         body = await request.json()
         email = str(body.get("email", "")).lower().strip()

@@ -10,6 +10,7 @@ from app.application.dto.auth_dto import (
     LoginOutput,
     LoginVerifyInput,
     LoginVerifyOutput,
+    LogoutInput,
     RegisteredUserOutput,
     RegisterUserInput,
     VerifiedEmailOutput,
@@ -23,7 +24,11 @@ from app.core.security.token_service import (
     create_refresh_token,
     verification_token,
     verify_otp_token,
+    verify_refresh_token,
     verify_verification_token,
+)
+from app.infrastructure.database.repositories.refresh_token_repository import (
+    RefreshTokenRepository,
 )
 from app.domain.entities.user_entity import (
     PublicUser,
@@ -53,13 +58,13 @@ from app.infrastructure.messaging.email import send_email, verification_email_ht
 
 
 class AuthUseCase:
-    """Handles all authentication flows: registration, email verification, and login.
+    """Handles all authentication flows: registration, email verification, login, and logout.
 
-    Supports two login modes:
-    - **Direct login** (``login``): single-step credential validation returning tokens.
-    - **OTP login** (``login_init`` + ``login_verify``): two-step flow where
-      credentials are validated first and an OTP is sent, then the OTP is verified
-      before tokens are issued.
+    Login is exclusively OTP-based and spans two steps:
+    - ``login``: validates credentials, sends a 6-digit code, returns an OTP session token.
+    - ``login_verify``: consumes the OTP, issues access and refresh tokens.
+
+    ``logout`` revokes a single refresh token, ending the associated session.
     """
 
     def __init__(
@@ -320,7 +325,6 @@ class AuthUseCase:
             InvalidOTPError: The code is wrong, expired, or already consumed.
             UserNotFoundError: No user matches the token's subject claim.
         """
-        # Decode and validate the OTP session token.
         try:
             payload = verify_otp_token(data.token)
         except ValueError as exc:
@@ -353,3 +357,46 @@ class AuthUseCase:
             access_token=access_token,
             refresh_token=refresh_token,
         )
+
+    async def logout(self, data: LogoutInput) -> None:
+        """Revoke a refresh token, terminating the associated session.
+
+        The refresh token itself authenticates the logout request — no access
+        token is required.  This allows clients to log out even when the access
+        token has already expired, which is the common case for a "logout on
+        next open" flow.
+
+        Concurrency note:
+            ``RefreshTokenRepository.revoke`` executes a single atomic
+            ``UPDATE … WHERE is_active = TRUE``, so two simultaneous logout
+            requests for the same token are both safe — whichever arrives second
+            sees ``rowcount = 0`` and effectively becomes a no-op.  No additional
+            locking is needed.
+
+        Silent-success policy:
+            Expired tokens and tokens that are no longer active in the database
+            (already revoked or belonging to a deleted account) are treated as
+            already-logged-out and return successfully.  This keeps logout
+            idempotent and prevents confusing error responses when a client
+            retries.  Only a structurally invalid token — one with a bad
+            signature, wrong type, or unparseable format — raises an exception,
+            because that can never represent a legitimate session.
+
+        Args:
+            data: A ``LogoutInput`` carrying the raw refresh token JWT.
+
+        Raises:
+            InvalidTokenError: The token is malformed, has an invalid signature,
+                or is not a refresh token.  Expired and already-revoked tokens
+                do NOT raise; they succeed silently.
+        """
+        try:
+            _, token_record = await verify_refresh_token(data.refresh_token, self.db)
+        except ValueError as exc:
+            message = str(exc).lower()
+            if "invalid token" in message or "invalid refresh token" == message:
+                raise InvalidTokenError(str(exc)) from exc
+            return
+
+        repo = RefreshTokenRepository(self.db)
+        await repo.revoke(token_record)
