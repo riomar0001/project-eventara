@@ -1,6 +1,8 @@
+from arq import cron
 from arq.connections import RedisSettings
 
 from app.infrastructure.messaging.jobs.email_jobs import send_email_job
+from app.infrastructure.messaging.jobs.token_jobs import revoke_expired_tokens_job
 from app.infrastructure.messaging.redis import get_redis_settings
 
 
@@ -24,6 +26,15 @@ class WorkerSettings:
         Failed jobs are retried up to ``max_tries`` times.  Email jobs benefit
         from retries because transient SMTP errors (e.g. connection timeouts,
         temporary service unavailability) are common and self-resolving.
+
+    Cron jobs:
+        ``revoke_expired_tokens_job`` fires daily at 00:00:00 UTC (midnight).
+        ARQ schedules against the worker process's system clock, so the
+        worker must run with ``TZ=UTC`` (or an equivalent UTC-pinned
+        environment) for the trigger time to match wall-clock UTC midnight.
+        ARQ's ``unique=True`` default ensures only one instance of the job
+        is enqueued at a time, so a slow run cannot stack with the next
+        scheduled invocation.
     """
 
     redis_settings: RedisSettings = get_redis_settings()
@@ -32,4 +43,7 @@ class WorkerSettings:
     max_tries: int = 3
     functions: list = [
         send_email_job,
+    ]
+    cron_jobs: list = [
+        cron(revoke_expired_tokens_job, hour={0}, minute={0}),
     ]

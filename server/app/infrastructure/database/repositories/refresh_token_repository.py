@@ -68,6 +68,25 @@ class RefreshTokenRepository:
         await self.db.commit()
         return cast(CursorResult, result).rowcount
 
+    async def revoke_expired(self) -> int:
+        """Atomically revoke all active tokens whose expiry time has passed.
+
+        Executes a single bulk ``UPDATE … WHERE is_active = TRUE AND expires_at < now``
+        so the operation is safe to run concurrently — if two workers overlap,
+        the second will simply match zero rows and commit a no-op.
+
+        Returns:
+            The number of tokens that were revoked.
+        """
+        now = datetime.now(UTC)
+        result = await self.db.execute(
+            update(Token)
+            .where(Token.is_active.is_(True), Token.expires_at < now)
+            .values(is_active=False, revoked_at=now)
+        )
+        await self.db.commit()
+        return cast(CursorResult, result).rowcount
+
     async def update_last_used(self, token: Token) -> None:
         """Stamp ``last_used_at`` on the token record for audit purposes."""
         now = datetime.now(UTC)
