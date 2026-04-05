@@ -6,10 +6,8 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application.dto.auth_dto import (
-    LoginInitInput,
-    LoginInitOutput,
+    LoginInput,
     LoginOutput,
-    LoginUserInput,
     LoginVerifyInput,
     LoginVerifyOutput,
     RegisteredUserOutput,
@@ -50,8 +48,8 @@ from app.domain.exceptions.user_exceptions import (
     UserNotFoundError,
 )
 from app.infrastructure.cache.repositories.otp_repository import OTPRepository
-from app.infrastructure.messaging.email import send_email, verification_email_html
 from app.infrastructure.messaging.auth_email_templates import otp_email_html
+from app.infrastructure.messaging.email import send_email, verification_email_html
 
 
 class AuthUseCase:
@@ -237,44 +235,7 @@ class AuthUseCase:
 
         return user
 
-    async def login(self, data: LoginUserInput) -> LoginOutput:
-        """Authenticate a user by email and password and return JWT tokens.
-
-        Delegates credential validation to ``_authenticate_user``, then resets
-        the brute-force counter, records the login event, and issues a token pair.
-
-        Login flow:
-            1–6. Credential validation — see ``_authenticate_user``.
-            7.   Reset failure counter and record the successful login.
-            8.   Issue and return an access token + refresh token pair.
-
-        Args:
-            data: A ``LoginUserInput`` carrying the candidate email and password.
-
-        Returns:
-            A ``LoginOutput`` containing ``access_token`` and ``refresh_token``.
-
-        Raises:
-            InvalidCredentialsError: Email not found or password incorrect.
-            CompletedOnboardingRequiredError: User has not completed onboarding.
-            UserInactiveError: Account is deactivated or soft-deleted.
-            UserLockedError: Account locked after too many failed attempts.
-            EmailNotVerifiedError: Email address has not been verified.
-        """
-        user = await self._authenticate_user(data.email, data.password)
-
-        await self.repo.reset_failed_login(user.id)
-        await self.repo.record_login(user.id)
-
-        access_token = create_access_token(user.id, user.email, user.onboarding_completed)
-        refresh_token = await create_refresh_token(user.id, self.db)
-
-        return LoginOutput(
-            access_token=access_token,
-            refresh_token=refresh_token,
-        )
-
-    async def login_init(self, data: LoginInitInput) -> LoginInitOutput:
+    async def login(self, data: LoginInput) -> LoginOutput:
         """Validate credentials, generate an OTP, and return an OTP session token.
 
         This is the first step of the two-step OTP login flow.  On success a
@@ -309,9 +270,11 @@ class AuthUseCase:
         """
         user = await self._authenticate_user(data.email, data.password)
 
-        # Generate OTP and store its bcrypt hash in Redis (plaintext never persisted).
-        # Redis SET is atomic — any previous OTP for this user is overwritten.
-        code = await self.otp_repo.create_for_user(user.id)  # type: ignore[union-attr]
+        otp_repo = self.otp_repo
+        if otp_repo is None:
+            raise RuntimeError("OTP repository is not configured.")
+
+        code = await otp_repo.create_for_user(user.id)
 
         await send_email(
             self.arq,
@@ -320,11 +283,9 @@ class AuthUseCase:
             html=otp_email_html(code),
         )
 
-        # Issue a short-lived JWT that encodes the user's identity.  The client
-        # treats this as opaque and submits it unchanged to /login/verify.
         token = create_otp_token(user.id, user.email)
 
-        return LoginInitOutput(verification_token=token)
+        return LoginOutput(verification_token=token)
 
     async def login_verify(self, data: LoginVerifyInput) -> LoginVerifyOutput:
         """Verify the OTP code and issue JWT tokens to complete the OTP login flow.
@@ -370,9 +331,11 @@ class AuthUseCase:
 
         user_id = uuid.UUID(payload.sub)
 
-        # Atomically consume the OTP.  GETDEL removes the hash from Redis
-        # regardless of whether the code matched, making the code single-use.
-        valid = await self.otp_repo.verify_and_consume(user_id, data.code)  # type: ignore[union-attr]
+        otp_repo = self.otp_repo
+        if otp_repo is None:
+            raise RuntimeError("OTP repository is not configured.")
+
+        valid = await otp_repo.verify_and_consume(user_id, data.code)
         if not valid:
             raise InvalidOTPError()
 
@@ -380,8 +343,6 @@ class AuthUseCase:
         if not user:
             raise UserNotFoundError()
 
-        # Full authentication is complete — reset the failure counter and log
-        # the successful login, mirroring the behaviour of the direct login flow.
         await self.repo.reset_failed_login(user_id)
         await self.repo.record_login(user_id)
 

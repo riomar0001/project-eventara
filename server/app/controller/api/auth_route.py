@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Path, status
 
-from app.application.dto.auth_dto import LoginInitInput, LoginUserInput, LoginVerifyInput, RegisterUserInput
+from app.application.dto.auth_dto import LoginInput, LoginVerifyInput, RegisterUserInput
 from app.application.use_cases.auth_usecase import AuthUseCase
 from app.controller.dependencies import get_auth_use_case, login_rate_limit
 from app.controller.docs.auth_docs import (
@@ -12,7 +12,6 @@ from app.controller.docs.auth_docs import (
     INVALID_TOKEN,
     LOGIN_INIT_VALIDATION_ERROR,
     LOGIN_RATE_LIMITED,
-    LOGIN_VALIDATION_ERROR,
     LOGIN_VERIFY_VALIDATION_ERROR,
     OTP_TOKEN_EXPIRED,
     OTP_TOKEN_INVALID,
@@ -26,7 +25,6 @@ from app.controller.docs.auth_docs import (
 from app.controller.schemas.auth_schema import (
     LoginInitResponse,
     LoginRequest,
-    LoginResponse,
     LoginVerifyRequest,
     LoginVerifyResponse,
     RegisterRequest,
@@ -138,67 +136,9 @@ async def verify_email(
     )
 
 
+
 @router.post(
     "/login",
-    response_model=LoginResponse,
-    status_code=status.HTTP_200_OK,
-    dependencies=[Depends(login_rate_limit)],
-    responses={
-        **INVALID_CREDENTIALS,
-        **USER_INACTIVE,
-        **USER_LOCKED,
-        **EMAIL_NOT_VERIFIED,
-        **LOGIN_RATE_LIMITED,
-        **LOGIN_VALIDATION_ERROR,
-    },
-    summary="User login",
-    description=(
-        "Authenticate with a registered email and password. "
-        "Returns a short-lived access token and a long-lived refresh token. "
-        "Rate limited per IP (20 req / 60 s) and per account (10 req / 60 s) "
-        "so users on a shared network are not affected by others' attempts. "
-        "Accounts are additionally locked after 5 consecutive failed attempts."
-    ),
-)
-async def login_user(
-    body: LoginRequest,
-    use_case: AuthUseCase = Depends(get_auth_use_case),
-) -> LoginResponse:
-    """Log in with email and password.
-
-    # Error mapping
-    - **401 Unauthorized** — wrong email or wrong password (combined to prevent
-      email enumeration: callers cannot distinguish between the two cases).
-    - **403 Forbidden** — account is inactive/deleted, or email not yet verified.
-    - **423 Locked** — account is temporarily locked after 5 consecutive failed
-      attempts; the client should wait before retrying.
-    - **429 Too Many Requests** — per-IP limit (20 req / 60 s) or per-account
-      limit (10 req / 60 s) exceeded; check ``Retry-After`` for remaining wait.
-    - **422 Unprocessable Entity** — request body failed schema validation.
-    """
-    try:
-        result = await use_case.login(LoginUserInput(email=body.email, password=body.password))
-    except InvalidCredentialsError as error:
-        # 401: wrong credentials — same response for "not found" and "wrong password"
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(error))
-    except UserInactiveError as error:
-        # 403: account deactivated or soft-deleted
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(error))
-    except UserLockedError as error:
-        # 423: brute-force lockout — RFC 4918 "Locked"
-        raise HTTPException(status_code=status.HTTP_423_LOCKED, detail=str(error))
-    except EmailNotVerifiedError as error:
-        # 403: email verification is a prerequisite for login
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(error))
-
-    return LoginResponse(
-        access_token=result.access_token,
-        refresh_token=result.refresh_token,
-    )
-
-
-@router.post(
-    "/login/init",
     response_model=LoginInitResponse,
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(login_rate_limit)],
@@ -210,7 +150,7 @@ async def login_user(
         **LOGIN_RATE_LIMITED,
         **LOGIN_INIT_VALIDATION_ERROR,
     },
-    summary="Initiate OTP login",
+    summary="Login and request OTP",
     description=(
         "First step of the two-step OTP login flow. "
         "Validates the supplied email and password against the same security checks "
@@ -224,7 +164,7 @@ async def login_user(
         "Subject to the same rate limits as the direct login endpoint."
     ),
 )
-async def login_init(
+async def login(
     body: LoginRequest,
     use_case: AuthUseCase = Depends(get_auth_use_case),
 ) -> LoginInitResponse:
@@ -241,18 +181,14 @@ async def login_init(
     - **422 Unprocessable Entity** — request body failed schema validation.
     """
     try:
-        result = await use_case.login_init(LoginInitInput(email=body.email, password=body.password))
+        result = await use_case.login(LoginInput(email=body.email, password=body.password))
     except InvalidCredentialsError as error:
-        # 401: same response for "not found" and "wrong password" — prevents enumeration
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(error))
     except UserInactiveError as error:
-        # 403: account deactivated or soft-deleted
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(error))
     except UserLockedError as error:
-        # 423: brute-force lockout — RFC 4918 "Locked"
         raise HTTPException(status_code=status.HTTP_423_LOCKED, detail=str(error))
     except EmailNotVerifiedError as error:
-        # 403: email verification is a prerequisite for login
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(error))
 
     return LoginInitResponse(verification_token=result.verification_token)
@@ -272,7 +208,7 @@ async def login_init(
     summary="Verify OTP and complete login",
     description=(
         "Second and final step of the two-step OTP login flow. "
-        "Accepts the ``verification_token`` returned by ``POST /auth/login/init`` "
+        "Accepts the ``verification_token`` returned by ``POST /auth/login`` "
         "and the 6-digit one-time code delivered to the user's email address. "
         "The OTP is consumed atomically — submitting any code (correct or incorrect) "
         "invalidates it immediately, making replay attacks impossible. "
@@ -301,16 +237,12 @@ async def login_verify(
             LoginVerifyInput(token=body.token, code=body.code)
         )
     except TokenExpiredError as error:
-        # 401: OTP session token expired — user must call /login/init again
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(error))
     except InvalidTokenError as error:
-        # 400: token is malformed or signature is invalid
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error))
     except InvalidOTPError as error:
-        # 401: wrong code, consumed code, or expired OTP — all unified to prevent state probing
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(error))
     except UserNotFoundError as error:
-        # 404: guard for deleted accounts whose OTP token is still valid
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error))
 
     return LoginVerifyResponse(
