@@ -8,8 +8,9 @@ from app.application.dto.audit_log_dto import GetAuditLogsInput
 from app.application.use_cases.audit_log_usecase import GetAuditLogsUseCase
 from app.controller.dependencies import (
     get_audit_logs_use_case,
-    require_admin_or_auditor_role,
+    require_permission,
 )
+from app.domain.entities.authorization_entities import RoleAction
 from app.controller.docs.audit_log_docs import (
     AUDIT_LOG_FORBIDDEN,
     AUDIT_LOG_UNAUTHORIZED,
@@ -48,7 +49,7 @@ async def get_audit_logs(
     resource_type: str | None = Query(default=None, description="Filter by resource type"),
     start_date: datetime | None = Query(default=None, description="Filter by start date (UTC)"),
     end_date: datetime | None = Query(default=None, description="Filter by end date (UTC)"),
-    _: uuid.UUID = Depends(require_admin_or_auditor_role),
+    _: uuid.UUID = Depends(require_permission("audit-logs", RoleAction.READ)),
     use_case: GetAuditLogsUseCase = Depends(get_audit_logs_use_case),
 ) -> GetAuditLogsResponse:
     """Retrieve paginated audit logs with comprehensive pagination metadata.
