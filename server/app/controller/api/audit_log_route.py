@@ -42,7 +42,7 @@ router = APIRouter(prefix="/audit-logs", tags=["Audit Logs"])
     ),
 )
 async def get_audit_logs(
-    limit: int = Query(default=100, ge=1, le=1000, description="Number of records per page"),
+    limit: int = Query(default=10, ge=10, le=100, description="Number of records per page"),
     cursor: str | None = Query(default=None, description="Base64-encoded cursor for pagination"),
     user_id: uuid.UUID | None = Query(default=None, description="Filter by user ID"),
     action_type: ActionType | None = Query(default=None, description="Filter by action type"),
@@ -56,6 +56,16 @@ async def get_audit_logs(
 
     Security: Enforces RBAC via JWT token validation. Only users with 'admin' or
     'auditor' role_id can access this endpoint. Returns 403 for other roles.
+
+    Args:
+        limit: Number of records per page (10–100, default 10).
+        cursor: Base64-encoded cursor for pagination. Omit for the first page;
+            use `next_cursor` / `prev_cursor` from a previous response to navigate.
+        user_id: Filter logs to a specific user UUID.
+        action_type: Filter by action type (e.g. login, create, update, delete).
+        resource_type: Filter by resource type (e.g. user, event, role).
+        start_date: Inclusive lower bound on log timestamp (UTC, ISO 8601).
+        end_date: Inclusive upper bound on log timestamp (UTC, ISO 8601).
 
     Pagination: Uses base64-encoded cursor-based pagination for consistent results
     under concurrent writes. The response includes:
