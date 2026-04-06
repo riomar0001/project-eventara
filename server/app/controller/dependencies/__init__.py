@@ -10,6 +10,7 @@ from app.controller.dependencies.use_cases_depends import (
     get_create_audit_log_use_case,
     get_onboarding_use_case,
     get_otp_repository,
+    get_role_use_case,
 )
 
 __all__ = [
@@ -22,4 +23,5 @@ __all__ = [
     "require_permission",
     "get_create_audit_log_use_case",
     "get_audit_logs_use_case",
+    "get_role_use_case",
 ]

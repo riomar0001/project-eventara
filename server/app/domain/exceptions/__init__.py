@@ -8,6 +8,14 @@ from app.domain.exceptions.auth_exceptions import (
     InvalidTokenError,
     TokenExpiredError,
 )
+from app.domain.exceptions.role_exceptions import (
+    DuplicateUserGrantError,
+    FeatureNotFoundError,
+    RoleAlreadyAssignedError,
+    RoleAssignmentNotFoundError,
+    RoleNotFoundError,
+    UserGrantNotFoundError,
+)
 from app.domain.exceptions.user_exceptions import (
     AliasAlreadyTakenError,
     EmailAlreadyTakenError,
@@ -34,4 +42,10 @@ __all__ = [
     "InvalidOTPError",
     "AuditLogWriteError",
     "UnauthorizedAuditAccessError",
+    "RoleNotFoundError",
+    "RoleAssignmentNotFoundError",
+    "RoleAlreadyAssignedError",
+    "FeatureNotFoundError",
+    "UserGrantNotFoundError",
+    "DuplicateUserGrantError",
 ]

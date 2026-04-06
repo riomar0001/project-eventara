@@ -6,11 +6,13 @@ from app.application.use_cases.audit_log_usecase import (
     GetAuditLogsUseCase,
 )
 from app.application.use_cases.auth_usecase import AuthUseCase
+from app.application.use_cases.role_usecase import UserRoleUseCase
 from app.application.use_cases.user_usecase import OnboardingUseCase
 from app.infrastructure.cache.repositories.otp_repository import OTPRepository
 from app.infrastructure.database.repositories.audit_log_repository import (
     AuditLogRepository,
 )
+from app.infrastructure.database.repositories.role_repository import RoleRepository
 from app.infrastructure.database.repositories.user_repository import UserRepository
 from app.infrastructure.database.session import get_db
 
@@ -50,3 +52,8 @@ def get_create_audit_log_use_case(
 def get_audit_logs_use_case(db: AsyncSession = Depends(get_db)) -> GetAuditLogsUseCase:
     """Construct a ``GetAuditLogsUseCase`` for querying audit trail."""
     return GetAuditLogsUseCase(AuditLogRepository(db))
+
+
+def get_role_use_case(db: AsyncSession = Depends(get_db)) -> UserRoleUseCase:
+    """Construct a ``UserRoleUseCase`` for role assignment and grant management."""
+    return UserRoleUseCase(RoleRepository(db), db)
