@@ -27,7 +27,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.security.constants import OTP_TTL_MINUTES
-from app.core.security.hashing import hash_string, verify_hash
+from app.core.security.hashing import hash_string, hash_token, verify_hash, verify_token_hash
 from app.domain.entities.token_entities import TokenPayload
 from app.domain.entities.user_entity import UserProfile
 from app.infrastructure.database.models.user_models import Token as TokenORM
@@ -143,8 +143,8 @@ async def create_refresh_token(user_id: uuid.UUID, db: AsyncSession) -> str:
         TokenORM(
             id=token_id,
             user_id=user_id,
-            token_hash=hash_string(refresh_token),
-            expires_at=payload["exp"],
+            token_hash=hash_token(refresh_token),
+            expires_at=payload["exp"].replace(tzinfo=None),
         )
     )
 
@@ -167,7 +167,7 @@ async def verify_refresh_token(raw_token: str, db: AsyncSession) -> tuple[TokenP
     if not refresh_token:
         raise ValueError("Invalid refresh token or has been revoked")
 
-    if not verify_hash(raw_token, refresh_token.token_hash):
+    if not verify_token_hash(raw_token, refresh_token.token_hash):
         raise ValueError("Invalid refresh token")
 
     return TokenPayload(**payload), refresh_token

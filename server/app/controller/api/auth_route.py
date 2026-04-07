@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Path, status
+from fastapi import APIRouter, Depends, HTTPException, Path, Response, status
 
 from app.application.dto.auth_dto import (
     LoginInput,
@@ -63,6 +63,31 @@ from app.domain.exceptions.user_exceptions import UserNotFoundError
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 
+def _set_auth_cookies(response: Response, access_token: str, refresh_token: str) -> None:
+    secure = not settings.DEBUG
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=True,
+        secure=secure,
+        samesite="lax",
+        max_age=int(settings.ACCESS_TOKEN_EXPIRATION.total_seconds()),
+    )
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        httponly=True,
+        secure=secure,
+        samesite="lax",
+        max_age=int(settings.REFRESH_TOKEN_EXPIRATION.total_seconds()),
+    )
+
+
+def _clear_auth_cookies(response: Response) -> None:
+    response.delete_cookie(key="access_token")
+    response.delete_cookie(key="refresh_token")
+
+
 @router.post(
     "/register",
     response_model=RegisterResponse,
@@ -103,7 +128,7 @@ async def register_user(
     )
 
 
-@router.post(
+@router.get(
     "/verify/{token}",
     response_model=VerifyEmailResponse,
     status_code=status.HTTP_200_OK,
@@ -122,6 +147,7 @@ async def register_user(
     ),
 )
 async def verify_email(
+    response: Response,
     token: str = Path(..., min_length=1),
     use_case: AuthUseCase = Depends(get_auth_use_case),
 ) -> VerifyEmailResponse:
@@ -145,6 +171,7 @@ async def verify_email(
     except EmailAlreadyVerifiedError as error:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error))
 
+    _set_auth_cookies(response, result.access_token, result.refresh_token)
     return VerifyEmailResponse(
         access_token=result.access_token,
         refresh_token=result.refresh_token,
@@ -208,7 +235,7 @@ async def login(
     return LoginInitResponse(verification_token=result.verification_token)
 
 
-@router.post(
+@router.get(
     "/login/verify",
     response_model=LoginVerifyResponse,
     status_code=status.HTTP_200_OK,
@@ -231,6 +258,7 @@ async def login(
     ),
 )
 async def login_verify(
+    response: Response,
     body: LoginVerifyRequest,
     use_case: AuthUseCase = Depends(get_auth_use_case),
 ) -> LoginVerifyResponse:
@@ -257,6 +285,7 @@ async def login_verify(
     except UserNotFoundError as error:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error))
 
+    _set_auth_cookies(response, result.access_token, result.refresh_token)
     return LoginVerifyResponse(
         access_token=result.access_token,
         refresh_token=result.refresh_token,
@@ -282,6 +311,7 @@ async def login_verify(
     ),
 )
 async def logout(
+    response: Response,
     body: LogoutRequest,
     use_case: AuthUseCase = Depends(get_auth_use_case),
 ) -> LogoutResponse:
@@ -298,6 +328,7 @@ async def logout(
     except InvalidTokenError as error:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error))
 
+    _clear_auth_cookies(response)
     return LogoutResponse()
 
 
@@ -323,6 +354,7 @@ async def logout(
     ),
 )
 async def refresh_token(
+    response: Response,
     body: RefreshTokenRequest,
     use_case: AuthUseCase = Depends(get_auth_use_case),
 ) -> RefreshTokenResponse:
@@ -344,6 +376,7 @@ async def refresh_token(
     except UserNotFoundError as error:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error))
 
+    _set_auth_cookies(response, result.access_token, result.refresh_token)
     return RefreshTokenResponse(
         access_token=result.access_token,
         refresh_token=result.refresh_token,

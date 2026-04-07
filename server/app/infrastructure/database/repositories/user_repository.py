@@ -225,7 +225,7 @@ class UserRepository:
 
         Returns True if updated, False if already completed.
         """
-        now = datetime.now(UTC)
+        now = datetime.now(UTC).replace(tzinfo=None)
         result = await self.db.execute(
             update(User)
             .where(User.id == user_id, User.onboarding_completed == False)  # noqa: E712
@@ -240,7 +240,7 @@ class UserRepository:
         Returns True if the row was updated, False if it was already in the
         desired state (guards against concurrent double-verification).
         """
-        now = datetime.now(UTC)
+        now = datetime.now(UTC).replace(tzinfo=None)
         result = await self.db.execute(
             update(UserSecurity)
             .where(
@@ -317,7 +317,7 @@ class UserRepository:
         Keeps UserActivity current for audit trails and analytics without
         requiring a separate SELECT before the UPDATE.
         """
-        now = datetime.now(UTC)
+        now = datetime.now(UTC).replace(tzinfo=None)
         await self.db.execute(
             update(UserActivity)
             .where(UserActivity.user_id == user_id)
