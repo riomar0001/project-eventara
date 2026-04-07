@@ -6,8 +6,9 @@ import axios, {
   InternalAxiosRequestConfig,
 } from "axios";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api";
+// Always route through the Next.js reverse proxy (/api → backend).
+// Set API_URL in .env.local to point the proxy at a different backend origin.
+const API_BASE_URL = "/api";
 const API_TIMEOUT = 30000;
 
 export class ApiError extends Error {

@@ -9,7 +9,7 @@ const stats = [
 
 export function StatsPanel() {
   return (
-    <Card className="w-[264px] shrink-0">
+    <Card className="w-66 shrink-0">
       <CardContent className="flex h-full flex-col divide-y p-0">
         {stats.map((stat) => (
           <div key={stat.label} className="flex flex-col gap-1 px-4 py-4">
