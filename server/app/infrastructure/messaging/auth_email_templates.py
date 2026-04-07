@@ -300,11 +300,11 @@ def email_verified_html(email: str) -> str:
       <table cellpadding="0" cellspacing="0" role="presentation" style="margin-bottom:32px;">
         <tr>
           <td style="border-radius:10px;background-color:#65a30d;">
-            <a href=""{settings.CORS_ORIGIN}/onboarding"
+            <a href="{settings.CORS_ORIGIN}"
                style="display:inline-block;padding:14px 32px;font-size:15px;font-weight:600;
                        color:#ffffff;text-decoration:none;border-radius:10px;
                        letter-spacing:0.1px;">
-              Start Onboarding
+              Get Started
             </a>
           </td>
         </tr>

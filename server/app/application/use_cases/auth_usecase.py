@@ -47,10 +47,7 @@ from app.domain.exceptions import (
     UserInactiveError,
     UserLockedError,
 )
-from app.domain.exceptions.user_exceptions import (
-    CompletedOnboardingRequiredError,
-    UserNotFoundError,
-)
+from app.domain.exceptions.user_exceptions import UserNotFoundError
 from app.infrastructure.cache.repositories.otp_repository import OTPRepository
 from app.infrastructure.database.repositories.refresh_token_repository import (
     RefreshTokenRepository,
@@ -215,7 +212,6 @@ class AuthUseCase:
 
         Raises:
             InvalidCredentialsError: Email not registered or password incorrect.
-            CompletedOnboardingRequiredError: User has not completed onboarding.
             UserInactiveError: Account is deactivated or soft-deleted.
             UserLockedError: Account is temporarily locked after too many failures.
             EmailNotVerifiedError: Email address has not been verified.
@@ -223,9 +219,6 @@ class AuthUseCase:
         user = await self.repo.get_by_email(email)
         if not user:
             raise InvalidCredentialsError()
-
-        if not user.onboarding_completed:
-            raise CompletedOnboardingRequiredError()
 
         if user.status in (UserStatus.INACTIVE, UserStatus.DELETED):
             raise UserInactiveError()
@@ -275,7 +268,6 @@ class AuthUseCase:
 
         Raises:
             InvalidCredentialsError: Email not found or password incorrect.
-            CompletedOnboardingRequiredError: User has not completed onboarding.
             UserInactiveError: Account is deactivated or soft-deleted.
             UserLockedError: Account locked after too many failed attempts.
             EmailNotVerifiedError: Email address has not been verified.
