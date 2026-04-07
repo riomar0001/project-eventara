@@ -16,6 +16,7 @@ const eslintConfig = defineConfig([
     "public/**",
     "dist/**",
     "components/ui/**",
+    "api/**",
   ]),
   {
     rules: {
