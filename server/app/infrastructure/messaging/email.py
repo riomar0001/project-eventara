@@ -1,5 +1,6 @@
 import smtplib
 import ssl
+from datetime import timedelta
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
@@ -30,7 +31,7 @@ async def send_email(arq: ArqRedis, to: str, subject: str, html: str) -> None:
         subject: Email subject line.
         html:    HTML body of the email.
     """
-    await arq.enqueue_job("send_email_job", to=to, subject=subject, html=html)
+    await arq.enqueue_job("send_email_job", to=to, subject=subject, html=html, _expires=timedelta(hours=3))
 
 
 def _send_smtp(to: str, subject: str, html: str) -> None:

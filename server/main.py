@@ -1,21 +1,10 @@
-from contextlib import asynccontextmanager
-
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import HTMLResponse, JSONResponse
 
 from app.controller.router import router
 from app.core.config import settings
-from app.infrastructure.messaging.redis import create_arq_pool, create_redis_client
-
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    app.state.arq = await create_arq_pool()
-    app.state.redis = await create_redis_client()
-    yield
-    await app.state.arq.aclose()
-    await app.state.redis.aclose()
+from app.core.lifespan import lifespan
 
 
 app = FastAPI(

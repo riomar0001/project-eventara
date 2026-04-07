@@ -1,4 +1,6 @@
-from arq import cron
+from datetime import timedelta
+
+from arq import cron, func
 from arq.connections import RedisSettings
 
 from app.infrastructure.messaging.jobs.audit_log_jobs import persist_audit_log
@@ -43,7 +45,7 @@ class WorkerSettings:
     on_shutdown = shutdown
     max_tries: int = 3
     functions: list = [
-        send_email_job,
+        func(send_email_job, keep_result=timedelta(hours=12)),
         persist_audit_log,
     ]
     cron_jobs: list = [

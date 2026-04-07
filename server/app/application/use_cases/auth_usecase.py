@@ -107,11 +107,9 @@ class AuthUseCase:
         if existing:
             raise EmailAlreadyTakenError(data.email)
 
-        user_id = uuid.uuid4()
-
         user = User(email=data.email, password=hash_string(data.password))
-        security = UserSecurity(user_id=user_id)
-        activity = UserActivity(user_id=user_id)
+        security = UserSecurity(user_id=user.id)
+        activity = UserActivity(user_id=user.id)
 
         try:
             new_user = await self.repo.create(user, security, activity)
@@ -119,7 +117,7 @@ class AuthUseCase:
             await self.db.rollback()
             raise EmailAlreadyTakenError(data.email)
 
-        verify_token = verification_token(user_id, data.email)
+        verify_token = verification_token(new_user.id, data.email)
 
         await send_email(
             self.arq,

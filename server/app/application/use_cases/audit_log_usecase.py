@@ -43,7 +43,7 @@ class CreateAuditLogUseCase:
 
         if self.redis:
             try:
-                await self.redis.enqueue_job("persist_audit_log", audit_log.model_dump())
+                await self.redis.enqueue_job("persist_audit_log", audit_log.model_dump(mode="json"))
             except Exception:
                 await self._fallback_sync_write(audit_log)
         else:
