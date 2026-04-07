@@ -1,4 +1,12 @@
-import type { User } from "@/api/types";
+interface User {
+  id: string;
+  email: string;
+  role: string;
+  first_name: string;
+  last_name: string;
+  applicant_profile_id?: string;
+  company_id?: string;
+}
 
 interface TokenPayload {
   user_id: string;
