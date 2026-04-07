@@ -59,7 +59,7 @@ export function AppSidebar() {
       {/* Logo */}
       <SidebarHeader className="h-19.25 justify-center bg-white px-6 group-data-[collapsible=icon]:px-2">
         <span className="text-xl font-bold tracking-tight group-data-[collapsible=icon]:hidden">
-          ACRU<span className="text-primary">i</span>
+          EVENT<span className="text-primary">ARA</span>
         </span>
         <span className="hidden text-center text-xl font-bold tracking-tight group-data-[collapsible=icon]:block">
           A<span className="text-primary">i</span>

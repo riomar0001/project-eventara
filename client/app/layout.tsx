@@ -36,7 +36,7 @@ export default function RootLayout({
           <SidebarProvider>
             <AppSidebar />
 
-            <SidebarInset className="flex flex-col gap-3 overflow-hidden bg-neutral-100 rounded-3xl p-6">
+            <SidebarInset className="flex flex-col gap-5 overflow-hidden bg-neutral-100 rounded-3xl p-5">
               <Header />
               <main>{children}</main>
             </SidebarInset>

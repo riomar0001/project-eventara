@@ -9,7 +9,7 @@ import { StatsPanel } from '@/components/dashboard/stats-panel';
 export default function DashboardPage() {
   return (
     <div className="flex h-full w-full gap-6">
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1">
         <div className="flex flex-col gap-4">
           {/* Row 1: Balance overview + Stats */}
           <div className="flex gap-4">
