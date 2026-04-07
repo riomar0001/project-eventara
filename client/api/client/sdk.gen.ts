@@ -24,6 +24,7 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
  * Create a new user account with an email and password. A verification email is sent immediately after registration. The account cannot be used until the email is verified.
  */
 export const registerUserAuthRegisterPost = <ThrowOnError extends boolean = false>(options: Options<RegisterUserAuthRegisterPostData, ThrowOnError>) => (options.client ?? client).post<RegisterUserAuthRegisterPostResponses, RegisterUserAuthRegisterPostErrors, ThrowOnError>({
+    responseType: 'json',
     url: '/auth/register',
     ...options,
     headers: {
@@ -37,7 +38,11 @@ export const registerUserAuthRegisterPost = <ThrowOnError extends boolean = fals
  *
  * Confirm a user's email address using the verification token sent after registration. On success, returns an access token and a refresh token so the user is immediately authenticated without a separate login step.
  */
-export const verifyEmailAuthVerifyTokenGet = <ThrowOnError extends boolean = false>(options: Options<VerifyEmailAuthVerifyTokenGetData, ThrowOnError>) => (options.client ?? client).get<VerifyEmailAuthVerifyTokenGetResponses, VerifyEmailAuthVerifyTokenGetErrors, ThrowOnError>({ url: '/auth/verify/{token}', ...options });
+export const verifyEmailAuthVerifyTokenGet = <ThrowOnError extends boolean = false>(options: Options<VerifyEmailAuthVerifyTokenGetData, ThrowOnError>) => (options.client ?? client).get<VerifyEmailAuthVerifyTokenGetResponses, VerifyEmailAuthVerifyTokenGetErrors, ThrowOnError>({
+    responseType: 'json',
+    url: '/auth/verify/{token}',
+    ...options
+});
 
 /**
  * Login and request OTP
@@ -45,6 +50,7 @@ export const verifyEmailAuthVerifyTokenGet = <ThrowOnError extends boolean = fal
  * First step of the two-step OTP login flow. Validates the supplied email and password against the same security checks as the direct login endpoint (account status, lock status, email verification). On success, a 6-digit one-time code is emailed to the account and a short-lived ``verification_token`` is returned. That token must be submitted together with the code to ``POST /auth/login/verify`` to complete sign-in and obtain access and refresh tokens. The OTP expires in 10 minutes and is single-use — submitting a wrong code immediately invalidates it and a new one must be requested. Subject to the same rate limits as the direct login endpoint.
  */
 export const loginAuthLoginPost = <ThrowOnError extends boolean = false>(options: Options<LoginAuthLoginPostData, ThrowOnError>) => (options.client ?? client).post<LoginAuthLoginPostResponses, LoginAuthLoginPostErrors, ThrowOnError>({
+    responseType: 'json',
     url: '/auth/login',
     ...options,
     headers: {
@@ -59,6 +65,7 @@ export const loginAuthLoginPost = <ThrowOnError extends boolean = false>(options
  * Second and final step of the two-step OTP login flow. Accepts the ``verification_token`` returned by ``POST /auth/login`` and the 6-digit one-time code delivered to the user's email address. The OTP is consumed atomically — submitting any code (correct or incorrect) invalidates it immediately, making replay attacks impossible. On success, returns a short-lived access token and a long-lived refresh token identical in format to the direct login response.
  */
 export const loginVerifyAuthLoginVerifyGet = <ThrowOnError extends boolean = false>(options: Options<LoginVerifyAuthLoginVerifyGetData, ThrowOnError>) => (options.client ?? client).get<LoginVerifyAuthLoginVerifyGetResponses, LoginVerifyAuthLoginVerifyGetErrors, ThrowOnError>({
+    responseType: 'json',
     url: '/auth/login/verify',
     ...options,
     headers: {
@@ -73,6 +80,7 @@ export const loginVerifyAuthLoginVerifyGet = <ThrowOnError extends boolean = fal
  * Revoke a refresh token, ending the associated session. The refresh token authenticates the request — no access token is required, so clients can log out even after the access token has expired. Logout is idempotent: already-expired and already-revoked tokens return 200 OK, because the session is effectively dead regardless. Only a structurally invalid token (bad signature, wrong type) returns an error.
  */
 export const logoutAuthLogoutPost = <ThrowOnError extends boolean = false>(options: Options<LogoutAuthLogoutPostData, ThrowOnError>) => (options.client ?? client).post<LogoutAuthLogoutPostResponses, LogoutAuthLogoutPostErrors, ThrowOnError>({
+    responseType: 'json',
     url: '/auth/logout',
     ...options,
     headers: {
@@ -87,6 +95,7 @@ export const logoutAuthLogoutPost = <ThrowOnError extends boolean = false>(optio
  * Exchange a valid refresh token for a new access token and a rotated refresh token. The submitted refresh token is immediately revoked and replaced — clients must store the new refresh token from the response. If two requests arrive simultaneously with the same token, only one will succeed; the other receives 401, preventing parallel rotation races. Presenting an already-revoked token also returns 401 with the same opaque error to avoid leaking rotation state to potential attackers.
  */
 export const refreshTokenAuthRefreshPost = <ThrowOnError extends boolean = false>(options: Options<RefreshTokenAuthRefreshPostData, ThrowOnError>) => (options.client ?? client).post<RefreshTokenAuthRefreshPostResponses, RefreshTokenAuthRefreshPostErrors, ThrowOnError>({
+    responseType: 'json',
     url: '/auth/refresh',
     ...options,
     headers: {
@@ -101,6 +110,7 @@ export const refreshTokenAuthRefreshPost = <ThrowOnError extends boolean = false
  * Submit profile details to complete onboarding for the authenticated user. Requires a verified email address. Can only be completed once per account.
  */
 export const userOnboardingUserOnboardPost = <ThrowOnError extends boolean = false>(options: Options<UserOnboardingUserOnboardPostData, ThrowOnError>) => (options.client ?? client).post<UserOnboardingUserOnboardPostResponses, UserOnboardingUserOnboardPostErrors, ThrowOnError>({
+    responseType: 'json',
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/user/onboard',
     ...options,
@@ -118,6 +128,7 @@ export const userOnboardingUserOnboardPost = <ThrowOnError extends boolean = fal
  * **Pagination**: Uses base64-encoded cursors for stable pagination. Response includes total counts and navigation cursors.
  */
 export const getAuditLogsAuditLogsGet = <ThrowOnError extends boolean = false>(options?: Options<GetAuditLogsAuditLogsGetData, ThrowOnError>) => (options?.client ?? client).get<GetAuditLogsAuditLogsGetResponses, GetAuditLogsAuditLogsGetErrors, ThrowOnError>({
+    responseType: 'json',
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/audit-logs',
     ...options
@@ -129,6 +140,7 @@ export const getAuditLogsAuditLogsGet = <ThrowOnError extends boolean = false>(o
  * Retrieve all role assignments for the specified user. The caller must hold a role with ``read`` permission on the ``user-roles`` feature.
  */
 export const listUserRolesUserRolesGet = <ThrowOnError extends boolean = false>(options: Options<ListUserRolesUserRolesGetData, ThrowOnError>) => (options.client ?? client).get<ListUserRolesUserRolesGetResponses, ListUserRolesUserRolesGetErrors, ThrowOnError>({
+    responseType: 'json',
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/user-roles',
     ...options
@@ -140,6 +152,7 @@ export const listUserRolesUserRolesGet = <ThrowOnError extends boolean = false>(
  * Assign an existing system role to a user account. The caller must hold a role with ``create`` permission on the ``user-roles`` feature. A role can only be assigned once per user — attempting a duplicate assignment returns **409**. An optional ``expires_at`` date can be provided to grant time-limited access; omit it (or pass ``null``) for a permanent assignment.
  */
 export const assignRoleUserRolesPost = <ThrowOnError extends boolean = false>(options: Options<AssignRoleUserRolesPostData, ThrowOnError>) => (options.client ?? client).post<AssignRoleUserRolesPostResponses, AssignRoleUserRolesPostErrors, ThrowOnError>({
+    responseType: 'json',
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/user-roles',
     ...options,
@@ -166,6 +179,7 @@ export const revokeAssignmentUserRolesAssignmentIdDelete = <ThrowOnError extends
  * Retrieve a single role assignment by its UUID. The caller must hold a role with ``read`` permission on the ``user-roles`` feature.
  */
 export const getAssignmentUserRolesAssignmentIdGet = <ThrowOnError extends boolean = false>(options: Options<GetAssignmentUserRolesAssignmentIdGetData, ThrowOnError>) => (options.client ?? client).get<GetAssignmentUserRolesAssignmentIdGetResponses, GetAssignmentUserRolesAssignmentIdGetErrors, ThrowOnError>({
+    responseType: 'json',
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/user-roles/{assignment_id}',
     ...options
@@ -177,6 +191,7 @@ export const getAssignmentUserRolesAssignmentIdGet = <ThrowOnError extends boole
  * Update the ``expires_at`` field of an existing role assignment. Pass ``null`` to make the assignment permanent. The caller must hold a role with ``update`` permission on the ``user-roles`` feature.
  */
 export const updateAssignmentUserRolesAssignmentIdPatch = <ThrowOnError extends boolean = false>(options: Options<UpdateAssignmentUserRolesAssignmentIdPatchData, ThrowOnError>) => (options.client ?? client).patch<UpdateAssignmentUserRolesAssignmentIdPatchResponses, UpdateAssignmentUserRolesAssignmentIdPatchErrors, ThrowOnError>({
+    responseType: 'json',
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/user-roles/{assignment_id}',
     ...options,
@@ -192,6 +207,7 @@ export const updateAssignmentUserRolesAssignmentIdPatch = <ThrowOnError extends 
  * Retrieve all active per-user action grants for the specified user. The caller must hold a role with ``read`` permission on the ``user-grants`` feature.
  */
 export const listUserGrantsUserGrantsGet = <ThrowOnError extends boolean = false>(options: Options<ListUserGrantsUserGrantsGetData, ThrowOnError>) => (options.client ?? client).get<ListUserGrantsUserGrantsGetResponses, ListUserGrantsUserGrantsGetErrors, ThrowOnError>({
+    responseType: 'json',
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/user-grants',
     ...options
@@ -203,6 +219,7 @@ export const listUserGrantsUserGrantsGet = <ThrowOnError extends boolean = false
  * Grant one or more role actions on a specific feature to a user, bypassing or supplementing their role-level permissions. The ``actions`` field accepts an array — e.g. ``["read", "create"]`` — and one ``user_grants`` row is created per action in a single atomic transaction. If any action in the array already has an active grant for the same user and feature, the entire request is rejected with **409** to prevent partial state. The caller must hold a role with ``create`` permission on the ``user-grants`` feature.
  */
 export const createGrantsUserGrantsPost = <ThrowOnError extends boolean = false>(options: Options<CreateGrantsUserGrantsPostData, ThrowOnError>) => (options.client ?? client).post<CreateGrantsUserGrantsPostResponses, CreateGrantsUserGrantsPostErrors, ThrowOnError>({
+    responseType: 'json',
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/user-grants',
     ...options,
@@ -228,9 +245,17 @@ export const revokeGrantUserGrantsGrantIdDelete = <ThrowOnError extends boolean 
  *
  * Root endpoint
  */
-export const rootGet = <ThrowOnError extends boolean = false>(options?: Options<RootGetData, ThrowOnError>) => (options?.client ?? client).get<RootGetResponses, unknown, ThrowOnError>({ url: '/', ...options });
+export const rootGet = <ThrowOnError extends boolean = false>(options?: Options<RootGetData, ThrowOnError>) => (options?.client ?? client).get<RootGetResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    url: '/',
+    ...options
+});
 
 /**
  * Health Check
  */
-export const healthCheckHealthGet = <ThrowOnError extends boolean = false>(options?: Options<HealthCheckHealthGetData, ThrowOnError>) => (options?.client ?? client).get<HealthCheckHealthGetResponses, unknown, ThrowOnError>({ url: '/health', ...options });
+export const healthCheckHealthGet = <ThrowOnError extends boolean = false>(options?: Options<HealthCheckHealthGetData, ThrowOnError>) => (options?.client ?? client).get<HealthCheckHealthGetResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    url: '/health',
+    ...options
+});
