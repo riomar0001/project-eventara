@@ -32,14 +32,16 @@ export default function RootLayout({
   return (
     <html lang="en" className={cn('h-full', 'antialiased', geistSans.variable, geistMono.variable, 'font-sans', inter.variable)}>
       <body className="min-h-screen">
-        <SidebarProvider>
-          <AppSidebar />
+        <TooltipProvider>
+          <SidebarProvider>
+            <AppSidebar />
 
-          <SidebarInset className="flex flex-col gap-3 overflow-hidden bg-neutral-100">
-            <Header />
-            <main className="px-6">{children}</main>
-          </SidebarInset>
-        </SidebarProvider>
+            <SidebarInset className="flex flex-col gap-3 overflow-hidden bg-neutral-100 rounded-3xl p-6">
+              <Header />
+              <main>{children}</main>
+            </SidebarInset>
+          </SidebarProvider>
+        </TooltipProvider>
       </body>
     </html>
   );

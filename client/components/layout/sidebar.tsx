@@ -18,7 +18,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
-  SidebarTrigger
+  useSidebar
 } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
 
@@ -41,35 +41,52 @@ const navItems = [
 ];
 
 const bottomItems = [
-  { label: 'Learning center', icon: BookOpen, href: '#' },
   { label: 'Support', icon: Headphones, href: '#' }
 ];
 
 export function AppSidebar() {
   const [transactionsOpen, setTransactionsOpen] = React.useState(true);
+  const { state } = useSidebar();
+  const isCollapsed = state === 'collapsed';
+
+  // Close sub-menu when sidebar collapses to icon mode
+  React.useEffect(() => {
+    if (isCollapsed) setTransactionsOpen(false);
+  }, [isCollapsed]);
 
   return (
-    <Sidebar>
+    <Sidebar collapsible="icon" className='border-0!'>
       {/* Logo */}
-      <SidebarHeader className="h-19.25 justify-center bg-white px-6">
-        <span className="text-xl font-bold tracking-tight">
+      <SidebarHeader className="h-19.25 justify-center bg-white px-6 group-data-[collapsible=icon]:px-2">
+        <span className="text-xl font-bold tracking-tight group-data-[collapsible=icon]:hidden">
           ACRU<span className="text-primary">i</span>
+        </span>
+        <span className="hidden text-center text-xl font-bold tracking-tight group-data-[collapsible=icon]:block">
+          A<span className="text-primary">i</span>
         </span>
       </SidebarHeader>
 
-      <SidebarContent className="bg-white px-4">
+      <SidebarContent className="bg-white px-4 group-data-[collapsible=icon]:px-0">
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu className='gap-2'>
+            <SidebarMenu className="gap-2">
               {navItems.map((item) =>
                 item.children ? (
                   <Collapsible key={item.label} open={transactionsOpen} onOpenChange={setTransactionsOpen} asChild>
                     <SidebarMenuItem>
                       <CollapsibleTrigger asChild>
-                        <SidebarMenuButton className={cn('h-10 [&_svg]:size-4.5', transactionsOpen && 'text-foreground')}>
+                        <SidebarMenuButton
+                          tooltip={item.label}
+                          className={cn('h-10 [&_svg]:size-4.5', transactionsOpen && 'text-foreground')}
+                        >
                           <item.icon />
                           <span>{item.label}</span>
-                          <ChevronDown className={cn('ml-auto size-4 transition-transform', transactionsOpen && 'rotate-180')} />
+                          <ChevronDown
+                            className={cn(
+                              'ml-auto size-4 transition-transform group-data-[collapsible=icon]:hidden',
+                              transactionsOpen && 'rotate-180'
+                            )}
+                          />
                         </SidebarMenuButton>
                       </CollapsibleTrigger>
                       <CollapsibleContent>
@@ -90,7 +107,7 @@ export function AppSidebar() {
                   </Collapsible>
                 ) : (
                   <SidebarMenuItem key={item.label}>
-                    <SidebarMenuButton asChild isActive={item.active} className="h-12 px-4 py-3.5 [&_svg]:size-4.5">
+                    <SidebarMenuButton asChild isActive={item.active} tooltip={item.label} className="h-12 px-4 py-3.5 [&_svg]:size-4.5">
                       <a href={item.href}>
                         <item.icon />
                         <span>{item.label}</span>
@@ -104,13 +121,13 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="bg-white">
+      <SidebarFooter className="bg-white group-data-[collapsible=icon]:px-0">
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
               {bottomItems.map((item) => (
                 <SidebarMenuItem key={item.label}>
-                  <SidebarMenuButton asChild className="h-12 px-4 py-3.5 [&_svg]:size-4.5">
+                  <SidebarMenuButton asChild tooltip={item.label} className="h-12 px-4 py-3.5 [&_svg]:size-4.5">
                     <a href={item.href}>
                       <item.icon />
                       <span>{item.label}</span>
@@ -121,19 +138,6 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-
-        {/* Upgrade card */}
-        <div className="bg-foreground text-background mx-2 mb-2 rounded-xl p-5">
-          <p className="mb-1 text-sm font-semibold">Upgrade to Pro!</p>
-          <p className="text-background/70 mb-3 text-xs">Full financial insights with analytics and graphs.</p>
-          <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 w-full">
-            Upgrade now
-          </Button>
-        </div>
-
-        <div className="flex items-center justify-between px-2 pb-2">
-          <SidebarTrigger />
-        </div>
       </SidebarFooter>
     </Sidebar>
   );

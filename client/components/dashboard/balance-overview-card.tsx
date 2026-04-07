@@ -1,11 +1,11 @@
 "use client"
 
-import { BarChart2, LineChart, ChevronDown } from "lucide-react"
+import { BarChart2, LineChart as LineChartIcon, ChevronDown } from "lucide-react"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from "recharts"
+import { Area, AreaChart, CartesianGrid, XAxis } from "recharts"
 
 const chartData = [
   { day: "Sun", savings: 8, income: 12, expenses: 4 },
@@ -48,7 +48,7 @@ export function BalanceOverviewCard() {
             <BarChart2 className="size-4" />
           </Button>
           <Button variant="ghost" size="icon-xs">
-            <LineChart className="size-4" />
+            <LineChartIcon className="size-4" />
           </Button>
         </div>
       </CardHeader>
@@ -63,17 +63,28 @@ export function BalanceOverviewCard() {
           ))}
         </div>
         <ChartContainer config={chartConfig} className="h-64 w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={chartData} barSize={18} barGap={2}>
-              <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="oklch(0.922 0 0)" />
-              <XAxis dataKey="day" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: "oklch(0.556 0 0)" }} />
-              <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: "oklch(0.556 0 0)" }} domain={[-10, 30]} />
-              <ChartTooltip content={<ChartTooltipContent />} />
-              <Bar dataKey="savings" stackId="a" fill={chartConfig.savings.color} />
-              <Bar dataKey="income" stackId="a" fill={chartConfig.income.color} />
-              <Bar dataKey="expenses" stackId="a" fill={chartConfig.expenses.color} radius={[2, 2, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+          <AreaChart data={chartData}>
+            <defs>
+              <linearGradient id="savings-gradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor={chartConfig.savings.color} stopOpacity={0.2} />
+                <stop offset="95%" stopColor={chartConfig.savings.color} stopOpacity={0} />
+              </linearGradient>
+              <linearGradient id="income-gradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor={chartConfig.income.color} stopOpacity={0.2} />
+                <stop offset="95%" stopColor={chartConfig.income.color} stopOpacity={0} />
+              </linearGradient>
+              <linearGradient id="expenses-gradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor={chartConfig.expenses.color} stopOpacity={0.2} />
+                <stop offset="95%" stopColor={chartConfig.expenses.color} stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="oklch(0.922 0 0)" />
+            <XAxis dataKey="day" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: "oklch(0.556 0 0)" }} />
+            <ChartTooltip content={<ChartTooltipContent />} />
+            <Area dataKey="savings" type="monotone" stroke={chartConfig.savings.color} strokeWidth={2} fill="url(#savings-gradient)" dot={false} />
+            <Area dataKey="income" type="monotone" stroke={chartConfig.income.color} strokeWidth={2} fill="url(#income-gradient)" dot={false} />
+            <Area dataKey="expenses" type="monotone" stroke={chartConfig.expenses.color} strokeWidth={2} fill="url(#expenses-gradient)" dot={false} />
+          </AreaChart>
         </ChartContainer>
       </CardContent>
     </Card>
