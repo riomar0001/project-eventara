@@ -34,26 +34,18 @@ class RefreshTokenRepository:
 
     async def get_active_by_id(self, token_id: uuid.UUID) -> Token | None:
         """Return the token only if it exists and has not been revoked."""
-        result = await self.db.execute(
-            select(Token).where(Token.id == token_id, Token.is_active.is_(True))
-        )
+        result = await self.db.execute(select(Token).where(Token.id == token_id, Token.is_active.is_(True)))
         return result.scalar_one_or_none()
 
     async def get_active_tokens_for_user(self, user_id: uuid.UUID) -> list[Token]:
         """Return all non-revoked tokens belonging to a user."""
-        result = await self.db.execute(
-            select(Token).where(Token.user_id == user_id, Token.is_active.is_(True))
-        )
+        result = await self.db.execute(select(Token).where(Token.user_id == user_id, Token.is_active.is_(True)))
         return list(result.scalars().all())
 
     async def revoke(self, token: Token) -> bool:
         """Atomically revoke a token. Returns False if already revoked."""
         now = datetime.now(UTC)
-        result = await self.db.execute(
-            update(Token)
-            .where(Token.id == token.id, Token.is_active.is_(True))
-            .values(is_active=False, revoked_at=now)
-        )
+        result = await self.db.execute(update(Token).where(Token.id == token.id, Token.is_active.is_(True)).values(is_active=False, revoked_at=now))
         await self.db.commit()
         return cast(CursorResult, result).rowcount > 0
 
@@ -61,9 +53,7 @@ class RefreshTokenRepository:
         """Revoke all active tokens for a user. Returns the number of tokens revoked."""
         now = datetime.now(UTC)
         result = await self.db.execute(
-            update(Token)
-            .where(Token.user_id == user_id, Token.is_active.is_(True))
-            .values(is_active=False, revoked_at=now)
+            update(Token).where(Token.user_id == user_id, Token.is_active.is_(True)).values(is_active=False, revoked_at=now)
         )
         await self.db.commit()
         return cast(CursorResult, result).rowcount
@@ -79,11 +69,7 @@ class RefreshTokenRepository:
             The number of tokens that were revoked.
         """
         now = datetime.now(UTC)
-        result = await self.db.execute(
-            update(Token)
-            .where(Token.is_active.is_(True), Token.expires_at < now)
-            .values(is_active=False, revoked_at=now)
-        )
+        result = await self.db.execute(update(Token).where(Token.is_active.is_(True), Token.expires_at < now).values(is_active=False, revoked_at=now))
         await self.db.commit()
         return cast(CursorResult, result).rowcount
 

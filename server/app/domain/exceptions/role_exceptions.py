@@ -26,10 +26,6 @@ class UserGrantNotFoundError(Exception):
 class DuplicateUserGrantError(Exception):
     def __init__(self, actions: list[str] | None = None) -> None:
         if actions:
-            super().__init__(
-                f"Grants already exist for actions: {', '.join(actions)}"
-            )
+            super().__init__(f"Grants already exist for actions: {', '.join(actions)}")
         else:
-            super().__init__(
-                "One or more grants already exist for this user, feature, and action combination"
-            )
+            super().__init__("One or more grants already exist for this user, feature, and action combination")

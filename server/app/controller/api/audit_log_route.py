@@ -10,7 +10,6 @@ from app.controller.dependencies import (
     get_audit_logs_use_case,
     require_permission,
 )
-from app.domain.entities.authorization_entities import RoleAction
 from app.controller.docs.audit_log_docs import (
     AUDIT_LOG_FORBIDDEN,
     AUDIT_LOG_UNAUTHORIZED,
@@ -22,6 +21,7 @@ from app.controller.schemas.audit_log_schema import (
     PaginationMeta,
 )
 from app.domain.entities.audit_log import ActionType
+from app.domain.entities.authorization_entities import RoleAction
 from app.domain.exceptions.audit_exceptions import UnauthorizedAuditAccessError
 
 router = APIRouter(prefix="/audit-logs", tags=["Audit Logs"])

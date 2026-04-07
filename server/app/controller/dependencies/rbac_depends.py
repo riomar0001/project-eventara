@@ -1,6 +1,5 @@
 import uuid
-from collections.abc import Callable
-from typing import Coroutine
+from collections.abc import Callable, Coroutine
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer

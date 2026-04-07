@@ -30,9 +30,7 @@ class User(Base):
     password: Mapped[str] = mapped_column(Text, nullable=False)
     onboarding_completed: Mapped[bool] = mapped_column(default=False)
     onboarding_completed_at: Mapped[datetime | None] = mapped_column(DateTime)
-    status: Mapped[str] = mapped_column(
-        Enum(UserStatus, name="user_status"), nullable=False, default="active"
-    )
+    status: Mapped[str] = mapped_column(Enum(UserStatus, name="user_status"), nullable=False, default="active")
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime)
 
     # Relationships
@@ -40,15 +38,9 @@ class User(Base):
     security: Mapped[UserSecurity] = relationship(back_populates="user", uselist=False)
     activity: Mapped[UserActivity] = relationship(back_populates="user", uselist=False)
     tokens: Mapped[list[Token]] = relationship(back_populates="user", foreign_keys="Token.user_id")
-    roles: Mapped[list[UserRole]] = relationship(
-        back_populates="user", foreign_keys="UserRole.user_id"
-    )
-    grants: Mapped[list[UserGrant]] = relationship(
-        back_populates="user", foreign_keys="UserGrant.user_id"
-    )
-    login_history: Mapped[list[UserLoginHistory]] = relationship(
-        back_populates="user", foreign_keys="UserLoginHistory.user_id"
-    )
+    roles: Mapped[list[UserRole]] = relationship(back_populates="user", foreign_keys="UserRole.user_id")
+    grants: Mapped[list[UserGrant]] = relationship(back_populates="user", foreign_keys="UserGrant.user_id")
+    login_history: Mapped[list[UserLoginHistory]] = relationship(back_populates="user", foreign_keys="UserLoginHistory.user_id")
 
     __table_args__ = (
         Index(
@@ -63,9 +55,7 @@ class User(Base):
 class UserProfile(Base):
     __tablename__ = "user_profiles"
 
-    user_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("users.id", ondelete="CASCADE"), unique=True
-    )
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), unique=True)
 
     alias: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
     first_name: Mapped[str] = mapped_column(String(100), nullable=False)
@@ -75,9 +65,7 @@ class UserProfile(Base):
     age_group: Mapped[str] = mapped_column(Enum(AgeGroup, name="age_group"), nullable=False)
     gender: Mapped[str] = mapped_column(Enum(Gender, name="gender"), nullable=False)
     occupation: Mapped[str | None] = mapped_column(String(150), nullable=True)
-    education_level: Mapped[str] = mapped_column(
-        Enum(EducationLevel, name="education_level"), nullable=False
-    )
+    education_level: Mapped[str] = mapped_column(Enum(EducationLevel, name="education_level"), nullable=False)
     bio: Mapped[str | None] = mapped_column(Text, nullable=True)
     preferences: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
@@ -87,9 +75,7 @@ class UserProfile(Base):
 class UserSecurity(Base):
     __tablename__ = "user_security"
 
-    user_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("users.id", ondelete="CASCADE"), unique=True
-    )
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), unique=True)
 
     email_verified: Mapped[bool] = mapped_column(default=False)
     email_verified_at: Mapped[datetime | None] = mapped_column(DateTime)
@@ -110,9 +96,7 @@ class UserSecurity(Base):
 class UserActivity(Base):
     __tablename__ = "user_activity"
 
-    user_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("users.id", ondelete="CASCADE"), unique=True
-    )
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), unique=True)
 
     last_login_at: Mapped[datetime | None] = mapped_column(DateTime)
     last_activity_at: Mapped[datetime | None] = mapped_column(DateTime)
@@ -177,9 +161,7 @@ class RolePermission(Base):
     role: Mapped[Role] = relationship(back_populates="permissions")
     feature: Mapped[Feature] = relationship(back_populates="permissions")
 
-    __table_args__ = (
-        Index("idx_role_permissions_role_feature_action", "role_id", "feature_id", "action"),
-    )
+    __table_args__ = (Index("idx_role_permissions_role_feature_action", "role_id", "feature_id", "action"),)
 
 
 class UserRole(Base):

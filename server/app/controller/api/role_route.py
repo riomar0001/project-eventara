@@ -120,8 +120,7 @@ async def assign_role(
     },
     summary="List role assignments for a user",
     description=(
-        "Retrieve all role assignments for the specified user. "
-        "The caller must hold a role with ``read`` permission on the ``user-roles`` feature."
+        "Retrieve all role assignments for the specified user. The caller must hold a role with ``read`` permission on the ``user-roles`` feature."
     ),
 )
 async def list_user_roles(
@@ -166,8 +165,7 @@ async def list_user_roles(
     },
     summary="Get a specific role assignment",
     description=(
-        "Retrieve a single role assignment by its UUID. "
-        "The caller must hold a role with ``read`` permission on the ``user-roles`` feature."
+        "Retrieve a single role assignment by its UUID. The caller must hold a role with ``read`` permission on the ``user-roles`` feature."
     ),
 )
 async def get_assignment(
@@ -299,7 +297,7 @@ async def revoke_assignment(
     description=(
         "Grant one or more role actions on a specific feature to a user, bypassing or "
         "supplementing their role-level permissions. "
-        "The ``actions`` field accepts an array — e.g. ``[\"read\", \"create\"]`` — and "
+        'The ``actions`` field accepts an array — e.g. ``["read", "create"]`` — and '
         "one ``user_grants`` row is created per action in a single atomic transaction. "
         "If any action in the array already has an active grant for the same user and feature, "
         "the entire request is rejected with **409** to prevent partial state. "

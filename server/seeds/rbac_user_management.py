@@ -143,9 +143,7 @@ def _log(msg: str) -> None:
 
 async def _upsert_features(session) -> dict[str, UUID]:
     """Insert features, ignore conflicts on slug. Returns slug -> id map."""
-    stmt = (
-        insert(Feature.__table__).values(FEATURES).on_conflict_do_nothing(index_elements=["slug"])
-    )
+    stmt = insert(Feature.__table__).values(FEATURES).on_conflict_do_nothing(index_elements=["slug"])
     await session.execute(stmt)
 
     rows = await session.execute(select(Feature.id, Feature.slug))
@@ -187,14 +185,10 @@ async def _upsert_role_permissions(
         return 0
 
     # Fetch already-existing (role_id, feature_id, action) combos
-    existing_rows = await session.execute(
-        select(RolePermission.role_id, RolePermission.feature_id, RolePermission.action)
-    )
+    existing_rows = await session.execute(select(RolePermission.role_id, RolePermission.feature_id, RolePermission.action))
     existing: set[tuple] = {(str(r), str(f), a) for r, f, a in existing_rows.all()}
 
-    new_records = [
-        r for r in desired if (str(r["role_id"]), str(r["feature_id"]), r["action"]) not in existing
-    ]
+    new_records = [r for r in desired if (str(r["role_id"]), str(r["feature_id"]), r["action"]) not in existing]
 
     if not new_records:
         return 0

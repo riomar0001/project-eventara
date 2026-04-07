@@ -25,9 +25,7 @@ class AuditLog(Base):
     action_type: Mapped[str] = mapped_column(Enum(ActionType, name="action_type"), nullable=False)
     resource_type: Mapped[str] = mapped_column(String(255), nullable=False)
     resource_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    status: Mapped[str] = mapped_column(
-        Enum(AuditLogStatus, name="audit_log_status"), nullable=False
-    )
+    status: Mapped[str] = mapped_column(Enum(AuditLogStatus, name="audit_log_status"), nullable=False)
     old_values: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     new_values: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     additional_context: Mapped[dict | None] = mapped_column(JSON, nullable=True)

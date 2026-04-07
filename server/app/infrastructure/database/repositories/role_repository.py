@@ -51,20 +51,14 @@ class RoleRepository:
         result = await self.db.execute(select(Feature.id).where(Feature.id == feature_id))
         return result.scalar_one_or_none() is not None
 
-    async def get_active_assignment(
-        self, user_id: uuid.UUID, role_id: uuid.UUID
-    ) -> DomainUserRole | None:
+    async def get_active_assignment(self, user_id: uuid.UUID, role_id: uuid.UUID) -> DomainUserRole | None:
         """Return the existing assignment for user + role, locking the row for update.
 
         The FOR UPDATE lock prevents a concurrent request from passing the
         duplicate check and inserting a second assignment for the same pair
         before this transaction commits.
         """
-        result = await self.db.execute(
-            select(UserRole)
-            .where(UserRole.user_id == user_id, UserRole.role_id == role_id)
-            .with_for_update()
-        )
+        result = await self.db.execute(select(UserRole).where(UserRole.user_id == user_id, UserRole.role_id == role_id).with_for_update())
         orm = result.scalar_one_or_none()
         return self._to_domain_role(orm) if orm else None
 
@@ -86,37 +80,23 @@ class RoleRepository:
         return self._to_domain_role(orm)
 
     async def get_assignments_by_user(self, user_id: uuid.UUID) -> list[DomainUserRole]:
-        result = await self.db.execute(
-            select(UserRole).where(UserRole.user_id == user_id)
-        )
+        result = await self.db.execute(select(UserRole).where(UserRole.user_id == user_id))
         return [self._to_domain_role(orm) for orm in result.scalars().all()]
 
     async def get_assignment_by_id(self, assignment_id: uuid.UUID) -> DomainUserRole | None:
-        result = await self.db.execute(
-            select(UserRole).where(UserRole.id == assignment_id)
-        )
+        result = await self.db.execute(select(UserRole).where(UserRole.id == assignment_id))
         orm = result.scalar_one_or_none()
         return self._to_domain_role(orm) if orm else None
 
-    async def update_assignment_expiry(
-        self, assignment_id: uuid.UUID, expires_at: datetime | None
-    ) -> DomainUserRole | None:
-        await self.db.execute(
-            update(UserRole)
-            .where(UserRole.id == assignment_id)
-            .values(expires_at=expires_at)
-        )
+    async def update_assignment_expiry(self, assignment_id: uuid.UUID, expires_at: datetime | None) -> DomainUserRole | None:
+        await self.db.execute(update(UserRole).where(UserRole.id == assignment_id).values(expires_at=expires_at))
         await self.db.flush()
-        result = await self.db.execute(
-            select(UserRole).where(UserRole.id == assignment_id)
-        )
+        result = await self.db.execute(select(UserRole).where(UserRole.id == assignment_id))
         orm = result.scalar_one_or_none()
         return self._to_domain_role(orm) if orm else None
 
     async def delete_assignment(self, assignment_id: uuid.UUID) -> bool:
-        result = await self.db.execute(
-            delete(UserRole).where(UserRole.id == assignment_id)
-        )
+        result = await self.db.execute(delete(UserRole).where(UserRole.id == assignment_id))
         await self.db.flush()
         return result.rowcount > 0
 
@@ -172,22 +152,16 @@ class RoleRepository:
         return [self._to_domain_grant(orm) for orm in orm_grants]
 
     async def get_grants_by_user(self, user_id: uuid.UUID) -> list[DomainUserGrant]:
-        result = await self.db.execute(
-            select(UserGrant).where(UserGrant.user_id == user_id)
-        )
+        result = await self.db.execute(select(UserGrant).where(UserGrant.user_id == user_id))
         return [self._to_domain_grant(orm) for orm in result.scalars().all()]
 
     async def get_grant_by_id(self, grant_id: uuid.UUID) -> DomainUserGrant | None:
-        result = await self.db.execute(
-            select(UserGrant).where(UserGrant.id == grant_id)
-        )
+        result = await self.db.execute(select(UserGrant).where(UserGrant.id == grant_id))
         orm = result.scalar_one_or_none()
         return self._to_domain_grant(orm) if orm else None
 
     async def delete_grant(self, grant_id: uuid.UUID) -> bool:
-        result = await self.db.execute(
-            delete(UserGrant).where(UserGrant.id == grant_id)
-        )
+        result = await self.db.execute(delete(UserGrant).where(UserGrant.id == grant_id))
         await self.db.flush()
         return result.rowcount > 0
 

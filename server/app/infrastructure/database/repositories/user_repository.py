@@ -47,11 +47,7 @@ class UserRepository:
 
     async def get_by_email(self, email: str) -> DomainUser | None:
         """Return the user with the given email address, or None if not found."""
-        result = await self.db.execute(
-            select(User)
-            .options(selectinload(User.profile), selectinload(User.security))
-            .where(User.email == email)
-        )
+        result = await self.db.execute(select(User).options(selectinload(User.profile), selectinload(User.security)).where(User.email == email))
         orm_user = result.scalar_one_or_none()
 
         if orm_user is None:
@@ -61,18 +57,12 @@ class UserRepository:
             id=orm_user.id,
             email=orm_user.email,
             password=orm_user.password,
-            status=orm_user.status
-            if isinstance(orm_user.status, UserStatus)
-            else UserStatus(orm_user.status),
+            status=orm_user.status if isinstance(orm_user.status, UserStatus) else UserStatus(orm_user.status),
         )
 
     async def get_by_id(self, user_id: uuid.UUID) -> DomainUser | None:
         """Return the user with the given ID, or None if not found."""
-        result = await self.db.execute(
-            select(User)
-            .options(selectinload(User.profile), selectinload(User.security))
-            .where(User.id == user_id)
-        )
+        result = await self.db.execute(select(User).options(selectinload(User.profile), selectinload(User.security)).where(User.id == user_id))
         orm_user = result.scalar_one_or_none()
 
         if orm_user is None:
@@ -84,9 +74,7 @@ class UserRepository:
             password=orm_user.password,
             onboarding_completed=orm_user.onboarding_completed,
             onboarding_completed_at=orm_user.onboarding_completed_at,
-            status=orm_user.status
-            if isinstance(orm_user.status, UserStatus)
-            else UserStatus(orm_user.status),
+            status=orm_user.status if isinstance(orm_user.status, UserStatus) else UserStatus(orm_user.status),
         )
 
     async def get_security_by_user_id(self, user_id: uuid.UUID) -> DomainUserSecurity | None:
@@ -127,9 +115,7 @@ class UserRepository:
         return PublicUser(
             id=orm_user.id,
             email=orm_user.email,
-            status=orm_user.status
-            if isinstance(orm_user.status, UserStatus)
-            else UserStatus(orm_user.status),
+            status=orm_user.status if isinstance(orm_user.status, UserStatus) else UserStatus(orm_user.status),
         )
 
     async def get_profile_by_user_id(self, user_id: uuid.UUID) -> DomainUserProfile | None:
@@ -147,12 +133,8 @@ class UserRepository:
             first_name=orm_profile.first_name,
             last_name=orm_profile.last_name,
             image_file_id=orm_profile.image_file_id,
-            age_group=orm_profile.age_group
-            if isinstance(orm_profile.age_group, AgeGroup)
-            else AgeGroup(orm_profile.age_group),
-            gender=orm_profile.gender
-            if isinstance(orm_profile.gender, Gender)
-            else Gender(orm_profile.gender),
+            age_group=orm_profile.age_group if isinstance(orm_profile.age_group, AgeGroup) else AgeGroup(orm_profile.age_group),
+            gender=orm_profile.gender if isinstance(orm_profile.gender, Gender) else Gender(orm_profile.gender),
             education_level=orm_profile.education_level
             if isinstance(orm_profile.education_level, EducationLevel)
             else EducationLevel(orm_profile.education_level),
@@ -163,11 +145,7 @@ class UserRepository:
 
     async def get_by_alias(self, alias: str) -> DomainUser | None:
         """Return the user who owns the given profile alias, or None if unclaimed."""
-        result = await self.db.execute(
-            select(User)
-            .join(UserProfile, User.id == UserProfile.user_id)
-            .where(UserProfile.alias == alias)
-        )
+        result = await self.db.execute(select(User).join(UserProfile, User.id == UserProfile.user_id).where(UserProfile.alias == alias))
         orm_user = result.scalar_one_or_none()
 
         if orm_user is None:
@@ -177,9 +155,7 @@ class UserRepository:
             id=orm_user.id,
             email=orm_user.email,
             password=orm_user.password,
-            status=orm_user.status
-            if isinstance(orm_user.status, UserStatus)
-            else UserStatus(orm_user.status),
+            status=orm_user.status if isinstance(orm_user.status, UserStatus) else UserStatus(orm_user.status),
         )
 
     async def create_profile(self, profile: DomainUserProfile) -> DomainUserProfile:
@@ -206,12 +182,8 @@ class UserRepository:
             first_name=orm_profile.first_name,
             last_name=orm_profile.last_name,
             image_file_id=orm_profile.image_file_id,
-            age_group=orm_profile.age_group
-            if isinstance(orm_profile.age_group, AgeGroup)
-            else AgeGroup(orm_profile.age_group),
-            gender=orm_profile.gender
-            if isinstance(orm_profile.gender, Gender)
-            else Gender(orm_profile.gender),
+            age_group=orm_profile.age_group if isinstance(orm_profile.age_group, AgeGroup) else AgeGroup(orm_profile.age_group),
+            gender=orm_profile.gender if isinstance(orm_profile.gender, Gender) else Gender(orm_profile.gender),
             education_level=orm_profile.education_level
             if isinstance(orm_profile.education_level, EducationLevel)
             else EducationLevel(orm_profile.education_level),
@@ -304,11 +276,7 @@ class UserRepository:
         genuine login failure starts from a clean baseline rather than an
         accumulated count from previous failed attempts.
         """
-        await self.db.execute(
-            update(UserSecurity)
-            .where(UserSecurity.user_id == user_id)
-            .values(failed_login_attempts=0, locked_until=None)
-        )
+        await self.db.execute(update(UserSecurity).where(UserSecurity.user_id == user_id).values(failed_login_attempts=0, locked_until=None))
         await self.db.commit()
 
     async def record_login(self, user_id: uuid.UUID) -> None:

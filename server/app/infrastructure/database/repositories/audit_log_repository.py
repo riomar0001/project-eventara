@@ -110,9 +110,7 @@ class AuditLogRepository:
         if cursor and logs:
             prev_cursor = self._encode_cursor(logs[0].id, logs[0].timestamp)
 
-        total_count = await self.count_total(
-            user_id, action_type, resource_type, start_date, end_date
-        )
+        total_count = await self.count_total(user_id, action_type, resource_type, start_date, end_date)
 
         return [self._to_domain(log) for log in logs], total_count, next_cursor, prev_cursor
 

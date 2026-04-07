@@ -27,7 +27,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.security.constants import OTP_TTL_MINUTES
-from app.core.security.hashing import hash_string, hash_token, verify_hash, verify_token_hash
+from app.core.security.hashing import hash_token, verify_token_hash
 from app.domain.entities.token_entities import TokenPayload
 from app.domain.entities.user_entity import UserProfile
 from app.infrastructure.database.models.user_models import Token as TokenORM
@@ -134,9 +134,7 @@ async def create_refresh_token(user_id: uuid.UUID, db: AsyncSession) -> str:
         "exp": now + settings.REFRESH_TOKEN_EXPIRATION,
     }
 
-    refresh_token = jwt.encode(
-        payload, settings.JWT_REFRESH_TOKEN_SECRET, algorithm=settings.JWT_ALGORITHM
-    )
+    refresh_token = jwt.encode(payload, settings.JWT_REFRESH_TOKEN_SECRET, algorithm=settings.JWT_ALGORITHM)
 
     repo = RefreshTokenRepository(db)
     await repo.create(
@@ -196,9 +194,7 @@ def verification_token(user_id: uuid.UUID, email: str) -> str:
         "iat": now,
         "exp": now + settings.VERIFICATION_TOKEN_EXPIRATION,
     }
-    return jwt.encode(
-        payload, settings.JWT_VERIFICATION_TOKEN_SECRET, algorithm=settings.JWT_ALGORITHM
-    )
+    return jwt.encode(payload, settings.JWT_VERIFICATION_TOKEN_SECRET, algorithm=settings.JWT_ALGORITHM)
 
 
 def verify_verification_token(token: str) -> TokenPayload:
@@ -214,9 +210,7 @@ def verify_verification_token(token: str) -> TokenPayload:
         ValueError: The token is expired, has an invalid signature, or is not
             of type ``verification``.
     """
-    payload = _decode(
-        token, secret=settings.JWT_VERIFICATION_TOKEN_SECRET, expected_type="verification"
-    )
+    payload = _decode(token, secret=settings.JWT_VERIFICATION_TOKEN_SECRET, expected_type="verification")
     return TokenPayload(**payload)
 
 

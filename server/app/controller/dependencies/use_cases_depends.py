@@ -42,9 +42,7 @@ def get_otp_repository(request: Request) -> OTPRepository:
     return OTPRepository(request.app.state.redis)
 
 
-def get_create_audit_log_use_case(
-    request: Request, db: AsyncSession = Depends(get_db)
-) -> CreateAuditLogUseCase:
+def get_create_audit_log_use_case(request: Request, db: AsyncSession = Depends(get_db)) -> CreateAuditLogUseCase:
     """Construct a ``CreateAuditLogUseCase`` with async queue support."""
     return CreateAuditLogUseCase(AuditLogRepository(db), request.app.state.arq)
 

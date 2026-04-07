@@ -4,11 +4,7 @@ UNAUTHORIZED = {
     401: {
         "description": "Missing or invalid Bearer token",
         "model": ErrorResponse,
-        "content": {
-            "application/json": {
-                "example": {"success": False, "message": "Token has expired"}
-            }
-        },
+        "content": {"application/json": {"example": {"success": False, "message": "Token has expired"}}},
     }
 }
 
@@ -31,11 +27,7 @@ USER_NOT_FOUND = {
     404: {
         "description": "Target user not found",
         "model": ErrorResponse,
-        "content": {
-            "application/json": {
-                "example": {"success": False, "message": "User not found"}
-            }
-        },
+        "content": {"application/json": {"example": {"success": False, "message": "User not found"}}},
     }
 }
 
@@ -43,11 +35,7 @@ ROLE_NOT_FOUND = {
     404: {
         "description": "Role not found",
         "model": ErrorResponse,
-        "content": {
-            "application/json": {
-                "example": {"success": False, "message": "Role not found"}
-            }
-        },
+        "content": {"application/json": {"example": {"success": False, "message": "Role not found"}}},
     }
 }
 
@@ -55,11 +43,7 @@ ASSIGNMENT_NOT_FOUND = {
     404: {
         "description": "Role assignment not found",
         "model": ErrorResponse,
-        "content": {
-            "application/json": {
-                "example": {"success": False, "message": "Role assignment not found"}
-            }
-        },
+        "content": {"application/json": {"example": {"success": False, "message": "Role assignment not found"}}},
     }
 }
 
@@ -82,11 +66,7 @@ FEATURE_NOT_FOUND = {
     404: {
         "description": "Feature not found",
         "model": ErrorResponse,
-        "content": {
-            "application/json": {
-                "example": {"success": False, "message": "Feature not found"}
-            }
-        },
+        "content": {"application/json": {"example": {"success": False, "message": "Feature not found"}}},
     }
 }
 
@@ -94,11 +74,7 @@ GRANT_NOT_FOUND = {
     404: {
         "description": "User grant not found",
         "model": ErrorResponse,
-        "content": {
-            "application/json": {
-                "example": {"success": False, "message": "User grant not found"}
-            }
-        },
+        "content": {"application/json": {"example": {"success": False, "message": "User grant not found"}}},
     }
 }
 

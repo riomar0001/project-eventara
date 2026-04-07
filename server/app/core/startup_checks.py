@@ -24,5 +24,7 @@ async def verify_connections(arq: ArqRedis) -> None:
     url = engine.url
     logger.info(
         "PostgreSQL connected — host=%s port=%s db=%s",
-        url.host, url.port, url.database,
+        url.host,
+        url.port,
+        url.database,
     )

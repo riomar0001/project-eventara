@@ -196,9 +196,7 @@ class UserRoleUseCase:
         if not await self.repo.feature_exists(data.feature_id):
             raise FeatureNotFoundError(str(data.feature_id))
 
-        existing = await self.repo.get_existing_grants(
-            data.user_id, data.feature_id, data.actions
-        )
+        existing = await self.repo.get_existing_grants(data.user_id, data.feature_id, data.actions)
         if existing:
             conflicting_actions = [g.action.value for g in existing]
             raise DuplicateUserGrantError(conflicting_actions)

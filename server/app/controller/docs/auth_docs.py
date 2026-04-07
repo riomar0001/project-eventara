@@ -176,9 +176,7 @@ USER_LOCKED = {
             "application/json": {
                 "example": {
                     "success": False,
-                    "message": (
-                        "Account is temporarily locked due to too many failed login attempts"
-                    ),
+                    "message": ("Account is temporarily locked due to too many failed login attempts"),
                 }
             }
         },
@@ -217,18 +215,13 @@ EMAIL_NOT_VERIFIED = {
 
 LOGIN_RATE_LIMITED = {
     429: {
-        "description": (
-            "Rate limit exceeded — either too many requests from this IP "
-            "(20 / 60 s) or too many attempts for this account (10 / 60 s)"
-        ),
+        "description": ("Rate limit exceeded — either too many requests from this IP (20 / 60 s) or too many attempts for this account (10 / 60 s)"),
         "model": ErrorResponse,
         "content": {
             "application/json": {
                 "example": {
                     "success": False,
-                    "message": (
-                        "Too many login attempts for this account. Try again in 42 second(s)."
-                    ),
+                    "message": ("Too many login attempts for this account. Try again in 42 second(s)."),
                 }
             }
         },
@@ -417,10 +410,7 @@ REFRESH_TOKEN_EXPIRED = {
 
 REFRESH_TOKEN_INVALID = {
     401: {
-        "description": (
-            "The refresh token is invalid, revoked, not found, or was already rotated "
-            "by a concurrent request"
-        ),
+        "description": ("The refresh token is invalid, revoked, not found, or was already rotated by a concurrent request"),
         "model": ErrorResponse,
         "content": {
             "application/json": {
