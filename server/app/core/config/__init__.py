@@ -42,6 +42,7 @@ class Settings(BaseSettings):
 
     CORS_ORIGIN: str
     ALLOWED_ORIGINS: str = "*"
+    ONBOARDING_URL: str
 
     @field_validator(
         "ACCESS_TOKEN_EXPIRATION",

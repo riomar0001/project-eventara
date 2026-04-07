@@ -8,11 +8,12 @@ from arq.connections import ArqRedis
 
 from app.core.config import settings
 from app.infrastructure.messaging.auth_email_templates import (
+    email_verified_html,
     otp_email_html,
     verification_email_html,
 )
 
-__all__ = ["send_email", "verification_email_html", "otp_email_html"]
+__all__ = ["send_email", "verification_email_html", "otp_email_html", "email_verified_html"]
 
 
 async def send_email(arq: ArqRedis, to: str, subject: str, html: str) -> None:

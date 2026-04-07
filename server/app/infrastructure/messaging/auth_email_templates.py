@@ -194,6 +194,135 @@ def account_locked_email_html(unlock_minutes: int = 30) -> str:
     )
 
 
+def email_verified_html(email: str) -> str:
+    body = f"""
+      <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#171717;
+                  letter-spacing:-0.3px;">Welcome to Eventara!</h1>
+      <p style="margin:0 0 28px;font-size:15px;color:#737373;line-height:1.6;">
+        Hi <strong style="color:#171717;">{email}</strong>, your account is now active.
+        Let's get you set up — it only takes a minute.
+      </p>
+
+      <!-- Onboarding steps -->
+      <table cellpadding="0" cellspacing="0" role="presentation"
+             style="width:100%;margin-bottom:32px;">
+        <tr>
+          <td style="background-color:#f9fafb;border:1px solid #e5e5e5;
+                      border-radius:12px;padding:24px 28px;">
+
+            <table cellpadding="0" cellspacing="0" role="presentation" style="width:100%;">
+              <tr>
+                <td style="padding-bottom:16px;">
+                  <p style="margin:0;font-size:13px;font-weight:600;color:#a3a3a3;
+                              letter-spacing:0.5px;text-transform:uppercase;">
+                    Get started in 3 steps
+                  </p>
+                </td>
+              </tr>
+
+              <!-- Step 1 -->
+              <tr>
+                <td style="padding-bottom:14px;">
+                  <table cellpadding="0" cellspacing="0" role="presentation">
+                    <tr>
+                      <td style="vertical-align:top;padding-right:14px;">
+                        <span style="display:inline-block;width:28px;height:28px;
+                                      line-height:28px;text-align:center;
+                                      background-color:#65a30d;border-radius:50%;
+                                      font-size:13px;font-weight:700;color:#ffffff;">1</span>
+                      </td>
+                      <td style="vertical-align:top;">
+                        <p style="margin:0 0 2px;font-size:14px;font-weight:600;color:#171717;">
+                          Complete your profile
+                        </p>
+                        <p style="margin:0;font-size:13px;color:#737373;line-height:1.5;">
+                          Add your name, photo, and preferences so others know who you are.
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+
+              <!-- Step 2 -->
+              <tr>
+                <td style="padding-bottom:14px;">
+                  <table cellpadding="0" cellspacing="0" role="presentation">
+                    <tr>
+                      <td style="vertical-align:top;padding-right:14px;">
+                        <span style="display:inline-block;width:28px;height:28px;
+                                      line-height:28px;text-align:center;
+                                      background-color:#65a30d;border-radius:50%;
+                                      font-size:13px;font-weight:700;color:#ffffff;">2</span>
+                      </td>
+                      <td style="vertical-align:top;">
+                        <p style="margin:0 0 2px;font-size:14px;font-weight:600;color:#171717;">
+                          Explore events
+                        </p>
+                        <p style="margin:0;font-size:13px;color:#737373;line-height:1.5;">
+                          Browse upcoming events in your area or discover new communities.
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+
+              <!-- Step 3 -->
+              <tr>
+                <td>
+                  <table cellpadding="0" cellspacing="0" role="presentation">
+                    <tr>
+                      <td style="vertical-align:top;padding-right:14px;">
+                        <span style="display:inline-block;width:28px;height:28px;
+                                      line-height:28px;text-align:center;
+                                      background-color:#65a30d;border-radius:50%;
+                                      font-size:13px;font-weight:700;color:#ffffff;">3</span>
+                      </td>
+                      <td style="vertical-align:top;">
+                        <p style="margin:0 0 2px;font-size:14px;font-weight:600;color:#171717;">
+                          Create or join an event
+                        </p>
+                        <p style="margin:0;font-size:13px;color:#737373;line-height:1.5;">
+                          Host your own event or RSVP to one that interests you.
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+
+          </td>
+        </tr>
+      </table>
+
+      <table cellpadding="0" cellspacing="0" role="presentation" style="margin-bottom:32px;">
+        <tr>
+          <td style="border-radius:10px;background-color:#65a30d;">
+            <a href=""{settings.CORS_ORIGIN}/onboarding"
+               style="display:inline-block;padding:14px 32px;font-size:15px;font-weight:600;
+                       color:#ffffff;text-decoration:none;border-radius:10px;
+                       letter-spacing:0.1px;">
+              Start Onboarding
+            </a>
+          </td>
+        </tr>
+      </table>
+
+      <hr style="border:none;border-top:1px solid #e5e5e5;margin:0 0 24px;" />
+
+      <p style="margin:0;font-size:13px;color:#a3a3a3;">
+        If you did not create this account, please contact us immediately.
+      </p>
+    """
+    return _base_template(
+        title="Welcome to Eventara!",
+        preview="Your account is ready. Complete your profile and start exploring events.",
+        body=body,
+    )
+
+
 def otp_email_html(code: str) -> str:
     digits = "".join(
         f'<span style="display:inline-block;width:44px;height:52px;line-height:52px;'

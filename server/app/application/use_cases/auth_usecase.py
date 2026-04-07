@@ -56,7 +56,7 @@ from app.infrastructure.database.repositories.refresh_token_repository import (
     RefreshTokenRepository,
 )
 from app.infrastructure.messaging.auth_email_templates import otp_email_html
-from app.infrastructure.messaging.email import send_email, verification_email_html
+from app.infrastructure.messaging.email import email_verified_html, send_email, verification_email_html
 
 
 class AuthUseCase:
@@ -171,6 +171,13 @@ class AuthUseCase:
         updated = await self.repo.update_verification_status(user_id, verified=True)
         if not updated:
             raise EmailAlreadyVerifiedError()
+
+        await send_email(
+            self.arq,
+            to=user.email,
+            subject="Your Eventara email is verified",
+            html=email_verified_html(user.email),
+        )
 
         access_token = create_access_token(user_id, user.email, user.onboarding_completed)
         refresh_token = await create_refresh_token(user_id, self.db)
