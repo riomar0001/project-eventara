@@ -8,8 +8,13 @@ from app.controller.dependencies.use_cases_depends import (
     get_audit_logs_use_case,
     get_auth_use_case,
     get_create_audit_log_use_case,
+    get_delete_dead_job_use_case,
+    get_list_dead_jobs_use_case,
     get_onboarding_use_case,
     get_otp_repository,
+    get_purge_dead_jobs_use_case,
+    get_queue_stats_use_case,
+    get_retry_dead_job_use_case,
     get_role_use_case,
 )
 
@@ -24,4 +29,9 @@ __all__ = [
     "get_create_audit_log_use_case",
     "get_audit_logs_use_case",
     "get_role_use_case",
+    "get_queue_stats_use_case",
+    "get_list_dead_jobs_use_case",
+    "get_retry_dead_job_use_case",
+    "get_delete_dead_job_use_case",
+    "get_purge_dead_jobs_use_case",
 ]
