@@ -16,6 +16,7 @@ class CreateVenueInput:
     address_line: str
     city: str
     province: str
+    region: str
     postal_code: str
     country: str
     capacity: int
@@ -35,6 +36,7 @@ class UpdateVenueInput:
     province: str | None = None
     postal_code: str | None = None
     country: str | None = None
+    region: str | None = None
     capacity: int | None = None
     venue_type: VenueType | None = None
     contact_name: str | None = None
@@ -68,6 +70,7 @@ class VenueUseCase:
             address_line=data.address_line,
             city=data.city,
             province=data.province,
+            region=data.region,
             postal_code=data.postal_code,
             country=data.country,
             capacity=data.capacity,

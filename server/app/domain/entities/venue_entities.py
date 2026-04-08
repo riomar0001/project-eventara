@@ -50,6 +50,7 @@ class PublicVenue(BaseModel):
     address_line: str
     city: str
     province: str
+    region: str 
     postal_code: str
     country: str
     capacity: int
@@ -58,6 +59,5 @@ class PublicVenue(BaseModel):
     contact_phone: str
     contact_email: str
     created_at: datetime | None
-    region: str 
     
     model_config = {"from_attributes": True}
