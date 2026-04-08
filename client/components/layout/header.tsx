@@ -17,7 +17,7 @@ import { SidebarTrigger } from '@/components/ui/sidebar';
 
 export function Header() {
   return (
-    <header className="flex  shrink-0 items-center gap-4 bg-neutral-100">
+    <header className="flex shrink-0 items-center gap-4 bg-neutral-100 my-5 px-5">
       <SidebarTrigger className="hover:bg-primary/30 size-11 rounded-xl bg-white" />
       {/* Search */}
       <div className="relative flex max-h-11 w-1/4 flex-row items-center">

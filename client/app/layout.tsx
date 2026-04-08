@@ -31,14 +31,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={cn('h-full', 'antialiased', geistSans.variable, geistMono.variable, 'font-sans', inter.variable)}>
-      <body className="min-h-screen">
+      <body>
         <TooltipProvider>
           <SidebarProvider>
             <AppSidebar />
 
-            <SidebarInset className="flex flex-col gap-5 overflow-hidden bg-neutral-100 rounded-3xl p-5">
+            <SidebarInset className="flex max-h-screen flex-col overflow-hidden rounded-3xl bg-neutral-100 pb-5">
               <Header />
-              <main>{children}</main>
+              <main className="overflow-y-auto rounded-3xl px-6">
+                <div className="mb-5">{children}</div>
+              </main>
             </SidebarInset>
           </SidebarProvider>
         </TooltipProvider>
