@@ -52,7 +52,7 @@ export function Header() {
               </div>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="p-2rounded-xl">
+          <DropdownMenuContent align="end" className="p-2 rounded-xl ">
             <DropdownMenuLabel className="py-3 font-normal">
               <div className="flex flex-col gap-0.5">
                 <span className="text-sm font-semibold">Michael Johnson</span>
@@ -61,21 +61,21 @@ export function Header() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem className="py-3">
+              <DropdownMenuItem className="py-3 cursor-pointer">
                 <User className="size-4" />
                 Profile
               </DropdownMenuItem>
-              <DropdownMenuItem className="py-3">
+              <DropdownMenuItem className="py-3 cursor-pointer">
                 <CreditCard className="size-4" />
                 Billing
               </DropdownMenuItem>
-              <DropdownMenuItem className="py-3">
+              <DropdownMenuItem className="py-3 cursor-pointer">
                 <Settings className="size-4" />
                 Settings
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem variant="destructive" className="py-3">
+            <DropdownMenuItem variant="destructive" className="py-3 cursor-pointer">
               <LogOut className="size-4" />
               Log out
             </DropdownMenuItem>
