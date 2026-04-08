@@ -27,6 +27,12 @@ from app.domain.exceptions.user_exceptions import (
     UserNotFoundError,
 )
 
+from app.domain.exceptions.venue_exceptions import (
+    VenueNotFoundError,
+    UnauthorizedVenueOperationError,
+    VenueValidationError,
+)
+
 __all__ = [
     "EmailAlreadyTakenError",
     "EmailAlreadyVerifiedError",
@@ -48,4 +54,9 @@ __all__ = [
     "FeatureNotFoundError",
     "UserGrantNotFoundError",
     "DuplicateUserGrantError",
+    "VenueNotFoundError",
+    "UnauthorizedVenueOperationError",
+    "VenueValidationError",
+
 ]
+
