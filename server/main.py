@@ -1,10 +1,12 @@
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse
 
 from app.controller.router import router
 from app.core.config import settings
 from app.core.lifespan import lifespan
+from app.core.security.headers import SecurityHeadersMiddleware
 
 app = FastAPI(
     title=settings.APP_NAME,
@@ -14,6 +16,14 @@ app = FastAPI(
     redoc_url=None,
     lifespan=lifespan,
 )
+
+app.add_middleware(SecurityHeadersMiddleware)
+
+app.add_middleware(
+    GZipMiddleware,
+    minimum_size=1000,
+)
+
 
 app.include_router(router)
 
