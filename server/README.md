@@ -47,35 +47,65 @@ A backend API for an event management platform, built with FastAPI and Clean Arc
    Edit `.env`:
 
    ```env
-   DATABASE_URL=postgresql+asyncpg://postgres:password@localhost:5432/eventara_db
-
-   JWT_ACCESS_TOKEN_SECRET=your-access-secret
-   JWT_REFRESH_TOKEN_SECRET=your-refresh-secret
-   JWT_VERIFICATION_TOKEN_SECRET=your-verification-secret
-
-   ACCESS_TOKEN_EXPIRATION=30m
-   REFRESH_TOKEN_EXPIRATION=7d
-   VERIFICATION_TOKEN_EXPIRATION=24h
+   APP_NAME
+   DEBUG=
+   HOST=
+   PORT=
    ```
+
+DATABASE_URL=
+
+SECRET_KEY=
+
+# JWT Settings
+
+JWT_ACCESS_TOKEN_SECRET=
+ACCESS_TOKEN_EXPIRATION=
+JWT_REFRESH_TOKEN_SECRET=
+REFRESH_TOKEN_EXPIRATION=
+JWT_VERIFICATION_TOKEN_SECRET=
+VERIFICATION_TOKEN_EXPIRATION=
+
+# Redis Settings
+
+REDIS_HOST=
+REDIS_PORT=
+REDIS_USERNAME=
+REDIS_PASSWORD=
+
+# Email Settings
+
+MAIL_HOST=
+MAIL_PORT=
+MAIL_SECURE=
+MAIL_USER=
+MAIL_PASS=
+
+# CORS Configuration
+
+CORS_ORIGIN="_"
+ALLOWED_ORIGINS="_"
+
+````
 
 4. **Run migrations**
 
-   Generate a migration from your current model changes, then apply it:
+Generate a migration from your current model changes, then apply it:
 
-   ```bash
-   alembic revision --autogenerate -m "your description here"
-   alembic upgrade head
-   ```
+```bash
+alembic revision --autogenerate -m "your description here"
+alembic upgrade head
+````
 
-   Other useful migration commands:
+Other useful migration commands:
 
-   ```bash
-   alembic current            # show current revision
-   alembic history --verbose  # list all revisions
-   alembic upgrade +1         # apply only the next migration
-   alembic downgrade -1       # roll back one step
-   alembic downgrade <id>     # roll back to a specific revision
-   ```
+```bash
+alembic current            # show current revision
+alembic history --verbose  # list all revisions
+alembic upgrade +1         # apply only the next migration
+alembic downgrade -1       # roll back one step
+alembic downgrade <id>     # roll back to a specific revision
+```
 
 5. **Start the server**
 
@@ -90,13 +120,13 @@ A backend API for an event management platform, built with FastAPI and Clean Arc
 
 ### Authentication — `/api/v1/auth`
 
-| Method | Path | Description |
-|--------|------|-------------|
-| `POST` | `/api/v1/auth/register` | Register a new user |
-| `POST` | `/api/v1/auth/email/verify` | Verify email address |
-| `POST` | `/api/v1/auth/login` | Login with email + password → tokens |
-| `POST` | `/api/v1/auth/login/verify` | Verify OTP code → tokens |
-| `POST` | `/api/v1/auth/logout` | Revoke refresh token |
+| Method | Path                        | Description                          |
+| ------ | --------------------------- | ------------------------------------ |
+| `POST` | `/api/v1/auth/register`     | Register a new user                  |
+| `POST` | `/api/v1/auth/email/verify` | Verify email address                 |
+| `POST` | `/api/v1/auth/login`        | Login with email + password → tokens |
+| `POST` | `/api/v1/auth/login/verify` | Verify OTP code → tokens             |
+| `POST` | `/api/v1/auth/logout`       | Revoke refresh token                 |
 
 ## Project Structure
 
