@@ -1,15 +1,16 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   async rewrites() {
-    const backendOrigin = process.env.API_URL ?? "http://127.0.0.1:8000";
+    const backendOrigin = process.env.API_URL ?? 'http://127.0.0.1:8000';
     return [
       {
-        source: "/api/:path*",
-        destination: `${backendOrigin}/:path*`,
-      },
+        source: '/api/:path*',
+        destination: `${backendOrigin}/:path*`
+      }
     ];
   },
+  allowedDevOrigins: ['192.168.56.1']
 };
 
 export default nextConfig;

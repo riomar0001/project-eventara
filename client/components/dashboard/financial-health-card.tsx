@@ -6,17 +6,7 @@ import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { ChartContainer } from "@/components/ui/chart"
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts"
-
-const chartConfig = {
-  filled: { label: "Saved", color: "oklch(0.841 0.238 128.85)" },
-  empty: { label: "Remaining", color: "oklch(0.922 0 0)" },
-}
-
-const percentage = 75
-const data = [
-  { name: "filled", value: percentage },
-  { name: "empty", value: 100 - percentage },
-]
+import { financialHealthChartConfig as chartConfig, financialHealthData as data, financialHealthPercentage as percentage } from "@/constants/dashboard"
 
 export function FinancialHealthCard() {
   return (
