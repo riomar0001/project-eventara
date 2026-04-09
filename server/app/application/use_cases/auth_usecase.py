@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.application.dto.auth_dto import (
     ForgotPasswordInput,
     LoginInput,
+    ResendVerificationInput,
     LoginOutput,
     LoginVerifyInput,
     LoginVerifyOutput,
@@ -470,6 +471,45 @@ class AuthUseCase:
         return RefreshTokenOutput(
             access_token=access_token,
             refresh_token=new_refresh_token,
+        )
+
+    async def resend_verification(self, data: ResendVerificationInput) -> None:
+        """Re-dispatch the email verification link for an unverified account.
+
+        Silent-success policy:
+            The method always returns ``None`` regardless of whether the address
+            is registered, the account is inactive/deleted, or the email is
+            already verified.  This prevents user enumeration — a caller cannot
+            infer from the API response whether a given address exists or what
+            state it is in.
+
+        Concurrency note:
+            Verification tokens are stateless JWTs.  Each call issues a fresh
+            token with a new ``jti`` and a 24-hour expiry.  Previously issued
+            tokens remain structurally valid until they expire, but
+            ``verify_email`` guards against double-verification with an atomic
+            conditional UPDATE (``WHERE email_verified != TRUE``), so at most
+            one verification attempt can ever succeed regardless of how many
+            tokens are in circulation.
+
+        Args:
+            data: A ``ResendVerificationInput`` with the candidate email address.
+        """
+        user = await self.repo.get_by_email(data.email)
+        if not user or user.status in (UserStatus.INACTIVE, UserStatus.DELETED):
+            return
+
+        security = await self.repo.get_security_by_user_id(user.id)
+        if security and security.email_verified:
+            return
+
+        verify_token = verification_token(user.id, user.email)
+
+        await send_email(
+            self.arq,
+            to=user.email,
+            subject="Verify your Eventara email",
+            html=verification_email_html(verify_token),
         )
 
     async def forgot_password(self, data: ForgotPasswordInput) -> None:
