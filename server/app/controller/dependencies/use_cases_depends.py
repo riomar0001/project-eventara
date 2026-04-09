@@ -26,6 +26,12 @@ from app.infrastructure.database.session import get_db
 from app.application.use_cases.venue_usecase import VenueUseCase
 from app.infrastructure.database.repositories.venue_repository import VenueRepository
 
+from app.application.use_cases.venue_rating_usecase import VenueRatingUseCase
+from app.infrastructure.database.repositories.venue_rating_repository import VenueRatingRepository
+
+def get_venue_rating_use_case(db: AsyncSession = Depends(get_db)) -> VenueRatingUseCase:
+    """Construct a ``VenueRatingUseCase`` for rating operations on venues."""
+    return VenueRatingUseCase(VenueRatingRepository(db))
 def get_venue_use_case(db: AsyncSession = Depends(get_db)) -> VenueUseCase:
     """Construct a ``VenueUseCase`` for CRUD operations on venues."""
     return VenueUseCase(VenueRepository(db))

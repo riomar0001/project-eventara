@@ -17,6 +17,7 @@ from app.controller.dependencies.use_cases_depends import (
     get_retry_dead_job_use_case,
     get_role_use_case,
     get_venue_use_case,
+    get_venue_rating_use_case,
 )
 
 __all__ = [
@@ -36,4 +37,5 @@ __all__ = [
     "get_delete_dead_job_use_case",
     "get_purge_dead_jobs_use_case",
     "get_venue_use_case",
+    "get_venue_rating_use_case",
 ]
