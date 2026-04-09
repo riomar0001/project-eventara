@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { LayoutDashboard, User, ArrowLeftRight, Waves, Wallet, TrendingUp, BookOpen, Headphones, ChevronDown } from 'lucide-react';
+import { LayoutDashboard, User, ArrowLeftRight, Waves, Wallet, TrendingUp, Headphones, ChevronDown, Settings } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -41,6 +41,7 @@ const navItems = [
 ];
 
 const bottomItems = [
+  { label: 'Settings', icon: Settings, href: '#' },
   { label: 'Support', icon: Headphones, href: '#' }
 ];
 
@@ -55,7 +56,7 @@ export function AppSidebar() {
   }, [isCollapsed]);
 
   return (
-    <Sidebar collapsible="icon" className='border-0!'>
+    <Sidebar collapsible="icon" className="border-0!">
       {/* Logo */}
       <SidebarHeader className="h-19.25 justify-center bg-white px-6 group-data-[collapsible=icon]:px-2">
         <span className="text-xl font-bold tracking-tight group-data-[collapsible=icon]:hidden">
@@ -75,17 +76,11 @@ export function AppSidebar() {
                   <Collapsible key={item.label} open={transactionsOpen} onOpenChange={setTransactionsOpen} asChild>
                     <SidebarMenuItem>
                       <CollapsibleTrigger asChild>
-                        <SidebarMenuButton
-                          tooltip={item.label}
-                          className={cn('h-10 [&_svg]:size-4.5', transactionsOpen && 'text-foreground')}
-                        >
+                        <SidebarMenuButton tooltip={item.label} className={cn('h-10 [&_svg]:size-4.5', transactionsOpen && 'text-foreground')}>
                           <item.icon />
                           <span>{item.label}</span>
                           <ChevronDown
-                            className={cn(
-                              'ml-auto size-4 transition-transform group-data-[collapsible=icon]:hidden',
-                              transactionsOpen && 'rotate-180'
-                            )}
+                            className={cn('ml-auto size-4 transition-transform group-data-[collapsible=icon]:hidden', transactionsOpen && 'rotate-180')}
                           />
                         </SidebarMenuButton>
                       </CollapsibleTrigger>
