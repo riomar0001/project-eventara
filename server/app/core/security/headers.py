@@ -50,7 +50,17 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         # xssFilter (legacy but still added)
         response.headers["X-XSS-Protection"] = "1; mode=block"
         
-        response.headers["Content-Security-Policy"] = "default-src 'self';"
+        if request.url.path == "/docs":
+            response.headers["Content-Security-Policy"] = (
+                "default-src 'self'; "
+                "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; "
+                "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; "
+                "font-src 'self' https://fonts.gstatic.com; "
+                "img-src 'self' data: https:; "
+                "connect-src 'self';"
+            )
+        else:
+            response.headers["Content-Security-Policy"] = "default-src 'self';"
 
         return response
 
