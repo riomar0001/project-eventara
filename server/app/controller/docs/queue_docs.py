@@ -3,11 +3,7 @@ from fastapi import status
 QUEUE_UNAUTHORIZED = {
     status.HTTP_401_UNAUTHORIZED: {
         "description": "Invalid or expired token",
-        "content": {
-            "application/json": {
-                "example": {"success": False, "message": "Token has expired"}
-            }
-        },
+        "content": {"application/json": {"example": {"success": False, "message": "Token has expired"}}},
     }
 }
 

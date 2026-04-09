@@ -50,9 +50,7 @@ _HEALTH_CHECK_KEY = "arq:queue:health-check"
 _DLQ_RETRY_LOCK_PREFIX = "arq:dlq:retry-lock:"
 _RETRY_LOCK_TTL = 30
 
-_HEALTH_RE = re.compile(
-    r"(\S+\s+\S+)\s+j_complete=(\d+)\s+j_failed=(\d+)\s+j_retried=(\d+)\s+j_ongoing=(\d+)\s+queued=(\d+)"
-)
+_HEALTH_RE = re.compile(r"(\S+\s+\S+)\s+j_complete=(\d+)\s+j_failed=(\d+)\s+j_retried=(\d+)\s+j_ongoing=(\d+)\s+queued=(\d+)")
 
 
 def _decode(value: bytes | str) -> str:
@@ -71,9 +69,7 @@ def _parse_health_entry(raw: str) -> WorkerHealthEntry:
             j_ongoing=int(m.group(5)),
             queued=int(m.group(6)),
         )
-    return WorkerHealthEntry(
-        raw=raw, timestamp=None, j_complete=0, j_failed=0, j_retried=0, j_ongoing=0, queued=0
-    )
+    return WorkerHealthEntry(raw=raw, timestamp=None, j_complete=0, j_failed=0, j_retried=0, j_ongoing=0, queued=0)
 
 
 def _safe_list(value) -> list:

@@ -9,7 +9,7 @@ Usage (from server/):
 """
 
 import asyncio
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import UUID
 
 from sqlalchemy import select
@@ -45,7 +45,7 @@ async def _get_or_create_admin(session) -> UUID:
         _log(f"Admin user already exists: {settings.ADMIN_EMAIL}")
         return user.id
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     stmt = (
         insert(User)
         .values(
@@ -71,7 +71,7 @@ async def _get_or_create_admin(session) -> UUID:
 
 async def _ensure_security(session, user_id: UUID) -> None:
     """Upsert UserSecurity with email_verified=True."""
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     stmt = (
         insert(UserSecurity)
         .values(
@@ -90,11 +90,7 @@ async def _ensure_security(session, user_id: UUID) -> None:
 
 async def _ensure_activity(session, user_id: UUID) -> None:
     """Upsert UserActivity row."""
-    stmt = (
-        insert(UserActivity)
-        .values(user_id=user_id)
-        .on_conflict_do_nothing(index_elements=["user_id"])
-    )
+    stmt = insert(UserActivity).values(user_id=user_id).on_conflict_do_nothing(index_elements=["user_id"])
     await session.execute(stmt)
     _log("UserActivity: row ensured")
 
@@ -104,9 +100,7 @@ async def _assign_admin_role(session, user_id: UUID) -> None:
     role_row = await session.execute(select(Role).where(Role.name == "system_administrator"))
     role = role_row.scalar_one_or_none()
     if not role:
-        raise RuntimeError(
-            "Role 'system_administrator' not found. Run seeds.rbac_user_management first."
-        )
+        raise RuntimeError("Role 'system_administrator' not found. Run seeds.rbac_user_management first.")
 
     existing = await session.execute(
         select(UserRole).where(
@@ -121,7 +115,7 @@ async def _assign_admin_role(session, user_id: UUID) -> None:
     stmt = insert(UserRole).values(
         user_id=user_id,
         role_id=role.id,
-        assigned_at=datetime.now(timezone.utc),
+        assigned_at=datetime.now(UTC),
     )
     await session.execute(stmt)
     _log("Assigned role: system_administrator")
