@@ -61,6 +61,11 @@ class RefreshTokenOutput:
 
 
 @dataclass
+class ResendVerificationInput:
+    email: str
+
+
+@dataclass
 class ForgotPasswordInput:
     email: str
 
