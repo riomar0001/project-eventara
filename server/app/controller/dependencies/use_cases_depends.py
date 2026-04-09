@@ -23,6 +23,13 @@ from app.infrastructure.database.repositories.role_repository import RoleReposit
 from app.infrastructure.database.repositories.user_repository import UserRepository
 from app.infrastructure.database.session import get_db
 
+from app.application.use_cases.venue_usecase import VenueUseCase
+from app.infrastructure.database.repositories.venue_repository import VenueRepository
+
+def get_venue_use_case(db: AsyncSession = Depends(get_db)) -> VenueUseCase:
+    """Construct a ``VenueUseCase`` for CRUD operations on venues."""
+    return VenueUseCase(VenueRepository(db))
+
 
 def get_auth_use_case(request: Request, db: AsyncSession = Depends(get_db)) -> AuthUseCase:
     """Construct a fully-wired ``AuthUseCase`` for the current request.
