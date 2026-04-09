@@ -1,11 +1,6 @@
 import { TrendingUp } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
-
-const stats = [
-  { label: "Total income", value: "$15,000", trend: "+5.1% from last month", positive: true },
-  { label: "Total expences", value: "$6,700", trend: "+13.5% from last month", positive: false },
-  { label: "Saved balance", value: "$8,300", trend: "+20.7% from last month", positive: true },
-]
+import { stats } from "@/constants/dashboard"
 
 export function StatsPanel() {
   return (

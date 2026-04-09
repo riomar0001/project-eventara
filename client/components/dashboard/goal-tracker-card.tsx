@@ -4,37 +4,7 @@ import { Plus } from "lucide-react"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
-
-const goals = [
-  {
-    label: "Reserve",
-    current: 7000,
-    target: 10000,
-    note: "Left to save 4 months",
-    color: "oklch(0.648 0.2 131.684)",
-  },
-  {
-    label: "Travel",
-    current: 2500,
-    target: 4000,
-    note: "Left to save 3 months",
-    color: "oklch(0.879 0.169 91.605)",
-  },
-  {
-    label: "Car",
-    current: 1600,
-    target: 30000,
-    note: "Left to save 3 years 6 months",
-    color: "oklch(0.769 0.188 70.08)",
-  },
-  {
-    label: "Real estate",
-    current: 8300,
-    target: 10000,
-    note: "Left to save 5 years 8 months",
-    color: "oklch(0.769 0.188 70.08)",
-  },
-]
+import { goals } from "@/constants/dashboard"
 
 export function GoalTrackerCard() {
   return (
