@@ -447,10 +447,10 @@ FORGOT_PASSWORD_VALIDATION_ERROR = {
 }
 
 
-# POST /auth/reset-password
+# POST /auth/reset-password/{token}
 RESET_PASSWORD_VALIDATION_ERROR = {
     422: {
-        "description": "Validation error — token is empty or new_password is shorter than 8 characters",
+        "description": "Validation error — token path parameter is empty or new_password is shorter than 8 characters",
         "model": ValidationErrorResponse,
         "content": {
             "application/json": {
@@ -458,7 +458,7 @@ RESET_PASSWORD_VALIDATION_ERROR = {
                     "success": False,
                     "detail": [
                         {
-                            "loc": ["body", "token"],
+                            "loc": ["path", "token"],
                             "msg": "String should have at least 1 character",
                             "type": "string_too_short",
                         },

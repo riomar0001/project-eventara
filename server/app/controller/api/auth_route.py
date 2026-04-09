@@ -427,7 +427,7 @@ async def forgot_password(
 
 
 @router.post(
-    "/reset-password",
+    "/reset-password/{token}",
     response_model=ResetPasswordResponse,
     status_code=status.HTTP_200_OK,
     responses={
@@ -439,9 +439,10 @@ async def forgot_password(
     summary="Reset password using a reset token",
     description=(
         "Consume a single-use password reset token and replace the account password. "
-        "The token is validated in two stages: the JWT signature and expiry are verified "
-        "first, then the token's SHA-256 hash is atomically retrieved and deleted from "
-        "Redis (``GETDEL``), making replay attacks impossible. "
+        "The token is taken from the URL path and validated in two stages: the JWT "
+        "signature and expiry are verified first, then the token's SHA-256 hash is "
+        "atomically retrieved and deleted from Redis (``GETDEL``), making replay attacks "
+        "impossible. "
         "If two requests arrive simultaneously with the same token only one will succeed; "
         "the second receives 400 with the same opaque error as an invalid token to avoid "
         "leaking whether the token was consumed by a concurrent request. "
@@ -450,9 +451,10 @@ async def forgot_password(
 )
 async def reset_password(
     body: ResetPasswordRequest,
+    token: str = Path(..., min_length=1),
     use_case: AuthUseCase = Depends(get_auth_use_case),
 ) -> ResetPasswordResponse:
-    """Validate a reset token and update the account password.
+    """Validate a reset token from the URL path and update the account password.
 
     # Error mapping
     - **400 Bad Request** — the token is malformed, has an invalid signature,
@@ -461,11 +463,11 @@ async def reset_password(
       request a new reset link via ``POST /auth/forgot-password``.
     - **404 Not Found** — no user is associated with the token's subject claim
       (guard against stale tokens from deleted accounts).
-    - **422 Unprocessable Entity** — ``token`` is empty or ``new_password`` is
-      shorter than 8 characters.
+    - **422 Unprocessable Entity** — ``token`` path parameter is empty or
+      ``new_password`` is shorter than 8 characters.
     """
     try:
-        await use_case.reset_password(ResetPasswordInput(token=body.token, new_password=body.new_password))
+        await use_case.reset_password(ResetPasswordInput(token=token, new_password=body.new_password))
     except TokenExpiredError as error:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(error))
     except InvalidTokenError as error:
