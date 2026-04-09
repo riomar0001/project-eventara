@@ -424,6 +424,29 @@ REFRESH_TOKEN_INVALID = {
 }
 
 
+# POST /auth/resend-verification
+RESEND_VERIFICATION_VALIDATION_ERROR = {
+    422: {
+        "description": "Validation error — email field is missing or not a valid email address",
+        "model": ValidationErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "detail": [
+                        {
+                            "loc": ["body", "email"],
+                            "msg": "value is not a valid email address",
+                            "type": "value_error.email",
+                        }
+                    ],
+                }
+            }
+        },
+    }
+}
+
+
 # POST /auth/forgot-password
 FORGOT_PASSWORD_VALIDATION_ERROR = {
     422: {
