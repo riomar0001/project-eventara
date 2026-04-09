@@ -143,6 +143,64 @@ export type CreateGrantsResponse = {
 };
 
 /**
+ * DeadJobResponse
+ */
+export type DeadJobResponse = {
+  /**
+   * Job Id
+   */
+  job_id: string;
+  /**
+   * Function
+   */
+  function: string;
+  /**
+   * Args
+   */
+  args: Array<unknown>;
+  /**
+   * Kwargs
+   */
+  kwargs: {
+    [key: string]: unknown;
+  };
+  /**
+   * Job Try
+   */
+  job_try: number;
+  /**
+   * Enqueue Time
+   */
+  enqueue_time: string;
+  /**
+   * Finish Time
+   */
+  finish_time: string | null;
+  /**
+   * Error
+   */
+  error: string;
+};
+
+/**
+ * DeleteJobResponse
+ */
+export type DeleteJobResponse = {
+  /**
+   * Success
+   */
+  success?: boolean;
+  /**
+   * Job Id
+   */
+  job_id: string;
+  /**
+   * Deleted
+   */
+  deleted: boolean;
+};
+
+/**
  * EducationLevel
  */
 export type EducationLevel =
@@ -207,6 +265,24 @@ export type HttpValidationError = {
    * Detail
    */
   detail?: Array<ValidationError>;
+};
+
+/**
+ * ListDeadJobsResponse
+ */
+export type ListDeadJobsResponse = {
+  /**
+   * Success
+   */
+  success?: boolean;
+  /**
+   * Data
+   */
+  data: Array<DeadJobResponse>;
+  /**
+   * Total
+   */
+  total: number;
 };
 
 /**
@@ -328,6 +404,54 @@ export type PaginationMeta = {
 };
 
 /**
+ * PurgeDeadJobsResponse
+ */
+export type PurgeDeadJobsResponse = {
+  /**
+   * Success
+   */
+  success?: boolean;
+  /**
+   * Deleted Count
+   */
+  deleted_count: number;
+};
+
+/**
+ * QueueStatsResponse
+ */
+export type QueueStatsResponse = {
+  /**
+   * Success
+   */
+  success?: boolean;
+  /**
+   * Queue Name
+   */
+  queue_name: string;
+  /**
+   * Pending
+   */
+  pending: number;
+  /**
+   * In Progress
+   */
+  in_progress: number;
+  /**
+   * Total Failed
+   */
+  total_failed: number;
+  /**
+   * Total Completed
+   */
+  total_completed: number;
+  /**
+   * Worker Health
+   */
+  worker_health: Array<WorkerHealthEntrySchema>;
+};
+
+/**
  * RefreshTokenRequest
  */
 export type RefreshTokenRequest = {
@@ -399,6 +523,28 @@ export type RegisterResponse = {
    * Only included in DEBUG mode
    */
   verification_token?: string | null;
+};
+
+/**
+ * RetryJobResponse
+ */
+export type RetryJobResponse = {
+  /**
+   * Success
+   */
+  success?: boolean;
+  /**
+   * Original Job Id
+   */
+  original_job_id: string;
+  /**
+   * New Job Id
+   */
+  new_job_id: string;
+  /**
+   * Function
+   */
+  function: string;
 };
 
 /**
@@ -649,6 +795,40 @@ export type VerifyEmailResponse = {
    * Message
    */
   message?: string;
+};
+
+/**
+ * WorkerHealthEntrySchema
+ */
+export type WorkerHealthEntrySchema = {
+  /**
+   * Raw
+   */
+  raw: string;
+  /**
+   * Timestamp
+   */
+  timestamp: string | null;
+  /**
+   * J Complete
+   */
+  j_complete: number;
+  /**
+   * J Failed
+   */
+  j_failed: number;
+  /**
+   * J Retried
+   */
+  j_retried: number;
+  /**
+   * J Ongoing
+   */
+  j_ongoing: number;
+  /**
+   * Queued
+   */
+  queued: number;
 };
 
 export type RegisterUserAuthRegisterPostData = {
@@ -1323,6 +1503,199 @@ export type RevokeGrantUserGrantsGrantIdDeleteResponses = {
 };
 
 export type RevokeGrantUserGrantsGrantIdDeleteResponse = RevokeGrantUserGrantsGrantIdDeleteResponses[keyof RevokeGrantUserGrantsGrantIdDeleteResponses];
+
+export type GetQueueStatsQueuesGetData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: '/queues';
+};
+
+export type GetQueueStatsQueuesGetErrors = {
+  /**
+   * Invalid or expired token
+   */
+  401: unknown;
+  /**
+   * Insufficient permissions to manage queues
+   */
+  403: unknown;
+  /**
+   * Unexpected Redis or ARQ error during queue inspection
+   */
+  500: unknown;
+};
+
+export type GetQueueStatsQueuesGetResponses = {
+  /**
+   * Successful Response
+   */
+  200: QueueStatsResponse;
+};
+
+export type GetQueueStatsQueuesGetResponse = GetQueueStatsQueuesGetResponses[keyof GetQueueStatsQueuesGetResponses];
+
+export type PurgeDeadJobsQueuesDlqDeleteData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: '/queues/dlq';
+};
+
+export type PurgeDeadJobsQueuesDlqDeleteErrors = {
+  /**
+   * Invalid or expired token
+   */
+  401: unknown;
+  /**
+   * Insufficient permissions to manage queues
+   */
+  403: unknown;
+  /**
+   * Unexpected Redis or ARQ error during queue inspection
+   */
+  500: unknown;
+};
+
+export type PurgeDeadJobsQueuesDlqDeleteResponses = {
+  /**
+   * Successful Response
+   */
+  200: PurgeDeadJobsResponse;
+};
+
+export type PurgeDeadJobsQueuesDlqDeleteResponse = PurgeDeadJobsQueuesDlqDeleteResponses[keyof PurgeDeadJobsQueuesDlqDeleteResponses];
+
+export type ListDeadJobsQueuesDlqGetData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: '/queues/dlq';
+};
+
+export type ListDeadJobsQueuesDlqGetErrors = {
+  /**
+   * Invalid or expired token
+   */
+  401: unknown;
+  /**
+   * Insufficient permissions to manage queues
+   */
+  403: unknown;
+  /**
+   * Unexpected Redis or ARQ error during queue inspection
+   */
+  500: unknown;
+};
+
+export type ListDeadJobsQueuesDlqGetResponses = {
+  /**
+   * Successful Response
+   */
+  200: ListDeadJobsResponse;
+};
+
+export type ListDeadJobsQueuesDlqGetResponse = ListDeadJobsQueuesDlqGetResponses[keyof ListDeadJobsQueuesDlqGetResponses];
+
+export type RetryDeadJobQueuesDlqJobIdRetryPostData = {
+  body?: never;
+  path: {
+    /**
+     * Job Id
+     */
+    job_id: string;
+  };
+  query?: never;
+  url: '/queues/dlq/{job_id}/retry';
+};
+
+export type RetryDeadJobQueuesDlqJobIdRetryPostErrors = {
+  /**
+   * Invalid or expired token
+   */
+  401: unknown;
+  /**
+   * Insufficient permissions to manage queues
+   */
+  403: unknown;
+  /**
+   * Job not found in the dead-letter queue
+   */
+  404: unknown;
+  /**
+   * A concurrent retry for the same job is already in progress
+   */
+  409: unknown;
+  /**
+   * Validation Error
+   */
+  422: HttpValidationError;
+  /**
+   * Unexpected Redis or ARQ error during queue inspection
+   */
+  500: unknown;
+};
+
+export type RetryDeadJobQueuesDlqJobIdRetryPostError = RetryDeadJobQueuesDlqJobIdRetryPostErrors[keyof RetryDeadJobQueuesDlqJobIdRetryPostErrors];
+
+export type RetryDeadJobQueuesDlqJobIdRetryPostResponses = {
+  /**
+   * Successful Response
+   */
+  200: RetryJobResponse;
+};
+
+export type RetryDeadJobQueuesDlqJobIdRetryPostResponse = RetryDeadJobQueuesDlqJobIdRetryPostResponses[keyof RetryDeadJobQueuesDlqJobIdRetryPostResponses];
+
+export type DeleteDeadJobQueuesDlqJobIdDeleteData = {
+  body?: never;
+  path: {
+    /**
+     * Job Id
+     */
+    job_id: string;
+  };
+  query?: never;
+  url: '/queues/dlq/{job_id}';
+};
+
+export type DeleteDeadJobQueuesDlqJobIdDeleteErrors = {
+  /**
+   * Invalid or expired token
+   */
+  401: unknown;
+  /**
+   * Insufficient permissions to manage queues
+   */
+  403: unknown;
+  /**
+   * Job not found in the dead-letter queue
+   */
+  404: unknown;
+  /**
+   * Job is not a failed job and cannot be managed via the DLQ
+   */
+  409: unknown;
+  /**
+   * Validation Error
+   */
+  422: HttpValidationError;
+  /**
+   * Unexpected Redis or ARQ error during queue inspection
+   */
+  500: unknown;
+};
+
+export type DeleteDeadJobQueuesDlqJobIdDeleteError = DeleteDeadJobQueuesDlqJobIdDeleteErrors[keyof DeleteDeadJobQueuesDlqJobIdDeleteErrors];
+
+export type DeleteDeadJobQueuesDlqJobIdDeleteResponses = {
+  /**
+   * Successful Response
+   */
+  200: DeleteJobResponse;
+};
+
+export type DeleteDeadJobQueuesDlqJobIdDeleteResponse = DeleteDeadJobQueuesDlqJobIdDeleteResponses[keyof DeleteDeadJobQueuesDlqJobIdDeleteResponses];
 
 export type RootGetData = {
   body?: never;

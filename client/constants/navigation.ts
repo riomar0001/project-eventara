@@ -1,4 +1,4 @@
-import { LayoutDashboard, User, ArrowLeftRight, Waves, Wallet, TrendingUp, Headphones, Settings, FlaskConical } from 'lucide-react';
+import { LayoutDashboard, User, ArrowLeftRight, Waves, Wallet, TrendingUp, Headphones, Settings, FlaskConical, MapPin } from 'lucide-react';
 
 export const navItems = [
   { label: 'Dashboard', icon: LayoutDashboard, href: '#', active: true },
@@ -16,7 +16,8 @@ export const navItems = [
   { label: 'Cash flow', icon: Waves, href: '#' },
   { label: 'Budget', icon: Wallet, href: '#' },
   { label: 'Investments', icon: TrendingUp, href: '#' },
-  { label: 'Kitchen Sink', icon: FlaskConical, href: '/kitchen-sink' }
+  { label: 'Kitchen Sink', icon: FlaskConical, href: '/kitchen-sink' },
+  { label: 'Venue', icon: MapPin, href: '#' }
 ];
 
 export const bottomNavItems = [

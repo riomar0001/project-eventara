@@ -48,6 +48,4 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         # xssFilter (legacy but still added)
         response.headers["X-XSS-Protection"] = "1; mode=block"
 
-        response.headers["Content-Security-Policy"] = "default-src 'self';"
-
         return response
