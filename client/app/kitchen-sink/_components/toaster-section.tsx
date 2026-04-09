@@ -30,39 +30,47 @@ export function ToasterSection() {
           <Row wrap>
             <Button
               variant="outline"
-              onClick={() => toast('Export ready', {
-                description: 'Your report has been generated.',
-                action: { label: 'Download', onClick: () => toast.success('Downloading…') },
-              })}
+              onClick={() =>
+                toast('Export ready', {
+                  description: 'Your report has been generated.',
+                  action: { label: 'Download', onClick: () => toast.success('Downloading…') }
+                })
+              }
             >
               With action
             </Button>
             <Button
               variant="outline"
-              onClick={() => toast('File uploaded', {
-                description: 'transactions-april.csv',
-                action: { label: 'Undo', onClick: () => toast('Upload cancelled') },
-                cancel: { label: 'Dismiss', onClick: () => {} },
-              })}
+              onClick={() =>
+                toast('File uploaded', {
+                  description: 'transactions-april.csv',
+                  action: { label: 'Undo', onClick: () => toast('Upload cancelled') },
+                  cancel: { label: 'Dismiss', onClick: () => {} }
+                })
+              }
             >
               With action + cancel
             </Button>
             <Button
               variant="outline"
-              onClick={() => toast.promise(new Promise(res => setTimeout(res, 2000)), {
-                loading: 'Syncing transactions…',
-                success: 'Transactions synced',
-                error: 'Sync failed',
-              })}
+              onClick={() =>
+                toast.promise(new Promise((res) => setTimeout(res, 2000)), {
+                  loading: 'Syncing transactions…',
+                  success: 'Transactions synced',
+                  error: 'Sync failed'
+                })
+              }
             >
               Promise
             </Button>
             <Button
               variant="outline"
-              onClick={() => toast('Saving changes', {
-                duration: Infinity,
-                action: { label: 'Dismiss', onClick: () => {} },
-              })}
+              onClick={() =>
+                toast('Saving changes', {
+                  duration: Infinity,
+                  action: { label: 'Dismiss', onClick: () => {} }
+                })
+              }
             >
               Persistent
             </Button>

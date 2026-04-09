@@ -7,7 +7,7 @@ export const notifications = [
     title: 'Transaction completed',
     description: 'Payment of $240.00 to Netflix was processed.',
     time: '2m ago',
-    unread: true,
+    unread: true
   },
   {
     id: 2,
@@ -15,7 +15,7 @@ export const notifications = [
     title: 'Investment update',
     description: 'Your portfolio grew by 3.2% this week.',
     time: '1h ago',
-    unread: true,
+    unread: true
   },
   {
     id: 3,
@@ -23,7 +23,7 @@ export const notifications = [
     title: 'Spending alert',
     description: "You've reached 86% of your monthly budget.",
     time: '3h ago',
-    unread: false,
+    unread: false
   },
   {
     id: 4,
@@ -31,6 +31,6 @@ export const notifications = [
     title: 'Transfer received',
     description: 'John Doe sent you $1,500.00.',
     time: 'Yesterday',
-    unread: false,
-  },
-]
+    unread: false
+  }
+];

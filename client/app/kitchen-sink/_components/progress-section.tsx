@@ -1,5 +1,5 @@
-import { Progress } from '@/components/ui/progress';
 import { Card, CardContent } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
 import { Section, Row, Label } from './shared';
 
 export function ProgressSection() {
@@ -7,7 +7,7 @@ export function ProgressSection() {
     <Section title="Progress">
       <Card>
         <CardContent className="flex flex-col gap-3 pt-2">
-          {[25, 50, 75, 100].map(v => (
+          {[25, 50, 75, 100].map((v) => (
             <Row key={v}>
               <Label>{v}%</Label>
               <Progress value={v} className="flex-1" />

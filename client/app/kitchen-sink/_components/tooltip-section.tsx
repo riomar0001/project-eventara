@@ -1,14 +1,14 @@
 import { Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Card, CardContent } from '@/components/ui/card';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Section, Row } from './shared';
 
 const positions = [
-  { side: 'top' as const,    label: 'Hover me (top)' },
+  { side: 'top' as const, label: 'Hover me (top)' },
   { side: 'bottom' as const, label: 'Bottom' },
-  { side: 'left' as const,   label: 'Left' },
-  { side: 'right' as const,  label: 'Right' },
+  { side: 'left' as const, label: 'Left' },
+  { side: 'right' as const, label: 'Right' }
 ];
 
 export function TooltipSection() {
@@ -27,7 +27,9 @@ export function TooltipSection() {
             ))}
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button size="icon" variant="ghost"><Bell className="size-4" /></Button>
+                <Button size="icon" variant="ghost">
+                  <Bell className="size-4" />
+                </Button>
               </TooltipTrigger>
               <TooltipContent>Notifications</TooltipContent>
             </Tooltip>

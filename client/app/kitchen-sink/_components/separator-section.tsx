@@ -1,5 +1,5 @@
-import { Separator } from '@/components/ui/separator';
 import { Card, CardContent } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 import { Section, Row, Label } from './shared';
 
 export function SeparatorSection() {
@@ -9,14 +9,16 @@ export function SeparatorSection() {
         <CardContent className="flex flex-col gap-4 pt-2">
           <Row>
             <Label>horizontal</Label>
-            <div className="flex-1"><Separator /></div>
+            <div className="flex-1">
+              <Separator />
+            </div>
           </Row>
           <Row>
             <Label>vertical</Label>
             <div className="flex h-8 items-center gap-3">
-              <span className="text-xs text-muted-foreground">Left</span>
+              <span className="text-muted-foreground text-xs">Left</span>
               <Separator orientation="vertical" />
-              <span className="text-xs text-muted-foreground">Right</span>
+              <span className="text-muted-foreground text-xs">Right</span>
             </div>
           </Row>
         </CardContent>

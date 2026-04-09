@@ -3,8 +3,8 @@ import { Inter } from 'next/font/google';
 import { Header } from '@/components/layout/header';
 import { AppSidebar } from '@/components/layout/sidebar';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
-import { TooltipProvider } from '@/components/ui/tooltip';
 import { Toaster } from '@/components/ui/sonner';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import './globals.css';
 import { cn } from '@/lib/utils';
 

@@ -25,21 +25,21 @@ interface TokenPayload {
  */
 export function decodeTokenUser(token: string): User | null {
   try {
-    const [, payload] = token.split(".");
+    const [, payload] = token.split('.');
     if (!payload) return null;
     // Base64url → Base64 → JSON
-    const json = atob(payload.replace(/-/g, "+").replace(/_/g, "/"));
+    const json = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
     const p: TokenPayload = JSON.parse(json);
     return {
       id: p.user_id,
       email: p.email,
       role: p.role,
-      first_name: p.first_name ?? "",
-      last_name: p.last_name ?? "",
+      first_name: p.first_name ?? '',
+      last_name: p.last_name ?? '',
       ...(p.applicant_profile_id && {
-        applicant_profile_id: p.applicant_profile_id,
+        applicant_profile_id: p.applicant_profile_id
       }),
-      ...(p.company_id && { company_id: p.company_id }),
+      ...(p.company_id && { company_id: p.company_id })
     };
   } catch {
     return null;

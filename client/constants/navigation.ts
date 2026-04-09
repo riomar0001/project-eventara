@@ -10,16 +10,16 @@ export const navItems = [
     children: [
       { label: 'History', href: '#', badge: 19 },
       { label: 'Integration', href: '#' },
-      { label: 'Reports', href: '#' },
-    ],
+      { label: 'Reports', href: '#' }
+    ]
   },
   { label: 'Cash flow', icon: Waves, href: '#' },
   { label: 'Budget', icon: Wallet, href: '#' },
   { label: 'Investments', icon: TrendingUp, href: '#' },
-  { label: 'Kitchen Sink', icon: FlaskConical, href: '/kitchen-sink' },
-]
+  { label: 'Kitchen Sink', icon: FlaskConical, href: '/kitchen-sink' }
+];
 
 export const bottomNavItems = [
   { label: 'Settings', icon: Settings, href: '#' },
-  { label: 'Support', icon: Headphones, href: '#' },
-]
+  { label: 'Support', icon: Headphones, href: '#' }
+];

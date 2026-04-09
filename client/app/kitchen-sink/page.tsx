@@ -22,7 +22,7 @@ export default function KitchenSinkPage() {
     <div className="flex flex-col gap-8 pb-10">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Kitchen Sink</h1>
-        <p className="text-sm text-muted-foreground">Every UI primitive and dashboard component in one place.</p>
+        <p className="text-muted-foreground text-sm">Every UI primitive and dashboard component in one place.</p>
       </div>
 
       <ButtonsSection />

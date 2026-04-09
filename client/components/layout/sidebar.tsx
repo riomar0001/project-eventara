@@ -3,7 +3,6 @@
 import * as React from 'react';
 import { ChevronDown } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
   Sidebar,
@@ -20,8 +19,8 @@ import {
   SidebarMenuSubItem,
   useSidebar
 } from '@/components/ui/sidebar';
-import { cn } from '@/lib/utils';
 import { navItems, bottomNavItems as bottomItems } from '@/constants/navigation';
+import { cn } from '@/lib/utils';
 
 export function AppSidebar() {
   const [transactionsOpen, setTransactionsOpen] = React.useState(true);

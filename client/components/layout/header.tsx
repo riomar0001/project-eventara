@@ -18,7 +18,7 @@ import { notifications } from '@/constants/notifications';
 
 export function Header() {
   return (
-    <header className="flex shrink-0 items-center gap-4 bg-neutral-100 my-5 px-5">
+    <header className="my-5 flex shrink-0 items-center gap-4 bg-neutral-100 px-5">
       <SidebarTrigger className="hover:bg-primary/30 size-11 rounded-xl bg-white" />
       {/* Search */}
       <div className="relative hidden max-h-11 w-1/3 flex-row items-center md:flex lg:w-1/4">
@@ -31,15 +31,13 @@ export function Header() {
           <DropdownMenuTrigger asChild>
             <Button size="icon-sm" className="hover:bg-primary/30 relative size-11 rounded-xl bg-white">
               <Bell className="size-4" />
-              {notifications.some((n) => n.unread) && (
-                <span className="bg-primary absolute top-2 right-2 size-2 rounded-full" />
-              )}
+              {notifications.some((n) => n.unread) && <span className="bg-primary absolute top-2 right-2 size-2 rounded-full" />}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" collisionPadding={20} className="w-80 max-w-[calc(100vw-40px)] rounded-xl p-2">
             <div className="flex items-center justify-between px-2 py-2">
               <span className="text-sm font-semibold">Notifications</span>
-              <Button variant="ghost" size="xs" className="text-muted-foreground h-auto p-0 text-xs hover:text-foreground">
+              <Button variant="ghost" size="xs" className="text-muted-foreground hover:text-foreground h-auto p-0 text-xs">
                 Mark all read
               </Button>
             </div>
@@ -62,9 +60,7 @@ export function Header() {
               ))}
             </DropdownMenuGroup>
             <DropdownMenuSeparator className="mt-1" />
-            <DropdownMenuItem className="mt-1 cursor-pointer justify-center rounded-lg py-2.5 text-xs font-medium">
-              View all notifications
-            </DropdownMenuItem>
+            <DropdownMenuItem className="mt-1 cursor-pointer justify-center rounded-lg py-2.5 text-xs font-medium">View all notifications</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
         <Button size="icon-sm" className="hover:bg-primary/30 size-11 rounded-xl bg-white">
@@ -88,7 +84,7 @@ export function Header() {
               <ChevronDown className="text-muted-foreground hidden size-3.5 sm:block" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-60 p-2 rounded-xl">
+          <DropdownMenuContent align="end" className="w-60 rounded-xl p-2">
             <DropdownMenuLabel className="py-3 font-normal">
               <div className="flex flex-col gap-0.5">
                 <span className="text-sm font-semibold">Michael Johnson</span>
@@ -97,21 +93,21 @@ export function Header() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem className="py-3 cursor-pointer">
+              <DropdownMenuItem className="cursor-pointer py-3">
                 <User className="size-4" />
                 Profile
               </DropdownMenuItem>
-              <DropdownMenuItem className="py-3 cursor-pointer">
+              <DropdownMenuItem className="cursor-pointer py-3">
                 <CreditCard className="size-4" />
                 Billing
               </DropdownMenuItem>
-              <DropdownMenuItem className="py-3 cursor-pointer">
+              <DropdownMenuItem className="cursor-pointer py-3">
                 <Settings className="size-4" />
                 Settings
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem variant="destructive" className="py-3 cursor-pointer">
+            <DropdownMenuItem variant="destructive" className="cursor-pointer py-3">
               <LogOut className="size-4" />
               Log out
             </DropdownMenuItem>

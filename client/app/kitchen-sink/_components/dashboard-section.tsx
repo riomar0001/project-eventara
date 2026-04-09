@@ -1,10 +1,10 @@
 import { BalanceOverviewCard } from '@/components/dashboard/balance-overview-card';
-import { StatsPanel } from '@/components/dashboard/stats-panel';
-import { MonthlySpendingCard } from '@/components/dashboard/monthly-spending-card';
 import { BudgetTipCard } from '@/components/dashboard/budget-tip-card';
 import { CostAnalysisCard } from '@/components/dashboard/cost-analysis-card';
 import { FinancialHealthCard } from '@/components/dashboard/financial-health-card';
 import { GoalTrackerCard } from '@/components/dashboard/goal-tracker-card';
+import { MonthlySpendingCard } from '@/components/dashboard/monthly-spending-card';
+import { StatsPanel } from '@/components/dashboard/stats-panel';
 import { Section } from './shared';
 
 export function DashboardSection() {
