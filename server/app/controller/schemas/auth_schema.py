@@ -85,3 +85,22 @@ class RefreshTokenResponse(BaseModel):
     refresh_token: str
     token_type: str = "bearer"
     message: str = "Token refreshed successfully."
+
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+
+class ForgotPasswordResponse(BaseModel):
+    success: bool = True
+    message: str = "If that email address is in our system, you will receive a password reset link shortly."
+
+
+class ResetPasswordRequest(BaseModel):
+    token: str = Field(min_length=1)
+    new_password: str = Field(min_length=8)
+
+
+class ResetPasswordResponse(BaseModel):
+    success: bool = True
+    message: str = "Password has been reset successfully."
