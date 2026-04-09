@@ -46,7 +46,7 @@ class User(Base):
         Index(
             "idx_users_not_deleted",
             "id",
-            postgresql_where=text("delete_at IS NULL"),
+            postgresql_where=text("deleted_at IS NULL"),
         ),
         Index("idx_users_status", "status"),
     )
