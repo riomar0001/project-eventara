@@ -78,7 +78,10 @@ class PasswordResetRepository:
         if stored_hash is None:
             return False
 
-        stored_str = stored_hash.decode() if isinstance(stored_hash, bytes) else stored_hash
+        if isinstance(stored_hash, bytes):
+            stored_str = stored_hash.decode()
+        else:
+            stored_str = str(stored_hash)
         return verify_token_hash(token, stored_str)
 
     async def delete(self, user_id: uuid.UUID) -> None:
