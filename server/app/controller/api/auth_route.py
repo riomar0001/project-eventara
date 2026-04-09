@@ -7,6 +7,7 @@ from app.application.dto.auth_dto import (
     LogoutInput,
     RefreshTokenInput,
     RegisterUserInput,
+    ResendVerificationInput,
     ResetPasswordInput,
 )
 from app.application.use_cases.auth_usecase import AuthUseCase
@@ -16,6 +17,7 @@ from app.controller.docs.auth_docs import (
     EMAIL_CONFLICT,
     EMAIL_NOT_VERIFIED,
     FORGOT_PASSWORD_VALIDATION_ERROR,
+    RESEND_VERIFICATION_VALIDATION_ERROR,
     INVALID_CREDENTIALS,
     INVALID_OTP,
     INVALID_TOKEN,
@@ -42,6 +44,8 @@ from app.controller.docs.auth_docs import (
 from app.controller.schemas.auth_schema import (
     ForgotPasswordRequest,
     ForgotPasswordResponse,
+    ResendVerificationRequest,
+    ResendVerificationResponse,
     LoginInitResponse,
     LoginRequest,
     LoginVerifyRequest,
@@ -186,6 +190,38 @@ async def verify_email(
         access_token=result.access_token,
         refresh_token=result.refresh_token,
     )
+
+
+@router.post(
+    "/resend-verification",
+    response_model=ResendVerificationResponse,
+    status_code=status.HTTP_200_OK,
+    responses={**RESEND_VERIFICATION_VALIDATION_ERROR},
+    summary="Resend email confirmation link",
+    description=(
+        "Re-dispatch the email verification link for an unverified account. "
+        "The response is always 200 OK regardless of whether the address is registered, "
+        "the account is inactive, or the email is already verified — "
+        "this prevents user enumeration. "
+        "Each call issues a fresh signed token; previously sent links remain valid "
+        "until they expire, but the verification endpoint's conditional UPDATE ensures "
+        "only the first successful confirmation is ever applied."
+    ),
+)
+async def resend_verification(
+    body: ResendVerificationRequest,
+    use_case: AuthUseCase = Depends(get_auth_use_case),
+) -> ResendVerificationResponse:
+    """Re-send the email verification link for an unverified account.
+
+    # Error mapping
+    - **422 Unprocessable Entity** — the ``email`` field is missing or not a
+      valid email address.
+    - All other failure conditions (unknown email, inactive account, already
+      verified) return **200 OK** to prevent user enumeration.
+    """
+    await use_case.resend_verification(ResendVerificationInput(email=body.email))
+    return ResendVerificationResponse()
 
 
 @router.post(
