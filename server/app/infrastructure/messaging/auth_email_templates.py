@@ -101,7 +101,7 @@ def verification_email_html(token: str) -> str:
 
 
 def reset_password_email_html(token: str) -> str:
-    link = f"{settings.CORS_ORIGIN}/auth/reset-password?token={token}"
+    link = f"{settings.CORS_ORIGIN}/auth/reset-password/{token}"
     body = f"""
       <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#171717;
                   letter-spacing:-0.3px;">Reset your password</h1>

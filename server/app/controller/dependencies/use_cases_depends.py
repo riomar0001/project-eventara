@@ -16,6 +16,7 @@ from app.application.use_cases.queue_usecase import (
 from app.application.use_cases.role_usecase import UserRoleUseCase
 from app.application.use_cases.user_usecase import OnboardingUseCase
 from app.infrastructure.cache.repositories.otp_repository import OTPRepository
+from app.infrastructure.cache.repositories.password_reset_repository import PasswordResetRepository
 from app.infrastructure.database.repositories.audit_log_repository import (
     AuditLogRepository,
 )
@@ -27,15 +28,17 @@ from app.infrastructure.database.session import get_db
 def get_auth_use_case(request: Request, db: AsyncSession = Depends(get_db)) -> AuthUseCase:
     """Construct a fully-wired ``AuthUseCase`` for the current request.
 
-    Injects the user repository, database session, ARQ job queue, and the
-    Redis-backed OTP repository so all auth flows are available from a
-    single dependency.
+    Injects the user repository, database session, ARQ job queue, the
+    Redis-backed OTP repository, and the Redis-backed password reset repository
+    so all auth flows — including forgot-password and reset-password — are
+    available from a single dependency.
     """
     return AuthUseCase(
         UserRepository(db),
         db,
         request.app.state.arq,
         OTPRepository(request.app.state.redis),
+        PasswordResetRepository(request.app.state.redis),
     )
 
 
