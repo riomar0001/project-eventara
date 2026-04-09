@@ -58,3 +58,14 @@ class RefreshTokenInput:
 class RefreshTokenOutput:
     access_token: str
     refresh_token: str
+
+
+@dataclass
+class ForgotPasswordInput:
+    email: str
+
+
+@dataclass
+class ResetPasswordInput:
+    token: str
+    new_password: str

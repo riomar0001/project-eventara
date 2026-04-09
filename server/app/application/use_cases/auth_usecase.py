@@ -6,6 +6,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application.dto.auth_dto import (
+    ForgotPasswordInput,
     LoginInput,
     LoginOutput,
     LoginVerifyInput,
@@ -15,6 +16,7 @@ from app.application.dto.auth_dto import (
     RefreshTokenOutput,
     RegisteredUserOutput,
     RegisterUserInput,
+    ResetPasswordInput,
     VerifiedEmailOutput,
 )
 from app.application.interfaces.user_interface import IUserRepository
@@ -23,9 +25,11 @@ from app.core.security.hashing import hash_string, verify_hash
 from app.core.security.token_service import (
     create_access_token,
     create_otp_token,
+    create_password_reset_token,
     create_refresh_token,
     verification_token,
     verify_otp_token,
+    verify_password_reset_token,
     verify_refresh_token,
     verify_verification_token,
 )
@@ -49,19 +53,27 @@ from app.domain.exceptions import (
 )
 from app.domain.exceptions.user_exceptions import UserNotFoundError
 from app.infrastructure.cache.repositories.otp_repository import OTPRepository
+from app.infrastructure.cache.repositories.password_reset_repository import PasswordResetRepository
 from app.infrastructure.database.repositories.refresh_token_repository import (
     RefreshTokenRepository,
 )
-from app.infrastructure.messaging.auth_email_templates import otp_email_html
+from app.infrastructure.messaging.auth_email_templates import otp_email_html, reset_password_email_html
 from app.infrastructure.messaging.email import email_verified_html, send_email, verification_email_html
 
 
 class AuthUseCase:
-    """Handles all authentication flows: registration, email verification, login, and logout.
+    """Handles all authentication flows: registration, email verification, login, logout,
+    and password reset.
 
     Login is exclusively OTP-based and spans two steps:
     - ``login``: validates credentials, sends a 6-digit code, returns an OTP session token.
     - ``login_verify``: consumes the OTP, issues access and refresh tokens.
+
+    Password reset spans two steps:
+    - ``forgot_password``: locates the account, stores a single-use reset token in Redis,
+      and emails a reset link.  Always returns successfully to prevent user enumeration.
+    - ``reset_password``: validates the JWT, atomically consumes the Redis token, and
+      updates the password hash in the database.
 
     ``logout`` revokes a single refresh token, ending the associated session.
     """
@@ -72,11 +84,13 @@ class AuthUseCase:
         db: AsyncSession,
         arq: ArqRedis,
         otp_repo: OTPRepository | None = None,
+        password_reset_repo: PasswordResetRepository | None = None,
     ) -> None:
         self.repo = repo
         self.db = db
         self.arq = arq
         self.otp_repo = otp_repo
+        self.password_reset_repo = password_reset_repo
 
     async def register_user(self, data: RegisterUserInput) -> RegisteredUserOutput:
         """Create a new user account and dispatch a verification email.
@@ -457,3 +471,107 @@ class AuthUseCase:
             access_token=access_token,
             refresh_token=new_refresh_token,
         )
+
+    async def forgot_password(self, data: ForgotPasswordInput) -> None:
+        """Dispatch a password reset email if the address belongs to an eligible account.
+
+        Silent-success policy:
+            The method returns ``None`` regardless of whether the email address is
+            registered, the account is inactive, or the email has not been verified.
+            This prevents user enumeration — a caller cannot infer from the API
+            response whether a given address exists in the system.
+
+        Eligibility checks (all silent on failure):
+            1. The email must belong to a registered user.
+            2. The account must not be inactive or deleted.
+            3. The email address must already be verified.
+
+        Concurrency note:
+            ``PasswordResetRepository.store`` executes a Redis ``SET`` which
+            atomically overwrites any previously pending reset token for the same
+            user.  At most one valid reset token exists per user at any time; a
+            second ``forgot-password`` request immediately invalidates the first
+            link that was emailed.
+
+        Args:
+            data: A ``ForgotPasswordInput`` with the candidate email address.
+        """
+        user = await self.repo.get_by_email(data.email)
+        if not user or user.status in (UserStatus.INACTIVE, UserStatus.DELETED):
+            return
+
+        security = await self.repo.get_security_by_user_id(user.id)
+        if not security or not security.email_verified:
+            return
+
+        reset_repo = self.password_reset_repo
+        if reset_repo is None:
+            raise RuntimeError("Password reset repository is not configured.")
+
+        reset_token = create_password_reset_token(user.id, user.email)
+        await reset_repo.store(user.id, reset_token)
+
+        await send_email(
+            self.arq,
+            to=user.email,
+            subject="Reset your Eventara password",
+            html=reset_password_email_html(reset_token),
+        )
+
+    async def reset_password(self, data: ResetPasswordInput) -> None:
+        """Validate the reset token and replace the user's password.
+
+        The flow enforces two independent guards before writing the new password:
+        1. The JWT signature and expiry are verified first.
+        2. The token's SHA-256 hash must match the value stored in Redis and is
+           atomically consumed (``GETDEL``) so the same token cannot be used twice.
+
+        Concurrency note:
+            Token consumption uses Redis ``GETDEL``, which atomically retrieves
+            and deletes the stored hash in a single round-trip.  If two reset
+            requests arrive simultaneously with the same token only one receives
+            the stored hash; the other receives ``None`` and is rejected with
+            ``InvalidTokenError`` without any additional locking or coordination.
+
+        Security note — unified error response:
+            An expired token, a malformed token, an already-consumed token, and
+            a hash-mismatch all raise the same class of exception (either
+            ``TokenExpiredError`` or ``InvalidTokenError``).  Distinguishing the
+            "already used" case from the "invalid signature" case would leak
+            internal Redis state to a potential attacker.
+
+        Args:
+            data: A ``ResetPasswordInput`` with the plaintext reset token JWT and
+                the new plaintext password.
+
+        Raises:
+            TokenExpiredError: The reset token JWT has passed its expiry time.
+            InvalidTokenError: The token is malformed, has an invalid signature,
+                has already been consumed, or its hash does not match the stored value.
+            UserNotFoundError: No user is associated with the token's subject claim.
+        """
+        try:
+            payload = verify_password_reset_token(data.token)
+        except ValueError as exc:
+            message = str(exc)
+            if "expired" in message.lower():
+                raise TokenExpiredError() from exc
+            raise InvalidTokenError(message) from exc
+
+        user_id = uuid.UUID(payload.sub)
+
+        reset_repo = self.password_reset_repo
+        if reset_repo is None:
+            raise RuntimeError("Password reset repository is not configured.")
+
+        consumed = await reset_repo.verify_and_consume(user_id, data.token)
+        if not consumed:
+            raise InvalidTokenError("Password reset token has already been used or is invalid")
+
+        user = await self.repo.get_by_id(user_id)
+        if not user:
+            raise UserNotFoundError()
+
+        updated = await self.repo.update_password(user_id, hash_string(data.new_password))
+        if not updated:
+            raise UserNotFoundError()
