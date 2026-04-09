@@ -87,6 +87,15 @@ class RefreshTokenResponse(BaseModel):
     message: str = "Token refreshed successfully."
 
 
+class ResendVerificationRequest(BaseModel):
+    email: EmailStr
+
+
+class ResendVerificationResponse(BaseModel):
+    success: bool = True
+    message: str = "If that email address is in our system and unverified, a new confirmation link has been sent."
+
+
 class ForgotPasswordRequest(BaseModel):
     email: EmailStr
 
