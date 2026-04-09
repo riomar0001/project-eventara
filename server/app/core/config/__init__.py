@@ -43,6 +43,9 @@ class Settings(BaseSettings):
     CORS_ORIGIN: str
     ALLOWED_ORIGINS: str = "*"
 
+    ADMIN_EMAIL: str
+    ADMIN_PASSWORD: str
+
     @field_validator(
         "ACCESS_TOKEN_EXPIRATION",
         "REFRESH_TOKEN_EXPIRATION",

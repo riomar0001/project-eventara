@@ -107,7 +107,23 @@ alembic downgrade -1       # roll back one step
 alembic downgrade <id>     # roll back to a specific revision
 ```
 
-5. **Start the server**
+5. **Seed the database**
+
+   Add your admin credentials to `.env`:
+
+   ```env
+   ADMIN_EMAIL="you@example.com"
+   ADMIN_PASSWORD="your-secure-password"
+   ```
+
+   Then run the seeds in order:
+
+   ```bash
+   python -m seeds.rbac_user_management   # roles, features, permissions
+   python -m seeds.system_admin           # system administrator account
+   ```
+
+6. **Start the server**
 
    ```bash
    uvicorn main:app --reload
