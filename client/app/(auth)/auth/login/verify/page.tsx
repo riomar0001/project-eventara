@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { Authentication } from '@/api/sdk.gen';
 import { OTPInput } from '@/components/authentication/otp-input';
 import { Button } from '@/components/ui/button';
+import { useAuthStore } from '@/store/auth-store';
 
 export default function LoginVerifyPage() {
   const router = useRouter();
@@ -30,16 +31,17 @@ export default function LoginVerifyPage() {
 
     setLoading(true);
     try {
-      const { error } = await Authentication.loginVerifyAuthLoginVerifyGet({
+      const { data, error } = await Authentication.loginVerifyAuthLoginVerifyGet({
         body: { token, code }
       });
 
-      if (error) {
+      if (error || !data) {
         toast.error((error as { message?: string }).message ?? 'Invalid or expired code');
         setCode('');
         return;
       }
 
+      useAuthStore.getState().setAuth(data.access_token, data.refresh_token);
       sessionStorage.removeItem('otp_token');
       router.push('/');
     } catch {

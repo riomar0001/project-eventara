@@ -7,6 +7,7 @@ import { use, useEffect, useState } from 'react';
 
 import { Authentication } from '@/api/sdk.gen';
 import { Button } from '@/components/ui/button';
+import { useAuthStore } from '@/store/auth-store';
 
 type Status = 'loading' | 'success' | 'error';
 
@@ -20,11 +21,11 @@ export default function VerifyEmailPage({ params }: { params: Promise<{ token: s
   useEffect(() => {
     async function verify() {
       try {
-        const { error } = await Authentication.verifyEmailAuthVerifyTokenGet({
+        const { data, error } = await Authentication.verifyEmailAuthVerifyTokenGet({
           path: { token }
         });
 
-        if (error) {
+        if (error || !data) {
           setErrorMessage(
             (error as { message?: string }).message ?? 'This link is invalid or has expired.'
           );
@@ -32,6 +33,7 @@ export default function VerifyEmailPage({ params }: { params: Promise<{ token: s
           return;
         }
 
+        useAuthStore.getState().setAuth(data.access_token, data.refresh_token);
         setStatus('success');
       } catch {
         setErrorMessage('Something went wrong. Please try again.');
