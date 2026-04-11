@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect } from 'react';
-
 import { useAuthStore } from '@/store/auth-store';
 
 /**
@@ -18,8 +17,8 @@ import { useAuthStore } from '@/store/auth-store';
  * redirect decisions until hydration is complete.
  */
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const initialize = useAuthStore(s => s.initialize);
-  const isInitialized = useAuthStore(s => s.isInitialized);
+  const initialize = useAuthStore((s) => s.initialize);
+  const isInitialized = useAuthStore((s) => s.isInitialized);
 
   useEffect(() => {
     if (!isInitialized) {

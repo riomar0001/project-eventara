@@ -40,7 +40,7 @@ export function decodeTokenUser(token: string): AuthUser | null {
       doneOnboarding: Boolean(p.done_onboarding),
       roleId: p.role_id ?? undefined,
       firstName: p.first_name ?? undefined,
-      lastName: p.last_name ?? undefined,
+      lastName: p.last_name ?? undefined
     };
   } catch {
     return null;

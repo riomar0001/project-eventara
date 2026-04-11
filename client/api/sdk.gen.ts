@@ -9,23 +9,14 @@ import type {
   CreateGrantsUserGrantsPostData,
   CreateGrantsUserGrantsPostErrors,
   CreateGrantsUserGrantsPostResponses,
-  DeleteDeadJobQueuesDlqJobIdDeleteData,
-  DeleteDeadJobQueuesDlqJobIdDeleteErrors,
-  DeleteDeadJobQueuesDlqJobIdDeleteResponses,
   GetAssignmentUserRolesAssignmentIdGetData,
   GetAssignmentUserRolesAssignmentIdGetErrors,
   GetAssignmentUserRolesAssignmentIdGetResponses,
   GetAuditLogsAuditLogsGetData,
   GetAuditLogsAuditLogsGetErrors,
   GetAuditLogsAuditLogsGetResponses,
-  GetQueueStatsQueuesGetData,
-  GetQueueStatsQueuesGetErrors,
-  GetQueueStatsQueuesGetResponses,
   HealthCheckHealthGetData,
   HealthCheckHealthGetResponses,
-  ListDeadJobsQueuesDlqGetData,
-  ListDeadJobsQueuesDlqGetErrors,
-  ListDeadJobsQueuesDlqGetResponses,
   ListUserGrantsUserGrantsGetData,
   ListUserGrantsUserGrantsGetErrors,
   ListUserGrantsUserGrantsGetResponses,
@@ -41,18 +32,12 @@ import type {
   LogoutAuthLogoutPostData,
   LogoutAuthLogoutPostErrors,
   LogoutAuthLogoutPostResponses,
-  PurgeDeadJobsQueuesDlqDeleteData,
-  PurgeDeadJobsQueuesDlqDeleteErrors,
-  PurgeDeadJobsQueuesDlqDeleteResponses,
   RefreshTokenAuthRefreshPostData,
   RefreshTokenAuthRefreshPostErrors,
   RefreshTokenAuthRefreshPostResponses,
   RegisterUserAuthRegisterPostData,
   RegisterUserAuthRegisterPostErrors,
   RegisterUserAuthRegisterPostResponses,
-  RetryDeadJobQueuesDlqJobIdRetryPostData,
-  RetryDeadJobQueuesDlqJobIdRetryPostErrors,
-  RetryDeadJobQueuesDlqJobIdRetryPostResponses,
   RevokeAssignmentUserRolesAssignmentIdDeleteData,
   RevokeAssignmentUserRolesAssignmentIdDeleteErrors,
   RevokeAssignmentUserRolesAssignmentIdDeleteResponses,
@@ -76,14 +61,10 @@ import {
   zAssignRoleUserRolesPostResponse,
   zCreateGrantsUserGrantsPostBody,
   zCreateGrantsUserGrantsPostResponse,
-  zDeleteDeadJobQueuesDlqJobIdDeletePath,
-  zDeleteDeadJobQueuesDlqJobIdDeleteResponse,
   zGetAssignmentUserRolesAssignmentIdGetPath,
   zGetAssignmentUserRolesAssignmentIdGetResponse,
   zGetAuditLogsAuditLogsGetQuery,
   zGetAuditLogsAuditLogsGetResponse,
-  zGetQueueStatsQueuesGetResponse,
-  zListDeadJobsQueuesDlqGetResponse,
   zListUserGrantsUserGrantsGetQuery,
   zListUserGrantsUserGrantsGetResponse,
   zListUserRolesUserRolesGetQuery,
@@ -94,13 +75,10 @@ import {
   zLoginVerifyAuthLoginVerifyGetResponse,
   zLogoutAuthLogoutPostBody,
   zLogoutAuthLogoutPostResponse,
-  zPurgeDeadJobsQueuesDlqDeleteResponse,
   zRefreshTokenAuthRefreshPostBody,
   zRefreshTokenAuthRefreshPostResponse,
   zRegisterUserAuthRegisterPostBody,
   zRegisterUserAuthRegisterPostResponse,
-  zRetryDeadJobQueuesDlqJobIdRetryPostPath,
-  zRetryDeadJobQueuesDlqJobIdRetryPostResponse,
   zRevokeAssignmentUserRolesAssignmentIdDeletePath,
   zRevokeAssignmentUserRolesAssignmentIdDeleteResponse,
   zRevokeGrantUserGrantsGrantIdDeletePath,
@@ -551,135 +529,6 @@ export class UserGrantManagement {
       responseValidator: async (data) => await zRevokeGrantUserGrantsGrantIdDeleteResponse.parseAsync(data),
       security: [{ scheme: 'bearer', type: 'http' }],
       url: '/user-grants/{grant_id}',
-      ...options
-    });
-  }
-}
-
-export class QueueManagement {
-  /**
-   * Get queue statistics
-   *
-   * Returns a live snapshot of the ARQ job queue, including pending, in-progress, completed, and failed job counts, along with the last known worker heartbeat entries from the health-check sorted set.
-   *
-   * **Requires** ``read`` permission on the ``queues`` feature.
-   */
-  public static getQueueStatsQueuesGet<ThrowOnError extends boolean = false>(options?: Options<GetQueueStatsQueuesGetData, ThrowOnError>) {
-    return (options?.client ?? client).get<GetQueueStatsQueuesGetResponses, GetQueueStatsQueuesGetErrors, ThrowOnError>({
-      requestValidator: async (data) =>
-        await z
-          .object({
-            body: z.never().optional(),
-            path: z.never().optional(),
-            query: z.never().optional()
-          })
-          .parseAsync(data),
-      responseType: 'json',
-      responseValidator: async (data) => await zGetQueueStatsQueuesGetResponse.parseAsync(data),
-      security: [{ scheme: 'bearer', type: 'http' }],
-      url: '/queues',
-      ...options
-    });
-  }
-
-  /**
-   * Purge all dead-letter jobs
-   *
-   * Bulk-deletes every failed job from the dead-letter store in a single operation.  Jobs that complete between the scan and the delete pass will not be affected.  This action is **irreversible**.
-   *
-   * **Requires** ``delete`` permission on the ``queues`` feature.
-   */
-  public static purgeDeadJobsQueuesDlqDelete<ThrowOnError extends boolean = false>(options?: Options<PurgeDeadJobsQueuesDlqDeleteData, ThrowOnError>) {
-    return (options?.client ?? client).delete<PurgeDeadJobsQueuesDlqDeleteResponses, PurgeDeadJobsQueuesDlqDeleteErrors, ThrowOnError>({
-      requestValidator: async (data) =>
-        await z
-          .object({
-            body: z.never().optional(),
-            path: z.never().optional(),
-            query: z.never().optional()
-          })
-          .parseAsync(data),
-      responseType: 'json',
-      responseValidator: async (data) => await zPurgeDeadJobsQueuesDlqDeleteResponse.parseAsync(data),
-      security: [{ scheme: 'bearer', type: 'http' }],
-      url: '/queues/dlq',
-      ...options
-    });
-  }
-
-  /**
-   * List dead-letter queue jobs
-   *
-   * Returns all jobs that exhausted their retry budget and ended in a permanent failure state.  Each entry includes the original function name, serialised arguments, retry count, and the last exception message.
-   *
-   * **Requires** ``read`` permission on the ``queues`` feature.
-   */
-  public static listDeadJobsQueuesDlqGet<ThrowOnError extends boolean = false>(options?: Options<ListDeadJobsQueuesDlqGetData, ThrowOnError>) {
-    return (options?.client ?? client).get<ListDeadJobsQueuesDlqGetResponses, ListDeadJobsQueuesDlqGetErrors, ThrowOnError>({
-      requestValidator: async (data) =>
-        await z
-          .object({
-            body: z.never().optional(),
-            path: z.never().optional(),
-            query: z.never().optional()
-          })
-          .parseAsync(data),
-      responseType: 'json',
-      responseValidator: async (data) => await zListDeadJobsQueuesDlqGetResponse.parseAsync(data),
-      security: [{ scheme: 'bearer', type: 'http' }],
-      url: '/queues/dlq',
-      ...options
-    });
-  }
-
-  /**
-   * Retry a dead-letter job
-   *
-   * Re-enqueues a failed job with its original function name and arguments, then removes it from the dead-letter store.  A distributed Redis lock prevents duplicate enqueue if two callers submit the same ``job_id`` simultaneously.
-   *
-   * **Requires** ``delete`` permission on the ``queues`` feature.
-   */
-  public static retryDeadJobQueuesDlqJobIdRetryPost<ThrowOnError extends boolean = false>(
-    options: Options<RetryDeadJobQueuesDlqJobIdRetryPostData, ThrowOnError>
-  ) {
-    return (options.client ?? client).post<RetryDeadJobQueuesDlqJobIdRetryPostResponses, RetryDeadJobQueuesDlqJobIdRetryPostErrors, ThrowOnError>({
-      requestValidator: async (data) =>
-        await z
-          .object({
-            body: z.never().optional(),
-            path: zRetryDeadJobQueuesDlqJobIdRetryPostPath,
-            query: z.never().optional()
-          })
-          .parseAsync(data),
-      responseType: 'json',
-      responseValidator: async (data) => await zRetryDeadJobQueuesDlqJobIdRetryPostResponse.parseAsync(data),
-      security: [{ scheme: 'bearer', type: 'http' }],
-      url: '/queues/dlq/{job_id}/retry',
-      ...options
-    });
-  }
-
-  /**
-   * Delete a dead-letter job
-   *
-   * Permanently removes a single failed job from the dead-letter store.  The job must exist and have ``success=False`` — successfully completed jobs cannot be deleted through this endpoint.
-   *
-   * **Requires** ``delete`` permission on the ``queues`` feature.
-   */
-  public static deleteDeadJobQueuesDlqJobIdDelete<ThrowOnError extends boolean = false>(options: Options<DeleteDeadJobQueuesDlqJobIdDeleteData, ThrowOnError>) {
-    return (options.client ?? client).delete<DeleteDeadJobQueuesDlqJobIdDeleteResponses, DeleteDeadJobQueuesDlqJobIdDeleteErrors, ThrowOnError>({
-      requestValidator: async (data) =>
-        await z
-          .object({
-            body: z.never().optional(),
-            path: zDeleteDeadJobQueuesDlqJobIdDeletePath,
-            query: z.never().optional()
-          })
-          .parseAsync(data),
-      responseType: 'json',
-      responseValidator: async (data) => await zDeleteDeadJobQueuesDlqJobIdDeleteResponse.parseAsync(data),
-      security: [{ scheme: 'bearer', type: 'http' }],
-      url: '/queues/dlq/{job_id}',
       ...options
     });
   }

@@ -1,14 +1,13 @@
 'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod';
+import { use, useState } from 'react';
 import { CheckCircle, Eye, EyeOff, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { use, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
-
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
@@ -17,7 +16,7 @@ const schema = z
     new_password: z.string().min(8, 'Password must be at least 8 characters'),
     confirm_password: z.string()
   })
-  .refine(data => data.new_password === data.confirm_password, {
+  .refine((data) => data.new_password === data.confirm_password, {
     message: "Passwords don't match",
     path: ['confirm_password']
   });
@@ -69,13 +68,11 @@ export default function ResetPasswordPage({ params }: { params: Promise<{ token:
   if (success) {
     return (
       <div className="w-full max-w-sm text-center">
-        <div className="mx-auto mb-5 flex size-16 items-center justify-center rounded-full bg-primary/10">
-          <CheckCircle className="size-8 text-primary" />
+        <div className="bg-primary/10 mx-auto mb-5 flex size-16 items-center justify-center rounded-full">
+          <CheckCircle className="text-primary size-8" />
         </div>
-        <h1 className="text-xl font-bold tracking-tight text-foreground">Password reset!</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Your password has been updated. Redirecting you to sign in…
-        </p>
+        <h1 className="text-foreground text-xl font-bold tracking-tight">Password reset!</h1>
+        <p className="text-muted-foreground mt-2 text-sm">Your password has been updated. Redirecting you to sign in…</p>
       </div>
     );
   }
@@ -83,13 +80,13 @@ export default function ResetPasswordPage({ params }: { params: Promise<{ token:
   return (
     <div className="w-full max-w-sm">
       <div className="mb-8">
-        <h1 className="text-[1.75rem] font-bold tracking-tight text-foreground">Reset your password</h1>
-        <p className="mt-1.5 text-sm text-muted-foreground">Enter your new password below.</p>
+        <h1 className="text-foreground text-[1.75rem] font-bold tracking-tight">Reset your password</h1>
+        <p className="text-muted-foreground mt-1.5 text-sm">Enter your new password below.</p>
       </div>
 
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <div className="space-y-1.5">
-          <label className="text-sm font-medium text-foreground" htmlFor="new_password">
+          <label className="text-foreground text-sm font-medium" htmlFor="new_password">
             New password
           </label>
           <div className="relative">
@@ -103,20 +100,18 @@ export default function ResetPasswordPage({ params }: { params: Promise<{ token:
             />
             <button
               type="button"
-              onClick={() => setShowNew(s => !s)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
+              onClick={() => setShowNew((s) => !s)}
+              className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 transition-colors"
               tabIndex={-1}
             >
               {showNew ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
             </button>
           </div>
-          {form.formState.errors.new_password && (
-            <p className="text-xs text-destructive">{form.formState.errors.new_password.message}</p>
-          )}
+          {form.formState.errors.new_password && <p className="text-destructive text-xs">{form.formState.errors.new_password.message}</p>}
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-sm font-medium text-foreground" htmlFor="confirm_password">
+          <label className="text-foreground text-sm font-medium" htmlFor="confirm_password">
             Confirm new password
           </label>
           <div className="relative">
@@ -130,18 +125,14 @@ export default function ResetPasswordPage({ params }: { params: Promise<{ token:
             />
             <button
               type="button"
-              onClick={() => setShowConfirm(s => !s)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
+              onClick={() => setShowConfirm((s) => !s)}
+              className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 transition-colors"
               tabIndex={-1}
             >
               {showConfirm ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
             </button>
           </div>
-          {form.formState.errors.confirm_password && (
-            <p className="text-xs text-destructive">
-              {form.formState.errors.confirm_password.message}
-            </p>
-          )}
+          {form.formState.errors.confirm_password && <p className="text-destructive text-xs">{form.formState.errors.confirm_password.message}</p>}
         </div>
 
         <Button type="submit" variant="black" className="w-full" disabled={isSubmitting}>
@@ -150,9 +141,9 @@ export default function ResetPasswordPage({ params }: { params: Promise<{ token:
         </Button>
       </form>
 
-      <p className="mt-6 text-sm text-muted-foreground">
+      <p className="text-muted-foreground mt-6 text-sm">
         Remembered your password?{' '}
-        <Link href="/auth/login" className="font-medium text-foreground hover:underline">
+        <Link href="/auth/login" className="text-foreground font-medium hover:underline">
           Sign in
         </Link>
       </p>

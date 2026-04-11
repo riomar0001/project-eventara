@@ -9,20 +9,13 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: 'bg-primary text-black hover:bg-primary/80',
-        black: 'bg-black text-white hover:bg-black/80 dark:bg-white dark:text-black dark:hover:bg-white/80',
         outline:
           'border-border bg-background hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:bg-transparent dark:hover:bg-input/30',
         secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80 aria-expanded:bg-secondary aria-expanded:text-secondary-foreground',
         ghost: 'hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50',
         destructive:
           'bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40',
-        link: 'text-primary underline-offset-4 hover:underline',
-        'link-black': 'text-black underline-offset-4 hover:underline dark:text-white',
-        'link-destructive': 'text-destructive underline-offset-4 hover:underline',
-        amber: 'bg-amber-400 text-amber-950 hover:bg-amber-400/80',
-        'amber-outline': 'border border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100',
-        'amber-ghost': 'text-amber-700 hover:bg-amber-100 hover:text-amber-800',
-        'link-amber': 'text-amber-600 underline-offset-4 hover:underline'
+        link: 'text-primary underline-offset-4 hover:underline'
       },
       size: {
         default: 'h-9 gap-1.5 px-3 has-data-[icon=inline-end]:pr-2.5 has-data-[icon=inline-start]:pl-2.5',

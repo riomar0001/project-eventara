@@ -6,7 +6,17 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ChartContainer } from '@/components/ui/chart';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { financialHealthChartConfig as chartConfig, financialHealthData as data } from '@/constants/dashboard';
+
+const chartConfig = {
+  filled: { label: 'Saved', color: 'oklch(0.841 0.238 128.85)' },
+  empty: { label: 'Remaining', color: 'oklch(0.922 0 0)' }
+};
+
+const percentage = 75;
+const data = [
+  { name: 'filled', value: percentage },
+  { name: 'empty', value: 100 - percentage }
+];
 
 export function FinancialHealthCard() {
   return (

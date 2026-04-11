@@ -1,12 +1,11 @@
 'use client';
 
+import { use, useEffect, useState } from 'react';
 import { CheckCircle, Loader2, XCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { use, useEffect, useState } from 'react';
-
-import { Authentication } from '@/api/sdk.gen';
 import { Button } from '@/components/ui/button';
+import { Authentication } from '@/api/sdk.gen';
 import { useAuthStore } from '@/store/auth-store';
 
 type Status = 'loading' | 'success' | 'error';
@@ -26,9 +25,7 @@ export default function VerifyEmailPage({ params }: { params: Promise<{ token: s
         });
 
         if (error || !data) {
-          setErrorMessage(
-            (error as { message?: string }).message ?? 'This link is invalid or has expired.'
-          );
+          setErrorMessage((error as { message?: string }).message ?? 'This link is invalid or has expired.');
           setStatus('error');
           return;
         }
@@ -48,7 +45,7 @@ export default function VerifyEmailPage({ params }: { params: Promise<{ token: s
     if (status !== 'success') return;
 
     const timer = setInterval(() => {
-      setCountdown(c => {
+      setCountdown((c) => {
         if (c <= 1) {
           clearInterval(timer);
           router.push('/');
@@ -65,35 +62,31 @@ export default function VerifyEmailPage({ params }: { params: Promise<{ token: s
     <div className="w-full max-w-sm text-center">
       {status === 'loading' && (
         <>
-          <div className="mx-auto mb-5 flex size-16 items-center justify-center rounded-full bg-primary/10">
-            <Loader2 className="size-8 animate-spin text-primary" />
+          <div className="bg-primary/10 mx-auto mb-5 flex size-16 items-center justify-center rounded-full">
+            <Loader2 className="text-primary size-8 animate-spin" />
           </div>
-          <h1 className="text-xl font-bold tracking-tight text-foreground">
-            Verifying your email…
-          </h1>
-          <p className="mt-2 text-sm text-muted-foreground">This will only take a moment.</p>
+          <h1 className="text-foreground text-xl font-bold tracking-tight">Verifying your email…</h1>
+          <p className="text-muted-foreground mt-2 text-sm">This will only take a moment.</p>
         </>
       )}
 
       {status === 'success' && (
         <>
-          <div className="mx-auto mb-5 flex size-16 items-center justify-center rounded-full bg-primary/10">
-            <CheckCircle className="size-8 text-primary" />
+          <div className="bg-primary/10 mx-auto mb-5 flex size-16 items-center justify-center rounded-full">
+            <CheckCircle className="text-primary size-8" />
           </div>
-          <h1 className="text-xl font-bold tracking-tight text-foreground">Email verified!</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Redirecting you to the dashboard in {countdown}…
-          </p>
+          <h1 className="text-foreground text-xl font-bold tracking-tight">Email verified!</h1>
+          <p className="text-muted-foreground mt-2 text-sm">Redirecting you to the dashboard in {countdown}…</p>
         </>
       )}
 
       {status === 'error' && (
         <>
-          <div className="mx-auto mb-5 flex size-16 items-center justify-center rounded-full bg-destructive/10">
-            <XCircle className="size-8 text-destructive" />
+          <div className="bg-destructive/10 mx-auto mb-5 flex size-16 items-center justify-center rounded-full">
+            <XCircle className="text-destructive size-8" />
           </div>
-          <h1 className="text-xl font-bold tracking-tight text-foreground">Verification failed</h1>
-          <p className="mt-2 text-sm text-muted-foreground">{errorMessage}</p>
+          <h1 className="text-foreground text-xl font-bold tracking-tight">Verification failed</h1>
+          <p className="text-muted-foreground mt-2 text-sm">{errorMessage}</p>
           <div className="mt-6 flex flex-col gap-2">
             <Button variant="black" asChild>
               <Link href="/auth/resend-verification">Resend verification email</Link>

@@ -7,7 +7,7 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 suites = {
     "unit": "tests/unit/",
     "integration": None,  # TODO: add integration tests
-    "e2e": None,          # TODO: add e2e tests
+    "e2e": None,  # TODO: add e2e tests
 }
 
 
