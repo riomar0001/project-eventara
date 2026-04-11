@@ -3,7 +3,7 @@ name = "eventara"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.14"
 dependencies = [
     "alembic==1.16.1",
     "annotated-doc==0.0.4",
@@ -22,7 +22,6 @@ dependencies = [
     "mangum==0.21.0",
     "markupsafe==3.0.3",
     "passlib==1.7.4",
-    "pip==25.2",
     "psycopg2-binary==2.9.10",
     "pydantic[email]==2.12.5",
     "pydantic-core==2.41.5",
@@ -42,9 +41,16 @@ dependencies = [
     "pyyaml>=6.0.3",
 ]
 
+[dependency-groups]
+dev = [
+    "pytest>=8.3.0",
+    "pytest-asyncio>=0.25.0",
+    "ruff>=0.11.0",
+]
+
 [tool.ruff]
 line-length = 150
-target-version = "py311"
+target-version = "py314"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP"]
@@ -56,13 +62,6 @@ known-first-party = ["app"]
 [tool.ruff.lint.per-file-ignores]
 "migrations/*" = ["E501"]
 "seeds/*" = ["E501"]
-
-[dependency-groups]
-dev = [
-    "pytest>=8.3.0",
-    "pytest-asyncio>=0.25.0",
-    "ruff>=0.11.0",
-]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
