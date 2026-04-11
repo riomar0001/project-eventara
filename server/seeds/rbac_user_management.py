@@ -143,7 +143,7 @@ def _log(msg: str) -> None:
 
 async def _upsert_features(session) -> dict[str, UUID]:
     """Insert features, ignore conflicts on slug. Returns slug -> id map."""
-    stmt = insert(Feature.__table__).values(FEATURES).on_conflict_do_nothing(index_elements=["slug"])
+    stmt = insert(Feature).values(FEATURES).on_conflict_do_nothing(index_elements=["slug"])
     await session.execute(stmt)
 
     rows = await session.execute(select(Feature.id, Feature.slug))
@@ -152,7 +152,7 @@ async def _upsert_features(session) -> dict[str, UUID]:
 
 async def _upsert_roles(session) -> dict[str, UUID]:
     """Insert roles, ignore conflicts on name. Returns name -> id map."""
-    stmt = insert(Role.__table__).values(ROLES).on_conflict_do_nothing(index_elements=["name"])
+    stmt = insert(Role).values(ROLES).on_conflict_do_nothing(index_elements=["name"])
     await session.execute(stmt)
 
     rows = await session.execute(select(Role.id, Role.name))
@@ -193,7 +193,7 @@ async def _upsert_role_permissions(
     if not new_records:
         return 0
 
-    await session.execute(insert(RolePermission.__table__).values(new_records))
+    await session.execute(insert(RolePermission).values(new_records))
     return len(new_records)
 
 

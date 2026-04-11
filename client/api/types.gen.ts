@@ -1324,6 +1324,199 @@ export type RevokeGrantUserGrantsGrantIdDeleteResponses = {
 
 export type RevokeGrantUserGrantsGrantIdDeleteResponse = RevokeGrantUserGrantsGrantIdDeleteResponses[keyof RevokeGrantUserGrantsGrantIdDeleteResponses];
 
+export type GetQueueStatsQueuesGetData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: '/queues';
+};
+
+export type GetQueueStatsQueuesGetErrors = {
+  /**
+   * Invalid or expired token
+   */
+  401: unknown;
+  /**
+   * Insufficient permissions to manage queues
+   */
+  403: unknown;
+  /**
+   * Unexpected Redis or ARQ error during queue inspection
+   */
+  500: unknown;
+};
+
+export type GetQueueStatsQueuesGetResponses = {
+  /**
+   * Successful Response
+   */
+  200: QueueStatsResponse;
+};
+
+export type GetQueueStatsQueuesGetResponse = GetQueueStatsQueuesGetResponses[keyof GetQueueStatsQueuesGetResponses];
+
+export type PurgeDeadJobsQueuesDlqDeleteData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: '/queues/dlq';
+};
+
+export type PurgeDeadJobsQueuesDlqDeleteErrors = {
+  /**
+   * Invalid or expired token
+   */
+  401: unknown;
+  /**
+   * Insufficient permissions to manage queues
+   */
+  403: unknown;
+  /**
+   * Unexpected Redis or ARQ error during queue inspection
+   */
+  500: unknown;
+};
+
+export type PurgeDeadJobsQueuesDlqDeleteResponses = {
+  /**
+   * Successful Response
+   */
+  200: PurgeDeadJobsResponse;
+};
+
+export type PurgeDeadJobsQueuesDlqDeleteResponse = PurgeDeadJobsQueuesDlqDeleteResponses[keyof PurgeDeadJobsQueuesDlqDeleteResponses];
+
+export type ListDeadJobsQueuesDlqGetData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: '/queues/dlq';
+};
+
+export type ListDeadJobsQueuesDlqGetErrors = {
+  /**
+   * Invalid or expired token
+   */
+  401: unknown;
+  /**
+   * Insufficient permissions to manage queues
+   */
+  403: unknown;
+  /**
+   * Unexpected Redis or ARQ error during queue inspection
+   */
+  500: unknown;
+};
+
+export type ListDeadJobsQueuesDlqGetResponses = {
+  /**
+   * Successful Response
+   */
+  200: ListDeadJobsResponse;
+};
+
+export type ListDeadJobsQueuesDlqGetResponse = ListDeadJobsQueuesDlqGetResponses[keyof ListDeadJobsQueuesDlqGetResponses];
+
+export type RetryDeadJobQueuesDlqJobIdRetryPostData = {
+  body?: never;
+  path: {
+    /**
+     * Job Id
+     */
+    job_id: string;
+  };
+  query?: never;
+  url: '/queues/dlq/{job_id}/retry';
+};
+
+export type RetryDeadJobQueuesDlqJobIdRetryPostErrors = {
+  /**
+   * Invalid or expired token
+   */
+  401: unknown;
+  /**
+   * Insufficient permissions to manage queues
+   */
+  403: unknown;
+  /**
+   * Job not found in the dead-letter queue
+   */
+  404: unknown;
+  /**
+   * A concurrent retry for the same job is already in progress
+   */
+  409: unknown;
+  /**
+   * Validation Error
+   */
+  422: HttpValidationError;
+  /**
+   * Unexpected Redis or ARQ error during queue inspection
+   */
+  500: unknown;
+};
+
+export type RetryDeadJobQueuesDlqJobIdRetryPostError = RetryDeadJobQueuesDlqJobIdRetryPostErrors[keyof RetryDeadJobQueuesDlqJobIdRetryPostErrors];
+
+export type RetryDeadJobQueuesDlqJobIdRetryPostResponses = {
+  /**
+   * Successful Response
+   */
+  200: RetryJobResponse;
+};
+
+export type RetryDeadJobQueuesDlqJobIdRetryPostResponse = RetryDeadJobQueuesDlqJobIdRetryPostResponses[keyof RetryDeadJobQueuesDlqJobIdRetryPostResponses];
+
+export type DeleteDeadJobQueuesDlqJobIdDeleteData = {
+  body?: never;
+  path: {
+    /**
+     * Job Id
+     */
+    job_id: string;
+  };
+  query?: never;
+  url: '/queues/dlq/{job_id}';
+};
+
+export type DeleteDeadJobQueuesDlqJobIdDeleteErrors = {
+  /**
+   * Invalid or expired token
+   */
+  401: unknown;
+  /**
+   * Insufficient permissions to manage queues
+   */
+  403: unknown;
+  /**
+   * Job not found in the dead-letter queue
+   */
+  404: unknown;
+  /**
+   * Job is not a failed job and cannot be managed via the DLQ
+   */
+  409: unknown;
+  /**
+   * Validation Error
+   */
+  422: HttpValidationError;
+  /**
+   * Unexpected Redis or ARQ error during queue inspection
+   */
+  500: unknown;
+};
+
+export type DeleteDeadJobQueuesDlqJobIdDeleteError = DeleteDeadJobQueuesDlqJobIdDeleteErrors[keyof DeleteDeadJobQueuesDlqJobIdDeleteErrors];
+
+export type DeleteDeadJobQueuesDlqJobIdDeleteResponses = {
+  /**
+   * Successful Response
+   */
+  200: DeleteJobResponse;
+};
+
+export type DeleteDeadJobQueuesDlqJobIdDeleteResponse = DeleteDeadJobQueuesDlqJobIdDeleteResponses[keyof DeleteDeadJobQueuesDlqJobIdDeleteResponses];
+
 export type RootGetData = {
   body?: never;
   path?: never;

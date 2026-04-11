@@ -25,3 +25,10 @@ class UserOnboardingInput:
 @dataclass
 class UserOnboardingOutput:
     profile: UserProfile
+
+
+@dataclass
+class ChangePasswordInput:
+    user_id: uuid.UUID
+    current_password: str
+    new_password: str

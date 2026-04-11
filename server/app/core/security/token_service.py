@@ -268,6 +268,51 @@ def verify_otp_token(token: str) -> TokenPayload:
     return TokenPayload(**payload)
 
 
+def create_password_reset_token(user_id: uuid.UUID, email: str) -> str:
+    """Build and sign a short-lived password reset token.
+
+    The token is signed with ``JWT_VERIFICATION_TOKEN_SECRET`` and carries a
+    ``type: "password_reset"`` claim so it cannot be used interchangeably with
+    verification or OTP tokens.  It is intended to be hashed and stored in
+    Redis so it can be consumed exactly once.
+
+    Args:
+        user_id: The requesting user's UUID, stored in the ``sub`` claim.
+        email:   The user's email address, embedded for audit traceability.
+
+    Returns:
+        A signed JWT string to be included in the password reset link emailed
+        to the user.
+    """
+    now = datetime.now(UTC)
+    payload = {
+        "sub": str(user_id),
+        "email": email,
+        "type": "password_reset",
+        "jti": str(uuid.uuid4()),
+        "iat": now,
+        "exp": now + settings.PASSWORD_RESET_TOKEN_EXPIRATION,
+    }
+    return jwt.encode(payload, settings.JWT_VERIFICATION_TOKEN_SECRET, algorithm=settings.JWT_ALGORITHM)
+
+
+def verify_password_reset_token(token: str) -> TokenPayload:
+    """Decode and validate a password reset token.
+
+    Args:
+        token: The raw JWT string extracted from the password reset link.
+
+    Returns:
+        A ``TokenPayload`` containing the ``sub`` (user ID) and ``email`` claims.
+
+    Raises:
+        ValueError: The token is expired, has an invalid signature, or is not
+            of type ``password_reset``.
+    """
+    payload = _decode(token, secret=settings.JWT_VERIFICATION_TOKEN_SECRET, expected_type="password_reset")
+    return TokenPayload(**payload)
+
+
 def _decode(token: str, secret: str, expected_type: str) -> dict:
     """Decode a JWT and enforce signature, expiry, and token-type claims.
 

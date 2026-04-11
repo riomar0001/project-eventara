@@ -81,6 +81,15 @@ export const zGender = z.enum(['male', 'female']);
 export const zGrantEffect = z.enum(['allow', 'deny']);
 
 /**
+ * ListDeadJobsResponse
+ */
+export const zListDeadJobsResponse = z.object({
+  success: z.boolean().optional().default(true),
+  data: z.array(zDeadJobResponse),
+  total: z.int()
+});
+
+/**
  * LoginInitResponse
  */
 export const zLoginInitResponse = z.object({
@@ -467,3 +476,36 @@ export const zRevokeGrantUserGrantsGrantIdDeletePath = z.object({
  * Successful Response
  */
 export const zRevokeGrantUserGrantsGrantIdDeleteResponse = z.void();
+
+/**
+ * Successful Response
+ */
+export const zGetQueueStatsQueuesGetResponse = zQueueStatsResponse;
+
+/**
+ * Successful Response
+ */
+export const zPurgeDeadJobsQueuesDlqDeleteResponse = zPurgeDeadJobsResponse;
+
+/**
+ * Successful Response
+ */
+export const zListDeadJobsQueuesDlqGetResponse = zListDeadJobsResponse;
+
+export const zRetryDeadJobQueuesDlqJobIdRetryPostPath = z.object({
+  job_id: z.string()
+});
+
+/**
+ * Successful Response
+ */
+export const zRetryDeadJobQueuesDlqJobIdRetryPostResponse = zRetryJobResponse;
+
+export const zDeleteDeadJobQueuesDlqJobIdDeletePath = z.object({
+  job_id: z.string()
+});
+
+/**
+ * Successful Response
+ */
+export const zDeleteDeadJobQueuesDlqJobIdDeleteResponse = zDeleteJobResponse;

@@ -6,6 +6,7 @@ from app.application.use_cases.audit_log_usecase import (
     GetAuditLogsUseCase,
 )
 from app.application.use_cases.auth_usecase import AuthUseCase
+from app.application.use_cases.user_usecase import ChangePasswordUseCase, OnboardingUseCase
 from app.application.use_cases.queue_usecase import (
     DeleteDeadJobUseCase,
     GetQueueStatsUseCase,
@@ -17,6 +18,7 @@ from app.application.use_cases.role_usecase import UserRoleUseCase
 from app.application.use_cases.user_usecase import OnboardingUseCase
 from app.application.use_cases.venue_usecase import VenueUseCase
 from app.infrastructure.cache.repositories.otp_repository import OTPRepository
+from app.infrastructure.cache.repositories.password_reset_repository import PasswordResetRepository
 from app.infrastructure.database.repositories.audit_log_repository import (
     AuditLogRepository,
 )
@@ -34,21 +36,33 @@ def get_venue_use_case(db: AsyncSession = Depends(get_db)) -> VenueUseCase:
 def get_auth_use_case(request: Request, db: AsyncSession = Depends(get_db)) -> AuthUseCase:
     """Construct a fully-wired ``AuthUseCase`` for the current request.
 
-    Injects the user repository, database session, ARQ job queue, and the
-    Redis-backed OTP repository so all auth flows are available from a
-    single dependency.
+    Injects the user repository, database session, ARQ job queue, the
+    Redis-backed OTP repository, and the Redis-backed password reset repository
+    so all auth flows — including forgot-password and reset-password — are
+    available from a single dependency.
     """
     return AuthUseCase(
         UserRepository(db),
         db,
         request.app.state.arq,
         OTPRepository(request.app.state.redis),
+        PasswordResetRepository(request.app.state.redis),
     )
 
 
 def get_onboarding_use_case(db: AsyncSession = Depends(get_db)) -> OnboardingUseCase:
     """Construct an ``OnboardingUseCase`` for the current request."""
     return OnboardingUseCase(UserRepository(db), db)
+
+
+def get_change_password_use_case(db: AsyncSession = Depends(get_db)) -> ChangePasswordUseCase:
+    """Construct a fully-wired ``ChangePasswordUseCase`` for the current request.
+
+    Injects the user repository and the database session so the use case can
+    both verify credentials and revoke all active refresh tokens for the account
+    within the same request lifecycle.
+    """
+    return ChangePasswordUseCase(UserRepository(db), db)
 
 
 def get_otp_repository(request: Request) -> OTPRepository:

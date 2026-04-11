@@ -19,6 +19,7 @@ import {
   SidebarMenuSubItem,
   useSidebar
 } from '@/components/ui/sidebar';
+import { navItems, bottomNavItems as bottomItems } from '@/constants/navigation';
 import { cn } from '@/lib/utils';
 
 const navItems = [
@@ -112,7 +113,7 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="bg-white group-data-[collapsible=icon]:px-0">
+      <SidebarFooter className="bg-white px-4 group-data-[collapsible=icon]:px-0">
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
