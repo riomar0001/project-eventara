@@ -1,7 +1,8 @@
 from datetime import datetime
-from sqlalchemy import ForeignKey, Index, Integer, DateTime
-from sqlalchemy.orm import Mapped, mapped_column, relationship
 from uuid import UUID
+
+from sqlalchemy import DateTime, ForeignKey, Index, Integer
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.infrastructure.database.base import Base
 from app.infrastructure.database.models.user_models import User
@@ -18,11 +19,9 @@ class VenueRating(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
 
     # Relationships
-    user: Mapped["User"] = relationship(back_populates="ratings", foreign_keys=[user_id])
-    venue: Mapped["Venue"] = relationship(back_populates="ratings", foreign_keys=[venue_id])
-    
-    
-    
+    user: Mapped[User] = relationship(back_populates="ratings", foreign_keys=[user_id])
+    venue: Mapped[Venue] = relationship(back_populates="ratings", foreign_keys=[venue_id])
+
     __table_args__ = (
         Index("idx_venue_ratings_user_id", "user_id"),
         Index("idx_venue_ratings_venue_id", "venue_id"),

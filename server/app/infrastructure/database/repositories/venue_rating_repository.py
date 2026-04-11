@@ -1,8 +1,10 @@
 import uuid
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.domain.entities.venue_rating_entities import VenueRating as DomainVenueRating, PublicVenueRating
+from app.domain.entities.venue_rating_entities import PublicVenueRating
+from app.domain.entities.venue_rating_entities import VenueRating as DomainVenueRating
 from app.infrastructure.database.models.venue_rating_models import VenueRating
 
 
@@ -30,20 +32,14 @@ class VenueRatingRepository:
         return DomainVenueRating.model_validate(orm_rating)
 
     async def get_by_user_and_venue(self, user_id: uuid.UUID, venue_id: uuid.UUID) -> DomainVenueRating | None:
-        result = await self.db.execute(
-            select(VenueRating).where(
-                (VenueRating.user_id == user_id) & (VenueRating.venue_id == venue_id)
-            )
-        )
+        result = await self.db.execute(select(VenueRating).where((VenueRating.user_id == user_id) & (VenueRating.venue_id == venue_id)))
         orm_rating = result.scalar_one_or_none()
         if not orm_rating:
             return None
         return DomainVenueRating.model_validate(orm_rating)
 
     async def get_by_venue(self, venue_id: uuid.UUID) -> list[PublicVenueRating]:
-        result = await self.db.execute(
-            select(VenueRating).where(VenueRating.venue_id == venue_id).order_by(VenueRating.created_at.desc())
-        )
+        result = await self.db.execute(select(VenueRating).where(VenueRating.venue_id == venue_id).order_by(VenueRating.created_at.desc()))
         orm_ratings = result.scalars().all()
         return [PublicVenueRating.model_validate(r) for r in orm_ratings]
 
@@ -52,9 +48,9 @@ class VenueRatingRepository:
         orm_rating = result.scalar_one_or_none()
         if not orm_rating:
             return None
-        
+
         orm_rating.rating = rating.rating
-     
+
         await self.db.commit()
         await self.db.refresh(orm_rating)
         return PublicVenueRating.model_validate(orm_rating)

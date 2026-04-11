@@ -1,10 +1,8 @@
 from datetime import datetime
-from sqlalchemy import DateTime, Enum, ForeignKey, String, Integer, Text
-from sqlalchemy.orm import Mapped, mapped_column, relationship
 from uuid import UUID
 
-from sqlalchemy import Enum, ForeignKey, Index, Integer, String, Text
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import DateTime, Enum, ForeignKey, Index, Integer, String, Text
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.domain.entities.venue_entities import VenueType
 from app.infrastructure.database.base import Base
@@ -36,15 +34,13 @@ class Venue(Base):
     contact_name: Mapped[str] = mapped_column(String(255), nullable=False)
     contact_phone: Mapped[str] = mapped_column(String(20), nullable=False)
     contact_email: Mapped[str] = mapped_column(String(255), nullable=False)
-    
+
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.timezone.utc)
     updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.timezone.utc, onupdate=datetime.timezone.utc)
-    
+
     # Relationships
-    ratings: Mapped[list["VenueRating"]] = relationship(back_populates="venue", foreign_keys="VenueRating.venue_id")
-    
-    
+    ratings: Mapped[list[VenueRating]] = relationship(back_populates="venue", foreign_keys="VenueRating.venue_id")
 
     # name, city, venue_type, created, updated
     __table_args__ = (

@@ -1,13 +1,13 @@
 import uuid
 from dataclasses import dataclass
 
-from app.domain.entities.venue_rating_entities import VenueRating, PublicVenueRating
-from app.domain.exceptions import (
-    VenueRatingNotFoundError,
-    RatingAlreadyExistsError,
-    InvalidRatingError,
-)
 from app.application.interfaces.venue_rating_interface import IVenueRatingRepository
+from app.domain.entities.venue_rating_entities import PublicVenueRating, VenueRating
+from app.domain.exceptions import (
+    InvalidRatingError,
+    RatingAlreadyExistsError,
+    VenueRatingNotFoundError,
+)
 
 
 @dataclass
@@ -15,7 +15,6 @@ class CreateVenueRatingInput:
     user_id: uuid.UUID
     venue_id: uuid.UUID
     rating: int
-
 
 
 @dataclass

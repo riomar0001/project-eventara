@@ -16,8 +16,8 @@ from app.controller.dependencies.use_cases_depends import (
     get_queue_stats_use_case,
     get_retry_dead_job_use_case,
     get_role_use_case,
-    get_venue_use_case,
     get_venue_rating_use_case,
+    get_venue_use_case,
 )
 
 __all__ = [

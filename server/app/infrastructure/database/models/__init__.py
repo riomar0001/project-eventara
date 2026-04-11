@@ -15,6 +15,7 @@ from app.infrastructure.database.models.user_models import (
 )
 from app.infrastructure.database.models.venue_models import Venue
 from app.infrastructure.database.models.venue_rating_models import VenueRating
+
 __all__ = [
     "User",
     "UserSecurity",

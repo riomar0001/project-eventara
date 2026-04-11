@@ -1,6 +1,7 @@
 import uuid
 from typing import Protocol
-from app.domain.entities.venue_rating_entities import VenueRating, PublicVenueRating
+
+from app.domain.entities.venue_rating_entities import PublicVenueRating, VenueRating
 
 
 class IVenueRatingRepository(Protocol):

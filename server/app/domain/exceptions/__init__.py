@@ -34,11 +34,10 @@ from app.domain.exceptions.venue_exceptions import (
     VenueNotFoundError,
     VenueValidationError,
 )
-
 from app.domain.exceptions.venue_rating_exceptions import (
-    VenueRatingNotFoundError,
-    RatingAlreadyExistsError,
     InvalidRatingError,
+    RatingAlreadyExistsError,
+    VenueRatingNotFoundError,
 )
 
 __all__ = [
@@ -67,7 +66,7 @@ __all__ = [
     "UnauthorizedVenueOperationError",
     "VenueValidationError",
     "VenueRatingNotFoundError",
-    "RatingAlreadyExistsError", 
+    "RatingAlreadyExistsError",
     "InvalidRatingError",
     "VenueAlreadyExistsError",
     "VenueInvalidTypeError",

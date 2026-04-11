@@ -1,24 +1,25 @@
 import uuid
-from fastapi import APIRouter, Depends, status, HTTPException
 
-from app.controller.dependencies import get_venue_rating_use_case, get_current_user_id
+from fastapi import APIRouter, Depends, HTTPException, status
+
+from app.application.use_cases.venue_rating_usecase import (
+    CreateVenueRatingInput,
+    UpdateVenueRatingInput,
+    VenueRatingUseCase,
+)
+from app.controller.dependencies import get_current_user_id, get_venue_rating_use_case
 from app.controller.schemas.venue_rating_schema import (
     CreateVenueRatingRequest,
     CreateVenueRatingResponse,
+    DeleteVenueRatingResponse,
     UpdateVenueRatingRequest,
     UpdateVenueRatingResponse,
-    DeleteVenueRatingResponse,
     VenueRatingResponse,
 )
-from app.application.use_cases.venue_rating_usecase import (
-    VenueRatingUseCase,
-    CreateVenueRatingInput,
-    UpdateVenueRatingInput,
-)
 from app.domain.exceptions import (
-    VenueRatingNotFoundError,
-    RatingAlreadyExistsError,
     InvalidRatingError,
+    RatingAlreadyExistsError,
+    VenueRatingNotFoundError,
 )
 
 router = APIRouter(prefix="/venues/{venue_id}/ratings", tags=["Venue Ratings"])
@@ -43,13 +44,10 @@ async def create_venue_rating(
                 rating=body.rating,
             )
         )
-        
+
         if result.rating.venue_id != venue_id:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Rating not found for this venue"
-            )
-        
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Rating not found for this venue")
+
         return CreateVenueRatingResponse(
             rating_id=result.rating.id,
             rating=result.rating.rating,
@@ -68,13 +66,10 @@ async def get_venue_rating(
 ) -> VenueRatingResponse:
     try:
         result = await use_case.get_by_id(rating_id)
-        
+
         if result.rating.venue_id != venue_id:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Rating not found for this venue"
-            )
-            
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Rating not found for this venue")
+
         return VenueRatingResponse(
             id=result.rating.id,
             user_id=result.rating.user_id,
@@ -92,13 +87,10 @@ async def get_venue_ratings(
     use_case: VenueRatingUseCase = Depends(get_venue_rating_use_case),
 ) -> list[VenueRatingResponse]:
     ratings = await use_case.get_by_venue(venue_id)
-    
+
     if ratings.rating.venue_id != venue_id:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Rating not found for this venue"
-            )
-            
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Rating not found for this venue")
+
     return [
         VenueRatingResponse(
             id=r.id,
@@ -127,13 +119,10 @@ async def update_venue_rating(
                 rating=body.rating,
             )
         )
-        
+
         if result.rating.venue_id != venue_id:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Rating not found for this venue"
-            )
-        
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Rating not found for this venue")
+
         return UpdateVenueRatingResponse(
             rating_id=result.rating.id,
             rating=result.rating.rating,
@@ -156,11 +145,8 @@ async def delete_venue_rating(
     try:
         existing = await use_case.get_by_id(rating_id)
         if existing.rating.venue_id != venue_id:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Rating not found for this venue"
-            )
-        
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Rating not found for this venue")
+
         await use_case.delete(rating_id, user_id)
         return DeleteVenueRatingResponse(rating_id=rating_id)
     except VenueRatingNotFoundError as error:
