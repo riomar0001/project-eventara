@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
-
 import { Authentication } from '@/api/sdk.gen';
 import { type AuthUser, decodeTokenUser, isTokenExpired } from '@/lib/token';
 
@@ -103,15 +102,15 @@ export const useAuthStore = create<AuthStore>()(
 
         await get().tryRefresh();
         set({ isInitialized: true });
-      },
+      }
     }),
     {
       name: 'eventara-auth',
       storage: createJSONStorage(() => sessionStorage),
-      partialize: state => ({
+      partialize: (state) => ({
         refreshToken: state.refreshToken,
-        accessToken: state.accessToken,
-      }),
+        accessToken: state.accessToken
+      })
     }
   )
 );

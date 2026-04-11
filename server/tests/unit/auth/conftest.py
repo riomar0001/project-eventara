@@ -1,13 +1,11 @@
 """Shared fixtures and factories for AuthUseCase unit tests."""
 
 import uuid
-from datetime import UTC, datetime
+from datetime import datetime
 from unittest.mock import AsyncMock, MagicMock
 
-import pytest
-
 from app.application.use_cases.auth_usecase import AuthUseCase
-from app.domain.entities.user_entity import User, UserActivity, UserSecurity, UserStatus
+from app.domain.entities.user_entity import User, UserSecurity, UserStatus
 
 MODULE = "app.application.use_cases.auth_usecase"
 

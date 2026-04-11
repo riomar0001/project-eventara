@@ -321,19 +321,11 @@ class UserRepository:
             given ID exists.
         """
         now = datetime.now(UTC).replace(tzinfo=None)
-        result = await self.db.execute(
-            update(User)
-            .where(User.id == user_id)
-            .values(password=password_hash)
-        )
+        result = await self.db.execute(update(User).where(User.id == user_id).values(password=password_hash))
         if cast(CursorResult, result).rowcount == 0:
             await self.db.rollback()
             return False
 
-        await self.db.execute(
-            update(UserSecurity)
-            .where(UserSecurity.user_id == user_id)
-            .values(password_change_at=now)
-        )
+        await self.db.execute(update(UserSecurity).where(UserSecurity.user_id == user_id).values(password_change_at=now))
         await self.db.commit()
         return True

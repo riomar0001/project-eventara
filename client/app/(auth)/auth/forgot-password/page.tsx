@@ -1,13 +1,12 @@
 'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod';
+import { useState } from 'react';
 import { Loader2, Mail } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
-
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
@@ -52,13 +51,13 @@ export default function ForgotPasswordPage() {
   if (sent) {
     return (
       <div className="w-full max-w-sm">
-        <div className="mb-6 flex size-14 items-center justify-center rounded-full bg-primary/10">
-          <Mail className="size-6 text-primary" />
+        <div className="bg-primary/10 mb-6 flex size-14 items-center justify-center rounded-full">
+          <Mail className="text-primary size-6" />
         </div>
-        <h1 className="text-[1.75rem] font-bold tracking-tight text-foreground">Check your inbox</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          If <span className="font-medium text-foreground">{sentEmail}</span> is registered, you&apos;ll
-          receive a password reset link shortly. Check your spam folder if you don&apos;t see it.
+        <h1 className="text-foreground text-[1.75rem] font-bold tracking-tight">Check your inbox</h1>
+        <p className="text-muted-foreground mt-2 text-sm">
+          If <span className="text-foreground font-medium">{sentEmail}</span> is registered, you&apos;ll receive a password reset link shortly. Check your spam
+          folder if you don&apos;t see it.
         </p>
 
         <div className="mt-8 space-y-3">
@@ -72,8 +71,8 @@ export default function ForgotPasswordPage() {
           >
             Try a different email
           </Button>
-          <p className="text-center text-sm text-muted-foreground">
-            <Link href="/auth/login" className="font-medium text-foreground hover:underline">
+          <p className="text-muted-foreground text-center text-sm">
+            <Link href="/auth/login" className="text-foreground font-medium hover:underline">
               Back to sign in
             </Link>
           </p>
@@ -85,15 +84,13 @@ export default function ForgotPasswordPage() {
   return (
     <div className="w-full max-w-sm">
       <div className="mb-8">
-        <h1 className="text-[1.75rem] font-bold tracking-tight text-foreground">Forgot password?</h1>
-        <p className="mt-1.5 text-sm text-muted-foreground">
-          Enter your email and we&apos;ll send you a reset link.
-        </p>
+        <h1 className="text-foreground text-[1.75rem] font-bold tracking-tight">Forgot password?</h1>
+        <p className="text-muted-foreground mt-1.5 text-sm">Enter your email and we&apos;ll send you a reset link.</p>
       </div>
 
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <div className="space-y-1.5">
-          <label className="text-sm font-medium text-foreground" htmlFor="email">
+          <label className="text-foreground text-sm font-medium" htmlFor="email">
             Email
           </label>
           <Input
@@ -104,9 +101,7 @@ export default function ForgotPasswordPage() {
             aria-invalid={!!form.formState.errors.email}
             {...form.register('email')}
           />
-          {form.formState.errors.email && (
-            <p className="text-xs text-destructive">{form.formState.errors.email.message}</p>
-          )}
+          {form.formState.errors.email && <p className="text-destructive text-xs">{form.formState.errors.email.message}</p>}
         </div>
 
         <Button type="submit" variant="black" className="w-full" disabled={isSubmitting}>
@@ -115,8 +110,8 @@ export default function ForgotPasswordPage() {
         </Button>
       </form>
 
-      <p className="mt-6 text-sm text-muted-foreground">
-        <Link href="/auth/login" className="font-medium text-foreground hover:underline">
+      <p className="text-muted-foreground mt-6 text-sm">
+        <Link href="/auth/login" className="text-foreground font-medium hover:underline">
           ← Back to sign in
         </Link>
       </p>

@@ -6,7 +6,6 @@ from app.application.use_cases.audit_log_usecase import (
     GetAuditLogsUseCase,
 )
 from app.application.use_cases.auth_usecase import AuthUseCase
-from app.application.use_cases.user_usecase import ChangePasswordUseCase, OnboardingUseCase
 from app.application.use_cases.queue_usecase import (
     DeleteDeadJobUseCase,
     GetQueueStatsUseCase,
@@ -15,7 +14,7 @@ from app.application.use_cases.queue_usecase import (
     RetryDeadJobUseCase,
 )
 from app.application.use_cases.role_usecase import UserRoleUseCase
-from app.application.use_cases.user_usecase import OnboardingUseCase
+from app.application.use_cases.user_usecase import ChangePasswordUseCase, OnboardingUseCase
 from app.application.use_cases.venue_usecase import VenueUseCase
 from app.infrastructure.cache.repositories.otp_repository import OTPRepository
 from app.infrastructure.cache.repositories.password_reset_repository import PasswordResetRepository

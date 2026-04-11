@@ -1,17 +1,16 @@
 'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod';
+import { useState } from 'react';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
-
-import { Authentication } from '@/api/sdk.gen';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Authentication } from '@/api/sdk.gen';
 
 const schema = z
   .object({
@@ -19,7 +18,7 @@ const schema = z
     password: z.string().min(8, 'Password must be at least 8 characters'),
     confirm_password: z.string()
   })
-  .refine(data => data.password === data.confirm_password, {
+  .refine((data) => data.password === data.confirm_password, {
     message: "Passwords don't match",
     path: ['confirm_password']
   });
@@ -59,13 +58,13 @@ export default function RegisterPage() {
   return (
     <div className="w-full max-w-sm">
       <div className="mb-8">
-        <h1 className="text-[1.75rem] font-bold tracking-tight text-foreground">Create an account</h1>
-        <p className="mt-1.5 text-sm text-muted-foreground">Start managing your events today</p>
+        <h1 className="text-foreground text-[1.75rem] font-bold tracking-tight">Create an account</h1>
+        <p className="text-muted-foreground mt-1.5 text-sm">Start managing your events today</p>
       </div>
 
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <div className="space-y-1.5">
-          <label className="text-sm font-medium text-foreground" htmlFor="email">
+          <label className="text-foreground text-sm font-medium" htmlFor="email">
             Email
           </label>
           <Input
@@ -76,13 +75,11 @@ export default function RegisterPage() {
             aria-invalid={!!form.formState.errors.email}
             {...form.register('email')}
           />
-          {form.formState.errors.email && (
-            <p className="text-xs text-destructive">{form.formState.errors.email.message}</p>
-          )}
+          {form.formState.errors.email && <p className="text-destructive text-xs">{form.formState.errors.email.message}</p>}
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-sm font-medium text-foreground" htmlFor="password">
+          <label className="text-foreground text-sm font-medium" htmlFor="password">
             Password
           </label>
           <div className="relative">
@@ -96,20 +93,18 @@ export default function RegisterPage() {
             />
             <button
               type="button"
-              onClick={() => setShowPassword(s => !s)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
+              onClick={() => setShowPassword((s) => !s)}
+              className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 transition-colors"
               tabIndex={-1}
             >
               {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
             </button>
           </div>
-          {form.formState.errors.password && (
-            <p className="text-xs text-destructive">{form.formState.errors.password.message}</p>
-          )}
+          {form.formState.errors.password && <p className="text-destructive text-xs">{form.formState.errors.password.message}</p>}
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-sm font-medium text-foreground" htmlFor="confirm_password">
+          <label className="text-foreground text-sm font-medium" htmlFor="confirm_password">
             Confirm password
           </label>
           <div className="relative">
@@ -123,18 +118,14 @@ export default function RegisterPage() {
             />
             <button
               type="button"
-              onClick={() => setShowConfirm(s => !s)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
+              onClick={() => setShowConfirm((s) => !s)}
+              className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 transition-colors"
               tabIndex={-1}
             >
               {showConfirm ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
             </button>
           </div>
-          {form.formState.errors.confirm_password && (
-            <p className="text-xs text-destructive">
-              {form.formState.errors.confirm_password.message}
-            </p>
-          )}
+          {form.formState.errors.confirm_password && <p className="text-destructive text-xs">{form.formState.errors.confirm_password.message}</p>}
         </div>
 
         <Button type="submit" variant="black" className="w-full" disabled={isSubmitting}>
@@ -143,9 +134,9 @@ export default function RegisterPage() {
         </Button>
       </form>
 
-      <p className="mt-6 text-sm text-muted-foreground">
+      <p className="text-muted-foreground mt-6 text-sm">
         Already have an account?{' '}
-        <Link href="/auth/login" className="font-medium text-foreground hover:underline">
+        <Link href="/auth/login" className="text-foreground font-medium hover:underline">
           Sign in
         </Link>
       </p>

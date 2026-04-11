@@ -26,21 +26,21 @@ interface RawTokenPayload {
  */
 export function decodeTokenUser(token: string): AuthUser | null {
   try {
-    const [, payload] = token.split('.');
-    if (!payload) return null;
-    // Base64url → Base64 → JSON
-    const json = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
-    const p: TokenPayload = JSON.parse(json);
+    const [, raw] = token.split('.');
+    if (!raw) return null;
+
+    const json = atob(raw.replace(/-/g, '+').replace(/_/g, '/'));
+    const p: RawTokenPayload = JSON.parse(json);
+
+    if (typeof p.sub !== 'string' || typeof p.email !== 'string') return null;
+
     return {
       id: p.sub,
       email: p.email,
-      role: p.role,
-      first_name: p.first_name ?? '',
-      last_name: p.last_name ?? '',
-      ...(p.applicant_profile_id && {
-        applicant_profile_id: p.applicant_profile_id
-      }),
-      ...(p.company_id && { company_id: p.company_id })
+      doneOnboarding: Boolean(p.done_onboarding),
+      roleId: p.role_id ?? undefined,
+      firstName: p.first_name ?? undefined,
+      lastName: p.last_name ?? undefined
     };
   } catch {
     return null;

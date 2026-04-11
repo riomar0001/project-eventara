@@ -1,14 +1,13 @@
 'use client';
 
+import { useCallback, useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
-
-import { Authentication } from '@/api/sdk.gen';
 import { OTPInput } from '@/components/authentication/otp-input';
 import { Button } from '@/components/ui/button';
+import { Authentication } from '@/api/sdk.gen';
 import { useAuthStore } from '@/store/auth-store';
 
 export default function LoginVerifyPage() {
@@ -58,29 +57,22 @@ export default function LoginVerifyPage() {
   return (
     <div className="w-full max-w-sm">
       <div className="mb-8">
-        <h1 className="text-[1.75rem] font-bold tracking-tight text-foreground">Check your email</h1>
-        <p className="mt-1.5 text-sm text-muted-foreground">
-          We sent a 6-digit code to your email address. Enter it below to continue.
-        </p>
+        <h1 className="text-foreground text-[1.75rem] font-bold tracking-tight">Check your email</h1>
+        <p className="text-muted-foreground mt-1.5 text-sm">We sent a 6-digit code to your email address. Enter it below to continue.</p>
       </div>
 
       <div className="space-y-6">
         <OTPInput value={code} onChange={setCode} disabled={loading} />
 
-        <Button
-          variant="black"
-          className="w-full"
-          disabled={code.length !== 6 || loading}
-          onClick={handleVerify}
-        >
+        <Button variant="black" className="w-full" disabled={code.length !== 6 || loading} onClick={handleVerify}>
           {loading && <Loader2 className="animate-spin" />}
           {loading ? 'Verifying…' : 'Verify'}
         </Button>
       </div>
 
-      <p className="mt-6 text-sm text-muted-foreground">
+      <p className="text-muted-foreground mt-6 text-sm">
         Didn&apos;t receive a code?{' '}
-        <Link href="/auth/login" className="font-medium text-foreground hover:underline">
+        <Link href="/auth/login" className="text-foreground font-medium hover:underline">
           Back to sign in
         </Link>
       </p>

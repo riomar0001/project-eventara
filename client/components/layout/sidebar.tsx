@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { LayoutDashboard, User, ArrowLeftRight, Waves, Wallet, TrendingUp, Headphones, ChevronDown } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
@@ -21,26 +21,6 @@ import {
 } from '@/components/ui/sidebar';
 import { navItems, bottomNavItems as bottomItems } from '@/constants/navigation';
 import { cn } from '@/lib/utils';
-
-const navItems = [
-  { label: 'Dashboard', icon: LayoutDashboard, href: '#', active: true },
-  { label: 'Accounts', icon: User, href: '#' },
-  {
-    label: 'Transactions',
-    icon: ArrowLeftRight,
-    href: '#',
-    children: [
-      { label: 'History', href: '#', badge: 19 },
-      { label: 'Integration', href: '#' },
-      { label: 'Reports', href: '#' }
-    ]
-  },
-  { label: 'Cash flow', icon: Waves, href: '#' },
-  { label: 'Budget', icon: Wallet, href: '#' },
-  { label: 'Investments', icon: TrendingUp, href: '#' }
-];
-
-const bottomItems = [{ label: 'Support', icon: Headphones, href: '#' }];
 
 export function AppSidebar() {
   const [transactionsOpen, setTransactionsOpen] = React.useState(true);
