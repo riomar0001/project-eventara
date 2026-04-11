@@ -624,6 +624,8 @@ All settings are loaded from `.env` via Pydantic `BaseSettings` in `app/core/con
 | `MAIL_PASS` | Yes | — | SMTP password |
 | `CORS_ORIGIN` | Yes | — | Allowed CORS origin |
 | `DEBUG` | No | `true` | Enable debug mode |
+| `ADMIN_EMAIL` | Yes | — | Email address for the seeded system administrator account |
+| `ADMIN_PASSWORD` | Yes | — | Password for the seeded system administrator account |
 
 Duration strings support suffixes: `s` (seconds), `m` (minutes), `h` (hours), `d` (days).
 
@@ -635,6 +637,32 @@ The project uses [Scalar](https://github.com/scalar/scalar) instead of the defau
 
 - `http://localhost:8000/docs` — Interactive Scalar UI
 - `http://localhost:8000/openapi.json` — Raw OpenAPI spec
+
+---
+
+## Seeds
+
+Seed scripts live in `seeds/` and are idempotent — safe to run multiple times. Run them from the `server/` directory after applying all migrations.
+
+| Script | Purpose |
+|--------|---------|
+| `seeds.rbac_user_management` | Populates features, roles, and role permissions for the user management domain |
+| `seeds.system_admin` | Creates the system administrator account and assigns the `system_administrator` role |
+
+```bash
+# 1. Seed roles and permissions first
+python -m seeds.rbac_user_management
+
+# 2. Seed the system admin user (requires ADMIN_EMAIL and ADMIN_PASSWORD in .env)
+python -m seeds.system_admin
+```
+
+The admin credentials are read from `.env`:
+
+```env
+ADMIN_EMAIL="you@example.com"
+ADMIN_PASSWORD="your-secure-password"
+```
 
 ---
 
@@ -669,6 +697,10 @@ alembic downgrade -1                                               # Rollback on
 # Dependencies
 uv sync                                                            # Install/sync dependencies
 uv add <package>                                                   # Add a new dependency
+
+# Seeds
+python -m seeds.rbac_user_management                               # Seed roles and permissions
+python -m seeds.system_admin                                       # Seed system admin user
 
 # Health check
 curl http://localhost:8000/health                                   # Verify server is running

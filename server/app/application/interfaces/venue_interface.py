@@ -1,6 +1,7 @@
 import uuid
 from typing import Protocol
-from app.domain.entities.venue_entities import Venue, PublicVenue
+
+from app.domain.entities.venue_entities import PublicVenue, Venue
 
 
 class IVenueRepository(Protocol):
@@ -9,4 +10,3 @@ class IVenueRepository(Protocol):
     async def delete(self, venue_id: uuid.UUID) -> None: ...
     async def get_by_id(self, venue_id: uuid.UUID) -> Venue | None: ...
     async def get_by_creator(self, creator_id: uuid.UUID) -> list[PublicVenue]: ...
-    

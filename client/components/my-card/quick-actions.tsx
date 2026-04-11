@@ -1,13 +1,13 @@
-import { ArrowUpCircle, Send, CornerUpRight, History, MoreHorizontal } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { ArrowUpCircle, Send, CornerUpRight, History, MoreHorizontal } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const actions = [
-  { label: "Top up", icon: ArrowUpCircle },
-  { label: "Send", icon: Send },
-  { label: "Request", icon: CornerUpRight },
-  { label: "History", icon: History },
-  { label: "More", icon: MoreHorizontal },
-]
+  { label: 'Top up', icon: ArrowUpCircle },
+  { label: 'Send', icon: Send },
+  { label: 'Request', icon: CornerUpRight },
+  { label: 'History', icon: History },
+  { label: 'More', icon: MoreHorizontal }
+];
 
 export function QuickActions() {
   return (
@@ -17,9 +17,9 @@ export function QuickActions() {
           <Button variant="outline" size="icon-sm">
             <Icon className="size-4" />
           </Button>
-          <span className="text-[10px] text-muted-foreground">{label}</span>
+          <span className="text-muted-foreground text-[10px]">{label}</span>
         </div>
       ))}
     </div>
-  )
+  );
 }

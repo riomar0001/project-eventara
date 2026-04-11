@@ -33,6 +33,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRATION: timedelta = timedelta(minutes=30)
     REFRESH_TOKEN_EXPIRATION: timedelta = timedelta(days=7)
     VERIFICATION_TOKEN_EXPIRATION: timedelta = timedelta(hours=24)
+    PASSWORD_RESET_TOKEN_EXPIRATION: timedelta = timedelta(hours=1)
 
     MAIL_HOST: str
     MAIL_PORT: int
@@ -43,10 +44,14 @@ class Settings(BaseSettings):
     CORS_ORIGIN: str
     ALLOWED_ORIGINS: str = "*"
 
+    ADMIN_EMAIL: str
+    ADMIN_PASSWORD: str
+
     @field_validator(
         "ACCESS_TOKEN_EXPIRATION",
         "REFRESH_TOKEN_EXPIRATION",
         "VERIFICATION_TOKEN_EXPIRATION",
+        "PASSWORD_RESET_TOKEN_EXPIRATION",
         mode="before",
     )
     @classmethod

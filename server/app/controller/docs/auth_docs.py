@@ -422,3 +422,110 @@ REFRESH_TOKEN_INVALID = {
         },
     }
 }
+
+
+# POST /auth/resend-verification
+RESEND_VERIFICATION_VALIDATION_ERROR = {
+    422: {
+        "description": "Validation error — email field is missing or not a valid email address",
+        "model": ValidationErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "detail": [
+                        {
+                            "loc": ["body", "email"],
+                            "msg": "value is not a valid email address",
+                            "type": "value_error.email",
+                        }
+                    ],
+                }
+            }
+        },
+    }
+}
+
+
+# POST /auth/forgot-password
+FORGOT_PASSWORD_VALIDATION_ERROR = {
+    422: {
+        "description": "Validation error — email field is missing or not a valid email address",
+        "model": ValidationErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "detail": [
+                        {
+                            "loc": ["body", "email"],
+                            "msg": "value is not a valid email address",
+                            "type": "value_error.email",
+                        }
+                    ],
+                }
+            }
+        },
+    }
+}
+
+
+# POST /auth/reset-password/{token}
+RESET_PASSWORD_VALIDATION_ERROR = {
+    422: {
+        "description": "Validation error — token path parameter is empty or new_password is shorter than 8 characters",
+        "model": ValidationErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "detail": [
+                        {
+                            "loc": ["path", "token"],
+                            "msg": "String should have at least 1 character",
+                            "type": "string_too_short",
+                        },
+                        {
+                            "loc": ["body", "new_password"],
+                            "msg": "String should have at least 8 characters",
+                            "type": "string_too_short",
+                        },
+                    ],
+                }
+            }
+        },
+    }
+}
+
+RESET_PASSWORD_TOKEN_EXPIRED = {
+    401: {
+        "description": "The password reset token has expired — the user must request a new reset link",
+        "model": ErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "message": "Token has expired",
+                }
+            }
+        },
+    }
+}
+
+RESET_PASSWORD_TOKEN_INVALID = {
+    400: {
+        "description": (
+            "The password reset token is malformed, has an invalid signature, "
+            "has already been consumed, or was rejected by a concurrent reset request"
+        ),
+        "model": ErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "message": "Invalid or malformed token",
+                }
+            }
+        },
+    }
+}

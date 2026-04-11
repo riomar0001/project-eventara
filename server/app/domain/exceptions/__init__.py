@@ -22,14 +22,16 @@ from app.domain.exceptions.user_exceptions import (
     EmailAlreadyVerifiedError,
     EmailNotVerifiedError,
     OnboardingAlreadyCompletedError,
+    SamePasswordError,
     UserInactiveError,
     UserLockedError,
     UserNotFoundError,
 )
-
 from app.domain.exceptions.venue_exceptions import (
-    VenueNotFoundError,
     UnauthorizedVenueOperationError,
+    VenueAlreadyExistsError,
+    VenueInvalidTypeError,
+    VenueNotFoundError,
     VenueValidationError,
 )
 
@@ -47,6 +49,7 @@ __all__ = [
     "UserInactiveError",
     "EmailNotVerifiedError",
     "OnboardingAlreadyCompletedError",
+    "SamePasswordError",
     "AliasAlreadyTakenError",
     "InvalidTokenError",
     "TokenExpiredError",
@@ -66,5 +69,6 @@ __all__ = [
     "VenueRatingNotFoundError",
     "RatingAlreadyExistsError", 
     "InvalidRatingError",
+    "VenueAlreadyExistsError",
+    "VenueInvalidTypeError",
 ]
-
