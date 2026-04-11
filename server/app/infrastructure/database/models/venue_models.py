@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import DateTime, Enum, ForeignKey, String, Integer, Text
+from sqlalchemy import DateTime, Enum, ForeignKey, Index, String, Integer, Text
 from sqlalchemy.orm import Mapped, mapped_column
 from uuid import UUID
 
@@ -32,3 +32,12 @@ class Venue(Base):
     contact_name: Mapped[str] = mapped_column(String(255), nullable=False)
     contact_phone: Mapped[str] = mapped_column(String(20), nullable=False)
     contact_email: Mapped[str] = mapped_column(String(255), nullable=False)
+    
+    
+    #name, city, venue_type
+    __table_args__ = (
+        Index("idx_venues_name", "name"),
+        Index("idx_venues_city", "city"),
+        Index("idx_venues_venue_type", "venue_type"),
+        Index("idx_venues_name_city", "name", "city"), 
+    )

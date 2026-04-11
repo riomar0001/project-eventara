@@ -15,3 +15,17 @@ class UnauthorizedVenueOperationError(Exception):
 class VenueValidationError(Exception):
     def __init__(self, message: str) -> None:
         super().__init__(f"Venue validation failed: {message}")
+
+
+class VenueAlreadyExistsError(Exception):
+    def __init__(self, name: str = "") -> None:
+        super().__init__(
+            f"Venue with this name already exists: {name}" 
+            if name 
+            else "Venue with this name already exists"
+        )
+
+
+class VenueInvalidTypeError(Exception):
+    def __init__(self, venue_type: str) -> None:
+        super().__init__(f"Invalid venue type: {venue_type}")
