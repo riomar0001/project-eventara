@@ -84,7 +84,7 @@ export function Header() {
               <ChevronDown className="text-muted-foreground hidden size-3.5 sm:block" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-60 rounded-xl p-2">
+          <DropdownMenuContent align="end" className="rounded-xl p-2">
             <DropdownMenuLabel className="py-3 font-normal">
               <div className="flex flex-col gap-0.5">
                 <span className="text-sm font-semibold">Michael Johnson</span>

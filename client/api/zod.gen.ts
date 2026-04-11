@@ -44,29 +44,6 @@ export const zAuditLogResponse = z.object({
 });
 
 /**
- * DeadJobResponse
- */
-export const zDeadJobResponse = z.object({
-  job_id: z.string(),
-  function: z.string(),
-  args: z.array(z.unknown()),
-  kwargs: z.record(z.string(), z.unknown()),
-  job_try: z.int(),
-  enqueue_time: z.iso.datetime(),
-  finish_time: z.iso.datetime().nullable(),
-  error: z.string()
-});
-
-/**
- * DeleteJobResponse
- */
-export const zDeleteJobResponse = z.object({
-  success: z.boolean().optional().default(true),
-  job_id: z.string(),
-  deleted: z.boolean()
-});
-
-/**
  * EducationLevel
  */
 export const zEducationLevel = z.enum([
@@ -186,14 +163,6 @@ export const zGetAuditLogsResponse = z.object({
 });
 
 /**
- * PurgeDeadJobsResponse
- */
-export const zPurgeDeadJobsResponse = z.object({
-  success: z.boolean().optional().default(true),
-  deleted_count: z.int()
-});
-
-/**
  * RefreshTokenRequest
  */
 export const zRefreshTokenRequest = z.object({
@@ -227,16 +196,6 @@ export const zRegisterResponse = z.object({
   email: z.string(),
   message: z.string().optional().default('Registration successful. Please verify your email.'),
   verification_token: z.string().nullish()
-});
-
-/**
- * RetryJobResponse
- */
-export const zRetryJobResponse = z.object({
-  success: z.boolean().optional().default(true),
-  original_job_id: z.string(),
-  new_job_id: z.string(),
-  function: z.string()
 });
 
 /**
@@ -380,32 +339,6 @@ export const zVerifyEmailResponse = z.object({
   refresh_token: z.string(),
   token_type: z.string().optional().default('bearer'),
   message: z.string().optional().default('Email verified successfully.')
-});
-
-/**
- * WorkerHealthEntrySchema
- */
-export const zWorkerHealthEntrySchema = z.object({
-  raw: z.string(),
-  timestamp: z.string().nullable(),
-  j_complete: z.int(),
-  j_failed: z.int(),
-  j_retried: z.int(),
-  j_ongoing: z.int(),
-  queued: z.int()
-});
-
-/**
- * QueueStatsResponse
- */
-export const zQueueStatsResponse = z.object({
-  success: z.boolean().optional().default(true),
-  queue_name: z.string(),
-  pending: z.int(),
-  in_progress: z.int(),
-  total_failed: z.int(),
-  total_completed: z.int(),
-  worker_health: z.array(zWorkerHealthEntrySchema)
 });
 
 export const zRegisterUserAuthRegisterPostBody = zRegisterRequest;

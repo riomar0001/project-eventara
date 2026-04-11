@@ -6,7 +6,22 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { balanceChartData as chartData, balanceChartConfig as chartConfig } from '@/constants/dashboard';
+
+const chartData = [
+  { day: 'Sun', savings: 8, income: 12, expenses: 4 },
+  { day: 'Mon', savings: 10, income: 15, expenses: 5 },
+  { day: 'Tue', savings: 12, income: 18, expenses: 8 },
+  { day: 'Wed', savings: 24, income: 70, expenses: 46 },
+  { day: 'Thu', savings: 9, income: 14, expenses: 6 },
+  { day: 'Fri', savings: 7, income: 11, expenses: 5 },
+  { day: 'Sat', savings: 6, income: 10, expenses: 3 }
+];
+
+const chartConfig = {
+  savings: { label: 'Savings', color: 'oklch(0.879 0.169 91.605)' },
+  income: { label: 'Income', color: 'oklch(0.648 0.2 131.684)' },
+  expenses: { label: 'Expenses', color: 'oklch(0.769 0.188 70.08)' }
+};
 
 export function BalanceOverviewCard() {
   return (

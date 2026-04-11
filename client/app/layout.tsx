@@ -19,12 +19,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={cn('h-full antialiased font-sans', inter.variable)}>
+    <html lang="en" className={cn('h-full font-sans antialiased', inter.variable)}>
       <body suppressHydrationWarning>
         <TooltipProvider>
-          <AuthProvider>
-            {children}
-          </AuthProvider>
+          <AuthProvider>{children}</AuthProvider>
         </TooltipProvider>
         <Toaster richColors position="bottom-right" />
       </body>

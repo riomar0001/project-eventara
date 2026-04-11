@@ -238,7 +238,7 @@ class RetryDeadJobUseCase:
                 new_job_id=new_job.job_id if new_job else job_id,
                 function=info.function,
             )
-        except (JobNotFoundError, JobNotDeadError, JobRetryConflictError):
+        except JobNotFoundError, JobNotDeadError, JobRetryConflictError:
             raise
         except Exception as exc:
             raise QueueInspectionError(f"Failed to retry job '{job_id}': {exc}") from exc
@@ -279,7 +279,7 @@ class DeleteDeadJobUseCase:
 
             deleted = await self.redis.delete(f"{_RESULT_KEY_PREFIX}{job_id}")
             return DeleteJobOutput(job_id=job_id, deleted=bool(deleted))
-        except (JobNotFoundError, JobNotDeadError):
+        except JobNotFoundError, JobNotDeadError:
             raise
         except Exception as exc:
             raise QueueInspectionError(f"Failed to delete job '{job_id}': {exc}") from exc

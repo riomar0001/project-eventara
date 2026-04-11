@@ -8,7 +8,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.application.dto.auth_dto import (
     ForgotPasswordInput,
     LoginInput,
-    ResendVerificationInput,
     LoginOutput,
     LoginVerifyInput,
     LoginVerifyOutput,
@@ -17,6 +16,7 @@ from app.application.dto.auth_dto import (
     RefreshTokenOutput,
     RegisteredUserOutput,
     RegisterUserInput,
+    ResendVerificationInput,
     ResetPasswordInput,
     VerifiedEmailOutput,
 )

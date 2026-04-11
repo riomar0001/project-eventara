@@ -13,6 +13,7 @@ from app.infrastructure.database.models.user_models import (
     UserRole,
     UserSecurity,
 )
+from app.infrastructure.database.models.venue_models import Venue
 
 __all__ = [
     "User",
@@ -27,4 +28,5 @@ __all__ = [
     "Role",
     "RolePermission",
     "AuditLog",
+    "Venue",
 ]
