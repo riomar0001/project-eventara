@@ -17,7 +17,7 @@ import { SidebarTrigger } from '@/components/ui/sidebar';
 
 export function Header() {
   return (
-    <header className="flex shrink-0 items-center gap-4 bg-neutral-100 my-5 px-5">
+    <header className="my-5 flex shrink-0 items-center gap-4 bg-neutral-100 px-5">
       <SidebarTrigger className="hover:bg-primary/30 size-11 rounded-xl bg-white" />
       {/* Search */}
       <div className="relative flex max-h-11 w-1/4 flex-row items-center">
@@ -52,7 +52,7 @@ export function Header() {
               </div>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="p-2 rounded-xl ">
+          <DropdownMenuContent align="end" className="rounded-xl p-2">
             <DropdownMenuLabel className="py-3 font-normal">
               <div className="flex flex-col gap-0.5">
                 <span className="text-sm font-semibold">Michael Johnson</span>
@@ -61,21 +61,21 @@ export function Header() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem className="py-3 cursor-pointer">
+              <DropdownMenuItem className="cursor-pointer py-3">
                 <User className="size-4" />
                 Profile
               </DropdownMenuItem>
-              <DropdownMenuItem className="py-3 cursor-pointer">
+              <DropdownMenuItem className="cursor-pointer py-3">
                 <CreditCard className="size-4" />
                 Billing
               </DropdownMenuItem>
-              <DropdownMenuItem className="py-3 cursor-pointer">
+              <DropdownMenuItem className="cursor-pointer py-3">
                 <Settings className="size-4" />
                 Settings
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem variant="destructive" className="py-3 cursor-pointer">
+            <DropdownMenuItem variant="destructive" className="cursor-pointer py-3">
               <LogOut className="size-4" />
               Log out
             </DropdownMenuItem>

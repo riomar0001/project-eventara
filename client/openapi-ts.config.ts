@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [
     {
       name: '@hey-api/client-axios',
-      baseUrl: '/api',
+      baseUrl: '/api'
     },
     {
       name: '@hey-api/sdk',

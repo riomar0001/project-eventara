@@ -24,7 +24,7 @@ export default function DashboardPage() {
           <Button
             onClick={async () => {
               try {
-                const {data, error} = await Authentication.loginAuthLoginPost({
+                const { data } = await Authentication.loginAuthLoginPost({
                   body: {
                     email: 'inguitomario00@gmail.com',
                     password: 'mario123'
