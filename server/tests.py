@@ -1,7 +1,8 @@
+import os
 import subprocess
 import sys
 
-ROOT = __file__.replace("run_tests.py", "")
+ROOT = os.path.dirname(os.path.abspath(__file__))
 
 suites = {
     "unit": "tests/unit/",
