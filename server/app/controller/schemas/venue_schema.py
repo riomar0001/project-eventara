@@ -42,7 +42,8 @@ class CreateVenueResponse(BaseModel):
     venue_id: uuid.UUID
     name: str
     message: str = "Venue created successfully."
-    
+
+
 class UpdateVenueRequest(BaseModel):
     name: str | None = None
     description: str | None = None
@@ -57,18 +58,21 @@ class UpdateVenueRequest(BaseModel):
     contact_name: str | None = None
     contact_phone: str | None = None
     contact_email: str | None = None
-    
+
+
 class UpdateVenueResponse(BaseModel):
     success: bool = True
     venue_id: uuid.UUID
     name: str | None = None
     message: str = "Venue updated successfully."
 
+
 class DeleteVenueResponse(BaseModel):
     success: bool = True
     venue_id: uuid.UUID
     message: str = "Venue deleted successfully."
-    
+
+
 class VenueDetailResponse(BaseModel):
     id: uuid.UUID
     name: str

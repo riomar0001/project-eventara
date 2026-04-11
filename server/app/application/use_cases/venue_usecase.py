@@ -25,6 +25,7 @@ class CreateVenueInput:
     contact_phone: str
     contact_email: str
 
+
 @dataclass
 class UpdateVenueInput:
     id: uuid.UUID
@@ -53,11 +54,14 @@ class CreatedVenueOutput:
 class VenueDetailOutput:
     venue: Venue
 
+
 """ @dev 
     Venue update and deletion needs to be restricted only to the creator and the admin
     will get back to the team for more details on the authorization and update this file accordingly
     ***if you know the details please go ahead and implement the authorization logic in the use case
 """
+
+
 class VenueUseCase:
     def __init__(self, repo: IVenueRepository) -> None:
         self.repo = repo
@@ -81,12 +85,12 @@ class VenueUseCase:
         )
         created = await self.repo.create(venue)
         return CreatedVenueOutput(venue=created)
-    
+
     async def update(self, venue_id: uuid.UUID, data: UpdateVenueInput) -> VenueDetailOutput:
         existing = await self.repo.get_by_id(venue_id)
         if not existing:
             raise VenueNotFoundError(str(venue_id))
-        
+
         for field in dataclass_fields(data):
             if field.name == "venue_id":
                 continue  # skip the ID fields
@@ -96,7 +100,7 @@ class VenueUseCase:
 
         updated = await self.repo.update(existing)
         return VenueDetailOutput(venue=updated)
-    
+
     async def delete(self, venue_id: uuid.UUID) -> None:
         existing = await self.repo.get_by_id(venue_id)
         if not existing:

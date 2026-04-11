@@ -61,6 +61,4 @@ __all__ = [
     "VenueValidationError",
     "VenueAlreadyExistsError",
     "VenueInvalidTypeError",
-
 ]
-

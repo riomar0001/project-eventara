@@ -32,7 +32,7 @@ class VenueRepository:
         await self.db.commit()
         await self.db.refresh(orm_venue)
         return PublicVenue.model_validate(orm_venue)
-    
+
     async def update(self, venue: DomainVenue) -> DomainVenue:
         orm_venue = await self.db.get(Venue, venue.id)
         if not orm_venue:
@@ -53,7 +53,7 @@ class VenueRepository:
         await self.db.commit()
         await self.db.refresh(orm_venue)
         return DomainVenue.model_validate(orm_venue)
-    
+
     async def delete(self, venue_id: uuid.UUID) -> None:
         orm_venue = await self.db.get(Venue, venue_id)
         if not orm_venue:
@@ -62,7 +62,6 @@ class VenueRepository:
         await self.db.commit()
         await self.db.refresh(orm_venue)
         return DomainVenue.model_validate(orm_venue)
-    
 
     async def get_by_id(self, venue_id: uuid.UUID) -> DomainVenue | None:
         result = await self.db.execute(select(Venue).where(Venue.id == venue_id))
@@ -72,8 +71,6 @@ class VenueRepository:
         return DomainVenue.model_validate(orm_venue)
 
     async def get_by_creator(self, creator_id: uuid.UUID) -> list[PublicVenue]:
-        result = await self.db.execute(
-            select(Venue).where(Venue.creator_id == creator_id)
-        )
+        result = await self.db.execute(select(Venue).where(Venue.creator_id == creator_id))
         orm_venues = result.scalars().all()
         return [PublicVenue.model_validate(v) for v in orm_venues]

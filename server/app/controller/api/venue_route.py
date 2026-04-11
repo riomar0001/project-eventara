@@ -125,7 +125,7 @@ async def update_venue(
     venue_id: uuid.UUID,
     body: UpdateVenueRequest,
     use_case: VenueUseCase = Depends(get_venue_use_case),
-    creator_id: uuid.UUID = Depends(get_current_user_id),    
+    creator_id: uuid.UUID = Depends(get_current_user_id),
     _: uuid.UUID = Depends(require_permission("venues", RoleAction.UPDATE)),
 ) -> UpdateVenueResponse:
     """Update an existing event venue.
@@ -171,6 +171,7 @@ async def update_venue(
     except Exception as error:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to update venue")
 
+
 @router.delete(
     "/{venue_id}",
     response_model=DeleteVenueResponse,
@@ -215,7 +216,6 @@ async def delete_venue(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error))
     except Exception as error:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to delete venue")
-    
 
 
 @router.get(

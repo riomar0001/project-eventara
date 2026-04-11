@@ -6,9 +6,7 @@ class VenueNotFoundError(Exception):
 class UnauthorizedVenueOperationError(Exception):
     def __init__(self, venue_id: str = "") -> None:
         super().__init__(
-            f"You do not have permission to access this venue: {venue_id}" 
-            if venue_id 
-            else "You do not have permission to access this venue"
+            f"You do not have permission to access this venue: {venue_id}" if venue_id else "You do not have permission to access this venue"
         )
 
 
@@ -19,11 +17,7 @@ class VenueValidationError(Exception):
 
 class VenueAlreadyExistsError(Exception):
     def __init__(self, name: str = "") -> None:
-        super().__init__(
-            f"Venue with this name already exists: {name}" 
-            if name 
-            else "Venue with this name already exists"
-        )
+        super().__init__(f"Venue with this name already exists: {name}" if name else "Venue with this name already exists")
 
 
 class VenueInvalidTypeError(Exception):
