@@ -1,10 +1,11 @@
 from datetime import datetime
 from sqlalchemy import DateTime, Enum, ForeignKey, String, Integer, Text
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from uuid import UUID
 
 from app.domain.entities.venue_entities import VenueType
 from app.infrastructure.database.base import Base
+from app.infrastructure.database.models.venue_rating_models import VenueRating
 
 
 class Venue(Base):
@@ -32,3 +33,11 @@ class Venue(Base):
     contact_name: Mapped[str] = mapped_column(String(255), nullable=False)
     contact_phone: Mapped[str] = mapped_column(String(20), nullable=False)
     contact_email: Mapped[str] = mapped_column(String(255), nullable=False)
+    
+    # Timestamps
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
+    
+    # Relationships
+    ratings: Mapped[list["VenueRating"]] = relationship(back_populates="venue", foreign_keys="VenueRating.venue_id")
+    
+    
