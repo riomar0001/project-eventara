@@ -38,17 +38,19 @@ class Venue(Base):
     contact_email: Mapped[str] = mapped_column(String(255), nullable=False)
     
     # Timestamps
-    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.timezone.utc)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.timezone.utc, onupdate=datetime.timezone.utc)
     
     # Relationships
     ratings: Mapped[list["VenueRating"]] = relationship(back_populates="venue", foreign_keys="VenueRating.venue_id")
     
     
 
-    # name, city, venue_type
+    # name, city, venue_type, created, updated
     __table_args__ = (
         Index("idx_venues_name", "name"),
         Index("idx_venues_city", "city"),
         Index("idx_venues_venue_type", "venue_type"),
-        Index("idx_venues_name_city", "name", "city"),
+        Index("idx_venues_created_at", "created_at"),
+        Index("idx_venues_updated_at", "updated_at"),
     )

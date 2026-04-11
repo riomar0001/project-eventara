@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import ForeignKey, Integer, DateTime
+from sqlalchemy import ForeignKey, Index, Integer, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from uuid import UUID
 
@@ -22,3 +22,9 @@ class VenueRating(Base):
     venue: Mapped["Venue"] = relationship(back_populates="ratings", foreign_keys=[venue_id])
     
     
+    
+    __table_args__ = (
+        Index("idx_venue_ratings_user_id", "user_id"),
+        Index("idx_venue_ratings_venue_id", "venue_id"),
+        Index("idx_venue_ratings_user_venue", "user_id", "venue_id", unique=True),
+    )
