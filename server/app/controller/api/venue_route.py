@@ -1,36 +1,36 @@
 import uuid
-from fastapi import APIRouter, Depends, status, HTTPException
 
-from app.controller.dependencies import get_venue_use_case, get_current_user_id, require_permission
+from fastapi import APIRouter, Depends, HTTPException, status
+
+from app.application.use_cases.venue_usecase import CreateVenueInput, UpdateVenueInput, VenueUseCase
+from app.controller.dependencies import get_current_user_id, get_venue_use_case, require_permission
 from app.controller.docs.venue_docs import (
     CREATE_VENUE_VALIDATION_ERROR,
-    UNAUTHORIZED,
     FORBIDDEN,
-    VENUE_ALREADY_EXISTS,
-    VENUE_VALIDATION_ERROR,
     INVALID_VENUE_TYPE,
-    VENUE_NOT_FOUND,
+    UNAUTHORIZED,
     UNAUTHORIZED_VENUE_OPERATION,
     UPDATE_VENUE_VALIDATION_ERROR,
+    VENUE_ALREADY_EXISTS,
+    VENUE_NOT_FOUND,
+    VENUE_VALIDATION_ERROR,
 )
 from app.controller.schemas.venue_schema import (
     CreateVenueRequest,
     CreateVenueResponse,
     DeleteVenueResponse,
-    DeleteVenueResponse,
     UpdateVenueRequest,
     UpdateVenueResponse,
     VenueResponse,
 )
-from app.application.use_cases.venue_usecase import UpdateVenueInput, VenueUseCase, CreateVenueInput
 from app.domain.entities.authorization_entities import RoleAction
 from app.domain.entities.venue_entities import VenueType
 from app.domain.exceptions import (
-    VenueNotFoundError,
     UnauthorizedVenueOperationError,
-    VenueValidationError,
     VenueAlreadyExistsError,
     VenueInvalidTypeError,
+    VenueNotFoundError,
+    VenueValidationError,
 )
 
 router = APIRouter(prefix="/venues", tags=["Venues"])
@@ -95,7 +95,7 @@ async def create_venue(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error))
     except VenueAlreadyExistsError as error:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error))
-    except Exception as error:
+    except Exception:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to create venue")
 
 
@@ -168,7 +168,7 @@ async def update_venue(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error))
     except VenueAlreadyExistsError as error:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error))
-    except Exception as error:
+    except Exception:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to update venue")
 
 
@@ -214,7 +214,7 @@ async def delete_venue(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(error))
     except VenueValidationError as error:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error))
-    except Exception as error:
+    except Exception:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to delete venue")
 
 
@@ -266,7 +266,7 @@ async def get_venue(
         )
     except VenueNotFoundError as error:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error))
-    except Exception as error:
+    except Exception:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to retrieve venue")
 
 
@@ -323,5 +323,5 @@ async def get_user_venues(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(error))
     except VenueValidationError as error:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error))
-    except Exception as error:
+    except Exception:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to retrieve user venues")

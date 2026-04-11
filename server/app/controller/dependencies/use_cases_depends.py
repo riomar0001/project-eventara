@@ -15,16 +15,15 @@ from app.application.use_cases.queue_usecase import (
 )
 from app.application.use_cases.role_usecase import UserRoleUseCase
 from app.application.use_cases.user_usecase import OnboardingUseCase
+from app.application.use_cases.venue_usecase import VenueUseCase
 from app.infrastructure.cache.repositories.otp_repository import OTPRepository
 from app.infrastructure.database.repositories.audit_log_repository import (
     AuditLogRepository,
 )
 from app.infrastructure.database.repositories.role_repository import RoleRepository
 from app.infrastructure.database.repositories.user_repository import UserRepository
-from app.infrastructure.database.session import get_db
-
-from app.application.use_cases.venue_usecase import VenueUseCase
 from app.infrastructure.database.repositories.venue_repository import VenueRepository
+from app.infrastructure.database.session import get_db
 
 
 def get_venue_use_case(db: AsyncSession = Depends(get_db)) -> VenueUseCase:

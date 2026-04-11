@@ -1,11 +1,10 @@
 import uuid
-from dataclasses import dataclass, field, field
+from dataclasses import dataclass
 from dataclasses import fields as dataclass_fields
-from datetime import datetime
 
-from app.domain.entities.venue_entities import Venue, PublicVenue, VenueType
-from app.domain.exceptions import VenueNotFoundError
 from app.application.interfaces.venue_interface import IVenueRepository
+from app.domain.entities.venue_entities import PublicVenue, Venue, VenueType
+from app.domain.exceptions import VenueNotFoundError
 
 
 @dataclass

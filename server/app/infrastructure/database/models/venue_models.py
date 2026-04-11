@@ -1,7 +1,7 @@
-from datetime import datetime
-from sqlalchemy import DateTime, Enum, ForeignKey, Index, String, Integer, Text
-from sqlalchemy.orm import Mapped, mapped_column
 from uuid import UUID
+
+from sqlalchemy import Enum, ForeignKey, Index, Integer, String, Text
+from sqlalchemy.orm import Mapped, mapped_column
 
 from app.domain.entities.venue_entities import VenueType
 from app.infrastructure.database.base import Base

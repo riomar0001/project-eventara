@@ -1,6 +1,7 @@
 import uuid
 from typing import Protocol
-from app.domain.entities.venue_entities import Venue, PublicVenue
+
+from app.domain.entities.venue_entities import PublicVenue, Venue
 
 
 class IVenueRepository(Protocol):

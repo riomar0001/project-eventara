@@ -1,8 +1,10 @@
 import uuid
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.domain.entities.venue_entities import Venue as DomainVenue, PublicVenue, VenueType
+from app.domain.entities.venue_entities import PublicVenue
+from app.domain.entities.venue_entities import Venue as DomainVenue
 from app.infrastructure.database.models.venue_models import Venue
 
 

@@ -13,7 +13,6 @@ from app.infrastructure.database.models.user_models import (
     UserRole,
     UserSecurity,
 )
-
 from app.infrastructure.database.models.venue_models import Venue
 
 __all__ = [

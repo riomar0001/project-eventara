@@ -26,13 +26,12 @@ from app.domain.exceptions.user_exceptions import (
     UserLockedError,
     UserNotFoundError,
 )
-
 from app.domain.exceptions.venue_exceptions import (
-    VenueNotFoundError,
     UnauthorizedVenueOperationError,
-    VenueValidationError,
     VenueAlreadyExistsError,
     VenueInvalidTypeError,
+    VenueNotFoundError,
+    VenueValidationError,
 )
 
 __all__ = [

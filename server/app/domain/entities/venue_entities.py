@@ -1,6 +1,7 @@
 import uuid
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
+
 from pydantic import BaseModel, Field
 
 """Venue classification init
@@ -8,7 +9,7 @@ from pydantic import BaseModel, Field
 """
 
 
-class VenueType(str, Enum):
+class VenueType(StrEnum):
     INDOOR = "indoor"
     OUTDOOR = "outdoor"
     HYBRID = "hybrid"
