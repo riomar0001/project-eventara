@@ -1,27 +1,12 @@
-"use client"
+'use client';
 
-import { BarChart2, LineChart as LineChartIcon, ChevronDown } from "lucide-react"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Button } from "@/components/ui/button"
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { Area, AreaChart, CartesianGrid, XAxis } from "recharts"
-
-const chartData = [
-  { day: "Sun", savings: 8, income: 12, expenses: 4 },
-  { day: "Mon", savings: 10, income: 15, expenses: 5 },
-  { day: "Tue", savings: 12, income: 18, expenses: 8 },
-  { day: "Wed", savings: 24, income: 70, expenses: 46 },
-  { day: "Thu", savings: 9, income: 14, expenses: 6 },
-  { day: "Fri", savings: 7, income: 11, expenses: 5 },
-  { day: "Sat", savings: 6, income: 10, expenses: 3 },
-]
-
-const chartConfig = {
-  savings: { label: "Savings", color: "oklch(0.879 0.169 91.605)" },
-  income: { label: "Income", color: "oklch(0.648 0.2 131.684)" },
-  expenses: { label: "Expenses", color: "oklch(0.769 0.188 70.08)" },
-}
+import { BarChart2, LineChart as LineChartIcon, ChevronDown } from 'lucide-react';
+import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { balanceChartData as chartData, balanceChartConfig as chartConfig } from '@/constants/dashboard';
 
 export function BalanceOverviewCard() {
   return (
@@ -29,7 +14,7 @@ export function BalanceOverviewCard() {
       <CardHeader className="flex flex-row items-start justify-between pb-2">
         <div>
           <p className="text-5xl font-bold tracking-tight">$12,450</p>
-          <p className="text-xs text-muted-foreground">Balance overview</p>
+          <p className="text-muted-foreground text-xs">Balance overview</p>
         </div>
         <div className="flex items-center gap-1.5">
           <DropdownMenu>
@@ -58,7 +43,7 @@ export function BalanceOverviewCard() {
           {Object.entries(chartConfig).map(([key, cfg]) => (
             <div key={key} className="flex items-center gap-1.5">
               <span className="size-2.5 rounded-sm" style={{ backgroundColor: cfg.color }} />
-              <span className="text-xs text-muted-foreground">{cfg.label}</span>
+              <span className="text-muted-foreground text-xs">{cfg.label}</span>
             </div>
           ))}
         </div>
@@ -79,7 +64,7 @@ export function BalanceOverviewCard() {
               </linearGradient>
             </defs>
             <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="oklch(0.922 0 0)" />
-            <XAxis dataKey="day" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: "oklch(0.556 0 0)" }} />
+            <XAxis dataKey="day" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: 'oklch(0.556 0 0)' }} />
             <ChartTooltip content={<ChartTooltipContent />} />
             <Area dataKey="savings" type="monotone" stroke={chartConfig.savings.color} strokeWidth={2} fill="url(#savings-gradient)" dot={false} />
             <Area dataKey="income" type="monotone" stroke={chartConfig.income.color} strokeWidth={2} fill="url(#income-gradient)" dot={false} />
@@ -88,5 +73,5 @@ export function BalanceOverviewCard() {
         </ChartContainer>
       </CardContent>
     </Card>
-  )
+  );
 }

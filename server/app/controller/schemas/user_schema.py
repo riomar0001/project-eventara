@@ -30,3 +30,13 @@ class UserOnboardingResponse(BaseModel):
     first_name: str
     last_name: str
     message: str = "Onboarding completed successfully."
+
+
+class ChangePasswordRequest(BaseModel):
+    current_password: str = Field(min_length=1)
+    new_password: str = Field(min_length=8)
+
+
+class ChangePasswordResponse(BaseModel):
+    success: bool = True
+    message: str = "Password changed successfully. All active sessions have been invalidated."

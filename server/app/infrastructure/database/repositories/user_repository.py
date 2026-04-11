@@ -295,3 +295,45 @@ class UserRepository:
             )
         )
         await self.db.commit()
+
+    async def update_password(self, user_id: uuid.UUID, password_hash: str) -> bool:
+        """Atomically replace the user's password hash and stamp the change time.
+
+        Both the ``users.password`` column and ``user_security.password_change_at``
+        are updated within a single database commit so they are always consistent.
+        A single ``UPDATE … WHERE id = user_id`` on the users table guards against
+        updating a non-existent account — if the row count is zero the method
+        rolls back and returns ``False`` without touching the security record.
+
+        Concurrency note:
+            The ``UPDATE … WHERE id = :user_id`` is unconditional beyond the
+            primary-key filter.  Concurrent reset requests are serialised by the
+            Redis ``GETDEL`` in ``PasswordResetRepository.verify_and_consume``
+            before reaching this method, so at most one request will ever arrive
+            here for the same token.
+
+        Args:
+            user_id:       The target user's UUID.
+            password_hash: The pre-hashed (bcrypt) new password to persist.
+
+        Returns:
+            ``True`` if the password was updated, ``False`` if no user with the
+            given ID exists.
+        """
+        now = datetime.now(UTC).replace(tzinfo=None)
+        result = await self.db.execute(
+            update(User)
+            .where(User.id == user_id)
+            .values(password=password_hash)
+        )
+        if cast(CursorResult, result).rowcount == 0:
+            await self.db.rollback()
+            return False
+
+        await self.db.execute(
+            update(UserSecurity)
+            .where(UserSecurity.user_id == user_id)
+            .values(password_change_at=now)
+        )
+        await self.db.commit()
+        return True

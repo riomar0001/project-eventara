@@ -1,9 +1,8 @@
 'use client';
 
 import * as React from 'react';
-import { LayoutDashboard, User, ArrowLeftRight, Waves, Wallet, TrendingUp, BookOpen, Headphones, ChevronDown } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
   Sidebar,
@@ -20,29 +19,8 @@ import {
   SidebarMenuSubItem,
   useSidebar
 } from '@/components/ui/sidebar';
+import { navItems, bottomNavItems as bottomItems } from '@/constants/navigation';
 import { cn } from '@/lib/utils';
-
-const navItems = [
-  { label: 'Dashboard', icon: LayoutDashboard, href: '#', active: true },
-  { label: 'Accounts', icon: User, href: '#' },
-  {
-    label: 'Transactions',
-    icon: ArrowLeftRight,
-    href: '#',
-    children: [
-      { label: 'History', href: '#', badge: 19 },
-      { label: 'Integration', href: '#' },
-      { label: 'Reports', href: '#' }
-    ]
-  },
-  { label: 'Cash flow', icon: Waves, href: '#' },
-  { label: 'Budget', icon: Wallet, href: '#' },
-  { label: 'Investments', icon: TrendingUp, href: '#' }
-];
-
-const bottomItems = [
-  { label: 'Support', icon: Headphones, href: '#' }
-];
 
 export function AppSidebar() {
   const [transactionsOpen, setTransactionsOpen] = React.useState(true);
@@ -55,7 +33,7 @@ export function AppSidebar() {
   }, [isCollapsed]);
 
   return (
-    <Sidebar collapsible="icon" className='border-0!'>
+    <Sidebar collapsible="icon" className="border-0!">
       {/* Logo */}
       <SidebarHeader className="h-19.25 justify-center bg-white px-6 group-data-[collapsible=icon]:px-2">
         <span className="text-xl font-bold tracking-tight group-data-[collapsible=icon]:hidden">
@@ -75,17 +53,11 @@ export function AppSidebar() {
                   <Collapsible key={item.label} open={transactionsOpen} onOpenChange={setTransactionsOpen} asChild>
                     <SidebarMenuItem>
                       <CollapsibleTrigger asChild>
-                        <SidebarMenuButton
-                          tooltip={item.label}
-                          className={cn('h-10 [&_svg]:size-4.5', transactionsOpen && 'text-foreground')}
-                        >
+                        <SidebarMenuButton tooltip={item.label} className={cn('h-10 [&_svg]:size-4.5', transactionsOpen && 'text-foreground')}>
                           <item.icon />
                           <span>{item.label}</span>
                           <ChevronDown
-                            className={cn(
-                              'ml-auto size-4 transition-transform group-data-[collapsible=icon]:hidden',
-                              transactionsOpen && 'rotate-180'
-                            )}
+                            className={cn('ml-auto size-4 transition-transform group-data-[collapsible=icon]:hidden', transactionsOpen && 'rotate-180')}
                           />
                         </SidebarMenuButton>
                       </CollapsibleTrigger>
@@ -121,7 +93,7 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="bg-white group-data-[collapsible=icon]:px-0">
+      <SidebarFooter className="bg-white px-4 group-data-[collapsible=icon]:px-0">
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>

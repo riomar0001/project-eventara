@@ -106,3 +106,61 @@ ALIAS_CONFLICT = {
         },
     }
 }
+
+
+# POST /user/change-password
+CHANGE_PASSWORD_VALIDATION_ERROR = {
+    422: {
+        "description": "Validation error — current_password is empty or new_password is shorter than 8 characters",
+        "model": ValidationErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "detail": [
+                        {
+                            "loc": ["body", "current_password"],
+                            "msg": "String should have at least 1 character",
+                            "type": "string_too_short",
+                        },
+                        {
+                            "loc": ["body", "new_password"],
+                            "msg": "String should have at least 8 characters",
+                            "type": "string_too_short",
+                        },
+                    ],
+                }
+            }
+        },
+    }
+}
+
+INVALID_CURRENT_PASSWORD = {
+    401: {
+        "description": "Current password is incorrect",
+        "model": ErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "message": "Invalid email or password",
+                }
+            }
+        },
+    }
+}
+
+SAME_PASSWORD_ERROR = {
+    400: {
+        "description": "New password is identical to the current password",
+        "model": ErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "message": "New password must be different from the current password",
+                }
+            }
+        },
+    }
+}
