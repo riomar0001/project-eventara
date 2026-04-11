@@ -41,3 +41,8 @@ class CompletedOnboardingRequiredError(Exception):
 class AliasAlreadyTakenError(Exception):
     def __init__(self, alias: str = "") -> None:
         super().__init__(f"Alias '{alias}' is already taken" if alias else "Alias is already taken")
+
+
+class SamePasswordError(Exception):
+    def __init__(self) -> None:
+        super().__init__("New password must be different from the current password")
