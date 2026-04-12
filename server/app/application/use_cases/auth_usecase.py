@@ -16,6 +16,8 @@ from app.application.dto.auth_dto import (
     RefreshTokenOutput,
     RegisteredUserOutput,
     RegisterUserInput,
+    ResendOtpInput,
+    ResendOtpOutput,
     ResendVerificationInput,
     ResetPasswordInput,
     VerifiedEmailOutput,
@@ -379,6 +381,63 @@ class AuthUseCase:
             access_token=access_token,
             refresh_token=refresh_token,
         )
+
+    async def resend_otp(self, data: ResendOtpInput) -> ResendOtpOutput:
+        """Invalidate the current OTP, generate a fresh one, and re-send it.
+
+        Decodes the existing OTP session token to identify the user, then
+        atomically replaces any in-flight OTP in Redis via
+        ``OTPRepository.create_for_user`` (a single ``SET`` command).  A new
+        OTP session token is issued so the client receives a fresh 10-minute
+        window aligned with the new code.
+
+        The old verification token remains structurally valid until its JWT
+        expiry, but because the OTP it was paired with has been overwritten,
+        submitting the old code will fail — only the newly delivered code is
+        accepted.
+
+        Args:
+            data: A ``ResendOtpInput`` carrying the current OTP session token.
+
+        Returns:
+            A ``ResendOtpOutput`` with a fresh ``verification_token`` to submit
+            to ``login_verify`` alongside the new code.
+
+        Raises:
+            TokenExpiredError: The OTP session token has passed its expiry.
+            InvalidTokenError: The token is malformed or has an invalid signature.
+            UserNotFoundError: No user matches the token's subject claim.
+        """
+        try:
+            payload = verify_otp_token(data.token)
+        except ValueError as exc:
+            message = str(exc)
+            if "expired" in message.lower():
+                raise TokenExpiredError() from exc
+            raise InvalidTokenError(message) from exc
+
+        user_id = uuid.UUID(payload.sub)
+
+        user = await self.repo.get_by_id(user_id)
+        if not user:
+            raise UserNotFoundError()
+
+        otp_repo = self.otp_repo
+        if otp_repo is None:
+            raise RuntimeError("OTP repository is not configured.")
+
+        code = await otp_repo.create_for_user(user_id)
+
+        await send_email(
+            self.arq,
+            to=user.email,
+            subject="Your new Eventara login code",
+            html=otp_email_html(code),
+        )
+
+        new_token = create_otp_token(user_id, user.email)
+
+        return ResendOtpOutput(verification_token=new_token)
 
     async def logout(self, data: LogoutInput) -> None:
         """Revoke a refresh token, terminating the associated session.

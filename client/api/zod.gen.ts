@@ -322,6 +322,22 @@ export const zRegisterResponse = z.object({
 });
 
 /**
+ * ResendOtpRequest
+ */
+export const zResendOtpRequest = z.object({
+    token: z.string().min(1)
+});
+
+/**
+ * ResendOtpResponse
+ */
+export const zResendOtpResponse = z.object({
+    success: z.boolean().optional().default(true),
+    verification_token: z.string(),
+    message: z.string().optional().default('A new OTP has been sent to your email.')
+});
+
+/**
  * ResendVerificationRequest
  */
 export const zResendVerificationRequest = z.object({
@@ -626,6 +642,13 @@ export const zLoginVerifyAuthLoginVerifyPostBody = zLoginVerifyRequest;
  * Successful Response
  */
 export const zLoginVerifyAuthLoginVerifyPostResponse = zLoginVerifyResponse;
+
+export const zResendOtpAuthLoginResendOtpPostBody = zResendOtpRequest;
+
+/**
+ * Successful Response
+ */
+export const zResendOtpAuthLoginResendOtpPostResponse = zResendOtpResponse;
 
 export const zLogoutAuthLogoutPostBody = zLogoutRequest;
 

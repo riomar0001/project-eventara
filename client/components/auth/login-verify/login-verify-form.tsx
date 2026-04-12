@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Mail, Loader2 } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Mail, Loader2, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { OtpInput, OTP_LENGTH } from '@/components/auth/login-verify/otp-input';
@@ -33,31 +33,44 @@ function secondsUntil(expiry: number): number {
 export function LoginVerifyForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const token = searchParams.get('token') ?? '';
+  const initialToken = searchParams.get('token') ?? '';
   const setAuth = useAuthStore((s) => s.setAuth);
 
+  // activeToken can update after a resend — kept in state so the interval effect re-runs
+  const [activeToken, setActiveToken] = useState(initialToken);
   const [digits, setDigits] = useState<string[]>(Array(OTP_LENGTH).fill(''));
   const [focusedIndex, setFocusedIndex] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [rootError, setRootError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+  const [resendSuccess, setResendSuccess] = useState(false);
+  const [verified, setVerified] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState<number | null>(() => {
-    if (typeof window === 'undefined' || !token) return null;
-    return secondsUntil(getOrCreateExpiry(token));
+    if (typeof window === 'undefined' || !initialToken) return null;
+    return secondsUntil(getOrCreateExpiry(initialToken));
   });
   const [shake, setShake] = useState(false);
 
-  // Tick the timer every second against the persisted expiry timestamp.
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Tick the timer every second against the persisted expiry for activeToken.
   useEffect(() => {
-    if (!token) return;
-    const expiry = getOrCreateExpiry(token);
-    const id = setInterval(() => {
+    if (!activeToken) return;
+    const expiry = getOrCreateExpiry(activeToken);
+
+    if (intervalRef.current) clearInterval(intervalRef.current);
+
+    intervalRef.current = setInterval(() => {
       const remaining = secondsUntil(expiry);
       setSecondsLeft(remaining);
-      if (remaining <= 0) clearInterval(id);
+      if (remaining <= 0) clearInterval(intervalRef.current!);
     }, 1000);
-    return () => clearInterval(id);
-  }, [token]);
+
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [activeToken]);
 
   const triggerShake = () => {
     setShake(true);
@@ -82,7 +95,7 @@ export function LoginVerifyForm() {
     setRootError(null);
 
     const result = await Authentication.loginVerifyAuthLoginVerifyPost({
-      body: { token, code },
+      body: { token: activeToken, code },
       throwOnError: false
     });
 
@@ -115,8 +128,65 @@ export function LoginVerifyForm() {
     }
 
     setAuth(result.data.access_token, result.data.refresh_token, user);
-    router.replace('/dashboard');
+    setVerified(true);
+    setTimeout(() => router.replace('/dashboard'), 1500);
   };
+
+  const handleResend = async () => {
+    setIsResending(true);
+    setError(null);
+    setRootError(null);
+    setResendSuccess(false);
+
+    const result = await Authentication.resendOtpAuthLoginResendOtpPost({
+      body: { token: activeToken },
+      throwOnError: false
+    });
+
+    setIsResending(false);
+
+    if (!result.data) {
+      const status = (result as { response?: { status?: number } }).response?.status;
+
+      if (status === 401 || status === 400) {
+        setRootError('Session expired. Please sign in again.');
+        return;
+      }
+
+      setRootError('Failed to resend code. Please try again.');
+      return;
+    }
+
+    const newToken = result.data.verification_token;
+
+    // Store a fresh expiry for the new token and reset the timer
+    sessionStorage.setItem(`otp-expiry:${newToken}`, String(Date.now() + EXPIRY_SECONDS * 1000));
+    setSecondsLeft(EXPIRY_SECONDS);
+    setDigits(Array(OTP_LENGTH).fill(''));
+    setFocusedIndex(0);
+    setActiveToken(newToken);
+    setResendSuccess(true);
+    setTimeout(() => setResendSuccess(false), 4000);
+  };
+
+  if (verified) {
+    return (
+      <Card className="flex flex-col items-center gap-4 px-8 py-10" style={{ animation: 'otp-success-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both' }}>
+        <CheckCircle2 size={52} className="text-primary" strokeWidth={1.5} />
+        <div className="flex flex-col items-center gap-1 text-center">
+          <h1 className="text-foreground text-2xl font-semibold tracking-tight">Verified!</h1>
+          <p className="text-muted-foreground text-sm">Taking you to your dashboard…</p>
+        </div>
+        <Loader2 size={18} className="text-muted-foreground animate-spin" />
+        <style>{`
+          @keyframes otp-success-in {
+            from { opacity: 0; transform: scale(0.95); }
+            to   { opacity: 1; transform: scale(1); }
+          }
+        `}</style>
+      </Card>
+    );
+  }
 
   const filled = digits.every((d) => d !== '');
   const timerReady = secondsLeft !== null;
@@ -127,8 +197,6 @@ export function LoginVerifyForm() {
 
   return (
     <Card className="flex flex-col items-center gap-8 px-8 py-10">
-      {/* Icon */}
-
       {/* Heading */}
       <div className="flex flex-col items-center gap-2 text-center">
         <Mail size={50} className="text-primary" />
@@ -144,6 +212,7 @@ export function LoginVerifyForm() {
 
         {error && <p className="text-destructive text-sm font-medium">{error}</p>}
         {rootError && <p className="text-destructive text-sm font-medium">{rootError}</p>}
+        {resendSuccess && <p className="text-primary text-sm font-medium">New code sent — check your inbox.</p>}
 
         {!rootError && timerReady && (
           <div className="flex items-center gap-1.5 text-xs">
@@ -163,14 +232,12 @@ export function LoginVerifyForm() {
 
       {/* Actions */}
       <div className="flex w-full max-w-xs flex-col gap-4">
-        <Button onClick={handleSubmit} className="h-11 w-full text-base font-medium" disabled={isSubmitting || !filled || !timerReady || expired}>
-          {isSubmitting ? (
-            <>
-              <Loader2 size={16} className="animate-spin" /> Verifying…
-            </>
-          ) : (
-            'Verify code'
-          )}
+        <Button onClick={handleSubmit} className="h-11 w-full text-base font-medium" disabled={isSubmitting || isResending || !filled || !timerReady || expired}>
+          {isSubmitting ? <><Loader2 size={16} className="animate-spin" /> Verifying…</> : 'Verify code'}
+        </Button>
+
+        <Button variant="outline" onClick={handleResend} className="w-full" disabled={isResending || isSubmitting}>
+          {isResending ? <><Loader2 size={16} className="animate-spin" /> Sending…</> : 'Resend code'}
         </Button>
 
         <p className="text-muted-foreground text-center text-sm">

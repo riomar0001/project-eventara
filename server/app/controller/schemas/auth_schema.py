@@ -56,6 +56,16 @@ class LoginInitResponse(BaseModel):
     message: str = "OTP sent to your email."
 
 
+class ResendOtpRequest(BaseModel):
+    token: str = Field(min_length=1)
+
+
+class ResendOtpResponse(BaseModel):
+    success: bool = True
+    verification_token: str
+    message: str = "A new OTP has been sent to your email."
+
+
 class LoginVerifyRequest(BaseModel):
     token: str = Field(min_length=1)
     code: str = Field(min_length=6, max_length=6, pattern=r"^\d{6}$")

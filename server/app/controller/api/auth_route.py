@@ -7,6 +7,7 @@ from app.application.dto.auth_dto import (
     LogoutInput,
     RefreshTokenInput,
     RegisterUserInput,
+    ResendOtpInput,
     ResendVerificationInput,
     ResetPasswordInput,
 )
@@ -31,6 +32,7 @@ from app.controller.docs.auth_docs import (
     REFRESH_TOKEN_INVALID,
     REFRESH_VALIDATION_ERROR,
     REGISTER_VALIDATION_ERROR,
+    RESEND_OTP_VALIDATION_ERROR,
     RESEND_VERIFICATION_VALIDATION_ERROR,
     RESET_PASSWORD_TOKEN_EXPIRED,
     RESET_PASSWORD_TOKEN_INVALID,
@@ -54,6 +56,8 @@ from app.controller.schemas.auth_schema import (
     RefreshTokenResponse,
     RegisterRequest,
     RegisterResponse,
+    ResendOtpRequest,
+    ResendOtpResponse,
     ResendVerificationRequest,
     ResendVerificationResponse,
     ResetPasswordRequest,
@@ -338,6 +342,51 @@ async def login_verify(
         access_token=result.access_token,
         refresh_token=result.refresh_token,
     )
+
+
+@router.post(
+    "/login/resend-otp",
+    response_model=ResendOtpResponse,
+    status_code=status.HTTP_200_OK,
+    responses={
+        **OTP_TOKEN_INVALID,
+        **OTP_TOKEN_EXPIRED,
+        **USER_NOT_FOUND,
+        **RESEND_OTP_VALIDATION_ERROR,
+    },
+    summary="Resend OTP code",
+    description=(
+        "Invalidate the current one-time code and dispatch a fresh 6-digit OTP to the "
+        "user's email address.  The existing ``verification_token`` from "
+        "``POST /auth/login`` is required to identify the session.  "
+        "A new ``verification_token`` is returned alongside the fresh code, giving the "
+        "client a new 10-minute window.  The old code is atomically overwritten in Redis "
+        "so only the newly delivered code is valid."
+    ),
+)
+async def resend_otp(
+    body: ResendOtpRequest,
+    use_case: AuthUseCase = Depends(get_auth_use_case),
+) -> ResendOtpResponse:
+    """Resend a fresh OTP to the user and return a new verification token.
+
+    # Error mapping
+    - **400 Bad Request** — ``token`` is malformed or has an invalid signature.
+    - **401 Unauthorized** — ``token`` has expired; the user must restart the
+      login flow via ``POST /auth/login``.
+    - **404 Not Found** — no user matches the token's subject claim.
+    - **422 Unprocessable Entity** — ``token`` field is missing or empty.
+    """
+    try:
+        result = await use_case.resend_otp(ResendOtpInput(token=body.token))
+    except TokenExpiredError as error:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(error))
+    except InvalidTokenError as error:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error))
+    except UserNotFoundError as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error))
+
+    return ResendOtpResponse(verification_token=result.verification_token)
 
 
 @router.post(
