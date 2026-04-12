@@ -1,10 +1,9 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import { useState } from 'react';
+import { AuthCard } from '../_components/auth-card';
+import { FormField } from '../_components/form-field';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -30,61 +29,48 @@ export default function LoginPage() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-xl">Welcome back</CardTitle>
-        <CardDescription>Sign in to continue to your account.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form id="login-form" onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1">
-            <label htmlFor="email" className="text-sm font-medium">
-              Email
-            </label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="you@example.com"
-              autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              aria-invalid={!!errors.email || undefined}
-            />
-            {errors.email && <p className="text-destructive text-xs">{errors.email}</p>}
-          </div>
-          <div className="flex flex-col gap-1">
-            <div className="flex items-center justify-between">
-              <label htmlFor="password" className="text-sm font-medium">
-                Password
-              </label>
-              <Link href="/forgot-password" className="text-muted-foreground hover:text-foreground text-xs transition-colors">
-                Forgot password?
-              </Link>
-            </div>
-            <Input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              aria-invalid={!!errors.password || undefined}
-            />
-            {errors.password && <p className="text-destructive text-xs">{errors.password}</p>}
-          </div>
-        </form>
-      </CardContent>
-      <CardFooter className="flex flex-col gap-3">
-        <Button type="submit" form="login-form" className="w-full" disabled={isLoading}>
-          {isLoading ? 'Signing in…' : 'Sign in'}
-        </Button>
+    <AuthCard
+      title="Welcome back"
+      description="Sign in to continue to your account."
+      formId="login-form"
+      submitLabel="Sign in"
+      submittingLabel="Signing in…"
+      isLoading={isLoading}
+      onSubmit={handleSubmit}
+      footer={
         <p className="text-muted-foreground text-center text-sm">
           No account?{' '}
           <Link href="/register" className="text-foreground font-medium underline-offset-4 hover:underline">
             Create one
           </Link>
         </p>
-      </CardFooter>
-    </Card>
+      }
+    >
+      <FormField
+        id="email"
+        label="Email"
+        type="email"
+        placeholder="you@example.com"
+        autoComplete="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        error={errors.email}
+      />
+      <FormField
+        id="password"
+        label="Password"
+        type="password"
+        placeholder="••••••••"
+        autoComplete="current-password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        error={errors.password}
+        action={
+          <Link href="/forgot-password" className="text-muted-foreground hover:text-foreground text-xs transition-colors">
+            Forgot password?
+          </Link>
+        }
+      />
+    </AuthCard>
   );
 }

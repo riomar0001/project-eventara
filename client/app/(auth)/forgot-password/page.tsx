@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { AuthCard } from '../_components/auth-card';
+import { FormField } from '../_components/form-field';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
@@ -15,10 +16,7 @@ export default function ForgotPasswordPage() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    if (!email.trim()) {
-      setEmailError('Email is required.');
-      return;
-    }
+    if (!email.trim()) { setEmailError('Email is required.'); return; }
     setEmailError('');
 
     setIsLoading(true);
@@ -55,40 +53,32 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-xl">Forgot your password?</CardTitle>
-        <CardDescription>Enter your email and we&apos;ll send a reset link.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form id="forgot-form" onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1">
-            <label htmlFor="email" className="text-sm font-medium">
-              Email
-            </label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="you@example.com"
-              autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              aria-invalid={!!emailError || undefined}
-            />
-            {emailError && <p className="text-destructive text-xs">{emailError}</p>}
-          </div>
-        </form>
-      </CardContent>
-      <CardFooter className="flex flex-col gap-3">
-        <Button type="submit" form="forgot-form" className="w-full" disabled={isLoading}>
-          {isLoading ? 'Sending…' : 'Send reset link'}
-        </Button>
+    <AuthCard
+      title="Forgot your password?"
+      description="Enter your email and we'll send a reset link."
+      formId="forgot-form"
+      submitLabel="Send reset link"
+      submittingLabel="Sending…"
+      isLoading={isLoading}
+      onSubmit={handleSubmit}
+      footer={
         <p className="text-muted-foreground text-center text-sm">
           <Link href="/login" className="text-foreground font-medium underline-offset-4 hover:underline">
             Back to sign in
           </Link>
         </p>
-      </CardFooter>
-    </Card>
+      }
+    >
+      <FormField
+        id="email"
+        label="Email"
+        type="email"
+        placeholder="you@example.com"
+        autoComplete="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        error={emailError}
+      />
+    </AuthCard>
   );
 }

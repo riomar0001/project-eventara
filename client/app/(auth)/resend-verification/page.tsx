@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { AuthCard } from '../_components/auth-card';
+import { FormField } from '../_components/form-field';
 
 export default function ResendVerificationPage() {
   const [email, setEmail] = useState('');
@@ -15,10 +16,7 @@ export default function ResendVerificationPage() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    if (!email.trim()) {
-      setEmailError('Email is required.');
-      return;
-    }
+    if (!email.trim()) { setEmailError('Email is required.'); return; }
     setEmailError('');
 
     setIsLoading(true);
@@ -49,40 +47,32 @@ export default function ResendVerificationPage() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-xl">Resend verification email</CardTitle>
-        <CardDescription>Enter your email and we&apos;ll send a new verification link.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form id="resend-form" onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1">
-            <label htmlFor="email" className="text-sm font-medium">
-              Email
-            </label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="you@example.com"
-              autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              aria-invalid={!!emailError || undefined}
-            />
-            {emailError && <p className="text-destructive text-xs">{emailError}</p>}
-          </div>
-        </form>
-      </CardContent>
-      <CardFooter className="flex flex-col gap-3">
-        <Button type="submit" form="resend-form" className="w-full" disabled={isLoading}>
-          {isLoading ? 'Sending…' : 'Send verification link'}
-        </Button>
+    <AuthCard
+      title="Resend verification email"
+      description="Enter your email and we'll send a new verification link."
+      formId="resend-form"
+      submitLabel="Send verification link"
+      submittingLabel="Sending…"
+      isLoading={isLoading}
+      onSubmit={handleSubmit}
+      footer={
         <p className="text-muted-foreground text-center text-sm">
           <Link href="/login" className="text-foreground font-medium underline-offset-4 hover:underline">
             Back to sign in
           </Link>
         </p>
-      </CardFooter>
-    </Card>
+      }
+    >
+      <FormField
+        id="email"
+        label="Email"
+        type="email"
+        placeholder="you@example.com"
+        autoComplete="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        error={emailError}
+      />
+    </AuthCard>
   );
 }
