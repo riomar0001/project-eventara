@@ -1,7 +1,7 @@
 from uuid import UUID
 
 from sqlalchemy import JSON, Enum, ForeignKey, Index
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.domain.entities.volunteer_application_entity import ApplicationStatus
 from app.infrastructure.database.base import Base
@@ -17,6 +17,9 @@ class VolunteerApplication(Base):
         default="pending",
     )
     application_data: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+
+    # Relationships
+    user: Mapped["User"] = relationship(back_populates="volunteer_applications")
 
     __table_args__ = (
         Index("idx_volunteer_applications_user_id", "user_id"),

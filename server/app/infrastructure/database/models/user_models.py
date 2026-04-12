@@ -45,6 +45,9 @@ class User(Base):
     roles: Mapped[list[UserRole]] = relationship(back_populates="user", foreign_keys="UserRole.user_id")
     grants: Mapped[list[UserGrant]] = relationship(back_populates="user", foreign_keys="UserGrant.user_id")
     login_history: Mapped[list[UserLoginHistory]] = relationship(back_populates="user", foreign_keys="UserLoginHistory.user_id")
+    venues: Mapped[list["Venue"]] = relationship(back_populates="creator", foreign_keys="Venue.creator_id")
+    volunteer: Mapped["Volunteer"] = relationship(back_populates="user", uselist=False)
+    volunteer_applications: Mapped[list["VolunteerApplication"]] = relationship(back_populates="user", foreign_keys="VolunteerApplication.user_id")
 
     __table_args__ = (
         Index(
@@ -74,6 +77,7 @@ class UserProfile(Base):
     preferences: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
     user: Mapped[User] = relationship(back_populates="profile")
+    venue_ratings: Mapped[list["VenueRating"]] = relationship(back_populates="user", foreign_keys="VenueRating.user_id")
 
 
 class UserSecurity(Base):
