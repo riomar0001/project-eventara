@@ -6,9 +6,10 @@ import { useAuthStore } from '@/store/auth-store';
 
 /**
  * Wraps authenticated routes. While auth state is still initializing it
- * renders nothing to avoid a flash of protected content. Once initialized,
- * unauthenticated users are redirected to /login; authenticated users see
- * their children.
+ * renders nothing to avoid a flash of protected content. Once initialized:
+ * - Unauthenticated users are redirected to /login
+ * - Authenticated users who haven't completed onboarding go to /onboarding
+ * - Everyone else sees their children
  */
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -16,12 +17,15 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   const user = useAuthStore((s) => s.user);
 
   useEffect(() => {
-    if (isInitialized && !user) {
+    if (!isInitialized) return;
+    if (!user) {
       router.replace('/login');
+    } else if (!user.doneOnboarding) {
+      router.replace('/onboarding');
     }
   }, [isInitialized, user, router]);
 
-  if (!isInitialized || !user) {
+  if (!isInitialized || !user || !user.doneOnboarding) {
     return null;
   }
 
