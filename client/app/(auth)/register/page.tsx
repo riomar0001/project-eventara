@@ -2,10 +2,10 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { AuthFormField } from '@/components/auth/form-field';
 import { AuthStatusCard } from '@/components/auth/status-card';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function RegisterPage() {
   const [email, setEmail] = useState('');
@@ -54,7 +54,7 @@ export default function RegisterPage() {
   }
 
   return (
-    <Card className="py-8 gap-8">
+    <Card className="gap-8 py-8">
       <CardHeader className="gap-3">
         <CardTitle className="text-2xl">Create an account</CardTitle>
         <CardDescription>Start managing your events with Eventara.</CardDescription>

@@ -1,6 +1,7 @@
 'use client';
 
-import { AuthFormField } from '@/components/auth/form-field';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 
 export interface ProfileFields {
@@ -15,40 +16,52 @@ interface StepProfileProps {
 }
 
 export function StepProfile({ values, onChange, errors }: StepProfileProps) {
-  return (
-    <div className="flex flex-col gap-5">
-      <AuthFormField
-        id="occupation"
-        label="Occupation"
-        placeholder="e.g. Software Engineer"
-        value={values.occupation}
-        onChange={(e) => onChange({ occupation: e.target.value })}
-        error={errors.occupation}
-        hint="Optional — max 150 characters."
-      />
+  const bioLength = values.bio.length;
+  const bioNearLimit = bioLength > 400;
 
-      {/* Bio textarea */}
+  return (
+    <div className="flex flex-col gap-3 sm:gap-5">
+      {/* Occupation */}
       <div className="flex flex-col gap-2">
-        <div className="flex items-center justify-between">
+        <div className="flex items-baseline justify-between">
+          <label htmlFor="occupation" className="text-sm font-medium">
+            Occupation
+          </label>
+          <span className="text-muted-foreground text-xs">Optional</span>
+        </div>
+        <Input
+          id="occupation"
+          placeholder="e.g. Software Engineer"
+          value={values.occupation}
+          maxLength={150}
+          onChange={(e) => onChange({ occupation: e.target.value })}
+          aria-invalid={!!errors.occupation || undefined}
+          className="text-sm"
+        />
+        {errors.occupation ? (
+          <p className="text-destructive text-xs">{errors.occupation}</p>
+        ) : (
+          <p className="text-muted-foreground text-xs">Max 150 characters.</p>
+        )}
+      </div>
+
+      {/* Bio */}
+      <div className="flex flex-col gap-2">
+        <div className="flex items-baseline justify-between">
           <label htmlFor="bio" className="text-sm font-medium">
             Bio
           </label>
-          <span className="text-muted-foreground text-xs">{values.bio.length} / 500</span>
+          <span className={cn('text-xs tabular-nums transition-colors', bioNearLimit ? 'text-amber-500' : 'text-muted-foreground')}>{bioLength} / 500</span>
         </div>
-        <textarea
+        <Textarea
           id="bio"
           placeholder="Tell others a little about yourself…"
           value={values.bio}
           maxLength={500}
           rows={4}
           onChange={(e) => onChange({ bio: e.target.value })}
-          className={cn(
-            'bg-input/50 placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/30',
-            'w-full min-w-0 resize-none rounded-xl border border-transparent px-3 py-2 text-sm',
-            'transition-[color,box-shadow,background-color] outline-none',
-            'focus-visible:ring-3',
-            errors.bio && 'border-destructive ring-3 ring-destructive/20'
-          )}
+          aria-invalid={!!errors.bio || undefined}
+          className="text-sm"
         />
         {errors.bio ? (
           <p className="text-destructive text-xs">{errors.bio}</p>

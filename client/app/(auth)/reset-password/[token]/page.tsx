@@ -3,10 +3,10 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { AuthFormField } from '@/components/auth/form-field';
 import { AuthStatusCard } from '@/components/auth/status-card';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function ResetPasswordPage() {
   const { token } = useParams<{ token: string }>();
@@ -39,10 +39,7 @@ export default function ResetPasswordPage() {
 
   if (success) {
     return (
-      <AuthStatusCard
-        title="Password updated"
-        description="Your password was reset. You can now sign in with the new one."
-      >
+      <AuthStatusCard title="Password updated" description="Your password was reset. You can now sign in with the new one.">
         <Button asChild className="w-full">
           <Link href="/login">Sign in</Link>
         </Button>
@@ -51,7 +48,7 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <Card className="py-8 gap-8">
+    <Card className="gap-8 py-8">
       <CardHeader className="gap-3">
         <CardTitle className="text-2xl">Set a new password</CardTitle>
         <CardDescription>Choose a strong password for your account.</CardDescription>

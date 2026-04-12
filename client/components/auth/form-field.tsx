@@ -1,10 +1,9 @@
 import { Input } from '@/components/ui/input';
 
-interface AuthFormFieldProps
-  extends Pick<
-    React.InputHTMLAttributes<HTMLInputElement>,
-    'type' | 'placeholder' | 'autoComplete' | 'inputMode' | 'pattern' | 'maxLength'
-  > {
+interface AuthFormFieldProps extends Pick<
+  React.InputHTMLAttributes<HTMLInputElement>,
+  'type' | 'placeholder' | 'autoComplete' | 'inputMode' | 'pattern' | 'maxLength'
+> {
   id: string;
   label: string;
   labelRight?: React.ReactNode;
@@ -29,7 +28,7 @@ export function AuthFormField({
   onChange,
   error,
   hint,
-  inputClassName,
+  inputClassName
 }: AuthFormFieldProps) {
   return (
     <div className="flex flex-col gap-2">
@@ -52,11 +51,7 @@ export function AuthFormField({
         aria-invalid={!!error || undefined}
         className={inputClassName}
       />
-      {error ? (
-        <p className="text-destructive text-xs">{error}</p>
-      ) : hint ? (
-        <p className="text-muted-foreground text-xs">{hint}</p>
-      ) : null}
+      {error ? <p className="text-destructive text-xs">{error}</p> : hint ? <p className="text-muted-foreground text-xs">{hint}</p> : null}
     </div>
   );
 }

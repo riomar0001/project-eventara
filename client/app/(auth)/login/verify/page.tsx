@@ -4,9 +4,9 @@ import { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
+import { AuthFormField } from '@/components/auth/form-field';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { AuthFormField } from '@/components/auth/form-field';
 
 function LoginVerifyForm() {
   const searchParams = useSearchParams();
@@ -47,7 +47,7 @@ function LoginVerifyForm() {
   }
 
   return (
-    <Card className="py-8 gap-8">
+    <Card className="gap-8 py-8">
       <CardHeader className="gap-3">
         <CardTitle className="text-2xl">Check your email</CardTitle>
         <CardDescription>We sent a 6-digit code to your inbox. It expires in 10 minutes.</CardDescription>

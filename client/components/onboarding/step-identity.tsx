@@ -1,9 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { AtSign, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
-import { AuthFormField } from '@/components/auth/form-field';
-import { cn } from '@/lib/utils';
+import { Loader2 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 
 export interface IdentityFields {
   first_name: string;
@@ -17,60 +16,77 @@ interface StepIdentityProps {
   errors: Partial<Record<keyof IdentityFields, string>>;
 }
 
-type AliasStatus = 'idle' | 'checking' | 'available' | 'taken';
+function FieldWrapper({ children }: { children: React.ReactNode }) {
+  return <div className="flex flex-col gap-2">{children}</div>;
+}
+
+function FieldLabel({ htmlFor, children }: { htmlFor: string; children: React.ReactNode }) {
+  return (
+    <label htmlFor={htmlFor} className="text-sm font-medium">
+      {children}
+    </label>
+  );
+}
+
+function FieldHint({ error, hint }: { error?: string; hint?: string }) {
+  if (error) return <p className="text-destructive text-xs">{error}</p>;
+  if (hint) return <p className="text-muted-foreground text-xs">{hint}</p>;
+  return null;
+}
 
 export function StepIdentity({ values, onChange, errors }: StepIdentityProps) {
-  const [aliasStatus, setAliasStatus] = useState<AliasStatus>('idle');
+  const [debouncedAlias, setDebouncedAlias] = useState(values.alias);
 
-  // Debounce alias check simulation (no API yet)
+  // setState is inside the timeout callback — not synchronous in the effect body
   useEffect(() => {
-    if (!values.alias || values.alias.length < 3) {
-      setAliasStatus('idle');
-      return;
-    }
-    if (!/^[a-z0-9_]+$/.test(values.alias)) {
-      setAliasStatus('idle');
-      return;
-    }
-    setAliasStatus('checking');
-    const t = setTimeout(() => {
-      // TODO: integrate GET /user/check-alias?alias={alias}
-      setAliasStatus('idle');
-    }, 600);
+    const t = setTimeout(() => setDebouncedAlias(values.alias), 500);
     return () => clearTimeout(t);
   }, [values.alias]);
 
+  const aliasCheckable = values.alias.length >= 3 && /^[a-z0-9_]+$/.test(values.alias);
+
+  // Derived — no setState needed for the status itself
+  // TODO: when API is integrated, extend with 'available' | 'taken' from the response
+  const aliasStatus: 'idle' | 'checking' = aliasCheckable && values.alias !== debouncedAlias ? 'checking' : 'idle';
+
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-3 sm:gap-5">
+      {/* Name row */}
       <div className="grid grid-cols-2 gap-3">
-        <AuthFormField
-          id="first_name"
-          label="First name"
-          placeholder="Jane"
-          autoComplete="given-name"
-          value={values.first_name}
-          onChange={(e) => onChange({ first_name: e.target.value })}
-          error={errors.first_name}
-        />
-        <AuthFormField
-          id="last_name"
-          label="Last name"
-          placeholder="Doe"
-          autoComplete="family-name"
-          value={values.last_name}
-          onChange={(e) => onChange({ last_name: e.target.value })}
-          error={errors.last_name}
-        />
+        <FieldWrapper>
+          <FieldLabel htmlFor="first_name">First name</FieldLabel>
+          <Input
+            id="first_name"
+            placeholder="Jane"
+            autoComplete="given-name"
+            value={values.first_name}
+            onChange={(e) => onChange({ first_name: e.target.value })}
+            aria-invalid={!!errors.first_name || undefined}
+            className="bg-white text-sm"
+          />
+          <FieldHint error={errors.first_name} />
+        </FieldWrapper>
+
+        <FieldWrapper>
+          <FieldLabel htmlFor="last_name">Last name</FieldLabel>
+          <Input
+            id="last_name"
+            placeholder="Doe"
+            autoComplete="family-name"
+            value={values.last_name}
+            onChange={(e) => onChange({ last_name: e.target.value })}
+            aria-invalid={!!errors.last_name || undefined}
+            className="bg-white text-sm"
+          />
+          <FieldHint error={errors.last_name} />
+        </FieldWrapper>
       </div>
 
-      {/* Alias field with status indicator */}
-      <div className="flex flex-col gap-2">
-        <label htmlFor="alias" className="text-sm font-medium">
-          Nickname
-        </label>
+      {/* Nickname field */}
+      <FieldWrapper>
+        <FieldLabel htmlFor="alias">Nickname</FieldLabel>
         <div className="relative">
-          <AtSign className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
-          <input
+          <Input
             id="alias"
             type="text"
             placeholder="jane_doe"
@@ -78,20 +94,10 @@ export function StepIdentity({ values, onChange, errors }: StepIdentityProps) {
             value={values.alias}
             onChange={(e) => onChange({ alias: e.target.value.toLowerCase() })}
             aria-invalid={!!errors.alias || undefined}
-            className={cn(
-              'bg-input/50 placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/30',
-              'aria-invalid:border-destructive aria-invalid:ring-destructive/20',
-              'h-9 w-full min-w-0 rounded-xl border border-transparent pl-9 pr-9 py-1 text-sm',
-              'transition-[color,box-shadow,background-color] outline-none',
-              'focus-visible:ring-3',
-              aliasStatus === 'available' && 'border-primary/50'
-            )}
+            className="pr-9 text-sm"
           />
-          {/* Status icon */}
           <div className="absolute top-1/2 right-3 -translate-y-1/2">
-            {aliasStatus === 'checking' && <Loader2 className="text-muted-foreground size-4 animate-spin" />}
-            {aliasStatus === 'available' && <CheckCircle2 className="text-primary size-4" />}
-            {aliasStatus === 'taken' && <XCircle className="text-destructive size-4" />}
+            {aliasStatus === 'checking' && <Loader2 className="text-muted-foreground size-3.5 animate-spin" />}
           </div>
         </div>
         {errors.alias ? (
@@ -99,10 +105,7 @@ export function StepIdentity({ values, onChange, errors }: StepIdentityProps) {
         ) : (
           <p className="text-muted-foreground text-xs">Lowercase letters, numbers, and underscores only.</p>
         )}
-        {aliasStatus === 'taken' && !errors.alias && (
-          <p className="text-destructive text-xs">This username is already taken.</p>
-        )}
-      </div>
+      </FieldWrapper>
     </div>
   );
 }
