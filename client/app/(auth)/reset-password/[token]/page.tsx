@@ -4,8 +4,9 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { AuthFormField } from '@/components/auth/form-field';
+import { AuthStatusCard } from '@/components/auth/status-card';
 
 export default function ResetPasswordPage() {
   const { token } = useParams<{ token: string }>();
@@ -38,17 +39,14 @@ export default function ResetPasswordPage() {
 
   if (success) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-xl">Password updated</CardTitle>
-          <CardDescription>Your password was reset. You can now sign in with the new one.</CardDescription>
-        </CardHeader>
-        <CardFooter>
-          <Button asChild className="w-full">
-            <Link href="/login">Sign in</Link>
-          </Button>
-        </CardFooter>
-      </Card>
+      <AuthStatusCard
+        title="Password updated"
+        description="Your password was reset. You can now sign in with the new one."
+      >
+        <Button asChild className="w-full">
+          <Link href="/login">Sign in</Link>
+        </Button>
+      </AuthStatusCard>
     );
   }
 
@@ -61,40 +59,27 @@ export default function ResetPasswordPage() {
       <CardContent>
         <form id="reset-form" onSubmit={handleSubmit} className="flex flex-col gap-4">
           <input type="hidden" name="token" value={token} />
-          <div className="flex flex-col gap-1">
-            <label htmlFor="password" className="text-sm font-medium">
-              New password
-            </label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              autoComplete="new-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              aria-invalid={!!errors.password || undefined}
-            />
-            {errors.password ? (
-              <p className="text-destructive text-xs">{errors.password}</p>
-            ) : (
-              <p className="text-muted-foreground text-xs">At least 8 characters.</p>
-            )}
-          </div>
-          <div className="flex flex-col gap-1">
-            <label htmlFor="confirm" className="text-sm font-medium">
-              Confirm password
-            </label>
-            <Input
-              id="confirm"
-              type="password"
-              placeholder="••••••••"
-              autoComplete="new-password"
-              value={confirm}
-              onChange={(e) => setConfirm(e.target.value)}
-              aria-invalid={!!errors.confirm || undefined}
-            />
-            {errors.confirm && <p className="text-destructive text-xs">{errors.confirm}</p>}
-          </div>
+          <AuthFormField
+            id="password"
+            label="New password"
+            type="password"
+            placeholder="••••••••"
+            autoComplete="new-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            error={errors.password}
+            hint="At least 8 characters."
+          />
+          <AuthFormField
+            id="confirm"
+            label="Confirm password"
+            type="password"
+            placeholder="••••••••"
+            autoComplete="new-password"
+            value={confirm}
+            onChange={(e) => setConfirm(e.target.value)}
+            error={errors.confirm}
+          />
         </form>
       </CardContent>
       <CardFooter className="flex flex-col gap-3">

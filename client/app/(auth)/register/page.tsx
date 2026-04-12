@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { AuthFormField } from '@/components/auth/form-field';
+import { AuthStatusCard } from '@/components/auth/status-card';
 
 export default function RegisterPage() {
   const [email, setEmail] = useState('');
@@ -34,22 +35,21 @@ export default function RegisterPage() {
 
   if (submitted) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-xl">Verify your email</CardTitle>
-          <CardDescription>
+      <AuthStatusCard
+        title="Verify your email"
+        description={
+          <>
             We sent a link to <span className="text-foreground font-medium">{email}</span>. Click it to activate your account.
-          </CardDescription>
-        </CardHeader>
-        <CardFooter>
-          <p className="text-muted-foreground text-center text-sm">
-            Wrong email?{' '}
-            <button type="button" onClick={() => setSubmitted(false)} className="text-foreground font-medium underline-offset-4 hover:underline">
-              Go back
-            </button>
-          </p>
-        </CardFooter>
-      </Card>
+          </>
+        }
+      >
+        <p className="text-muted-foreground text-center text-sm">
+          Wrong email?{' '}
+          <button type="button" onClick={() => setSubmitted(false)} className="text-foreground font-medium underline-offset-4 hover:underline">
+            Go back
+          </button>
+        </p>
+      </AuthStatusCard>
     );
   }
 
@@ -61,40 +61,27 @@ export default function RegisterPage() {
       </CardHeader>
       <CardContent>
         <form id="register-form" onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1">
-            <label htmlFor="email" className="text-sm font-medium">
-              Email
-            </label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="you@example.com"
-              autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              aria-invalid={!!errors.email || undefined}
-            />
-            {errors.email && <p className="text-destructive text-xs">{errors.email}</p>}
-          </div>
-          <div className="flex flex-col gap-1">
-            <label htmlFor="password" className="text-sm font-medium">
-              Password
-            </label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              autoComplete="new-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              aria-invalid={!!errors.password || undefined}
-            />
-            {errors.password ? (
-              <p className="text-destructive text-xs">{errors.password}</p>
-            ) : (
-              <p className="text-muted-foreground text-xs">At least 8 characters.</p>
-            )}
-          </div>
+          <AuthFormField
+            id="email"
+            label="Email"
+            type="email"
+            placeholder="you@example.com"
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            error={errors.email}
+          />
+          <AuthFormField
+            id="password"
+            label="Password"
+            type="password"
+            placeholder="••••••••"
+            autoComplete="new-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            error={errors.password}
+            hint="At least 8 characters."
+          />
         </form>
       </CardContent>
       <CardFooter className="flex flex-col gap-3">

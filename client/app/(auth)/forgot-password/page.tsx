@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { AuthFormField } from '@/components/auth/form-field';
+import { AuthStatusCard } from '@/components/auth/status-card';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
@@ -32,25 +33,24 @@ export default function ForgotPasswordPage() {
 
   if (submitted) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-xl">Check your inbox</CardTitle>
-          <CardDescription>
+      <AuthStatusCard
+        title="Check your inbox"
+        description={
+          <>
             If <span className="text-foreground font-medium">{email}</span> is linked to an account, a reset link was sent. It expires in 1 hour.
-          </CardDescription>
-        </CardHeader>
-        <CardFooter className="flex flex-col gap-3">
-          <Button asChild className="w-full">
-            <Link href="/login">Back to sign in</Link>
-          </Button>
-          <p className="text-muted-foreground text-center text-sm">
-            Didn&apos;t receive it?{' '}
-            <button type="button" onClick={() => setSubmitted(false)} className="text-foreground font-medium underline-offset-4 hover:underline">
-              Try again
-            </button>
-          </p>
-        </CardFooter>
-      </Card>
+          </>
+        }
+      >
+        <Button asChild className="w-full">
+          <Link href="/login">Back to sign in</Link>
+        </Button>
+        <p className="text-muted-foreground text-center text-sm">
+          Didn&apos;t receive it?{' '}
+          <button type="button" onClick={() => setSubmitted(false)} className="text-foreground font-medium underline-offset-4 hover:underline">
+            Try again
+          </button>
+        </p>
+      </AuthStatusCard>
     );
   }
 
@@ -62,21 +62,16 @@ export default function ForgotPasswordPage() {
       </CardHeader>
       <CardContent>
         <form id="forgot-form" onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1">
-            <label htmlFor="email" className="text-sm font-medium">
-              Email
-            </label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="you@example.com"
-              autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              aria-invalid={!!emailError || undefined}
-            />
-            {emailError && <p className="text-destructive text-xs">{emailError}</p>}
-          </div>
+          <AuthFormField
+            id="email"
+            label="Email"
+            type="email"
+            placeholder="you@example.com"
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            error={emailError}
+          />
         </form>
       </CardContent>
       <CardFooter className="flex flex-col gap-3">

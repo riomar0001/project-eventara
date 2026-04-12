@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { AuthFormField } from '@/components/auth/form-field';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -37,41 +37,31 @@ export default function LoginPage() {
       </CardHeader>
       <CardContent>
         <form id="login-form" onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1">
-            <label htmlFor="email" className="text-sm font-medium">
-              Email
-            </label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="you@example.com"
-              autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              aria-invalid={!!errors.email || undefined}
-            />
-            {errors.email && <p className="text-destructive text-xs">{errors.email}</p>}
-          </div>
-          <div className="flex flex-col gap-1">
-            <div className="flex items-center justify-between">
-              <label htmlFor="password" className="text-sm font-medium">
-                Password
-              </label>
+          <AuthFormField
+            id="email"
+            label="Email"
+            type="email"
+            placeholder="you@example.com"
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            error={errors.email}
+          />
+          <AuthFormField
+            id="password"
+            label="Password"
+            labelRight={
               <Link href="/forgot-password" className="text-muted-foreground hover:text-foreground text-xs transition-colors">
                 Forgot password?
               </Link>
-            </div>
-            <Input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              aria-invalid={!!errors.password || undefined}
-            />
-            {errors.password && <p className="text-destructive text-xs">{errors.password}</p>}
-          </div>
+            }
+            type="password"
+            placeholder="••••••••"
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            error={errors.password}
+          />
         </form>
       </CardContent>
       <CardFooter className="flex flex-col gap-3">

@@ -5,8 +5,8 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { AuthFormField } from '@/components/auth/form-field';
 
 function LoginVerifyForm() {
   const searchParams = useSearchParams();
@@ -55,25 +55,19 @@ function LoginVerifyForm() {
       <CardContent>
         <form id="verify-form" onSubmit={handleSubmit} className="flex flex-col gap-4">
           <input type="hidden" name="token" value={token} />
-          <div className="flex flex-col gap-1">
-            <label htmlFor="code" className="text-sm font-medium">
-              One-time code
-            </label>
-            <Input
-              id="code"
-              type="text"
-              inputMode="numeric"
-              pattern="[0-9]{6}"
-              maxLength={6}
-              placeholder="000000"
-              autoComplete="one-time-code"
-              value={code}
-              onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
-              className="text-center text-lg tracking-[0.5em]"
-              aria-invalid={!!codeError || undefined}
-            />
-            {codeError && <p className="text-destructive text-xs">{codeError}</p>}
-          </div>
+          <AuthFormField
+            id="code"
+            label="One-time code"
+            inputMode="numeric"
+            pattern="[0-9]{6}"
+            maxLength={6}
+            placeholder="000000"
+            autoComplete="one-time-code"
+            value={code}
+            onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
+            error={codeError}
+            inputClassName="text-center text-lg tracking-[0.5em]"
+          />
         </form>
       </CardContent>
       <CardFooter className="flex flex-col gap-3">
