@@ -1,6 +1,6 @@
 import { CheckCircle2, XCircle, AlertTriangle, Loader2, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
-import { IconCluster } from '@/components/auth/icon-cluster';
+import { IconCluster } from '@/components/auth/verify/icon-cluster';
 import { Button } from '@/components/ui/button';
 
 export function LoadingState() {

@@ -4,11 +4,12 @@ import Link from 'next/link';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AuthFormField } from '@/components/auth/form-field';
+import { AuthFormField } from '@/components/auth/shared/form-field';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Authentication } from '@/api/sdk.gen';
+import { Loader2 } from 'lucide-react';
 
 const schema = z
   .object({
@@ -125,7 +126,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
       </CardContent>
       <CardFooter className="flex flex-col gap-5">
         <Button type="submit" form="register-form" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? 'Creating account…' : 'Create account'}
+          {isSubmitting ? <><Loader2 size={16} className="animate-spin" /> Creating account…</> : 'Create account'}
         </Button>
         <p className="text-muted-foreground text-center text-sm">
           Already have an account?{' '}

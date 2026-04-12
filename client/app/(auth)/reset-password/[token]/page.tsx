@@ -6,11 +6,12 @@ import { useParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AuthFormField } from '@/components/auth/form-field';
-import { AuthStatusCard } from '@/components/auth/status-card';
+import { AuthFormField } from '@/components/auth/shared/form-field';
+import { AuthStatusCard } from '@/components/auth/shared/status-card';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Authentication } from '@/api/sdk.gen';
+import { Loader2 } from 'lucide-react';
 
 const schema = z
   .object({
@@ -101,7 +102,7 @@ export default function ResetPasswordPage() {
       </CardContent>
       <CardFooter className="flex flex-col gap-5">
         <Button type="submit" form="reset-form" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? 'Updating…' : 'Update password'}
+          {isSubmitting ? <><Loader2 size={16} className="animate-spin" /> Updating…</> : 'Update password'}
         </Button>
         <p className="text-muted-foreground text-center text-sm">
           Link expired?{' '}

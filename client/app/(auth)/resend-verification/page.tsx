@@ -5,11 +5,12 @@ import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AuthFormField } from '@/components/auth/form-field';
-import { VerifyEmailCard } from '@/components/auth/verify-email-card';
+import { AuthFormField } from '@/components/auth/shared/form-field';
+import { VerifyEmailCard } from '@/components/auth/shared/verify-email-card';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Authentication } from '@/api/sdk.gen';
+import { Loader2 } from 'lucide-react';
 
 const schema = z.object({
   email: z.string().min(1, 'Email is required.').email('Enter a valid email.')
@@ -67,7 +68,7 @@ export default function ResendVerificationPage() {
       </CardContent>
       <CardFooter className="flex flex-col gap-5">
         <Button type="submit" form="resend-form" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? 'Sending…' : 'Send verification link'}
+          {isSubmitting ? <><Loader2 size={16} className="animate-spin" /> Sending…</> : 'Send verification link'}
         </Button>
         <p className="text-muted-foreground text-center text-sm">
           <Link href="/login" className="text-foreground font-medium underline-offset-4 hover:underline">
