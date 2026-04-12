@@ -32,10 +32,10 @@ export default function LoginPage() {
   return (
     <Card className="gap-8 py-8">
       <CardHeader className="gap-3">
-        <CardTitle className="text-2xl">Welcome back</CardTitle>
+        <CardTitle className="text-2xl">Welcome!</CardTitle>
         <CardDescription>Sign in to continue to your account.</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="min-h-40">
         <form id="login-form" onSubmit={handleSubmit} className="flex flex-col gap-6">
           <AuthFormField
             id="email"

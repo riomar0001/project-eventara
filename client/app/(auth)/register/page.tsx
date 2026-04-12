@@ -59,7 +59,7 @@ export default function RegisterPage() {
         <CardTitle className="text-2xl">Create an account</CardTitle>
         <CardDescription>Start managing your events with Eventara.</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="min-h-40">
         <form id="register-form" onSubmit={handleSubmit} className="flex flex-col gap-6">
           <AuthFormField
             id="email"

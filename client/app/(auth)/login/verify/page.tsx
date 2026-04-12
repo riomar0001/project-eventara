@@ -52,7 +52,7 @@ function LoginVerifyForm() {
         <CardTitle className="text-2xl">Check your email</CardTitle>
         <CardDescription>We sent a 6-digit code to your inbox. It expires in 10 minutes.</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="min-h-40">
         <form id="verify-form" onSubmit={handleSubmit} className="flex flex-col gap-6">
           <input type="hidden" name="token" value={token} />
           <AuthFormField

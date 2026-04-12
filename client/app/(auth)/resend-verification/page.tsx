@@ -54,7 +54,7 @@ export default function ResendVerificationPage() {
         <CardTitle className="text-2xl">Resend verification email</CardTitle>
         <CardDescription>Enter your email and we&apos;ll send a new verification link.</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="min-h-40">
         <form id="resend-form" onSubmit={handleSubmit} className="flex flex-col gap-6">
           <AuthFormField
             id="email"

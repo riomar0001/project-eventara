@@ -53,7 +53,7 @@ export default function ResetPasswordPage() {
         <CardTitle className="text-2xl">Set a new password</CardTitle>
         <CardDescription>Choose a strong password for your account.</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="min-h-40">
         <form id="reset-form" onSubmit={handleSubmit} className="flex flex-col gap-6">
           <input type="hidden" name="token" value={token} />
           <AuthFormField

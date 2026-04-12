@@ -60,7 +60,7 @@ export default function ForgotPasswordPage() {
         <CardTitle className="text-2xl">Forgot your password?</CardTitle>
         <CardDescription>Enter your email and we&apos;ll send a reset link.</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="min-h-40">
         <form id="forgot-form" onSubmit={handleSubmit} className="flex flex-col gap-6">
           <AuthFormField
             id="email"
