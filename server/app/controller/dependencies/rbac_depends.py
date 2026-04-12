@@ -5,6 +5,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.controller.dependencies.auth_depends import _auth_detail
 from app.core.security.token_service import verify_access_token
 from app.domain.entities.authorization_entities import GrantEffect, RoleAction
 from app.infrastructure.database.repositories.rbac_repository import RBACRepository
@@ -101,10 +102,10 @@ def require_permission(
     ) -> uuid.UUID:
         try:
             payload = verify_access_token(credentials.credentials)
-        except ValueError:
+        except ValueError as exc:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Not authenticated",
+                detail=_auth_detail(exc),
                 headers={"WWW-Authenticate": "Bearer"},
             )
 

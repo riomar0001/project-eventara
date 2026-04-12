@@ -42,27 +42,30 @@ async def http_exception_handler(request: Request, exc: HTTPException):
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
-    safe_errors = [
-        {
-            "loc": err.get("loc"),
-            "msg": err.get("msg"),
-            "type": err.get("type"),
-        }
-        for err in exc.errors()
-    ]
+    if settings.DEBUG:
+        return JSONResponse(
+            status_code=422,
+            content={"success": False, "detail": exc.errors()},
+        )
     return JSONResponse(
         status_code=422,
-        content={"success": False, "detail": safe_errors},
+        content={
+            "success": False,
+            "detail": [
+                {"loc": err.get("loc"), "msg": err.get("msg"), "type": err.get("type")}
+                for err in exc.errors()
+            ],
+        },
     )
 
 
 @app.exception_handler(Exception)
 async def general_exception_handler(request: Request, exc: Exception):
     logger.exception("Unhandled exception on %s %s", request.method, request.url.path)
-    return JSONResponse(
-        status_code=500,
-        content={"success": False, "message": "An unexpected error occurred"},
-    )
+    content: dict = {"success": False, "message": "An unexpected error occurred"}
+    if settings.DEBUG:
+        content["debug"] = f"{type(exc).__name__}: {exc}"
+    return JSONResponse(status_code=500, content=content)
 
 
 @app.get("/docs", include_in_schema=False)

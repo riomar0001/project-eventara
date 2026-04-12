@@ -119,8 +119,12 @@ async def get_audit_logs(
             status_code=status.HTTP_403_FORBIDDEN,
             detail=str(e),
         )
-    except Exception:
+    except Exception as e:
+        from app.core.config import settings
+        detail = "Failed to retrieve audit logs"
+        if settings.DEBUG:
+            detail = f"Failed to retrieve audit logs: {e}"
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve audit logs",
+            detail=detail,
         )
