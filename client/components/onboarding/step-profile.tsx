@@ -58,10 +58,10 @@ export function StepProfile({ values, onChange, errors }: StepProfileProps) {
           placeholder="Tell others a little about yourself…"
           value={values.bio}
           maxLength={500}
-          rows={4}
+          rows={8}
           onChange={(e) => onChange({ bio: e.target.value })}
           aria-invalid={!!errors.bio || undefined}
-          className="text-sm"
+          className="text-sm min-h-28"
         />
         {errors.bio ? (
           <p className="text-destructive text-xs">{errors.bio}</p>

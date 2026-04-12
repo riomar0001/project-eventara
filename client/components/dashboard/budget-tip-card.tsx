@@ -17,12 +17,12 @@ export function BudgetTipCard() {
 
       {/* Decorative blocks */}
       <div className="absolute top-1/2 right-4 grid -translate-y-1/2 grid-cols-2 gap-1 opacity-80">
-        <div className="bg-primary/60 size-7 rounded-md" />
-        <div className="bg-chart-1/80 size-7 rounded-md" />
-        <div className="bg-chart-2/70 size-7 rounded-md" />
-        <div className="bg-primary/40 size-7 rounded-md" />
-        <div className="bg-chart-1/50 size-7 rounded-md" />
-        <div className="bg-chart-2/90 size-7 rounded-md" />
+        <div className="bg-primary/60 size-7 rounded-xl" />
+        <div className="bg-chart-1/80 size-7 rounded-xl" />
+        <div className="bg-chart-2/70 size-7 rounded-xl" />
+        <div className="bg-primary/40 size-7 rounded-xl" />
+        <div className="bg-chart-1/50 size-7 rounded-xl" />
+        <div className="bg-chart-2/90 size-7 rounded-xl" />
       </div>
     </Card>
   );

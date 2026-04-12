@@ -103,9 +103,6 @@ export default function OnboardPage() {
   if (isDone) {
     return (
       <Card className="gap-0 overflow-hidden py-0">
-        {/* Green accent strip */}
-        <div className="bg-primary h-1.5 w-full" />
-
         <div
           className="flex flex-col items-center gap-4 px-6 py-8 text-center sm:gap-6 sm:px-8 sm:py-12"
           style={{ animation: 'auth-card-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both' }}
