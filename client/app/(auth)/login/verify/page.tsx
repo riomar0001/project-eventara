@@ -19,7 +19,7 @@ export default function LoginVerifyPage() {
   useEffect(() => {
     const stored = sessionStorage.getItem('otp_token');
     if (!stored) {
-      router.replace('/auth/login');
+      router.replace('/login');
       return;
     }
     setToken(stored);
@@ -64,7 +64,7 @@ export default function LoginVerifyPage() {
       <div className="space-y-6">
         <OTPInput value={code} onChange={setCode} disabled={loading} />
 
-        <Button variant="black" className="w-full" disabled={code.length !== 6 || loading} onClick={handleVerify}>
+        <Button variant="default" className="w-full" disabled={code.length !== 6 || loading} onClick={handleVerify}>
           {loading && <Loader2 className="animate-spin" />}
           {loading ? 'Verifying…' : 'Verify'}
         </Button>
@@ -72,7 +72,7 @@ export default function LoginVerifyPage() {
 
       <p className="text-muted-foreground mt-6 text-sm">
         Didn&apos;t receive a code?{' '}
-        <Link href="/auth/login" className="text-foreground font-medium hover:underline">
+        <Link href="/login" className="text-foreground font-medium hover:underline">
           Back to sign in
         </Link>
       </p>

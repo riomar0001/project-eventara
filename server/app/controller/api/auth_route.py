@@ -281,7 +281,7 @@ async def login(
     return LoginInitResponse(verification_token=result.verification_token)
 
 
-@router.get(
+@router.post(
     "/login/verify",
     response_model=LoginVerifyResponse,
     status_code=status.HTTP_200_OK,

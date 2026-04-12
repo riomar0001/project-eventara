@@ -29,7 +29,7 @@ export default function ResendVerificationPage() {
 
   async function onSubmit(data: FormData) {
     try {
-      const res = await fetch('/api/auth/resend-verification', {
+      const res = await fetch('/api/resend-verification', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: data.email })
@@ -72,7 +72,7 @@ export default function ResendVerificationPage() {
             Try a different email
           </Button>
           <p className="text-muted-foreground text-center text-sm">
-            <Link href="/auth/login" className="text-foreground font-medium hover:underline">
+            <Link href="/login" className="text-foreground font-medium hover:underline">
               Back to sign in
             </Link>
           </p>
@@ -104,7 +104,7 @@ export default function ResendVerificationPage() {
           {form.formState.errors.email && <p className="text-destructive text-xs">{form.formState.errors.email.message}</p>}
         </div>
 
-        <Button type="submit" variant="black" className="w-full" disabled={isSubmitting}>
+        <Button type="submit" variant="default" className="w-full" disabled={isSubmitting}>
           {isSubmitting && <Loader2 className="animate-spin" />}
           {isSubmitting ? 'Sending…' : 'Send verification email'}
         </Button>
@@ -112,7 +112,7 @@ export default function ResendVerificationPage() {
 
       <p className="text-muted-foreground mt-6 text-sm">
         Already verified?{' '}
-        <Link href="/auth/login" className="text-foreground font-medium hover:underline">
+        <Link href="/login" className="text-foreground font-medium hover:underline">
           Sign in
         </Link>
       </p>

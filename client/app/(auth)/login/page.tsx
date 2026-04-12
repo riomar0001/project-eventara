@@ -12,44 +12,37 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Authentication } from '@/api/sdk.gen';
 
-const schema = z
-  .object({
-    email: z.string().email('Please enter a valid email address'),
-    password: z.string().min(8, 'Password must be at least 8 characters'),
-    confirm_password: z.string()
-  })
-  .refine((data) => data.password === data.confirm_password, {
-    message: "Passwords don't match",
-    path: ['confirm_password']
-  });
+const schema = z.object({
+  email: z.email('Please enter a valid email address'),
+  password: z.string().min(1, 'Password is required')
+});
 
 type FormData = z.infer<typeof schema>;
 
-export default function RegisterPage() {
+export default function LoginPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
 
   const form = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: { email: '', password: '', confirm_password: '' }
+    defaultValues: { email: '', password: '' }
   });
 
   const { isSubmitting } = form.formState;
 
   async function onSubmit(data: FormData) {
     try {
-      const { error } = await Authentication.registerUserAuthRegisterPost({
+      const { data: result, error } = await Authentication.loginAuthLoginPost({
         body: { email: data.email, password: data.password }
       });
 
       if (error) {
-        toast.error((error as { message?: string }).message ?? 'Registration failed');
+        toast.error((error as { message?: string }).message ?? 'Invalid email or password');
         return;
       }
 
-      toast.success('Account created! Please check your email to verify your account.');
-      router.push('/auth/login');
+      sessionStorage.setItem('otp_token', result!.verification_token);
+      router.push('/login/verify');
     } catch {
       toast.error('Something went wrong. Please try again.');
     }
@@ -58,8 +51,8 @@ export default function RegisterPage() {
   return (
     <div className="w-full max-w-sm">
       <div className="mb-8">
-        <h1 className="text-foreground text-[1.75rem] font-bold tracking-tight">Create an account</h1>
-        <p className="text-muted-foreground mt-1.5 text-sm">Start managing your events today</p>
+        <h1 className="text-foreground text-[1.75rem] font-bold tracking-tight">Welcome back,</h1>
+        <p className="text-muted-foreground mt-1.5 text-sm">Please enter your details</p>
       </div>
 
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -79,15 +72,20 @@ export default function RegisterPage() {
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-foreground text-sm font-medium" htmlFor="password">
-            Password
-          </label>
+          <div className="flex items-center justify-between">
+            <label className="text-foreground text-sm font-medium" htmlFor="password">
+              Password
+            </label>
+            <Link href="/forgot-password" className="text-muted-foreground hover:text-foreground text-xs">
+              Forgot password?
+            </Link>
+          </div>
           <div className="relative">
             <Input
               id="password"
               type={showPassword ? 'text' : 'password'}
-              placeholder="Min. 8 characters"
-              autoComplete="new-password"
+              placeholder="••••••••"
+              autoComplete="current-password"
               aria-invalid={!!form.formState.errors.password}
               {...form.register('password')}
             />
@@ -103,41 +101,16 @@ export default function RegisterPage() {
           {form.formState.errors.password && <p className="text-destructive text-xs">{form.formState.errors.password.message}</p>}
         </div>
 
-        <div className="space-y-1.5">
-          <label className="text-foreground text-sm font-medium" htmlFor="confirm_password">
-            Confirm password
-          </label>
-          <div className="relative">
-            <Input
-              id="confirm_password"
-              type={showConfirm ? 'text' : 'password'}
-              placeholder="Re-enter your password"
-              autoComplete="new-password"
-              aria-invalid={!!form.formState.errors.confirm_password}
-              {...form.register('confirm_password')}
-            />
-            <button
-              type="button"
-              onClick={() => setShowConfirm((s) => !s)}
-              className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 transition-colors"
-              tabIndex={-1}
-            >
-              {showConfirm ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-            </button>
-          </div>
-          {form.formState.errors.confirm_password && <p className="text-destructive text-xs">{form.formState.errors.confirm_password.message}</p>}
-        </div>
-
-        <Button type="submit" variant="black" className="w-full" disabled={isSubmitting}>
+        <Button type="submit" variant="default" className="w-full" disabled={isSubmitting}>
           {isSubmitting && <Loader2 className="animate-spin" />}
-          {isSubmitting ? 'Creating account…' : 'Create account'}
+          {isSubmitting ? 'Signing in…' : 'Sign in'}
         </Button>
       </form>
 
       <p className="text-muted-foreground mt-6 text-sm">
-        Already have an account?{' '}
-        <Link href="/auth/login" className="text-foreground font-medium hover:underline">
-          Sign in
+        New to Eventara?{' '}
+        <Link href="/register" className="text-foreground font-medium hover:underline">
+          Create an account
         </Link>
       </p>
     </div>

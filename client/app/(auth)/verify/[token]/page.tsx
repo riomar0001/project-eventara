@@ -88,11 +88,11 @@ export default function VerifyEmailPage({ params }: { params: Promise<{ token: s
           <h1 className="text-foreground text-xl font-bold tracking-tight">Verification failed</h1>
           <p className="text-muted-foreground mt-2 text-sm">{errorMessage}</p>
           <div className="mt-6 flex flex-col gap-2">
-            <Button variant="black" asChild>
-              <Link href="/auth/resend-verification">Resend verification email</Link>
+            <Button variant="default" asChild>
+              <Link href="/resend-verification">Resend verification email</Link>
             </Button>
             <Button variant="outline" asChild>
-              <Link href="/auth/login">Back to sign in</Link>
+              <Link href="/login">Back to sign in</Link>
             </Button>
           </div>
         </>

@@ -7,6 +7,7 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Authentication } from '@/api/sdk.gen';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
@@ -29,15 +30,12 @@ export default function ForgotPasswordPage() {
 
   async function onSubmit(data: FormData) {
     try {
-      const res = await fetch('/api/auth/forgot-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: data.email })
+      const { error } = await Authentication.forgotPasswordAuthForgotPasswordPost({
+        body: { email: data.email }
       });
 
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        toast.error(body.message ?? 'Something went wrong. Please try again.');
+      if (error) {
+        toast.error((error as { message?: string }).message ?? 'Something went wrong. Please try again.');
         return;
       }
 
@@ -72,7 +70,7 @@ export default function ForgotPasswordPage() {
             Try a different email
           </Button>
           <p className="text-muted-foreground text-center text-sm">
-            <Link href="/auth/login" className="text-foreground font-medium hover:underline">
+            <Link href="/login" className="text-foreground font-medium hover:underline">
               Back to sign in
             </Link>
           </p>
@@ -104,14 +102,14 @@ export default function ForgotPasswordPage() {
           {form.formState.errors.email && <p className="text-destructive text-xs">{form.formState.errors.email.message}</p>}
         </div>
 
-        <Button type="submit" variant="black" className="w-full" disabled={isSubmitting}>
+        <Button type="submit" variant="default" className="w-full" disabled={isSubmitting}>
           {isSubmitting && <Loader2 className="animate-spin" />}
           {isSubmitting ? 'Sending…' : 'Send reset link'}
         </Button>
       </form>
 
       <p className="text-muted-foreground mt-6 text-sm">
-        <Link href="/auth/login" className="text-foreground font-medium hover:underline">
+        <Link href="/login" className="text-foreground font-medium hover:underline">
           ← Back to sign in
         </Link>
       </p>

@@ -39,7 +39,7 @@ class TokenPayload(BaseModel):
     age_group: str | None = None
     gender: str | None = None
     education_level: str | None = None
-    type: Literal["access", "refresh", "verification", "otp"]
+    type: Literal["access", "refresh", "verification", "otp", "password_reset"]
     jti: str
     exp: datetime
     iat: datetime

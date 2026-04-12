@@ -8,6 +8,7 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Authentication } from '@/api/sdk.gen';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
@@ -39,27 +40,25 @@ export default function ResetPasswordPage({ params }: { params: Promise<{ token:
 
   async function onSubmit(data: FormData) {
     try {
-      const res = await fetch(`/api/auth/reset-password/${token}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ new_password: data.new_password })
+      const { error } = await Authentication.resetPasswordAuthResetPasswordTokenPost({
+        path: { token },
+        body: { new_password: data.new_password }
       });
 
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        const message = body.message ?? body.detail ?? 'Failed to reset password.';
-        if (res.status === 401) {
+      if (error) {
+        const status = (error as { status?: number }).status;
+        if (status === 401) {
           toast.error('This reset link has expired. Please request a new one.');
-        } else if (res.status === 400) {
+        } else if (status === 400) {
           toast.error('This reset link has already been used. Please request a new one.');
         } else {
-          toast.error(message);
+          toast.error((error as { message?: string }).message ?? 'Failed to reset password.');
         }
         return;
       }
 
       setSuccess(true);
-      setTimeout(() => router.push('/auth/login'), 2500);
+      setTimeout(() => router.push('/login'), 2500);
     } catch {
       toast.error('Something went wrong. Please try again.');
     }
@@ -135,7 +134,7 @@ export default function ResetPasswordPage({ params }: { params: Promise<{ token:
           {form.formState.errors.confirm_password && <p className="text-destructive text-xs">{form.formState.errors.confirm_password.message}</p>}
         </div>
 
-        <Button type="submit" variant="black" className="w-full" disabled={isSubmitting}>
+        <Button type="submit" variant="default" className="w-full" disabled={isSubmitting}>
           {isSubmitting && <Loader2 className="animate-spin" />}
           {isSubmitting ? 'Resetting…' : 'Reset password'}
         </Button>
@@ -143,7 +142,7 @@ export default function ResetPasswordPage({ params }: { params: Promise<{ token:
 
       <p className="text-muted-foreground mt-6 text-sm">
         Remembered your password?{' '}
-        <Link href="/auth/login" className="text-foreground font-medium hover:underline">
+        <Link href="/login" className="text-foreground font-medium hover:underline">
           Sign in
         </Link>
       </p>

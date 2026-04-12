@@ -59,7 +59,7 @@ def _base_template(title: str, preview: str, body: str) -> str:
 
 
 def verification_email_html(token: str) -> str:
-    link = f"{settings.CORS_ORIGIN}/auth/verify/{token}"
+    link = f"{settings.CORS_ORIGIN}/verify/{token}"
     body = f"""
       <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#171717;
                   letter-spacing:-0.3px;">Verify your email</h1>
@@ -101,7 +101,7 @@ def verification_email_html(token: str) -> str:
 
 
 def reset_password_email_html(token: str) -> str:
-    link = f"{settings.CORS_ORIGIN}/auth/reset-password/{token}"
+    link = f"{settings.CORS_ORIGIN}/reset-password/{token}"
     body = f"""
       <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#171717;
                   letter-spacing:-0.3px;">Reset your password</h1>
@@ -170,7 +170,7 @@ def account_locked_email_html(unlock_minutes: int = 30) -> str:
       <table cellpadding="0" cellspacing="0" role="presentation" style="margin-bottom:32px;">
         <tr>
           <td style="border-radius:10px;background-color:#65a30d;">
-            <a href="{settings.CORS_ORIGIN}/auth/forgot-password"
+            <a href="{settings.CORS_ORIGIN}/forgot-password"
                style="display:inline-block;padding:14px 32px;font-size:15px;font-weight:600;
                        color:#ffffff;text-decoration:none;border-radius:10px;
                        letter-spacing:0.1px;">
