@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from uuid import UUID
 
 from sqlalchemy import Enum, ForeignKey, Index, String
@@ -25,7 +27,7 @@ class Volunteer(Base):
     )
 
     # Relationships
-    user: Mapped["User"] = relationship(back_populates="volunteer")
+    user = relationship("User", back_populates="volunteer")
 
     __table_args__ = (
         Index("idx_volunteers_user_id", "user_id"),

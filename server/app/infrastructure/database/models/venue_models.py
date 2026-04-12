@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from uuid import UUID
 
 from sqlalchemy import Enum, ForeignKey, Index, Integer, String, Text
@@ -34,8 +36,8 @@ class Venue(Base):
     contact_email: Mapped[str] = mapped_column(String(255), nullable=False)
 
     # Relationships
-    creator: Mapped["User"] = relationship(back_populates="venues")
-    venue_ratings: Mapped[list["VenueRating"]] = relationship(back_populates="venue")
+    creator = relationship("User", back_populates="venues")
+    venue_ratings = relationship("VenueRating", back_populates="venue")
 
     # name, city, venue_type
     __table_args__ = (

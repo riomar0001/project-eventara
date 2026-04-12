@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from uuid import UUID
 
 from sqlalchemy import JSON, Enum, ForeignKey, Index
@@ -19,7 +21,7 @@ class VolunteerApplication(Base):
     application_data: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
     # Relationships
-    user: Mapped["User"] = relationship(back_populates="volunteer_applications")
+    user = relationship("User", back_populates="volunteer_applications")
 
     __table_args__ = (
         Index("idx_volunteer_applications_user_id", "user_id"),

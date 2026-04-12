@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from uuid import UUID
 
 from sqlalchemy import ForeignKey, Index, Integer, Text
@@ -15,8 +17,8 @@ class VenueRating(Base):
     comment: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # Relationships
-    user: Mapped["UserProfile"] = relationship(back_populates="venue_ratings")
-    venue: Mapped["Venue"] = relationship(back_populates="venue_ratings")
+    user = relationship("UserProfile", back_populates="venue_ratings")
+    venue = relationship("Venue", back_populates="venue_ratings")
 
     __table_args__ = (
         Index("idx_venue_ratings_user_id", "user_id"),
