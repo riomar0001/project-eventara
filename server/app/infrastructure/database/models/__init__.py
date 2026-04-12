@@ -14,6 +14,7 @@ from app.infrastructure.database.models.user_models import (
     UserSecurity,
 )
 from app.infrastructure.database.models.venue_models import Venue
+from app.infrastructure.database.models.venue_rating_models import VenueRating
 
 __all__ = [
     "User",
@@ -29,4 +30,5 @@ __all__ = [
     "RolePermission",
     "AuditLog",
     "Venue",
+    "VenueRating",
 ]
