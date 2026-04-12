@@ -7,8 +7,6 @@ import { FinancialHealthCard } from '@/components/dashboard/financial-health-car
 import { GoalTrackerCard } from '@/components/dashboard/goal-tracker-card';
 import { MonthlySpendingCard } from '@/components/dashboard/monthly-spending-card';
 import { StatsPanel } from '@/components/dashboard/stats-panel';
-import { Button } from '@/components/ui/button';
-import { Authentication } from '@/api/sdk.gen';
 
 export default function DashboardPage() {
   return (
@@ -20,25 +18,6 @@ export default function DashboardPage() {
             <BalanceOverviewCard />
             <StatsPanel />
           </div>
-
-          <Button
-            onClick={async () => {
-              try {
-                const { data } = await Authentication.loginAuthLoginPost({
-                  body: {
-                    email: 'inguitomario00@gmail.com',
-                    password: 'mario123'
-                  }
-                });
-
-                console.log(data); // 👈 usually the actual payload
-              } catch (error) {
-                console.error('Login failed:', error);
-              }
-            }}
-          >
-            Add Transaction
-          </Button>
 
           {/* Row 2: Spending limit + Budget tip */}
           <div className="grid grid-cols-2 gap-4">
