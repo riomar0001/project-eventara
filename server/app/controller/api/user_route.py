@@ -3,10 +3,11 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.application.dto.user_dto import ChangePasswordInput, UserOnboardingInput
-from app.application.use_cases.user_usecase import ChangePasswordUseCase, OnboardingUseCase
+from app.application.use_cases.user_usecase import ChangePasswordUseCase, CheckAliasUseCase, OnboardingUseCase
 from app.controller.dependencies import get_current_user_id, get_onboarding_use_case
-from app.controller.dependencies.use_cases_depends import get_change_password_use_case
+from app.controller.dependencies.use_cases_depends import get_change_password_use_case, get_check_alias_use_case
 from app.controller.docs.user_docs import (
+    ALIAS_CHECK_UNAUTHORIZED,
     ALIAS_CONFLICT,
     CHANGE_PASSWORD_VALIDATION_ERROR,
     EMAIL_NOT_VERIFIED,
@@ -20,6 +21,7 @@ from app.controller.docs.user_docs import (
 from app.controller.schemas.user_schema import (
     ChangePasswordRequest,
     ChangePasswordResponse,
+    CheckAliasResponse,
     UserOnboardingRequest,
     UserOnboardingResponse,
 )
@@ -34,6 +36,23 @@ from app.domain.exceptions.user_exceptions import (
 )
 
 router = APIRouter(prefix="/user", tags=["User"])
+
+
+@router.get(
+    "/check-alias",
+    response_model=CheckAliasResponse,
+    status_code=status.HTTP_200_OK,
+    responses={**ALIAS_CHECK_UNAUTHORIZED},
+    summary="Check alias availability",
+    description="Returns whether the requested alias is available. Requires authentication.",
+)
+async def check_alias(
+    alias: str,
+    _: uuid.UUID = Depends(get_current_user_id),
+    use_case: CheckAliasUseCase = Depends(get_check_alias_use_case),
+) -> CheckAliasResponse:
+    available = await use_case.is_available(alias.lower())
+    return CheckAliasResponse(alias=alias.lower(), available=available)
 
 
 @router.post(

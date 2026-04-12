@@ -108,6 +108,22 @@ ALIAS_CONFLICT = {
 }
 
 
+# GET /user/check-alias
+ALIAS_CHECK_UNAUTHORIZED = {
+    401: {
+        "description": "Unauthorized",
+        "model": ErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "message": "Token has expired",
+                }
+            }
+        },
+    }
+}
+
 # POST /user/change-password
 CHANGE_PASSWORD_VALIDATION_ERROR = {
     422: {

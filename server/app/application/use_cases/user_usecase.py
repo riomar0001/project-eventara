@@ -95,6 +95,17 @@ class OnboardingUseCase:
         return UserOnboardingOutput(profile=created_profile)
 
 
+class CheckAliasUseCase:
+    """Checks whether a given alias is available."""
+
+    def __init__(self, repo: IUserRepository) -> None:
+        self.repo = repo
+
+    async def is_available(self, alias: str) -> bool:
+        existing = await self.repo.get_by_alias(alias)
+        return existing is None
+
+
 class ChangePasswordUseCase:
     """Handles authenticated password changes for an existing user account.
 
