@@ -8,7 +8,7 @@ function Progress({ className, value, ...props }: React.ComponentProps<typeof Pr
   return (
     <ProgressPrimitive.Root
       data-slot="progress"
-      className={cn('bg-muted relative flex h-3 w-full items-center overflow-x-hidden rounded-full', className)}
+      className={cn('bg-muted relative flex h-1.5 w-full items-center overflow-x-hidden rounded-full', className)}
       {...props}
     >
       <ProgressPrimitive.Indicator

@@ -2,10 +2,10 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { AuthFormField } from '@/components/auth/form-field';
 import { AuthStatusCard } from '@/components/auth/status-card';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
@@ -55,12 +55,12 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <Card className="py-8 gap-8">
+    <Card className="gap-8 py-8">
       <CardHeader className="gap-3">
         <CardTitle className="text-2xl">Forgot your password?</CardTitle>
         <CardDescription>Enter your email and we&apos;ll send a reset link.</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="min-h-40">
         <form id="forgot-form" onSubmit={handleSubmit} className="flex flex-col gap-6">
           <AuthFormField
             id="email"

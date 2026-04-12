@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { Button } from '@/components/ui/button';
 import { AuthStatusCard } from '@/components/auth/status-card';
+import { Button } from '@/components/ui/button';
 
 type VerifyState = 'loading' | 'success' | 'error';
 
@@ -28,20 +28,12 @@ export default function VerifyEmailPage() {
   }, [token]);
 
   if (state === 'loading') {
-    return (
-      <AuthStatusCard
-        title="Verifying your email…"
-        description="Please wait while we confirm your email address."
-      />
-    );
+    return <AuthStatusCard title="Verifying your email…" description="Please wait while we confirm your email address." />;
   }
 
   if (state === 'error') {
     return (
-      <AuthStatusCard
-        title="Verification failed"
-        description={errorMessage || 'The verification link is invalid or has expired.'}
-      >
+      <AuthStatusCard title="Verification failed" description={errorMessage || 'The verification link is invalid or has expired.'}>
         <Button asChild className="w-full">
           <Link href="/register">Back to sign up</Link>
         </Button>
@@ -56,10 +48,7 @@ export default function VerifyEmailPage() {
   }
 
   return (
-    <AuthStatusCard
-      title="Email verified"
-      description="Your email address has been verified. You can now sign in to your account."
-    >
+    <AuthStatusCard title="Email verified" description="Your email address has been verified. You can now sign in to your account.">
       <Button asChild className="w-full">
         <Link href="/login">Continue to sign in</Link>
       </Button>

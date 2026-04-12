@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { AuthFormField } from '@/components/auth/form-field';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { AuthFormField } from '@/components/auth/form-field';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -30,12 +30,12 @@ export default function LoginPage() {
   }
 
   return (
-    <Card className="py-8 gap-8">
+    <Card className="gap-8 py-8">
       <CardHeader className="gap-3">
-        <CardTitle className="text-2xl">Welcome back</CardTitle>
+        <CardTitle className="text-2xl">Welcome!</CardTitle>
         <CardDescription>Sign in to continue to your account.</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="min-h-40">
         <form id="login-form" onSubmit={handleSubmit} className="flex flex-col gap-6">
           <AuthFormField
             id="email"
