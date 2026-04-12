@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { AuthFormField } from '@/components/auth/form-field';
 import { AuthStatusCard } from '@/components/auth/status-card';
 
@@ -51,13 +51,13 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-xl">Set a new password</CardTitle>
+    <Card className="py-8 gap-8">
+      <CardHeader className="gap-3">
+        <CardTitle className="text-2xl">Set a new password</CardTitle>
         <CardDescription>Choose a strong password for your account.</CardDescription>
       </CardHeader>
       <CardContent>
-        <form id="reset-form" onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <form id="reset-form" onSubmit={handleSubmit} className="flex flex-col gap-6">
           <input type="hidden" name="token" value={token} />
           <AuthFormField
             id="password"
@@ -82,7 +82,7 @@ export default function ResetPasswordPage() {
           />
         </form>
       </CardContent>
-      <CardFooter className="flex flex-col gap-3">
+      <CardFooter className="flex flex-col gap-5">
         <Button type="submit" form="reset-form" className="w-full" disabled={isLoading}>
           {isLoading ? 'Updating…' : 'Update password'}
         </Button>

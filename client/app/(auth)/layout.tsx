@@ -25,7 +25,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       {/* top-left primary orb */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -top-32 -left-32 size-[520px] rounded-full opacity-30 blur-3xl"
+        className="pointer-events-none absolute -top-32 -left-32 size-130 rounded-full opacity-30 blur-3xl"
         style={{
           background: 'radial-gradient(circle at 40% 40%, oklch(0.841 0.238 128.85), oklch(0.768 0.233 130.85 / 0))',
           animation: 'auth-float-a 18s ease-in-out infinite'
@@ -34,7 +34,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       {/* bottom-right accent orb */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -right-24 -bottom-40 size-[460px] rounded-full opacity-25 blur-3xl"
+        className="pointer-events-none absolute -right-24 -bottom-40 size-115 rounded-full opacity-25 blur-3xl"
         style={{
           background: 'radial-gradient(circle at 60% 60%, oklch(0.841 0.238 128.85), oklch(0.879 0.169 91.605 / 0))',
           animation: 'auth-float-b 22s ease-in-out infinite'
@@ -43,7 +43,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       {/* center-right small orb */}
       <div
         aria-hidden
-        className="pointer-events-none absolute top-[20%] right-[15%] size-[260px] rounded-full opacity-20 blur-2xl"
+        className="pointer-events-none absolute top-[20%] right-[15%] size-65 rounded-full opacity-20 blur-2xl"
         style={{
           background: 'radial-gradient(circle, oklch(0.769 0.188 70.08), oklch(0.769 0.188 70.08 / 0))',
           animation: 'auth-float-c 14s ease-in-out infinite'
@@ -60,9 +60,9 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       />
 
       {/* ── Content ──────────────────────────────────────────────────── */}
-      <div className="relative z-10 flex w-full max-w-sm flex-col items-center gap-6">
+      <div className="relative z-10 flex w-full max-w-sm flex-col items-center gap-10">
         {/* Wordmark */}
-        <span className="text-xl font-bold tracking-tight">
+        <span className="text-2xl font-bold tracking-tight">
           EVENT<span className="text-primary">ARA</span>
         </span>
 

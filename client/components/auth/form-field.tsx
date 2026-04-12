@@ -32,7 +32,7 @@ export function AuthFormField({
   inputClassName,
 }: AuthFormFieldProps) {
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-2">
       <div className={labelRight ? 'flex items-center justify-between' : undefined}>
         <label htmlFor={id} className="text-sm font-medium">
           {label}

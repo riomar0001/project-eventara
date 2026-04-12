@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { AuthFormField } from '@/components/auth/form-field';
 
 function LoginVerifyForm() {
@@ -47,13 +47,13 @@ function LoginVerifyForm() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-xl">Check your email</CardTitle>
+    <Card className="py-8 gap-8">
+      <CardHeader className="gap-3">
+        <CardTitle className="text-2xl">Check your email</CardTitle>
         <CardDescription>We sent a 6-digit code to your inbox. It expires in 10 minutes.</CardDescription>
       </CardHeader>
       <CardContent>
-        <form id="verify-form" onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <form id="verify-form" onSubmit={handleSubmit} className="flex flex-col gap-6">
           <input type="hidden" name="token" value={token} />
           <AuthFormField
             id="code"
@@ -70,7 +70,7 @@ function LoginVerifyForm() {
           />
         </form>
       </CardContent>
-      <CardFooter className="flex flex-col gap-3">
+      <CardFooter className="flex flex-col gap-5">
         <Button type="submit" form="verify-form" className="w-full" disabled={isLoading}>
           {isLoading ? 'Verifying…' : 'Verify code'}
         </Button>

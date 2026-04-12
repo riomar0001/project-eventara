@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { AuthFormField } from '@/components/auth/form-field';
 
 export default function LoginPage() {
@@ -30,13 +30,13 @@ export default function LoginPage() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-xl">Welcome back</CardTitle>
+    <Card className="py-8 gap-8">
+      <CardHeader className="gap-3">
+        <CardTitle className="text-2xl">Welcome back</CardTitle>
         <CardDescription>Sign in to continue to your account.</CardDescription>
       </CardHeader>
       <CardContent>
-        <form id="login-form" onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <form id="login-form" onSubmit={handleSubmit} className="flex flex-col gap-6">
           <AuthFormField
             id="email"
             label="Email"
@@ -64,7 +64,7 @@ export default function LoginPage() {
           />
         </form>
       </CardContent>
-      <CardFooter className="flex flex-col gap-3">
+      <CardFooter className="flex flex-col gap-5">
         <Button type="submit" form="login-form" className="w-full" disabled={isLoading}>
           {isLoading ? 'Signing in…' : 'Sign in'}
         </Button>

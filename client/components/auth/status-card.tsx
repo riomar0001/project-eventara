@@ -8,12 +8,12 @@ interface AuthStatusCardProps {
 
 export function AuthStatusCard({ title, description, children }: AuthStatusCardProps) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-xl">{title}</CardTitle>
+    <Card className="py-8 gap-8">
+      <CardHeader className="gap-3">
+        <CardTitle className="text-2xl">{title}</CardTitle>
         <CardDescription>{description}</CardDescription>
       </CardHeader>
-      {children && <CardFooter className="flex flex-col gap-3">{children}</CardFooter>}
+      {children && <CardFooter className="flex flex-col gap-5">{children}</CardFooter>}
     </Card>
   );
 }

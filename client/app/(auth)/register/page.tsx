@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { AuthFormField } from '@/components/auth/form-field';
 import { AuthStatusCard } from '@/components/auth/status-card';
 
@@ -54,13 +54,13 @@ export default function RegisterPage() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-xl">Create an account</CardTitle>
+    <Card className="py-8 gap-8">
+      <CardHeader className="gap-3">
+        <CardTitle className="text-2xl">Create an account</CardTitle>
         <CardDescription>Start managing your events with Eventara.</CardDescription>
       </CardHeader>
       <CardContent>
-        <form id="register-form" onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <form id="register-form" onSubmit={handleSubmit} className="flex flex-col gap-6">
           <AuthFormField
             id="email"
             label="Email"
@@ -84,7 +84,7 @@ export default function RegisterPage() {
           />
         </form>
       </CardContent>
-      <CardFooter className="flex flex-col gap-3">
+      <CardFooter className="flex flex-col gap-5">
         <Button type="submit" form="register-form" className="w-full" disabled={isLoading}>
           {isLoading ? 'Creating account…' : 'Create account'}
         </Button>
