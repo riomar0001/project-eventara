@@ -61,7 +61,7 @@ export function StepProfile({ values, onChange, errors }: StepProfileProps) {
           rows={8}
           onChange={(e) => onChange({ bio: e.target.value })}
           aria-invalid={!!errors.bio || undefined}
-          className="text-sm min-h-28"
+          className="min-h-28 text-sm"
         />
         {errors.bio ? (
           <p className="text-destructive text-xs">{errors.bio}</p>
