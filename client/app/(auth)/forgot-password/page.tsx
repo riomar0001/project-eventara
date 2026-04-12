@@ -5,14 +5,14 @@ import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Authentication } from '@/api/sdk.gen';
 import { AuthFormField } from '@/components/auth/form-field';
 import { AuthStatusCard } from '@/components/auth/status-card';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Authentication } from '@/api/sdk.gen';
 
 const schema = z.object({
-  email: z.string().min(1, 'Email is required.').email('Enter a valid email.'),
+  email: z.string().min(1, 'Email is required.').email('Enter a valid email.')
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -24,13 +24,13 @@ export default function ForgotPasswordPage() {
     register,
     handleSubmit,
     setError,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting }
   } = useForm<FormValues>({ resolver: zodResolver(schema) });
 
   async function onSubmit(values: FormValues) {
     const result = await Authentication.forgotPasswordAuthForgotPasswordPost({
       body: { email: values.email },
-      throwOnError: false,
+      throwOnError: false
     });
 
     if (!result.data) {
@@ -56,11 +56,7 @@ export default function ForgotPasswordPage() {
         </Button>
         <p className="text-muted-foreground text-center text-sm">
           Didn&apos;t receive it?{' '}
-          <button
-            type="button"
-            onClick={() => setSubmittedEmail(null)}
-            className="text-foreground font-medium underline-offset-4 hover:underline"
-          >
+          <button type="button" onClick={() => setSubmittedEmail(null)} className="text-foreground font-medium underline-offset-4 hover:underline">
             Try again
           </button>
         </p>

@@ -60,7 +60,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       />
 
       {/* ── Content ──────────────────────────────────────────────────── */}
-      <div className="relative z-10 flex w-full max-w-md max-h-md flex-col items-center gap-10">
+      <div className="max-h-md relative z-10 flex w-full max-w-md flex-col items-center gap-10">
         {/* Wordmark */}
         <span className="text-2xl font-bold tracking-tight">
           EVENT<span className="text-primary">ARA</span>

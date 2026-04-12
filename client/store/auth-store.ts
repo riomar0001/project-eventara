@@ -73,7 +73,7 @@ export const useAuthStore = create<AuthStore>()(
 
         try {
           const { data, error } = await Authentication.refreshTokenAuthRefreshPost({
-            body: { refresh_token: refreshToken },
+            body: { refresh_token: refreshToken }
           });
 
           if (error || !data) {
@@ -115,7 +115,7 @@ export const useAuthStore = create<AuthStore>()(
 
         await get().tryRefresh();
         set({ isInitialized: true });
-      },
+      }
     }),
     {
       name: 'eventara-auth',
@@ -123,8 +123,8 @@ export const useAuthStore = create<AuthStore>()(
       partialize: (state) => ({
         refreshToken: state.refreshToken,
         accessToken: state.accessToken,
-        user: state.user,
-      }),
+        user: state.user
+      })
     }
   )
 );

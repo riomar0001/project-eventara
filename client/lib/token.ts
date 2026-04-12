@@ -58,7 +58,7 @@ export function decodeTokenUser(token: string): AuthUser | null {
       gender: p.gender ?? undefined,
       educationLevel: p.education_level ?? undefined,
       occupation: p.occupation ?? undefined,
-      bio: p.bio ?? undefined,
+      bio: p.bio ?? undefined
     };
   } catch {
     // jwtDecode throws an InvalidTokenError if the token is invalid/malformed

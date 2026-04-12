@@ -26,14 +26,11 @@ export function VerifyEmailCard({ email, onBack }: VerifyEmailCardProps) {
   return (
     <Card className="gap-0 overflow-hidden py-0" style={{ animation: 'step-enter-forward 0.3s ease both' }}>
       {/* Hero */}
-      <div className="flex flex-col items-center gap-5 px-8 pb-6 pt-10">
+      <div className="flex flex-col items-center gap-5 px-8 pt-10 pb-6">
         {/* Pulsing icon */}
         <div className="relative flex items-center justify-center">
-          <div
-            className="absolute h-24 w-24 rounded-full bg-primary/10"
-            style={{ animation: 'ping 2.5s cubic-bezier(0,0,0.2,1) infinite' }}
-          />
-          <div className="absolute h-18 w-18 rounded-full bg-primary/10" />
+          <div className="bg-primary/10 absolute h-24 w-24 rounded-full" style={{ animation: 'ping 2.5s cubic-bezier(0,0,0.2,1) infinite' }} />
+          <div className="bg-primary/10 absolute h-18 w-18 rounded-full" />
           <div className="bg-primary/15 border-primary/25 relative flex h-14 w-14 items-center justify-center rounded-full border-2">
             <Mail className="text-primary h-6 w-6" strokeWidth={1.5} />
           </div>
@@ -53,9 +50,7 @@ export function VerifyEmailCard({ email, onBack }: VerifyEmailCardProps) {
           <span className="text-foreground truncate text-sm font-medium">{email}</span>
         </div>
 
-        <p className="text-muted-foreground/70 text-center text-xs">
-          Can&apos;t find it? Check your spam or junk folder.
-        </p>
+        <p className="text-muted-foreground/70 text-center text-xs">Can&apos;t find it? Check your spam or junk folder.</p>
       </div>
 
       <div className="border-border" />
@@ -72,20 +67,12 @@ export function VerifyEmailCard({ email, onBack }: VerifyEmailCardProps) {
           </div>
         )}
 
-        <Button
-          type="button"
-          variant="outline"
-          onClick={handleResend}
-          disabled={resendState === 'loading'}
-          className="w-full gap-2"
-        >
+        <Button type="button" variant="outline" onClick={handleResend} disabled={resendState === 'loading'} className="w-full gap-2">
           <RotateCcw className={`h-3.5 w-3.5 ${resendState === 'loading' ? 'animate-spin' : ''}`} />
           {resendState === 'loading' ? 'Resending…' : 'Resend verification email'}
         </Button>
 
-        {resendState === 'error' && (
-          <p className="text-destructive text-center text-xs">Failed to resend. Please try again.</p>
-        )}
+        {resendState === 'error' && <p className="text-destructive text-center text-xs">Failed to resend. Please try again.</p>}
 
         <button
           type="button"

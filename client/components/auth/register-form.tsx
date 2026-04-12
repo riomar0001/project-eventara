@@ -42,7 +42,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
       body: {
         email: values.email,
         password: values.password,
-        accepted_terms_and_privacy_policy: values.terms,
+        accepted_terms_and_privacy_policy: values.terms
       },
       throwOnError: false
     });

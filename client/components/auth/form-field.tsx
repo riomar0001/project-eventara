@@ -13,24 +13,27 @@ interface AuthFormFieldProps extends Pick<
   inputClassName?: string;
 }
 
-export const AuthFormField = forwardRef<HTMLInputElement, AuthFormFieldProps>(function AuthFormField({
-  id,
-  label,
-  labelRight,
-  type = 'text',
-  placeholder,
-  autoComplete,
-  inputMode,
-  pattern,
-  maxLength,
-  value,
-  onChange,
-  onBlur,
-  name,
-  error,
-  hint,
-  inputClassName,
-}, ref) {
+export const AuthFormField = forwardRef<HTMLInputElement, AuthFormFieldProps>(function AuthFormField(
+  {
+    id,
+    label,
+    labelRight,
+    type = 'text',
+    placeholder,
+    autoComplete,
+    inputMode,
+    pattern,
+    maxLength,
+    value,
+    onChange,
+    onBlur,
+    name,
+    error,
+    hint,
+    inputClassName
+  },
+  ref
+) {
   return (
     <div className="flex flex-col gap-2">
       <div className={labelRight ? 'flex items-center justify-between' : undefined}>

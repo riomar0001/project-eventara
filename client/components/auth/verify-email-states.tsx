@@ -1,5 +1,5 @@
-import Link from 'next/link';
 import { CheckCircle2, XCircle, AlertTriangle, Loader2, ArrowRight } from 'lucide-react';
+import Link from 'next/link';
 import { IconCluster } from '@/components/auth/icon-cluster';
 import { Button } from '@/components/ui/button';
 
@@ -37,14 +37,14 @@ export function SuccessState() {
 export function ExpiredState() {
   return (
     <>
-      <div className="flex flex-col items-center gap-10 px-8 pb-6 pt-10" style={{ animation: 'step-enter-forward 0.3s ease both' }}>
+      <div className="flex flex-col items-center gap-10 px-8 pt-10 pb-6" style={{ animation: 'step-enter-forward 0.3s ease both' }}>
         <IconCluster icon={AlertTriangle} variant="warning" />
         <div className="space-y-1.5 text-center">
           <h2 className="text-foreground text-xl font-semibold tracking-tight">Link expired</h2>
           <p className="text-muted-foreground text-sm">This verification link has expired. Request a new one to continue.</p>
         </div>
       </div>
-      <div className="border-border " />
+      <div className="border-border" />
       <div className="flex flex-col gap-3 px-8 py-6">
         <Button asChild className="w-full">
           <Link href="/resend-verification">Resend verification email</Link>
@@ -60,14 +60,14 @@ export function ExpiredState() {
 export function AlreadyVerifiedState() {
   return (
     <>
-      <div className="flex flex-col items-center gap-10 px-8 pb-6 pt-10" style={{ animation: 'step-enter-forward 0.3s ease both' }}>
+      <div className="flex flex-col items-center gap-10 px-8 pt-10 pb-6" style={{ animation: 'step-enter-forward 0.3s ease both' }}>
         <IconCluster icon={CheckCircle2} variant="success" />
         <div className="space-y-1.5 text-center">
           <h2 className="text-foreground text-xl font-semibold tracking-tight">Already verified</h2>
           <p className="text-muted-foreground text-sm">Your email address is already confirmed. You can sign in to your account.</p>
         </div>
       </div>
-      <div className="border-border " />
+      <div className="border-border" />
       <div className="px-8 py-6">
         <Button asChild className="w-full">
           <Link href="/login">Continue to sign in</Link>
@@ -80,14 +80,14 @@ export function AlreadyVerifiedState() {
 export function InvalidState() {
   return (
     <>
-      <div className="flex flex-col items-center gap-10 px-8 pb-6 pt-10" style={{ animation: 'step-enter-forward 0.3s ease both' }}>
+      <div className="flex flex-col items-center gap-10 px-8 pt-10 pb-6" style={{ animation: 'step-enter-forward 0.3s ease both' }}>
         <IconCluster icon={XCircle} variant="destructive" />
         <div className="space-y-1.5 text-center">
           <h2 className="text-foreground text-xl font-semibold tracking-tight">Invalid link</h2>
           <p className="text-muted-foreground text-sm">This verification link is invalid or no longer exists.</p>
         </div>
       </div>
-      <div className="border-border " />
+      <div className="border-border" />
       <div className="flex flex-col gap-3 px-8 py-6">
         <Button asChild className="w-full">
           <Link href="/register">Back to sign up</Link>

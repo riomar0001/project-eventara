@@ -8,12 +8,7 @@ export default function RegisterPage() {
   const [submittedEmail, setSubmittedEmail] = useState<string | null>(null);
 
   if (submittedEmail) {
-    return (
-      <VerifyEmailCard
-        email={submittedEmail}
-        onBack={() => setSubmittedEmail(null)}
-      />
-    );
+    return <VerifyEmailCard email={submittedEmail} onBack={() => setSubmittedEmail(null)} />;
   }
 
   return <RegisterForm onSuccess={setSubmittedEmail} />;

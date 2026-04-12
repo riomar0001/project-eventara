@@ -24,7 +24,6 @@ export default function VerifyEmailPage() {
         const user = decodeTokenUser(result.data.access_token);
 
         console.log(user);
-        
 
         if (!user) {
           setState('invalid');

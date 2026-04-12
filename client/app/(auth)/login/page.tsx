@@ -5,14 +5,14 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Authentication } from '@/api/sdk.gen';
 import { AuthFormField } from '@/components/auth/form-field';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Authentication } from '@/api/sdk.gen';
 
 const schema = z.object({
   email: z.string().min(1, 'Email is required.').email('Enter a valid email.'),
-  password: z.string().min(1, 'Password is required.'),
+  password: z.string().min(1, 'Password is required.')
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -24,13 +24,13 @@ export default function LoginPage() {
     register,
     handleSubmit,
     setError,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting }
   } = useForm<FormValues>({ resolver: zodResolver(schema) });
 
   async function onSubmit(values: FormValues) {
     const result = await Authentication.loginAuthLoginPost({
       body: { email: values.email, password: values.password },
-      throwOnError: false,
+      throwOnError: false
     });
 
     if (!result.data) {

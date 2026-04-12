@@ -6,19 +6,15 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Authentication } from '@/api/sdk.gen';
-import { decodeTokenUser } from '@/lib/token';
-import { useAuthStore } from '@/store/auth-store';
 import { AuthFormField } from '@/components/auth/form-field';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Authentication } from '@/api/sdk.gen';
+import { decodeTokenUser } from '@/lib/token';
+import { useAuthStore } from '@/store/auth-store';
 
 const schema = z.object({
-  code: z
-    .string()
-    .min(1, 'Code is required.')
-    .length(6, 'Enter the full 6-digit code.')
-    .regex(/^\d+$/, 'Code must be numeric.'),
+  code: z.string().min(1, 'Code is required.').length(6, 'Enter the full 6-digit code.').regex(/^\d+$/, 'Code must be numeric.')
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -34,13 +30,13 @@ function LoginVerifyForm() {
     handleSubmit,
     setValue,
     setError,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting }
   } = useForm<FormValues>({ resolver: zodResolver(schema) });
 
   async function onSubmit(values: FormValues) {
     const result = await Authentication.loginVerifyAuthLoginVerifyPost({
       body: { token, code: values.code },
-      throwOnError: false,
+      throwOnError: false
     });
 
     if (!result.data) {
@@ -87,7 +83,7 @@ function LoginVerifyForm() {
               onChange: (e) => {
                 const digits = e.target.value.replace(/\D/g, '');
                 setValue('code', digits, { shouldValidate: false });
-              },
+              }
             })}
           />
           {errors.root && <p className="text-destructive text-sm">{errors.root.message}</p>}

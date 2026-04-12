@@ -1,25 +1,25 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Authentication } from '@/api/sdk.gen';
 import { AuthFormField } from '@/components/auth/form-field';
 import { AuthStatusCard } from '@/components/auth/status-card';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { useState } from 'react';
+import { Authentication } from '@/api/sdk.gen';
 
 const schema = z
   .object({
     password: z.string().min(8, 'Must be at least 8 characters.'),
-    confirm: z.string().min(1, 'Please confirm your password.'),
+    confirm: z.string().min(1, 'Please confirm your password.')
   })
   .refine((d) => d.password === d.confirm, {
     message: 'Passwords do not match.',
-    path: ['confirm'],
+    path: ['confirm']
   });
 
 type FormValues = z.infer<typeof schema>;
@@ -32,14 +32,14 @@ export default function ResetPasswordPage() {
     register,
     handleSubmit,
     setError,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting }
   } = useForm<FormValues>({ resolver: zodResolver(schema) });
 
   async function onSubmit(values: FormValues) {
     const result = await Authentication.resetPasswordAuthResetPasswordTokenPost({
       body: { new_password: values.password },
       path: { token },
-      throwOnError: false,
+      throwOnError: false
     });
 
     if (!result.data) {
