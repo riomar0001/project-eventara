@@ -232,12 +232,28 @@ export function LoginVerifyForm() {
 
       {/* Actions */}
       <div className="flex w-full max-w-xs flex-col gap-4">
-        <Button onClick={handleSubmit} className="h-11 w-full text-base font-medium" disabled={isSubmitting || isResending || !filled || !timerReady || expired}>
-          {isSubmitting ? <><Loader2 size={16} className="animate-spin" /> Verifying…</> : 'Verify code'}
+        <Button
+          onClick={handleSubmit}
+          className="h-11 w-full text-base font-medium"
+          disabled={isSubmitting || isResending || !filled || !timerReady || expired}
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 size={16} className="animate-spin" /> Verifying…
+            </>
+          ) : (
+            'Verify code'
+          )}
         </Button>
 
         <Button variant="outline" onClick={handleResend} className="w-full" disabled={isResending || isSubmitting}>
-          {isResending ? <><Loader2 size={16} className="animate-spin" /> Sending…</> : 'Resend code'}
+          {isResending ? (
+            <>
+              <Loader2 size={16} className="animate-spin" /> Sending…
+            </>
+          ) : (
+            'Resend code'
+          )}
         </Button>
 
         <p className="text-muted-foreground text-center text-sm">

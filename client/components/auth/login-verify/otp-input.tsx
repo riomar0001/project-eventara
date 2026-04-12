@@ -55,7 +55,7 @@ function OtpCell({
         onPaste={onPaste}
         aria-label={`Digit ${index + 1}`}
         className={cn(
-          'h-11 w-11 rounded-xl border-2 bg-transparent text-center text-xl font-semibold outline-none transition-all duration-200 select-none caret-transparent',
+          'h-11 w-11 rounded-xl border-2 bg-transparent text-center text-xl font-semibold caret-transparent transition-all duration-200 outline-none select-none',
           hasError
             ? 'border-destructive text-destructive'
             : isFocused
@@ -65,7 +65,6 @@ function OtpCell({
                 : 'border-border text-foreground'
         )}
       />
-
     </div>
   );
 }

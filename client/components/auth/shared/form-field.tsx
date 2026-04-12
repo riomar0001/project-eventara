@@ -1,6 +1,6 @@
 import { forwardRef } from 'react';
-import { Input } from '@/components/ui/input';
 import { AlertCircle, Info } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 
 interface AuthFormFieldProps extends Pick<
   React.InputHTMLAttributes<HTMLInputElement>,

@@ -1,5 +1,6 @@
 'use client';
 
+import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
@@ -9,7 +10,6 @@ import { AuthFormField } from '@/components/auth/shared/form-field';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Authentication } from '@/api/sdk.gen';
-import { Loader2 } from 'lucide-react';
 
 const schema = z.object({
   email: z.string().min(1, 'Email is required.').email('Enter a valid email.'),
@@ -96,7 +96,13 @@ export function LoginForm() {
       </CardContent>
       <CardFooter className="flex flex-col gap-5">
         <Button type="submit" form="login-form" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? <><Loader2 size={16} className="animate-spin" /> Signing in…</> : 'Sign in'}
+          {isSubmitting ? (
+            <>
+              <Loader2 size={16} className="animate-spin" /> Signing in…
+            </>
+          ) : (
+            'Sign in'
+          )}
         </Button>
         <p className="text-muted-foreground text-center text-sm">
           No account?{' '}
