@@ -23,4 +23,4 @@ export const dashboardNavItems = [
 export const dashboardBottomNavItems = [
   { label: 'Settings', icon: Settings, href: '#' },
   { label: 'Support', icon: Headphones, href: '#' }
-]; 
+];

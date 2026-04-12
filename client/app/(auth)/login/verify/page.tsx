@@ -1,8 +1,8 @@
 'use client';
 
+import { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { Suspense, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,8 +20,14 @@ function LoginVerifyForm() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    if (!code) { setCodeError('Code is required.'); return; }
-    if (code.length !== 6) { setCodeError('Enter the full 6-digit code.'); return; }
+    if (!code) {
+      setCodeError('Code is required.');
+      return;
+    }
+    if (code.length !== 6) {
+      setCodeError('Enter the full 6-digit code.');
+      return;
+    }
     setCodeError('');
 
     setIsLoading(true);
@@ -63,7 +69,7 @@ function LoginVerifyForm() {
               autoComplete="one-time-code"
               value={code}
               onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
-              className="text-center tracking-[0.5em] text-lg"
+              className="text-center text-lg tracking-[0.5em]"
               aria-invalid={!!codeError || undefined}
             />
             {codeError && <p className="text-destructive text-xs">{codeError}</p>}

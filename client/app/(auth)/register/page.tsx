@@ -1,7 +1,7 @@
 'use client';
 
-import Link from 'next/link';
 import { useState } from 'react';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -89,9 +89,11 @@ export default function RegisterPage() {
               onChange={(e) => setPassword(e.target.value)}
               aria-invalid={!!errors.password || undefined}
             />
-            {errors.password
-              ? <p className="text-destructive text-xs">{errors.password}</p>
-              : <p className="text-muted-foreground text-xs">At least 8 characters.</p>}
+            {errors.password ? (
+              <p className="text-destructive text-xs">{errors.password}</p>
+            ) : (
+              <p className="text-muted-foreground text-xs">At least 8 characters.</p>
+            )}
           </div>
         </form>
       </CardContent>

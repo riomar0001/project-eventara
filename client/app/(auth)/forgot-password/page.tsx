@@ -1,7 +1,7 @@
 'use client';
 
-import Link from 'next/link';
 import { useState } from 'react';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -15,7 +15,10 @@ export default function ForgotPasswordPage() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    if (!email.trim()) { setEmailError('Email is required.'); return; }
+    if (!email.trim()) {
+      setEmailError('Email is required.');
+      return;
+    }
     setEmailError('');
 
     setIsLoading(true);
