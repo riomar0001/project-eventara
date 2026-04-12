@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Authentication } from '@/api/sdk.gen';
-import { useAuthStore } from '@/store/auth-store';
-import { Card } from '@/components/ui/card';
 import { LoadingState, SuccessState, ExpiredState, AlreadyVerifiedState, InvalidState } from '@/components/auth/verify-email-states';
+import { Card } from '@/components/ui/card';
+import { Authentication } from '@/api/sdk.gen';
+import { decodeTokenUser } from '@/lib/token';
+import { useAuthStore } from '@/store/auth-store';
 
 type VerifyState = 'loading' | 'success' | 'expired' | 'already_verified' | 'invalid';
 
@@ -18,19 +19,37 @@ export default function VerifyEmailPage() {
   useEffect(() => {
     if (!token) return;
 
-    Authentication.verifyEmailAuthVerifyTokenGet({ path: { token }, throwOnError: false })
-      .then((result) => {
-        if (result.data) {
-          setAuth(result.data.access_token, result.data.refresh_token);
-          setState('success');
-          setTimeout(() => router.replace('/dashboard'), 1800);
+    Authentication.verifyEmailAuthVerifyTokenGet({ path: { token }, throwOnError: false }).then((result) => {
+      if (result.data) {
+        const user = decodeTokenUser(result.data.access_token);
+
+        console.log(user);
+        
+
+        if (!user) {
+          setState('invalid');
           return;
         }
-        const status = (result as { response?: { status?: number } }).response?.status;
-        if (status === 401) setState('expired');
-        else if (status === 409) setState('already_verified');
-        else setState('invalid');
-      });
+
+        setAuth(result.data.access_token, result.data.refresh_token, user);
+        setState('success');
+        setTimeout(() => router.replace('/dashboard'), 1800);
+        return;
+      }
+      const status = (result as { response?: { status?: number } }).response?.status;
+
+      if (status === 401) {
+        setState('expired');
+        return;
+      }
+
+      if (status === 409) {
+        setState('already_verified');
+        return;
+      }
+
+      setState('invalid');
+    });
   }, [token, router, setAuth]);
 
   return (

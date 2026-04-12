@@ -7,6 +7,12 @@ export interface AuthUser {
   roleId?: string;
   firstName?: string;
   lastName?: string;
+  alias?: string;
+  ageGroup?: string;
+  gender?: string;
+  educationLevel?: string;
+  occupation?: string;
+  bio?: string;
 }
 
 // Extending standard JwtPayload gives you 'sub' and 'exp' automatically
@@ -16,6 +22,12 @@ interface RawTokenPayload extends JwtPayload {
   role_id?: string;
   first_name?: string;
   last_name?: string;
+  alias?: string;
+  age_group?: string;
+  gender?: string;
+  education_level?: string;
+  occupation?: string;
+  bio?: string;
 }
 
 /**
@@ -40,7 +52,13 @@ export function decodeTokenUser(token: string): AuthUser | null {
       doneOnboarding: Boolean(p.done_onboarding),
       roleId: p.role_id ?? undefined,
       firstName: p.first_name ?? undefined,
-      lastName: p.last_name ?? undefined
+      lastName: p.last_name ?? undefined,
+      alias: p.alias ?? undefined,
+      ageGroup: p.age_group ?? undefined,
+      gender: p.gender ?? undefined,
+      educationLevel: p.education_level ?? undefined,
+      occupation: p.occupation ?? undefined,
+      bio: p.bio ?? undefined,
     };
   } catch {
     // jwtDecode throws an InvalidTokenError if the token is invalid/malformed

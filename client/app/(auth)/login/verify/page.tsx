@@ -7,6 +7,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Authentication } from '@/api/sdk.gen';
+import { decodeTokenUser } from '@/lib/token';
 import { useAuthStore } from '@/store/auth-store';
 import { AuthFormField } from '@/components/auth/form-field';
 import { Button } from '@/components/ui/button';
@@ -54,7 +55,13 @@ function LoginVerifyForm() {
       return;
     }
 
-    setAuth(result.data.access_token, result.data.refresh_token);
+    const user = decodeTokenUser(result.data.access_token);
+    if (!user) {
+      setError('root', { message: 'Something went wrong. Please try again.' });
+      return;
+    }
+
+    setAuth(result.data.access_token, result.data.refresh_token, user);
     router.replace('/dashboard');
   }
 
