@@ -15,6 +15,9 @@ from app.infrastructure.database.models.user_models import (
 )
 from app.infrastructure.database.models.venue_models import Venue
 from app.infrastructure.database.models.venue_rating_models import VenueRating
+from app.infrastructure.database.models.volunteer_application_models import (
+    VolunteerApplication,
+)
 from app.infrastructure.database.models.volunteer_models import Volunteer
 
 __all__ = [
@@ -33,4 +36,5 @@ __all__ = [
     "Venue",
     "VenueRating",
     "Volunteer",
+    "VolunteerApplication",
 ]

@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 from uuid import UUID
 
 from sqlalchemy import Enum, ForeignKey, Index, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.domain.entities.volunteer_entity import VolunteerRole, VolunteerStatus
 from app.infrastructure.database.base import Base
@@ -23,6 +25,9 @@ class Volunteer(Base):
         nullable=False,
         default="active",
     )
+
+    # Relationships
+    user = relationship("User", back_populates="volunteer")
 
     __table_args__ = (
         Index("idx_volunteers_user_id", "user_id"),

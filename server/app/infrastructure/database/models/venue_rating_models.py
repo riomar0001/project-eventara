@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 from uuid import UUID
 
 from sqlalchemy import ForeignKey, Index, Integer, Text
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.infrastructure.database.base import Base
 
@@ -13,6 +15,10 @@ class VenueRating(Base):
     venue_id: Mapped[UUID] = mapped_column(ForeignKey("venues.id", ondelete="CASCADE"), nullable=False)
     rating: Mapped[int] = mapped_column(Integer, nullable=False)
     comment: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    # Relationships
+    user = relationship("UserProfile", back_populates="venue_ratings")
+    venue = relationship("Venue", back_populates="venue_ratings")
 
     __table_args__ = (
         Index("idx_venue_ratings_user_id", "user_id"),
