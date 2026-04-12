@@ -1,3 +1,5 @@
+import { jwtDecode, JwtPayload } from 'jwt-decode';
+
 export interface AuthUser {
   id: string;
   email: string;
@@ -7,18 +9,17 @@ export interface AuthUser {
   lastName?: string;
 }
 
-interface RawTokenPayload {
-  sub: string;
-  email: string;
+// Extending standard JwtPayload gives you 'sub' and 'exp' automatically
+interface RawTokenPayload extends JwtPayload {
+  email?: string;
   done_onboarding?: boolean;
   role_id?: string;
   first_name?: string;
   last_name?: string;
-  exp?: number;
 }
 
 /**
- * Decodes a JWT access token (without verification — trust is established
+ * Decodes a JWT access token using jwt-decode (without verification — trust is established
  * by the server-issued httpOnly refresh cookie flow) and maps the payload
  * to the client AuthUser shape.
  *
@@ -26,13 +27,12 @@ interface RawTokenPayload {
  */
 export function decodeTokenUser(token: string): AuthUser | null {
   try {
-    const [, raw] = token.split('.');
-    if (!raw) return null;
+    // jwtDecode handles the splitting, base64url decoding, and JSON parsing safely
+    const p = jwtDecode<RawTokenPayload>(token);
 
-    const json = atob(raw.replace(/-/g, '+').replace(/_/g, '/'));
-    const p: RawTokenPayload = JSON.parse(json);
-
-    if (typeof p.sub !== 'string' || typeof p.email !== 'string') return null;
+    if (typeof p.sub !== 'string' || typeof p.email !== 'string') {
+      return null;
+    }
 
     return {
       id: p.sub,
@@ -43,6 +43,7 @@ export function decodeTokenUser(token: string): AuthUser | null {
       lastName: p.last_name ?? undefined
     };
   } catch {
+    // jwtDecode throws an InvalidTokenError if the token is invalid/malformed
     return null;
   }
 }
@@ -52,10 +53,7 @@ export function decodeTokenUser(token: string): AuthUser | null {
  */
 export function getTokenExpiry(token: string): number | null {
   try {
-    const [, raw] = token.split('.');
-    if (!raw) return null;
-    const json = atob(raw.replace(/-/g, '+').replace(/_/g, '/'));
-    const p: { exp?: number } = JSON.parse(json);
+    const p = jwtDecode<JwtPayload>(token);
     return typeof p.exp === 'number' ? p.exp * 1000 : null;
   } catch {
     return null;
@@ -64,6 +62,6 @@ export function getTokenExpiry(token: string): number | null {
 
 export function isTokenExpired(token: string): boolean {
   const expiry = getTokenExpiry(token);
-  if (expiry === null) return true;
+  if (expiry === null) return true; // Treat unreadable/missing tokens as expired
   return Date.now() >= expiry;
 }
