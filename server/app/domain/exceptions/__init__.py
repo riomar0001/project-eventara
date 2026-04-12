@@ -40,6 +40,13 @@ from app.domain.exceptions.venue_rating_exceptions import (
     VenueRatingNotFoundError,
     VenueRatingValidationError,
 )
+from app.domain.exceptions.volunteer_exceptions import (
+    UnauthorizedVolunteerOperationError,
+    VolunteerAlreadyExistsError,
+    VolunteerInactiveError,
+    VolunteerNotFoundError,
+    VolunteerValidationError,
+)
 
 __all__ = [
     "EmailAlreadyTakenError",
@@ -72,4 +79,9 @@ __all__ = [
     "UnauthorizedRatingOperationError",
     "VenueRatingValidationError",
     "VenueRatingAlreadyExistsError",
+    "VolunteerNotFoundError",
+    "VolunteerValidationError",
+    "VolunteerAlreadyExistsError",
+    "UnauthorizedVolunteerOperationError",
+    "VolunteerInactiveError",
 ]
