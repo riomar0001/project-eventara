@@ -2,50 +2,47 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { AuthFormField } from '@/components/auth/form-field';
-import { AuthStatusCard } from '@/components/auth/status-card';
+import { VerifyEmailCard } from '@/components/auth/verify-email-card';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Authentication } from '@/api/sdk.gen';
+
+const schema = z.object({
+  email: z.string().min(1, 'Email is required.').email('Enter a valid email.')
+});
+
+type FormValues = z.infer<typeof schema>;
 
 export default function ResendVerificationPage() {
-  const [email, setEmail] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
-  const [emailError, setEmailError] = useState('');
+  const [submittedEmail, setSubmittedEmail] = useState<string | null>(null);
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors, isSubmitting }
+  } = useForm<FormValues>({ resolver: zodResolver(schema) });
 
-    if (!email.trim()) {
-      setEmailError('Email is required.');
+  async function onSubmit(values: FormValues) {
+    const result = await Authentication.resendVerificationAuthResendVerificationPost({
+      body: { email: values.email },
+      throwOnError: false
+    });
+
+    if (!result.data) {
+      setError('root', { message: 'Something went wrong. Please try again.' });
       return;
     }
-    setEmailError('');
 
-    setIsLoading(true);
-    // TODO: integrate POST /auth/resend-verification — expects { email }
-    // Always returns 200 OK regardless of whether email exists (prevents enumeration)
-    setTimeout(() => {
-      setIsLoading(false);
-      setSubmitted(true);
-    }, 1000);
+    setSubmittedEmail(values.email);
   }
 
-  if (submitted) {
-    return (
-      <AuthStatusCard
-        title="Check your inbox"
-        description={
-          <>
-            If <span className="text-foreground font-medium">{email}</span> is associated with an unverified account, a new verification link has been sent.
-          </>
-        }
-      >
-        <Button asChild className="w-full">
-          <Link href="/login">Back to sign in</Link>
-        </Button>
-      </AuthStatusCard>
-    );
+  if (submittedEmail) {
+    return <VerifyEmailCard email={submittedEmail} onBack={() => setSubmittedEmail(null)} />;
   }
 
   return (
@@ -55,22 +52,22 @@ export default function ResendVerificationPage() {
         <CardDescription>Enter your email and we&apos;ll send a new verification link.</CardDescription>
       </CardHeader>
       <CardContent className="min-h-40">
-        <form id="resend-form" onSubmit={handleSubmit} className="flex flex-col gap-6">
+        <form id="resend-form" onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
           <AuthFormField
             id="email"
             label="Email"
             type="email"
             placeholder="you@example.com"
             autoComplete="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            error={emailError}
+            error={errors.email?.message}
+            {...register('email')}
           />
+          {errors.root && <p className="text-destructive text-sm">{errors.root.message}</p>}
         </form>
       </CardContent>
       <CardFooter className="flex flex-col gap-5">
-        <Button type="submit" form="resend-form" className="w-full" disabled={isLoading}>
-          {isLoading ? 'Sending…' : 'Send verification link'}
+        <Button type="submit" form="resend-form" className="w-full" disabled={isSubmitting}>
+          {isSubmitting ? 'Sending…' : 'Send verification link'}
         </Button>
         <p className="text-muted-foreground text-center text-sm">
           <Link href="/login" className="text-foreground font-medium underline-offset-4 hover:underline">

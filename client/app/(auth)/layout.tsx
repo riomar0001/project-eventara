@@ -1,7 +1,7 @@
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <div
-      className="relative flex min-h-svh items-center justify-center overflow-hidden px-4 py-12"
+      className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-12"
       style={{
         background: `
           radial-gradient(ellipse 80% 60% at 0% 0%,   oklch(0.94 0.08 128.85) 0%, transparent 60%),
@@ -60,14 +60,14 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       />
 
       {/* ── Content ──────────────────────────────────────────────────── */}
-      <div className="relative z-10 flex w-full max-w-sm flex-col items-center gap-10">
+      <div className="max-h-md relative z-10 flex w-full max-w-md flex-col items-center gap-10">
         {/* Wordmark */}
         <span className="text-2xl font-bold tracking-tight">
           EVENT<span className="text-primary">ARA</span>
         </span>
 
         {/* Card — entrance animation driven by CSS keyframes */}
-        <div className="w-full" style={{ animation: 'auth-card-in 0.45s cubic-bezier(0.16, 1, 0.3, 1) both' }}>
+        <div className="w-full drop-shadow-2xl" style={{ animation: 'auth-card-in 0.45s cubic-bezier(0.16, 1, 0.3, 1) both' }}>
           {children}
         </div>
       </div>

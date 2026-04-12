@@ -130,6 +130,8 @@ async def register_user(
             RegisterUserInput(
                 email=body.email,
                 password=body.password,
+                accepted_terms=body.accepted_terms_and_privacy_policy,
+                accepted_privacy_policy=body.accepted_terms_and_privacy_policy,
             )
         )
     except EmailAlreadyTakenError as error:

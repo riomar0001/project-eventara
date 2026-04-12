@@ -46,6 +46,10 @@ class User(BaseModel):
     password: str
     onboarding_completed: bool = False
     onboarding_completed_at: datetime | None = None
+    accepted_terms: bool = False
+    accepted_terms_at: datetime | None = None
+    accepted_privacy_policy: bool = False
+    accepted_privacy_policy_at: datetime | None = None
     status: UserStatus = UserStatus.ACTIVE
     deleted_at: datetime | None = None
     model_config = {"from_attributes": True}

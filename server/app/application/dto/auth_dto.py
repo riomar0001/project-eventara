@@ -7,6 +7,8 @@ from app.domain.entities.user_entity import PublicUser
 class RegisterUserInput:
     email: str
     password: str
+    accepted_terms: bool
+    accepted_privacy_policy: bool
 
 
 @dataclass

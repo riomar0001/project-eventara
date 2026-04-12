@@ -3,38 +3,60 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { AuthFormField } from '@/components/auth/form-field';
 import { AuthStatusCard } from '@/components/auth/status-card';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Authentication } from '@/api/sdk.gen';
+
+const schema = z
+  .object({
+    password: z.string().min(8, 'Must be at least 8 characters.'),
+    confirm: z.string().min(1, 'Please confirm your password.')
+  })
+  .refine((d) => d.password === d.confirm, {
+    message: 'Passwords do not match.',
+    path: ['confirm']
+  });
+
+type FormValues = z.infer<typeof schema>;
 
 export default function ResetPasswordPage() {
   const { token } = useParams<{ token: string }>();
-  const [password, setPassword] = useState('');
-  const [confirm, setConfirm] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [errors, setErrors] = useState({ password: '', confirm: '' });
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors, isSubmitting }
+  } = useForm<FormValues>({ resolver: zodResolver(schema) });
 
-    const next = { password: '', confirm: '' };
-    if (!password) next.password = 'Password is required.';
-    else if (password.length < 8) next.password = 'Must be at least 8 characters.';
-    if (!confirm) next.confirm = 'Please confirm your password.';
-    else if (password && password !== confirm) next.confirm = 'Passwords do not match.';
-    setErrors(next);
-    if (next.password || next.confirm) return;
+  async function onSubmit(values: FormValues) {
+    const result = await Authentication.resetPasswordAuthResetPasswordTokenPost({
+      body: { new_password: values.password },
+      path: { token },
+      throwOnError: false
+    });
 
-    setIsLoading(true);
-    // TODO: integrate POST /auth/reset-password/{token} — expects { new_password }
-    // On 401: setErrors({ ...next, password: 'Reset link has expired.' })
-    // On 400: setErrors({ ...next, password: 'This link has already been used.' })
-    setTimeout(() => {
-      setIsLoading(false);
-      setSuccess(true);
-    }, 1000);
+    if (!result.data) {
+      const status = (result as { response?: { status?: number } }).response?.status;
+      if (status === 401) {
+        setError('root', { message: 'This reset link has expired. Please request a new one.' });
+      } else if (status === 400) {
+        setError('root', { message: 'This reset link has already been used.' });
+      } else if (status === 404) {
+        setError('root', { message: 'Account not found.' });
+      } else {
+        setError('root', { message: 'Something went wrong. Please try again.' });
+      }
+      return;
+    }
+
+    setSuccess(true);
   }
 
   if (success) {
@@ -54,18 +76,16 @@ export default function ResetPasswordPage() {
         <CardDescription>Choose a strong password for your account.</CardDescription>
       </CardHeader>
       <CardContent className="min-h-40">
-        <form id="reset-form" onSubmit={handleSubmit} className="flex flex-col gap-6">
-          <input type="hidden" name="token" value={token} />
+        <form id="reset-form" onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
           <AuthFormField
             id="password"
             label="New password"
             type="password"
             placeholder="••••••••"
             autoComplete="new-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            error={errors.password}
             hint="At least 8 characters."
+            error={errors.password?.message}
+            {...register('password')}
           />
           <AuthFormField
             id="confirm"
@@ -73,15 +93,15 @@ export default function ResetPasswordPage() {
             type="password"
             placeholder="••••••••"
             autoComplete="new-password"
-            value={confirm}
-            onChange={(e) => setConfirm(e.target.value)}
-            error={errors.confirm}
+            error={errors.confirm?.message}
+            {...register('confirm')}
           />
+          {errors.root && <p className="text-destructive text-sm">{errors.root.message}</p>}
         </form>
       </CardContent>
       <CardFooter className="flex flex-col gap-5">
-        <Button type="submit" form="reset-form" className="w-full" disabled={isLoading}>
-          {isLoading ? 'Updating…' : 'Update password'}
+        <Button type="submit" form="reset-form" className="w-full" disabled={isSubmitting}>
+          {isSubmitting ? 'Updating…' : 'Update password'}
         </Button>
         <p className="text-muted-foreground text-center text-sm">
           Link expired?{' '}

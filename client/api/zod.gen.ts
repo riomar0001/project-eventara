@@ -306,7 +306,8 @@ export const zRefreshTokenResponse = z.object({
  */
 export const zRegisterRequest = z.object({
     email: z.email(),
-    password: z.string().min(8)
+    password: z.string().min(8),
+    accepted_terms_and_privacy_policy: z.boolean()
 });
 
 /**

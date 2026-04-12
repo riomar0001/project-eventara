@@ -1,49 +1,64 @@
 'use client';
 
-import { Suspense, useState } from 'react';
+import { Suspense } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
-import { toast } from 'sonner';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { AuthFormField } from '@/components/auth/form-field';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Authentication } from '@/api/sdk.gen';
+import { decodeTokenUser } from '@/lib/token';
+import { useAuthStore } from '@/store/auth-store';
+
+const schema = z.object({
+  code: z.string().min(1, 'Code is required.').length(6, 'Enter the full 6-digit code.').regex(/^\d+$/, 'Code must be numeric.')
+});
+
+type FormValues = z.infer<typeof schema>;
 
 function LoginVerifyForm() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get('token') ?? '';
+  const setAuth = useAuthStore((s) => s.setAuth);
 
-  const [code, setCode] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [isResending, setIsResending] = useState(false);
-  const [codeError, setCodeError] = useState('');
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    setError,
+    formState: { errors, isSubmitting }
+  } = useForm<FormValues>({ resolver: zodResolver(schema) });
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function onSubmit(values: FormValues) {
+    const result = await Authentication.loginVerifyAuthLoginVerifyPost({
+      body: { token, code: values.code },
+      throwOnError: false
+    });
 
-    if (!code) {
-      setCodeError('Code is required.');
+    if (!result.data) {
+      const status = (result as { response?: { status?: number } }).response?.status;
+      if (status === 401) {
+        setError('code', { message: 'Incorrect or expired code.' });
+      } else if (status === 400 || status === 404) {
+        setError('root', { message: 'Session expired. Please sign in again.' });
+      } else {
+        setError('root', { message: 'Something went wrong. Please try again.' });
+      }
       return;
     }
-    if (code.length !== 6) {
-      setCodeError('Enter the full 6-digit code.');
+
+    const user = decodeTokenUser(result.data.access_token);
+    if (!user) {
+      setError('root', { message: 'Something went wrong. Please try again.' });
       return;
     }
-    setCodeError('');
 
-    setIsLoading(true);
-    // TODO: integrate POST /auth/login/verify — expects { token, code }
-    // On 401: setCodeError('Incorrect or expired code.')
-    // On 400: setCodeError('Session expired. Go back and sign in again.')
-    setTimeout(() => setIsLoading(false), 1000);
-  }
-
-  function handleResend() {
-    setIsResending(true);
-    // TODO: re-trigger POST /auth/login with stored credentials, or navigate back to /login
-    setTimeout(() => {
-      setIsResending(false);
-      toast.success('Code resent', { description: 'Check your inbox for a new code.' });
-    }, 1000);
+    setAuth(result.data.access_token, result.data.refresh_token, user);
+    router.replace('/dashboard');
   }
 
   return (
@@ -53,8 +68,7 @@ function LoginVerifyForm() {
         <CardDescription>We sent a 6-digit code to your inbox. It expires in 10 minutes.</CardDescription>
       </CardHeader>
       <CardContent className="min-h-40">
-        <form id="verify-form" onSubmit={handleSubmit} className="flex flex-col gap-6">
-          <input type="hidden" name="token" value={token} />
+        <form id="verify-form" onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
           <AuthFormField
             id="code"
             label="One-time code"
@@ -63,19 +77,21 @@ function LoginVerifyForm() {
             maxLength={6}
             placeholder="000000"
             autoComplete="one-time-code"
-            value={code}
-            onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
-            error={codeError}
+            error={errors.code?.message}
             inputClassName="text-center text-lg tracking-[0.5em]"
+            {...register('code', {
+              onChange: (e) => {
+                const digits = e.target.value.replace(/\D/g, '');
+                setValue('code', digits, { shouldValidate: false });
+              }
+            })}
           />
+          {errors.root && <p className="text-destructive text-sm">{errors.root.message}</p>}
         </form>
       </CardContent>
       <CardFooter className="flex flex-col gap-5">
-        <Button type="submit" form="verify-form" className="w-full" disabled={isLoading}>
-          {isLoading ? 'Verifying…' : 'Verify code'}
-        </Button>
-        <Button type="button" variant="ghost" className="w-full" disabled={isResending} onClick={handleResend}>
-          {isResending ? 'Resending…' : "Didn't receive it? Resend"}
+        <Button type="submit" form="verify-form" className="w-full" disabled={isSubmitting}>
+          {isSubmitting ? 'Verifying…' : 'Verify code'}
         </Button>
         <p className="text-muted-foreground text-center text-sm">
           <Link href="/login" className="text-foreground font-medium underline-offset-4 hover:underline">

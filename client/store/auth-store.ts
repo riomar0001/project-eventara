@@ -14,30 +14,30 @@ interface AuthState {
 
 interface AuthActions {
   /**
-   * Decode the access token, derive the user shape, and commit both tokens
-   * to state. Called after any flow that issues a fresh token pair
-   * (login-verify, email-verify).
+   * Store both tokens and the resolved user. Pass the decoded user explicitly
+   * so callers can merge in any extra details not present in the JWT.
    */
-  setAuth: (accessToken: string, refreshToken: string) => void;
+  setAuth: (accessToken: string, refreshToken: string, user: AuthUser) => void;
 
   /**
-   * Wipe all auth state. Called on logout or after a failed refresh that
-   * cannot be recovered.
+   * Merge partial details into the existing user (e.g. after onboarding).
+   * No-ops when there is no authenticated user.
+   */
+  updateUser: (details: Partial<AuthUser>) => void;
+
+  /**
+   * Wipe all auth state. Called on logout or after a failed refresh.
    */
   clearAuth: () => void;
 
   /**
-   * Exchange the stored refresh token for a fresh token pair. Returns true
-   * on success, false if the refresh token is missing, expired, or rejected
-   * by the server. Automatically calls clearAuth on failure.
+   * Exchange the stored refresh token for a fresh token pair. Preserves any
+   * profile fields already on the user so they survive token rotation.
    */
   tryRefresh: () => Promise<boolean>;
 
   /**
-   * Run once on application mount. If the persisted refresh token is still
-   * usable it obtains a fresh access token silently; otherwise auth state is
-   * cleared. Sets isInitialized to true when complete so consumers can gate
-   * on a stable, settled auth state.
+   * Run once on application mount to settle auth state from sessionStorage.
    */
   initialize: () => Promise<void>;
 }
@@ -52,9 +52,14 @@ export const useAuthStore = create<AuthStore>()(
       refreshToken: null,
       isInitialized: false,
 
-      setAuth(accessToken, refreshToken) {
-        const user = decodeTokenUser(accessToken);
+      setAuth(accessToken, refreshToken, user) {
         set({ user, accessToken, refreshToken });
+      },
+
+      updateUser(details) {
+        const current = get().user;
+        if (!current) return;
+        set({ user: { ...current, ...details } });
       },
 
       clearAuth() {
@@ -62,7 +67,7 @@ export const useAuthStore = create<AuthStore>()(
       },
 
       async tryRefresh() {
-        const { refreshToken } = get();
+        const { refreshToken, user: currentUser } = get();
 
         if (!refreshToken) return false;
 
@@ -76,7 +81,16 @@ export const useAuthStore = create<AuthStore>()(
             return false;
           }
 
-          get().setAuth(data.access_token, data.refresh_token);
+          const freshUser = decodeTokenUser(data.access_token);
+          if (!freshUser) {
+            get().clearAuth();
+            return false;
+          }
+
+          // Preserve any profile fields already stored (e.g. set after onboarding)
+          // and overlay the identity fields from the new token.
+          const mergedUser: AuthUser = { ...currentUser, ...freshUser };
+          get().setAuth(data.access_token, data.refresh_token, mergedUser);
           return true;
         } catch {
           get().clearAuth();
@@ -92,11 +106,10 @@ export const useAuthStore = create<AuthStore>()(
           return;
         }
 
-        const accessStillValid = accessToken !== null && !isTokenExpired(accessToken);
-
-        if (accessStillValid) {
-          const user = decodeTokenUser(accessToken!);
-          set({ user, isInitialized: true });
+        if (accessToken !== null && !isTokenExpired(accessToken)) {
+          // User is already rehydrated from sessionStorage by the persist
+          // middleware — no need to re-decode and lose profile fields.
+          set({ isInitialized: true });
           return;
         }
 
@@ -109,7 +122,8 @@ export const useAuthStore = create<AuthStore>()(
       storage: createJSONStorage(() => sessionStorage),
       partialize: (state) => ({
         refreshToken: state.refreshToken,
-        accessToken: state.accessToken
+        accessToken: state.accessToken,
+        user: state.user
       })
     }
   )
