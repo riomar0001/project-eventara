@@ -16,7 +16,7 @@ class UserOnboardingRequest(BaseModel):
     gender: Gender
     education_level: EducationLevel
     occupation: str | None = Field(default=None, max_length=150)
-    bio: str | None = None
+    bio: str | None = Field(default=None, max_length=500)
 
     @field_validator("alias")
     @classmethod
@@ -33,6 +33,11 @@ class UserOnboardingResponse(BaseModel):
     alias: str
     first_name: str
     last_name: str
+    age_group: AgeGroup
+    gender: Gender
+    education_level: EducationLevel
+    occupation: str | None = None
+    bio: str | None = None
     message: str = "Onboarding completed successfully."
 
 

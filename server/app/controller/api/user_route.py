@@ -1,6 +1,7 @@
+import re
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from app.application.dto.user_dto import ChangePasswordInput, UserOnboardingInput
 from app.application.use_cases.user_usecase import ChangePasswordUseCase, CheckAliasUseCase, OnboardingUseCase
@@ -8,11 +9,10 @@ from app.controller.dependencies import get_current_user_id, get_onboarding_use_
 from app.controller.dependencies.use_cases_depends import get_change_password_use_case, get_check_alias_use_case
 from app.controller.docs.user_docs import (
     ALIAS_CHECK_UNAUTHORIZED,
-    ALIAS_CONFLICT,
     CHANGE_PASSWORD_VALIDATION_ERROR,
     EMAIL_NOT_VERIFIED,
     INVALID_CURRENT_PASSWORD,
-    ONBOARDING_ALREADY_COMPLETED,
+    ONBOARDING_CONFLICT,
     ONBOARDING_VALIDATION_ERROR,
     SAME_PASSWORD_ERROR,
     UNAUTHORIZED,
@@ -35,6 +35,8 @@ from app.domain.exceptions.user_exceptions import (
     UserNotFoundError,
 )
 
+_ALIAS_RE = re.compile(r"^[a-z0-9_]+$")
+
 router = APIRouter(prefix="/user", tags=["User"])
 
 
@@ -47,24 +49,29 @@ router = APIRouter(prefix="/user", tags=["User"])
     description="Returns whether the requested alias is available. Requires authentication.",
 )
 async def check_alias(
-    alias: str,
+    alias: str = Query(min_length=3, max_length=100),
     _: uuid.UUID = Depends(get_current_user_id),
     use_case: CheckAliasUseCase = Depends(get_check_alias_use_case),
 ) -> CheckAliasResponse:
-    available = await use_case.is_available(alias.lower())
-    return CheckAliasResponse(alias=alias.lower(), available=available)
+    normalized = alias.lower()
+    if not _ALIAS_RE.match(normalized):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Alias may only contain lowercase letters, numbers, and underscores",
+        )
+    available = await use_case.is_available(normalized)
+    return CheckAliasResponse(alias=normalized, available=available)
 
 
 @router.post(
     "/onboard",
     response_model=UserOnboardingResponse,
-    status_code=status.HTTP_200_OK,
+    status_code=status.HTTP_201_CREATED,
     responses={
         **UNAUTHORIZED,
         **USER_NOT_FOUND,
         **EMAIL_NOT_VERIFIED,
-        **ONBOARDING_ALREADY_COMPLETED,
-        **ALIAS_CONFLICT,
+        **ONBOARDING_CONFLICT,
         **ONBOARDING_VALIDATION_ERROR,
     },
     summary="Complete user onboarding",
@@ -83,7 +90,7 @@ async def user_onboarding(
 
     # Error mapping
     - **401 Unauthorized** — missing, expired, or invalid Bearer token.
-    - **403 Forbidden** — email address has not been verified yet.
+    - **403 Forbidden** — account is inactive/deleted, or email not yet verified.
     - **404 Not Found** — no user found for the ID encoded in the token.
     - **409 Conflict** — onboarding already completed, or the chosen alias
       is already taken by another user.
@@ -107,6 +114,8 @@ async def user_onboarding(
         )
     except UserNotFoundError as error:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error))
+    except UserInactiveError as error:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(error))
     except EmailNotVerifiedError as error:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(error))
     except OnboardingAlreadyCompletedError as error:
@@ -114,11 +123,17 @@ async def user_onboarding(
     except AliasAlreadyTakenError as error:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error))
 
+    p = result.profile
     return UserOnboardingResponse(
-        user_id=result.profile.user_id,
-        alias=result.profile.alias,
-        first_name=result.profile.first_name,
-        last_name=result.profile.last_name,
+        user_id=p.user_id,
+        alias=p.alias,
+        first_name=p.first_name,
+        last_name=p.last_name,
+        age_group=p.age_group,
+        gender=p.gender,
+        education_level=p.education_level,
+        occupation=p.occupation,
+        bio=p.bio,
     )
 
 

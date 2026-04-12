@@ -54,6 +54,9 @@ class OnboardingUseCase:
         if not user:
             raise UserNotFoundError()
 
+        if user.status in (UserStatus.INACTIVE, UserStatus.DELETED):
+            raise UserInactiveError()
+
         security = await self.repo.get_security_by_user_id(data.user_id)
         if not security or not security.email_verified:
             raise EmailNotVerifiedError()
