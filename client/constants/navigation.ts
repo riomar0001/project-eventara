@@ -1,6 +1,6 @@
 import { LayoutDashboard, User, ArrowLeftRight, Waves, Wallet, TrendingUp, Headphones, Settings, FlaskConical, MapPin } from 'lucide-react';
 
-export const navItems = [
+export const dashboardNavItems = [
   { label: 'Dashboard', icon: LayoutDashboard, href: '#', active: true },
   { label: 'Accounts', icon: User, href: '#' },
   {
@@ -20,7 +20,7 @@ export const navItems = [
   { label: 'Venue', icon: MapPin, href: '#' }
 ];
 
-export const bottomNavItems = [
+export const dashboardBottomNavItems = [
   { label: 'Settings', icon: Settings, href: '#' },
   { label: 'Support', icon: Headphones, href: '#' }
-];
+]; 

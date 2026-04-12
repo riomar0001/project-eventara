@@ -19,7 +19,7 @@ import {
   SidebarMenuSubItem,
   useSidebar
 } from '@/components/ui/sidebar';
-import { navItems, bottomNavItems as bottomItems } from '@/constants/navigation';
+import { dashboardNavItems, dashboardBottomNavItems } from '@/constants/navigation';
 import { cn } from '@/lib/utils';
 
 export function AppSidebar() {
@@ -48,7 +48,7 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu className="gap-2">
-              {navItems.map((item) =>
+              {dashboardNavItems.map((item) =>
                 item.children ? (
                   <Collapsible key={item.label} open={transactionsOpen} onOpenChange={setTransactionsOpen} asChild>
                     <SidebarMenuItem>
@@ -97,7 +97,7 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {bottomItems.map((item) => (
+              {dashboardBottomNavItems.map((item) => (
                 <SidebarMenuItem key={item.label}>
                   <SidebarMenuButton asChild tooltip={item.label} className="h-12 px-4 py-3.5 [&_svg]:size-4.5">
                     <a href={item.href}>
