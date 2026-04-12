@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.gzip import GZipMiddleware
@@ -7,6 +9,8 @@ from app.controller.router import router
 from app.core.config import settings
 from app.core.lifespan import lifespan
 from app.core.security.headers import SecurityHeadersMiddleware
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title=settings.APP_NAME,
@@ -38,19 +42,27 @@ async def http_exception_handler(request: Request, exc: HTTPException):
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    if settings.DEBUG:
+        return JSONResponse(
+            status_code=422,
+            content={"success": False, "detail": exc.errors()},
+        )
     return JSONResponse(
         status_code=422,
-        content={"success": False, "detail": exc.errors()},
+        content={
+            "success": False,
+            "detail": [{"loc": err.get("loc"), "msg": err.get("msg"), "type": err.get("type")} for err in exc.errors()],
+        },
     )
 
 
 @app.exception_handler(Exception)
 async def general_exception_handler(request: Request, exc: Exception):
-    """Handle all other exceptions"""
-    return JSONResponse(
-        status_code=500,
-        content={"error": True, "message": "An unexpected error occurred", "detail": None},
-    )
+    logger.exception("Unhandled exception on %s %s", request.method, request.url.path)
+    content: dict = {"success": False, "message": "An unexpected error occurred"}
+    if settings.DEBUG:
+        content["debug"] = f"{type(exc).__name__}: {exc}"
+    return JSONResponse(status_code=500, content=content)
 
 
 @app.get("/docs", include_in_schema=False)

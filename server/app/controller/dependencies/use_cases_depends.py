@@ -14,7 +14,7 @@ from app.application.use_cases.queue_usecase import (
     RetryDeadJobUseCase,
 )
 from app.application.use_cases.role_usecase import UserRoleUseCase
-from app.application.use_cases.user_usecase import ChangePasswordUseCase, OnboardingUseCase
+from app.application.use_cases.user_usecase import ChangePasswordUseCase, CheckAliasUseCase, OnboardingUseCase
 from app.application.use_cases.venue_usecase import VenueUseCase
 from app.infrastructure.cache.repositories.otp_repository import OTPRepository
 from app.infrastructure.cache.repositories.password_reset_repository import PasswordResetRepository
@@ -47,6 +47,11 @@ def get_auth_use_case(request: Request, db: AsyncSession = Depends(get_db)) -> A
         OTPRepository(request.app.state.redis),
         PasswordResetRepository(request.app.state.redis),
     )
+
+
+def get_check_alias_use_case(db: AsyncSession = Depends(get_db)) -> CheckAliasUseCase:
+    """Construct a ``CheckAliasUseCase`` for the current request."""
+    return CheckAliasUseCase(UserRepository(db))
 
 
 def get_onboarding_use_case(db: AsyncSession = Depends(get_db)) -> OnboardingUseCase:

@@ -342,9 +342,13 @@ def _decode(token: str, secret: str, expected_type: str) -> dict:
     except jwt.ExpiredSignatureError:
         raise ValueError("Token has expired")
     except jwt.InvalidTokenError as exc:
-        raise ValueError(f"Invalid token: {exc}")
+        if settings.DEBUG:
+            raise ValueError(f"Invalid token: {exc}")
+        raise ValueError("Invalid token")
 
     if payload.get("type") != expected_type:
-        raise ValueError(f"Expected {expected_type} token, got {payload.get('type')!r}")
+        if settings.DEBUG:
+            raise ValueError(f"Expected {expected_type} token, got {payload.get('type')!r}")
+        raise ValueError("Invalid token type")
 
     return payload

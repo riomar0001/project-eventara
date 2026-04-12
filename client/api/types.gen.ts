@@ -120,6 +120,24 @@ export type ChangePasswordResponse = {
 };
 
 /**
+ * CheckAliasResponse
+ */
+export type CheckAliasResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Alias
+     */
+    alias: string;
+    /**
+     * Available
+     */
+    available: boolean;
+};
+
+/**
  * CreateGrantsRequest
  */
 export type CreateGrantsRequest = {
@@ -1318,6 +1336,30 @@ export type LoginAuthLoginPostResponses = {
 
 export type LoginAuthLoginPostResponse = LoginAuthLoginPostResponses[keyof LoginAuthLoginPostResponses];
 
+export type LoginVerifyAuthLoginVerifyPostData = {
+    body: LoginVerifyRequest;
+    path?: never;
+    query?: never;
+    url: '/auth/login/verify';
+};
+
+export type LoginVerifyAuthLoginVerifyPostErrors = {
+    /**
+     * The OTP session token is malformed or has an invalid signature
+     */
+    400: ErrorResponse;
+    /**
+     * OTP code is incorrect, already consumed, or has expired
+     */
+    401: ErrorResponse;
+    /**
+     * User not found
+     */
+    404: ErrorResponse;
+    /**
+     * Validation error — token is empty or code is not exactly 6 digits
+     */
+    422: ValidationErrorResponse;
 export type LoginVerifyAuthLoginVerifyGetData = {
   body: LoginVerifyRequest;
   path?: never;
@@ -1344,8 +1386,13 @@ export type LoginVerifyAuthLoginVerifyGetErrors = {
   422: ValidationErrorResponse;
 };
 
-export type LoginVerifyAuthLoginVerifyGetError = LoginVerifyAuthLoginVerifyGetErrors[keyof LoginVerifyAuthLoginVerifyGetErrors];
+export type LoginVerifyAuthLoginVerifyPostError = LoginVerifyAuthLoginVerifyPostErrors[keyof LoginVerifyAuthLoginVerifyPostErrors];
 
+export type LoginVerifyAuthLoginVerifyPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: LoginVerifyResponse;
 export type LoginVerifyAuthLoginVerifyGetResponses = {
   /**
    * Successful Response
@@ -1353,7 +1400,7 @@ export type LoginVerifyAuthLoginVerifyGetResponses = {
   200: LoginVerifyResponse;
 };
 
-export type LoginVerifyAuthLoginVerifyGetResponse = LoginVerifyAuthLoginVerifyGetResponses[keyof LoginVerifyAuthLoginVerifyGetResponses];
+export type LoginVerifyAuthLoginVerifyPostResponse = LoginVerifyAuthLoginVerifyPostResponses[keyof LoginVerifyAuthLoginVerifyPostResponses];
 
 export type LogoutAuthLogoutPostData = {
   body: LogoutRequest;
@@ -1484,6 +1531,40 @@ export type ResetPasswordAuthResetPasswordTokenPostResponses = {
 
 export type ResetPasswordAuthResetPasswordTokenPostResponse =
   ResetPasswordAuthResetPasswordTokenPostResponses[keyof ResetPasswordAuthResetPasswordTokenPostResponses];
+
+export type CheckAliasUserCheckAliasGetData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Alias
+         */
+        alias: string;
+    };
+    url: '/user/check-alias';
+};
+
+export type CheckAliasUserCheckAliasGetErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CheckAliasUserCheckAliasGetError = CheckAliasUserCheckAliasGetErrors[keyof CheckAliasUserCheckAliasGetErrors];
+
+export type CheckAliasUserCheckAliasGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: CheckAliasResponse;
+};
+
+export type CheckAliasUserCheckAliasGetResponse = CheckAliasUserCheckAliasGetResponses[keyof CheckAliasUserCheckAliasGetResponses];
 
 export type UserOnboardingUserOnboardPostData = {
   body: UserOnboardingRequest;

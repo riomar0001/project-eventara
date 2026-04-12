@@ -61,7 +61,7 @@ class PublicUser(BaseModel):
 
 class UserProfile(BaseModel):
     user_id: uuid.UUID
-    email: str
+    email: str | None = None
     alias: str
     first_name: str
     last_name: str

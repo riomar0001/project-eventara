@@ -3,9 +3,16 @@ import uuid
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
+from app.core.config import settings
 from app.core.security.token_service import verify_access_token
 
 _bearer = HTTPBearer()
+
+
+def _auth_detail(exc: ValueError) -> str:
+    if settings.DEBUG:
+        return str(exc)
+    return "Not authenticated"
 
 
 def get_current_user_id(
@@ -24,7 +31,7 @@ def get_current_user_id(
     except ValueError as exc:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=str(exc),
+            detail=_auth_detail(exc),
             headers={"WWW-Authenticate": "Bearer"},
         )
     return uuid.UUID(payload.sub)
@@ -51,7 +58,7 @@ def require_completed_onboarding(
     except ValueError as exc:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=str(exc),
+            detail=_auth_detail(exc),
             headers={"WWW-Authenticate": "Bearer"},
         )
     if not payload.done_onboarding:

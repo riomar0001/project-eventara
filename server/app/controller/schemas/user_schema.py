@@ -1,8 +1,11 @@
+import re
 import uuid
 
 from pydantic import BaseModel, Field, field_validator
 
 from app.domain.entities.user_entity import AgeGroup, EducationLevel, Gender
+
+_ALIAS_RE = re.compile(r"^[a-z0-9_]+$")
 
 
 class UserOnboardingRequest(BaseModel):
@@ -13,14 +16,15 @@ class UserOnboardingRequest(BaseModel):
     gender: Gender
     education_level: EducationLevel
     occupation: str | None = Field(default=None, max_length=150)
-    bio: str | None = None
+    bio: str | None = Field(default=None, max_length=500)
 
     @field_validator("alias")
     @classmethod
-    def alias_no_spaces(cls, v: str) -> str:
-        if " " in v:
-            raise ValueError("Alias must not contain spaces")
-        return v.lower()
+    def alias_valid(cls, v: str) -> str:
+        lowered = v.lower()
+        if not _ALIAS_RE.match(lowered):
+            raise ValueError("Alias may only contain lowercase letters, numbers, and underscores")
+        return lowered
 
 
 class UserOnboardingResponse(BaseModel):
@@ -29,7 +33,18 @@ class UserOnboardingResponse(BaseModel):
     alias: str
     first_name: str
     last_name: str
+    age_group: AgeGroup
+    gender: Gender
+    education_level: EducationLevel
+    occupation: str | None = None
+    bio: str | None = None
     message: str = "Onboarding completed successfully."
+
+
+class CheckAliasResponse(BaseModel):
+    success: bool = True
+    alias: str
+    available: bool
 
 
 class ChangePasswordRequest(BaseModel):

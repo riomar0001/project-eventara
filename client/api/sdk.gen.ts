@@ -2,6 +2,296 @@
 import * as z from 'zod';
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
+import type { AssignRoleUserRolesPostData, AssignRoleUserRolesPostErrors, AssignRoleUserRolesPostResponses, ChangePasswordUserChangePasswordPostData, ChangePasswordUserChangePasswordPostErrors, ChangePasswordUserChangePasswordPostResponses, CheckAliasUserCheckAliasGetData, CheckAliasUserCheckAliasGetErrors, CheckAliasUserCheckAliasGetResponses, CreateGrantsUserGrantsPostData, CreateGrantsUserGrantsPostErrors, CreateGrantsUserGrantsPostResponses, CreateVenueVenuesPostData, CreateVenueVenuesPostErrors, CreateVenueVenuesPostResponses, DeleteDeadJobQueuesDlqJobIdDeleteData, DeleteDeadJobQueuesDlqJobIdDeleteErrors, DeleteDeadJobQueuesDlqJobIdDeleteResponses, DeleteVenueVenuesVenueIdDeleteData, DeleteVenueVenuesVenueIdDeleteErrors, DeleteVenueVenuesVenueIdDeleteResponses, ForgotPasswordAuthForgotPasswordPostData, ForgotPasswordAuthForgotPasswordPostErrors, ForgotPasswordAuthForgotPasswordPostResponses, GetAssignmentUserRolesAssignmentIdGetData, GetAssignmentUserRolesAssignmentIdGetErrors, GetAssignmentUserRolesAssignmentIdGetResponses, GetAuditLogsAuditLogsGetData, GetAuditLogsAuditLogsGetErrors, GetAuditLogsAuditLogsGetResponses, GetQueueStatsQueuesGetData, GetQueueStatsQueuesGetErrors, GetQueueStatsQueuesGetResponses, GetUserVenuesVenuesCreatorCreatorIdGetData, GetUserVenuesVenuesCreatorCreatorIdGetErrors, GetUserVenuesVenuesCreatorCreatorIdGetResponses, GetVenueVenuesVenueIdGetData, GetVenueVenuesVenueIdGetErrors, GetVenueVenuesVenueIdGetResponses, HealthCheckHealthGetData, HealthCheckHealthGetResponses, ListDeadJobsQueuesDlqGetData, ListDeadJobsQueuesDlqGetErrors, ListDeadJobsQueuesDlqGetResponses, ListUserGrantsUserGrantsGetData, ListUserGrantsUserGrantsGetErrors, ListUserGrantsUserGrantsGetResponses, ListUserRolesUserRolesGetData, ListUserRolesUserRolesGetErrors, ListUserRolesUserRolesGetResponses, LoginAuthLoginPostData, LoginAuthLoginPostErrors, LoginAuthLoginPostResponses, LoginVerifyAuthLoginVerifyPostData, LoginVerifyAuthLoginVerifyPostErrors, LoginVerifyAuthLoginVerifyPostResponses, LogoutAuthLogoutPostData, LogoutAuthLogoutPostErrors, LogoutAuthLogoutPostResponses, PurgeDeadJobsQueuesDlqDeleteData, PurgeDeadJobsQueuesDlqDeleteErrors, PurgeDeadJobsQueuesDlqDeleteResponses, RefreshTokenAuthRefreshPostData, RefreshTokenAuthRefreshPostErrors, RefreshTokenAuthRefreshPostResponses, RegisterUserAuthRegisterPostData, RegisterUserAuthRegisterPostErrors, RegisterUserAuthRegisterPostResponses, ResendVerificationAuthResendVerificationPostData, ResendVerificationAuthResendVerificationPostErrors, ResendVerificationAuthResendVerificationPostResponses, ResetPasswordAuthResetPasswordTokenPostData, ResetPasswordAuthResetPasswordTokenPostErrors, ResetPasswordAuthResetPasswordTokenPostResponses, RetryDeadJobQueuesDlqJobIdRetryPostData, RetryDeadJobQueuesDlqJobIdRetryPostErrors, RetryDeadJobQueuesDlqJobIdRetryPostResponses, RevokeAssignmentUserRolesAssignmentIdDeleteData, RevokeAssignmentUserRolesAssignmentIdDeleteErrors, RevokeAssignmentUserRolesAssignmentIdDeleteResponses, RevokeGrantUserGrantsGrantIdDeleteData, RevokeGrantUserGrantsGrantIdDeleteErrors, RevokeGrantUserGrantsGrantIdDeleteResponses, RootGetData, RootGetResponses, UpdateAssignmentUserRolesAssignmentIdPatchData, UpdateAssignmentUserRolesAssignmentIdPatchErrors, UpdateAssignmentUserRolesAssignmentIdPatchResponses, UpdateVenueVenuesVenueIdPatchData, UpdateVenueVenuesVenueIdPatchErrors, UpdateVenueVenuesVenueIdPatchResponses, UserOnboardingUserOnboardPostData, UserOnboardingUserOnboardPostErrors, UserOnboardingUserOnboardPostResponses, VerifyEmailAuthVerifyTokenGetData, VerifyEmailAuthVerifyTokenGetErrors, VerifyEmailAuthVerifyTokenGetResponses } from './types.gen';
+import { zAssignRoleUserRolesPostBody, zAssignRoleUserRolesPostResponse, zChangePasswordUserChangePasswordPostBody, zChangePasswordUserChangePasswordPostResponse, zCheckAliasUserCheckAliasGetQuery, zCheckAliasUserCheckAliasGetResponse, zCreateGrantsUserGrantsPostBody, zCreateGrantsUserGrantsPostResponse, zCreateVenueVenuesPostBody, zCreateVenueVenuesPostResponse, zDeleteDeadJobQueuesDlqJobIdDeletePath, zDeleteDeadJobQueuesDlqJobIdDeleteResponse, zDeleteVenueVenuesVenueIdDeletePath, zDeleteVenueVenuesVenueIdDeleteResponse, zForgotPasswordAuthForgotPasswordPostBody, zForgotPasswordAuthForgotPasswordPostResponse, zGetAssignmentUserRolesAssignmentIdGetPath, zGetAssignmentUserRolesAssignmentIdGetResponse, zGetAuditLogsAuditLogsGetQuery, zGetAuditLogsAuditLogsGetResponse, zGetQueueStatsQueuesGetResponse, zGetUserVenuesVenuesCreatorCreatorIdGetPath, zGetUserVenuesVenuesCreatorCreatorIdGetResponse, zGetVenueVenuesVenueIdGetPath, zGetVenueVenuesVenueIdGetResponse, zListDeadJobsQueuesDlqGetResponse, zListUserGrantsUserGrantsGetQuery, zListUserGrantsUserGrantsGetResponse, zListUserRolesUserRolesGetQuery, zListUserRolesUserRolesGetResponse, zLoginAuthLoginPostBody, zLoginAuthLoginPostResponse, zLoginVerifyAuthLoginVerifyPostBody, zLoginVerifyAuthLoginVerifyPostResponse, zLogoutAuthLogoutPostBody, zLogoutAuthLogoutPostResponse, zPurgeDeadJobsQueuesDlqDeleteResponse, zRefreshTokenAuthRefreshPostBody, zRefreshTokenAuthRefreshPostResponse, zRegisterUserAuthRegisterPostBody, zRegisterUserAuthRegisterPostResponse, zResendVerificationAuthResendVerificationPostBody, zResendVerificationAuthResendVerificationPostResponse, zResetPasswordAuthResetPasswordTokenPostBody, zResetPasswordAuthResetPasswordTokenPostPath, zResetPasswordAuthResetPasswordTokenPostResponse, zRetryDeadJobQueuesDlqJobIdRetryPostPath, zRetryDeadJobQueuesDlqJobIdRetryPostResponse, zRevokeAssignmentUserRolesAssignmentIdDeletePath, zRevokeAssignmentUserRolesAssignmentIdDeleteResponse, zRevokeGrantUserGrantsGrantIdDeletePath, zRevokeGrantUserGrantsGrantIdDeleteResponse, zUpdateAssignmentUserRolesAssignmentIdPatchBody, zUpdateAssignmentUserRolesAssignmentIdPatchPath, zUpdateAssignmentUserRolesAssignmentIdPatchResponse, zUpdateVenueVenuesVenueIdPatchBody, zUpdateVenueVenuesVenueIdPatchPath, zUpdateVenueVenuesVenueIdPatchResponse, zUserOnboardingUserOnboardPostBody, zUserOnboardingUserOnboardPostResponse, zVerifyEmailAuthVerifyTokenGetPath, zVerifyEmailAuthVerifyTokenGetResponse } from './zod.gen';
+
+export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
+    /**
+     * You can provide a client instance returned by `createClient()` instead of
+     * individual options. This might be also useful if you want to implement a
+     * custom client.
+     */
+    client?: Client;
+    /**
+     * You can pass arbitrary values through the `meta` object. This can be
+     * used to access values that aren't defined as part of the SDK function.
+     */
+    meta?: Record<string, unknown>;
+};
+
+export class Authentication {
+    /**
+     * Register a new user
+     *
+     * Create a new user account with an email and password. A verification email is sent immediately after registration. The account cannot be used until the email is verified.
+     */
+    public static registerUserAuthRegisterPost<ThrowOnError extends boolean = false>(options: Options<RegisterUserAuthRegisterPostData, ThrowOnError>) {
+        return (options.client ?? client).post<RegisterUserAuthRegisterPostResponses, RegisterUserAuthRegisterPostErrors, ThrowOnError>({
+            requestValidator: async (data) => await z.object({
+                body: zRegisterUserAuthRegisterPostBody,
+                path: z.never().optional(),
+                query: z.never().optional()
+            }).parseAsync(data),
+            responseType: 'json',
+            responseValidator: async (data) => await zRegisterUserAuthRegisterPostResponse.parseAsync(data),
+            url: '/auth/register',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+    
+    /**
+     * Verify email address
+     *
+     * Confirm a user's email address using the verification token sent after registration. On success, returns an access token and a refresh token so the user is immediately authenticated without a separate login step.
+     */
+    public static verifyEmailAuthVerifyTokenGet<ThrowOnError extends boolean = false>(options: Options<VerifyEmailAuthVerifyTokenGetData, ThrowOnError>) {
+        return (options.client ?? client).get<VerifyEmailAuthVerifyTokenGetResponses, VerifyEmailAuthVerifyTokenGetErrors, ThrowOnError>({
+            requestValidator: async (data) => await z.object({
+                body: z.never().optional(),
+                path: zVerifyEmailAuthVerifyTokenGetPath,
+                query: z.never().optional()
+            }).parseAsync(data),
+            responseType: 'json',
+            responseValidator: async (data) => await zVerifyEmailAuthVerifyTokenGetResponse.parseAsync(data),
+            url: '/auth/verify/{token}',
+            ...options
+        });
+    }
+    
+    /**
+     * Resend email confirmation link
+     *
+     * Re-dispatch the email verification link for an unverified account. The response is always 200 OK regardless of whether the address is registered, the account is inactive, or the email is already verified — this prevents user enumeration. Each call issues a fresh signed token; previously sent links remain valid until they expire, but the verification endpoint's conditional UPDATE ensures only the first successful confirmation is ever applied.
+     */
+    public static resendVerificationAuthResendVerificationPost<ThrowOnError extends boolean = false>(options: Options<ResendVerificationAuthResendVerificationPostData, ThrowOnError>) {
+        return (options.client ?? client).post<ResendVerificationAuthResendVerificationPostResponses, ResendVerificationAuthResendVerificationPostErrors, ThrowOnError>({
+            requestValidator: async (data) => await z.object({
+                body: zResendVerificationAuthResendVerificationPostBody,
+                path: z.never().optional(),
+                query: z.never().optional()
+            }).parseAsync(data),
+            responseType: 'json',
+            responseValidator: async (data) => await zResendVerificationAuthResendVerificationPostResponse.parseAsync(data),
+            url: '/auth/resend-verification',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+    
+    /**
+     * Login and request OTP
+     *
+     * First step of the two-step OTP login flow. Validates the supplied email and password against the same security checks as the direct login endpoint (account status, lock status, email verification). On success, a 6-digit one-time code is emailed to the account and a short-lived ``verification_token`` is returned. That token must be submitted together with the code to ``POST /auth/login/verify`` to complete sign-in and obtain access and refresh tokens. The OTP expires in 10 minutes and is single-use — submitting a wrong code immediately invalidates it and a new one must be requested. Subject to the same rate limits as the direct login endpoint.
+     */
+    public static loginAuthLoginPost<ThrowOnError extends boolean = false>(options: Options<LoginAuthLoginPostData, ThrowOnError>) {
+        return (options.client ?? client).post<LoginAuthLoginPostResponses, LoginAuthLoginPostErrors, ThrowOnError>({
+            requestValidator: async (data) => await z.object({
+                body: zLoginAuthLoginPostBody,
+                path: z.never().optional(),
+                query: z.never().optional()
+            }).parseAsync(data),
+            responseType: 'json',
+            responseValidator: async (data) => await zLoginAuthLoginPostResponse.parseAsync(data),
+            url: '/auth/login',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+    
+    /**
+     * Verify OTP and complete login
+     *
+     * Second and final step of the two-step OTP login flow. Accepts the ``verification_token`` returned by ``POST /auth/login`` and the 6-digit one-time code delivered to the user's email address. The OTP is consumed atomically — submitting any code (correct or incorrect) invalidates it immediately, making replay attacks impossible. On success, returns a short-lived access token and a long-lived refresh token identical in format to the direct login response.
+     */
+    public static loginVerifyAuthLoginVerifyPost<ThrowOnError extends boolean = false>(options: Options<LoginVerifyAuthLoginVerifyPostData, ThrowOnError>) {
+        return (options.client ?? client).post<LoginVerifyAuthLoginVerifyPostResponses, LoginVerifyAuthLoginVerifyPostErrors, ThrowOnError>({
+            requestValidator: async (data) => await z.object({
+                body: zLoginVerifyAuthLoginVerifyPostBody,
+                path: z.never().optional(),
+                query: z.never().optional()
+            }).parseAsync(data),
+            responseType: 'json',
+            responseValidator: async (data) => await zLoginVerifyAuthLoginVerifyPostResponse.parseAsync(data),
+            url: '/auth/login/verify',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+    
+    /**
+     * Log out
+     *
+     * Revoke a refresh token, ending the associated session. The refresh token authenticates the request — no access token is required, so clients can log out even after the access token has expired. Logout is idempotent: already-expired and already-revoked tokens return 200 OK, because the session is effectively dead regardless. Only a structurally invalid token (bad signature, wrong type) returns an error.
+     */
+    public static logoutAuthLogoutPost<ThrowOnError extends boolean = false>(options: Options<LogoutAuthLogoutPostData, ThrowOnError>) {
+        return (options.client ?? client).post<LogoutAuthLogoutPostResponses, LogoutAuthLogoutPostErrors, ThrowOnError>({
+            requestValidator: async (data) => await z.object({
+                body: zLogoutAuthLogoutPostBody,
+                path: z.never().optional(),
+                query: z.never().optional()
+            }).parseAsync(data),
+            responseType: 'json',
+            responseValidator: async (data) => await zLogoutAuthLogoutPostResponse.parseAsync(data),
+            url: '/auth/logout',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+    
+    /**
+     * Refresh access token
+     *
+     * Exchange a valid refresh token for a new access token and a rotated refresh token. The submitted refresh token is immediately revoked and replaced — clients must store the new refresh token from the response. If two requests arrive simultaneously with the same token, only one will succeed; the other receives 401, preventing parallel rotation races. Presenting an already-revoked token also returns 401 with the same opaque error to avoid leaking rotation state to potential attackers.
+     */
+    public static refreshTokenAuthRefreshPost<ThrowOnError extends boolean = false>(options: Options<RefreshTokenAuthRefreshPostData, ThrowOnError>) {
+        return (options.client ?? client).post<RefreshTokenAuthRefreshPostResponses, RefreshTokenAuthRefreshPostErrors, ThrowOnError>({
+            requestValidator: async (data) => await z.object({
+                body: zRefreshTokenAuthRefreshPostBody,
+                path: z.never().optional(),
+                query: z.never().optional()
+            }).parseAsync(data),
+            responseType: 'json',
+            responseValidator: async (data) => await zRefreshTokenAuthRefreshPostResponse.parseAsync(data),
+            url: '/auth/refresh',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+    
+    /**
+     * Request a password reset email
+     *
+     * Send a password reset link to the given email address. The response is always 200 OK regardless of whether the address is registered — this prevents user enumeration attacks. If the account is eligible (active, email verified), a signed single-use reset token is stored in Redis and emailed as a link. Any previously pending reset token for the same account is atomically overwritten, so only the most recently requested link is valid. The link expires in 1 hour and can only be used once.
+     */
+    public static forgotPasswordAuthForgotPasswordPost<ThrowOnError extends boolean = false>(options: Options<ForgotPasswordAuthForgotPasswordPostData, ThrowOnError>) {
+        return (options.client ?? client).post<ForgotPasswordAuthForgotPasswordPostResponses, ForgotPasswordAuthForgotPasswordPostErrors, ThrowOnError>({
+            requestValidator: async (data) => await z.object({
+                body: zForgotPasswordAuthForgotPasswordPostBody,
+                path: z.never().optional(),
+                query: z.never().optional()
+            }).parseAsync(data),
+            responseType: 'json',
+            responseValidator: async (data) => await zForgotPasswordAuthForgotPasswordPostResponse.parseAsync(data),
+            url: '/auth/forgot-password',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+    
+    /**
+     * Reset password using a reset token
+     *
+     * Consume a single-use password reset token and replace the account password. The token is taken from the URL path and validated in two stages: the JWT signature and expiry are verified first, then the token's SHA-256 hash is atomically retrieved and deleted from Redis (``GETDEL``), making replay attacks impossible. If two requests arrive simultaneously with the same token only one will succeed; the second receives 400 with the same opaque error as an invalid token to avoid leaking whether the token was consumed by a concurrent request. On success the new password is persisted and the reset timestamp is updated.
+     */
+    public static resetPasswordAuthResetPasswordTokenPost<ThrowOnError extends boolean = false>(options: Options<ResetPasswordAuthResetPasswordTokenPostData, ThrowOnError>) {
+        return (options.client ?? client).post<ResetPasswordAuthResetPasswordTokenPostResponses, ResetPasswordAuthResetPasswordTokenPostErrors, ThrowOnError>({
+            requestValidator: async (data) => await z.object({
+                body: zResetPasswordAuthResetPasswordTokenPostBody,
+                path: zResetPasswordAuthResetPasswordTokenPostPath,
+                query: z.never().optional()
+            }).parseAsync(data),
+            responseType: 'json',
+            responseValidator: async (data) => await zResetPasswordAuthResetPasswordTokenPostResponse.parseAsync(data),
+            url: '/auth/reset-password/{token}',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+}
+
+export class User {
+    /**
+     * Check alias availability
+     *
+     * Returns whether the requested alias is available. Requires authentication.
+     */
+    public static checkAliasUserCheckAliasGet<ThrowOnError extends boolean = false>(options: Options<CheckAliasUserCheckAliasGetData, ThrowOnError>) {
+        return (options.client ?? client).get<CheckAliasUserCheckAliasGetResponses, CheckAliasUserCheckAliasGetErrors, ThrowOnError>({
+            requestValidator: async (data) => await z.object({
+                body: z.never().optional(),
+                path: z.never().optional(),
+                query: zCheckAliasUserCheckAliasGetQuery
+            }).parseAsync(data),
+            responseType: 'json',
+            responseValidator: async (data) => await zCheckAliasUserCheckAliasGetResponse.parseAsync(data),
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/user/check-alias',
+            ...options
+        });
+    }
+    
+    /**
+     * Complete user onboarding
+     *
+     * Submit profile details to complete onboarding for the authenticated user. Requires a verified email address. Can only be completed once per account.
+     */
+    public static userOnboardingUserOnboardPost<ThrowOnError extends boolean = false>(options: Options<UserOnboardingUserOnboardPostData, ThrowOnError>) {
+        return (options.client ?? client).post<UserOnboardingUserOnboardPostResponses, UserOnboardingUserOnboardPostErrors, ThrowOnError>({
+            requestValidator: async (data) => await z.object({
+                body: zUserOnboardingUserOnboardPostBody,
+                path: z.never().optional(),
+                query: z.never().optional()
+            }).parseAsync(data),
+            responseType: 'json',
+            responseValidator: async (data) => await zUserOnboardingUserOnboardPostResponse.parseAsync(data),
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/user/onboard',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+    
+    /**
+     * Change account password
+     *
+     * Replace the authenticated user's current password with a new one. The caller must supply their existing password for verification before any change is applied. The new password must be at least 8 characters and must differ from the current password. On success, all active refresh tokens for the account are immediately revoked — every other session is invalidated as a security measure, requiring re-authentication. The current session's access token remains valid until its natural expiry, but its refresh token is also revoked so it cannot be silently rotated.
+     */
+    public static changePasswordUserChangePasswordPost<ThrowOnError extends boolean = false>(options: Options<ChangePasswordUserChangePasswordPostData, ThrowOnError>) {
+        return (options.client ?? client).post<ChangePasswordUserChangePasswordPostResponses, ChangePasswordUserChangePasswordPostErrors, ThrowOnError>({
+            requestValidator: async (data) => await z.object({
+                body: zChangePasswordUserChangePasswordPostBody,
+                path: z.never().optional(),
+                query: z.never().optional()
+            }).parseAsync(data),
+            responseType: 'json',
+            responseValidator: async (data) => await zChangePasswordUserChangePasswordPostResponse.parseAsync(data),
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/user/change-password',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
 import type {
   AssignRoleUserRolesPostData,
   AssignRoleUserRolesPostErrors,

@@ -64,49 +64,78 @@ USER_NOT_FOUND = {
 
 EMAIL_NOT_VERIFIED = {
     403: {
-        "description": "Email not verified",
+        "description": (
+            "Forbidden — account is inactive/deleted, or email has not been verified. Check the `message` field to distinguish the two cases."
+        ),
         "model": ErrorResponse,
         "content": {
             "application/json": {
-                "example": {
-                    "success": False,
-                    "message": "Email must be verified before completing onboarding",
+                "examples": {
+                    "email_not_verified": {
+                        "summary": "Email not verified",
+                        "value": {
+                            "success": False,
+                            "message": "Email must be verified before completing onboarding",
+                        },
+                    },
+                    "account_inactive": {
+                        "summary": "Account inactive or deleted",
+                        "value": {
+                            "success": False,
+                            "message": "Account is inactive or has been deleted",
+                        },
+                    },
                 }
             }
         },
     }
 }
 
-ONBOARDING_ALREADY_COMPLETED = {
+ONBOARDING_CONFLICT = {
     409: {
-        "description": "Onboarding already completed",
+        "description": (
+            "Conflict — onboarding already completed, or the chosen alias is already taken. Check the `message` field to distinguish the two cases."
+        ),
         "model": ErrorResponse,
         "content": {
             "application/json": {
-                "example": {
-                    "success": False,
-                    "message": "Onboarding has already been completed",
+                "examples": {
+                    "already_completed": {
+                        "summary": "Onboarding already completed",
+                        "value": {
+                            "success": False,
+                            "message": "Onboarding has already been completed",
+                        },
+                    },
+                    "alias_taken": {
+                        "summary": "Alias already taken",
+                        "value": {
+                            "success": False,
+                            "message": "Alias 'johndoe' is already taken",
+                        },
+                    },
                 }
             }
         },
     }
 }
 
-ALIAS_CONFLICT = {
-    409: {
-        "description": "Alias already taken",
+
+# GET /user/check-alias
+ALIAS_CHECK_UNAUTHORIZED = {
+    401: {
+        "description": "Unauthorized",
         "model": ErrorResponse,
         "content": {
             "application/json": {
                 "example": {
                     "success": False,
-                    "message": "Alias 'johndoe' is already taken",
+                    "message": "Token has expired",
                 }
             }
         },
     }
 }
-
 
 # POST /user/change-password
 CHANGE_PASSWORD_VALIDATION_ERROR = {

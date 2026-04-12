@@ -120,7 +120,12 @@ async def get_audit_logs(
             detail=str(e),
         )
     except Exception as e:
+        from app.core.config import settings
+
+        detail = "Failed to retrieve audit logs"
+        if settings.DEBUG:
+            detail = f"Failed to retrieve audit logs: {e}"
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to retrieve audit logs: {str(e)}",
+            detail=detail,
         )

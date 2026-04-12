@@ -36,6 +36,7 @@ from app.application.dto.queue_dto import (
     RetryJobOutput,
     WorkerHealthEntry,
 )
+from app.core.config import settings
 from app.domain.exceptions.queue_exceptions import (
     JobNotDeadError,
     JobNotFoundError,
@@ -139,7 +140,10 @@ class GetQueueStatsUseCase:
                 worker_health=worker_health,
             )
         except Exception as exc:
-            raise QueueInspectionError(f"Failed to inspect queue state: {exc}") from exc
+            msg = "Failed to inspect queue state"
+            if settings.DEBUG:
+                msg = f"Failed to inspect queue state: {exc}"
+            raise QueueInspectionError(msg) from exc
 
 
 class ListDeadJobsUseCase:
@@ -182,7 +186,10 @@ class ListDeadJobsUseCase:
                         )
                     )
         except Exception as exc:
-            raise QueueInspectionError(f"Failed to list dead jobs: {exc}") from exc
+            msg = "Failed to list dead jobs"
+            if settings.DEBUG:
+                msg = f"Failed to list dead jobs: {exc}"
+            raise QueueInspectionError(msg) from exc
         return ListDeadJobsOutput(jobs=dead, total=len(dead))
 
 
@@ -241,7 +248,10 @@ class RetryDeadJobUseCase:
         except JobNotFoundError, JobNotDeadError, JobRetryConflictError:
             raise
         except Exception as exc:
-            raise QueueInspectionError(f"Failed to retry job '{job_id}': {exc}") from exc
+            msg = "Failed to retry job"
+            if settings.DEBUG:
+                msg = f"Failed to retry job: {exc}"
+            raise QueueInspectionError(msg) from exc
         finally:
             await self.redis.delete(lock_key)
 
@@ -282,7 +292,10 @@ class DeleteDeadJobUseCase:
         except JobNotFoundError, JobNotDeadError:
             raise
         except Exception as exc:
-            raise QueueInspectionError(f"Failed to delete job '{job_id}': {exc}") from exc
+            msg = "Failed to delete job"
+            if settings.DEBUG:
+                msg = f"Failed to delete job: {exc}"
+            raise QueueInspectionError(msg) from exc
 
 
 class PurgeDeadJobsUseCase:
@@ -322,4 +335,7 @@ class PurgeDeadJobsUseCase:
 
             return PurgeDeadJobsOutput(deleted_count=len(keys_to_delete))
         except Exception as exc:
-            raise QueueInspectionError(f"Failed to purge dead jobs: {exc}") from exc
+            msg = "Failed to purge dead jobs"
+            if settings.DEBUG:
+                msg = f"Failed to purge dead jobs: {exc}"
+            raise QueueInspectionError(msg) from exc

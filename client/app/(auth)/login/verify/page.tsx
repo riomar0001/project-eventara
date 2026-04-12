@@ -30,7 +30,7 @@ export default function LoginVerifyPage() {
 
     setLoading(true);
     try {
-      const { data, error } = await Authentication.loginVerifyAuthLoginVerifyGet({
+      const { data, error } = await Authentication.loginVerifyAuthLoginVerifyPost({
         body: { token, code }
       });
 
@@ -42,7 +42,8 @@ export default function LoginVerifyPage() {
 
       useAuthStore.getState().setAuth(data.access_token, data.refresh_token);
       sessionStorage.removeItem('otp_token');
-      router.push('/');
+      const user = useAuthStore.getState().user;
+      router.push(user?.doneOnboarding ? '/main' : '/onboarding');
     } catch {
       toast.error('Something went wrong. Please try again.');
     } finally {

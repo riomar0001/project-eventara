@@ -60,6 +60,15 @@ export const zChangePasswordResponse = z.object({
 });
 
 /**
+ * CheckAliasResponse
+ */
+export const zCheckAliasResponse = z.object({
+    success: z.boolean().optional().default(true),
+    alias: z.string(),
+    available: z.boolean()
+});
+
+/**
  * CreateVenueRequest
  */
 export const zCreateVenueRequest = z.object({
@@ -587,12 +596,12 @@ export const zLoginAuthLoginPostBody = zLoginRequest;
  */
 export const zLoginAuthLoginPostResponse = zLoginInitResponse;
 
-export const zLoginVerifyAuthLoginVerifyGetBody = zLoginVerifyRequest;
+export const zLoginVerifyAuthLoginVerifyPostBody = zLoginVerifyRequest;
 
 /**
  * Successful Response
  */
-export const zLoginVerifyAuthLoginVerifyGetResponse = zLoginVerifyResponse;
+export const zLoginVerifyAuthLoginVerifyPostResponse = zLoginVerifyResponse;
 
 export const zLogoutAuthLogoutPostBody = zLogoutRequest;
 
@@ -625,6 +634,15 @@ export const zResetPasswordAuthResetPasswordTokenPostPath = z.object({
  * Successful Response
  */
 export const zResetPasswordAuthResetPasswordTokenPostResponse = zResetPasswordResponse;
+
+export const zCheckAliasUserCheckAliasGetQuery = z.object({
+    alias: z.string()
+});
+
+/**
+ * Successful Response
+ */
+export const zCheckAliasUserCheckAliasGetResponse = zCheckAliasResponse;
 
 export const zUserOnboardingUserOnboardPostBody = zUserOnboardingRequest;
 

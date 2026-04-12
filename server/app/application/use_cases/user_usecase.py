@@ -54,6 +54,9 @@ class OnboardingUseCase:
         if not user:
             raise UserNotFoundError()
 
+        if user.status in (UserStatus.INACTIVE, UserStatus.DELETED):
+            raise UserInactiveError()
+
         security = await self.repo.get_security_by_user_id(data.user_id)
         if not security or not security.email_verified:
             raise EmailNotVerifiedError()
@@ -93,6 +96,17 @@ class OnboardingUseCase:
             raise OnboardingAlreadyCompletedError()
 
         return UserOnboardingOutput(profile=created_profile)
+
+
+class CheckAliasUseCase:
+    """Checks whether a given alias is available."""
+
+    def __init__(self, repo: IUserRepository) -> None:
+        self.repo = repo
+
+    async def is_available(self, alias: str) -> bool:
+        existing = await self.repo.get_by_alias(alias)
+        return existing is None
 
 
 class ChangePasswordUseCase:
