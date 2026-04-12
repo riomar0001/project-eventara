@@ -119,7 +119,15 @@ class AuthUseCase:
         if existing:
             raise EmailAlreadyTakenError(data.email)
 
-        user = User(email=data.email, password=hash_string(data.password))
+        now = datetime.now(UTC)
+        user = User(
+            email=data.email,
+            password=hash_string(data.password),
+            accepted_terms=data.accepted_terms,
+            accepted_terms_at=now if data.accepted_terms else None,
+            accepted_privacy_policy=data.accepted_privacy_policy,
+            accepted_privacy_policy_at=now if data.accepted_privacy_policy else None,
+        )
         security = UserSecurity(user_id=user.id)
         activity = UserActivity(user_id=user.id)
 

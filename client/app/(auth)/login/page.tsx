@@ -30,7 +30,7 @@ export default function LoginPage() {
   }
 
   return (
-    <Card className="gap-8 py-8">
+    <Card className="gap-8 py-8 drop-shadow-2xl">
       <CardHeader className="gap-3">
         <CardTitle className="text-2xl">Welcome!</CardTitle>
         <CardDescription>Sign in to continue to your account.</CardDescription>

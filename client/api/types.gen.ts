@@ -650,6 +650,12 @@ export type RegisterRequest = {
      * Password
      */
     password: string;
+    /**
+     * Accepted Terms And Privacy Policy
+     *
+     * Must be true to proceed.
+     */
+    accepted_terms_and_privacy_policy: boolean;
 };
 
 /**

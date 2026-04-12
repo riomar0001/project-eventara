@@ -30,6 +30,10 @@ class User(Base):
     password: Mapped[str] = mapped_column(Text, nullable=False)
     onboarding_completed: Mapped[bool] = mapped_column(default=False)
     onboarding_completed_at: Mapped[datetime | None] = mapped_column(DateTime)
+    accepted_terms: Mapped[bool] = mapped_column(default=False)
+    accepted_terms_at: Mapped[datetime | None] = mapped_column(DateTime)
+    accepted_privacy_policy: Mapped[bool] = mapped_column(default=False)
+    accepted_privacy_policy_at: Mapped[datetime | None] = mapped_column(DateTime)
     status: Mapped[str] = mapped_column(Enum(UserStatus, name="user_status"), nullable=False, default="active")
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime)
 

@@ -106,7 +106,16 @@ class UserRepository:
         Returns:
             A ``PublicUser`` containing only the fields safe to expose externally.
         """
-        orm_user = User(id=user.id, email=user.email, password=user.password, status=user.status)
+        orm_user = User(
+            id=user.id,
+            email=user.email,
+            password=user.password,
+            status=user.status,
+            accepted_terms=user.accepted_terms,
+            accepted_terms_at=user.accepted_terms_at,
+            accepted_privacy_policy=user.accepted_privacy_policy,
+            accepted_privacy_policy_at=user.accepted_privacy_policy_at,
+        )
         orm_security = UserSecurity(user_id=security.user_id)
         orm_activity = UserActivity(user_id=activity.user_id)
         self.db.add_all([orm_user, orm_security, orm_activity])

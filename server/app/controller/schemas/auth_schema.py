@@ -16,6 +16,7 @@ class ValidationErrorResponse(BaseModel):
 class RegisterRequest(BaseModel):
     email: EmailStr
     password: str = Field(min_length=8)
+    accepted_terms_and_privacy_policy: bool = Field(..., description="Must be true to proceed.")
 
 
 class RegisterResponse(BaseModel):

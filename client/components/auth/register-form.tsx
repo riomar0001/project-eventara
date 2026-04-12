@@ -39,7 +39,11 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
 
   async function onSubmit(values: FormValues) {
     const { error } = await Authentication.registerUserAuthRegisterPost({
-      body: { email: values.email, password: values.password },
+      body: {
+        email: values.email,
+        password: values.password,
+        accepted_terms_and_privacy_policy: values.terms,
+      },
       throwOnError: false
     });
 
