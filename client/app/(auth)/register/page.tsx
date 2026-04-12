@@ -3,8 +3,8 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { AuthCard } from '../_components/auth-card';
-import { FormField } from '../_components/form-field';
+import { AuthCard } from '../../../components/authentication/auth-card';
+import { FormField } from '../../../components/authentication/form-field';
 
 export default function RegisterPage() {
   const [email, setEmail] = useState('');

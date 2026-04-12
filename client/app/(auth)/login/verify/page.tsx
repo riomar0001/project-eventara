@@ -5,9 +5,8 @@ import { useSearchParams } from 'next/navigation';
 import { Suspense, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { AuthCard } from '../_components/auth-card';
-import { FormField } from '../_components/form-field';
+import { AuthCard } from '@/components/authentication/auth-card';
+import { FormField } from '@/components/authentication/form-field';
 
 function LoginVerifyForm() {
   const searchParams = useSearchParams();
