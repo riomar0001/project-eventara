@@ -58,7 +58,7 @@ export function VerifyEmailCard({ email, onBack }: VerifyEmailCardProps) {
         </p>
       </div>
 
-      <div className="border-border border-t" />
+      <div className="border-border" />
 
       {/* Actions */}
       <div className="flex flex-col gap-3 px-8 py-6">

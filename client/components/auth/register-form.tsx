@@ -38,7 +38,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
   } = useForm<FormValues>({ resolver: zodResolver(schema) });
 
   async function onSubmit(values: FormValues) {
-    const { error } = await Authentication.registerUserAuthRegisterPost({
+    const result = await Authentication.registerUserAuthRegisterPost({
       body: {
         email: values.email,
         password: values.password,
@@ -47,9 +47,13 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
       throwOnError: false
     });
 
-    if (error) {
-      const errorMessage = typeof error === 'string' ? error : 'message' in error ? error.message : 'An unexpected error occurred.';
-      setError('root', { message: errorMessage });
+    if (!result.data) {
+      const status = (result as { response?: { status?: number } }).response?.status;
+      if (status === 409) {
+        setError('email', { message: 'Email is already registered.' });
+      } else {
+        setError('root', { message: 'Something went wrong. Please try again.' });
+      }
       return;
     }
 

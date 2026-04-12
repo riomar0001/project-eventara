@@ -119,7 +119,7 @@ class AuthUseCase:
         if existing:
             raise EmailAlreadyTakenError(data.email)
 
-        now = datetime.now(UTC)
+        now = datetime.now(UTC).replace(tzinfo=None)
         user = User(
             email=data.email,
             password=hash_string(data.password),
