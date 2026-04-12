@@ -65,8 +65,7 @@ USER_NOT_FOUND = {
 EMAIL_NOT_VERIFIED = {
     403: {
         "description": (
-            "Forbidden — account is inactive/deleted, or email has not been verified. "
-            "Check the `message` field to distinguish the two cases."
+            "Forbidden — account is inactive/deleted, or email has not been verified. Check the `message` field to distinguish the two cases."
         ),
         "model": ErrorResponse,
         "content": {
@@ -95,8 +94,7 @@ EMAIL_NOT_VERIFIED = {
 ONBOARDING_CONFLICT = {
     409: {
         "description": (
-            "Conflict — onboarding already completed, or the chosen alias is already taken. "
-            "Check the `message` field to distinguish the two cases."
+            "Conflict — onboarding already completed, or the chosen alias is already taken. Check the `message` field to distinguish the two cases."
         ),
         "model": ErrorResponse,
         "content": {

@@ -121,6 +121,7 @@ async def get_audit_logs(
         )
     except Exception as e:
         from app.core.config import settings
+
         detail = "Failed to retrieve audit logs"
         if settings.DEBUG:
             detail = f"Failed to retrieve audit logs: {e}"

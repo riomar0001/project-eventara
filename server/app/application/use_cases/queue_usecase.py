@@ -27,7 +27,6 @@ import re
 from arq.connections import ArqRedis
 from arq.jobs import Job
 
-from app.core.config import settings
 from app.application.dto.queue_dto import (
     DeadJobInfo,
     DeleteJobOutput,
@@ -37,6 +36,7 @@ from app.application.dto.queue_dto import (
     RetryJobOutput,
     WorkerHealthEntry,
 )
+from app.core.config import settings
 from app.domain.exceptions.queue_exceptions import (
     JobNotDeadError,
     JobNotFoundError,

@@ -54,6 +54,7 @@ class CreateAuditLogUseCase:
             await self.repository.create(audit_log)
         except Exception as e:
             from app.core.config import settings
+
             msg = "Failed to persist audit log"
             if settings.DEBUG:
                 msg = f"Failed to persist audit log: {e}"

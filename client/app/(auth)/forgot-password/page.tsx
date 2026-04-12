@@ -7,9 +7,9 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Authentication } from '@/api/sdk.gen';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Authentication } from '@/api/sdk.gen';
 
 const schema = z.object({
   email: z.string().email('Please enter a valid email address')

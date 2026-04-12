@@ -7,11 +7,11 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { User } from '@/api/sdk.gen';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useAuthStore } from '@/store/auth-store';
+import { User } from '@/api/sdk.gen';
 import { cn } from '@/lib/utils';
+import { useAuthStore } from '@/store/auth-store';
 
 // ─── Label maps ───────────────────────────────────────────────────────────────
 
@@ -19,12 +19,12 @@ const AGE_GROUP_LABELS: Record<string, string> = {
   child: 'Child (under 13)',
   teen: 'Teen (13–17)',
   adult: 'Adult (18–64)',
-  senior: 'Senior (65+)',
+  senior: 'Senior (65+)'
 };
 
 const GENDER_LABELS: Record<string, string> = {
   male: 'Male',
-  female: 'Female',
+  female: 'Female'
 };
 
 const EDUCATION_LABELS: Record<string, string> = {
@@ -40,7 +40,7 @@ const EDUCATION_LABELS: Record<string, string> = {
   associate_degree: 'Associate Degree',
   bachelors_degree: "Bachelor's Degree",
   masters_degree: "Master's Degree",
-  doctorate_degree: 'Doctorate Degree',
+  doctorate_degree: 'Doctorate Degree'
 };
 
 // ─── Schema ───────────────────────────────────────────────────────────────────
@@ -52,13 +52,8 @@ const schema = z.object({
     .string()
     .min(3, 'Must be at least 3 characters')
     .max(100)
-    .refine(
-      (v) => /^[a-z0-9_]+$/.test(v.toLowerCase()),
-      'Only lowercase letters, numbers, and underscores',
-    ),
-  age_group: z
-    .enum(['child', 'teen', 'adult', 'senior'])
-    .refine((v) => !!v, 'Please select an age group'),
+    .refine((v) => /^[a-z0-9_]+$/.test(v.toLowerCase()), 'Only lowercase letters, numbers, and underscores'),
+  age_group: z.enum(['child', 'teen', 'adult', 'senior']).refine((v) => !!v, 'Please select an age group'),
   gender: z.enum(['male', 'female']).refine((v) => !!v, 'Please select a gender'),
   education_level: z
     .enum([
@@ -74,11 +69,11 @@ const schema = z.object({
       'associate_degree',
       'bachelors_degree',
       'masters_degree',
-      'doctorate_degree',
+      'doctorate_degree'
     ])
     .refine((v) => !!v, 'Please select your education level'),
   occupation: z.string().max(150).optional(),
-  bio: z.string().max(500).optional(),
+  bio: z.string().max(500).optional()
 });
 
 type FormData = z.infer<typeof schema>;
@@ -91,24 +86,24 @@ const STEP_META = [
   {
     icon: User2,
     title: "Let's set up your profile",
-    description: 'Your name and a unique nickname for the Eventara community.',
+    description: 'Your name and a unique nickname for the Eventara community.'
   },
   {
     icon: BookOpen,
     title: 'A bit of background',
-    description: 'Helps us tailor your experience.',
+    description: 'Helps us tailor your experience.'
   },
   {
     icon: Sparkles,
     title: 'Almost there',
-    description: 'Optional details to introduce yourself.',
-  },
+    description: 'Optional details to introduce yourself.'
+  }
 ] as const;
 
 const STEP_FIELDS: (keyof FormData)[][] = [
   ['first_name', 'last_name', 'alias'],
   ['age_group', 'gender', 'education_level'],
-  ['occupation', 'bio'],
+  ['occupation', 'bio']
 ];
 
 type AliasStatus = 'idle' | 'checking' | 'available' | 'taken' | 'error' | 'invalid';
@@ -127,7 +122,7 @@ export default function OnboardingPage() {
 
   const form = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: { first_name: '', last_name: '', alias: '', occupation: '', bio: '' },
+    defaultValues: { first_name: '', last_name: '', alias: '', occupation: '', bio: '' }
   });
 
   const { isSubmitting } = form.formState;
@@ -182,8 +177,8 @@ export default function OnboardingPage() {
           gender: data.gender,
           education_level: data.education_level,
           occupation: data.occupation || undefined,
-          bio: data.bio || undefined,
-        },
+          bio: data.bio || undefined
+        }
       });
 
       if (error) {
@@ -215,19 +210,13 @@ export default function OnboardingPage() {
     <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm">
       {/* ── Header band ──────────────────────────────────────────────────────── */}
       <div className="bg-primary px-7 pt-6 pb-5">
-
         {/* Stepper */}
         <div className="mb-5 flex items-center">
           {STEPS.map((label, i) => (
             <Fragment key={label}>
               {/* Connector line */}
               {i > 0 && (
-                <div
-                  className={cn(
-                    'mx-2 h-px flex-1 transition-colors duration-300',
-                    i <= step ? 'bg-primary-foreground/50' : 'bg-primary-foreground/20',
-                  )}
-                />
+                <div className={cn('mx-2 h-px flex-1 transition-colors duration-300', i <= step ? 'bg-primary-foreground/50' : 'bg-primary-foreground/20')} />
               )}
 
               {/* Step node */}
@@ -239,9 +228,9 @@ export default function OnboardingPage() {
                     // completed
                     i < step && 'bg-primary-foreground text-white',
                     // active — larger ring to draw the eye
-                    i === step && 'bg-primary-foreground text-white ring-2 ring-primary-foreground/30 ring-offset-1 ring-offset-primary',
+                    i === step && 'bg-primary-foreground ring-primary-foreground/30 ring-offset-primary text-white ring-2 ring-offset-1',
                     // inactive — outlined only; considered inactive UI element per WCAG 1.4.3
-                    i > step && 'border-[1.5px] border-primary-foreground/40 text-primary-foreground/50',
+                    i > step && 'border-primary-foreground/40 text-primary-foreground/50 border-[1.5px]'
                   )}
                 >
                   {i < step ? <Check className="size-3" strokeWidth={3} /> : i + 1}
@@ -251,7 +240,7 @@ export default function OnboardingPage() {
                 <span
                   className={cn(
                     'text-[10px] font-semibold tracking-wide whitespace-nowrap',
-                    i <= step ? 'text-primary-foreground' : 'text-primary-foreground/50',
+                    i <= step ? 'text-primary-foreground' : 'text-primary-foreground/50'
                   )}
                 >
                   {label}
@@ -263,13 +252,11 @@ export default function OnboardingPage() {
 
         {/* Step title */}
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary-foreground/15">
+          <div className="bg-primary-foreground/15 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl">
             <StepIcon className="text-primary-foreground size-4" />
           </div>
           <div>
-            <h1 className="text-primary-foreground text-[17px] font-semibold leading-tight">
-              {title}
-            </h1>
+            <h1 className="text-primary-foreground text-[17px] leading-tight font-semibold">{title}</h1>
             <p className="text-primary-foreground mt-0.5 text-xs">{description}</p>
           </div>
         </div>
@@ -278,159 +265,115 @@ export default function OnboardingPage() {
       {/* ── Form body ─────────────────────────────────────────────────────────── */}
       <div className="px-7 py-6">
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
-
           {/* ─── Step 1: Personal Info ─── */}
           {step === 0 && (
             <>
               <div className="grid grid-cols-2 gap-3">
-                <Field
-                  id="first_name"
-                  label="First name"
-                  error={form.formState.errors.first_name?.message}
-                >
-                  <Input
-                    id="first_name"
-                    placeholder="Juan"
-                    aria-invalid={!!form.formState.errors.first_name}
-                    {...form.register('first_name')}
-                  />
+                <Field id="first_name" label="First name" error={form.formState.errors.first_name?.message}>
+                  <Input id="first_name" placeholder="Juan" aria-invalid={!!form.formState.errors.first_name} {...form.register('first_name')} />
                 </Field>
 
-                <Field
-                  id="last_name"
-                  label="Last name"
-                  error={form.formState.errors.last_name?.message}
-                >
-                  <Input
-                    id="last_name"
-                    placeholder="dela Cruz"
-                    aria-invalid={!!form.formState.errors.last_name}
-                    {...form.register('last_name')}
-                  />
+                <Field id="last_name" label="Last name" error={form.formState.errors.last_name?.message}>
+                  <Input id="last_name" placeholder="dela Cruz" aria-invalid={!!form.formState.errors.last_name} {...form.register('last_name')} />
                 </Field>
               </div>
 
-              <Field
-                id="alias"
-                label="Nickname"
-                error={aliasFieldError}
-                hint="Lowercase, no spaces. This cannot be changed later."
-              >
+              <Field id="alias" label="Nickname" error={aliasFieldError} hint="Lowercase, no spaces. This cannot be changed later.">
                 <div className="relative">
                   <Input
                     id="alias"
                     placeholder="e.g. juandc"
-                    aria-invalid={
-                      !!form.formState.errors.alias ||
-                      aliasStatus === 'taken' ||
-                      aliasStatus === 'invalid'
-                    }
+                    aria-invalid={!!form.formState.errors.alias || aliasStatus === 'taken' || aliasStatus === 'invalid'}
                     {...form.register('alias', { onChange: (e) => checkAlias(e.target.value) })}
                     className="pr-8"
                   />
                   <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2">
-                    {aliasStatus === 'checking' && (
-                      <Loader2 className="text-muted-foreground size-4 animate-spin" />
-                    )}
-                    {aliasStatus === 'available' && (
-                      <CheckCircle2 className="text-primary-foreground size-4" />
-                    )}
-                    {(aliasStatus === 'taken' || aliasStatus === 'invalid') && (
-                      <XCircle className="text-destructive size-4" />
-                    )}
+                    {aliasStatus === 'checking' && <Loader2 className="text-muted-foreground size-4 animate-spin" />}
+                    {aliasStatus === 'available' && <CheckCircle2 className="text-primary-foreground size-4" />}
+                    {(aliasStatus === 'taken' || aliasStatus === 'invalid') && <XCircle className="text-destructive size-4" />}
                   </span>
                 </div>
-                {!aliasFieldError && aliasStatus === 'available' && (
-                  <p className="text-primary-foreground text-xs font-medium">
-                    Nickname is available.
-                  </p>
-                )}
+                {!aliasFieldError && aliasStatus === 'available' && <p className="text-primary-foreground text-xs font-medium">Nickname is available.</p>}
               </Field>
             </>
           )}
 
           {/* ─── Step 2: Background ─── */}
-          {step === 1 && (
-            <>
-              <Field label="Age group" error={form.formState.errors.age_group?.message}>
-                <div className="grid grid-cols-2 gap-2">
-                  {Object.entries(AGE_GROUP_LABELS).map(([value, label]) => (
-                    <OptionButton
-                      key={value}
-                      selected={form.watch('age_group') === value}
-                      onClick={() =>
-                        form.setValue('age_group', value as FormData['age_group'], {
-                          shouldValidate: true,
-                        })
-                      }
-                    >
-                      {label}
-                    </OptionButton>
-                  ))}
-                </div>
-              </Field>
+          {step === 1 &&
+            (() => {
+              const watchedAgeGroup = form.watch('age_group');
+              const watchedGender = form.watch('gender');
+              const watchedEducation = form.watch('education_level');
 
-              <Field label="Gender" error={form.formState.errors.gender?.message}>
-                <div className="grid grid-cols-2 gap-2">
-                  {Object.entries(GENDER_LABELS).map(([value, label]) => (
-                    <OptionButton
-                      key={value}
-                      selected={form.watch('gender') === value}
-                      onClick={() =>
-                        form.setValue('gender', value as FormData['gender'], {
-                          shouldValidate: true,
-                        })
-                      }
-                    >
-                      {label}
-                    </OptionButton>
-                  ))}
-                </div>
-              </Field>
+              return (
+                <>
+                  <Field label="Age group" error={form.formState.errors.age_group?.message}>
+                    <div className="grid grid-cols-2 gap-2">
+                      {Object.entries(AGE_GROUP_LABELS).map(([value, label]) => (
+                        <OptionButton
+                          key={value}
+                          selected={watchedAgeGroup === value}
+                          onClick={() =>
+                            form.setValue('age_group', value as FormData['age_group'], {
+                              shouldValidate: true
+                            })
+                          }
+                        >
+                          {label}
+                        </OptionButton>
+                      ))}
+                    </div>
+                  </Field>
 
-              <Field
-                label="Education level"
-                error={form.formState.errors.education_level?.message}
-              >
-                <div
-                  className={cn(
-                    'max-h-[204px] overflow-y-auto rounded-xl border bg-input/50 p-1.5',
-                    form.formState.errors.education_level
-                      ? 'border-destructive'
-                      : 'border-transparent',
-                  )}
-                >
-                  {Object.entries(EDUCATION_LABELS).map(([value, label]) => {
-                    const selected = form.watch('education_level') === value;
-                    return (
-                      <button
-                        key={value}
-                        type="button"
-                        onClick={() =>
-                          form.setValue(
-                            'education_level',
-                            value as FormData['education_level'],
-                            { shouldValidate: true },
-                          )
-                        }
-                        className={cn(
-                          'flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm transition-colors',
-                          selected
-                            ? 'bg-primary font-semibold text-primary-foreground'
-                            : 'font-medium text-neutral-700 hover:bg-primary/10 hover:text-primary-foreground',
-                        )}
-                      >
-                        <span>{label}</span>
-                        {selected && (
-                          <Check className="size-3.5 shrink-0" strokeWidth={3} />
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              </Field>
-            </>
-          )}
+                  <Field label="Gender" error={form.formState.errors.gender?.message}>
+                    <div className="grid grid-cols-2 gap-2">
+                      {Object.entries(GENDER_LABELS).map(([value, label]) => (
+                        <OptionButton
+                          key={value}
+                          selected={watchedGender === value}
+                          onClick={() =>
+                            form.setValue('gender', value as FormData['gender'], {
+                              shouldValidate: true
+                            })
+                          }
+                        >
+                          {label}
+                        </OptionButton>
+                      ))}
+                    </div>
+                  </Field>
+
+                  <Field label="Education level" error={form.formState.errors.education_level?.message}>
+                    <div
+                      className={cn(
+                        'bg-input/50 max-h-[204px] overflow-y-auto rounded-xl border p-1.5',
+                        form.formState.errors.education_level ? 'border-destructive' : 'border-transparent'
+                      )}
+                    >
+                      {Object.entries(EDUCATION_LABELS).map(([value, label]) => {
+                        const selected = watchedEducation === value;
+                        return (
+                          <button
+                            key={value}
+                            type="button"
+                            onClick={() => form.setValue('education_level', value as FormData['education_level'], { shouldValidate: true })}
+                            className={cn(
+                              'flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm transition-colors',
+                              selected
+                                ? 'bg-primary text-primary-foreground font-semibold'
+                                : 'hover:bg-primary/10 hover:text-primary-foreground font-medium text-neutral-700'
+                            )}
+                          >
+                            <span>{label}</span>
+                            {selected && <Check className="size-3.5 shrink-0" strokeWidth={3} />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </Field>
+                </>
+              );
+            })()}
 
           {/* ─── Step 3: About You ─── */}
           {step === 2 && (
@@ -439,24 +382,18 @@ export default function OnboardingPage() {
                 id="occupation"
                 label={
                   <>
-                    Occupation{' '}
-                    <span className="text-muted-foreground font-normal">(optional)</span>
+                    Occupation <span className="text-muted-foreground font-normal">(optional)</span>
                   </>
                 }
               >
-                <Input
-                  id="occupation"
-                  placeholder="e.g. Event Coordinator, Student…"
-                  {...form.register('occupation')}
-                />
+                <Input id="occupation" placeholder="e.g. Event Coordinator, Student…" {...form.register('occupation')} />
               </Field>
 
               <Field
                 id="bio"
                 label={
                   <>
-                    Bio{' '}
-                    <span className="text-muted-foreground font-normal">(optional)</span>
+                    Bio <span className="text-muted-foreground font-normal">(optional)</span>
                   </>
                 }
               >
@@ -470,7 +407,7 @@ export default function OnboardingPage() {
                     'focus-visible:border-ring focus-visible:ring-ring/30',
                     'w-full resize-none rounded-xl border border-transparent',
                     'px-3 py-2 text-sm outline-none',
-                    'transition-[color,box-shadow,background-color] focus-visible:ring-3',
+                    'transition-[color,box-shadow,background-color] focus-visible:ring-3'
                   )}
                   {...form.register('bio')}
                 />
@@ -481,12 +418,7 @@ export default function OnboardingPage() {
           {/* ── Navigation ── */}
           <div className="flex gap-3 pt-1">
             {step > 0 && (
-              <Button
-                type="button"
-                variant="outline"
-                className="flex-1"
-                onClick={() => setStep((s) => s - 1)}
-              >
+              <Button type="button" variant="outline" className="flex-1" onClick={() => setStep((s) => s - 1)}>
                 Back
               </Button>
             )}
@@ -510,19 +442,7 @@ export default function OnboardingPage() {
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-function Field({
-  id,
-  label,
-  error,
-  hint,
-  children,
-}: {
-  id?: string;
-  label: ReactNode;
-  error?: string;
-  hint?: string;
-  children: ReactNode;
-}) {
+function Field({ id, label, error, hint, children }: { id?: string; label: ReactNode; error?: string; hint?: string; children: ReactNode }) {
   return (
     <div className="space-y-1.5">
       <label htmlFor={id} className="text-foreground text-sm font-medium">
@@ -535,15 +455,7 @@ function Field({
   );
 }
 
-function OptionButton({
-  selected,
-  onClick,
-  children,
-}: {
-  selected: boolean;
-  onClick: () => void;
-  children: ReactNode;
-}) {
+function OptionButton({ selected, onClick, children }: { selected: boolean; onClick: () => void; children: ReactNode }) {
   return (
     <button
       type="button"
@@ -551,8 +463,8 @@ function OptionButton({
       className={cn(
         'flex w-full items-center justify-between rounded-xl border px-4 py-2.5 text-sm transition-all',
         selected
-          ? 'border-primary bg-primary font-semibold text-primary-foreground'
-          : 'border-neutral-200 bg-white font-medium text-neutral-700 hover:border-primary/40 hover:bg-primary/5 hover:text-primary-foreground',
+          ? 'border-primary bg-primary text-primary-foreground font-semibold'
+          : 'hover:border-primary/40 hover:bg-primary/5 hover:text-primary-foreground border-neutral-200 bg-white font-medium text-neutral-700'
       )}
     >
       <span>{children}</span>
