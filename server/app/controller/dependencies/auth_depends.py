@@ -21,10 +21,10 @@ def get_current_user_id(
     """
     try:
         payload = verify_access_token(credentials.credentials)
-    except ValueError as exc:
+    except ValueError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=str(exc),
+            detail="Not authenticated",
             headers={"WWW-Authenticate": "Bearer"},
         )
     return uuid.UUID(payload.sub)
@@ -48,10 +48,10 @@ def require_completed_onboarding(
     """
     try:
         payload = verify_access_token(credentials.credentials)
-    except ValueError as exc:
+    except ValueError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=str(exc),
+            detail="Not authenticated",
             headers={"WWW-Authenticate": "Bearer"},
         )
     if not payload.done_onboarding:

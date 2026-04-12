@@ -101,10 +101,10 @@ def require_permission(
     ) -> uuid.UUID:
         try:
             payload = verify_access_token(credentials.credentials)
-        except ValueError as exc:
+        except ValueError:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail=str(exc),
+                detail="Not authenticated",
                 headers={"WWW-Authenticate": "Bearer"},
             )
 
