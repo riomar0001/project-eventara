@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft, ArrowRight, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { StepAbout, type AboutFields } from '@/components/onboarding/step-about';
-import { StepIdentity, type IdentityFields } from '@/components/onboarding/step-identity';
+import { StepIdentity, type AliasStatus, type IdentityFields } from '@/components/onboarding/step-identity';
 import { StepIndicator } from '@/components/onboarding/step-indicator';
 import { StepProfile, type ProfileFields } from '@/components/onboarding/step-profile';
 import { Button } from '@/components/ui/button';
@@ -66,6 +66,7 @@ export default function OnboardPage() {
   const [errors, setErrors] = useState<StepErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDone, setIsDone] = useState(false);
+  const [aliasStatus, setAliasStatus] = useState<AliasStatus>('idle');
 
   const router = useRouter();
   const { refreshToken, setAuth } = useAuthStore();
@@ -186,7 +187,12 @@ export default function OnboardPage() {
         }}
       >
         {step === 1 && (
-          <StepIdentity values={{ first_name: form.first_name, last_name: form.last_name, alias: form.alias }} onChange={handleChange} errors={errors} />
+          <StepIdentity
+            values={{ first_name: form.first_name, last_name: form.last_name, alias: form.alias }}
+            onChange={handleChange}
+            errors={errors}
+            onAliasStatus={setAliasStatus}
+          />
         )}
         {step === 2 && (
           <StepAbout
@@ -208,7 +214,11 @@ export default function OnboardPage() {
           )}
 
           {step < TOTAL_STEPS ? (
-            <Button onClick={handleNext} className={cn(step === 1 ? 'w-full' : 'flex-1')}>
+            <Button
+              onClick={handleNext}
+              className={cn(step === 1 ? 'w-full' : 'flex-1')}
+              disabled={step === 1 && (aliasStatus === 'checking' || aliasStatus === 'taken')}
+            >
               Continue
               <ArrowRight className="size-4" />
             </Button>

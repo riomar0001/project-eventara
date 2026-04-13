@@ -33,6 +33,11 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
         return;
       }
 
+      if (isOnboarded && pathname.startsWith('/onboarding')) {
+        router.replace('/dashboard');
+        return;
+      }
+
       setIsChecking(false);
     }
 
