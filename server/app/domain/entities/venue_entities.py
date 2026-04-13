@@ -35,6 +35,8 @@ class Venue(BaseModel):
     # Venue details
     capacity: int = Field(gt=0)  # Must be greater than 0
     venue_type: VenueType
+    popularity_count: int = Field(default=0, ge=0)
+    usage_count: int = Field(default=0, ge=0)
 
     # Contact information
     contact_name: str = Field(min_length=1, max_length=255)
