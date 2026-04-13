@@ -15,6 +15,13 @@ from app.domain.exceptions.event_exceptions import (
     EventValidationError,
     UnauthorizedEventOperationError,
 )
+from app.domain.exceptions.event_volunteer_exceptions import (
+    EventVolunteerAlreadyExistsError,
+    EventVolunteerNotFoundError,
+    EventVolunteerValidationError,
+    InvalidEventVolunteerStatusTransitionError,
+    UnauthorizedEventVolunteerOperationError,
+)
 from app.domain.exceptions.role_exceptions import (
     DuplicateUserGrantError,
     FeatureNotFoundError,
@@ -108,4 +115,9 @@ __all__ = [
     "UnauthorizedEventOperationError",
     "EventStatusTransitionError",
     "EventDateValidationError",
+    "EventVolunteerNotFoundError",
+    "EventVolunteerValidationError",
+    "EventVolunteerAlreadyExistsError",
+    "UnauthorizedEventVolunteerOperationError",
+    "InvalidEventVolunteerStatusTransitionError",
 ]
