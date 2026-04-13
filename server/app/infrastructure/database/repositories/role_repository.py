@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 
 from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -39,6 +39,12 @@ class RoleRepository:
     def __init__(self, db: AsyncSession) -> None:
         self.db = db
 
+    @staticmethod
+    def _as_naive_utc(value: datetime | None) -> datetime | None:
+        if value is None:
+            return None
+        return value.astimezone(UTC).replace(tzinfo=None) if value.tzinfo else value
+
     async def user_exists(self, user_id: uuid.UUID) -> bool:
         result = await self.db.execute(select(User.id).where(User.id == user_id))
         return result.scalar_one_or_none() is not None
@@ -72,7 +78,7 @@ class RoleRepository:
         orm = UserRole(
             user_id=user_id,
             role_id=role_id,
-            expires_at=expires_at,
+            expires_at=self._as_naive_utc(expires_at),
             assigned_by=assigned_by,
         )
         self.db.add(orm)
@@ -89,7 +95,7 @@ class RoleRepository:
         return self._to_domain_role(orm) if orm else None
 
     async def update_assignment_expiry(self, assignment_id: uuid.UUID, expires_at: datetime | None) -> DomainUserRole | None:
-        await self.db.execute(update(UserRole).where(UserRole.id == assignment_id).values(expires_at=expires_at))
+        await self.db.execute(update(UserRole).where(UserRole.id == assignment_id).values(expires_at=self._as_naive_utc(expires_at)))
         await self.db.flush()
         result = await self.db.execute(select(UserRole).where(UserRole.id == assignment_id))
         orm = result.scalar_one_or_none()
@@ -141,7 +147,7 @@ class RoleRepository:
                 feature_id=feature_id,
                 action=action,
                 effect=effect,
-                expires_at=expires_at,
+                expires_at=self._as_naive_utc(expires_at),
                 reason=reason,
                 granted_by=granted_by,
             )

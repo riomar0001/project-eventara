@@ -34,11 +34,14 @@ class TokenPayload(BaseModel):
     email: str | None = None
     done_onboarding: bool = False
     role_id: str | None = None
+    alias: str | None = None
     first_name: str | None = None
     last_name: str | None = None
     age_group: str | None = None
     gender: str | None = None
     education_level: str | None = None
+    occupation: str | None = None
+    bio: str | None = None
     type: Literal["access", "refresh", "verification", "otp", "password_reset"]
     jti: str
     exp: datetime

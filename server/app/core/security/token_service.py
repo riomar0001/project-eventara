@@ -78,11 +78,14 @@ def create_access_token(
     if user:
         payload.update(
             {
+                "alias": user.alias,
                 "first_name": user.first_name,
                 "last_name": user.last_name,
                 "age_group": user.age_group,
                 "gender": user.gender,
                 "education_level": user.education_level,
+                "occupation": user.occupation,
+                "bio": user.bio,
             }
         )
 

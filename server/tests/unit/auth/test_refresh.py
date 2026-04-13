@@ -4,6 +4,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from app.application.dto.auth_dto import RefreshTokenInput
+from app.domain.entities.user_entity import AgeGroup, EducationLevel, Gender, UserProfile
 from app.domain.exceptions import (
     InvalidTokenError,
     TokenExpiredError,
@@ -15,12 +16,25 @@ from .conftest import MODULE, make_token_payload, make_use_case, make_user
 
 class TestRefresh:
     async def test_success(self):
-        user = make_user()
+        user = make_user(onboarding_completed=True)
         payload = make_token_payload(user.id)
         token_record = MagicMock()
+        profile = UserProfile(
+            user_id=user.id,
+            email=user.email,
+            alias="eventara_user",
+            first_name="Event",
+            last_name="Ara",
+            age_group=AgeGroup.ADULT,
+            gender=Gender.FEMALE,
+            education_level=EducationLevel.BACHELORS_DEGREE,
+            occupation="Organizer",
+            bio="Loves community events.",
+        )
 
         repo = MagicMock()
         repo.get_by_id = AsyncMock(return_value=user)
+        repo.get_profile_by_user_id = AsyncMock(return_value=profile)
 
         uc = make_use_case(repo=repo)
 
@@ -38,6 +52,7 @@ class TestRefresh:
 
         assert result.access_token == "new_access"
         assert result.refresh_token == "new_refresh"
+        repo.get_profile_by_user_id.assert_awaited_once_with(user.id)
 
     async def test_raises_token_expired(self):
         uc = make_use_case()

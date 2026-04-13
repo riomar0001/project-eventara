@@ -1,6 +1,9 @@
 'use client';
 
+import { useState } from 'react';
 import { Search, Bell, Settings, User, LogOut, CreditCard, ChevronDown } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Authentication } from '@/api/sdk.gen';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -15,8 +18,89 @@ import {
 import { Input } from '@/components/ui/input';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { notifications } from '@/constants/notifications';
+import { useAuthStore } from '@/store/auth-store';
+import { toast } from 'sonner';
+
+function getDisplayName(user: ReturnType<typeof useAuthStore.getState>['user']) {
+  if (!user) return 'My Account';
+
+  const fullName = [user.firstName, user.lastName].filter(Boolean).join(' ').trim();
+  if (fullName) return fullName;
+  if (user.alias) return user.alias;
+  if (user.email) return user.email.split('@')[0];
+
+  return 'My Account';
+}
+
+function getInitials(user: ReturnType<typeof useAuthStore.getState>['user']) {
+  if (!user) return 'UA';
+
+  const fromNames = [user.firstName, user.lastName]
+    .filter(Boolean)
+    .map((part) => part!.trim()[0])
+    .filter(Boolean)
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
+
+  if (fromNames) return fromNames;
+
+  if (user.alias) {
+    return user.alias.replace(/[^a-zA-Z0-9]/g, '').slice(0, 2).toUpperCase() || 'UA';
+  }
+
+  if (user.email) {
+    return user.email.slice(0, 2).toUpperCase();
+  }
+
+  return 'UA';
+}
 
 export function Header() {
+  const router = useRouter();
+  const user = useAuthStore((state) => state.user);
+  const refreshToken = useAuthStore((state) => state.refreshToken);
+  const clearAuth = useAuthStore((state) => state.clearAuth);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const displayName = getDisplayName(user);
+  const email = user?.email ?? 'Signed in';
+  const initials = getInitials(user);
+
+  async function handleLogout() {
+    if (isLoggingOut) return;
+
+    setIsLoggingOut(true);
+    let revokeFailed = false;
+
+    try {
+      if (refreshToken) {
+        const result = await Authentication.logoutAuthLogoutPost({
+          body: { refresh_token: refreshToken },
+          throwOnError: false
+        });
+
+        const status = (result as { response?: { status?: number } }).response?.status;
+        if (!result.data && status && status !== 400) {
+          revokeFailed = true;
+        }
+      }
+    } catch {
+      revokeFailed = true;
+    } finally {
+      clearAuth();
+
+      if (revokeFailed) {
+        toast.warning('Logged out locally, but the server session could not be revoked.');
+      } else {
+        toast.success('Logged out successfully.');
+      }
+
+      router.replace('/login');
+      router.refresh();
+      setIsLoggingOut(false);
+    }
+  }
+
   return (
     <header className="my-5 flex shrink-0 items-center gap-4 bg-neutral-100 px-5">
       <SidebarTrigger className="hover:bg-primary/30 size-11 rounded-xl bg-white" />
@@ -73,12 +157,12 @@ export function Header() {
             <Button className="hover:bg-primary/30 flex h-11 w-11 items-center justify-center rounded-xl bg-white p-1 transition-colors outline-none sm:w-60 sm:justify-between sm:px-2.5 sm:pr-5">
               <div className="flex items-center gap-2.5">
                 <Avatar className="size-8 shrink-0">
-                  <AvatarImage src="" alt="Michael Johnson" />
-                  <AvatarFallback className="text-xs">MJ</AvatarFallback>
+                  <AvatarImage alt={displayName} />
+                  <AvatarFallback className="text-xs">{initials}</AvatarFallback>
                 </Avatar>
                 <div className="hidden flex-col text-left sm:flex">
-                  <span className="text-xs leading-tight font-semibold">Michael Johnson</span>
-                  <span className="text-muted-foreground text-[10px] leading-tight">m.johnson@finex.com</span>
+                  <span className="text-xs leading-tight font-semibold">{displayName}</span>
+                  <span className="text-muted-foreground text-[10px] leading-tight">{email}</span>
                 </div>
               </div>
               <ChevronDown className="text-muted-foreground hidden size-3.5 sm:block" />
@@ -87,8 +171,8 @@ export function Header() {
           <DropdownMenuContent align="end" className="rounded-xl p-2">
             <DropdownMenuLabel className="py-3 font-normal">
               <div className="flex flex-col gap-0.5">
-                <span className="text-sm font-semibold">Michael Johnson</span>
-                <span className="text-muted-foreground text-xs">m.johnson@finex.com</span>
+                <span className="text-sm font-semibold">{displayName}</span>
+                <span className="text-muted-foreground text-xs">{email}</span>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
@@ -107,9 +191,9 @@ export function Header() {
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem variant="destructive" className="cursor-pointer py-3">
+            <DropdownMenuItem variant="destructive" className="cursor-pointer py-3" onClick={handleLogout} disabled={isLoggingOut}>
               <LogOut className="size-4" />
-              Log out
+              {isLoggingOut ? 'Logging out...' : 'Log out'}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

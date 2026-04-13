@@ -84,11 +84,44 @@ export function OtpInput({ value, onChange, focusedIndex, onFocusChange, hasErro
     inputRefs.current[clamped]?.focus();
   };
 
+  const focusAndSelectCell = useCallback(
+    (index: number) => {
+      const clamped = Math.max(0, Math.min(OTP_LENGTH - 1, index));
+      const el = inputRefs.current[clamped];
+      if (!el) return;
+
+      requestAnimationFrame(() => {
+        el.focus();
+        el.select();
+      });
+    },
+    []
+  );
+
   // Select-all on focus so typing over an existing digit replaces it cleanly
   useEffect(() => {
     const el = inputRefs.current[focusedIndex];
     if (el) el.select();
   }, [focusedIndex]);
+
+  useEffect(() => {
+    focusAndSelectCell(focusedIndex);
+
+    const handleWindowFocus = () => focusAndSelectCell(focusedIndex);
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        focusAndSelectCell(focusedIndex);
+      }
+    };
+
+    window.addEventListener('focus', handleWindowFocus);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('focus', handleWindowFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [focusAndSelectCell, focusedIndex]);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>, index: number) => {
     const raw = e.target.value.replace(/\D/g, '');

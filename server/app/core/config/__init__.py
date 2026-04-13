@@ -30,7 +30,7 @@ class Settings(BaseSettings):
     JWT_ACCESS_TOKEN_SECRET: str
     JWT_REFRESH_TOKEN_SECRET: str
     JWT_VERIFICATION_TOKEN_SECRET: str
-    ACCESS_TOKEN_EXPIRATION: timedelta = timedelta(minutes=30)
+    ACCESS_TOKEN_EXPIRATION: timedelta = timedelta(hours=3)
     REFRESH_TOKEN_EXPIRATION: timedelta = timedelta(days=7)
     VERIFICATION_TOKEN_EXPIRATION: timedelta = timedelta(hours=24)
     PASSWORD_RESET_TOKEN_EXPIRATION: timedelta = timedelta(hours=1)

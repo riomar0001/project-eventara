@@ -4,6 +4,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from app.application.dto.auth_dto import LoginVerifyInput
+from app.domain.entities.user_entity import AgeGroup, EducationLevel, Gender, UserProfile
 from app.domain.exceptions import (
     InvalidOTPError,
     InvalidTokenError,
@@ -18,9 +19,22 @@ class TestLoginVerify:
     async def test_success(self):
         user = make_user()
         payload = make_token_payload(user.id)
+        profile = UserProfile(
+            user_id=user.id,
+            email=user.email,
+            alias="eventara_user",
+            first_name="Event",
+            last_name="Ara",
+            age_group=AgeGroup.ADULT,
+            gender=Gender.FEMALE,
+            education_level=EducationLevel.BACHELORS_DEGREE,
+            occupation="Organizer",
+            bio="Loves community events.",
+        )
 
         repo = MagicMock()
         repo.get_by_id = AsyncMock(return_value=user)
+        repo.get_profile_by_user_id = AsyncMock(return_value=profile)
         repo.reset_failed_login = AsyncMock()
         repo.record_login = AsyncMock()
 
@@ -38,6 +52,7 @@ class TestLoginVerify:
 
         assert result.access_token == "access"
         assert result.refresh_token == "refresh"
+        repo.get_profile_by_user_id.assert_awaited_once_with(user.id)
         repo.reset_failed_login.assert_awaited_once()
         repo.record_login.assert_awaited_once()
 

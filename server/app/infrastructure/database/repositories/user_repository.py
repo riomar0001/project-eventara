@@ -45,6 +45,14 @@ class UserRepository:
     def __init__(self, db: AsyncSession) -> None:
         self.db = db
 
+    @staticmethod
+    def _utcnow_naive() -> datetime:
+        return datetime.now(UTC).replace(tzinfo=None)
+
+    @staticmethod
+    def _as_naive_utc(value: datetime) -> datetime:
+        return value.astimezone(UTC).replace(tzinfo=None) if value.tzinfo else value
+
     async def get_by_email(self, email: str) -> DomainUser | None:
         """Return the user with the given email address, or None if not found."""
         result = await self.db.execute(select(User).options(selectinload(User.profile), selectinload(User.security)).where(User.email == email))
@@ -206,7 +214,7 @@ class UserRepository:
 
         Returns True if updated, False if already completed.
         """
-        now = datetime.now(UTC).replace(tzinfo=None)
+        now = self._utcnow_naive()
         result = await self.db.execute(
             update(User)
             .where(User.id == user_id, User.onboarding_completed == False)  # noqa: E712
@@ -221,7 +229,7 @@ class UserRepository:
         Returns True if the row was updated, False if it was already in the
         desired state (guards against concurrent double-verification).
         """
-        now = datetime.now(UTC).replace(tzinfo=None)
+        now = self._utcnow_naive()
         result = await self.db.execute(
             update(UserSecurity)
             .where(
@@ -260,6 +268,7 @@ class UserRepository:
         Returns:
             The new value of failed_login_attempts after the increment.
         """
+        normalized_lockout_until = self._as_naive_utc(lockout_until)
         result = await self.db.execute(
             update(UserSecurity)
             .where(UserSecurity.user_id == user_id)
@@ -268,7 +277,7 @@ class UserRepository:
                 # Lock only when the new count first hits the threshold;
                 # once locked, keep the existing locked_until unchanged.
                 locked_until=case(
-                    (UserSecurity.failed_login_attempts + 1 >= max_attempts, lockout_until),
+                    (UserSecurity.failed_login_attempts + 1 >= max_attempts, normalized_lockout_until),
                     else_=UserSecurity.locked_until,
                 ),
             )
@@ -294,7 +303,7 @@ class UserRepository:
         Keeps UserActivity current for audit trails and analytics without
         requiring a separate SELECT before the UPDATE.
         """
-        now = datetime.now(UTC).replace(tzinfo=None)
+        now = self._utcnow_naive()
         await self.db.execute(
             update(UserActivity)
             .where(UserActivity.user_id == user_id)
@@ -329,7 +338,7 @@ class UserRepository:
             ``True`` if the password was updated, ``False`` if no user with the
             given ID exists.
         """
-        now = datetime.now(UTC).replace(tzinfo=None)
+        now = self._utcnow_naive()
         result = await self.db.execute(update(User).where(User.id == user_id).values(password=password_hash))
         if cast(CursorResult, result).rowcount == 0:
             await self.db.rollback()

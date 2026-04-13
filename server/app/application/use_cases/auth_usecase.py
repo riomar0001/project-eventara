@@ -95,6 +95,19 @@ class AuthUseCase:
         self.otp_repo = otp_repo
         self.password_reset_repo = password_reset_repo
 
+    async def _issue_access_token_for_user(self, user: User) -> str:
+        """Create an access token enriched with profile claims when available."""
+        profile = None
+        if user.onboarding_completed:
+            profile = await self.repo.get_profile_by_user_id(user.id)
+
+        return create_access_token(
+            user.id,
+            user.email,
+            user.onboarding_completed,
+            user=profile,
+        )
+
     async def register_user(self, data: RegisterUserInput) -> RegisteredUserOutput:
         """Create a new user account and dispatch a verification email.
 
@@ -201,7 +214,7 @@ class AuthUseCase:
             html=email_verified_html(user.email),
         )
 
-        access_token = create_access_token(user_id, user.email, user.onboarding_completed)
+        access_token = await self._issue_access_token_for_user(user)
         refresh_token = await create_refresh_token(user_id, self.db)
 
         return VerifiedEmailOutput(
@@ -374,7 +387,7 @@ class AuthUseCase:
         await self.repo.reset_failed_login(user_id)
         await self.repo.record_login(user_id)
 
-        access_token = create_access_token(user.id, user.email, user.onboarding_completed)
+        access_token = await self._issue_access_token_for_user(user)
         refresh_token = await create_refresh_token(user.id, self.db)
 
         return LoginVerifyOutput(
@@ -532,7 +545,7 @@ class AuthUseCase:
         if not user:
             raise UserNotFoundError()
 
-        access_token = create_access_token(user.id, user.email, user.onboarding_completed)
+        access_token = await self._issue_access_token_for_user(user)
         new_refresh_token = await create_refresh_token(user.id, self.db)
 
         return RefreshTokenOutput(

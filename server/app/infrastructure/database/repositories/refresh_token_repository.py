@@ -20,6 +20,11 @@ class RefreshTokenRepository:
     def __init__(self, db: AsyncSession) -> None:
         self.db = db
 
+    @staticmethod
+    def _utcnow_naive() -> datetime:
+        """Return UTC now as a naive datetime for TIMESTAMP WITHOUT TIME ZONE columns."""
+        return datetime.now(UTC).replace(tzinfo=None)
+
     async def create(self, token: Token) -> Token:
         """Persist a new refresh token record and return it with DB fields populated."""
         self.db.add(token)
@@ -44,14 +49,14 @@ class RefreshTokenRepository:
 
     async def revoke(self, token: Token) -> bool:
         """Atomically revoke a token. Returns False if already revoked."""
-        now = datetime.now(UTC)
+        now = self._utcnow_naive()
         result = await self.db.execute(update(Token).where(Token.id == token.id, Token.is_active.is_(True)).values(is_active=False, revoked_at=now))
         await self.db.commit()
         return cast(CursorResult, result).rowcount > 0
 
     async def revoke_all_for_user(self, user_id: uuid.UUID) -> int:
         """Revoke all active tokens for a user. Returns the number of tokens revoked."""
-        now = datetime.now(UTC)
+        now = self._utcnow_naive()
         result = await self.db.execute(
             update(Token).where(Token.user_id == user_id, Token.is_active.is_(True)).values(is_active=False, revoked_at=now)
         )
@@ -68,13 +73,13 @@ class RefreshTokenRepository:
         Returns:
             The number of tokens that were revoked.
         """
-        now = datetime.now(UTC)
+        now = self._utcnow_naive()
         result = await self.db.execute(update(Token).where(Token.is_active.is_(True), Token.expires_at < now).values(is_active=False, revoked_at=now))
         await self.db.commit()
         return cast(CursorResult, result).rowcount
 
     async def update_last_used(self, token: Token) -> None:
         """Stamp ``last_used_at`` on the token record for audit purposes."""
-        now = datetime.now(UTC)
+        now = self._utcnow_naive()
         await self.db.execute(update(Token).where(Token.id == token.id).values(last_used_at=now))
         await self.db.commit()

@@ -39,6 +39,10 @@ class RBACRepository:
     def __init__(self, db: AsyncSession) -> None:
         self.db = db
 
+    @staticmethod
+    def _utcnow_naive() -> datetime:
+        return datetime.now(UTC).replace(tzinfo=None)
+
     async def get_role_permission(
         self,
         role_name: str,
@@ -125,7 +129,7 @@ class RBACRepository:
             # get_user_grant will return that row, and the dependency will raise 403
             # even if the user's role has READ permission on "reports".
         """
-        now = datetime.now(UTC)
+        now = self._utcnow_naive()
         result = await self.db.execute(
             select(UserGrant)
             .join(Feature, UserGrant.feature_id == Feature.id)
