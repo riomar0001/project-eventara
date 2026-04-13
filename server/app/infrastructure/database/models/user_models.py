@@ -46,6 +46,7 @@ class User(Base):
     grants: Mapped[list[UserGrant]] = relationship(back_populates="user", foreign_keys="UserGrant.user_id")
     login_history: Mapped[list[UserLoginHistory]] = relationship(back_populates="user", foreign_keys="UserLoginHistory.user_id")
     venues = relationship("Venue", back_populates="creator", foreign_keys="Venue.creator_id")
+    events = relationship("Event", back_populates="creator", foreign_keys="Event.created_by")
     volunteer = relationship("Volunteer", back_populates="user", uselist=False)
     volunteer_applications = relationship("VolunteerApplication", back_populates="user", foreign_keys="VolunteerApplication.user_id")
 

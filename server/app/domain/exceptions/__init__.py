@@ -8,6 +8,13 @@ from app.domain.exceptions.auth_exceptions import (
     InvalidTokenError,
     TokenExpiredError,
 )
+from app.domain.exceptions.event_exceptions import (
+    EventDateValidationError,
+    EventNotFoundError,
+    EventStatusTransitionError,
+    EventValidationError,
+    UnauthorizedEventOperationError,
+)
 from app.domain.exceptions.role_exceptions import (
     DuplicateUserGrantError,
     FeatureNotFoundError,
@@ -96,4 +103,9 @@ __all__ = [
     "VolunteerApplicationAlreadyExistsError",
     "UnauthorizedApplicationOperationError",
     "ApplicationStatusError",
+    "EventNotFoundError",
+    "EventValidationError",
+    "UnauthorizedEventOperationError",
+    "EventStatusTransitionError",
+    "EventDateValidationError",
 ]
