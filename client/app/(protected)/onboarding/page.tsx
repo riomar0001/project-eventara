@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { ArrowLeft, ArrowRight, Sparkles } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { StepAbout, type AboutFields } from '@/components/onboarding/step-about';
 import { StepIdentity, type AliasStatus, type IdentityFields } from '@/components/onboarding/step-identity';
@@ -10,11 +10,11 @@ import { StepIndicator } from '@/components/onboarding/step-indicator';
 import { StepProfile, type ProfileFields } from '@/components/onboarding/step-profile';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
-import { ONBOARDING_STEPS } from '@/constants/onboarding';
-import { cn } from '@/lib/utils';
 import { User } from '@/api/sdk.gen';
 import type { AgeGroup, EducationLevel, Gender } from '@/api/types.gen';
+import { ONBOARDING_STEPS } from '@/constants/onboarding';
 import { decodeTokenUser } from '@/lib/token';
+import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/auth-store';
 
 const TOTAL_STEPS = ONBOARDING_STEPS.length;
@@ -113,9 +113,9 @@ export default function OnboardPage() {
         gender: form.gender as Gender,
         education_level: form.education_level as EducationLevel,
         occupation: form.occupation || undefined,
-        bio: form.bio || undefined,
+        bio: form.bio || undefined
       },
-      throwOnError: false,
+      throwOnError: false
     });
 
     setIsSubmitting(false);

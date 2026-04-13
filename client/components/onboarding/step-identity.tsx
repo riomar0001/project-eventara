@@ -3,8 +3,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { CheckCircle2, Loader2, XCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
 import { User } from '@/api/sdk.gen';
+import { cn } from '@/lib/utils';
 
 export interface IdentityFields {
   first_name: string;
@@ -51,11 +51,7 @@ export function StepIdentity({ values, onChange, errors, onAliasStatus }: StepId
   const aliasCheckable = values.alias.length >= 3 && /^[a-z0-9_]+$/.test(values.alias);
 
   // Derive aliasStatus — no setState needed, so no synchronous setState in effects.
-  const aliasStatus: AliasStatus = !aliasCheckable
-    ? 'idle'
-    : values.alias !== debouncedAlias || debouncedAlias !== checkedFor
-      ? 'checking'
-      : apiResult;
+  const aliasStatus: AliasStatus = !aliasCheckable ? 'idle' : values.alias !== debouncedAlias || debouncedAlias !== checkedFor ? 'checking' : apiResult;
 
   // Notify the parent whenever the derived status changes.
   useEffect(() => {
@@ -80,7 +76,7 @@ export function StepIdentity({ values, onChange, errors, onAliasStatus }: StepId
 
     User.checkAliasUserCheckAliasGet({
       query: { alias: debouncedAlias },
-      throwOnError: false,
+      throwOnError: false
     }).then((result) => {
       if (cancelled) return;
       const next = result.data ? (result.data.available ? 'available' : 'taken') : 'idle';
@@ -96,7 +92,7 @@ export function StepIdentity({ values, onChange, errors, onAliasStatus }: StepId
 
   const aliasIcon = (() => {
     if (aliasStatus === 'checking') return <Loader2 className="text-muted-foreground size-3.5 animate-spin" />;
-    if (aliasStatus === 'available') return <CheckCircle2 className="text-lime-600 size-3.5" />;
+    if (aliasStatus === 'available') return <CheckCircle2 className="size-3.5 text-lime-600" />;
     if (aliasStatus === 'taken') return <XCircle className="text-destructive size-3.5" />;
     return null;
   })();
@@ -146,10 +142,7 @@ export function StepIdentity({ values, onChange, errors, onAliasStatus }: StepId
             value={values.alias}
             onChange={(e) => onChange({ alias: e.target.value.toLowerCase() })}
             aria-invalid={!!errors.alias || aliasStatus === 'taken' || undefined}
-            className={cn(
-              'pr-9 text-sm',
-              aliasStatus === 'available' && 'border-lime-600 ring-3 ring-lime-600/20'
-            )}
+            className={cn('pr-9 text-sm', aliasStatus === 'available' && 'border-lime-600 ring-3 ring-lime-600/20')}
           />
           <div className="absolute top-1/2 right-3 -translate-y-1/2">{aliasIcon}</div>
         </div>
@@ -158,7 +151,7 @@ export function StepIdentity({ values, onChange, errors, onAliasStatus }: StepId
         ) : aliasStatus === 'taken' ? (
           <p className="text-destructive text-xs">That nickname is already taken.</p>
         ) : aliasStatus === 'available' ? (
-          <p className="text-lime-600 text-xs">Nickname is available!</p>
+          <p className="text-xs text-lime-600">Nickname is available!</p>
         ) : (
           <p className="text-muted-foreground text-xs">Lowercase letters, numbers, and underscores only.</p>
         )}
