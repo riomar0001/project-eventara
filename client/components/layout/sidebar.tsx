@@ -1,6 +1,8 @@
 'use client';
 
 import * as React from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { ChevronDown } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -25,7 +27,14 @@ import { cn } from '@/lib/utils';
 export function AppSidebar() {
   const [transactionsOpen, setTransactionsOpen] = React.useState(true);
   const { state } = useSidebar();
+  const pathname = usePathname();
   const isCollapsed = state === 'collapsed';
+
+  function isActiveHref(href: string) {
+    if (!href.startsWith('/')) return false;
+    if (href === '/dashboard') return pathname === '/dashboard';
+    return pathname === href || pathname.startsWith(`${href}/`);
+  }
 
   // Close sub-menu when sidebar collapses to icon mode
   React.useEffect(() => {
@@ -79,11 +88,18 @@ export function AppSidebar() {
                   </Collapsible>
                 ) : (
                   <SidebarMenuItem key={item.label}>
-                    <SidebarMenuButton asChild isActive={item.active} tooltip={item.label} className="h-12 px-4 py-3.5 [&_svg]:size-4.5">
-                      <a href={item.href}>
-                        <item.icon />
-                        <span>{item.label}</span>
-                      </a>
+                    <SidebarMenuButton asChild isActive={isActiveHref(item.href)} tooltip={item.label} className="h-12 px-4 py-3.5 [&_svg]:size-4.5">
+                      {item.href.startsWith('/') ? (
+                        <Link href={item.href}>
+                          <item.icon />
+                          <span>{item.label}</span>
+                        </Link>
+                      ) : (
+                        <a href={item.href}>
+                          <item.icon />
+                          <span>{item.label}</span>
+                        </a>
+                      )}
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 )
@@ -100,10 +116,17 @@ export function AppSidebar() {
               {dashboardBottomNavItems.map((item) => (
                 <SidebarMenuItem key={item.label}>
                   <SidebarMenuButton asChild tooltip={item.label} className="h-12 px-4 py-3.5 [&_svg]:size-4.5">
-                    <a href={item.href}>
-                      <item.icon />
-                      <span>{item.label}</span>
-                    </a>
+                    {item.href.startsWith('/') ? (
+                      <Link href={item.href}>
+                        <item.icon />
+                        <span>{item.label}</span>
+                      </Link>
+                    ) : (
+                      <a href={item.href}>
+                        <item.icon />
+                        <span>{item.label}</span>
+                      </a>
+                    )}
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}

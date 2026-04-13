@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, Bell, Settings, User, LogOut, CreditCard, ChevronDown } from 'lucide-react';
+import { Search, Bell, Settings, User, LogOut, Shield, ChevronDown } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Authentication } from '@/api/sdk.gen';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -18,43 +18,9 @@ import {
 import { Input } from '@/components/ui/input';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { notifications } from '@/constants/notifications';
+import { getDisplayName, getInitials } from '@/lib/auth-user';
 import { useAuthStore } from '@/store/auth-store';
 import { toast } from 'sonner';
-
-function getDisplayName(user: ReturnType<typeof useAuthStore.getState>['user']) {
-  if (!user) return 'My Account';
-
-  const fullName = [user.firstName, user.lastName].filter(Boolean).join(' ').trim();
-  if (fullName) return fullName;
-  if (user.alias) return user.alias;
-  if (user.email) return user.email.split('@')[0];
-
-  return 'My Account';
-}
-
-function getInitials(user: ReturnType<typeof useAuthStore.getState>['user']) {
-  if (!user) return 'UA';
-
-  const fromNames = [user.firstName, user.lastName]
-    .filter(Boolean)
-    .map((part) => part!.trim()[0])
-    .filter(Boolean)
-    .join('')
-    .slice(0, 2)
-    .toUpperCase();
-
-  if (fromNames) return fromNames;
-
-  if (user.alias) {
-    return user.alias.replace(/[^a-zA-Z0-9]/g, '').slice(0, 2).toUpperCase() || 'UA';
-  }
-
-  if (user.email) {
-    return user.email.slice(0, 2).toUpperCase();
-  }
-
-  return 'UA';
-}
 
 export function Header() {
   const router = useRouter();
@@ -177,13 +143,13 @@ export function Header() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem className="cursor-pointer py-3">
+              <DropdownMenuItem className="cursor-pointer py-3" onClick={() => router.push('/profile')}>
                 <User className="size-4" />
                 Profile
               </DropdownMenuItem>
               <DropdownMenuItem className="cursor-pointer py-3">
-                <CreditCard className="size-4" />
-                Billing
+                <Shield className="size-4" />
+                Security
               </DropdownMenuItem>
               <DropdownMenuItem className="cursor-pointer py-3">
                 <Settings className="size-4" />
