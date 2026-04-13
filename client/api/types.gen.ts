@@ -687,6 +687,34 @@ export type RegisterResponse = {
 };
 
 /**
+ * ResendOtpRequest
+ */
+export type ResendOtpRequest = {
+    /**
+     * Token
+     */
+    token: string;
+};
+
+/**
+ * ResendOtpResponse
+ */
+export type ResendOtpResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Verification Token
+     */
+    verification_token: string;
+    /**
+     * Message
+     */
+    message?: string;
+};
+
+/**
  * ResendVerificationRequest
  */
 export type ResendVerificationRequest = {
@@ -1374,6 +1402,43 @@ export type LoginVerifyAuthLoginVerifyPostResponses = {
 };
 
 export type LoginVerifyAuthLoginVerifyPostResponse = LoginVerifyAuthLoginVerifyPostResponses[keyof LoginVerifyAuthLoginVerifyPostResponses];
+
+export type ResendOtpAuthLoginResendOtpPostData = {
+    body: ResendOtpRequest;
+    path?: never;
+    query?: never;
+    url: '/auth/login/resend-otp';
+};
+
+export type ResendOtpAuthLoginResendOtpPostErrors = {
+    /**
+     * The OTP session token is malformed or has an invalid signature
+     */
+    400: ErrorResponse;
+    /**
+     * The OTP session token has expired — user must restart the login flow
+     */
+    401: ErrorResponse;
+    /**
+     * User not found
+     */
+    404: ErrorResponse;
+    /**
+     * Validation error — token field is missing or empty
+     */
+    422: ValidationErrorResponse;
+};
+
+export type ResendOtpAuthLoginResendOtpPostError = ResendOtpAuthLoginResendOtpPostErrors[keyof ResendOtpAuthLoginResendOtpPostErrors];
+
+export type ResendOtpAuthLoginResendOtpPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: ResendOtpResponse;
+};
+
+export type ResendOtpAuthLoginResendOtpPostResponse = ResendOtpAuthLoginResendOtpPostResponses[keyof ResendOtpAuthLoginResendOtpPostResponses];
 
 export type LogoutAuthLogoutPostData = {
     body: LogoutRequest;

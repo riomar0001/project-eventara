@@ -1,4 +1,5 @@
 import { forwardRef } from 'react';
+import { AlertCircle, Info } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 
 interface AuthFormFieldProps extends Pick<
@@ -58,7 +59,17 @@ export const AuthFormField = forwardRef<HTMLInputElement, AuthFormFieldProps>(fu
         aria-invalid={!!error || undefined}
         className={inputClassName}
       />
-      {error ? <p className="text-destructive text-xs">{error}</p> : hint ? <p className="text-muted-foreground text-xs">{hint}</p> : null}
+      {error ? (
+        <p className="text-destructive flex items-center gap-1 text-xs">
+          <AlertCircle size={12} className="shrink-0" />
+          {error}
+        </p>
+      ) : hint ? (
+        <p className="text-muted-foreground flex items-center gap-1 text-xs">
+          <Info size={12} className="shrink-0" />
+          {hint}
+        </p>
+      ) : null}
     </div>
   );
 });

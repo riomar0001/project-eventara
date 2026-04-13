@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { RegisterForm } from '@/components/auth/register-form';
-import { VerifyEmailCard } from '@/components/auth/verify-email-card';
+import { RegisterForm } from '@/components/auth/register/register-form';
+import { VerifyEmailCard } from '@/components/auth/shared/verify-email-card';
 
 export default function RegisterPage() {
   const [submittedEmail, setSubmittedEmail] = useState<string | null>(null);

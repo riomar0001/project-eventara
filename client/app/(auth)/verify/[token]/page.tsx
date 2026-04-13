@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { LoadingState, SuccessState, ExpiredState, AlreadyVerifiedState, InvalidState } from '@/components/auth/verify-email-states';
+import { LoadingState, SuccessState, ExpiredState, AlreadyVerifiedState, InvalidState } from '@/components/auth/verify/verify-email-states';
 import { Card } from '@/components/ui/card';
 import { Authentication } from '@/api/sdk.gen';
 import { decodeTokenUser } from '@/lib/token';

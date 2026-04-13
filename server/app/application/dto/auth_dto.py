@@ -63,6 +63,16 @@ class RefreshTokenOutput:
 
 
 @dataclass
+class ResendOtpInput:
+    token: str
+
+
+@dataclass
+class ResendOtpOutput:
+    verification_token: str
+
+
+@dataclass
 class ResendVerificationInput:
     email: str
 

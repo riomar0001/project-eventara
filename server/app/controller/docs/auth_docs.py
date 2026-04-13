@@ -330,6 +330,29 @@ OTP_TOKEN_INVALID = {
 }
 
 
+# POST /auth/login/resend-otp
+RESEND_OTP_VALIDATION_ERROR = {
+    422: {
+        "description": "Validation error — token field is missing or empty",
+        "model": ValidationErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "detail": [
+                        {
+                            "loc": ["body", "token"],
+                            "msg": "String should have at least 1 character",
+                            "type": "string_too_short",
+                        }
+                    ],
+                }
+            }
+        },
+    }
+}
+
+
 # POST /auth/logout
 LOGOUT_VALIDATION_ERROR = {
     422: {
