@@ -18,6 +18,7 @@ from .conftest import MODULE, make_token_payload, make_use_case, make_user
 class TestLoginVerify:
     async def test_success(self):
         user = make_user()
+        user.onboarding_completed = True
         payload = make_token_payload(user.id)
         profile = UserProfile(
             user_id=user.id,
