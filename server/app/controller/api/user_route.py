@@ -6,7 +6,6 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from app.application.dto.user_dto import ChangePasswordInput, UserOnboardingInput
 from app.application.use_cases.user_usecase import ChangePasswordUseCase, CheckAliasUseCase, OnboardingUseCase
 from app.controller.dependencies import get_current_user_id, get_onboarding_use_case
-from app.core.security.token_service import create_access_token
 from app.controller.dependencies.use_cases_depends import get_change_password_use_case, get_check_alias_use_case
 from app.controller.docs.user_docs import (
     ALIAS_CHECK_UNAUTHORIZED,
@@ -26,6 +25,7 @@ from app.controller.schemas.user_schema import (
     UserOnboardingRequest,
     UserOnboardingResponse,
 )
+from app.core.security.token_service import create_access_token
 from app.domain.exceptions.auth_exceptions import InvalidCredentialsError
 from app.domain.exceptions.user_exceptions import (
     AliasAlreadyTakenError,
