@@ -99,6 +99,9 @@ export const useAuthStore = create<AuthStore>()(
       },
 
       async initialize() {
+        // Idempotent — safe to call multiple times; only runs once.
+        if (get().isInitialized) return;
+
         const { accessToken, refreshToken } = get();
 
         if (!refreshToken) {

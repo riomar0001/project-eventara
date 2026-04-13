@@ -1003,6 +1003,10 @@ export type UserOnboardingResponse = {
      * Message
      */
     message?: string;
+    /**
+     * Access Token
+     */
+    access_token: string;
 };
 
 /**

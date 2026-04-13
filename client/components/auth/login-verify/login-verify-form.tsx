@@ -128,6 +128,7 @@ export function LoginVerifyForm() {
     }
 
     setAuth(result.data.access_token, result.data.refresh_token, user);
+    sessionStorage.removeItem(`otp-expiry:${activeToken}`);
     setVerified(true);
     setTimeout(() => router.replace('/dashboard'), 1500);
   };
@@ -159,7 +160,8 @@ export function LoginVerifyForm() {
 
     const newToken = result.data.verification_token;
 
-    // Store a fresh expiry for the new token and reset the timer
+    // Remove the old token's expiry entry and store a fresh one for the new token
+    sessionStorage.removeItem(`otp-expiry:${activeToken}`);
     sessionStorage.setItem(`otp-expiry:${newToken}`, String(Date.now() + EXPIRY_SECONDS * 1000));
     setSecondsLeft(EXPIRY_SECONDS);
     setDigits(Array(OTP_LENGTH).fill(''));

@@ -39,6 +39,7 @@ class UserOnboardingResponse(BaseModel):
     occupation: str | None = None
     bio: str | None = None
     message: str = "Onboarding completed successfully."
+    access_token: str
 
 
 class CheckAliasResponse(BaseModel):

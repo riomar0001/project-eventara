@@ -2,14 +2,20 @@
 
 import { useState } from 'react';
 import { ArrowLeft, ArrowRight, Sparkles } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import { StepAbout, type AboutFields } from '@/components/onboarding/step-about';
-import { StepIdentity, type IdentityFields } from '@/components/onboarding/step-identity';
+import { StepIdentity, type AliasStatus, type IdentityFields } from '@/components/onboarding/step-identity';
 import { StepIndicator } from '@/components/onboarding/step-indicator';
 import { StepProfile, type ProfileFields } from '@/components/onboarding/step-profile';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import { User } from '@/api/sdk.gen';
+import type { AgeGroup, EducationLevel, Gender } from '@/api/types.gen';
 import { ONBOARDING_STEPS } from '@/constants/onboarding';
+import { decodeTokenUser } from '@/lib/token';
 import { cn } from '@/lib/utils';
+import { useAuthStore } from '@/store/auth-store';
 
 const TOTAL_STEPS = ONBOARDING_STEPS.length;
 
@@ -60,6 +66,10 @@ export default function OnboardPage() {
   const [errors, setErrors] = useState<StepErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDone, setIsDone] = useState(false);
+  const [aliasStatus, setAliasStatus] = useState<AliasStatus>('idle');
+
+  const router = useRouter();
+  const { refreshToken, setAuth } = useAuthStore();
 
   const currentMeta = ONBOARDING_STEPS[step - 1];
 
@@ -91,13 +101,41 @@ export default function OnboardPage() {
     setStep((s) => Math.max(s - 1, 1));
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
     setIsSubmitting(true);
-    // TODO: integrate POST /user/onboard — expects { alias, first_name, last_name, age_group, gender, education_level, occupation, bio }
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setIsDone(true);
-    }, 1000);
+
+    const result = await User.userOnboardingUserOnboardPost({
+      body: {
+        alias: form.alias,
+        first_name: form.first_name,
+        last_name: form.last_name,
+        age_group: form.age_group as AgeGroup,
+        gender: form.gender as Gender,
+        education_level: form.education_level as EducationLevel,
+        occupation: form.occupation || undefined,
+        bio: form.bio || undefined
+      },
+      throwOnError: false
+    });
+
+    setIsSubmitting(false);
+
+    if (result.error || !result.data) {
+      const status = (result as { response?: { status?: number } }).response?.status;
+      if (status === 409) {
+        toast.error('That nickname is already taken. Go back and choose another.');
+      } else {
+        toast.error('Something went wrong. Please try again.');
+      }
+      return;
+    }
+
+    const newUser = decodeTokenUser(result.data.access_token);
+    if (newUser && refreshToken) {
+      setAuth(result.data.access_token, refreshToken, newUser);
+    }
+
+    setIsDone(true);
   }
 
   if (isDone) {
@@ -121,7 +159,7 @@ export default function OnboardPage() {
             </p>
           </div>
 
-          <Button className="w-full" onClick={() => (window.location.href = '/dashboard')}>
+          <Button className="w-full" onClick={() => router.replace('/dashboard')}>
             Go to dashboard
             <ArrowRight className="size-4" />
           </Button>
@@ -149,7 +187,12 @@ export default function OnboardPage() {
         }}
       >
         {step === 1 && (
-          <StepIdentity values={{ first_name: form.first_name, last_name: form.last_name, alias: form.alias }} onChange={handleChange} errors={errors} />
+          <StepIdentity
+            values={{ first_name: form.first_name, last_name: form.last_name, alias: form.alias }}
+            onChange={handleChange}
+            errors={errors}
+            onAliasStatus={setAliasStatus}
+          />
         )}
         {step === 2 && (
           <StepAbout
@@ -171,7 +214,11 @@ export default function OnboardPage() {
           )}
 
           {step < TOTAL_STEPS ? (
-            <Button onClick={handleNext} className={cn(step === 1 ? 'w-full' : 'flex-1')}>
+            <Button
+              onClick={handleNext}
+              className={cn(step === 1 ? 'w-full' : 'flex-1')}
+              disabled={step === 1 && (aliasStatus === 'checking' || aliasStatus === 'taken')}
+            >
               Continue
               <ArrowRight className="size-4" />
             </Button>

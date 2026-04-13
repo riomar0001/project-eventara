@@ -25,6 +25,7 @@ from app.controller.schemas.user_schema import (
     UserOnboardingRequest,
     UserOnboardingResponse,
 )
+from app.core.security.token_service import create_access_token
 from app.domain.exceptions.auth_exceptions import InvalidCredentialsError
 from app.domain.exceptions.user_exceptions import (
     AliasAlreadyTakenError,
@@ -124,6 +125,12 @@ async def user_onboarding(
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error))
 
     p = result.profile
+    new_token = create_access_token(
+        user_id=p.user_id,
+        email=p.email or "",
+        done_onboarding=True,
+        user=p,
+    )
     return UserOnboardingResponse(
         user_id=p.user_id,
         alias=p.alias,
@@ -134,6 +141,7 @@ async def user_onboarding(
         education_level=p.education_level,
         occupation=p.occupation,
         bio=p.bio,
+        access_token=new_token,
     )
 
 
