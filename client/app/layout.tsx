@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { AuthProvider } from '@/components/auth/auth-provider';
 import './globals.css';
 import { cn } from '@/lib/utils';
 
@@ -20,7 +21,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={cn('h-full font-sans antialiased', inter.variable)}>
       <body suppressHydrationWarning>
-        <TooltipProvider>{children}</TooltipProvider>
+        <AuthProvider>
+          <TooltipProvider>{children}</TooltipProvider>
+        </AuthProvider>
         <Toaster richColors position="bottom-right" />
       </body>
     </html>

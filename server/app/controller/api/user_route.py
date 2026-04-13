@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from app.application.dto.user_dto import ChangePasswordInput, UserOnboardingInput
 from app.application.use_cases.user_usecase import ChangePasswordUseCase, CheckAliasUseCase, OnboardingUseCase
 from app.controller.dependencies import get_current_user_id, get_onboarding_use_case
+from app.core.security.token_service import create_access_token
 from app.controller.dependencies.use_cases_depends import get_change_password_use_case, get_check_alias_use_case
 from app.controller.docs.user_docs import (
     ALIAS_CHECK_UNAUTHORIZED,
@@ -124,6 +125,12 @@ async def user_onboarding(
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error))
 
     p = result.profile
+    new_token = create_access_token(
+        user_id=p.user_id,
+        email=p.email or "",
+        done_onboarding=True,
+        user=p,
+    )
     return UserOnboardingResponse(
         user_id=p.user_id,
         alias=p.alias,
@@ -134,6 +141,7 @@ async def user_onboarding(
         education_level=p.education_level,
         occupation=p.occupation,
         bio=p.bio,
+        access_token=new_token,
     )
 
 
