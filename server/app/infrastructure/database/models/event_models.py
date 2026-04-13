@@ -26,6 +26,7 @@ class Event(Base):
 
     # Relationships
     creator = relationship("User", back_populates="events")
+    volunteers = relationship("EventVolunteer", back_populates="event")
 
     __table_args__ = (
         Index("idx_events_status", "status"),
