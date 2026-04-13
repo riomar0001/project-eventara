@@ -28,6 +28,7 @@ class Volunteer(Base):
 
     # Relationships
     user = relationship("User", back_populates="volunteer")
+    event_volunteers = relationship("EventVolunteer", back_populates="volunteer")
 
     __table_args__ = (
         Index("idx_volunteers_user_id", "user_id"),
