@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { useAliasAvailability } from '@/hooks/use-alias-availability';
 import { User } from '@/api/sdk.gen';
 import type { AgeGroup, EducationLevel, Gender } from '@/api/types.gen';
 import { ONBOARDING_STEPS } from '@/constants/onboarding';
 import { PROFILE_ALIAS_MIN_LENGTH, PROFILE_ALIAS_PATTERN } from '@/constants/profile';
-import { useAliasAvailability } from '@/hooks/use-alias-availability';
 import { decodeTokenUser } from '@/lib/token';
 import { useAuthStore } from '@/store/auth-store';
 

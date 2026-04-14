@@ -1,9 +1,9 @@
 'use client';
 
 import { ChevronDown } from 'lucide-react';
-import { PROFILE_AGE_GROUP_OPTIONS, PROFILE_EDUCATION_LEVEL_OPTIONS, PROFILE_GENDER_OPTIONS } from '@/constants/profile';
 import type { AboutFields } from '@/hooks/use-onboarding-form';
 import { OptionCard } from './option-card';
+import { PROFILE_AGE_GROUP_OPTIONS, PROFILE_EDUCATION_LEVEL_OPTIONS, PROFILE_GENDER_OPTIONS } from '@/constants/profile';
 import { cn } from '@/lib/utils';
 
 interface StepAboutProps {

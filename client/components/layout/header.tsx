@@ -81,7 +81,7 @@ export function Header() {
           <DropdownMenuTrigger asChild>
             <Button size="icon-sm" className="hover:bg-primary/30 relative size-11 rounded-xl bg-white">
               <Bell className="size-4" />
-              {notifications.some((n) => n.unread) && <span className=" absolute top-2 right-2 size-2 rounded-full" />}
+              {notifications.some((n) => n.unread) && <span className="absolute top-2 right-2 size-2 rounded-full" />}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" collisionPadding={20} className="w-80 max-w-[calc(100vw-40px)] rounded-xl p-2">

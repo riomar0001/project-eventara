@@ -1,7 +1,7 @@
 'use client';
 
 import { format, formatDistanceToNow } from 'date-fns';
-import { Clock3, Globe, LaptopMinimal, MapPin, ShieldCheck, Smartphone, Tablet, TriangleAlert } from 'lucide-react';
+import { Clock3, Globe, LaptopMinimal, MapPin, Smartphone, Tablet, TriangleAlert } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLoginHistory, type LoginHistoryEntry } from '@/hooks/use-login-history';
 
@@ -110,7 +110,7 @@ export function LoginHistoryList() {
   }
 
   return (
-    <div className="space-y-4 max-w-3xl">
+    <div className="max-w-3xl space-y-4">
       <div className="space-y-3">
         {entries.map((entry) => (
           <LoginHistoryRow key={entry.id} entry={entry} />

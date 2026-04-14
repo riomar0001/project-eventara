@@ -13,8 +13,23 @@ import { cn } from '@/lib/utils';
 
 export default function OnboardPage() {
   const router = useRouter();
-  const { aliasStatus, animKey, currentStepMeta, direction, errors, form, handleBack, handleChange, handleNext, handleSubmit, isDone, isNextDisabled, isSubmitting, step, totalSteps } =
-    useOnboardingForm();
+  const {
+    aliasStatus,
+    animKey,
+    currentStepMeta,
+    direction,
+    errors,
+    form,
+    handleBack,
+    handleChange,
+    handleNext,
+    handleSubmit,
+    isDone,
+    isNextDisabled,
+    isSubmitting,
+    step,
+    totalSteps
+  } = useOnboardingForm();
 
   if (isDone) {
     return (
@@ -65,7 +80,12 @@ export default function OnboardPage() {
         }}
       >
         {step === 1 && (
-          <StepIdentity values={{ first_name: form.first_name, last_name: form.last_name, alias: form.alias }} onChange={handleChange} errors={errors} aliasStatus={aliasStatus} />
+          <StepIdentity
+            values={{ first_name: form.first_name, last_name: form.last_name, alias: form.alias }}
+            onChange={handleChange}
+            errors={errors}
+            aliasStatus={aliasStatus}
+          />
         )}
         {step === 2 && (
           <StepAbout

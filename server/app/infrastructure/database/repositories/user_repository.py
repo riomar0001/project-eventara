@@ -11,7 +11,6 @@ from app.domain.entities.user_entity import (
     AgeGroup,
     EducationLevel,
     Gender,
-    UserLoginHistory as DomainUserLoginHistory,
     PublicUser,
     UserStatus,
 )
@@ -20,6 +19,9 @@ from app.domain.entities.user_entity import (
 )
 from app.domain.entities.user_entity import (
     UserActivity as DomainUserActivity,
+)
+from app.domain.entities.user_entity import (
+    UserLoginHistory as DomainUserLoginHistory,
 )
 from app.domain.entities.user_entity import (
     UserProfile as DomainUserProfile,

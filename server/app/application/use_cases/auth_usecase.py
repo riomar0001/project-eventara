@@ -1,6 +1,6 @@
+import re
 import uuid
 from datetime import UTC, datetime
-import re
 
 from arq.connections import ArqRedis
 from sqlalchemy.exc import IntegrityError

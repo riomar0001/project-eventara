@@ -14,7 +14,7 @@ export default function DeleteAccountPage() {
   }
 
   return (
-    <div className="space-y-5 max-w-3xl">
+    <div className="max-w-3xl space-y-5">
       <div className="rounded-2xl border border-red-200 bg-red-50 p-5">
         <div className="flex items-start gap-3">
           <AlertTriangle className="mt-0.5 size-4 shrink-0 text-red-600" />

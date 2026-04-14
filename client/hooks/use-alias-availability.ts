@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
+import { useDebounce } from '@/hooks/use-debounce';
 import { User } from '@/api/sdk.gen';
 import { PROFILE_ALIAS_DEBOUNCE_MS, PROFILE_ALIAS_MIN_LENGTH, PROFILE_ALIAS_PATTERN } from '@/constants/profile';
-import { useDebounce } from '@/hooks/use-debounce';
 
 export type AliasStatus = 'idle' | 'checking' | 'available' | 'taken' | 'error';
 

@@ -1,9 +1,9 @@
 'use client';
 
-import { PROFILE_BIO_MAX_LENGTH, PROFILE_OCCUPATION_MAX_LENGTH } from '@/constants/profile';
-import type { ProfileFields } from '@/hooks/use-onboarding-form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import type { ProfileFields } from '@/hooks/use-onboarding-form';
+import { PROFILE_BIO_MAX_LENGTH, PROFILE_OCCUPATION_MAX_LENGTH } from '@/constants/profile';
 import { cn } from '@/lib/utils';
 
 interface StepProfileProps {

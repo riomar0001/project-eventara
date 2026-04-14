@@ -198,7 +198,7 @@ export default function UserProfilePage() {
                     <div className="flex items-center gap-4 sm:w-28 sm:flex-none">
                       <div className="flex size-12.5 flex-col items-center justify-center overflow-hidden rounded-2xl border bg-amber-100 text-center shadow-xs">
                         <div className="text-muted-foreground w-full border-b text-[10px] font-semibold tracking-[0.18em]">{event.month}</div>
-                        <div className="w-full h-full bg-white text-lg font-semibold">{event.day}</div>
+                        <div className="h-full w-full bg-white text-lg font-semibold">{event.day}</div>
                       </div>
                       <div className="sm:hidden">
                         <EventStatusBadge status={event.status} />
