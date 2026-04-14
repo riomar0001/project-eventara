@@ -6,7 +6,7 @@ import { User } from '@/api';
 import { getAccessToken } from '@/store/auth-store';
 
 const loginHistoryEntrySchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   ip_address: z.string().nullable(),
   user_agent: z.string().nullable(),
   browser: z.string().nullable(),
