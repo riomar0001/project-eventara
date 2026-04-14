@@ -1,151 +1,196 @@
 'use client';
 
-import Link from 'next/link';
-import { CalendarDays, Mail, UserRound } from 'lucide-react';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
+import { useEffect, useState } from 'react';
+import { Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { getDisplayName, getInitials, getProfileHandle, getRoleLabel, humanizeProfileValue } from '@/lib/auth-user';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { SettingsShell } from '@/components/settings/settings-shell';
+import { Textarea } from '@/components/ui/textarea';
+import { humanizeProfileValue } from '@/lib/auth-user';
 import { useAuthStore } from '@/store/auth-store';
+import { toast } from 'sonner';
 
-function InfoRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-start justify-between gap-4 py-3">
-      <span className="text-muted-foreground text-sm">{label}</span>
-      <span className="max-w-[60%] text-right text-sm font-medium text-balance">{value}</span>
-    </div>
-  );
-}
+const ageGroupOptions = ['child', 'teen', 'adult', 'senior'] as const;
+const genderOptions = ['male', 'female'] as const;
+const educationOptions = [
+  'no_formal_education',
+  'elementary_level',
+  'elementary_graduate',
+  'junior_high_school_level',
+  'junior_high_school_graduate',
+  'senior_high_school_level',
+  'senior_high_school_graduate',
+  'vocational_trade_certificate',
+  'college_level_undergraduate',
+  'associate_degree',
+  'bachelors_degree',
+  'masters_degree',
+  'doctorate_degree'
+] as const;
 
 export default function ProfilePage() {
   const user = useAuthStore((state) => state.user);
-  const displayName = getDisplayName(user);
-  const initials = getInitials(user);
-  const handle = getProfileHandle(user);
-  const role = getRoleLabel(user?.roleId);
+  const updateUser = useAuthStore((state) => state.updateUser);
+  const [form, setForm] = useState({
+    alias: '',
+    firstName: '',
+    lastName: '',
+    ageGroup: '',
+    gender: '',
+    educationLevel: '',
+    occupation: '',
+    bio: ''
+  });
+
+  useEffect(() => {
+    setForm({
+      alias: user?.alias ?? '',
+      firstName: user?.firstName ?? '',
+      lastName: user?.lastName ?? '',
+      ageGroup: user?.ageGroup ?? '',
+      gender: user?.gender ?? '',
+      educationLevel: user?.educationLevel ?? '',
+      occupation: user?.occupation ?? '',
+      bio: user?.bio ?? ''
+    });
+  }, [user]);
+
+  function handleSave(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    updateUser({
+      alias: form.alias || undefined,
+      firstName: form.firstName || undefined,
+      lastName: form.lastName || undefined,
+      ageGroup: form.ageGroup || undefined,
+      gender: form.gender || undefined,
+      educationLevel: form.educationLevel || undefined,
+      occupation: form.occupation || undefined,
+      bio: form.bio || undefined
+    });
+
+    toast.success('Profile updated.');
+  }
 
   return (
-    <div className="grid gap-5 xl:grid-cols-[320px_minmax(0,1fr)]">
-      <div className="space-y-5">
-        <Card className="bg-white">
-          <CardContent className="pt-6">
-            <div className="flex flex-col items-start gap-4">
-              <Avatar className="size-20">
-                <AvatarFallback className="bg-primary text-primary-foreground text-xl font-semibold">{initials}</AvatarFallback>
-              </Avatar>
-
-              <div className="min-w-0">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h1 className="text-2xl font-semibold">{displayName}</h1>
-                  <Badge variant="secondary">{role}</Badge>
-                </div>
-                <p className="text-muted-foreground mt-1 text-sm">{handle}</p>
-                <p className="mt-3 text-sm leading-6 text-neutral-700">{user?.bio || 'No bio added yet.'}</p>
-              </div>
-
-              <div className="grid w-full grid-cols-2 gap-3">
-                <div className="rounded-xl border border-border p-3">
-                  <p className="text-muted-foreground text-xs">Status</p>
-                  <p className="mt-1 text-sm font-semibold">{user?.doneOnboarding ? 'Active' : 'Setup pending'}</p>
-                </div>
-                <div className="rounded-xl border border-border p-3">
-                  <p className="text-muted-foreground text-xs">Events</p>
-                  <p className="mt-1 text-sm font-semibold">0 attended</p>
-                </div>
-              </div>
+    <SettingsShell title="Profile" description="Update your personal information.">
+      <form className="space-y-6" onSubmit={handleSave}>
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="space-y-2 md:col-span-2">
+            <label className="text-sm font-medium" htmlFor="email">
+              Email
+            </label>
+            <div className="relative">
+              <Mail className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
+              <Input id="email" value={user?.email ?? ''} className="pl-9" readOnly />
             </div>
-          </CardContent>
-        </Card>
+          </div>
 
-        <Card className="bg-white">
-          <CardHeader>
-            <CardTitle>Settings shortcuts</CardTitle>
-            <CardDescription>Quick access to common account actions.</CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-3">
-            <Button asChild variant="outline" className="justify-start">
-              <Link href="/forgot-password">Change Password</Link>
-            </Button>
-            <Button variant="outline" className="justify-start" disabled>
-              Login History
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium" htmlFor="alias">
+              Alias
+            </label>
+            <Input id="alias" value={form.alias} onChange={(event) => setForm((current) => ({ ...current, alias: event.target.value }))} />
+          </div>
 
-      <div className="space-y-5">
-        <div className="grid gap-5 lg:grid-cols-2">
-          <Card className="bg-white">
-            <CardHeader>
-              <CardTitle>Account</CardTitle>
-              <CardDescription>Basic account details from the current session.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-2 text-sm font-medium">
-                <Mail className="text-muted-foreground size-4" />
-                {user?.email || 'No email found'}
-              </div>
-              <Separator className="my-3" />
-              <InfoRow label="Alias" value={user?.alias || 'Not set'} />
-              <Separator />
-              <InfoRow label="First name" value={user?.firstName || 'Not set'} />
-              <Separator />
-              <InfoRow label="Last name" value={user?.lastName || 'Not set'} />
-              <Separator />
-              <InfoRow label="Role" value={role} />
-            </CardContent>
-          </Card>
+          <div className="space-y-2">
+            <label className="text-sm font-medium" htmlFor="occupation">
+              Occupation
+            </label>
+            <Input
+              id="occupation"
+              value={form.occupation}
+              onChange={(event) => setForm((current) => ({ ...current, occupation: event.target.value }))}
+            />
+          </div>
 
-          <Card className="bg-white">
-            <CardHeader>
-              <CardTitle>Profile details</CardTitle>
-              <CardDescription>Extra information currently available on the token payload.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-2 text-sm font-medium">
-                <UserRound className="text-muted-foreground size-4" />
-                {displayName}
-              </div>
-              <Separator className="my-3" />
-              <InfoRow label="Age group" value={humanizeProfileValue(user?.ageGroup)} />
-              <Separator />
-              <InfoRow label="Gender" value={humanizeProfileValue(user?.gender)} />
-              <Separator />
-              <InfoRow label="Education" value={humanizeProfileValue(user?.educationLevel)} />
-              <Separator />
-              <InfoRow label="Occupation" value={user?.occupation || 'Not set'} />
-            </CardContent>
-          </Card>
+          <div className="space-y-2">
+            <label className="text-sm font-medium" htmlFor="first-name">
+              First name
+            </label>
+            <Input
+              id="first-name"
+              value={form.firstName}
+              onChange={(event) => setForm((current) => ({ ...current, firstName: event.target.value }))}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium" htmlFor="last-name">
+              Last name
+            </label>
+            <Input
+              id="last-name"
+              value={form.lastName}
+              onChange={(event) => setForm((current) => ({ ...current, lastName: event.target.value }))}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Age group</label>
+            <Select value={form.ageGroup} onValueChange={(value) => setForm((current) => ({ ...current, ageGroup: value }))}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select age group" />
+              </SelectTrigger>
+              <SelectContent>
+                {ageGroupOptions.map((option) => (
+                  <SelectItem key={option} value={option}>
+                    {humanizeProfileValue(option)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Gender</label>
+            <Select value={form.gender} onValueChange={(value) => setForm((current) => ({ ...current, gender: value }))}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select gender" />
+              </SelectTrigger>
+              <SelectContent>
+                {genderOptions.map((option) => (
+                  <SelectItem key={option} value={option}>
+                    {humanizeProfileValue(option)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2 md:col-span-2">
+            <label className="text-sm font-medium">Education</label>
+            <Select value={form.educationLevel} onValueChange={(value) => setForm((current) => ({ ...current, educationLevel: value }))}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select education" />
+              </SelectTrigger>
+              <SelectContent>
+                {educationOptions.map((option) => (
+                  <SelectItem key={option} value={option}>
+                    {humanizeProfileValue(option)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2 md:col-span-2">
+            <label className="text-sm font-medium" htmlFor="bio">
+              Bio
+            </label>
+            <Textarea
+              id="bio"
+              value={form.bio}
+              onChange={(event) => setForm((current) => ({ ...current, bio: event.target.value }))}
+              placeholder="Tell people a little about yourself"
+              rows={5}
+            />
+          </div>
         </div>
 
-        <Card className="bg-white">
-          <CardHeader>
-            <CardTitle>Attended events</CardTitle>
-            <CardDescription>Placeholder section for the member&apos;s event history.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-3 md:grid-cols-3">
-              <div className="rounded-xl border border-dashed border-border p-4">
-                <div className="flex items-center gap-2">
-                  <CalendarDays className="text-muted-foreground size-4" />
-                  <p className="text-sm font-medium">Recent events</p>
-                </div>
-                <p className="text-muted-foreground mt-2 text-sm">No events yet.</p>
-              </div>
-              <div className="rounded-xl border border-dashed border-border p-4">
-                <p className="text-sm font-medium">Upcoming activity</p>
-                <p className="text-muted-foreground mt-2 text-sm">This area can show registrations and reminders.</p>
-              </div>
-              <div className="rounded-xl border border-dashed border-border p-4">
-                <p className="text-sm font-medium">Participation summary</p>
-                <p className="text-muted-foreground mt-2 text-sm">Attendance stats can live here once connected.</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+        <Button type="submit">Save changes</Button>
+      </form>
+    </SettingsShell>
   );
 }

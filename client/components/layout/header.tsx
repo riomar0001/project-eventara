@@ -147,7 +147,7 @@ export function Header() {
                 <User className="size-4" />
                 Profile
               </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer py-3">
+              <DropdownMenuItem className="cursor-pointer py-3" onClick={() => router.push('/security')}>
                 <Shield className="size-4" />
                 Security
               </DropdownMenuItem>

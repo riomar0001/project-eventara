@@ -21,6 +21,6 @@ export const dashboardNavItems = [
 ];
 
 export const dashboardBottomNavItems = [
-  { label: 'Settings', icon: Settings, href: '#' },
+  { label: 'Settings', icon: Settings, href: '/profile' },
   { label: 'Support', icon: Headphones, href: '#' }
 ];
