@@ -1,15 +1,10 @@
 'use client';
 
 import { ChevronDown } from 'lucide-react';
+import { PROFILE_AGE_GROUP_OPTIONS, PROFILE_EDUCATION_LEVEL_OPTIONS, PROFILE_GENDER_OPTIONS } from '@/constants/profile';
+import type { AboutFields } from '@/hooks/use-onboarding-form';
 import { OptionCard } from './option-card';
-import { AGE_GROUP_OPTIONS, EDUCATION_LEVEL_OPTIONS, GENDER_OPTIONS } from '@/constants/onboarding';
 import { cn } from '@/lib/utils';
-
-export interface AboutFields {
-  age_group: string;
-  gender: string;
-  education_level: string;
-}
 
 interface StepAboutProps {
   values: AboutFields;
@@ -24,7 +19,7 @@ export function StepAbout({ values, onChange, errors }: StepAboutProps) {
       <div className="flex flex-col gap-2">
         <span className="text-sm font-medium">Age group</span>
         <div className="grid grid-cols-4 gap-2">
-          {AGE_GROUP_OPTIONS.map((opt) => (
+          {PROFILE_AGE_GROUP_OPTIONS.map((opt) => (
             <OptionCard
               key={opt.value}
               value={opt.value}
@@ -42,7 +37,7 @@ export function StepAbout({ values, onChange, errors }: StepAboutProps) {
       <div className="flex flex-col gap-2">
         <span className="text-sm font-medium">Gender</span>
         <div className="grid grid-cols-2 gap-2">
-          {GENDER_OPTIONS.map((opt) => (
+          {PROFILE_GENDER_OPTIONS.map((opt) => (
             <OptionCard key={opt.value} value={opt.value} label={opt.label} selected={values.gender === opt.value} onSelect={(v) => onChange({ gender: v })} />
           ))}
         </div>
@@ -70,7 +65,7 @@ export function StepAbout({ values, onChange, errors }: StepAboutProps) {
             <option value="" disabled>
               Select your education level
             </option>
-            {EDUCATION_LEVEL_OPTIONS.map((opt) => (
+            {PROFILE_EDUCATION_LEVEL_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>
                 {opt.label}
               </option>

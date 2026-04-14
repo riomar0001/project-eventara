@@ -1,13 +1,10 @@
 'use client';
 
+import { PROFILE_BIO_MAX_LENGTH, PROFILE_OCCUPATION_MAX_LENGTH } from '@/constants/profile';
+import type { ProfileFields } from '@/hooks/use-onboarding-form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
-
-export interface ProfileFields {
-  occupation: string;
-  bio: string;
-}
 
 interface StepProfileProps {
   values: ProfileFields;
@@ -33,7 +30,7 @@ export function StepProfile({ values, onChange, errors }: StepProfileProps) {
           id="occupation"
           placeholder="e.g. Software Engineer"
           value={values.occupation}
-          maxLength={150}
+          maxLength={PROFILE_OCCUPATION_MAX_LENGTH}
           onChange={(e) => onChange({ occupation: e.target.value })}
           aria-invalid={!!errors.occupation || undefined}
           className="text-sm"
@@ -51,13 +48,15 @@ export function StepProfile({ values, onChange, errors }: StepProfileProps) {
           <label htmlFor="bio" className="text-sm font-medium">
             Bio
           </label>
-          <span className={cn('text-xs tabular-nums transition-colors', bioNearLimit ? 'text-amber-500' : 'text-muted-foreground')}>{bioLength} / 500</span>
+          <span className={cn('text-xs tabular-nums transition-colors', bioNearLimit ? 'text-amber-500' : 'text-muted-foreground')}>
+            {bioLength} / {PROFILE_BIO_MAX_LENGTH}
+          </span>
         </div>
         <Textarea
           id="bio"
           placeholder="Tell others a little about yourself…"
           value={values.bio}
-          maxLength={500}
+          maxLength={PROFILE_BIO_MAX_LENGTH}
           rows={8}
           onChange={(e) => onChange({ bio: e.target.value })}
           aria-invalid={!!errors.bio || undefined}

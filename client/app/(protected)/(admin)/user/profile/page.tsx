@@ -1,6 +1,6 @@
 'use client';
 
-import { CalendarDays, Clock3, Mail, MapPin, PencilLine, ShieldCheck, Sparkles, Ticket, UserRound } from 'lucide-react';
+import { CalendarDays, Clock3, MapPin, PencilLine, ShieldCheck, Sparkles, Ticket } from 'lucide-react';
 import Link from 'next/link';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';

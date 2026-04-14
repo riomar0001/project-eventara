@@ -1,3 +1,4 @@
+import { PROFILE_COMPLETION_FIELDS } from '@/constants/profile';
 import type { AuthUser } from '@/lib/token';
 
 export function getDisplayName(user: AuthUser | null | undefined) {
@@ -63,8 +64,7 @@ export function humanizeProfileValue(value: string | undefined) {
 export function getProfileCompletion(user: AuthUser | null | undefined) {
   if (!user) return 0;
 
-  const trackedFields = [user.alias, user.firstName, user.lastName, user.occupation, user.bio, user.ageGroup, user.gender, user.educationLevel];
-  const completedFields = trackedFields.filter((field) => Boolean(field && String(field).trim())).length;
+  const completedFields = PROFILE_COMPLETION_FIELDS.filter((field) => Boolean(user[field] && String(user[field]).trim())).length;
 
-  return Math.round((completedFields / trackedFields.length) * 100);
+  return Math.round((completedFields / PROFILE_COMPLETION_FIELDS.length) * 100);
 }
