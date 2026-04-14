@@ -441,6 +441,70 @@ export type ListDeadJobsResponse = {
 };
 
 /**
+ * LoginHistoryEntryResponse
+ */
+export type LoginHistoryEntryResponse = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Ip Address
+     */
+    ip_address?: string | null;
+    /**
+     * User Agent
+     */
+    user_agent?: string | null;
+    /**
+     * Browser
+     */
+    browser?: string | null;
+    /**
+     * Os
+     */
+    os?: string | null;
+    /**
+     * Device Type
+     */
+    device_type?: string | null;
+    /**
+     * City
+     */
+    city?: string | null;
+    /**
+     * Region
+     */
+    region?: string | null;
+    /**
+     * Country
+     */
+    country?: string | null;
+    /**
+     * Successful
+     */
+    successful?: boolean;
+    /**
+     * Created At
+     */
+    created_at: string;
+};
+
+/**
+ * LoginHistoryListResponse
+ */
+export type LoginHistoryListResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Data
+     */
+    data: Array<LoginHistoryEntryResponse>;
+};
+
+/**
  * LoginInitResponse
  */
 export type LoginInitResponse = {
@@ -1572,6 +1636,40 @@ export type ResetPasswordAuthResetPasswordTokenPostResponses = {
 };
 
 export type ResetPasswordAuthResetPasswordTokenPostResponse = ResetPasswordAuthResetPasswordTokenPostResponses[keyof ResetPasswordAuthResetPasswordTokenPostResponses];
+
+export type GetLoginHistoryUserLoginHistoryGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Limit
+         */
+        limit?: number;
+    };
+    url: '/user/login-history';
+};
+
+export type GetLoginHistoryUserLoginHistoryGetErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetLoginHistoryUserLoginHistoryGetError = GetLoginHistoryUserLoginHistoryGetErrors[keyof GetLoginHistoryUserLoginHistoryGetErrors];
+
+export type GetLoginHistoryUserLoginHistoryGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: LoginHistoryListResponse;
+};
+
+export type GetLoginHistoryUserLoginHistoryGetResponse = GetLoginHistoryUserLoginHistoryGetResponses[keyof GetLoginHistoryUserLoginHistoryGetResponses];
 
 export type CheckAliasUserCheckAliasGetData = {
     body?: never;
