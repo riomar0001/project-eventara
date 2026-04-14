@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { z } from 'zod';
-import { client } from '@/api/client.gen';
-import { LOGIN_HISTORY_ENDPOINT, LOGIN_HISTORY_LIMIT } from '@/constants/login-history';
+import { User } from '@/api';
 import { getAccessToken } from '@/store/auth-store';
 
 const loginHistoryEntrySchema = z.object({
@@ -27,6 +26,8 @@ const loginHistoryResponseSchema = z.object({
 
 export type LoginHistoryEntry = z.infer<typeof loginHistoryEntrySchema>;
 
+const DEFAULT_LOGIN_HISTORY_LIMIT = 10;
+
 function getErrorMessage(error: unknown) {
   if (typeof error === 'string') return error;
 
@@ -47,7 +48,7 @@ function getErrorMessage(error: unknown) {
   return 'Unable to load login history right now.';
 }
 
-export function useLoginHistory(limit: number = LOGIN_HISTORY_LIMIT) {
+export function useLoginHistory(limit: number = DEFAULT_LOGIN_HISTORY_LIMIT) {
   const [entries, setEntries] = useState<LoginHistoryEntry[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -71,14 +72,19 @@ export function useLoginHistory(limit: number = LOGIN_HISTORY_LIMIT) {
       setError(null);
 
       try {
-        const response = await client.instance.get(LOGIN_HISTORY_ENDPOINT, {
-          params: { limit },
+        const result = await User.getLoginHistoryUserLoginHistoryGet({
+          query: { limit },
           headers: {
             Authorization: `Bearer ${accessToken}`
-          }
+          },
+          throwOnError: false
         });
 
-        const parsed = loginHistoryResponseSchema.parse(response.data);
+        if (!result.data) {
+          throw result.error ?? new Error('Unable to load login history right now.');
+        }
+
+        const parsed = loginHistoryResponseSchema.parse(result.data);
 
         if (!cancelled) {
           setEntries(parsed.data);

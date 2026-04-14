@@ -123,7 +123,7 @@ export default function UserProfilePage() {
             </div>
 
             <Button asChild className="mt-6 w-full">
-              <Link href="/user/settings/profile">
+              <Link href="/admin/user/settings/profile">
                 <PencilLine className="size-4" />
                 Edit profile
               </Link>
@@ -146,7 +146,7 @@ export default function UserProfilePage() {
                   <p className="text-muted-foreground mt-1 text-sm">Your personal details and profile information.</p>
                 </div>
                 <Button asChild size="xs" variant="outline">
-                  <Link href="/user/settings/profile">
+                  <Link href="/admin/user/settings/profile">
                     Edit
                     <PencilLine className="size-3" />
                   </Link>

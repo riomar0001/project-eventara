@@ -32,7 +32,7 @@ export default function VerifyEmailPage() {
 
         setAuth(result.data.access_token, result.data.refresh_token, user);
         setState('success');
-        setTimeout(() => router.replace('/dashboard'), 1800);
+        setTimeout(() => router.replace('/admin/dashboard'), 1800);
         return;
       }
       const status = (result as { response?: { status?: number } }).response?.status;

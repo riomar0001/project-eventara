@@ -52,7 +52,7 @@ export default function OnboardPage() {
             </p>
           </div>
 
-          <Button className="w-full" onClick={() => router.replace('/dashboard')}>
+          <Button className="w-full" onClick={() => router.replace('/admin/dashboard')}>
             Go to dashboard
             <ArrowRight className="size-4" />
           </Button>

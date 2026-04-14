@@ -20,7 +20,7 @@ export default function LoginPage() {
       const { accessToken, user } = useAuthStore.getState();
 
       if (!!accessToken && !!user && user.doneOnboarding) {
-        router.replace('/dashboard');
+        router.replace('/admin/dashboard');
         return;
       }
 
