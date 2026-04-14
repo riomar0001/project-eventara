@@ -1,7 +1,7 @@
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.application.dto.user_dto import ChangePasswordInput, UserOnboardingInput, UserOnboardingOutput
+from app.application.dto.user_dto import ChangePasswordInput, GetLoginHistoryInput, GetLoginHistoryOutput, UserOnboardingInput, UserOnboardingOutput
 from app.application.interfaces.user_interface import IUserRepository
 from app.core.security.hashing import hash_string, verify_hash
 from app.domain.entities.user_entity import UserProfile, UserStatus
@@ -195,3 +195,14 @@ class ChangePasswordUseCase:
 
         token_repo = RefreshTokenRepository(self.db)
         await token_repo.revoke_all_for_user(data.user_id)
+
+
+class GetLoginHistoryUseCase:
+    """Retrieves recent login history entries for the authenticated user."""
+
+    def __init__(self, repo: IUserRepository) -> None:
+        self.repo = repo
+
+    async def execute(self, data: GetLoginHistoryInput) -> GetLoginHistoryOutput:
+        entries = await self.repo.get_login_history(data.user_id, data.limit)
+        return GetLoginHistoryOutput(entries=entries)

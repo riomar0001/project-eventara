@@ -4,38 +4,16 @@ import { AlertCircle, CheckCircle2, Loader2, Mail, RotateCcw, Save, XCircle } fr
 import { FieldHint } from '@/components/shared/field-hint';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { PROFILE_AGE_GROUP_OPTIONS, PROFILE_EDUCATION_LEVEL_OPTIONS, PROFILE_GENDER_OPTIONS } from '@/constants/profile';
 import { useProfileSettingsForm } from '@/hooks/use-profile-settings-form';
+import { PROFILE_AGE_GROUP_OPTIONS, PROFILE_EDUCATION_LEVEL_OPTIONS, PROFILE_GENDER_OPTIONS } from '@/constants/profile';
 
 export default function ProfileSettingsPage() {
-  const { aliasHint, aliasStatus, completionValue, errors, form, handleReset, handleSubmit, isOnboarded, isSubmitting, setField, user } = useProfileSettingsForm();
+  const { aliasHint, aliasStatus, errors, form, handleReset, handleSubmit, isOnboarded, isSubmitting, setField, user } = useProfileSettingsForm();
 
   return (
-    <div className="space-y-6">
-      <div className="rounded-2xl border bg-neutral-50 p-5">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div className="space-y-2">
-            <p className="text-sm font-medium">{isOnboarded ? 'Profile settings' : 'Complete your profile'}</p>
-            <p className="text-muted-foreground max-w-2xl text-sm">
-              {isOnboarded
-                ? 'Alias validation is wired to the live API. Profile edits are still stored in the current session until the backend exposes an update-profile endpoint.'
-                : 'Finishing this form will call the onboarding API and write your profile to the server.'}
-            </p>
-          </div>
-
-          <div className="min-w-52 space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Profile completion</span>
-              <span className="font-medium">{completionValue}%</span>
-            </div>
-            <Progress value={completionValue} />
-          </div>
-        </div>
-      </div>
-
+    <div className="max-w-3xl space-y-6">
       <form className="space-y-6" onSubmit={handleSubmit}>
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2 md:col-span-2">
@@ -47,6 +25,22 @@ export default function ProfileSettingsPage() {
               <Input id="email" value={user?.email ?? ''} className="pl-9" readOnly />
             </div>
             <FieldHint hint="Your email is managed through account security and cannot be edited here." />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium" htmlFor="first-name">
+              First name
+            </label>
+            <Input id="first-name" value={form.firstName} onChange={(event) => setField('firstName', event.target.value)} autoComplete="given-name" />
+            <FieldHint error={errors.firstName} />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium" htmlFor="last-name">
+              Last name
+            </label>
+            <Input id="last-name" value={form.lastName} onChange={(event) => setField('lastName', event.target.value)} autoComplete="family-name" />
+            <FieldHint error={errors.lastName} />
           </div>
 
           <div className="space-y-2">
@@ -86,22 +80,6 @@ export default function ProfileSettingsPage() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium" htmlFor="first-name">
-              First name
-            </label>
-            <Input id="first-name" value={form.firstName} onChange={(event) => setField('firstName', event.target.value)} autoComplete="given-name" />
-            <FieldHint error={errors.firstName} />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium" htmlFor="last-name">
-              Last name
-            </label>
-            <Input id="last-name" value={form.lastName} onChange={(event) => setField('lastName', event.target.value)} autoComplete="family-name" />
-            <FieldHint error={errors.lastName} />
-          </div>
-
-          <div className="space-y-2">
             <label className="text-sm font-medium">Age group</label>
             <Select value={form.ageGroup} onValueChange={(value) => setField('ageGroup', value)}>
               <SelectTrigger className="w-full">
@@ -135,7 +113,7 @@ export default function ProfileSettingsPage() {
             <FieldHint error={errors.gender} />
           </div>
 
-          <div className="space-y-2 md:col-span-2">
+          <div className="space-y-2">
             <label className="text-sm font-medium">Education</label>
             <Select value={form.educationLevel} onValueChange={(value) => setField('educationLevel', value)}>
               <SelectTrigger className="w-full">

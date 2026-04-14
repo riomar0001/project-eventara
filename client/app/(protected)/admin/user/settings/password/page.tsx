@@ -64,7 +64,7 @@ export default function SecurityPage() {
   }
 
   return (
-    <form className="max-w-2xl space-y-4" onSubmit={handleChangePassword}>
+    <form className="max-w-3xl space-y-4" onSubmit={handleChangePassword}>
       <div className="space-y-2">
         <label className="text-sm font-medium" htmlFor="current-password">
           Current password

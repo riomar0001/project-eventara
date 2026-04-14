@@ -1,5 +1,6 @@
 import re
 import uuid
+from datetime import datetime
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -56,3 +57,24 @@ class ChangePasswordRequest(BaseModel):
 class ChangePasswordResponse(BaseModel):
     success: bool = True
     message: str = "Password changed successfully. All active sessions have been invalidated."
+
+
+class LoginHistoryEntryResponse(BaseModel):
+    id: uuid.UUID
+    ip_address: str | None = None
+    user_agent: str | None = None
+    browser: str | None = None
+    os: str | None = None
+    device_type: str | None = None
+    city: str | None = None
+    region: str | None = None
+    country: str | None = None
+    successful: bool = True
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class LoginHistoryListResponse(BaseModel):
+    success: bool = True
+    data: list[LoginHistoryEntryResponse]

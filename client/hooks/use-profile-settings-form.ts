@@ -1,9 +1,9 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { toast } from 'sonner';
+import { type AliasStatus, normalizeAlias, useAliasAvailability } from '@/hooks/use-alias-availability';
 import { User } from '@/api/sdk.gen';
 import type { AgeGroup, EducationLevel, Gender } from '@/api/types.gen';
 import { PROFILE_ALIAS_MIN_LENGTH, PROFILE_ALIAS_PATTERN, PROFILE_COMPLETION_FIELDS } from '@/constants/profile';
-import { type AliasStatus, normalizeAlias, useAliasAvailability } from '@/hooks/use-alias-availability';
 import { getProfileCompletion } from '@/lib/auth-user';
 import { decodeTokenUser } from '@/lib/token';
 import { type AuthUser, useAuthStore } from '@/store/auth-store';

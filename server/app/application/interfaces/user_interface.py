@@ -6,6 +6,7 @@ from app.domain.entities.user_entity import (
     PublicUser,
     User,
     UserActivity,
+    UserLoginHistory,
     UserProfile,
     UserSecurity,
 )
@@ -44,6 +45,21 @@ class IUserRepository(Protocol):
 
     async def reset_failed_login(self, user_id: uuid.UUID) -> None: ...
 
-    async def record_login(self, user_id: uuid.UUID) -> None: ...
+    async def record_login(
+        self,
+        user_id: uuid.UUID,
+        *,
+        ip_address: str | None = None,
+        user_agent: str | None = None,
+        browser: str | None = None,
+        os: str | None = None,
+        device_type: str | None = None,
+        city: str | None = None,
+        region: str | None = None,
+        country: str | None = None,
+        successful: bool = True,
+    ) -> None: ...
+
+    async def get_login_history(self, user_id: uuid.UUID, limit: int = 10) -> list[UserLoginHistory]: ...
 
     async def update_password(self, user_id: uuid.UUID, password_hash: str) -> bool: ...

@@ -1,3 +1,4 @@
+import re
 import uuid
 from datetime import UTC, datetime
 
@@ -94,6 +95,46 @@ class AuthUseCase:
         self.arq = arq
         self.otp_repo = otp_repo
         self.password_reset_repo = password_reset_repo
+
+    @staticmethod
+    def _parse_user_agent(user_agent: str | None) -> tuple[str | None, str | None, str | None]:
+        if not user_agent:
+            return None, None, None
+
+        ua = user_agent.lower()
+
+        if "edg/" in ua:
+            browser = "Microsoft Edge"
+        elif "chrome/" in ua and "chromium" not in ua:
+            browser = "Google Chrome"
+        elif "firefox/" in ua:
+            browser = "Mozilla Firefox"
+        elif "safari/" in ua and "chrome/" not in ua:
+            browser = "Safari"
+        else:
+            browser = None
+
+        if "windows" in ua:
+            os = "Windows"
+        elif "android" in ua:
+            os = "Android"
+        elif re.search(r"iphone|ipad|ipod", ua):
+            os = "iOS"
+        elif "mac os x" in ua or "macintosh" in ua:
+            os = "macOS"
+        elif "linux" in ua:
+            os = "Linux"
+        else:
+            os = None
+
+        if "ipad" in ua or "tablet" in ua:
+            device_type = "tablet"
+        elif "mobile" in ua or "iphone" in ua or "android" in ua:
+            device_type = "mobile"
+        else:
+            device_type = "desktop"
+
+        return browser, os, device_type
 
     async def _issue_access_token_for_user(self, user: User) -> str:
         """Create an access token enriched with profile claims when available."""
@@ -385,7 +426,15 @@ class AuthUseCase:
             raise UserNotFoundError()
 
         await self.repo.reset_failed_login(user_id)
-        await self.repo.record_login(user_id)
+        browser, os, device_type = self._parse_user_agent(data.user_agent)
+        await self.repo.record_login(
+            user_id,
+            ip_address=data.ip_address,
+            user_agent=data.user_agent,
+            browser=browser,
+            os=os,
+            device_type=device_type,
+        )
 
         access_token = await self._issue_access_token_for_user(user)
         refresh_token = await create_refresh_token(user.id, self.db)

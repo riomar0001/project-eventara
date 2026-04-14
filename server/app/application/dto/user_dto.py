@@ -5,6 +5,7 @@ from app.domain.entities.user_entity import (
     AgeGroup,
     EducationLevel,
     Gender,
+    UserLoginHistory,
     UserProfile,
 )
 
@@ -32,3 +33,14 @@ class ChangePasswordInput:
     user_id: uuid.UUID
     current_password: str
     new_password: str
+
+
+@dataclass
+class GetLoginHistoryInput:
+    user_id: uuid.UUID
+    limit: int = 10
+
+
+@dataclass
+class GetLoginHistoryOutput:
+    entries: list[UserLoginHistory]

@@ -14,7 +14,7 @@ export default function DeleteAccountPage() {
   }
 
   return (
-    <div className="space-y-5">
+    <div className="max-w-3xl space-y-5">
       <div className="rounded-2xl border border-red-200 bg-red-50 p-5">
         <div className="flex items-start gap-3">
           <AlertTriangle className="mt-0.5 size-4 shrink-0 text-red-600" />
@@ -26,7 +26,7 @@ export default function DeleteAccountPage() {
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium" htmlFor="delete-confirmation">
+        <label className="text-sm" htmlFor="delete-confirmation">
           Type <span className="font-semibold">DELETE</span> to confirm
         </label>
         <Input id="delete-confirmation" value={confirmation} onChange={(event) => setConfirmation(event.target.value)} placeholder="Type DELETE" />

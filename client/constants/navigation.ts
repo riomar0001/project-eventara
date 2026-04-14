@@ -1,8 +1,8 @@
 import { LayoutDashboard, User, ArrowLeftRight, Waves, Wallet, TrendingUp, Headphones, Settings, FlaskConical, MapPin } from 'lucide-react';
 
 export const dashboardNavItems = [
-  { label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
-  { label: 'Profile', icon: User, href: '/user/profile' },
+  { label: 'Dashboard', icon: LayoutDashboard, href: '/admin/dashboard' },
+  { label: 'Profile', icon: User, href: '/admin/user/profile' },
   {
     label: 'Transactions',
     icon: ArrowLeftRight,
@@ -21,6 +21,6 @@ export const dashboardNavItems = [
 ];
 
 export const dashboardBottomNavItems = [
-  { label: 'Settings', icon: Settings, href: '/user/settings/profile' },
+  { label: 'Settings', icon: Settings, href: '/admin/user/settings/profile' },
   { label: 'Support', icon: Headphones, href: '#' }
 ];

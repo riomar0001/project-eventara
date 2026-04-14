@@ -6,8 +6,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { getDisplayName, getInitials, getProfileCompletion, getProfileHandle, getRoleLabel, humanizeProfileValue } from '@/lib/auth-user';
+import { getDisplayName, getInitials, getProfileHandle, getRoleLabel, humanizeProfileValue } from '@/lib/auth-user';
 import { useAuthStore } from '@/store/auth-store';
 
 const profileEvents = [
@@ -51,7 +50,7 @@ const profileEvents = [
 
 function InfoTile({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border bg-white/70 p-4">
+    <div className="rounded-xl border bg-neutral-100 p-2">
       <p className="text-muted-foreground text-xs font-medium tracking-[0.18em] uppercase">{label}</p>
       <p className="mt-2 text-sm font-medium">{value}</p>
     </div>
@@ -62,7 +61,7 @@ function DetailRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="min-w-0">
       <p className="text-muted-foreground text-xs">{label}</p>
-      <p className="mt-2 text-sm font-medium break-words text-neutral-900">{value}</p>
+      <p className="mt-2 text-sm font-medium wrap-break-word text-neutral-900">{value}</p>
     </div>
   );
 }
@@ -92,15 +91,14 @@ export default function UserProfilePage() {
   const initials = getInitials(user);
   const handle = getProfileHandle(user);
   const roleLabel = getRoleLabel(user.roleId);
-  const completion = getProfileCompletion(user);
 
   return (
     <div className="space-y-6">
       <div className="grid gap-6 xl:grid-cols-[320px_minmax(0,1fr)]">
-        <Card className="border-0 bg-linear-to-b from-white via-neutral-50 to-sky-50/60 shadow-none ring-1 ring-neutral-200">
+        <Card className="border-0 bg-linear-to-b from-lime-50 via-neutral-50 to-amber-100/60 shadow-none ring-1 ring-neutral-200">
           <CardContent className="flex h-full flex-col px-6 py-7">
             <div className="flex flex-col items-center text-center">
-              <Avatar size="lg" className="size-24 shadow-sm">
+              <Avatar className="size-32 shadow-sm">
                 <AvatarFallback className="bg-white text-2xl font-semibold">{initials}</AvatarFallback>
               </Avatar>
 
@@ -136,30 +134,18 @@ export default function UserProfilePage() {
               <InfoTile label="Gender" value={humanizeProfileValue(user.gender)} />
               <InfoTile label="Profile status" value={user.doneOnboarding ? 'Ready to join events' : 'Complete your setup'} />
             </div>
-
-            <div className="mt-6 rounded-2xl border bg-white/80 p-4">
-              <div className="mb-2 flex items-center justify-between gap-3">
-                <span className="text-sm font-medium">Profile completion</span>
-                <span className="text-sm font-semibold">{completion}%</span>
-              </div>
-              <Progress value={completion} />
-              <p className="text-muted-foreground mt-3 text-sm">
-                {user.doneOnboarding
-                  ? 'Your profile information is ready for upcoming event activity.'
-                  : 'Finish the remaining fields to unlock the full profile experience.'}
-              </p>
-            </div>
           </CardContent>
         </Card>
 
         <div className="space-y-6">
           <Card className="border-0 shadow-none ring-1 ring-neutral-200">
-            <CardHeader className="border-b pb-5">
+            <CardHeader>
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <CardTitle className="text-emerald-900">Personal Information</CardTitle>
+                  <CardTitle className="text-xl font-medium">Personal Information</CardTitle>
+                  <p className="text-muted-foreground mt-1 text-sm">Your personal details and profile information.</p>
                 </div>
-                <Button asChild size="xs" className="bg-orange-500 text-white hover:bg-orange-500/90">
+                <Button asChild size="xs" variant="outline">
                   <Link href="/user/settings/profile">
                     Edit
                     <PencilLine className="size-3" />
@@ -168,7 +154,7 @@ export default function UserProfilePage() {
               </div>
             </CardHeader>
 
-            <CardContent className="pt-6">
+            <CardContent>
               <div className="grid gap-x-10 gap-y-8 md:grid-cols-2 xl:grid-cols-3">
                 <DetailRow label="First Name" value={user.firstName ?? 'Not set'} />
                 <DetailRow label="Last Name" value={user.lastName ?? 'Not set'} />
@@ -189,10 +175,10 @@ export default function UserProfilePage() {
           </Card>
 
           <Card className="border-0 shadow-none ring-1 ring-neutral-200">
-            <CardHeader className="border-b">
+            <CardHeader className="">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <CardTitle>Events</CardTitle>
+                  <CardTitle className="text-xl font-medium">Events</CardTitle>
                   <p className="text-muted-foreground mt-1 text-sm">Recent and upcoming event activity arranged in a client-profile style list.</p>
                 </div>
                 <Badge variant="outline" className="w-fit gap-1">
@@ -210,9 +196,9 @@ export default function UserProfilePage() {
                     className="flex flex-col gap-4 rounded-2xl px-2 py-4 transition-colors hover:bg-neutral-50 sm:flex-row sm:items-center"
                   >
                     <div className="flex items-center gap-4 sm:w-28 sm:flex-none">
-                      <div className="rounded-2xl border bg-white px-3 py-2 text-center shadow-xs">
-                        <div className="text-muted-foreground text-[10px] font-semibold tracking-[0.18em]">{event.month}</div>
-                        <div className="text-lg font-semibold">{event.day}</div>
+                      <div className="flex size-12.5 flex-col items-center justify-center overflow-hidden rounded-2xl border bg-amber-100 text-center shadow-xs">
+                        <div className="text-muted-foreground w-full border-b text-[10px] font-semibold tracking-[0.18em]">{event.month}</div>
+                        <div className="h-full w-full bg-white text-lg font-semibold">{event.day}</div>
                       </div>
                       <div className="sm:hidden">
                         <EventStatusBadge status={event.status} />
@@ -238,10 +224,6 @@ export default function UserProfilePage() {
                         <div className="flex items-center gap-3">
                           <div className="hidden sm:block">
                             <EventStatusBadge status={event.status} />
-                          </div>
-                          <div className="text-right">
-                            <p className="text-sm font-semibold">{event.fee}</p>
-                            <p className="text-muted-foreground text-xs">entry</p>
                           </div>
                         </div>
                       </div>

@@ -3,10 +3,10 @@ import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
-from app.application.dto.user_dto import ChangePasswordInput, UserOnboardingInput
-from app.application.use_cases.user_usecase import ChangePasswordUseCase, CheckAliasUseCase, OnboardingUseCase
+from app.application.dto.user_dto import ChangePasswordInput, GetLoginHistoryInput, UserOnboardingInput
+from app.application.use_cases.user_usecase import ChangePasswordUseCase, CheckAliasUseCase, GetLoginHistoryUseCase, OnboardingUseCase
 from app.controller.dependencies import get_current_user_id, get_onboarding_use_case
-from app.controller.dependencies.use_cases_depends import get_change_password_use_case, get_check_alias_use_case
+from app.controller.dependencies.use_cases_depends import get_change_password_use_case, get_check_alias_use_case, get_login_history_use_case
 from app.controller.docs.user_docs import (
     ALIAS_CHECK_UNAUTHORIZED,
     CHANGE_PASSWORD_VALIDATION_ERROR,
@@ -22,6 +22,8 @@ from app.controller.schemas.user_schema import (
     ChangePasswordRequest,
     ChangePasswordResponse,
     CheckAliasResponse,
+    LoginHistoryEntryResponse,
+    LoginHistoryListResponse,
     UserOnboardingRequest,
     UserOnboardingResponse,
 )
@@ -39,6 +41,23 @@ from app.domain.exceptions.user_exceptions import (
 _ALIAS_RE = re.compile(r"^[a-z0-9_]+$")
 
 router = APIRouter(prefix="/user", tags=["User"])
+
+
+@router.get(
+    "/login-history",
+    response_model=LoginHistoryListResponse,
+    status_code=status.HTTP_200_OK,
+    responses={**UNAUTHORIZED},
+    summary="Retrieve recent login history",
+    description="Returns recent successful sign-ins for the authenticated user, newest first.",
+)
+async def get_login_history(
+    limit: int = Query(default=10, ge=1, le=50),
+    user_id: uuid.UUID = Depends(get_current_user_id),
+    use_case: GetLoginHistoryUseCase = Depends(get_login_history_use_case),
+) -> LoginHistoryListResponse:
+    result = await use_case.execute(GetLoginHistoryInput(user_id=user_id, limit=limit))
+    return LoginHistoryListResponse(data=[LoginHistoryEntryResponse.model_validate(entry) for entry in result.entries])
 
 
 @router.get(

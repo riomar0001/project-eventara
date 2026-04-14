@@ -2,9 +2,9 @@
 
 import { AlertCircle, CheckCircle2, Loader2, XCircle } from 'lucide-react';
 import { FieldHint } from '@/components/shared/field-hint';
+import { Input } from '@/components/ui/input';
 import type { AliasStatus } from '@/hooks/use-alias-availability';
 import type { IdentityFields } from '@/hooks/use-onboarding-form';
-import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 
 interface StepIdentityProps {

@@ -38,6 +38,8 @@ class LoginOutput:
 class LoginVerifyInput:
     token: str
     code: str
+    ip_address: str | None = None
+    user_agent: str | None = None
 
 
 @dataclass
