@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Search, Bell, Settings, User, LogOut, Shield, ChevronDown } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { Authentication } from '@/api/sdk.gen';
+import { toast } from 'sonner';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -17,10 +17,10 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { SidebarTrigger } from '@/components/ui/sidebar';
+import { Authentication } from '@/api/sdk.gen';
 import { notifications } from '@/constants/notifications';
 import { getDisplayName, getInitials } from '@/lib/auth-user';
 import { useAuthStore } from '@/store/auth-store';
-import { toast } from 'sonner';
 
 export function Header() {
   const router = useRouter();

@@ -25,7 +25,12 @@ export function getInitials(user: AuthUser | null | undefined) {
   if (fromNames) return fromNames;
 
   if (user.alias) {
-    return user.alias.replace(/[^a-zA-Z0-9]/g, '').slice(0, 2).toUpperCase() || 'UA';
+    return (
+      user.alias
+        .replace(/[^a-zA-Z0-9]/g, '')
+        .slice(0, 2)
+        .toUpperCase() || 'UA'
+    );
   }
 
   if (user.email) {
@@ -43,9 +48,7 @@ export function getProfileHandle(user: AuthUser | null | undefined) {
 
 export function getRoleLabel(roleId: string | undefined) {
   if (!roleId) return 'Member';
-  return roleId
-    .replace(/[_-]+/g, ' ')
-    .replace(/\b\w/g, (char) => char.toUpperCase());
+  return roleId.replace(/[_-]+/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
 export function humanizeProfileValue(value: string | undefined) {

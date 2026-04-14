@@ -84,19 +84,16 @@ export function OtpInput({ value, onChange, focusedIndex, onFocusChange, hasErro
     inputRefs.current[clamped]?.focus();
   };
 
-  const focusAndSelectCell = useCallback(
-    (index: number) => {
-      const clamped = Math.max(0, Math.min(OTP_LENGTH - 1, index));
-      const el = inputRefs.current[clamped];
-      if (!el) return;
+  const focusAndSelectCell = useCallback((index: number) => {
+    const clamped = Math.max(0, Math.min(OTP_LENGTH - 1, index));
+    const el = inputRefs.current[clamped];
+    if (!el) return;
 
-      requestAnimationFrame(() => {
-        el.focus();
-        el.select();
-      });
-    },
-    []
-  );
+    requestAnimationFrame(() => {
+      el.focus();
+      el.select();
+    });
+  }, []);
 
   // Select-all on focus so typing over an existing digit replaces it cleanly
   useEffect(() => {
