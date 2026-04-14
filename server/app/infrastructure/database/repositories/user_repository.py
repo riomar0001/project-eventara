@@ -11,6 +11,7 @@ from app.domain.entities.user_entity import (
     AgeGroup,
     EducationLevel,
     Gender,
+    UserLoginHistory as DomainUserLoginHistory,
     PublicUser,
     UserStatus,
 )
@@ -29,6 +30,7 @@ from app.domain.entities.user_entity import (
 from app.infrastructure.database.models.user_models import (
     User,
     UserActivity,
+    UserLoginHistory,
     UserProfile,
     UserSecurity,
 )
@@ -297,13 +299,40 @@ class UserRepository:
         await self.db.execute(update(UserSecurity).where(UserSecurity.user_id == user_id).values(failed_login_attempts=0, locked_until=None))
         await self.db.commit()
 
-    async def record_login(self, user_id: uuid.UUID) -> None:
+    async def record_login(
+        self,
+        user_id: uuid.UUID,
+        *,
+        ip_address: str | None = None,
+        user_agent: str | None = None,
+        browser: str | None = None,
+        os: str | None = None,
+        device_type: str | None = None,
+        city: str | None = None,
+        region: str | None = None,
+        country: str | None = None,
+        successful: bool = True,
+    ) -> None:
         """Update last_login_at and increment login_count in one atomic statement.
 
         Keeps UserActivity current for audit trails and analytics without
         requiring a separate SELECT before the UPDATE.
         """
         now = self._utcnow_naive()
+        self.db.add(
+            UserLoginHistory(
+                user_id=user_id,
+                ip_address=ip_address,
+                user_agent=user_agent,
+                browser=browser,
+                os=os,
+                device_type=device_type,
+                city=city,
+                region=region,
+                country=country,
+                successful=successful,
+            )
+        )
         await self.db.execute(
             update(UserActivity)
             .where(UserActivity.user_id == user_id)
@@ -313,6 +342,31 @@ class UserRepository:
             )
         )
         await self.db.commit()
+
+    async def get_login_history(self, user_id: uuid.UUID, limit: int = 10) -> list[DomainUserLoginHistory]:
+        """Return recent login history entries for the given user ordered newest first."""
+        result = await self.db.execute(
+            select(UserLoginHistory).where(UserLoginHistory.user_id == user_id).order_by(UserLoginHistory.created_at.desc()).limit(limit)
+        )
+        entries = result.scalars().all()
+
+        return [
+            DomainUserLoginHistory(
+                id=entry.id,
+                user_id=entry.user_id,
+                ip_address=entry.ip_address,
+                user_agent=entry.user_agent,
+                browser=entry.browser,
+                os=entry.os,
+                device_type=entry.device_type,
+                city=entry.city,
+                region=entry.region,
+                country=entry.country,
+                successful=entry.successful,
+                created_at=entry.created_at,
+            )
+            for entry in entries
+        ]
 
     async def update_password(self, user_id: uuid.UUID, password_hash: str) -> bool:
         """Atomically replace the user's password hash and stamp the change time.

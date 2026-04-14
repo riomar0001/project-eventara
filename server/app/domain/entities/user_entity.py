@@ -98,3 +98,20 @@ class UserActivity(BaseModel):
     login_count: int = 0
 
     model_config = {"from_attributes": True}
+
+
+class UserLoginHistory(BaseModel):
+    id: uuid.UUID | None = None
+    user_id: uuid.UUID
+    ip_address: str | None = None
+    user_agent: str | None = None
+    browser: str | None = None
+    os: str | None = None
+    device_type: str | None = None
+    city: str | None = None
+    region: str | None = None
+    country: str | None = None
+    successful: bool = True
+    created_at: datetime | None = None
+
+    model_config = {"from_attributes": True}

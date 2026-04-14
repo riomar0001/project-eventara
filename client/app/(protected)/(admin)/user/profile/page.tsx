@@ -6,8 +6,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { getDisplayName, getInitials, getProfileCompletion, getProfileHandle, getRoleLabel, humanizeProfileValue } from '@/lib/auth-user';
+import { getDisplayName, getInitials, getProfileHandle, getRoleLabel, humanizeProfileValue } from '@/lib/auth-user';
 import { useAuthStore } from '@/store/auth-store';
 
 const profileEvents = [
@@ -51,7 +50,7 @@ const profileEvents = [
 
 function InfoTile({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border bg-white/70 p-4">
+    <div className="rounded-xl border bg-neutral-100 p-2">
       <p className="text-muted-foreground text-xs font-medium tracking-[0.18em] uppercase">{label}</p>
       <p className="mt-2 text-sm font-medium">{value}</p>
     </div>
@@ -62,7 +61,7 @@ function DetailRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="min-w-0">
       <p className="text-muted-foreground text-xs">{label}</p>
-      <p className="mt-2 text-sm font-medium break-words text-neutral-900">{value}</p>
+      <p className="mt-2 text-sm font-medium wrap-break-word text-neutral-900">{value}</p>
     </div>
   );
 }
@@ -92,8 +91,7 @@ export default function UserProfilePage() {
   const initials = getInitials(user);
   const handle = getProfileHandle(user);
   const roleLabel = getRoleLabel(user.roleId);
-  const completion = getProfileCompletion(user);
-
+  
   return (
     <div className="space-y-6">
       <div className="grid gap-6 xl:grid-cols-[320px_minmax(0,1fr)]">
@@ -137,18 +135,6 @@ export default function UserProfilePage() {
               <InfoTile label="Profile status" value={user.doneOnboarding ? 'Ready to join events' : 'Complete your setup'} />
             </div>
 
-            <div className="mt-6 rounded-2xl border bg-white/80 p-4">
-              <div className="mb-2 flex items-center justify-between gap-3">
-                <span className="text-sm font-medium">Profile completion</span>
-                <span className="text-sm font-semibold">{completion}%</span>
-              </div>
-              <Progress value={completion} />
-              <p className="text-muted-foreground mt-3 text-sm">
-                {user.doneOnboarding
-                  ? 'Your profile information is ready for upcoming event activity.'
-                  : 'Finish the remaining fields to unlock the full profile experience.'}
-              </p>
-            </div>
           </CardContent>
         </Card>
 
@@ -238,10 +224,6 @@ export default function UserProfilePage() {
                         <div className="flex items-center gap-3">
                           <div className="hidden sm:block">
                             <EventStatusBadge status={event.status} />
-                          </div>
-                          <div className="text-right">
-                            <p className="text-sm font-semibold">{event.fee}</p>
-                            <p className="text-muted-foreground text-xs">entry</p>
                           </div>
                         </div>
                       </div>

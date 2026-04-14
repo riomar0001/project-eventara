@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Path, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Path, Request, Response, status
 
 from app.application.dto.auth_dto import (
     ForgotPasswordInput,
@@ -79,6 +79,21 @@ from app.domain.exceptions import (
 from app.domain.exceptions.user_exceptions import UserNotFoundError
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
+
+
+def _get_client_ip(request: Request) -> str | None:
+    forwarded_for = request.headers.get("x-forwarded-for")
+    if forwarded_for:
+        return forwarded_for.split(",")[0].strip()
+
+    real_ip = request.headers.get("x-real-ip")
+    if real_ip:
+        return real_ip.strip()
+
+    if request.client and request.client.host:
+        return request.client.host
+
+    return None
 
 
 def _set_auth_cookies(response: Response, access_token: str, refresh_token: str) -> None:
@@ -310,6 +325,7 @@ async def login(
     ),
 )
 async def login_verify(
+    request: Request,
     response: Response,
     body: LoginVerifyRequest,
     use_case: AuthUseCase = Depends(get_auth_use_case),
@@ -327,7 +343,14 @@ async def login_verify(
       6 digits.
     """
     try:
-        result = await use_case.login_verify(LoginVerifyInput(token=body.token, code=body.code))
+        result = await use_case.login_verify(
+            LoginVerifyInput(
+                token=body.token,
+                code=body.code,
+                ip_address=_get_client_ip(request),
+                user_agent=request.headers.get("user-agent"),
+            )
+        )
     except TokenExpiredError as error:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(error))
     except InvalidTokenError as error:
