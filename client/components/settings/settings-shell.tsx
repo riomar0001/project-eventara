@@ -9,25 +9,25 @@ const settingsItems = [
   {
     label: 'Profile',
     description: 'Update your personal information.',
-    href: '/account-settings/profile',
+    href: '/user/settings/profile',
     icon: UserRound
   },
   {
     label: 'Security',
     description: 'Change your password.',
-    href: '/account-settings/change-password',
+    href: '/user/settings/password',
     icon: Shield
   },
   {
     label: 'Login History',
     description: 'Review recent sign-ins to your account.',
-    href: '/account-settings/login-history',
+    href: '/user/settings/login-history',
     icon: Clock3
   },
   {
     label: 'Delete Account',
     description: 'Permanently remove your account.',
-    href: '/account-settings/delete-account',
+    href: '/user/settings/delete-account',
     icon: Trash2,
     destructive: true
   }
