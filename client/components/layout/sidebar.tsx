@@ -32,7 +32,7 @@ export function AppSidebar() {
 
   function isActiveHref(href: string) {
     if (!href.startsWith('/')) return false;
-    if (href === '/dashboard') return pathname === '/dashboard';
+    if (href === '/admin/dashboard') return pathname === '/admin/dashboard';
     return pathname === href || pathname.startsWith(`${href}/`);
   }
 

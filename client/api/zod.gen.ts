@@ -207,6 +207,31 @@ export const zListDeadJobsResponse = z.object({
 });
 
 /**
+ * LoginHistoryEntryResponse
+ */
+export const zLoginHistoryEntryResponse = z.object({
+    id: z.uuid(),
+    ip_address: z.string().nullish(),
+    user_agent: z.string().nullish(),
+    browser: z.string().nullish(),
+    os: z.string().nullish(),
+    device_type: z.string().nullish(),
+    city: z.string().nullish(),
+    region: z.string().nullish(),
+    country: z.string().nullish(),
+    successful: z.boolean().optional().default(true),
+    created_at: z.iso.datetime()
+});
+
+/**
+ * LoginHistoryListResponse
+ */
+export const zLoginHistoryListResponse = z.object({
+    success: z.boolean().optional().default(true),
+    data: z.array(zLoginHistoryEntryResponse)
+});
+
+/**
  * LoginInitResponse
  */
 export const zLoginInitResponse = z.object({
@@ -497,7 +522,8 @@ export const zUserOnboardingResponse = z.object({
     education_level: zEducationLevel,
     occupation: z.string().nullish(),
     bio: z.string().nullish(),
-    message: z.string().optional().default('Onboarding completed successfully.')
+    message: z.string().optional().default('Onboarding completed successfully.'),
+    access_token: z.string()
 });
 
 /**
@@ -681,6 +707,15 @@ export const zResetPasswordAuthResetPasswordTokenPostPath = z.object({
  * Successful Response
  */
 export const zResetPasswordAuthResetPasswordTokenPostResponse = zResetPasswordResponse;
+
+export const zGetLoginHistoryUserLoginHistoryGetQuery = z.object({
+    limit: z.int().gte(1).lte(50).optional().default(10)
+});
+
+/**
+ * Successful Response
+ */
+export const zGetLoginHistoryUserLoginHistoryGetResponse = zLoginHistoryListResponse;
 
 export const zCheckAliasUserCheckAliasGetQuery = z.object({
     alias: z.string().min(3).max(100)
