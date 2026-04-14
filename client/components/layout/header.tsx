@@ -143,15 +143,15 @@ export function Header() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem className="cursor-pointer py-3" onClick={() => router.push('/profile')}>
+              <DropdownMenuItem className="cursor-pointer py-3" onClick={() => router.push('/account-settings/profile')}>
                 <User className="size-4" />
                 Profile
               </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer py-3" onClick={() => router.push('/security')}>
+              <DropdownMenuItem className="cursor-pointer py-3" onClick={() => router.push('/account-settings/change-password')}>
                 <Shield className="size-4" />
                 Security
               </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer py-3">
+              <DropdownMenuItem className="cursor-pointer py-3" onClick={() => router.push('/account-settings/profile')}>
                 <Settings className="size-4" />
                 Settings
               </DropdownMenuItem>

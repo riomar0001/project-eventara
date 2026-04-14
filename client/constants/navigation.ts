@@ -2,7 +2,7 @@ import { LayoutDashboard, User, ArrowLeftRight, Waves, Wallet, TrendingUp, Headp
 
 export const dashboardNavItems = [
   { label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
-  { label: 'Profile', icon: User, href: '/profile' },
+  { label: 'Profile', icon: User, href: '/account-settings/profile' },
   {
     label: 'Transactions',
     icon: ArrowLeftRight,
@@ -21,6 +21,6 @@ export const dashboardNavItems = [
 ];
 
 export const dashboardBottomNavItems = [
-  { label: 'Settings', icon: Settings, href: '/profile' },
+  { label: 'Settings', icon: Settings, href: '/account-settings/profile' },
   { label: 'Support', icon: Headphones, href: '#' }
 ];
