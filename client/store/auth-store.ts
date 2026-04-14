@@ -122,7 +122,7 @@ export const useAuthStore = create<AuthStore>()(
     }),
     {
       name: 'eventara-auth',
-      storage: createJSONStorage(() => sessionStorage),
+      storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         refreshToken: state.refreshToken,
         accessToken: state.accessToken,
