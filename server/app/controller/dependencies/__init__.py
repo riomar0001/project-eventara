@@ -5,8 +5,8 @@ from app.controller.dependencies.auth_depends import (
 from app.controller.dependencies.rate_limit_depends import login_rate_limit
 from app.controller.dependencies.rbac_depends import require_permission
 from app.controller.dependencies.use_cases_depends import (
-    get_audit_logs_use_case,
     get_admin_user_account_use_case,
+    get_audit_logs_use_case,
     get_auth_use_case,
     get_create_audit_log_use_case,
     get_delete_account_use_case,

@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
 
 from app.application.dto.role_dto import CreateGrantsInput
@@ -34,7 +34,7 @@ class TestUserRoleUseCase:
         role_id = uuid.uuid4()
         feature_id = uuid.uuid4()
         granted_by = uuid.uuid4()
-        starts_at = datetime.now(timezone.utc)
+        starts_at = datetime.now(UTC)
         repo = MagicMock()
         repo.user_exists = AsyncMock(return_value=True)
         repo.role_exists = AsyncMock(return_value=True)

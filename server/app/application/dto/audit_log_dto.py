@@ -1,6 +1,5 @@
 import uuid
 from dataclasses import dataclass
-from typing import Optional
 
 from pydantic import AwareDatetime
 
@@ -28,8 +27,8 @@ class GetAuditLogsInput:
     user_id: uuid.UUID | None
     action_type: ActionType | None
     resource_type: str | None
-    start_date: Optional[AwareDatetime]
-    end_date: Optional[AwareDatetime]
+    start_date: AwareDatetime | None
+    end_date: AwareDatetime | None
 
 
 @dataclass

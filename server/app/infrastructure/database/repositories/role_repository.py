@@ -1,14 +1,14 @@
 import uuid
-from datetime import datetime, timezone
-from typing import Optional
+from datetime import UTC, datetime
 
 from pydantic import AwareDatetime
 from sqlalchemy import delete, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application.dto.admin_user_account_dto import RolePermissionSummary
-from app.domain.entities.authorization_entities import GrantEffect, Role as RoleEntity, RoleAction
 from app.domain.entities.authorization_entities import Feature as FeatureEntity
+from app.domain.entities.authorization_entities import GrantEffect, RoleAction
+from app.domain.entities.authorization_entities import Role as RoleEntity
 from app.domain.entities.authorization_entities import UserGrant as DomainUserGrant
 from app.domain.entities.authorization_entities import UserRole as DomainUserRole
 from app.infrastructure.database.models.user_models import (
@@ -45,14 +45,14 @@ class RoleRepository:
         self.db = db
 
     @staticmethod
-    def _as_naive_utc(value: Optional[AwareDatetime]) -> datetime | None:
+    def _as_naive_utc(value: AwareDatetime | None) -> datetime | None:
         if value is None:
             return None
-        return value.astimezone(timezone.utc).replace(tzinfo=None) if value.tzinfo else value
+        return value.astimezone(UTC).replace(tzinfo=None) if value.tzinfo else value
 
     @staticmethod
     def _utcnow_naive() -> datetime:
-        return datetime.now(timezone.utc).replace(tzinfo=None)
+        return datetime.now(UTC).replace(tzinfo=None)
 
     async def user_exists(self, user_id: uuid.UUID) -> bool:
         result = await self.db.execute(select(User.id).where(User.id == user_id))
@@ -155,7 +155,7 @@ class RoleRepository:
         self,
         user_id: uuid.UUID,
         role_id: uuid.UUID,
-        expires_at: Optional[AwareDatetime],
+        expires_at: AwareDatetime | None,
         assigned_by: uuid.UUID,
     ) -> DomainUserRole:
         orm = UserRole(
@@ -196,7 +196,7 @@ class RoleRepository:
         orm = result.scalar_one_or_none()
         return self._to_domain_role(orm) if orm else None
 
-    async def update_assignment_expiry(self, assignment_id: uuid.UUID, expires_at: Optional[AwareDatetime]) -> DomainUserRole | None:
+    async def update_assignment_expiry(self, assignment_id: uuid.UUID, expires_at: AwareDatetime | None) -> DomainUserRole | None:
         await self.db.execute(update(UserRole).where(UserRole.id == assignment_id).values(expires_at=self._as_naive_utc(expires_at)))
         await self.db.flush()
         result = await self.db.execute(select(UserRole).where(UserRole.id == assignment_id))
@@ -268,8 +268,8 @@ class RoleRepository:
         feature_id: uuid.UUID,
         actions: list[RoleAction],
         effect: GrantEffect,
-        starts_at: Optional[AwareDatetime],
-        expires_at: Optional[AwareDatetime],
+        starts_at: AwareDatetime | None,
+        expires_at: AwareDatetime | None,
         reason: str | None,
         granted_by: uuid.UUID,
     ) -> list[DomainUserGrant]:

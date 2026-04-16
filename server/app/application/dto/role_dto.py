@@ -1,11 +1,10 @@
 import uuid
 from dataclasses import dataclass
-from typing import Optional
 
 from pydantic import AwareDatetime
 
-from app.domain.entities.authorization_entities import GrantEffect, RoleAction
 from app.domain.entities.authorization_entities import Feature as FeatureEntity
+from app.domain.entities.authorization_entities import GrantEffect, RoleAction
 from app.domain.entities.authorization_entities import UserGrant as UserGrantEntity
 from app.domain.entities.authorization_entities import UserRole as UserRoleEntity
 
@@ -15,7 +14,7 @@ class AssignRoleInput:
     user_id: uuid.UUID
     role_id: uuid.UUID
     assigned_by: uuid.UUID
-    expires_at: Optional[AwareDatetime] = None
+    expires_at: AwareDatetime | None = None
 
 
 @dataclass
@@ -31,7 +30,7 @@ class GetUserRolesOutput:
 @dataclass
 class UpdateAssignmentInput:
     assignment_id: uuid.UUID
-    expires_at: Optional[AwareDatetime]
+    expires_at: AwareDatetime | None
 
 
 @dataclass
@@ -47,8 +46,8 @@ class CreateGrantsInput:
     actions: list[RoleAction]
     effect: GrantEffect
     granted_by: uuid.UUID
-    starts_at: Optional[AwareDatetime] = None
-    expires_at: Optional[AwareDatetime] = None
+    starts_at: AwareDatetime | None = None
+    expires_at: AwareDatetime | None = None
     reason: str | None = None
 
 

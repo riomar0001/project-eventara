@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
 
 from app.domain.entities.authorization_entities import GrantEffect, RoleAction
@@ -17,7 +17,7 @@ class TestRoleRepositoryAdminFlows:
 
         def add_assignment(assignment):
             assignment.id = uuid.uuid4()
-            assignment.assigned_at = datetime.now(timezone.utc)
+            assignment.assigned_at = datetime.now(UTC)
 
         db.add = MagicMock(side_effect=add_assignment)
         repository = RoleRepository(db)
@@ -62,7 +62,7 @@ class TestRoleRepositoryAdminFlows:
         role_id = uuid.uuid4()
         feature_id = uuid.uuid4()
         granted_by = uuid.uuid4()
-        starts_at = datetime.now(timezone.utc)
+        starts_at = datetime.now(UTC)
 
         await repository.create_grants(
             user_id=user_id,
@@ -87,7 +87,7 @@ class TestUserRepositoryAdminFlows:
         user = User(email="old@example.com", password="hashed_password", status=UserStatus.ACTIVE)
         user.id = uuid.uuid4()
         user.onboarding_completed = False
-        security = UserSecurity(user_id=user.id, email_verified=True, email_verified_at=datetime.now(timezone.utc))
+        security = UserSecurity(user_id=user.id, email_verified=True, email_verified_at=datetime.now(UTC))
         execute_result = MagicMock()
         execute_result.scalar_one_or_none.return_value = security
         db = MagicMock()

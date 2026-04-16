@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import cast
 
 from sqlalchemy import select, update
@@ -23,7 +23,7 @@ class RefreshTokenRepository:
     @staticmethod
     def _utcnow_naive() -> datetime:
         """Return UTC now as a naive datetime for TIMESTAMP WITHOUT TIME ZONE columns."""
-        return datetime.now(timezone.utc).replace(tzinfo=None)
+        return datetime.now(UTC).replace(tzinfo=None)
 
     async def create(self, token: Token) -> Token:
         """Persist a new refresh token record and return it with DB fields populated."""

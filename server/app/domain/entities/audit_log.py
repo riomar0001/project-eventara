@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import StrEnum
 
 from pydantic import BaseModel, Field
@@ -34,7 +34,7 @@ class AuditLog(BaseModel):
     user_id: uuid.UUID | None = None
     ip_address: str | None = None
     user_agent: str | None = None
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
     action_type: ActionType
     resource_type: str
     resource_id: str | None = None

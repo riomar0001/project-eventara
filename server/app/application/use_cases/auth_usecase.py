@@ -1,6 +1,6 @@
 import re
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from arq.connections import ArqRedis
 from sqlalchemy.exc import IntegrityError
@@ -141,7 +141,7 @@ class AuthUseCase:
     def _is_deletion_grace_expired(user: User) -> bool:
         if not user.deletion_scheduled_for:
             return False
-        return user.deletion_scheduled_for.replace(tzinfo=timezone.utc) <= datetime.now(timezone.utc)
+        return user.deletion_scheduled_for.replace(tzinfo=UTC) <= datetime.now(UTC)
 
     async def _issue_access_token_for_user(self, user: User) -> str:
         """Create an access token enriched with profile claims when available."""
@@ -184,7 +184,7 @@ class AuthUseCase:
         if existing:
             raise EmailAlreadyTakenError(data.email)
 
-        now = datetime.now(timezone.utc).replace(tzinfo=None)
+        now = datetime.now(UTC).replace(tzinfo=None)
         user = User(
             email=data.email,
             password=hash_string(data.password),
@@ -315,9 +315,9 @@ class AuthUseCase:
             raise AccountDeletionGracePeriodExpiredError()
 
         security = await self.repo.get_security_by_user_id(user.id)
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         if security and security.locked_until:
-            locked_until_aware = security.locked_until.replace(tzinfo=timezone.utc)
+            locked_until_aware = security.locked_until.replace(tzinfo=UTC)
             if locked_until_aware > now:
                 raise UserLockedError()
 

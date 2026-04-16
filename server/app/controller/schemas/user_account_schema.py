@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Annotated
 
 from pydantic import BaseModel, EmailStr, Field, PlainSerializer
@@ -9,7 +9,7 @@ from app.domain.entities.user_entity import AgeGroup, EducationLevel, Gender, Us
 
 
 def _serialize_datetime_as_utc_z(value: datetime) -> str:
-    normalized = value.replace(tzinfo=timezone.utc) if value.tzinfo is None else value.astimezone(timezone.utc)
+    normalized = value.replace(tzinfo=UTC) if value.tzinfo is None else value.astimezone(UTC)
     return normalized.isoformat().replace("+00:00", "Z")
 
 

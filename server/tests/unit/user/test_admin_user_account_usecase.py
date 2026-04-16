@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -15,7 +15,8 @@ from app.application.dto.admin_user_account_dto import (
     SendUserPasswordResetInput,
 )
 from app.application.use_cases.admin_user_account_usecase import AdminUserAccountUseCase
-from app.domain.entities.authorization_entities import GrantEffect, Role as RoleEntity, RoleAction
+from app.domain.entities.authorization_entities import GrantEffect, RoleAction
+from app.domain.entities.authorization_entities import Role as RoleEntity
 from app.domain.entities.authorization_entities import UserRole as UserRoleEntity
 from app.domain.entities.user_entity import User, UserSecurity, UserStatus
 from app.domain.exceptions.role_exceptions import RoleAlreadyCurrentError
@@ -147,7 +148,7 @@ class TestAdminUserAccountUseCase:
                     user_id=user.id,
                     role_id=uuid.uuid4(),
                     assigned_by=uuid.uuid4(),
-                    assigned_at=datetime.now(timezone.utc),
+                    assigned_at=datetime.now(UTC),
                 )
             ]
         )
@@ -237,7 +238,7 @@ class TestAdminUserAccountUseCase:
                     user_id=user.id,
                     role_id=role_id,
                     assigned_by=uuid.uuid4(),
-                    assigned_at=datetime.now(timezone.utc),
+                    assigned_at=datetime.now(UTC),
                 )
             ]
         )
@@ -312,9 +313,7 @@ class TestAdminUserAccountUseCase:
         current_user = make_user(email="old@example.com")
         user_repo = MagicMock()
         user_repo.get_by_id_for_update = AsyncMock(return_value=current_user)
-        user_repo.update_email_and_clear_verification = AsyncMock(
-            side_effect=IntegrityError("stmt", "params", Exception("duplicate key"))
-        )
+        user_repo.update_email_and_clear_verification = AsyncMock(side_effect=IntegrityError("stmt", "params", Exception("duplicate key")))
         db = AsyncMock()
 
         use_case = make_use_case(user_repo=user_repo, db=db)

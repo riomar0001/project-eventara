@@ -75,7 +75,9 @@ class DeleteAccountResponse(BaseModel):
     deletion_scheduled_for: datetime
     requested_by: uuid.UUID
     grace_period_days: int = 30
-    message: str = "Account deletion scheduled. The account will be permanently deleted after the 30-day grace period unless the user logs in before then."
+    message: str = (
+        "Account deletion scheduled. The account will be permanently deleted after the 30-day grace period unless the user logs in before then."
+    )
 
 
 class LoginHistoryEntryResponse(BaseModel):

@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -38,7 +38,7 @@ def make_user(
 class TestDeleteAccountUseCase:
     async def test_self_service_success_enqueues_deferred_job(self):
         user = make_user()
-        requested_at = datetime.now(timezone.utc).replace(tzinfo=None)
+        requested_at = datetime.now(UTC).replace(tzinfo=None)
         scheduled_for = requested_at + timedelta(days=30)
         scheduled_user = make_user(
             deletion_requested_at=requested_at,
@@ -70,12 +70,12 @@ class TestDeleteAccountUseCase:
         assert result.user_id == user.id
         repo.schedule_account_deletion.assert_awaited_once()
         arq.enqueue_job.assert_awaited_once()
-        assert arq.enqueue_job.await_args.kwargs["_defer_until"] == scheduled_for.replace(tzinfo=timezone.utc)
+        assert arq.enqueue_job.await_args.kwargs["_defer_until"] == scheduled_for.replace(tzinfo=UTC)
 
     async def test_raises_conflict_when_deletion_already_scheduled(self):
-        future = datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(days=5)
+        future = datetime.now(UTC).replace(tzinfo=None) + timedelta(days=5)
         user = make_user(
-            deletion_requested_at=datetime.now(timezone.utc).replace(tzinfo=None),
+            deletion_requested_at=datetime.now(UTC).replace(tzinfo=None),
             deletion_scheduled_for=future,
         )
 
@@ -95,8 +95,8 @@ class TestDeleteAccountUseCase:
 
     async def test_raises_when_grace_period_has_already_elapsed(self):
         user = make_user(
-            deletion_requested_at=datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(days=31),
-            deletion_scheduled_for=datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(days=1),
+            deletion_requested_at=datetime.now(UTC).replace(tzinfo=None) - timedelta(days=31),
+            deletion_scheduled_for=datetime.now(UTC).replace(tzinfo=None) - timedelta(days=1),
         )
 
         repo = MagicMock()

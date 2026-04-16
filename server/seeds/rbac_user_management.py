@@ -8,6 +8,8 @@ Usage (from server/):
     python -m seeds.rbac_user_management
 """
 
+# ruff: noqa: E402
+
 import asyncio
 from uuid import UUID
 

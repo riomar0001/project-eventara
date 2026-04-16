@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -41,7 +41,7 @@ class RBACRepository:
 
     @staticmethod
     def _utcnow_naive() -> datetime:
-        return datetime.now(timezone.utc).replace(tzinfo=None)
+        return datetime.now(UTC).replace(tzinfo=None)
 
     async def get_role_permission(
         self,

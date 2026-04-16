@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import uuid4
 
 from app.controller.schemas.user_account_schema import (
@@ -30,7 +30,7 @@ class TestUserAccountSchema:
             email_verified=True,
             failed_login_attempts=0,
             login_count=0,
-            deletion_requested_at=datetime(2026, 4, 16, 12, 30, 45, tzinfo=timezone.utc),
+            deletion_requested_at=datetime(2026, 4, 16, 12, 30, 45, tzinfo=UTC),
         ).model_dump(mode="json")
 
         assert payload["deletion_requested_at"] == "2026-04-16T12:30:45Z"

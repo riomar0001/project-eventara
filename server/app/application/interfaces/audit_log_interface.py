@@ -1,5 +1,5 @@
 import uuid
-from typing import Optional, Protocol
+from typing import Protocol
 
 from pydantic import AwareDatetime
 
@@ -22,8 +22,8 @@ class IAuditLogRepository(Protocol):
         user_id: uuid.UUID | None,
         action_type: ActionType | None,
         resource_type: str | None,
-        start_date: Optional[AwareDatetime],
-        end_date: Optional[AwareDatetime],
+        start_date: AwareDatetime | None,
+        end_date: AwareDatetime | None,
     ) -> tuple[list[AuditLog], int, str | None, str | None]: ...
 
     async def count_total(
@@ -31,6 +31,6 @@ class IAuditLogRepository(Protocol):
         user_id: uuid.UUID | None,
         action_type: ActionType | None,
         resource_type: str | None,
-        start_date: Optional[AwareDatetime],
-        end_date: Optional[AwareDatetime],
+        start_date: AwareDatetime | None,
+        end_date: AwareDatetime | None,
     ) -> int: ...

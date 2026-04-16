@@ -1,6 +1,6 @@
 import uuid
-from datetime import datetime
 from dataclasses import dataclass
+from datetime import datetime
 
 from app.domain.entities.user_entity import (
     AgeGroup,

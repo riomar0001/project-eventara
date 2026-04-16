@@ -8,11 +8,13 @@ Usage (from server/):
     python -m seeds.set_admin --id fd15698a-f8ca-4481-9e2e-5e63da4bc000
 """
 
+# ruff: noqa: E402
+
 from __future__ import annotations
 
 import argparse
 import asyncio
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import UUID
 
 from sqlalchemy import select
@@ -26,7 +28,7 @@ except ModuleNotFoundError:
 ensure_server_on_path()
 
 from app.domain.entities.authorization_entities import GrantEffect
-from app.infrastructure.database.models.user_models import Feature, Role, RolePermission, User, UserGrant, UserRole
+from app.infrastructure.database.models.user_models import Role, RolePermission, User, UserGrant, UserRole
 from app.infrastructure.database.session import AsyncSessionLocal
 from seeds.rbac_user_management import _upsert_features, _upsert_role_permissions, _upsert_roles
 
@@ -36,7 +38,7 @@ def _log(message: str) -> None:
 
 
 def _utcnow_naive() -> datetime:
-    return datetime.now(timezone.utc).replace(tzinfo=None)
+    return datetime.now(UTC).replace(tzinfo=None)
 
 
 def parse_args() -> argparse.Namespace:

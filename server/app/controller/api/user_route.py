@@ -5,7 +5,13 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application.dto.user_dto import ChangePasswordInput, GetLoginHistoryInput, RequestAccountDeletionInput, UserOnboardingInput
-from app.application.use_cases.user_usecase import ChangePasswordUseCase, CheckAliasUseCase, DeleteAccountUseCase, GetLoginHistoryUseCase, OnboardingUseCase
+from app.application.use_cases.user_usecase import (
+    ChangePasswordUseCase,
+    CheckAliasUseCase,
+    DeleteAccountUseCase,
+    GetLoginHistoryUseCase,
+    OnboardingUseCase,
+)
 from app.controller.dependencies import get_current_user_id, get_onboarding_use_case, require_permission
 from app.controller.dependencies.use_cases_depends import (
     get_change_password_use_case,
@@ -323,7 +329,9 @@ async def schedule_own_account_deletion(
     description=(
         "Schedule account deletion for a target user after the same 30-day grace period used by self-service deletion. "
         "The caller must hold ``delete`` permission on the ``user-accounts`` feature. "
-        "A required reason is captured in the request payload, the pending deletion is stored immediately, and a deferred ARQ job is queued to finalize it when the grace period expires unless the user logs in first."
+        "A required reason is captured in the request payload, the pending deletion is stored "
+        "immediately, and a deferred ARQ job is queued to finalize it when the grace "
+        "period expires unless the user logs in first."
     ),
 )
 async def schedule_admin_account_deletion(

@@ -12,11 +12,12 @@ import type {
   GrantEffect,
   GrantFeatureResponse,
   RoleAction,
+  UserGrantResponse,
   SendUserPasswordResetResponse
 } from '@/api/types.gen';
 import { getAccessToken } from '@/store/auth-store';
 
-type PendingAction = 'role' | 'email' | 'password-reset' | 'delete' | 'special-permission' | null;
+type PendingAction = 'role' | 'email' | 'password-reset' | 'delete' | 'special-permission' | 'delete-special-permission' | null;
 
 function extractErrorMessage(payload: unknown): string | undefined {
   if (!payload || typeof payload !== 'object') return undefined;
@@ -63,6 +64,9 @@ export function useAdminUserAccountActions() {
   const [grantFeatures, setGrantFeatures] = useState<GrantFeatureResponse[]>([]);
   const [grantFeaturesError, setGrantFeaturesError] = useState<string | null>(null);
   const [isLoadingGrantFeatures, setIsLoadingGrantFeatures] = useState(true);
+  const [specialPermissions, setSpecialPermissions] = useState<UserGrantResponse[]>([]);
+  const [specialPermissionsError, setSpecialPermissionsError] = useState<string | null>(null);
+  const [isLoadingSpecialPermissions, setIsLoadingSpecialPermissions] = useState(false);
   const [pendingAction, setPendingAction] = useState<PendingAction>(null);
 
   useEffect(() => {
@@ -270,21 +274,84 @@ export function useAdminUserAccountActions() {
     }
   }
 
+  async function loadSpecialPermissions(userId: string) {
+    setIsLoadingSpecialPermissions(true);
+    setSpecialPermissionsError(null);
+
+    try {
+      const result = await UserGrantManagement.listUserGrantsUserGrantsGet({
+        query: { user_id: userId },
+        headers: { Authorization: `Bearer ${getAccessToken()}` },
+        throwOnError: false
+      });
+
+      if (!result.data) {
+        throw result.error ?? new Error('Unable to load special permissions right now.');
+      }
+
+      setSpecialPermissions(result.data.data);
+    } catch (error) {
+      setSpecialPermissions([]);
+      setSpecialPermissionsError(getAdminUserAccountErrorMessage(error, 'Unable to load special permissions right now.'));
+    } finally {
+      setIsLoadingSpecialPermissions(false);
+    }
+  }
+
+  function clearSpecialPermissions() {
+    setSpecialPermissions([]);
+    setSpecialPermissionsError(null);
+    setIsLoadingSpecialPermissions(false);
+  }
+
+  async function deleteSpecialPermission(grantId: string): Promise<boolean> {
+    if (pendingAction) return false;
+
+    setPendingAction('delete-special-permission');
+
+    try {
+      const result = await UserGrantManagement.revokeGrantUserGrantsGrantIdDelete({
+        path: { grant_id: grantId },
+        headers: { Authorization: `Bearer ${getAccessToken()}` },
+        throwOnError: false
+      });
+
+      if (result.error) {
+        throw result.error;
+      }
+
+      setSpecialPermissions((currentPermissions) => currentPermissions.filter((permission) => permission.id !== grantId));
+      toast.success('Special permission removed successfully.');
+      return true;
+    } catch (error) {
+      toast.error(getAdminUserAccountErrorMessage(error, 'Unable to remove the special permission right now.'));
+      return false;
+    } finally {
+      setPendingAction(null);
+    }
+  }
+
   return {
     changeEmail,
     changeRole,
+    clearSpecialPermissions,
     createSpecialPermission,
+    deleteSpecialPermission,
     grantFeatures,
     grantFeaturesError,
     isLoadingRoles,
     isLoadingGrantFeatures,
+    isLoadingSpecialPermissions,
     isSubmitting: pendingAction !== null,
+    loadSpecialPermissions,
     pendingAction,
     refreshGrantFeatures,
     refreshRoles,
     roles,
     rolesError,
     scheduleDeletion,
+    specialPermissions,
+    specialPermissionsError,
     sendPasswordReset
   };
 }

@@ -45,18 +45,24 @@ export function AdminUserManagement() {
   const {
     changeEmail,
     changeRole,
+    clearSpecialPermissions,
     createSpecialPermission,
+    deleteSpecialPermission,
     grantFeatures,
     grantFeaturesError,
     isLoadingGrantFeatures,
     isLoadingRoles,
+    isLoadingSpecialPermissions,
     isSubmitting,
+    loadSpecialPermissions,
     pendingAction,
     refreshGrantFeatures,
     refreshRoles,
     roles,
     rolesError,
     scheduleDeletion,
+    specialPermissions,
+    specialPermissionsError,
     sendPasswordReset
   } = useAdminUserAccountActions();
 
@@ -80,6 +86,7 @@ export function AdminUserManagement() {
     setEffectiveFromDate(getDefaultEffectiveFromDate());
     setEffectiveToDate(undefined);
     setSpecialPermissionError(undefined);
+    clearSpecialPermissions();
   }
 
   function resetPasswordResetDialog() {
@@ -120,6 +127,7 @@ export function AdminUserManagement() {
     setEffectiveFromDate(getDefaultEffectiveFromDate());
     setEffectiveToDate(undefined);
     setSpecialPermissionError(undefined);
+    void loadSpecialPermissions(user.user_id);
   }
 
   function openPasswordResetDialog(user: AdminUserAccountSummary) {
@@ -176,17 +184,17 @@ export function AdminUserManagement() {
     if (!specialPermissionDialogUser) return;
 
     if (!specialPermissionDialogUser.role_id) {
-      setSpecialPermissionError('Assign a system role before adding a special permission.');
+      setSpecialPermissionError('Assign a system role before adding a separate special permission for this user.');
       return;
     }
 
     if (!selectedFeatureId) {
-      setSpecialPermissionError('Choose a feature for this permission override.');
+      setSpecialPermissionError('Choose a feature for this special permission.');
       return;
     }
 
     if (selectedGrantActions.length === 0) {
-      setSpecialPermissionError('Select at least one action to override.');
+      setSpecialPermissionError('Select at least one action for this special permission.');
       return;
     }
 
@@ -222,7 +230,23 @@ export function AdminUserManagement() {
     if (!response) return;
 
     handleMutationSuccess(specialPermissionDialogUser.user_id);
-    resetSpecialPermissionDialog();
+    setSelectedFeatureId('');
+    setSelectedGrantActions([]);
+    setSelectedGrantEffect('allow');
+    setEffectiveFromDate(getDefaultEffectiveFromDate());
+    setEffectiveToDate(undefined);
+    setSpecialPermissionError(undefined);
+    await loadSpecialPermissions(specialPermissionDialogUser.user_id);
+  }
+
+  async function handleSpecialPermissionDelete(grantId: string) {
+    if (!specialPermissionDialogUser) return;
+
+    const deleted = await deleteSpecialPermission(grantId);
+
+    if (!deleted) return;
+
+    handleMutationSuccess(specialPermissionDialogUser.user_id);
   }
 
   async function handlePasswordResetConfirm() {
@@ -295,6 +319,7 @@ export function AdminUserManagement() {
         grantFeaturesError={grantFeaturesError}
         isLoadingRoles={isLoadingRoles}
         isLoadingGrantFeatures={isLoadingGrantFeatures}
+        isLoadingSpecialPermissions={isLoadingSpecialPermissions}
         isSubmitting={isSubmitting}
         onCloseDeleteDialog={resetDeleteDialog}
         onCloseEmailDialog={resetEmailDialog}
@@ -339,6 +364,7 @@ export function AdminUserManagement() {
           setSelectedFeatureId(value);
           setSpecialPermissionError(undefined);
         }}
+        onSpecialPermissionDelete={handleSpecialPermissionDelete}
         onSpecialPermissionSubmit={handleSpecialPermissionSubmit}
         passwordResetUser={passwordResetUser}
         pendingAction={pendingAction}
@@ -354,6 +380,8 @@ export function AdminUserManagement() {
         selectedGrantEffect={selectedGrantEffect}
         specialPermissionDialogUser={specialPermissionDialogUser}
         specialPermissionError={specialPermissionError}
+        specialPermissions={specialPermissions}
+        specialPermissionsError={specialPermissionsError}
       />
     </>
   );

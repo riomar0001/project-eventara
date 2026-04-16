@@ -9,8 +9,10 @@ Usage (from server/):
     python -m seeds.system_admin
 """
 
+# ruff: noqa: E402
+
 import asyncio
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import UUID
 
 from sqlalchemy import select
@@ -45,7 +47,7 @@ def _log(msg: str) -> None:
 
 
 def _utcnow_naive() -> datetime:
-    return datetime.now(timezone.utc).replace(tzinfo=None)
+    return datetime.now(UTC).replace(tzinfo=None)
 
 
 async def _get_or_create_admin(session) -> UUID:

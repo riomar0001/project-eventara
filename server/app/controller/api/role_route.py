@@ -1,4 +1,5 @@
 import uuid
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
@@ -47,6 +48,13 @@ from app.domain.exceptions.user_exceptions import UserNotFoundError
 
 role_router = APIRouter(prefix="/user-roles", tags=["User Role Management"])
 grant_router = APIRouter(prefix="/user-grants", tags=["User Grant Management"])
+
+
+def _as_aware_utc(value: datetime | None) -> datetime | None:
+    """Normalize naive datetimes from the persistence layer into UTC-aware values."""
+    if value is None:
+        return None
+    return value.replace(tzinfo=UTC) if value.tzinfo is None else value.astimezone(UTC)
 
 
 @role_router.post(
@@ -105,9 +113,9 @@ async def assign_role(
         id=a.id,
         user_id=a.user_id,
         role_id=a.role_id,
-        expires_at=a.expires_at,
+        expires_at=_as_aware_utc(a.expires_at),
         assigned_by=a.assigned_by,
-        assigned_at=a.assigned_at,
+        assigned_at=_as_aware_utc(a.assigned_at),
     )
 
 
@@ -147,9 +155,9 @@ async def list_user_roles(
             id=a.id,
             user_id=a.user_id,
             role_id=a.role_id,
-            expires_at=a.expires_at,
+            expires_at=_as_aware_utc(a.expires_at),
             assigned_by=a.assigned_by,
-            assigned_at=a.assigned_at,
+            assigned_at=_as_aware_utc(a.assigned_at),
         )
         for a in result.assignments
     ]
@@ -191,9 +199,9 @@ async def get_assignment(
         id=assignment.id,
         user_id=assignment.user_id,
         role_id=assignment.role_id,
-        expires_at=assignment.expires_at,
+        expires_at=_as_aware_utc(assignment.expires_at),
         assigned_by=assignment.assigned_by,
-        assigned_at=assignment.assigned_at,
+        assigned_at=_as_aware_utc(assignment.assigned_at),
     )
 
 
@@ -243,9 +251,9 @@ async def update_assignment(
         id=a.id,
         user_id=a.user_id,
         role_id=a.role_id,
-        expires_at=a.expires_at,
+        expires_at=_as_aware_utc(a.expires_at),
         assigned_by=a.assigned_by,
-        assigned_at=a.assigned_at,
+        assigned_at=_as_aware_utc(a.assigned_at),
     )
 
 
@@ -355,8 +363,8 @@ async def create_grants(
                 action=g.action,
                 effect=g.effect,
                 reason=g.reason,
-                starts_at=g.starts_at,
-                expires_at=g.expires_at,
+                starts_at=_as_aware_utc(g.starts_at),
+                expires_at=_as_aware_utc(g.expires_at),
                 granted_by=g.granted_by,
             )
             for g in result.grants
@@ -373,10 +381,7 @@ async def create_grants(
         **FORBIDDEN,
     },
     summary="List grantable features",
-    description=(
-        "Return the enabled feature catalog that administrators can target when creating "
-        "special per-user permission grants."
-    ),
+    description=("Return the enabled feature catalog that administrators can target when creating special per-user permission grants."),
 )
 async def list_grant_features(
     _: uuid.UUID = Depends(require_permission("user-grants", RoleAction.READ)),
@@ -444,8 +449,8 @@ async def list_user_grants(
             action=g.action,
             effect=g.effect,
             reason=g.reason,
-            starts_at=g.starts_at,
-            expires_at=g.expires_at,
+            starts_at=_as_aware_utc(g.starts_at),
+            expires_at=_as_aware_utc(g.expires_at),
             granted_by=g.granted_by,
         )
         for g in result.grants
