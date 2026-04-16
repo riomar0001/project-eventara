@@ -58,7 +58,7 @@ function getInitialPagination(page: number, pageSize: number): AdminUserAccountP
   };
 }
 
-export function useAdminUserAccounts(page: number, pageSize: number = 10, search?: string, statusFilter?: UserStatus) {
+export function useAdminUserAccounts(page: number, pageSize: number = 10, search?: string, statusFilter?: UserStatus, roleFilter?: string) {
   const [users, setUsers] = useState<AdminUserAccountSummary[]>([]);
   const [pagination, setPagination] = useState<AdminUserAccountPagination>(() => getInitialPagination(page, pageSize));
   const [error, setError] = useState<string | null>(null);
@@ -80,7 +80,8 @@ export function useAdminUserAccounts(page: number, pageSize: number = 10, search
             page,
             page_size: pageSize,
             ...(search ? { search } : {}),
-            ...(statusFilter ? { status: statusFilter } : {})
+            ...(statusFilter ? { status: statusFilter } : {}),
+            ...(roleFilter ? { role: roleFilter } : {})
           },
           headers: {
             Authorization: `Bearer ${accessToken}`
@@ -116,7 +117,7 @@ export function useAdminUserAccounts(page: number, pageSize: number = 10, search
     return () => {
       cancelled = true;
     };
-  }, [page, pageSize, search, statusFilter, reloadToken]);
+  }, [page, pageSize, search, statusFilter, roleFilter, reloadToken]);
 
   function refresh() {
     setReloadToken((current) => current + 1);

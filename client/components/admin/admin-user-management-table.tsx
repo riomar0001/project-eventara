@@ -1,7 +1,6 @@
 'use client';
 
 import * as React from 'react';
-import { flexRender, getCoreRowModel, useReactTable, type ColumnDef } from '@tanstack/react-table';
 import {
   ChevronLeft,
   ChevronRight,
@@ -19,13 +18,8 @@ import {
   Users,
   X
 } from 'lucide-react';
-import {
-  formatDateTime,
-  getInitials,
-  humanizeRoleName,
-  isSoftDeleteDisabled,
-  UserStatusBadge
-} from '@/components/admin/admin-user-management-ui';
+import { flexRender, getCoreRowModel, useReactTable, type ColumnDef } from '@tanstack/react-table';
+import { formatDateTime, getInitials, humanizeRoleName, isSoftDeleteDisabled, UserStatusBadge } from '@/components/admin/admin-user-management-ui';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -45,6 +39,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import type {
   AdminUserAccountPaginationResponse as AdminUserAccountPagination,
   AdminUserAccountSummaryResponse as AdminUserAccountSummary,
+  AssignableRoleResponse,
   UserStatus
 } from '@/api/types.gen';
 import { cn } from '@/lib/utils';
@@ -76,9 +71,12 @@ interface AdminUserManagementTableProps {
   onSearchChange: (value: string) => void;
   onSelectUser: (userId: string) => void;
   onStatusFilterChange: (value: UserStatus | undefined) => void;
+  onRoleFilterChange: (value: string | undefined) => void;
   pagination: AdminUserAccountPagination;
   search: string;
   statusFilter: UserStatus | undefined;
+  roleFilter: string | undefined;
+  roles: AssignableRoleResponse[];
   users: AdminUserAccountSummary[];
 }
 
@@ -96,9 +94,12 @@ export function AdminUserManagementTable({
   onSearchChange,
   onSelectUser,
   onStatusFilterChange,
+  onRoleFilterChange,
   pagination,
   search,
   statusFilter,
+  roleFilter,
+  roles,
   users
 }: AdminUserManagementTableProps) {
   const currentUserId = useAuthStore((state) => state.user?.id ?? null);
@@ -107,7 +108,7 @@ export function AdminUserManagementTable({
   const showingFrom = users.length === 0 ? 0 : (pagination.page - 1) * pagination.page_size + 1;
   const showingTo = users.length === 0 ? 0 : showingFrom + users.length - 1;
   const pageLabel = pagination.total_pages === 0 ? 0 : pagination.page;
-  const hasActiveFilters = Boolean(search) || Boolean(statusFilter);
+  const hasActiveFilters = Boolean(search) || Boolean(statusFilter) || Boolean(roleFilter);
 
   const columns = React.useMemo<ColumnDef<AdminUserAccountSummary>[]>(
     () => [
@@ -172,7 +173,9 @@ export function AdminUserManagementTable({
         cell: ({ row }) => (
           <div className="space-y-1">
             <UserStatusBadge status={row.original.status} />
-            {row.original.deletion_scheduled_for ? <p className="text-muted-foreground text-xs">Scheduled {formatDateTime(row.original.deletion_scheduled_for)}</p> : null}
+            {row.original.deletion_scheduled_for ? (
+              <p className="text-muted-foreground text-xs">Scheduled {formatDateTime(row.original.deletion_scheduled_for)}</p>
+            ) : null}
           </div>
         ),
         header: 'Status',
@@ -305,7 +308,7 @@ export function AdminUserManagementTable({
               <Search className="text-muted-foreground absolute top-1/2 left-3 size-3.5 -translate-y-1/2" />
               <Input
                 id="admin-user-search"
-                className="h-8 w-52 pl-8 text-sm"
+                className="h-8 w-90 pl-8 text-sm"
                 placeholder="Search name, email, alias..."
                 value={search}
                 onChange={(e) => onSearchChange(e.target.value)}
@@ -321,10 +324,7 @@ export function AdminUserManagementTable({
                 </button>
               )}
             </div>
-            <Select
-              value={statusFilter ?? 'all'}
-              onValueChange={(value) => onStatusFilterChange(value === 'all' ? undefined : (value as UserStatus))}
-            >
+            <Select value={statusFilter ?? 'all'} onValueChange={(value) => onStatusFilterChange(value === 'all' ? undefined : (value as UserStatus))}>
               <SelectTrigger id="admin-user-status-filter" className="h-8 w-36 text-sm">
                 <SelectValue placeholder="All statuses" />
               </SelectTrigger>
@@ -333,6 +333,19 @@ export function AdminUserManagementTable({
                 {STATUS_OPTIONS.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
                     {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={roleFilter ?? 'all'} onValueChange={(value) => onRoleFilterChange(value === 'all' ? undefined : value)}>
+              <SelectTrigger id="admin-user-role-filter" className="h-8 w-36 text-sm">
+                <SelectValue placeholder="All roles" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All roles</SelectItem>
+                {roles.map((role) => (
+                  <SelectItem key={role.id} value={role.name}>
+                    {humanizeRoleName(role.name)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -362,7 +375,7 @@ export function AdminUserManagementTable({
                       const meta = header.column.columnDef.meta as AdminTableColumnMeta | undefined;
 
                       return (
-                        <TableHead key={header.id} className={cn('py-3 text-xs font-medium text-muted-foreground', meta?.headerClassName)}>
+                        <TableHead key={header.id} className={cn('text-muted-foreground py-3 text-xs font-medium', meta?.headerClassName)}>
                           {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                         </TableHead>
                       );
@@ -407,9 +420,7 @@ export function AdminUserManagementTable({
                       <div className="space-y-2">
                         <p className="text-base font-medium">{hasActiveFilters ? 'No users match your search' : 'No users found'}</p>
                         <p className="text-muted-foreground text-sm">
-                          {hasActiveFilters
-                            ? 'Try adjusting your search term or status filter.'
-                            : 'Try refreshing the table after new accounts are created.'}
+                          {hasActiveFilters ? 'Try adjusting your search term or status filter.' : 'Try refreshing the table after new accounts are created.'}
                         </p>
                         {hasActiveFilters && (
                           <Button
@@ -419,6 +430,7 @@ export function AdminUserManagementTable({
                             onClick={() => {
                               onSearchChange('');
                               onStatusFilterChange(undefined);
+                              onRoleFilterChange(undefined);
                             }}
                           >
                             <X className="size-3.5" />

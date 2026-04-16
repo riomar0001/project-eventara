@@ -75,6 +75,7 @@ class IUserRepository(Protocol):
         page_size: int,
         search: str | None = None,
         status: UserStatus | None = None,
+        role_name: str | None = None,
     ) -> tuple[list[AdminUserAccountSummary], int]: ...
 
     async def get_admin_user_account_detail(self, user_id: uuid.UUID) -> AdminUserAccountDetail | None: ...

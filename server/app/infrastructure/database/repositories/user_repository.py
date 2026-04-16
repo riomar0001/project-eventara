@@ -167,6 +167,7 @@ class UserRepository:
         page_size: int,
         search: str | None = None,
         status: UserStatus | None = None,
+        role_name: str | None = None,
     ) -> tuple[list[AdminUserAccountSummary], int]:
         """Return a paginated administrative view of user accounts with optional search and status filters.
 
@@ -213,6 +214,8 @@ class UserRepository:
         filter_clauses = []
         if status is not None:
             filter_clauses.append(User.status == status)
+        if role_name is not None:
+            filter_clauses.append(role_name_sq == role_name)
         if search:
             pattern = f"%{search.strip()}%"
             filter_clauses.append(

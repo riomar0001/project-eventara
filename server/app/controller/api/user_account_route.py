@@ -111,13 +111,14 @@ async def list_user_accounts(
     page_size: int = Query(default=10, ge=1, le=100),
     search: str | None = Query(default=None, max_length=200, description="Case-insensitive text search across name, email, and alias."),
     user_status: UserStatus | None = Query(default=None, alias="status", description="Filter by exact account status."),
+    role_name: str | None = Query(default=None, alias="role", description="Filter by exact assigned role name."),
     _: uuid.UUID = Depends(require_permission("user-accounts", RoleAction.READ)),
     use_case: AdminUserAccountUseCase = Depends(get_admin_user_account_use_case),
 ) -> AdminUserAccountListResponse:
     """Return one page of user-account summaries for administrators.
 
-    Supports optional server-side search (``search``) and status filtering
-    (``status``).  Both parameters are independent and may be combined.
+    Supports optional server-side search (``search``), status filtering
+    (``status``), and role filtering (``role``). All parameters are independent and may be combined.
 
     # Error mapping
     - **401 Unauthorized** — missing, expired, or invalid Bearer token.
@@ -130,6 +131,7 @@ async def list_user_accounts(
             page_size=page_size,
             search=search,
             status=user_status,
+            role_name=role_name,
         )
     )
     return AdminUserAccountListResponse(

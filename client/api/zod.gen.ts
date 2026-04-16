@@ -974,7 +974,8 @@ export const zListUserAccountsUserAccountsGetQuery = z.object({
     page: z.int().gte(1).optional().default(1),
     page_size: z.int().gte(1).lte(100).optional().default(10),
     search: z.string().max(200).nullish(),
-    status: zUserStatus.nullish()
+    status: zUserStatus.nullish(),
+    role: z.string().nullish()
 });
 
 /**

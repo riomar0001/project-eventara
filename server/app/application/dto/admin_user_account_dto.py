@@ -12,6 +12,7 @@ class ListUserAccountsInput:
     page_size: int = 10
     search: str | None = None
     status: UserStatus | None = None
+    role_name: str | None = None
 
 
 @dataclass

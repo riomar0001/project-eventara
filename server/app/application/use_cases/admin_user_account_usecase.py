@@ -91,6 +91,7 @@ class AdminUserAccountUseCase:
             page_size=data.page_size,
             search=data.search,
             status=data.status,
+            role_name=data.role_name,
         )
         total_pages = (total_count + data.page_size - 1) // data.page_size if total_count > 0 else 0
         return ListUserAccountsOutput(

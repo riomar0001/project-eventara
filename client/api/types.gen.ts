@@ -2398,6 +2398,12 @@ export type ListUserAccountsUserAccountsGetData = {
          * Filter by exact account status.
          */
         status?: UserStatus | null;
+        /**
+         * Role
+         *
+         * Filter by exact assigned role name.
+         */
+        role?: string | null;
     };
     url: '/user-accounts';
 };

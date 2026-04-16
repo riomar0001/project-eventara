@@ -24,6 +24,7 @@ export function AdminUserManagement() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<UserStatus | undefined>(undefined);
+  const [roleFilter, setRoleFilter] = useState<string | undefined>(undefined);
   const debouncedSearch = useDebounce(search, 400);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [roleDialogUser, setRoleDialogUser] = useState<AdminUserAccountSummary | null>(null);
@@ -44,7 +45,7 @@ export function AdminUserManagement() {
   const [emailError, setEmailError] = useState<string | undefined>();
   const [deleteReasonError, setDeleteReasonError] = useState<string | undefined>();
 
-  const { error, isEmpty, isLoading, pagination, refresh, users } = useAdminUserAccounts(page, PAGE_SIZE, debouncedSearch || undefined, statusFilter);
+  const { error, isEmpty, isLoading, pagination, refresh, users } = useAdminUserAccounts(page, PAGE_SIZE, debouncedSearch || undefined, statusFilter, roleFilter);
   const { detail, error: detailError, isLoading: isLoadingDetail, refresh: refreshDetail } = useAdminUserAccountDetail(selectedUserId);
   const {
     changeEmail,
@@ -293,6 +294,11 @@ export function AdminUserManagement() {
     setPage(1);
   }
 
+  function handleRoleFilterChange(value: string | undefined) {
+    setRoleFilter(value);
+    setPage(1);
+  }
+
   return (
     <>
       <AdminUserManagementTable
@@ -309,9 +315,12 @@ export function AdminUserManagement() {
         onSearchChange={handleSearchChange}
         onSelectUser={setSelectedUserId}
         onStatusFilterChange={handleStatusFilterChange}
+        onRoleFilterChange={handleRoleFilterChange}
         pagination={pagination}
         search={search}
         statusFilter={statusFilter}
+        roleFilter={roleFilter}
+        roles={roles}
         users={users}
       />
 
