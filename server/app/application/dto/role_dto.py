@@ -5,6 +5,7 @@ from typing import Optional
 from pydantic import AwareDatetime
 
 from app.domain.entities.authorization_entities import GrantEffect, RoleAction
+from app.domain.entities.authorization_entities import Feature as FeatureEntity
 from app.domain.entities.authorization_entities import UserGrant as UserGrantEntity
 from app.domain.entities.authorization_entities import UserRole as UserRoleEntity
 
@@ -46,6 +47,7 @@ class CreateGrantsInput:
     actions: list[RoleAction]
     effect: GrantEffect
     granted_by: uuid.UUID
+    starts_at: Optional[AwareDatetime] = None
     expires_at: Optional[AwareDatetime] = None
     reason: str | None = None
 
@@ -58,3 +60,8 @@ class CreateGrantsOutput:
 @dataclass
 class GetUserGrantsOutput:
     grants: list[UserGrantEntity]
+
+
+@dataclass
+class ListGrantFeaturesOutput:
+    features: list[FeatureEntity]

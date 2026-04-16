@@ -3,11 +3,12 @@ from datetime import datetime, timezone
 from typing import Optional
 
 from pydantic import AwareDatetime
-from sqlalchemy import delete, select, update
+from sqlalchemy import delete, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application.dto.admin_user_account_dto import RolePermissionSummary
 from app.domain.entities.authorization_entities import GrantEffect, Role as RoleEntity, RoleAction
+from app.domain.entities.authorization_entities import Feature as FeatureEntity
 from app.domain.entities.authorization_entities import UserGrant as DomainUserGrant
 from app.domain.entities.authorization_entities import UserRole as DomainUserRole
 from app.infrastructure.database.models.user_models import (
@@ -134,6 +135,11 @@ class RoleRepository:
         result = await self.db.execute(select(Feature.id).where(Feature.id == feature_id))
         return result.scalar_one_or_none() is not None
 
+    async def list_features(self) -> list[FeatureEntity]:
+        """Return enabled features that can receive per-user grants."""
+        result = await self.db.execute(select(Feature).where(Feature.is_enabled.is_(True)).order_by(Feature.name.asc()))
+        return [self._to_domain_feature(orm) for orm in result.scalars().all()]
+
     async def get_active_assignment(self, user_id: uuid.UUID, role_id: uuid.UUID) -> DomainUserRole | None:
         """Return the existing assignment for user + role, locking the row for update.
 
@@ -249,6 +255,7 @@ class RoleRepository:
                 UserGrant.user_id == user_id,
                 UserGrant.feature_id == feature_id,
                 UserGrant.action.in_(actions),
+                or_(UserGrant.expires_at.is_(None), UserGrant.expires_at > self._utcnow_naive()),
             )
             .with_for_update()
         )
@@ -261,6 +268,7 @@ class RoleRepository:
         feature_id: uuid.UUID,
         actions: list[RoleAction],
         effect: GrantEffect,
+        starts_at: Optional[AwareDatetime],
         expires_at: Optional[AwareDatetime],
         reason: str | None,
         granted_by: uuid.UUID,
@@ -272,6 +280,7 @@ class RoleRepository:
                 feature_id=feature_id,
                 action=action,
                 effect=effect,
+                starts_at=self._as_naive_utc(starts_at),
                 expires_at=self._as_naive_utc(expires_at),
                 reason=reason,
                 granted_by=granted_by,
@@ -283,7 +292,14 @@ class RoleRepository:
         return [self._to_domain_grant(orm) for orm in orm_grants]
 
     async def get_grants_by_user(self, user_id: uuid.UUID) -> list[DomainUserGrant]:
-        result = await self.db.execute(select(UserGrant).where(UserGrant.user_id == user_id))
+        result = await self.db.execute(
+            select(UserGrant)
+            .where(
+                UserGrant.user_id == user_id,
+                or_(UserGrant.expires_at.is_(None), UserGrant.expires_at > self._utcnow_naive()),
+            )
+            .order_by(UserGrant.starts_at.asc(), UserGrant.id.asc())
+        )
         return [self._to_domain_grant(orm) for orm in result.scalars().all()]
 
     async def get_grant_by_id(self, grant_id: uuid.UUID) -> DomainUserGrant | None:
@@ -315,6 +331,15 @@ class RoleRepository:
             is_system=orm.is_system,
         )
 
+    def _to_domain_feature(self, orm: Feature) -> FeatureEntity:
+        return FeatureEntity(
+            id=orm.id,
+            slug=orm.slug,
+            name=orm.name,
+            description=orm.description,
+            is_enabled=orm.is_enabled,
+        )
+
     def _to_domain_grant(self, orm: UserGrant) -> DomainUserGrant:
         return DomainUserGrant(
             id=orm.id,
@@ -324,6 +349,7 @@ class RoleRepository:
             action=RoleAction(orm.action),
             effect=GrantEffect(orm.effect),
             reason=orm.reason,
+            starts_at=orm.starts_at,
             expires_at=orm.expires_at,
             granted_by=orm.granted_by,
         )

@@ -47,8 +47,24 @@ class CreateGrantsRequest(BaseModel):
         description="One or more role actions to grant. Duplicates within the list are ignored.",
     )
     effect: GrantEffect = GrantEffect.ALLOW
+    starts_at: Optional[AwareDatetime] = None
     expires_at: Optional[AwareDatetime] = None
     reason: str | None = Field(default=None, max_length=500)
+
+
+class GrantFeatureResponse(BaseModel):
+    id: uuid.UUID
+    slug: str
+    name: str
+    description: str | None = None
+    is_enabled: bool
+
+    model_config = {"from_attributes": True}
+
+
+class GrantFeatureListResponse(BaseModel):
+    success: bool = True
+    data: list[GrantFeatureResponse]
 
 
 class UserGrantResponse(BaseModel):
@@ -59,6 +75,7 @@ class UserGrantResponse(BaseModel):
     action: RoleAction
     effect: GrantEffect
     reason: str | None
+    starts_at: datetime | None
     expires_at: datetime | None
     granted_by: uuid.UUID | None
 

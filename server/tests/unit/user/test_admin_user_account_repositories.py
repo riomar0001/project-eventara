@@ -53,6 +53,34 @@ class TestRoleRepositoryAdminFlows:
         assert result[0].feature_slug == "user-accounts"
         assert result[0].action == RoleAction.UPDATE
 
+    async def test_create_grants_stages_starts_at(self):
+        db = MagicMock()
+        db.flush = AsyncMock()
+        db.add_all = MagicMock()
+        repository = RoleRepository(db)
+        user_id = uuid.uuid4()
+        role_id = uuid.uuid4()
+        feature_id = uuid.uuid4()
+        granted_by = uuid.uuid4()
+        starts_at = datetime.now(timezone.utc)
+
+        await repository.create_grants(
+            user_id=user_id,
+            role_id=role_id,
+            feature_id=feature_id,
+            actions=[RoleAction.READ],
+            effect=GrantEffect.ALLOW,
+            starts_at=starts_at,
+            expires_at=None,
+            reason="Temporary override",
+            granted_by=granted_by,
+        )
+
+        db.add_all.assert_called_once()
+        created_grants = db.add_all.call_args.args[0]
+        assert len(created_grants) == 1
+        assert created_grants[0].starts_at == starts_at.replace(tzinfo=None)
+
 
 class TestUserRepositoryAdminFlows:
     async def test_update_email_and_clear_verification_resets_security_state(self):

@@ -207,6 +207,7 @@ class UserGrant(Base):
     action: Mapped[str] = mapped_column(Enum(RoleAction, name="role_action"), nullable=False)
     effect: Mapped[str] = mapped_column(Enum(GrantEffect, name="grant_effect"), nullable=False)
     reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+    starts_at: Mapped[datetime | None] = mapped_column(DateTime)
     expires_at: Mapped[datetime | None] = mapped_column(DateTime)
     granted_by: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("users.id"), nullable=True)
 
@@ -224,6 +225,7 @@ class UserGrant(Base):
             "feature_id",
             "action",
         ),
+        Index("idx_user_grants_starts_at", "starts_at"),
         Index("idx_user_grants_expires_at", "expires_at"),
     )
 

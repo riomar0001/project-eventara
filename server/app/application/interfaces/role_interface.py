@@ -5,6 +5,7 @@ from pydantic import AwareDatetime
 
 from app.application.dto.admin_user_account_dto import RolePermissionSummary
 from app.domain.entities.authorization_entities import GrantEffect, RoleAction
+from app.domain.entities.authorization_entities import Feature as FeatureEntity
 from app.domain.entities.authorization_entities import Role as RoleEntity
 from app.domain.entities.authorization_entities import UserGrant as UserGrantEntity
 from app.domain.entities.authorization_entities import UserRole as UserRoleEntity
@@ -28,6 +29,8 @@ class IRoleRepository(Protocol):
     async def list_role_permissions(self, role_ids: list[uuid.UUID]) -> dict[uuid.UUID, list[RolePermissionSummary]]: ...
 
     async def feature_exists(self, feature_id: uuid.UUID) -> bool: ...
+
+    async def list_features(self) -> list[FeatureEntity]: ...
 
     async def get_active_assignment(self, user_id: uuid.UUID, role_id: uuid.UUID) -> UserRoleEntity | None: ...
 
@@ -70,6 +73,7 @@ class IRoleRepository(Protocol):
         feature_id: uuid.UUID,
         actions: list[RoleAction],
         effect: GrantEffect,
+        starts_at: Optional[AwareDatetime],
         expires_at: Optional[AwareDatetime],
         reason: str | None,
         granted_by: uuid.UUID,

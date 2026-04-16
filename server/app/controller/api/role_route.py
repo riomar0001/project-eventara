@@ -26,6 +26,8 @@ from app.controller.schemas.role_schema import (
     AssignRoleRequest,
     CreateGrantsRequest,
     CreateGrantsResponse,
+    GrantFeatureListResponse,
+    GrantFeatureResponse,
     UpdateAssignmentRequest,
     UserGrantListResponse,
     UserGrantResponse,
@@ -328,6 +330,7 @@ async def create_grants(
                 feature_id=body.feature_id,
                 actions=list(set(body.actions)),
                 effect=body.effect,
+                starts_at=body.starts_at,
                 expires_at=body.expires_at,
                 reason=body.reason,
                 granted_by=caller_id,
@@ -352,10 +355,50 @@ async def create_grants(
                 action=g.action,
                 effect=g.effect,
                 reason=g.reason,
+                starts_at=g.starts_at,
                 expires_at=g.expires_at,
                 granted_by=g.granted_by,
             )
             for g in result.grants
+        ]
+    )
+
+
+@grant_router.get(
+    "/features",
+    response_model=GrantFeatureListResponse,
+    status_code=status.HTTP_200_OK,
+    responses={
+        **UNAUTHORIZED,
+        **FORBIDDEN,
+    },
+    summary="List grantable features",
+    description=(
+        "Return the enabled feature catalog that administrators can target when creating "
+        "special per-user permission grants."
+    ),
+)
+async def list_grant_features(
+    _: uuid.UUID = Depends(require_permission("user-grants", RoleAction.READ)),
+    use_case: UserRoleUseCase = Depends(get_role_use_case),
+) -> GrantFeatureListResponse:
+    """Return the feature catalog used by the special-permission dialog.
+
+    # Error mapping
+    - **401 Unauthorized** — missing, expired, or invalid Bearer token.
+    - **403 Forbidden** — caller lacks ``read`` permission on ``user-grants``.
+    """
+    result = await use_case.list_grant_features()
+    return GrantFeatureListResponse(
+        data=[
+            GrantFeatureResponse(
+                id=feature.id,
+                slug=feature.slug,
+                name=feature.name,
+                description=feature.description,
+                is_enabled=feature.is_enabled,
+            )
+            for feature in result.features
         ]
     )
 
@@ -401,6 +444,7 @@ async def list_user_grants(
             action=g.action,
             effect=g.effect,
             reason=g.reason,
+            starts_at=g.starts_at,
             expires_at=g.expires_at,
             granted_by=g.granted_by,
         )

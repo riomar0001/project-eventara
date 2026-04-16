@@ -66,6 +66,7 @@ class UserGrant(BaseModel):
     action: RoleAction
     effect: GrantEffect
     reason: str | None = None
+    starts_at: datetime | None = None
     expires_at: datetime | None = None
     granted_by: uuid.UUID | None = None
 

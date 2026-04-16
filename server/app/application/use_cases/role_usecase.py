@@ -9,6 +9,7 @@ from app.application.dto.role_dto import (
     CreateGrantsOutput,
     GetUserGrantsOutput,
     GetUserRolesOutput,
+    ListGrantFeaturesOutput,
     UpdateAssignmentInput,
     UpdateAssignmentOutput,
 )
@@ -207,12 +208,18 @@ class UserRoleUseCase:
             feature_id=data.feature_id,
             actions=data.actions,
             effect=data.effect,
+            starts_at=data.starts_at,
             expires_at=data.expires_at,
             reason=data.reason,
             granted_by=data.granted_by,
         )
         await self.db.commit()
         return CreateGrantsOutput(grants=grants)
+
+    async def list_grant_features(self) -> ListGrantFeaturesOutput:
+        """Return the enabled feature catalog available for per-user grants."""
+        features = await self.repo.list_features()
+        return ListGrantFeaturesOutput(features=features)
 
     async def get_user_grants(self, user_id: uuid.UUID) -> GetUserGrantsOutput:
         """Return all active grants for a given user.
