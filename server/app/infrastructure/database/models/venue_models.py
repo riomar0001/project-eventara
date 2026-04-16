@@ -21,6 +21,7 @@ class Venue(Base):
     city: Mapped[str] = mapped_column(String(100), nullable=False)
     province: Mapped[str] = mapped_column(String(100), nullable=False)
     postal_code: Mapped[str] = mapped_column(String(20), nullable=False)
+    region: Mapped[str] = mapped_column(String(100), nullable=False)
     country: Mapped[str] = mapped_column(String(100), nullable=False)
 
     # Venue details
