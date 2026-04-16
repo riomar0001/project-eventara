@@ -40,20 +40,20 @@ def create_access_token(
     user_id: uuid.UUID,
     email: str,
     done_onboarding: bool,
-    role_id: str | None = None,
+    role: str | None = None,
     user: UserProfile | None = None,
 ) -> str:
     """Build and sign a short-lived access token for the given user.
 
     The token always includes ``sub``, ``email``, ``type``, ``jti``, ``iat``,
-    and ``exp`` claims.  ``role_id`` and profile fields are embedded only when
+    and ``exp`` claims.  ``role`` and profile fields are embedded only when
     provided so the token payload stays compact for unenriched sessions.
 
     Args:
         user_id:  The user's UUID, stored in the ``sub`` claim.
         email:    The user's email address, embedded for convenience.
         done_onboarding:  Whether the user has completed the onboarding process.
-        role_id:  Optional role identifier to include in the payload.
+        role:     Optional role name to include in the payload.
         user:     Optional full profile; when supplied, name and demographic
                   fields are embedded so clients avoid a separate profile fetch.
 
@@ -72,8 +72,8 @@ def create_access_token(
         "exp": now + settings.ACCESS_TOKEN_EXPIRATION,
     }
 
-    if role_id:
-        payload["role_id"] = role_id
+    if role:
+        payload["role"] = role
 
     if user:
         payload.update(

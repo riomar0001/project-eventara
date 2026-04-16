@@ -45,6 +45,7 @@ from app.domain.entities.user_entity import (
     UserStatus,
 )
 from app.domain.exceptions import (
+    AccountDeletionGracePeriodExpiredError,
     EmailAlreadyTakenError,
     EmailAlreadyVerifiedError,
     EmailNotVerifiedError,
@@ -136,9 +137,16 @@ class AuthUseCase:
 
         return browser, os, device_type
 
+    @staticmethod
+    def _is_deletion_grace_expired(user: User) -> bool:
+        if not user.deletion_scheduled_for:
+            return False
+        return user.deletion_scheduled_for.replace(tzinfo=UTC) <= datetime.now(UTC)
+
     async def _issue_access_token_for_user(self, user: User) -> str:
         """Create an access token enriched with profile claims when available."""
         profile = None
+        role_name = await self.repo.get_active_role_name_by_user_id(user.id)
         if user.onboarding_completed:
             profile = await self.repo.get_profile_by_user_id(user.id)
 
@@ -146,6 +154,7 @@ class AuthUseCase:
             user.id,
             user.email,
             user.onboarding_completed,
+            role=role_name,
             user=profile,
         )
 
@@ -302,6 +311,9 @@ class AuthUseCase:
         if user.status in (UserStatus.INACTIVE, UserStatus.DELETED):
             raise UserInactiveError()
 
+        if self._is_deletion_grace_expired(user):
+            raise AccountDeletionGracePeriodExpiredError()
+
         security = await self.repo.get_security_by_user_id(user.id)
         now = datetime.now(UTC)
         if security and security.locked_until:
@@ -425,6 +437,12 @@ class AuthUseCase:
         if not user:
             raise UserNotFoundError()
 
+        if user.status in (UserStatus.INACTIVE, UserStatus.DELETED):
+            raise UserInactiveError()
+
+        if self._is_deletion_grace_expired(user):
+            raise AccountDeletionGracePeriodExpiredError()
+
         await self.repo.reset_failed_login(user_id)
         browser, os, device_type = self._parse_user_agent(data.user_agent)
         await self.repo.record_login(
@@ -435,6 +453,7 @@ class AuthUseCase:
             os=os,
             device_type=device_type,
         )
+        await self.repo.cancel_pending_account_deletion(user_id)
 
         access_token = await self._issue_access_token_for_user(user)
         refresh_token = await create_refresh_token(user.id, self.db)
@@ -593,6 +612,12 @@ class AuthUseCase:
         user = await self.repo.get_by_id(user_id)
         if not user:
             raise UserNotFoundError()
+
+        if user.status in (UserStatus.INACTIVE, UserStatus.DELETED):
+            raise UserInactiveError()
+
+        if self._is_deletion_grace_expired(user):
+            raise AccountDeletionGracePeriodExpiredError()
 
         access_token = await self._issue_access_token_for_user(user)
         new_refresh_token = await create_refresh_token(user.id, self.db)

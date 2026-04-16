@@ -1,4 +1,5 @@
 import uuid
+from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -6,6 +7,7 @@ import pytest
 from app.application.dto.auth_dto import LoginVerifyInput
 from app.domain.entities.user_entity import AgeGroup, EducationLevel, Gender, UserProfile
 from app.domain.exceptions import (
+    AccountDeletionGracePeriodExpiredError,
     InvalidOTPError,
     InvalidTokenError,
     TokenExpiredError,
@@ -35,9 +37,11 @@ class TestLoginVerify:
 
         repo = MagicMock()
         repo.get_by_id = AsyncMock(return_value=user)
+        repo.get_active_role_name_by_user_id = AsyncMock(return_value=None)
         repo.get_profile_by_user_id = AsyncMock(return_value=profile)
         repo.reset_failed_login = AsyncMock()
         repo.record_login = AsyncMock()
+        repo.cancel_pending_account_deletion = AsyncMock(return_value=True)
 
         otp_repo = AsyncMock()
         otp_repo.verify_and_consume = AsyncMock(return_value=True)
@@ -56,6 +60,7 @@ class TestLoginVerify:
         repo.get_profile_by_user_id.assert_awaited_once_with(user.id)
         repo.reset_failed_login.assert_awaited_once()
         repo.record_login.assert_awaited_once()
+        repo.cancel_pending_account_deletion.assert_awaited_once_with(user.id)
 
     async def test_raises_token_expired(self):
         uc = make_use_case(otp_repo=AsyncMock())
@@ -103,5 +108,26 @@ class TestLoginVerify:
         with (
             patch(f"{MODULE}.verify_otp_token", return_value=payload),
             pytest.raises(UserNotFoundError),
+        ):
+            await uc.login_verify(LoginVerifyInput(token="jwt", code="123456"))
+
+    async def test_raises_when_deletion_grace_period_expired(self):
+        user = make_user(
+            deletion_requested_at=datetime.now(UTC) - timedelta(days=31),
+            deletion_scheduled_for=datetime.now(UTC) - timedelta(days=1),
+        )
+        payload = make_token_payload(user.id)
+
+        repo = MagicMock()
+        repo.get_by_id = AsyncMock(return_value=user)
+
+        otp_repo = AsyncMock()
+        otp_repo.verify_and_consume = AsyncMock(return_value=True)
+
+        uc = make_use_case(repo=repo, otp_repo=otp_repo)
+
+        with (
+            patch(f"{MODULE}.verify_otp_token", return_value=payload),
+            pytest.raises(AccountDeletionGracePeriodExpiredError),
         ):
             await uc.login_verify(LoginVerifyInput(token="jwt", code="123456"))

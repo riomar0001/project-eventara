@@ -1,8 +1,12 @@
 import uuid
-from datetime import datetime
 from typing import Protocol
 
+from pydantic import AwareDatetime
+
+from app.application.dto.admin_user_account_dto import RolePermissionSummary
+from app.domain.entities.authorization_entities import Feature as FeatureEntity
 from app.domain.entities.authorization_entities import GrantEffect, RoleAction
+from app.domain.entities.authorization_entities import Role as RoleEntity
 from app.domain.entities.authorization_entities import UserGrant as UserGrantEntity
 from app.domain.entities.authorization_entities import UserRole as UserRoleEntity
 
@@ -14,15 +18,29 @@ class IRoleRepository(Protocol):
 
     async def role_exists(self, role_id: uuid.UUID) -> bool: ...
 
+    async def lock_user(self, user_id: uuid.UUID) -> bool: ...
+
+    async def get_role_by_id(self, role_id: uuid.UUID) -> RoleEntity | None: ...
+
+    async def list_roles(self) -> list[RoleEntity]: ...
+
+    async def get_role_permissions(self, role_id: uuid.UUID) -> list[RolePermissionSummary]: ...
+
+    async def list_role_permissions(self, role_ids: list[uuid.UUID]) -> dict[uuid.UUID, list[RolePermissionSummary]]: ...
+
     async def feature_exists(self, feature_id: uuid.UUID) -> bool: ...
 
+    async def list_features(self) -> list[FeatureEntity]: ...
+
     async def get_active_assignment(self, user_id: uuid.UUID, role_id: uuid.UUID) -> UserRoleEntity | None: ...
+
+    async def get_active_assignments_for_user(self, user_id: uuid.UUID) -> list[UserRoleEntity]: ...
 
     async def create_assignment(
         self,
         user_id: uuid.UUID,
         role_id: uuid.UUID,
-        expires_at: datetime | None,
+        expires_at: AwareDatetime | None,
         assigned_by: uuid.UUID,
     ) -> UserRoleEntity: ...
 
@@ -30,9 +48,16 @@ class IRoleRepository(Protocol):
 
     async def get_assignment_by_id(self, assignment_id: uuid.UUID) -> UserRoleEntity | None: ...
 
-    async def update_assignment_expiry(self, assignment_id: uuid.UUID, expires_at: datetime | None) -> UserRoleEntity | None: ...
+    async def update_assignment_expiry(self, assignment_id: uuid.UUID, expires_at: AwareDatetime | None) -> UserRoleEntity | None: ...
 
     async def delete_assignment(self, assignment_id: uuid.UUID) -> bool: ...
+
+    async def replace_active_assignments(
+        self,
+        user_id: uuid.UUID,
+        role_id: uuid.UUID,
+        assigned_by: uuid.UUID,
+    ) -> UserRoleEntity: ...
 
     async def get_existing_grants(
         self,
@@ -48,7 +73,8 @@ class IRoleRepository(Protocol):
         feature_id: uuid.UUID,
         actions: list[RoleAction],
         effect: GrantEffect,
-        expires_at: datetime | None,
+        starts_at: AwareDatetime | None,
+        expires_at: AwareDatetime | None,
         reason: str | None,
         granted_by: uuid.UUID,
     ) -> list[UserGrantEntity]: ...

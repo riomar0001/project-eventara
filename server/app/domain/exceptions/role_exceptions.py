@@ -13,6 +13,11 @@ class RoleAlreadyAssignedError(Exception):
         super().__init__("This role is already assigned to the user")
 
 
+class RoleAlreadyCurrentError(Exception):
+    def __init__(self) -> None:
+        super().__init__("This role is already the user's current effective role")
+
+
 class FeatureNotFoundError(Exception):
     def __init__(self, identifier: str = "") -> None:
         super().__init__(f"Feature not found: {identifier}" if identifier else "Feature not found")

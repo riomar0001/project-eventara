@@ -193,3 +193,114 @@ SAME_PASSWORD_ERROR = {
         },
     }
 }
+
+ACCOUNT_DELETION_VALIDATION_ERROR = {
+    422: {
+        "description": "Validation error — self-service deletion requires current_password; administrator deletion requires a non-empty reason",
+        "model": ValidationErrorResponse,
+        "content": {
+            "application/json": {
+                "examples": {
+                    "self_service": {
+                        "summary": "Missing current password",
+                        "value": {
+                            "success": False,
+                            "detail": [
+                                {
+                                    "loc": ["body", "current_password"],
+                                    "msg": "String should have at least 1 character",
+                                    "type": "string_too_short",
+                                }
+                            ],
+                        },
+                    },
+                    "admin_reason": {
+                        "summary": "Missing admin reason",
+                        "value": {
+                            "success": False,
+                            "detail": [
+                                {
+                                    "loc": ["body", "reason"],
+                                    "msg": "String should have at least 1 character",
+                                    "type": "string_too_short",
+                                }
+                            ],
+                        },
+                    },
+                }
+            }
+        },
+    }
+}
+
+ACCOUNT_DELETION_INVALID_PASSWORD = {
+    401: {
+        "description": "Current password is incorrect",
+        "model": ErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "message": "Invalid email or password",
+                }
+            }
+        },
+    }
+}
+
+ACCOUNT_DELETION_CONFLICT = {
+    409: {
+        "description": "Conflict — account deletion is already scheduled",
+        "model": ErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "message": "Account deletion is already scheduled",
+                }
+            }
+        },
+    }
+}
+
+ACCOUNT_DELETION_FORBIDDEN = {
+    403: {
+        "description": "Forbidden — account is inactive, already deleted, or past the deletion grace period",
+        "model": ErrorResponse,
+        "content": {
+            "application/json": {
+                "examples": {
+                    "inactive": {
+                        "summary": "Inactive or deleted account",
+                        "value": {
+                            "success": False,
+                            "message": "Account is inactive or has been deleted",
+                        },
+                    },
+                    "grace_expired": {
+                        "summary": "Deletion grace period expired",
+                        "value": {
+                            "success": False,
+                            "message": "Account deletion grace period has expired and the account is awaiting final deletion",
+                        },
+                    },
+                }
+            }
+        },
+    }
+}
+
+FORBIDDEN = {
+    403: {
+        "description": "Forbidden",
+        "model": ErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "message": "Role 'participant' does not have 'delete' access to 'user-accounts'.",
+                }
+            }
+        },
+    }
+}

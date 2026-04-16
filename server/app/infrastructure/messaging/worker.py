@@ -3,6 +3,7 @@ from datetime import timedelta
 from arq import cron, func
 from arq.connections import RedisSettings
 
+from app.infrastructure.messaging.jobs.account_deletion_jobs import finalize_account_deletion_job
 from app.infrastructure.messaging.jobs.audit_log_jobs import persist_audit_log
 from app.infrastructure.messaging.jobs.email_jobs import send_email_job
 from app.infrastructure.messaging.jobs.token_jobs import revoke_expired_tokens_job
@@ -45,6 +46,7 @@ class WorkerSettings:
     on_shutdown = shutdown
     max_tries: int = 3
     functions: list = [
+        func(finalize_account_deletion_job, keep_result=timedelta(days=2)),
         func(send_email_job, keep_result=timedelta(hours=12)),
         persist_audit_log,
     ]

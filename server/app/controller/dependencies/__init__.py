@@ -5,9 +5,11 @@ from app.controller.dependencies.auth_depends import (
 from app.controller.dependencies.rate_limit_depends import login_rate_limit
 from app.controller.dependencies.rbac_depends import require_permission
 from app.controller.dependencies.use_cases_depends import (
+    get_admin_user_account_use_case,
     get_audit_logs_use_case,
     get_auth_use_case,
     get_create_audit_log_use_case,
+    get_delete_account_use_case,
     get_delete_dead_job_use_case,
     get_list_dead_jobs_use_case,
     get_login_history_use_case,
@@ -25,12 +27,14 @@ __all__ = [
     "require_completed_onboarding",
     "get_auth_use_case",
     "get_onboarding_use_case",
+    "get_admin_user_account_use_case",
     "get_login_history_use_case",
     "get_otp_repository",
     "login_rate_limit",
     "require_permission",
     "get_create_audit_log_use_case",
     "get_audit_logs_use_case",
+    "get_delete_account_use_case",
     "get_role_use_case",
     "get_queue_stats_use_case",
     "get_list_dead_jobs_use_case",

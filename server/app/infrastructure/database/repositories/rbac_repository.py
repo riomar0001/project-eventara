@@ -138,6 +138,7 @@ class RBACRepository:
                 Feature.slug == feature_slug,
                 Feature.is_enabled.is_(True),
                 UserGrant.action == action,
+                or_(UserGrant.starts_at.is_(None), UserGrant.starts_at <= now),
                 or_(UserGrant.expires_at.is_(None), UserGrant.expires_at > now),
             )
         )

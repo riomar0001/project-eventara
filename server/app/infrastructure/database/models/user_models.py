@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 from uuid import uuid4
 
 from sqlalchemy import (
@@ -35,6 +35,10 @@ class User(Base):
     accepted_privacy_policy: Mapped[bool] = mapped_column(default=False)
     accepted_privacy_policy_at: Mapped[datetime | None] = mapped_column(DateTime)
     status: Mapped[str] = mapped_column(Enum(UserStatus, name="user_status"), nullable=False, default="active")
+    deletion_requested_at: Mapped[datetime | None] = mapped_column(DateTime)
+    deletion_scheduled_for: Mapped[datetime | None] = mapped_column(DateTime)
+    deletion_requested_by: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    deletion_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime)
 
     # Relationships
@@ -57,6 +61,7 @@ class User(Base):
             postgresql_where=text("deleted_at IS NULL"),
         ),
         Index("idx_users_status", "status"),
+        Index("idx_users_deletion_scheduled_for", "deletion_scheduled_for"),
     )
 
 
@@ -180,7 +185,7 @@ class UserRole(Base):
     role_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("roles.id", ondelete="CASCADE"))
     expires_at: Mapped[datetime | None] = mapped_column(DateTime)
     assigned_by: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("users.id"), nullable=True)
-    assigned_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    assigned_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(UTC).replace(tzinfo=None))
 
     # Relationships
     user: Mapped[User] = relationship(back_populates="roles", foreign_keys=[user_id])
@@ -202,6 +207,7 @@ class UserGrant(Base):
     action: Mapped[str] = mapped_column(Enum(RoleAction, name="role_action"), nullable=False)
     effect: Mapped[str] = mapped_column(Enum(GrantEffect, name="grant_effect"), nullable=False)
     reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+    starts_at: Mapped[datetime | None] = mapped_column(DateTime)
     expires_at: Mapped[datetime | None] = mapped_column(DateTime)
     granted_by: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("users.id"), nullable=True)
 
@@ -219,6 +225,7 @@ class UserGrant(Base):
             "feature_id",
             "action",
         ),
+        Index("idx_user_grants_starts_at", "starts_at"),
         Index("idx_user_grants_expires_at", "expires_at"),
     )
 
@@ -237,7 +244,7 @@ class Token(Base):
     expires_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     last_used_at: Mapped[datetime | None] = mapped_column(DateTime)
 
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(UTC).replace(tzinfo=None))
 
     user: Mapped[User] = relationship(back_populates="tokens", foreign_keys=[user_id])
 

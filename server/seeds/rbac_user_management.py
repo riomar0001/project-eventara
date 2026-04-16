@@ -1,17 +1,27 @@
 """
-Seed: RBAC - User Management
-Populates features, roles, and role permissions for the user management domain.
+Seed: RBAC
+Populates features, roles, and role permissions for the current API surface.
 Idempotent — safe to run multiple times.
 
 Usage (from server/):
+    python .\\seeds\\rbac_user_management.py
     python -m seeds.rbac_user_management
 """
+
+# ruff: noqa: E402
 
 import asyncio
 from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
+
+try:
+    from seeds._bootstrap import ensure_server_on_path
+except ModuleNotFoundError:
+    from _bootstrap import ensure_server_on_path
+
+ensure_server_on_path()
 
 from app.domain.entities.authorization_entities import GrantEffect, RoleAction
 from app.infrastructure.database.models.user_models import Feature, Role, RolePermission
@@ -21,29 +31,49 @@ from app.infrastructure.database.session import AsyncSessionLocal
 # Seed data
 # ---------------------------------------------------------------------------
 
+ALL_ACTIONS = [
+    RoleAction.CREATE,
+    RoleAction.READ,
+    RoleAction.UPDATE,
+    RoleAction.DELETE,
+]
+
+
 FEATURES: list[dict] = [
     {
-        "slug": "user_management",
-        "name": "User Management",
-        "description": "Create, read, update, and delete user accounts.",
+        "slug": "venues",
+        "name": "Venues",
+        "description": "Create, read, update, and delete venue records.",
         "is_enabled": True,
     },
     {
-        "slug": "user_profile_management",
-        "name": "User Profile Management",
-        "description": "Manage user profile data such as name, bio, and preferences.",
+        "slug": "user-roles",
+        "name": "User Roles",
+        "description": "Assign, view, update, and revoke user role assignments.",
         "is_enabled": True,
     },
     {
-        "slug": "user_role_management",
-        "name": "User Role Management",
-        "description": "Assign and revoke roles on user accounts.",
-        "is_enabled": True,
-    },
-    {
-        "slug": "user_grant_management",
-        "name": "User Grant Management",
+        "slug": "user-grants",
+        "name": "User Grants",
         "description": "Manage fine-grained per-user permission grants.",
+        "is_enabled": True,
+    },
+    {
+        "slug": "queues",
+        "name": "Queues",
+        "description": "Inspect and manage background job queues.",
+        "is_enabled": True,
+    },
+    {
+        "slug": "audit-logs",
+        "name": "Audit Logs",
+        "description": "View system audit log entries.",
+        "is_enabled": True,
+    },
+    {
+        "slug": "user-accounts",
+        "name": "User Accounts",
+        "description": "Manage account-level lifecycle operations such as administrative deletion scheduling.",
         "is_enabled": True,
     },
 ]
@@ -85,49 +115,25 @@ ROLES: list[dict] = [
 # Effect is ALLOW for all entries below; DENY grants are added as user-level
 # overrides and are not seeded at the role level.
 ROLE_PERMISSIONS: dict[str, dict[str, list[RoleAction]]] = {
-    "participant": {
-        "user_management": [RoleAction.READ, RoleAction.DELETE],
-        "user_profile_management": [RoleAction.READ, RoleAction.UPDATE],
-    },
-    "volunteer": {
-        "user_management": [RoleAction.READ, RoleAction.DELETE],
-        "user_profile_management": [RoleAction.READ, RoleAction.UPDATE],
-    },
+    "participant": {},
+    "volunteer": {},
     "event_organizer": {
-        "user_management": [RoleAction.READ, RoleAction.DELETE],
-        "user_profile_management": [RoleAction.READ, RoleAction.UPDATE],
+        "venues": [RoleAction.CREATE, RoleAction.READ, RoleAction.UPDATE],
     },
     "community_leader": {
-        "user_management": [RoleAction.READ],
-        "user_profile_management": [RoleAction.READ],
-        "user_role_management": [RoleAction.READ],
-        "user_grant_management": [RoleAction.READ],
+        "venues": [RoleAction.READ],
+        "user-roles": [RoleAction.READ],
+        "user-grants": [RoleAction.READ],
+        "queues": [RoleAction.READ],
+        "audit-logs": [RoleAction.READ],
     },
     "system_administrator": {
-        "user_management": [
-            RoleAction.CREATE,
-            RoleAction.READ,
-            RoleAction.UPDATE,
-            RoleAction.DELETE,
-        ],
-        "user_profile_management": [
-            RoleAction.CREATE,
-            RoleAction.READ,
-            RoleAction.UPDATE,
-            RoleAction.DELETE,
-        ],
-        "user_role_management": [
-            RoleAction.CREATE,
-            RoleAction.READ,
-            RoleAction.UPDATE,
-            RoleAction.DELETE,
-        ],
-        "user_grant_management": [
-            RoleAction.CREATE,
-            RoleAction.READ,
-            RoleAction.UPDATE,
-            RoleAction.DELETE,
-        ],
+        "venues": ALL_ACTIONS,
+        "user-accounts": [RoleAction.READ, RoleAction.UPDATE, RoleAction.DELETE],
+        "user-roles": ALL_ACTIONS,
+        "user-grants": ALL_ACTIONS,
+        "queues": [RoleAction.READ, RoleAction.DELETE],
+        "audit-logs": [RoleAction.READ],
     },
 }
 
@@ -203,7 +209,7 @@ async def _upsert_role_permissions(
 
 
 async def run() -> None:
-    print("\nRunning seed: RBAC - User Management\n" + "-" * 40)
+    print("\nRunning seed: RBAC\n" + "-" * 40)
 
     async with AsyncSessionLocal() as session:
         async with session.begin():

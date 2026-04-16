@@ -4,8 +4,8 @@ import * as z from 'zod';
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { AssignRoleUserRolesPostData, AssignRoleUserRolesPostErrors, AssignRoleUserRolesPostResponses, ChangePasswordUserChangePasswordPostData, ChangePasswordUserChangePasswordPostErrors, ChangePasswordUserChangePasswordPostResponses, CheckAliasUserCheckAliasGetData, CheckAliasUserCheckAliasGetErrors, CheckAliasUserCheckAliasGetResponses, CreateGrantsUserGrantsPostData, CreateGrantsUserGrantsPostErrors, CreateGrantsUserGrantsPostResponses, CreateVenueVenuesPostData, CreateVenueVenuesPostErrors, CreateVenueVenuesPostResponses, DeleteDeadJobQueuesDlqJobIdDeleteData, DeleteDeadJobQueuesDlqJobIdDeleteErrors, DeleteDeadJobQueuesDlqJobIdDeleteResponses, DeleteVenueVenuesVenueIdDeleteData, DeleteVenueVenuesVenueIdDeleteErrors, DeleteVenueVenuesVenueIdDeleteResponses, ForgotPasswordAuthForgotPasswordPostData, ForgotPasswordAuthForgotPasswordPostErrors, ForgotPasswordAuthForgotPasswordPostResponses, GetAssignmentUserRolesAssignmentIdGetData, GetAssignmentUserRolesAssignmentIdGetErrors, GetAssignmentUserRolesAssignmentIdGetResponses, GetAuditLogsAuditLogsGetData, GetAuditLogsAuditLogsGetErrors, GetAuditLogsAuditLogsGetResponses, GetLoginHistoryUserLoginHistoryGetData, GetLoginHistoryUserLoginHistoryGetErrors, GetLoginHistoryUserLoginHistoryGetResponses, GetQueueStatsQueuesGetData, GetQueueStatsQueuesGetErrors, GetQueueStatsQueuesGetResponses, GetUserVenuesVenuesCreatorCreatorIdGetData, GetUserVenuesVenuesCreatorCreatorIdGetErrors, GetUserVenuesVenuesCreatorCreatorIdGetResponses, GetVenueVenuesVenueIdGetData, GetVenueVenuesVenueIdGetErrors, GetVenueVenuesVenueIdGetResponses, HealthCheckHealthGetData, HealthCheckHealthGetResponses, ListDeadJobsQueuesDlqGetData, ListDeadJobsQueuesDlqGetErrors, ListDeadJobsQueuesDlqGetResponses, ListUserGrantsUserGrantsGetData, ListUserGrantsUserGrantsGetErrors, ListUserGrantsUserGrantsGetResponses, ListUserRolesUserRolesGetData, ListUserRolesUserRolesGetErrors, ListUserRolesUserRolesGetResponses, LoginAuthLoginPostData, LoginAuthLoginPostErrors, LoginAuthLoginPostResponses, LoginVerifyAuthLoginVerifyPostData, LoginVerifyAuthLoginVerifyPostErrors, LoginVerifyAuthLoginVerifyPostResponses, LogoutAuthLogoutPostData, LogoutAuthLogoutPostErrors, LogoutAuthLogoutPostResponses, PurgeDeadJobsQueuesDlqDeleteData, PurgeDeadJobsQueuesDlqDeleteErrors, PurgeDeadJobsQueuesDlqDeleteResponses, RefreshTokenAuthRefreshPostData, RefreshTokenAuthRefreshPostErrors, RefreshTokenAuthRefreshPostResponses, RegisterUserAuthRegisterPostData, RegisterUserAuthRegisterPostErrors, RegisterUserAuthRegisterPostResponses, ResendOtpAuthLoginResendOtpPostData, ResendOtpAuthLoginResendOtpPostErrors, ResendOtpAuthLoginResendOtpPostResponses, ResendVerificationAuthResendVerificationPostData, ResendVerificationAuthResendVerificationPostErrors, ResendVerificationAuthResendVerificationPostResponses, ResetPasswordAuthResetPasswordTokenPostData, ResetPasswordAuthResetPasswordTokenPostErrors, ResetPasswordAuthResetPasswordTokenPostResponses, RetryDeadJobQueuesDlqJobIdRetryPostData, RetryDeadJobQueuesDlqJobIdRetryPostErrors, RetryDeadJobQueuesDlqJobIdRetryPostResponses, RevokeAssignmentUserRolesAssignmentIdDeleteData, RevokeAssignmentUserRolesAssignmentIdDeleteErrors, RevokeAssignmentUserRolesAssignmentIdDeleteResponses, RevokeGrantUserGrantsGrantIdDeleteData, RevokeGrantUserGrantsGrantIdDeleteErrors, RevokeGrantUserGrantsGrantIdDeleteResponses, RootGetData, RootGetResponses, UpdateAssignmentUserRolesAssignmentIdPatchData, UpdateAssignmentUserRolesAssignmentIdPatchErrors, UpdateAssignmentUserRolesAssignmentIdPatchResponses, UpdateVenueVenuesVenueIdPatchData, UpdateVenueVenuesVenueIdPatchErrors, UpdateVenueVenuesVenueIdPatchResponses, UserOnboardingUserOnboardPostData, UserOnboardingUserOnboardPostErrors, UserOnboardingUserOnboardPostResponses, VerifyEmailAuthVerifyTokenGetData, VerifyEmailAuthVerifyTokenGetErrors, VerifyEmailAuthVerifyTokenGetResponses } from './types.gen';
-import { zAssignRoleUserRolesPostBody, zAssignRoleUserRolesPostResponse, zChangePasswordUserChangePasswordPostBody, zChangePasswordUserChangePasswordPostResponse, zCheckAliasUserCheckAliasGetQuery, zCheckAliasUserCheckAliasGetResponse, zCreateGrantsUserGrantsPostBody, zCreateGrantsUserGrantsPostResponse, zCreateVenueVenuesPostBody, zCreateVenueVenuesPostResponse, zDeleteDeadJobQueuesDlqJobIdDeletePath, zDeleteDeadJobQueuesDlqJobIdDeleteResponse, zDeleteVenueVenuesVenueIdDeletePath, zDeleteVenueVenuesVenueIdDeleteResponse, zForgotPasswordAuthForgotPasswordPostBody, zForgotPasswordAuthForgotPasswordPostResponse, zGetAssignmentUserRolesAssignmentIdGetPath, zGetAssignmentUserRolesAssignmentIdGetResponse, zGetAuditLogsAuditLogsGetQuery, zGetAuditLogsAuditLogsGetResponse, zGetLoginHistoryUserLoginHistoryGetQuery, zGetLoginHistoryUserLoginHistoryGetResponse, zGetQueueStatsQueuesGetResponse, zGetUserVenuesVenuesCreatorCreatorIdGetPath, zGetUserVenuesVenuesCreatorCreatorIdGetResponse, zGetVenueVenuesVenueIdGetPath, zGetVenueVenuesVenueIdGetResponse, zListDeadJobsQueuesDlqGetResponse, zListUserGrantsUserGrantsGetQuery, zListUserGrantsUserGrantsGetResponse, zListUserRolesUserRolesGetQuery, zListUserRolesUserRolesGetResponse, zLoginAuthLoginPostBody, zLoginAuthLoginPostResponse, zLoginVerifyAuthLoginVerifyPostBody, zLoginVerifyAuthLoginVerifyPostResponse, zLogoutAuthLogoutPostBody, zLogoutAuthLogoutPostResponse, zPurgeDeadJobsQueuesDlqDeleteResponse, zRefreshTokenAuthRefreshPostBody, zRefreshTokenAuthRefreshPostResponse, zRegisterUserAuthRegisterPostBody, zRegisterUserAuthRegisterPostResponse, zResendOtpAuthLoginResendOtpPostBody, zResendOtpAuthLoginResendOtpPostResponse, zResendVerificationAuthResendVerificationPostBody, zResendVerificationAuthResendVerificationPostResponse, zResetPasswordAuthResetPasswordTokenPostBody, zResetPasswordAuthResetPasswordTokenPostPath, zResetPasswordAuthResetPasswordTokenPostResponse, zRetryDeadJobQueuesDlqJobIdRetryPostPath, zRetryDeadJobQueuesDlqJobIdRetryPostResponse, zRevokeAssignmentUserRolesAssignmentIdDeletePath, zRevokeAssignmentUserRolesAssignmentIdDeleteResponse, zRevokeGrantUserGrantsGrantIdDeletePath, zRevokeGrantUserGrantsGrantIdDeleteResponse, zUpdateAssignmentUserRolesAssignmentIdPatchBody, zUpdateAssignmentUserRolesAssignmentIdPatchPath, zUpdateAssignmentUserRolesAssignmentIdPatchResponse, zUpdateVenueVenuesVenueIdPatchBody, zUpdateVenueVenuesVenueIdPatchPath, zUpdateVenueVenuesVenueIdPatchResponse, zUserOnboardingUserOnboardPostBody, zUserOnboardingUserOnboardPostResponse, zVerifyEmailAuthVerifyTokenGetPath, zVerifyEmailAuthVerifyTokenGetResponse } from './zod.gen';
+import type { AssignRoleUserRolesPostData, AssignRoleUserRolesPostErrors, AssignRoleUserRolesPostResponses, ChangePasswordUserChangePasswordPostData, ChangePasswordUserChangePasswordPostErrors, ChangePasswordUserChangePasswordPostResponses, ChangeUserEmailUserAccountsUserIdEmailPatchData, ChangeUserEmailUserAccountsUserIdEmailPatchErrors, ChangeUserEmailUserAccountsUserIdEmailPatchResponses, ChangeUserRoleUserAccountsUserIdRolePatchData, ChangeUserRoleUserAccountsUserIdRolePatchErrors, ChangeUserRoleUserAccountsUserIdRolePatchResponses, CheckAliasUserCheckAliasGetData, CheckAliasUserCheckAliasGetErrors, CheckAliasUserCheckAliasGetResponses, CreateGrantsUserGrantsPostData, CreateGrantsUserGrantsPostErrors, CreateGrantsUserGrantsPostResponses, CreateVenueVenuesPostData, CreateVenueVenuesPostErrors, CreateVenueVenuesPostResponses, DeleteDeadJobQueuesDlqJobIdDeleteData, DeleteDeadJobQueuesDlqJobIdDeleteErrors, DeleteDeadJobQueuesDlqJobIdDeleteResponses, DeleteVenueVenuesVenueIdDeleteData, DeleteVenueVenuesVenueIdDeleteErrors, DeleteVenueVenuesVenueIdDeleteResponses, ForgotPasswordAuthForgotPasswordPostData, ForgotPasswordAuthForgotPasswordPostErrors, ForgotPasswordAuthForgotPasswordPostResponses, GetAssignmentUserRolesAssignmentIdGetData, GetAssignmentUserRolesAssignmentIdGetErrors, GetAssignmentUserRolesAssignmentIdGetResponses, GetAuditLogsAuditLogsGetData, GetAuditLogsAuditLogsGetErrors, GetAuditLogsAuditLogsGetResponses, GetLoginHistoryUserLoginHistoryGetData, GetLoginHistoryUserLoginHistoryGetErrors, GetLoginHistoryUserLoginHistoryGetResponses, GetQueueStatsQueuesGetData, GetQueueStatsQueuesGetErrors, GetQueueStatsQueuesGetResponses, GetUserAccountDetailUserAccountsUserIdGetData, GetUserAccountDetailUserAccountsUserIdGetErrors, GetUserAccountDetailUserAccountsUserIdGetResponses, GetUserVenuesVenuesCreatorCreatorIdGetData, GetUserVenuesVenuesCreatorCreatorIdGetErrors, GetUserVenuesVenuesCreatorCreatorIdGetResponses, GetVenueVenuesVenueIdGetData, GetVenueVenuesVenueIdGetErrors, GetVenueVenuesVenueIdGetResponses, HealthCheckHealthGetData, HealthCheckHealthGetResponses, ListDeadJobsQueuesDlqGetData, ListDeadJobsQueuesDlqGetErrors, ListDeadJobsQueuesDlqGetResponses, ListGrantFeaturesUserGrantsFeaturesGetData, ListGrantFeaturesUserGrantsFeaturesGetErrors, ListGrantFeaturesUserGrantsFeaturesGetResponses, ListRolesUserAccountsRolesGetData, ListRolesUserAccountsRolesGetErrors, ListRolesUserAccountsRolesGetResponses, ListUserAccountsUserAccountsGetData, ListUserAccountsUserAccountsGetErrors, ListUserAccountsUserAccountsGetResponses, ListUserGrantsUserGrantsGetData, ListUserGrantsUserGrantsGetErrors, ListUserGrantsUserGrantsGetResponses, ListUserRolesUserRolesGetData, ListUserRolesUserRolesGetErrors, ListUserRolesUserRolesGetResponses, LoginAuthLoginPostData, LoginAuthLoginPostErrors, LoginAuthLoginPostResponses, LoginVerifyAuthLoginVerifyPostData, LoginVerifyAuthLoginVerifyPostErrors, LoginVerifyAuthLoginVerifyPostResponses, LogoutAuthLogoutPostData, LogoutAuthLogoutPostErrors, LogoutAuthLogoutPostResponses, PurgeDeadJobsQueuesDlqDeleteData, PurgeDeadJobsQueuesDlqDeleteErrors, PurgeDeadJobsQueuesDlqDeleteResponses, RefreshTokenAuthRefreshPostData, RefreshTokenAuthRefreshPostErrors, RefreshTokenAuthRefreshPostResponses, RegisterUserAuthRegisterPostData, RegisterUserAuthRegisterPostErrors, RegisterUserAuthRegisterPostResponses, ResendOtpAuthLoginResendOtpPostData, ResendOtpAuthLoginResendOtpPostErrors, ResendOtpAuthLoginResendOtpPostResponses, ResendVerificationAuthResendVerificationPostData, ResendVerificationAuthResendVerificationPostErrors, ResendVerificationAuthResendVerificationPostResponses, ResetPasswordAuthResetPasswordTokenPostData, ResetPasswordAuthResetPasswordTokenPostErrors, ResetPasswordAuthResetPasswordTokenPostResponses, RetryDeadJobQueuesDlqJobIdRetryPostData, RetryDeadJobQueuesDlqJobIdRetryPostErrors, RetryDeadJobQueuesDlqJobIdRetryPostResponses, RevokeAssignmentUserRolesAssignmentIdDeleteData, RevokeAssignmentUserRolesAssignmentIdDeleteErrors, RevokeAssignmentUserRolesAssignmentIdDeleteResponses, RevokeGrantUserGrantsGrantIdDeleteData, RevokeGrantUserGrantsGrantIdDeleteErrors, RevokeGrantUserGrantsGrantIdDeleteResponses, RootGetData, RootGetResponses, ScheduleAdminAccountDeletionUserTargetUserIdAccountDeletionPostData, ScheduleAdminAccountDeletionUserTargetUserIdAccountDeletionPostErrors, ScheduleAdminAccountDeletionUserTargetUserIdAccountDeletionPostResponses, ScheduleOwnAccountDeletionUserAccountDeletionPostData, ScheduleOwnAccountDeletionUserAccountDeletionPostErrors, ScheduleOwnAccountDeletionUserAccountDeletionPostResponses, SendUserPasswordResetUserAccountsUserIdPasswordResetPostData, SendUserPasswordResetUserAccountsUserIdPasswordResetPostErrors, SendUserPasswordResetUserAccountsUserIdPasswordResetPostResponses, UpdateAssignmentUserRolesAssignmentIdPatchData, UpdateAssignmentUserRolesAssignmentIdPatchErrors, UpdateAssignmentUserRolesAssignmentIdPatchResponses, UpdateVenueVenuesVenueIdPatchData, UpdateVenueVenuesVenueIdPatchErrors, UpdateVenueVenuesVenueIdPatchResponses, UserOnboardingUserOnboardPostData, UserOnboardingUserOnboardPostErrors, UserOnboardingUserOnboardPostResponses, VerifyEmailAuthVerifyTokenGetData, VerifyEmailAuthVerifyTokenGetErrors, VerifyEmailAuthVerifyTokenGetResponses } from './types.gen';
+import { zAssignRoleUserRolesPostBody, zAssignRoleUserRolesPostResponse, zChangePasswordUserChangePasswordPostBody, zChangePasswordUserChangePasswordPostResponse, zChangeUserEmailUserAccountsUserIdEmailPatchBody, zChangeUserEmailUserAccountsUserIdEmailPatchPath, zChangeUserEmailUserAccountsUserIdEmailPatchResponse, zChangeUserRoleUserAccountsUserIdRolePatchBody, zChangeUserRoleUserAccountsUserIdRolePatchPath, zChangeUserRoleUserAccountsUserIdRolePatchResponse, zCheckAliasUserCheckAliasGetQuery, zCheckAliasUserCheckAliasGetResponse, zCreateGrantsUserGrantsPostBody, zCreateGrantsUserGrantsPostResponse, zCreateVenueVenuesPostBody, zCreateVenueVenuesPostResponse, zDeleteDeadJobQueuesDlqJobIdDeletePath, zDeleteDeadJobQueuesDlqJobIdDeleteResponse, zDeleteVenueVenuesVenueIdDeletePath, zDeleteVenueVenuesVenueIdDeleteResponse, zForgotPasswordAuthForgotPasswordPostBody, zForgotPasswordAuthForgotPasswordPostResponse, zGetAssignmentUserRolesAssignmentIdGetPath, zGetAssignmentUserRolesAssignmentIdGetResponse, zGetAuditLogsAuditLogsGetQuery, zGetAuditLogsAuditLogsGetResponse, zGetLoginHistoryUserLoginHistoryGetQuery, zGetLoginHistoryUserLoginHistoryGetResponse, zGetQueueStatsQueuesGetResponse, zGetUserAccountDetailUserAccountsUserIdGetPath, zGetUserAccountDetailUserAccountsUserIdGetResponse, zGetUserVenuesVenuesCreatorCreatorIdGetPath, zGetUserVenuesVenuesCreatorCreatorIdGetResponse, zGetVenueVenuesVenueIdGetPath, zGetVenueVenuesVenueIdGetResponse, zListDeadJobsQueuesDlqGetResponse, zListGrantFeaturesUserGrantsFeaturesGetResponse, zListRolesUserAccountsRolesGetResponse, zListUserAccountsUserAccountsGetQuery, zListUserAccountsUserAccountsGetResponse, zListUserGrantsUserGrantsGetQuery, zListUserGrantsUserGrantsGetResponse, zListUserRolesUserRolesGetQuery, zListUserRolesUserRolesGetResponse, zLoginAuthLoginPostBody, zLoginAuthLoginPostResponse, zLoginVerifyAuthLoginVerifyPostBody, zLoginVerifyAuthLoginVerifyPostResponse, zLogoutAuthLogoutPostBody, zLogoutAuthLogoutPostResponse, zPurgeDeadJobsQueuesDlqDeleteResponse, zRefreshTokenAuthRefreshPostBody, zRefreshTokenAuthRefreshPostResponse, zRegisterUserAuthRegisterPostBody, zRegisterUserAuthRegisterPostResponse, zResendOtpAuthLoginResendOtpPostBody, zResendOtpAuthLoginResendOtpPostResponse, zResendVerificationAuthResendVerificationPostBody, zResendVerificationAuthResendVerificationPostResponse, zResetPasswordAuthResetPasswordTokenPostBody, zResetPasswordAuthResetPasswordTokenPostPath, zResetPasswordAuthResetPasswordTokenPostResponse, zRetryDeadJobQueuesDlqJobIdRetryPostPath, zRetryDeadJobQueuesDlqJobIdRetryPostResponse, zRevokeAssignmentUserRolesAssignmentIdDeletePath, zRevokeAssignmentUserRolesAssignmentIdDeleteResponse, zRevokeGrantUserGrantsGrantIdDeletePath, zRevokeGrantUserGrantsGrantIdDeleteResponse, zScheduleAdminAccountDeletionUserTargetUserIdAccountDeletionPostBody, zScheduleAdminAccountDeletionUserTargetUserIdAccountDeletionPostPath, zScheduleAdminAccountDeletionUserTargetUserIdAccountDeletionPostResponse, zScheduleOwnAccountDeletionUserAccountDeletionPostBody, zScheduleOwnAccountDeletionUserAccountDeletionPostResponse, zSendUserPasswordResetUserAccountsUserIdPasswordResetPostPath, zSendUserPasswordResetUserAccountsUserIdPasswordResetPostResponse, zUpdateAssignmentUserRolesAssignmentIdPatchBody, zUpdateAssignmentUserRolesAssignmentIdPatchPath, zUpdateAssignmentUserRolesAssignmentIdPatchResponse, zUpdateVenueVenuesVenueIdPatchBody, zUpdateVenueVenuesVenueIdPatchPath, zUpdateVenueVenuesVenueIdPatchResponse, zUserOnboardingUserOnboardPostBody, zUserOnboardingUserOnboardPostResponse, zVerifyEmailAuthVerifyTokenGetPath, zVerifyEmailAuthVerifyTokenGetResponse } from './zod.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -182,7 +182,7 @@ export class Authentication {
     /**
      * Refresh access token
      *
-     * Exchange a valid refresh token for a new access token and a rotated refresh token. The submitted refresh token is immediately revoked and replaced — clients must store the new refresh token from the response. If two requests arrive simultaneously with the same token, only one will succeed; the other receives 401, preventing parallel rotation races. Presenting an already-revoked token also returns 401 with the same opaque error to avoid leaking rotation state to potential attackers.
+     * Exchange a valid refresh token for a new access token and a rotated refresh token. The submitted refresh token is immediately revoked and replaced — clients must store the new refresh token from the response. If two requests arrive simultaneously with the same token, only one will succeed; the other receives 401, preventing parallel rotation races. Refresh is also refused for inactive, deleted, or deletion-finalized accounts. Presenting an already-revoked token also returns 401 with the same opaque error to avoid leaking rotation state to potential attackers.
      */
     public static refreshTokenAuthRefreshPost<ThrowOnError extends boolean = false>(options: Options<RefreshTokenAuthRefreshPostData, ThrowOnError>) {
         return (options.client ?? client).post<RefreshTokenAuthRefreshPostResponses, RefreshTokenAuthRefreshPostErrors, ThrowOnError>({
@@ -335,6 +335,184 @@ export class User {
                 'Content-Type': 'application/json',
                 ...options.headers
             }
+        });
+    }
+    
+    /**
+     * Schedule deletion of the authenticated account
+     *
+     * Schedule the authenticated user's account for deletion after a 30-day grace period. The caller must confirm the request with their current password. The request is persisted immediately, and a deferred ARQ job is enqueued to finalize the deletion once the grace period expires. If the user completes a fresh login during the grace period, the pending deletion is automatically canceled.
+     */
+    public static scheduleOwnAccountDeletionUserAccountDeletionPost<ThrowOnError extends boolean = false>(options: Options<ScheduleOwnAccountDeletionUserAccountDeletionPostData, ThrowOnError>) {
+        return (options.client ?? client).post<ScheduleOwnAccountDeletionUserAccountDeletionPostResponses, ScheduleOwnAccountDeletionUserAccountDeletionPostErrors, ThrowOnError>({
+            requestValidator: async (data) => await z.object({
+                body: zScheduleOwnAccountDeletionUserAccountDeletionPostBody,
+                path: z.never().optional(),
+                query: z.never().optional()
+            }).parseAsync(data),
+            responseType: 'json',
+            responseValidator: async (data) => await zScheduleOwnAccountDeletionUserAccountDeletionPostResponse.parseAsync(data),
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/user/account-deletion',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+    
+    /**
+     * Schedule deletion of a user account as a system administrator
+     *
+     * Schedule account deletion for a target user after the same 30-day grace period used by self-service deletion. The caller must hold ``delete`` permission on the ``user-accounts`` feature. A required reason is captured in the request payload, the pending deletion is stored immediately, and a deferred ARQ job is queued to finalize it when the grace period expires unless the user logs in first.
+     */
+    public static scheduleAdminAccountDeletionUserTargetUserIdAccountDeletionPost<ThrowOnError extends boolean = false>(options: Options<ScheduleAdminAccountDeletionUserTargetUserIdAccountDeletionPostData, ThrowOnError>) {
+        return (options.client ?? client).post<ScheduleAdminAccountDeletionUserTargetUserIdAccountDeletionPostResponses, ScheduleAdminAccountDeletionUserTargetUserIdAccountDeletionPostErrors, ThrowOnError>({
+            requestValidator: async (data) => await z.object({
+                body: zScheduleAdminAccountDeletionUserTargetUserIdAccountDeletionPostBody,
+                path: zScheduleAdminAccountDeletionUserTargetUserIdAccountDeletionPostPath,
+                query: z.never().optional()
+            }).parseAsync(data),
+            responseType: 'json',
+            responseValidator: async (data) => await zScheduleAdminAccountDeletionUserTargetUserIdAccountDeletionPostResponse.parseAsync(data),
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/user/{target_user_id}/account-deletion',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+}
+
+export class AdminUserAccounts {
+    /**
+     * List assignable system roles
+     *
+     * Return the role catalog used by the admin change-role dialog.
+     */
+    public static listRolesUserAccountsRolesGet<ThrowOnError extends boolean = false>(options?: Options<ListRolesUserAccountsRolesGetData, ThrowOnError>) {
+        return (options?.client ?? client).get<ListRolesUserAccountsRolesGetResponses, ListRolesUserAccountsRolesGetErrors, ThrowOnError>({
+            requestValidator: async (data) => await z.object({
+                body: z.never().optional(),
+                path: z.never().optional(),
+                query: z.never().optional()
+            }).parseAsync(data),
+            responseType: 'json',
+            responseValidator: async (data) => await zListRolesUserAccountsRolesGetResponse.parseAsync(data),
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/user-accounts/roles',
+            ...options
+        });
+    }
+    
+    /**
+     * List user accounts
+     *
+     * Return a paginated administrative list of user accounts for the management table. Optionally filter by ``status`` and/or search across name, email, and alias with ``search``.
+     */
+    public static listUserAccountsUserAccountsGet<ThrowOnError extends boolean = false>(options?: Options<ListUserAccountsUserAccountsGetData, ThrowOnError>) {
+        return (options?.client ?? client).get<ListUserAccountsUserAccountsGetResponses, ListUserAccountsUserAccountsGetErrors, ThrowOnError>({
+            requestValidator: async (data) => await z.object({
+                body: z.never().optional(),
+                path: z.never().optional(),
+                query: zListUserAccountsUserAccountsGetQuery.optional()
+            }).parseAsync(data),
+            responseType: 'json',
+            responseValidator: async (data) => await zListUserAccountsUserAccountsGetResponse.parseAsync(data),
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/user-accounts',
+            ...options
+        });
+    }
+    
+    /**
+     * Get user account details
+     *
+     * Return the full administrative profile details for a specific user account.
+     */
+    public static getUserAccountDetailUserAccountsUserIdGet<ThrowOnError extends boolean = false>(options: Options<GetUserAccountDetailUserAccountsUserIdGetData, ThrowOnError>) {
+        return (options.client ?? client).get<GetUserAccountDetailUserAccountsUserIdGetResponses, GetUserAccountDetailUserAccountsUserIdGetErrors, ThrowOnError>({
+            requestValidator: async (data) => await z.object({
+                body: z.never().optional(),
+                path: zGetUserAccountDetailUserAccountsUserIdGetPath,
+                query: z.never().optional()
+            }).parseAsync(data),
+            responseType: 'json',
+            responseValidator: async (data) => await zGetUserAccountDetailUserAccountsUserIdGetResponse.parseAsync(data),
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/user-accounts/{user_id}',
+            ...options
+        });
+    }
+    
+    /**
+     * Change a user's effective role
+     *
+     * Replace the target user's current effective role with a single new role.
+     */
+    public static changeUserRoleUserAccountsUserIdRolePatch<ThrowOnError extends boolean = false>(options: Options<ChangeUserRoleUserAccountsUserIdRolePatchData, ThrowOnError>) {
+        return (options.client ?? client).patch<ChangeUserRoleUserAccountsUserIdRolePatchResponses, ChangeUserRoleUserAccountsUserIdRolePatchErrors, ThrowOnError>({
+            requestValidator: async (data) => await z.object({
+                body: zChangeUserRoleUserAccountsUserIdRolePatchBody,
+                path: zChangeUserRoleUserAccountsUserIdRolePatchPath,
+                query: z.never().optional()
+            }).parseAsync(data),
+            responseType: 'json',
+            responseValidator: async (data) => await zChangeUserRoleUserAccountsUserIdRolePatchResponse.parseAsync(data),
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/user-accounts/{user_id}/role',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+    
+    /**
+     * Change a user's email address
+     *
+     * Update the target user's email, clear verification status, and send a fresh verification link.
+     */
+    public static changeUserEmailUserAccountsUserIdEmailPatch<ThrowOnError extends boolean = false>(options: Options<ChangeUserEmailUserAccountsUserIdEmailPatchData, ThrowOnError>) {
+        return (options.client ?? client).patch<ChangeUserEmailUserAccountsUserIdEmailPatchResponses, ChangeUserEmailUserAccountsUserIdEmailPatchErrors, ThrowOnError>({
+            requestValidator: async (data) => await z.object({
+                body: zChangeUserEmailUserAccountsUserIdEmailPatchBody,
+                path: zChangeUserEmailUserAccountsUserIdEmailPatchPath,
+                query: z.never().optional()
+            }).parseAsync(data),
+            responseType: 'json',
+            responseValidator: async (data) => await zChangeUserEmailUserAccountsUserIdEmailPatchResponse.parseAsync(data),
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/user-accounts/{user_id}/email',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+    
+    /**
+     * Send a password reset link for a user
+     *
+     * Dispatch the existing password-reset email flow to the target user's current verified email address.
+     */
+    public static sendUserPasswordResetUserAccountsUserIdPasswordResetPost<ThrowOnError extends boolean = false>(options: Options<SendUserPasswordResetUserAccountsUserIdPasswordResetPostData, ThrowOnError>) {
+        return (options.client ?? client).post<SendUserPasswordResetUserAccountsUserIdPasswordResetPostResponses, SendUserPasswordResetUserAccountsUserIdPasswordResetPostErrors, ThrowOnError>({
+            requestValidator: async (data) => await z.object({
+                body: z.never().optional(),
+                path: zSendUserPasswordResetUserAccountsUserIdPasswordResetPostPath,
+                query: z.never().optional()
+            }).parseAsync(data),
+            responseType: 'json',
+            responseValidator: async (data) => await zSendUserPasswordResetUserAccountsUserIdPasswordResetPostResponse.parseAsync(data),
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/user-accounts/{user_id}/password-reset',
+            ...options
         });
     }
 }
@@ -514,6 +692,26 @@ export class UserGrantManagement {
                 'Content-Type': 'application/json',
                 ...options.headers
             }
+        });
+    }
+    
+    /**
+     * List grantable features
+     *
+     * Return the enabled feature catalog that administrators can target when creating special per-user permission grants.
+     */
+    public static listGrantFeaturesUserGrantsFeaturesGet<ThrowOnError extends boolean = false>(options?: Options<ListGrantFeaturesUserGrantsFeaturesGetData, ThrowOnError>) {
+        return (options?.client ?? client).get<ListGrantFeaturesUserGrantsFeaturesGetResponses, ListGrantFeaturesUserGrantsFeaturesGetErrors, ThrowOnError>({
+            requestValidator: async (data) => await z.object({
+                body: z.never().optional(),
+                path: z.never().optional(),
+                query: z.never().optional()
+            }).parseAsync(data),
+            responseType: 'json',
+            responseValidator: async (data) => await zListGrantFeaturesUserGrantsFeaturesGetResponse.parseAsync(data),
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/user-grants/features',
+            ...options
         });
     }
     

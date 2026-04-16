@@ -66,6 +66,7 @@ from app.controller.schemas.auth_schema import (
 )
 from app.core.config import settings
 from app.domain.exceptions import (
+    AccountDeletionGracePeriodExpiredError,
     EmailAlreadyTakenError,
     EmailAlreadyVerifiedError,
     EmailNotVerifiedError,
@@ -292,7 +293,7 @@ async def login(
         result = await use_case.login(LoginInput(email=body.email, password=body.password))
     except InvalidCredentialsError as error:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(error))
-    except UserInactiveError as error:
+    except (UserInactiveError, AccountDeletionGracePeriodExpiredError) as error:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(error))
     except UserLockedError as error:
         raise HTTPException(status_code=status.HTTP_423_LOCKED, detail=str(error))
@@ -310,6 +311,7 @@ async def login(
         **OTP_TOKEN_INVALID,
         **OTP_TOKEN_EXPIRED,
         **INVALID_OTP,
+        **USER_INACTIVE,
         **USER_NOT_FOUND,
         **LOGIN_VERIFY_VALIDATION_ERROR,
     },
@@ -337,6 +339,8 @@ async def login_verify(
     - **401 Unauthorized** — ``token`` has expired (restart the flow via
       ``/login/init``), or the OTP code is wrong, already consumed, or expired
       (all combined into one response to avoid leaking internal OTP state).
+    - **403 Forbidden** — the account became inactive, was deleted, or passed
+      its deletion grace period before the OTP flow completed.
     - **404 Not Found** — no user found for the token's subject claim (should
       not occur in normal operation; guard against stale tokens from deleted accounts).
     - **422 Unprocessable Entity** — ``token`` is empty or ``code`` is not exactly
@@ -359,6 +363,8 @@ async def login_verify(
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(error))
     except UserNotFoundError as error:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error))
+    except (UserInactiveError, AccountDeletionGracePeriodExpiredError) as error:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(error))
 
     _set_auth_cookies(response, result.access_token, result.refresh_token)
     return LoginVerifyResponse(
@@ -459,6 +465,7 @@ async def logout(
     responses={
         **REFRESH_TOKEN_EXPIRED,
         **REFRESH_TOKEN_INVALID,
+        **USER_INACTIVE,
         **USER_NOT_FOUND,
         **REFRESH_VALIDATION_ERROR,
     },
@@ -469,6 +476,7 @@ async def logout(
         "store the new refresh token from the response. "
         "If two requests arrive simultaneously with the same token, only one will succeed; "
         "the other receives 401, preventing parallel rotation races. "
+        "Refresh is also refused for inactive, deleted, or deletion-finalized accounts. "
         "Presenting an already-revoked token also returns 401 with the same opaque error "
         "to avoid leaking rotation state to potential attackers."
     ),
@@ -484,6 +492,8 @@ async def refresh_token(
     - **401 Unauthorized** — token is expired, invalid, revoked, not found,
       or was already rotated by a concurrent request (all cases return the
       same opaque response to avoid leaking rotation state).
+    - **403 Forbidden** — the account is inactive, deleted, or has passed the
+      account-deletion grace period.
     - **404 Not Found** — no user matches the token's subject claim.
     - **422 Unprocessable Entity** — ``refresh_token`` field is missing or empty.
     """
@@ -495,6 +505,8 @@ async def refresh_token(
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(error))
     except UserNotFoundError as error:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error))
+    except (UserInactiveError, AccountDeletionGracePeriodExpiredError) as error:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(error))
 
     _set_auth_cookies(response, result.access_token, result.refresh_token)
     return RefreshTokenResponse(

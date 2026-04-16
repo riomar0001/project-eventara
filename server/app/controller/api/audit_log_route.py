@@ -1,8 +1,8 @@
 import math
 import uuid
-from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from pydantic import AwareDatetime
 
 from app.application.dto.audit_log_dto import GetAuditLogsInput
 from app.application.use_cases.audit_log_usecase import GetAuditLogsUseCase
@@ -47,8 +47,8 @@ async def get_audit_logs(
     user_id: uuid.UUID | None = Query(default=None, description="Filter by user ID"),
     action_type: ActionType | None = Query(default=None, description="Filter by action type"),
     resource_type: str | None = Query(default=None, description="Filter by resource type"),
-    start_date: datetime | None = Query(default=None, description="Filter by start date (UTC)"),
-    end_date: datetime | None = Query(default=None, description="Filter by end date (UTC)"),
+    start_date: AwareDatetime | None = Query(default=None, description="Filter by start date (UTC)"),
+    end_date: AwareDatetime | None = Query(default=None, description="Filter by end date (UTC)"),
     _: uuid.UUID = Depends(require_permission("audit-logs", RoleAction.READ)),
     use_case: GetAuditLogsUseCase = Depends(get_audit_logs_use_case),
 ) -> GetAuditLogsResponse:

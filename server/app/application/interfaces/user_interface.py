@@ -2,6 +2,7 @@ import uuid
 from datetime import datetime
 from typing import Protocol
 
+from app.application.dto.admin_user_account_dto import AdminUserAccountDetail, AdminUserAccountSummary
 from app.domain.entities.user_entity import (
     PublicUser,
     User,
@@ -9,6 +10,7 @@ from app.domain.entities.user_entity import (
     UserLoginHistory,
     UserProfile,
     UserSecurity,
+    UserStatus,
 )
 
 
@@ -16,6 +18,8 @@ class IUserRepository(Protocol):
     async def get_by_email(self, email: str) -> User | None: ...
 
     async def get_by_id(self, user_id: uuid.UUID) -> User | None: ...
+
+    async def get_active_role_name_by_user_id(self, user_id: uuid.UUID) -> str | None: ...
 
     async def get_security_by_user_id(self, user_id: uuid.UUID) -> UserSecurity | None: ...
 
@@ -63,3 +67,39 @@ class IUserRepository(Protocol):
     async def get_login_history(self, user_id: uuid.UUID, limit: int = 10) -> list[UserLoginHistory]: ...
 
     async def update_password(self, user_id: uuid.UUID, password_hash: str) -> bool: ...
+
+    async def list_admin_user_accounts(
+        self,
+        *,
+        page: int,
+        page_size: int,
+        search: str | None = None,
+        status: UserStatus | None = None,
+        role_name: str | None = None,
+    ) -> tuple[list[AdminUserAccountSummary], int]: ...
+
+    async def get_admin_user_account_detail(self, user_id: uuid.UUID) -> AdminUserAccountDetail | None: ...
+
+    async def get_by_id_for_update(self, user_id: uuid.UUID) -> User | None: ...
+
+    async def update_email_and_clear_verification(self, user_id: uuid.UUID, email: str) -> User | None: ...
+
+    async def schedule_account_deletion(
+        self,
+        user_id: uuid.UUID,
+        *,
+        requested_by: uuid.UUID,
+        requested_at: datetime,
+        scheduled_for: datetime,
+        reason: str | None = None,
+    ) -> User | None: ...
+
+    async def cancel_pending_account_deletion(self, user_id: uuid.UUID) -> bool: ...
+
+    async def finalize_account_deletion(
+        self,
+        user_id: uuid.UUID,
+        *,
+        expected_requested_at: datetime,
+        expected_scheduled_for: datetime,
+    ) -> bool: ...

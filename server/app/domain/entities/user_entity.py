@@ -51,6 +51,10 @@ class User(BaseModel):
     accepted_privacy_policy: bool = False
     accepted_privacy_policy_at: datetime | None = None
     status: UserStatus = UserStatus.ACTIVE
+    deletion_requested_at: datetime | None = None
+    deletion_scheduled_for: datetime | None = None
+    deletion_requested_by: uuid.UUID | None = None
+    deletion_reason: str | None = None
     deleted_at: datetime | None = None
     model_config = {"from_attributes": True}
 
