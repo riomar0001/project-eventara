@@ -1,10 +1,14 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { FormEvent, useState } from 'react';
 import { z } from 'zod';
-import { AdminUserAccountDialogs } from '@/components/admin/admin-user-account-dialogs';
 import { AdminUserDetailSheet } from '@/components/admin/admin-user-detail-sheet';
 import { AdminUserManagementTable } from '@/components/admin/admin-user-management-table';
+import { AdminDeleteDialog } from '@/components/admin/dialogs/delete-dialog';
+import { AdminEmailDialog } from '@/components/admin/dialogs/email-dialog';
+import { AdminPasswordResetDialog } from '@/components/admin/dialogs/password-reset-dialog';
+import { AdminRoleDialog } from '@/components/admin/dialogs/role-dialog';
+import { AdminSpecialPermissionDialog } from '@/components/admin/dialogs/special-permission-dialog';
 import { useAdminUserAccountActions } from '@/hooks/use-admin-user-account-actions';
 import { useAdminUserAccountDetail } from '@/hooks/use-admin-user-account-detail';
 import { useAdminUserAccounts } from '@/hooks/use-admin-user-accounts';
@@ -339,42 +343,47 @@ export function AdminUserManagement() {
         open={Boolean(selectedUserId)}
       />
 
-      <AdminUserAccountDialogs
-        deleteDialogUser={deleteDialogUser}
-        deleteReason={deleteReason}
-        deleteReasonError={deleteReasonError}
-        emailDialogUser={emailDialogUser}
-        emailError={emailError}
-        emailValue={emailValue}
-        effectiveFromDate={effectiveFromDate}
-        effectiveToDate={effectiveToDate}
-        grantFeatures={grantFeatures}
-        grantFeaturesError={grantFeaturesError}
+      <AdminRoleDialog
         isLoadingRoles={isLoadingRoles}
-        isLoadingGrantFeatures={isLoadingGrantFeatures}
-        isLoadingSpecialPermissions={isLoadingSpecialPermissions}
         isSubmitting={isSubmitting}
-        onCloseDeleteDialog={resetDeleteDialog}
-        onCloseEmailDialog={resetEmailDialog}
-        onClosePasswordResetDialog={resetPasswordResetDialog}
         onCloseRoleDialog={resetRoleDialog}
-        onCloseSpecialPermissionDialog={resetSpecialPermissionDialog}
-        onDeleteReasonChange={(value) => {
-          setDeleteReason(value);
-          setDeleteReasonError(undefined);
-        }}
-        onDeleteSubmit={handleDeleteSubmit}
-        onEmailChange={(value) => {
-          setEmailValue(value);
-          setEmailError(undefined);
-        }}
-        onEmailSubmit={handleEmailSubmit}
-        onPasswordResetConfirm={handlePasswordResetConfirm}
         onRoleChange={(value) => {
           setSelectedRoleId(value);
           setRoleError(undefined);
         }}
         onRoleSubmit={handleRoleSubmit}
+        pendingAction={pendingAction}
+        refreshRoles={refreshRoles}
+        roleDialogUser={roleDialogUser}
+        roleError={roleError}
+        roles={roles}
+        rolesError={rolesError}
+        selectedRoleId={selectedRoleId}
+      />
+
+      <AdminEmailDialog
+        emailDialogUser={emailDialogUser}
+        emailError={emailError}
+        emailValue={emailValue}
+        isSubmitting={isSubmitting}
+        onCloseEmailDialog={resetEmailDialog}
+        onEmailChange={(value) => {
+          setEmailValue(value);
+          setEmailError(undefined);
+        }}
+        onEmailSubmit={handleEmailSubmit}
+        pendingAction={pendingAction}
+      />
+
+      <AdminSpecialPermissionDialog
+        effectiveFromDate={effectiveFromDate}
+        effectiveToDate={effectiveToDate}
+        grantFeatures={grantFeatures}
+        grantFeaturesError={grantFeaturesError}
+        isLoadingGrantFeatures={isLoadingGrantFeatures}
+        isLoadingSpecialPermissions={isLoadingSpecialPermissions}
+        isSubmitting={isSubmitting}
+        onCloseSpecialPermissionDialog={resetSpecialPermissionDialog}
         onSpecialPermissionActionToggle={(value) => {
           setSelectedGrantActions((currentActions) =>
             currentActions.includes(value) ? currentActions.filter((action) => action !== value) : [...currentActions, value]
@@ -389,25 +398,18 @@ export function AdminUserManagement() {
           setEffectiveFromDate(value);
           setSpecialPermissionError(undefined);
         }}
-        onSpecialPermissionToDateChange={(value) => {
-          setEffectiveToDate(value);
-          setSpecialPermissionError(undefined);
-        }}
         onSpecialPermissionFeatureChange={(value) => {
           setSelectedFeatureId(value);
           setSpecialPermissionError(undefined);
         }}
         onSpecialPermissionDelete={handleSpecialPermissionDelete}
         onSpecialPermissionSubmit={handleSpecialPermissionSubmit}
-        passwordResetUser={passwordResetUser}
+        onSpecialPermissionToDateChange={(value) => {
+          setEffectiveToDate(value);
+          setSpecialPermissionError(undefined);
+        }}
         pendingAction={pendingAction}
         refreshGrantFeatures={refreshGrantFeatures}
-        refreshRoles={refreshRoles}
-        roleDialogUser={roleDialogUser}
-        roleError={roleError}
-        roles={roles}
-        rolesError={rolesError}
-        selectedRoleId={selectedRoleId}
         selectedFeatureId={selectedFeatureId}
         selectedGrantActions={selectedGrantActions}
         selectedGrantEffect={selectedGrantEffect}
@@ -415,6 +417,28 @@ export function AdminUserManagement() {
         specialPermissionError={specialPermissionError}
         specialPermissions={specialPermissions}
         specialPermissionsError={specialPermissionsError}
+      />
+
+      <AdminPasswordResetDialog
+        isSubmitting={isSubmitting}
+        onClosePasswordResetDialog={resetPasswordResetDialog}
+        onPasswordResetConfirm={handlePasswordResetConfirm}
+        passwordResetUser={passwordResetUser}
+        pendingAction={pendingAction}
+      />
+
+      <AdminDeleteDialog
+        deleteDialogUser={deleteDialogUser}
+        deleteReason={deleteReason}
+        deleteReasonError={deleteReasonError}
+        isSubmitting={isSubmitting}
+        onCloseDeleteDialog={resetDeleteDialog}
+        onDeleteReasonChange={(value) => {
+          setDeleteReason(value);
+          setDeleteReasonError(undefined);
+        }}
+        onDeleteSubmit={handleDeleteSubmit}
+        pendingAction={pendingAction}
       />
     </>
   );

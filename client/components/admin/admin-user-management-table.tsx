@@ -1,40 +1,16 @@
 'use client';
 
-import * as React from 'react';
-import {
-  ChevronLeft,
-  ChevronRight,
-  Eye,
-  KeyRound,
-  Loader2,
-  Mail,
-  MoreHorizontal,
-  RefreshCcw,
-  Search,
-  ShieldCheck,
-  ShieldPlus,
-  ShieldX,
-  Trash2,
-  X
-} from 'lucide-react';
-import { flexRender, getCoreRowModel, useReactTable, type ColumnDef } from '@tanstack/react-table';
-import { formatDateTime, getInitials, humanizeRoleName, isSoftDeleteDisabled, UserStatusBadge } from '@/components/admin/admin-user-management-ui';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
+import { ChevronLeft, ChevronRight, Loader2, RefreshCcw, Search, ShieldX, X } from 'lucide-react';
+import { flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
 import { Button } from '@/components/ui/button';
 import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { STATUS_OPTIONS } from '../../constants/user-managment';
+import { humanizeRoleName } from './admin-user-management-ui';
+import { useAdminTableColumns, type AdminTableColumnMeta } from './table-columns';
 import type {
   AdminUserAccountPaginationResponse as AdminUserAccountPagination,
   AdminUserAccountSummaryResponse as AdminUserAccountSummary,
@@ -43,18 +19,6 @@ import type {
 } from '@/api/types.gen';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/auth-store';
-
-const STATUS_OPTIONS: { label: string; value: UserStatus }[] = [
-  { label: 'Active', value: 'active' },
-  { label: 'Inactive', value: 'inactive' },
-  { label: 'Locked', value: 'locked' },
-  { label: 'Deleted', value: 'deleted' }
-];
-
-type AdminTableColumnMeta = {
-  cellClassName?: string;
-  headerClassName?: string;
-};
 
 interface AdminUserManagementTableProps {
   error: string | null;
@@ -109,145 +73,15 @@ export function AdminUserManagementTable({
   const pageLabel = pagination.total_pages === 0 ? 0 : pagination.page;
   const hasActiveFilters = Boolean(search) || Boolean(statusFilter) || Boolean(roleFilter);
 
-  const columns = React.useMemo<ColumnDef<AdminUserAccountSummary>[]>(
-    () => [
-      {
-        id: 'avatar',
-        cell: ({ row }) => (
-          <div className="flex items-center gap-3">
-            <Avatar>
-              <AvatarFallback>{getInitials(row.original.name)}</AvatarFallback>
-            </Avatar>
-          </div>
-        ),
-        header: () => null,
-        meta: {
-          headerClassName: 'w-16 pl-6',
-          cellClassName: 'pl-6'
-        }
-      },
-      {
-        accessorKey: 'user_id',
-        cell: ({ row }) => <p className="text-xs">{row.original.user_id}</p>,
-        header: 'ID'
-      },
-      {
-        accessorKey: 'alias',
-        cell: ({ row }) => <p className="text-sm text-neutral-900">@{row.original.alias ?? 'n/a'}</p>,
-        header: 'Alias'
-      },
-      {
-        accessorKey: 'name',
-        cell: ({ row }) => <p className="font-medium text-neutral-900">{row.original.name}</p>,
-        header: 'Name',
-        meta: {
-          cellClassName: 'px-6',
-          headerClassName: 'px-6'
-        }
-      },
-      {
-        accessorKey: 'email',
-        cell: ({ row }) => <p className="text-sm text-neutral-900">{row.original.email}</p>,
-        header: 'Email',
-        meta: {
-          cellClassName: 'px-6',
-          headerClassName: 'px-6'
-        }
-      },
-      {
-        accessorKey: 'role_name',
-        cell: ({ row }) => (
-          <Badge variant="outline" className="text-[11px]">
-            {humanizeRoleName(row.original.role_name)}
-          </Badge>
-        ),
-        header: 'Role',
-        meta: {
-          cellClassName: 'px-6',
-          headerClassName: 'px-6'
-        }
-      },
-      {
-        id: 'status',
-        cell: ({ row }) => (
-          <div className="space-y-1">
-            <UserStatusBadge status={row.original.status} />
-            {row.original.deletion_scheduled_for ? (
-              <p className="text-muted-foreground text-xs">Scheduled {formatDateTime(row.original.deletion_scheduled_for)}</p>
-            ) : null}
-          </div>
-        ),
-        header: 'Status',
-        meta: {
-          cellClassName: 'px-6',
-          headerClassName: 'px-6'
-        }
-      },
-      {
-        id: 'actions',
-        cell: ({ row }) => {
-          const user = row.original;
-          const isSelf = currentUserId === user.user_id;
-
-          return (
-            <div className="text-right">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon-sm">
-                    <MoreHorizontal className="size-4" />
-                    <span className="sr-only">Open actions</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-52">
-                  <DropdownMenuLabel>Account actions</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onSelect={() => onSelectUser(user.user_id)}>
-                    <Eye className="size-4" />
-                    View details
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={() => onOpenRoleDialog(user)}>
-                    <ShieldCheck className="size-4" />
-                    Change role
-                  </DropdownMenuItem>
-                  <DropdownMenuItem disabled={!user.role_id || user.status === 'deleted'} onSelect={() => onOpenSpecialPermissionDialog(user)}>
-                    <ShieldPlus className="size-4" />
-                    Special permission
-                  </DropdownMenuItem>
-                  <DropdownMenuItem disabled={isSelf} onSelect={() => onOpenEmailDialog(user)}>
-                    <Mail className="size-4" />
-                    Change email
-                  </DropdownMenuItem>
-                  <DropdownMenuItem disabled={isSelf} onSelect={() => onOpenPasswordResetDialog(user)}>
-                    <KeyRound className="size-4" />
-                    Reset password
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem variant="destructive" disabled={isSoftDeleteDisabled(user) || isSelf} onSelect={() => onOpenDeleteDialog(user)}>
-                    <Trash2 className="size-4" />
-                    Soft delete
-                  </DropdownMenuItem>
-                  {isSelf ? (
-                    <>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem disabled className="text-muted-foreground text-xs">
-                        Manage your own account in Settings.
-                      </DropdownMenuItem>
-                    </>
-                  ) : null}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          );
-        },
-        header: () => <div className="text-right">Actions</div>,
-        meta: {
-          cellClassName: 'px-6 text-right',
-          headerClassName: 'px-6 text-right'
-        }
-      }
-    ],
-    [currentUserId, onOpenDeleteDialog, onOpenEmailDialog, onOpenPasswordResetDialog, onOpenRoleDialog, onOpenSpecialPermissionDialog, onSelectUser]
-  );
+  const columns = useAdminTableColumns({
+    currentUserId,
+    onOpenDeleteDialog,
+    onOpenEmailDialog,
+    onOpenPasswordResetDialog,
+    onOpenRoleDialog,
+    onOpenSpecialPermissionDialog,
+    onSelectUser
+  });
 
   // TanStack Table is intentionally used here for the shadcn data table pattern.
   // eslint-disable-next-line react-hooks/incompatible-library
