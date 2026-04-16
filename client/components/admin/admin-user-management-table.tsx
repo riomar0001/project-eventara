@@ -15,7 +15,6 @@ import {
   ShieldPlus,
   ShieldX,
   Trash2,
-  Users,
   X
 } from 'lucide-react';
 import { flexRender, getCoreRowModel, useReactTable, type ColumnDef } from '@tanstack/react-table';

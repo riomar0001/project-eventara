@@ -2,13 +2,13 @@
 
 import { format } from 'date-fns';
 import { AlertTriangle, CalendarClock, Loader2, RotateCcw, ShieldAlert, Trash2 } from 'lucide-react';
-import { DELETE_ACCOUNT_OTHER_REASON, DELETE_ACCOUNT_REASON_OPTIONS } from '@/constants/delete-account';
 import { FieldHint } from '@/components/shared/field-hint';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useDeleteAccount } from '@/hooks/use-delete-account';
+import { DELETE_ACCOUNT_OTHER_REASON, DELETE_ACCOUNT_REASON_OPTIONS } from '@/constants/delete-account';
 
 export default function DeleteAccountPage() {
   const { confirmationValue, errors, form, handleSubmit, isSubmitting, resetForm, scheduledDeletion, setField } = useDeleteAccount();
@@ -34,8 +34,7 @@ export default function DeleteAccountPage() {
             <div className="space-y-2">
               <p className="text-sm font-semibold text-amber-800">Account deletion requested</p>
               <p className="text-sm text-amber-800/90">
-                Your account will be deleted on{' '}
-                <span className="font-medium">{format(new Date(scheduledDeletion.deletion_scheduled_for), 'PPP p')}</span>.
+                Your account will be deleted on <span className="font-medium">{format(new Date(scheduledDeletion.deletion_scheduled_for), 'PPP p')}</span>.
               </p>
               <p className="text-sm text-amber-800/90">Log in again before then if you want to keep your account active.</p>
             </div>
@@ -48,7 +47,8 @@ export default function DeleteAccountPage() {
           <div className="flex items-start gap-3">
             <ShieldAlert className="mt-0.5 size-4 shrink-0 text-neutral-700" />
             <div className="text-sm text-neutral-700">
-              We require your current password before accepting this request so someone with temporary browser access cannot delete your account without re-authenticating.
+              We require your current password before accepting this request so someone with temporary browser access cannot delete your account without
+              re-authenticating.
             </div>
           </div>
         </div>

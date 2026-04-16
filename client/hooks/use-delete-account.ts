@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
-import { z } from 'zod';
 import { toast } from 'sonner';
+import { z } from 'zod';
 import { DELETE_ACCOUNT_OTHER_REASON } from '@/constants/delete-account';
 import { getAccessToken } from '@/store/auth-store';
 

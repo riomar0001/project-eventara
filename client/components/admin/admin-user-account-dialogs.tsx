@@ -185,7 +185,7 @@ export function AdminUserAccountDialogs({
               </div>
 
               {selectedRole ? (
-                <div className="rounded-xl py-3 border p-4">
+                <div className="rounded-xl border p-4 py-3">
                   <div className="space-y-10">
                     <div className="space-y-1">
                       <div className="flex flex-wrap items-center gap-2">
@@ -202,8 +202,8 @@ export function AdminUserAccountDialogs({
                       </p>
                     </div>
                     <div>
-                      <p className="text-xs font-semibold tracking-[0.16em] text-neutral-500 uppercase pb-3">Included permissions</p>
-                      <ScrollArea className="max-h-64 rounded-md overflow-y-auto">
+                      <p className="pb-3 text-xs font-semibold tracking-[0.16em] text-neutral-500 uppercase">Included permissions</p>
+                      <ScrollArea className="max-h-64 overflow-y-auto rounded-md">
                         <div className="p-3">
                           <RolePermissionList permissions={selectedRole.permissions} />
                         </div>
@@ -288,7 +288,9 @@ export function AdminUserAccountDialogs({
                 <div className="space-y-1.5">
                   <p className="text-sm font-semibold text-neutral-950">{specialPermissionDialogUser?.name ?? 'Selected user'}</p>
                   <p className="text-xs text-neutral-500">Base role: {humanizeRoleName(specialPermissionDialogUser?.role_name, 'No assigned role')}</p>
-                  <p className="text-xs leading-5 text-neutral-500">Special permissions belong to this user account and are tracked independently from the role&apos;s included permissions.</p>
+                  <p className="text-xs leading-5 text-neutral-500">
+                    Special permissions belong to this user account and are tracked independently from the role&apos;s included permissions.
+                  </p>
                 </div>
               </div>
 
@@ -304,9 +306,7 @@ export function AdminUserAccountDialogs({
                 </div>
 
                 {specialPermissionsError ? (
-                  <div className="rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700">
-                    {specialPermissionsError}
-                  </div>
+                  <div className="rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700">{specialPermissionsError}</div>
                 ) : isLoadingSpecialPermissions ? (
                   <div className="rounded-2xl bg-neutral-50 px-4 py-8">
                     <div className="flex items-center justify-center gap-2 text-sm text-neutral-500">
@@ -387,7 +387,7 @@ export function AdminUserAccountDialogs({
                     </label>
                     <Select value={selectedFeatureId || undefined} onValueChange={onSpecialPermissionFeatureChange}>
                       <SelectTrigger
-                        className="h-11 rounded-xl border-0 bg-white shadow-none w-full"
+                        className="h-11 w-full rounded-xl border-0 bg-white shadow-none"
                         id="admin-special-permission-feature"
                         disabled={isLoadingGrantFeatures || isSubmitting}
                       >
@@ -408,7 +408,11 @@ export function AdminUserAccountDialogs({
                       Effect
                     </label>
                     <Select value={selectedGrantEffect} onValueChange={(value) => onSpecialPermissionEffectChange(value as GrantEffect)}>
-                      <SelectTrigger className="h-11 rounded-xl border-0 bg-white shadow-none min-w-36" id="admin-special-permission-effect" disabled={isSubmitting}>
+                      <SelectTrigger
+                        className="h-11 min-w-36 rounded-xl border-0 bg-white shadow-none"
+                        id="admin-special-permission-effect"
+                        disabled={isSubmitting}
+                      >
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -462,7 +466,12 @@ export function AdminUserAccountDialogs({
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar mode="single" selected={effectiveToDate} onSelect={onSpecialPermissionToDateChange} defaultMonth={effectiveToDate ?? effectiveFromDate} />
+                        <Calendar
+                          mode="single"
+                          selected={effectiveToDate}
+                          onSelect={onSpecialPermissionToDateChange}
+                          defaultMonth={effectiveToDate ?? effectiveFromDate}
+                        />
                       </PopoverContent>
                     </Popover>
                   </div>
@@ -498,7 +507,9 @@ export function AdminUserAccountDialogs({
                     <div className="flex items-start justify-between gap-3">
                       <div className="space-y-1">
                         <p className="text-sm font-semibold text-neutral-950">{selectedGrantFeature.name}</p>
-                        <p className="text-xs text-neutral-500">{selectedGrantFeature.description?.trim() ? selectedGrantFeature.description : 'No feature description is available.'}</p>
+                        <p className="text-xs text-neutral-500">
+                          {selectedGrantFeature.description?.trim() ? selectedGrantFeature.description : 'No feature description is available.'}
+                        </p>
                       </div>
                       <Badge variant="secondary" className="bg-neutral-100 px-2 py-0.5 text-[10px] text-neutral-600 shadow-none">
                         {selectedGrantFeature.slug}

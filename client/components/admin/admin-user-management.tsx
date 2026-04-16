@@ -45,7 +45,13 @@ export function AdminUserManagement() {
   const [emailError, setEmailError] = useState<string | undefined>();
   const [deleteReasonError, setDeleteReasonError] = useState<string | undefined>();
 
-  const { error, isEmpty, isLoading, pagination, refresh, users } = useAdminUserAccounts(page, PAGE_SIZE, debouncedSearch || undefined, statusFilter, roleFilter);
+  const { error, isEmpty, isLoading, pagination, refresh, users } = useAdminUserAccounts(
+    page,
+    PAGE_SIZE,
+    debouncedSearch || undefined,
+    statusFilter,
+    roleFilter
+  );
   const { detail, error: detailError, isLoading: isLoadingDetail, refresh: refreshDetail } = useAdminUserAccountDetail(selectedUserId);
   const {
     changeEmail,
