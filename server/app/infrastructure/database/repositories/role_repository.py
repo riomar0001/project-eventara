@@ -4,7 +4,7 @@ from datetime import UTC, datetime
 from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.domain.entities.authorization_entities import GrantEffect, RoleAction
+from app.domain.entities.authorization_entities import GrantEffect, Role as RoleEntity, RoleAction
 from app.domain.entities.authorization_entities import UserGrant as DomainUserGrant
 from app.domain.entities.authorization_entities import UserRole as DomainUserRole
 from app.infrastructure.database.models.user_models import (
@@ -45,6 +45,10 @@ class RoleRepository:
             return None
         return value.astimezone(UTC).replace(tzinfo=None) if value.tzinfo else value
 
+    @staticmethod
+    def _utcnow_naive() -> datetime:
+        return datetime.now(UTC).replace(tzinfo=None)
+
     async def user_exists(self, user_id: uuid.UUID) -> bool:
         result = await self.db.execute(select(User.id).where(User.id == user_id))
         return result.scalar_one_or_none() is not None
@@ -52,6 +56,26 @@ class RoleRepository:
     async def role_exists(self, role_id: uuid.UUID) -> bool:
         result = await self.db.execute(select(Role.id).where(Role.id == role_id))
         return result.scalar_one_or_none() is not None
+
+    async def lock_user(self, user_id: uuid.UUID) -> bool:
+        """Acquire a pessimistic lock on the target user row for role replacement flows.
+
+        Locking the user row ensures two administrators cannot both observe an empty
+        active-assignment set and create competing replacements for the same account.
+        """
+        result = await self.db.execute(select(User.id).where(User.id == user_id).with_for_update())
+        return result.scalar_one_or_none() is not None
+
+    async def get_role_by_id(self, role_id: uuid.UUID) -> RoleEntity | None:
+        """Return a single role definition by ID."""
+        result = await self.db.execute(select(Role).where(Role.id == role_id))
+        orm = result.scalar_one_or_none()
+        return self._to_domain_role_record(orm) if orm else None
+
+    async def list_roles(self) -> list[RoleEntity]:
+        """Return all assignable system roles ordered by name."""
+        result = await self.db.execute(select(Role).order_by(Role.name.asc()))
+        return [self._to_domain_role_record(orm) for orm in result.scalars().all()]
 
     async def feature_exists(self, feature_id: uuid.UUID) -> bool:
         result = await self.db.execute(select(Feature.id).where(Feature.id == feature_id))
@@ -89,6 +113,25 @@ class RoleRepository:
         result = await self.db.execute(select(UserRole).where(UserRole.user_id == user_id))
         return [self._to_domain_role(orm) for orm in result.scalars().all()]
 
+    async def get_active_assignments_for_user(self, user_id: uuid.UUID) -> list[DomainUserRole]:
+        """Return active assignments for a user while holding row-level locks.
+
+        The query locks every currently effective assignment row so a concurrent
+        replacement cannot delete or create overlapping current-role state until
+        the surrounding transaction commits or rolls back.
+        """
+        now = self._utcnow_naive()
+        result = await self.db.execute(
+            select(UserRole)
+            .where(
+                UserRole.user_id == user_id,
+                (UserRole.expires_at.is_(None) | (UserRole.expires_at > now)),
+            )
+            .order_by(UserRole.assigned_at.desc())
+            .with_for_update()
+        )
+        return [self._to_domain_role(orm) for orm in result.scalars().all()]
+
     async def get_assignment_by_id(self, assignment_id: uuid.UUID) -> DomainUserRole | None:
         result = await self.db.execute(select(UserRole).where(UserRole.id == assignment_id))
         orm = result.scalar_one_or_none()
@@ -105,6 +148,35 @@ class RoleRepository:
         result = await self.db.execute(delete(UserRole).where(UserRole.id == assignment_id))
         await self.db.flush()
         return result.rowcount > 0
+
+    async def replace_active_assignments(
+        self,
+        user_id: uuid.UUID,
+        role_id: uuid.UUID,
+        assigned_by: uuid.UUID,
+    ) -> DomainUserRole:
+        """Replace the user's current active assignments with a single new role.
+
+        The caller is expected to have already acquired the user-row lock through
+        ``lock_user`` and, if present, row locks on current assignments through
+        ``get_active_assignments_for_user``. This method then performs the
+        destructive replacement and staged insert in the same transaction.
+        """
+        now = self._utcnow_naive()
+        await self.db.execute(
+            delete(UserRole).where(
+                UserRole.user_id == user_id,
+                (UserRole.expires_at.is_(None) | (UserRole.expires_at > now)),
+            )
+        )
+        assignment = UserRole(
+            user_id=user_id,
+            role_id=role_id,
+            assigned_by=assigned_by,
+        )
+        self.db.add(assignment)
+        await self.db.flush()
+        return self._to_domain_role(assignment)
 
     async def get_existing_grants(
         self,
@@ -179,6 +251,15 @@ class RoleRepository:
             expires_at=orm.expires_at,
             assigned_by=orm.assigned_by,
             assigned_at=orm.assigned_at,
+        )
+
+    def _to_domain_role_record(self, orm: Role) -> RoleEntity:
+        return RoleEntity(
+            id=orm.id,
+            name=orm.name,
+            description=orm.description,
+            is_default=orm.is_default,
+            is_system=orm.is_system,
         )
 
     def _to_domain_grant(self, orm: UserGrant) -> DomainUserGrant:

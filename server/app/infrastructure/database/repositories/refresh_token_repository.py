@@ -63,6 +63,20 @@ class RefreshTokenRepository:
         await self.db.commit()
         return cast(CursorResult, result).rowcount
 
+    async def stage_revoke_all_for_user(self, user_id: uuid.UUID) -> int:
+        """Stage revocation of all active tokens for a user within the current transaction.
+
+        This variant mirrors ``revoke_all_for_user`` but leaves transaction finalization
+        to the caller so security-sensitive account mutations can commit user state and
+        token invalidation atomically.
+        """
+        now = self._utcnow_naive()
+        result = await self.db.execute(
+            update(Token).where(Token.user_id == user_id, Token.is_active.is_(True)).values(is_active=False, revoked_at=now)
+        )
+        await self.db.flush()
+        return cast(CursorResult, result).rowcount
+
     async def revoke_expired(self) -> int:
         """Atomically revoke all active tokens whose expiry time has passed.
 

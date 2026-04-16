@@ -5,6 +5,7 @@ from app.application.use_cases.audit_log_usecase import (
     CreateAuditLogUseCase,
     GetAuditLogsUseCase,
 )
+from app.application.use_cases.admin_user_account_usecase import AdminUserAccountUseCase
 from app.application.use_cases.auth_usecase import AuthUseCase
 from app.application.use_cases.queue_usecase import (
     DeleteDeadJobUseCase,
@@ -88,6 +89,17 @@ def get_delete_account_use_case(request: Request, db: AsyncSession = Depends(get
 def get_login_history_use_case(db: AsyncSession = Depends(get_db)) -> GetLoginHistoryUseCase:
     """Construct a ``GetLoginHistoryUseCase`` for the current request."""
     return GetLoginHistoryUseCase(UserRepository(db))
+
+
+def get_admin_user_account_use_case(request: Request, db: AsyncSession = Depends(get_db)) -> AdminUserAccountUseCase:
+    """Construct an ``AdminUserAccountUseCase`` for administrative user management."""
+    return AdminUserAccountUseCase(
+        user_repo=UserRepository(db),
+        role_repo=RoleRepository(db),
+        db=db,
+        arq=request.app.state.arq,
+        password_reset_repo=PasswordResetRepository(request.app.state.redis),
+    )
 
 
 def get_otp_repository(request: Request) -> OTPRepository:

@@ -2,6 +2,7 @@ import uuid
 from datetime import datetime
 from typing import Protocol
 
+from app.application.dto.admin_user_account_dto import AdminUserAccountDetail, AdminUserAccountSummary
 from app.domain.entities.user_entity import (
     PublicUser,
     User,
@@ -65,6 +66,19 @@ class IUserRepository(Protocol):
     async def get_login_history(self, user_id: uuid.UUID, limit: int = 10) -> list[UserLoginHistory]: ...
 
     async def update_password(self, user_id: uuid.UUID, password_hash: str) -> bool: ...
+
+    async def list_admin_user_accounts(
+        self,
+        *,
+        page: int,
+        page_size: int,
+    ) -> tuple[list[AdminUserAccountSummary], int]: ...
+
+    async def get_admin_user_account_detail(self, user_id: uuid.UUID) -> AdminUserAccountDetail | None: ...
+
+    async def get_by_id_for_update(self, user_id: uuid.UUID) -> User | None: ...
+
+    async def update_email_and_clear_verification(self, user_id: uuid.UUID, email: str) -> User | None: ...
 
     async def schedule_account_deletion(
         self,

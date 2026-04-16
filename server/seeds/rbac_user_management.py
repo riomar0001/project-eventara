@@ -127,7 +127,7 @@ ROLE_PERMISSIONS: dict[str, dict[str, list[RoleAction]]] = {
     },
     "system_administrator": {
         "venues": ALL_ACTIONS,
-        "user-accounts": [RoleAction.DELETE],
+        "user-accounts": [RoleAction.READ, RoleAction.UPDATE, RoleAction.DELETE],
         "user-roles": ALL_ACTIONS,
         "user-grants": ALL_ACTIONS,
         "queues": [RoleAction.READ, RoleAction.DELETE],
