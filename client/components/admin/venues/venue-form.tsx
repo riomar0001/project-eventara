@@ -45,9 +45,7 @@ export function VenueForm({ mode, venue }: { mode: 'create' | 'edit'; venue?: Ve
         <Card className="border-0 bg-white shadow-none ring-1 ring-neutral-200">
           <CardHeader className="border-b border-neutral-200/80 pb-5">
             <CardTitle>{mode === 'create' ? 'Add venue' : `Edit ${venue?.name ?? 'venue'}`}</CardTitle>
-            <CardDescription>
-              This page is intentionally UI-only. Inputs are interactive for design review, but nothing is sent to an API yet.
-            </CardDescription>
+            <CardDescription>This page is intentionally UI-only. Inputs are interactive for design review, but nothing is sent to an API yet.</CardDescription>
           </CardHeader>
           <CardContent className="pt-6">
             <form className="space-y-6" onSubmit={(event) => event.preventDefault()}>
@@ -62,7 +60,12 @@ export function VenueForm({ mode, venue }: { mode: 'create' | 'edit'; venue?: Ve
                 </div>
                 <div className="space-y-2">
                   <FieldLabel htmlFor="venue-neighborhood">Neighborhood</FieldLabel>
-                  <Input id="venue-neighborhood" value={neighborhood} onChange={(event) => setNeighborhood(event.target.value)} placeholder="Quayside District" />
+                  <Input
+                    id="venue-neighborhood"
+                    value={neighborhood}
+                    onChange={(event) => setNeighborhood(event.target.value)}
+                    placeholder="Quayside District"
+                  />
                 </div>
                 <div className="space-y-2">
                   <FieldLabel htmlFor="venue-city">City</FieldLabel>
@@ -125,7 +128,10 @@ export function VenueForm({ mode, venue }: { mode: 'create' | 'edit'; venue?: Ve
                 <FieldLabel>Amenities</FieldLabel>
                 <div className="grid gap-3 md:grid-cols-2">
                   {amenityOptions.map((amenity) => (
-                    <label key={amenity} className="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-700">
+                    <label
+                      key={amenity}
+                      className="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-700"
+                    >
                       <Checkbox checked={selectedAmenities.includes(amenity)} onCheckedChange={() => toggleAmenity(amenity)} />
                       <span>{amenity}</span>
                     </label>

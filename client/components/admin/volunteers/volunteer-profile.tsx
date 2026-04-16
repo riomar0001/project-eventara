@@ -1,12 +1,12 @@
 import { CalendarDays, PencilLine, Sparkles } from 'lucide-react';
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
 import { BackLink, DetailList } from '@/components/admin/event-management/shared';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { EVENT_MANAGEMENT_PATHS, getEventById, getVolunteerById, getVolunteerInitials } from '@/constants/event-management';
-import { notFound } from 'next/navigation';
 
 export function VolunteerProfile({ volunteerId }: { volunteerId: string }) {
   const volunteer = getVolunteerById(volunteerId);
@@ -15,9 +15,7 @@ export function VolunteerProfile({ volunteerId }: { volunteerId: string }) {
     notFound();
   }
 
-  const assignedEvents = volunteer.assignedEventIds
-    .map((eventId) => getEventById(eventId))
-    .filter((event) => event !== null);
+  const assignedEvents = volunteer.assignedEventIds.map((eventId) => getEventById(eventId)).filter((event) => event !== null);
 
   return (
     <div className="space-y-6">
@@ -124,7 +122,10 @@ export function VolunteerProfile({ volunteerId }: { volunteerId: string }) {
             </div>
           ) : (
             assignedEvents.map((event) => (
-              <div key={event.id} className="flex flex-col gap-3 rounded-3xl border border-neutral-200 bg-neutral-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+              <div
+                key={event.id}
+                className="flex flex-col gap-3 rounded-3xl border border-neutral-200 bg-neutral-50 p-4 sm:flex-row sm:items-center sm:justify-between"
+              >
                 <div className="space-y-1">
                   <p className="font-medium text-neutral-950">{event.title}</p>
                   <p className="text-sm text-neutral-500">{event.dateLabel}</p>

@@ -5,9 +5,19 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  EmptyState,
+  RbacHeroCard,
+  RbacMetricStrip,
+  averageActionsPerFeature,
+  countAllowRules,
+  countDenyRules,
+  countPermissionFeatures,
+  countPermissionRows,
+  humanizeSlug
+} from '../shared/rbac-management-shared';
 import type { RoleRecordResponse } from '@/api/types.gen';
 import { RBAC_COPY, RBAC_PROTECTED_ROLE_DELETE_MESSAGE } from '@/constants/rbac-management';
-import { EmptyState, RbacHeroCard, RbacMetricStrip, averageActionsPerFeature, countAllowRules, countDenyRules, countPermissionFeatures, countPermissionRows, humanizeSlug } from '../shared/rbac-management-shared';
 
 interface RolesTableProps {
   error: string | null;
@@ -105,65 +115,65 @@ export function RolesTable({ error, isEmpty, isLoading, onCreate, onDelete, onEd
                       const isDeleteDisabled = role.is_system && role.name === 'system_administrator';
 
                       return (
-                      <TableRow key={role.id} className="align-top hover:bg-neutral-50/70">
-                        <TableCell className="px-6 py-5">
-                          <div className="space-y-1">
-                            <p className="font-medium text-neutral-950">{humanizeSlug(role.name)}</p>
-                            <p className="font-mono text-xs text-neutral-500">{role.name}</p>
-                          </div>
-                        </TableCell>
-                        <TableCell className="max-w-sm py-5 text-sm leading-6 whitespace-normal text-neutral-500">
-                          {role.description?.trim() ? role.description : 'No description yet.'}
-                        </TableCell>
-                        <TableCell className="py-5">
-                          <div className="space-y-1 text-sm text-neutral-600">
-                            <p>{countPermissionFeatures(role.permissions)} features</p>
-                            <p>
-                              {countPermissionRows(role.permissions)} permission rows
-                              {countPermissionRows(role.permissions) > 0 ? `, ${averageActionsPerFeature(role.permissions)} per feature` : ''}
-                            </p>
-                            {countAllowRules(role.permissions) > 0 ? <p>{countAllowRules(role.permissions)} allow rules</p> : null}
-                          </div>
-                        </TableCell>
-                        <TableCell className="py-5">
-                          <div className="flex flex-wrap gap-2">
-                            {role.is_default ? (
-                              <Badge variant="secondary" className="bg-emerald-100 text-emerald-800">
-                                Default
-                              </Badge>
-                            ) : null}
-                            {role.is_system ? (
-                              <Badge variant="secondary" className="bg-amber-100 text-amber-800">
-                                System
-                              </Badge>
-                            ) : null}
-                            {!role.is_default && !role.is_system ? (
-                              <Badge variant="secondary" className="bg-neutral-100 text-neutral-600">
-                                Standard
-                              </Badge>
-                            ) : null}
-                          </div>
-                        </TableCell>
-                        <TableCell className="px-6 py-5">
-                          <div className="flex items-center justify-end gap-2">
-                            <Button variant="outline" size="sm" onClick={() => onEdit(role)}>
-                              <PencilLine className="size-4" />
-                              Edit
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="text-red-600 hover:text-red-700 disabled:text-neutral-400 disabled:hover:text-neutral-400"
-                              disabled={isDeleteDisabled}
-                              onClick={() => onDelete(role)}
-                              title={isDeleteDisabled ? RBAC_PROTECTED_ROLE_DELETE_MESSAGE : undefined}
-                            >
-                              <Trash2 className="size-4" />
-                              Delete
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
+                        <TableRow key={role.id} className="align-top hover:bg-neutral-50/70">
+                          <TableCell className="px-6 py-5">
+                            <div className="space-y-1">
+                              <p className="font-medium text-neutral-950">{humanizeSlug(role.name)}</p>
+                              <p className="font-mono text-xs text-neutral-500">{role.name}</p>
+                            </div>
+                          </TableCell>
+                          <TableCell className="max-w-sm py-5 text-sm leading-6 whitespace-normal text-neutral-500">
+                            {role.description?.trim() ? role.description : 'No description yet.'}
+                          </TableCell>
+                          <TableCell className="py-5">
+                            <div className="space-y-1 text-sm text-neutral-600">
+                              <p>{countPermissionFeatures(role.permissions)} features</p>
+                              <p>
+                                {countPermissionRows(role.permissions)} permission rows
+                                {countPermissionRows(role.permissions) > 0 ? `, ${averageActionsPerFeature(role.permissions)} per feature` : ''}
+                              </p>
+                              {countAllowRules(role.permissions) > 0 ? <p>{countAllowRules(role.permissions)} allow rules</p> : null}
+                            </div>
+                          </TableCell>
+                          <TableCell className="py-5">
+                            <div className="flex flex-wrap gap-2">
+                              {role.is_default ? (
+                                <Badge variant="secondary" className="bg-emerald-100 text-emerald-800">
+                                  Default
+                                </Badge>
+                              ) : null}
+                              {role.is_system ? (
+                                <Badge variant="secondary" className="bg-amber-100 text-amber-800">
+                                  System
+                                </Badge>
+                              ) : null}
+                              {!role.is_default && !role.is_system ? (
+                                <Badge variant="secondary" className="bg-neutral-100 text-neutral-600">
+                                  Standard
+                                </Badge>
+                              ) : null}
+                            </div>
+                          </TableCell>
+                          <TableCell className="px-6 py-5">
+                            <div className="flex items-center justify-end gap-2">
+                              <Button variant="outline" size="sm" onClick={() => onEdit(role)}>
+                                <PencilLine className="size-4" />
+                                Edit
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="text-red-600 hover:text-red-700 disabled:text-neutral-400 disabled:hover:text-neutral-400"
+                                disabled={isDeleteDisabled}
+                                onClick={() => onDelete(role)}
+                                title={isDeleteDisabled ? RBAC_PROTECTED_ROLE_DELETE_MESSAGE : undefined}
+                              >
+                                <Trash2 className="size-4" />
+                                Delete
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
                       );
                     })}
               </TableBody>

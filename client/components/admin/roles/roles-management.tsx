@@ -2,14 +2,14 @@
 
 import type { FormEvent } from 'react';
 import { useState } from 'react';
-import type { GrantEffect, RoleAction, RolePermissionRequest, RoleRecordResponse } from '@/api/types.gen';
-import { RBAC_COPY } from '@/constants/rbac-management';
 import { useRbacFeatures } from '@/hooks/use-rbac-features';
 import { useRbacRoles } from '@/hooks/use-rbac-roles';
 import { RbacDeleteDialog } from '../shared/rbac-delete-dialog';
+import { createEmptyRoleForm, createRolePermissionDraftMap, type RoleFormValues, type RolePermissionDraftMap } from '../shared/rbac-management-shared';
 import { RoleFormDialog } from './role-form-dialog';
 import { RolesTable } from './roles-table';
-import { createEmptyRoleForm, createRolePermissionDraftMap, type RoleFormValues, type RolePermissionDraftMap } from '../shared/rbac-management-shared';
+import type { GrantEffect, RoleAction, RolePermissionRequest, RoleRecordResponse } from '@/api/types.gen';
+import { RBAC_COPY } from '@/constants/rbac-management';
 
 function buildPermissionsPayload(permissionDrafts: RolePermissionDraftMap): RolePermissionRequest[] {
   return Object.entries(permissionDrafts)
@@ -26,18 +26,7 @@ function isProtectedRole(role: RoleRecordResponse) {
 }
 
 export function RolesManagement() {
-  const {
-    createRole,
-    deleteRole,
-    error: rolesError,
-    isDeleting,
-    isEmpty,
-    isLoading,
-    isSaving,
-    refresh,
-    roles,
-    updateRole
-  } = useRbacRoles();
+  const { createRole, deleteRole, error: rolesError, isDeleting, isEmpty, isLoading, isSaving, refresh, roles, updateRole } = useRbacRoles();
   const { features, isLoading: isLoadingFeatures } = useRbacFeatures();
   const [mode, setMode] = useState<'create' | 'edit'>('create');
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -130,8 +119,7 @@ export function RolesManagement() {
       return;
     }
 
-    const response =
-      mode === 'create' ? await createRole(payload) : selectedRole ? await updateRole(selectedRole.id, payload) : null;
+    const response = mode === 'create' ? await createRole(payload) : selectedRole ? await updateRole(selectedRole.id, payload) : null;
 
     if (!response) return;
 

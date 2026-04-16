@@ -1,11 +1,11 @@
 import { PencilLine, Trash2, Users } from 'lucide-react';
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
 import { BackLink, DetailList, DetailPanel, PhotoPanel } from '@/components/admin/event-management/shared';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { EVENT_MANAGEMENT_PATHS, getEventById, getVenueById, getVolunteerInitials, getVolunteersByEventId } from '@/constants/event-management';
-import { notFound } from 'next/navigation';
 
 export function EventDetail({ eventId }: { eventId: string }) {
   const event = getEventById(eventId);
@@ -84,7 +84,10 @@ export function EventDetail({ eventId }: { eventId: string }) {
         <DetailPanel title="Assigned volunteers" description="Volunteers linked to this event from the shared mock dataset.">
           <div className="space-y-3">
             {volunteers.map((volunteer) => (
-              <div key={volunteer.id} className="flex flex-col gap-3 rounded-3xl border border-neutral-200 bg-neutral-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+              <div
+                key={volunteer.id}
+                className="flex flex-col gap-3 rounded-3xl border border-neutral-200 bg-neutral-50 p-4 sm:flex-row sm:items-center sm:justify-between"
+              >
                 <div className="flex items-center gap-3">
                   <Avatar size="lg">
                     <AvatarImage src={volunteer.photo} alt={volunteer.name} />

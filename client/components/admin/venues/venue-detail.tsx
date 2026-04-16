@@ -1,10 +1,10 @@
 import { CalendarRange, PencilLine, Trash2 } from 'lucide-react';
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
 import { BackLink, DetailList, DetailPanel, PhotoPanel } from '@/components/admin/event-management/shared';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { EVENT_MANAGEMENT_PATHS, getEventsByVenueId, getVenueById } from '@/constants/event-management';
-import { notFound } from 'next/navigation';
 
 export function VenueDetail({ venueId }: { venueId: string }) {
   const venue = getVenueById(venueId);
@@ -91,7 +91,10 @@ export function VenueDetail({ venueId }: { venueId: string }) {
         <DetailPanel title="Scheduled sample events" description="Linked event pages included in the same UI-only admin preview.">
           <div className="space-y-3">
             {relatedEvents.map((event) => (
-              <div key={event.id} className="flex flex-col gap-3 rounded-3xl border border-neutral-200 bg-neutral-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+              <div
+                key={event.id}
+                className="flex flex-col gap-3 rounded-3xl border border-neutral-200 bg-neutral-50 p-4 sm:flex-row sm:items-center sm:justify-between"
+              >
                 <div className="space-y-1">
                   <p className="font-medium text-neutral-950">{event.title}</p>
                   <p className="text-sm text-neutral-500">{event.dateLabel}</p>

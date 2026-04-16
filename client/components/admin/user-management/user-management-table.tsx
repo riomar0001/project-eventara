@@ -9,8 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { STATUS_OPTIONS } from '../../../constants/user-managment';
-import { humanizeRoleName } from './user-management-ui';
 import { useAdminTableColumns, type AdminTableColumnMeta } from './table-columns';
+import { humanizeRoleName } from './user-management-ui';
 import type {
   AdminUserAccountPaginationResponse as AdminUserAccountPagination,
   AdminUserAccountSummaryResponse as AdminUserAccountSummary,
@@ -209,7 +209,7 @@ export function AdminUserManagementTable({
             </div>
           ) : (
             <Table className="min-w-245 text-sm">
-              <TableHeader className="bg-neutral-50/80 border-y">
+              <TableHeader className="border-y bg-neutral-50/80">
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id}>
                     {headerGroup.headers.map((header) => {

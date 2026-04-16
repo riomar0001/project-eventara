@@ -1,18 +1,18 @@
 'use client';
 
-import { flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
+import { useState } from 'react';
 import { Search, UserPlus, Users, X } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
+import { flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
 import { OperationsPageIntro } from '@/components/admin/event-management/shared';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { volunteerColumns, type VolunteerColumnMeta } from './volunteer-columns';
 import { EVENT_MANAGEMENT_PATHS, volunteerRecords } from '@/constants/event-management';
 import { cn } from '@/lib/utils';
-import { volunteerColumns, type VolunteerColumnMeta } from './volunteer-columns';
 
 export function VolunteersTable() {
   const [search, setSearch] = useState('');

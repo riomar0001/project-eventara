@@ -1,6 +1,6 @@
+import { notFound } from 'next/navigation';
 import { VenueForm } from '@/components/admin/venues/venue-form';
 import { getVenueById } from '@/constants/event-management';
-import { notFound } from 'next/navigation';
 
 export default async function AdminVenueEditPage({ params }: { params: Promise<{ venueId: string }> }) {
   const { venueId } = await params;

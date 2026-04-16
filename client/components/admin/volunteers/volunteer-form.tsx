@@ -127,7 +127,10 @@ export function VolunteerForm({ mode, volunteer }: { mode: 'create' | 'edit'; vo
                 <FieldLabel>Skills</FieldLabel>
                 <div className="grid gap-3 md:grid-cols-2">
                   {skillOptions.map((skill) => (
-                    <label key={skill} className="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-700">
+                    <label
+                      key={skill}
+                      className="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-700"
+                    >
                       <Checkbox checked={skills.includes(skill)} onCheckedChange={() => toggleSkill(skill)} />
                       <span>{skill}</span>
                     </label>

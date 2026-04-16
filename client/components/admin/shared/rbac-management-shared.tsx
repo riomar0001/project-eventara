@@ -124,8 +124,7 @@ export function RbacHeroCard({
       ? 'from-lime-50 via-white to-white text-neutral-950 ring-lime-200'
       : 'from-orange-50 via-white to-white text-neutral-950 ring-orange-200';
 
-  const metricAccentClassName =
-    tone === 'feature' ? 'border-lime-200 bg-lime-50 text-lime-950' : 'border-orange-200 bg-orange-50 text-orange-950';
+  const metricAccentClassName = tone === 'feature' ? 'border-lime-200 bg-lime-50 text-lime-950' : 'border-orange-200 bg-orange-50 text-orange-950';
 
   const icon = tone === 'feature' ? <Blocks className="size-5 text-neutral-900" /> : <ShieldCheck className="size-5 text-neutral-900" />;
 
@@ -157,13 +156,7 @@ export function RbacHeroCard({
   );
 }
 
-export function RbacMetricStrip({
-  items,
-  tone
-}: {
-  items: Array<{ label: string; value: string | number; detail: string }>;
-  tone: 'feature' | 'role';
-}) {
+export function RbacMetricStrip({ items, tone }: { items: Array<{ label: string; value: string | number; detail: string }>; tone: 'feature' | 'role' }) {
   const accentClassName = tone === 'feature' ? 'from-lime-100/70 to-white' : 'from-orange-100/70 to-white';
 
   return (
@@ -183,13 +176,7 @@ export function RbacMetricStrip({
   );
 }
 
-export function EmptyState({
-  description,
-  title
-}: {
-  description: string;
-  title: string;
-}) {
+export function EmptyState({ description, title }: { description: string; title: string }) {
   return (
     <div className="flex min-h-64 flex-col items-center justify-center gap-3 px-6 py-12 text-center">
       <div className="flex size-12 items-center justify-center rounded-2xl border border-neutral-200 bg-neutral-50 shadow-sm">

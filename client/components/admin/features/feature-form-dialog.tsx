@@ -8,9 +8,9 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import type { FeatureFormValues } from '../shared/rbac-management-shared';
 import type { FeatureRecordResponse } from '@/api/types.gen';
 import { RBAC_COPY } from '@/constants/rbac-management';
-import type { FeatureFormValues } from '../shared/rbac-management-shared';
 
 interface FeatureFormDialogProps {
   error?: string;
@@ -24,17 +24,7 @@ interface FeatureFormDialogProps {
   values: FeatureFormValues;
 }
 
-export function FeatureFormDialog({
-  error,
-  isSaving,
-  mode,
-  onClose,
-  onSubmit,
-  onValuesChange,
-  open,
-  selectedFeature,
-  values
-}: FeatureFormDialogProps) {
+export function FeatureFormDialog({ error, isSaving, mode, onClose, onSubmit, onValuesChange, open, selectedFeature, values }: FeatureFormDialogProps) {
   const title = mode === 'create' ? RBAC_COPY.features.createTitle : RBAC_COPY.features.editTitle;
 
   return (

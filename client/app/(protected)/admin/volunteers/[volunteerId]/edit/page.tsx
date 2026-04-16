@@ -1,6 +1,6 @@
+import { notFound } from 'next/navigation';
 import { VolunteerForm } from '@/components/admin/volunteers/volunteer-form';
 import { getVolunteerById } from '@/constants/event-management';
-import { notFound } from 'next/navigation';
 
 export default async function AdminVolunteerEditPage({ params }: { params: Promise<{ volunteerId: string }> }) {
   const { volunteerId } = await params;

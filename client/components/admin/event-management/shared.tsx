@@ -1,5 +1,5 @@
-import Link from 'next/link';
 import { ArrowLeft, ArrowUpRight } from 'lucide-react';
+import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -97,24 +97,10 @@ export function BackLink({ href, label }: { href: string; label: string }) {
   );
 }
 
-export function PhotoPanel({
-  children,
-  className,
-  photo,
-  tone
-}: {
-  children?: React.ReactNode;
-  className?: string;
-  photo: string;
-  tone: Tone;
-}) {
+export function PhotoPanel({ children, className, photo, tone }: { children?: React.ReactNode; className?: string; photo: string; tone: Tone }) {
   return (
     <div
-      className={cn(
-        'relative overflow-hidden rounded-[32px] border border-white/60 bg-neutral-900 text-white',
-        toneClasses[tone].photoGlow,
-        className
-      )}
+      className={cn('relative overflow-hidden rounded-[32px] border border-white/60 bg-neutral-900 text-white', toneClasses[tone].photoGlow, className)}
       style={{
         backgroundImage: `linear-gradient(180deg, rgba(15,23,42,0.12) 0%, rgba(15,23,42,0.72) 100%), url("${photo}")`,
         backgroundPosition: 'center',
@@ -149,7 +135,7 @@ export function CatalogCard({
 }) {
   return (
     <Card className="border-0 bg-white py-0 shadow-none ring-1 ring-neutral-200">
-      <PhotoPanel photo={photo} tone={tone} className="h-64 rounded-b-[28px] rounded-t-xl">
+      <PhotoPanel photo={photo} tone={tone} className="h-64 rounded-t-xl rounded-b-[28px]">
         <div className="flex h-full flex-col justify-between p-5">
           <div className="flex flex-wrap gap-2">
             {badges.map((badge) => (
@@ -190,15 +176,7 @@ export function CatalogCard({
   );
 }
 
-export function DetailPanel({
-  children,
-  description,
-  title
-}: {
-  children: React.ReactNode;
-  description?: string;
-  title: string;
-}) {
+export function DetailPanel({ children, description, title }: { children: React.ReactNode; description?: string; title: string }) {
   return (
     <Card className="border-0 bg-white shadow-none ring-1 ring-neutral-200">
       <CardHeader className="border-b border-neutral-200/80 pb-4">
@@ -224,7 +202,7 @@ export function DetailList({ items }: { items: { label: string; value: string }[
       {items.map((item) => (
         <div key={item.label} className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3">
           <p className="text-[11px] tracking-[0.16em] text-neutral-500 uppercase">{item.label}</p>
-          <p className="mt-1 text-sm font-medium leading-6 text-neutral-950">{item.value}</p>
+          <p className="mt-1 text-sm leading-6 font-medium text-neutral-950">{item.value}</p>
         </div>
       ))}
     </div>

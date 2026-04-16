@@ -2,13 +2,13 @@
 
 import type { FormEvent } from 'react';
 import { useState } from 'react';
-import type { FeatureRecordResponse } from '@/api/types.gen';
-import { RBAC_COPY } from '@/constants/rbac-management';
 import { useRbacFeatures } from '@/hooks/use-rbac-features';
-import { FeatureFormDialog } from './feature-form-dialog';
-import { FeaturesTable } from './features-table';
 import { RbacDeleteDialog } from '../shared/rbac-delete-dialog';
 import { createEmptyFeatureForm, type FeatureFormValues } from '../shared/rbac-management-shared';
+import { FeatureFormDialog } from './feature-form-dialog';
+import { FeaturesTable } from './features-table';
+import type { FeatureRecordResponse } from '@/api/types.gen';
+import { RBAC_COPY } from '@/constants/rbac-management';
 
 export function FeaturesManagement() {
   const { createFeature, deleteFeature, error, features, isDeleting, isEmpty, isLoading, isSaving, refresh, updateFeature } = useRbacFeatures();
@@ -68,8 +68,7 @@ export function FeaturesManagement() {
       return;
     }
 
-    const response =
-      mode === 'create' ? await createFeature(payload) : selectedFeature ? await updateFeature(selectedFeature.id, payload) : null;
+    const response = mode === 'create' ? await createFeature(payload) : selectedFeature ? await updateFeature(selectedFeature.id, payload) : null;
 
     if (!response) return;
 

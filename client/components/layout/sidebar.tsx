@@ -55,11 +55,7 @@ export function AppSidebar() {
       <SidebarContent className="bg-white px-4 group-data-[collapsible=icon]:px-0">
         {dashboardNavGroups.map((group) => (
           <SidebarGroup key={group.label}>
-            {group.label && (
-              <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
-                {group.label}
-              </SidebarGroupLabel>
-            )}
+            {group.label && <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">{group.label}</SidebarGroupLabel>}
             <SidebarGroupContent>
               <SidebarMenu className="gap-2">
                 {group.items.map((item) =>

@@ -129,7 +129,10 @@ export function EventForm({ event, mode }: { event?: EventRecord; mode: 'create'
                 <FieldLabel>Host teams</FieldLabel>
                 <div className="grid gap-3 md:grid-cols-2">
                   {hostTeamOptions.map((host) => (
-                    <label key={host} className="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-700">
+                    <label
+                      key={host}
+                      className="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-700"
+                    >
                       <Checkbox checked={selectedHosts.includes(host)} onCheckedChange={() => toggleHost(host)} />
                       <span>{host}</span>
                     </label>

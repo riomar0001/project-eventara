@@ -1,13 +1,13 @@
 'use client';
 
 import { Loader2, PencilLine, Plus, RefreshCcw, Trash2 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
+import { EmptyState, RbacHeroCard, RbacMetricStrip, countEnabledFeatures, humanizeSlug } from '../shared/rbac-management-shared';
 import type { FeatureRecordResponse } from '@/api/types.gen';
 import { RBAC_COPY } from '@/constants/rbac-management';
-import { EmptyState, RbacHeroCard, RbacMetricStrip, countEnabledFeatures, humanizeSlug } from '../shared/rbac-management-shared';
 
 interface FeaturesTableProps {
   error: string | null;
@@ -112,10 +112,7 @@ export function FeaturesTable({ error, features, isEmpty, isLoading, onCreate, o
                           {feature.description?.trim() ? feature.description : 'No description yet.'}
                         </TableCell>
                         <TableCell className="py-5">
-                          <Badge
-                            variant="secondary"
-                            className={feature.is_enabled ? 'bg-lime-100 text-lime-800' : 'bg-neutral-100 text-neutral-600'}
-                          >
+                          <Badge variant="secondary" className={feature.is_enabled ? 'bg-lime-100 text-lime-800' : 'bg-neutral-100 text-neutral-600'}>
                             {feature.is_enabled ? 'Enabled' : 'Disabled'}
                           </Badge>
                         </TableCell>
