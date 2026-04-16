@@ -26,7 +26,7 @@ const settingsItems = [
   },
   {
     label: 'Delete Account',
-    description: 'Permanently remove your account.',
+    description: 'Schedule account removal after a 30-day grace period.',
     href: '/admin/user/settings/delete-account',
     icon: Trash2,
     destructive: true
