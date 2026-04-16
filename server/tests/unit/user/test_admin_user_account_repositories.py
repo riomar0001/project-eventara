@@ -2,6 +2,7 @@ import uuid
 from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock
 
+from app.domain.entities.authorization_entities import GrantEffect, RoleAction
 from app.domain.entities.user_entity import UserStatus
 from app.infrastructure.database.models.user_models import User, UserSecurity
 from app.infrastructure.database.repositories.role_repository import RoleRepository
@@ -36,6 +37,21 @@ class TestRoleRepositoryAdminFlows:
         assert result.user_id == user_id
         assert result.role_id == role_id
         assert result.assigned_by == assigned_by
+
+    async def test_get_role_permissions_returns_enabled_permissions(self):
+        role_id = uuid.uuid4()
+        row = (role_id, "user-accounts", "User Accounts", RoleAction.UPDATE, GrantEffect.ALLOW)
+        execute_result = MagicMock()
+        execute_result.all.return_value = [row]
+        db = MagicMock()
+        db.execute = AsyncMock(return_value=execute_result)
+        repository = RoleRepository(db)
+
+        result = await repository.get_role_permissions(role_id)
+
+        assert len(result) == 1
+        assert result[0].feature_slug == "user-accounts"
+        assert result[0].action == RoleAction.UPDATE
 
 
 class TestUserRepositoryAdminFlows:

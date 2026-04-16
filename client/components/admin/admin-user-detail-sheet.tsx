@@ -1,7 +1,7 @@
 'use client';
 
 import { RefreshCcw, ShieldX } from 'lucide-react';
-import { formatDateTime, getInitials, humanizeValue, UserStatusBadge } from '@/components/admin/admin-user-management-ui';
+import { formatDateTime, getInitials, humanizeRoleName, humanizeValue, RolePermissionList, UserStatusBadge } from '@/components/admin/admin-user-management-ui';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -71,7 +71,7 @@ export function AdminUserDetailSheet({ detail, error, isLoading, onOpenChange, o
                         <div className="flex flex-wrap gap-2">
                           <UserStatusBadge status={detail.status} />
                           <Badge variant="outline" className="text-[11px]">
-                            {detail.role_name ?? 'No role assigned'}
+                            {humanizeRoleName(detail.role_name)}
                           </Badge>
                           <Badge variant="outline" className="text-[11px]">
                             {detail.email_verified ? 'Verified email' : 'Verification pending'}
@@ -90,8 +90,8 @@ export function AdminUserDetailSheet({ detail, error, isLoading, onOpenChange, o
                 <div className="space-y-3">
                   <div className="rounded-xl border border-neutral-200 bg-white p-4">
                     <div>
-                    <p className="text-sm font-medium">Profile</p>
-                    <p className="text-muted-foreground text-xs">Identity, onboarding, and personal details.</p>
+                      <p className="text-sm font-medium">Profile</p>
+                      <p className="text-muted-foreground text-xs">Identity, onboarding, and personal details.</p>
                     </div>
                     <div className="mt-6 grid gap-x-10 gap-y-8 md:grid-cols-2">
                       <DetailItem label="User ID" value={detail.user_id} />
@@ -115,8 +115,8 @@ export function AdminUserDetailSheet({ detail, error, isLoading, onOpenChange, o
                 <div className="space-y-3">
                   <div className="rounded-xl border border-neutral-200 bg-white p-4">
                     <div>
-                    <p className="text-sm font-medium">Security</p>
-                    <p className="text-muted-foreground text-xs">Verification, password, and account protection signals.</p>
+                      <p className="text-sm font-medium">Security</p>
+                      <p className="text-muted-foreground text-xs">Verification, password, and account protection signals.</p>
                     </div>
                     <div className="mt-6 grid gap-x-10 gap-y-8 md:grid-cols-2">
                       <DetailItem label="Email Verified" value={detail.email_verified ? 'Yes' : 'No'} />
@@ -124,7 +124,7 @@ export function AdminUserDetailSheet({ detail, error, isLoading, onOpenChange, o
                       <DetailItem label="Password Changed" value={formatDateTime(detail.password_change_at)} />
                       <DetailItem label="Failed Login Attempts" value={detail.failed_login_attempts.toString()} />
                       <DetailItem label="Locked Until" value={formatDateTime(detail.locked_until)} />
-                      <DetailItem label="Current Role" value={detail.role_name ?? 'No role assigned'} />
+                      <DetailItem label="Account Status" value={humanizeValue(detail.status)} />
                     </div>
                   </div>
                 </div>
@@ -132,8 +132,25 @@ export function AdminUserDetailSheet({ detail, error, isLoading, onOpenChange, o
                 <div className="space-y-3">
                   <div className="rounded-xl border border-neutral-200 bg-white p-4">
                     <div>
-                    <p className="text-sm font-medium">Activity</p>
-                    <p className="text-muted-foreground text-xs">Latest account activity and session history counters.</p>
+                      <p className="text-sm font-medium">Role access</p>
+                      <p className="text-muted-foreground text-xs">Current effective role and the permissions included with that role.</p>
+                    </div>
+                    <div className="mt-6 grid gap-x-10 gap-y-8 md:grid-cols-2">
+                      <DetailItem label="Current Role" value={humanizeRoleName(detail.role_name)} />
+                      <DetailItem label="Permission Count" value={(detail.role_permissions?.length ?? 0).toString()} />
+                    </div>
+                    <div className="mt-8 space-y-3">
+                      <p className="text-muted-foreground text-xs font-medium tracking-[0.16em] uppercase">Role Permissions</p>
+                      <RolePermissionList permissions={detail.role_permissions} />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="rounded-xl border border-neutral-200 bg-white p-4">
+                    <div>
+                      <p className="text-sm font-medium">Activity</p>
+                      <p className="text-muted-foreground text-xs">Latest account activity and session history counters.</p>
                     </div>
                     <div className="mt-6 grid gap-x-10 gap-y-8 md:grid-cols-2">
                       <DetailItem label="Last Login" value={formatDateTime(detail.last_login_at)} />
@@ -149,8 +166,8 @@ export function AdminUserDetailSheet({ detail, error, isLoading, onOpenChange, o
                 <div className="space-y-3">
                   <div className="rounded-xl border border-neutral-200 bg-white p-4">
                     <div>
-                    <p className="text-sm font-medium">Deletion state</p>
-                    <p className="text-muted-foreground text-xs">Pending deletion requests, reason, and final deletion timestamp.</p>
+                      <p className="text-sm font-medium">Deletion state</p>
+                      <p className="text-muted-foreground text-xs">Pending deletion requests, reason, and final deletion timestamp.</p>
                     </div>
                     <div className="mt-6 grid gap-x-10 gap-y-8 md:grid-cols-2">
                       <DetailItem label="Requested At" value={formatDateTime(detail.deletion_requested_at)} />

@@ -1,8 +1,8 @@
 import uuid
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 
-from app.domain.entities.authorization_entities import Role as RoleEntity
+from app.domain.entities.authorization_entities import GrantEffect, RoleAction
 from app.domain.entities.user_entity import AgeGroup, EducationLevel, Gender, UserStatus
 
 
@@ -10,6 +10,14 @@ from app.domain.entities.user_entity import AgeGroup, EducationLevel, Gender, Us
 class ListUserAccountsInput:
     page: int = 1
     page_size: int = 10
+
+
+@dataclass
+class RolePermissionSummary:
+    feature_slug: str
+    feature_name: str
+    action: RoleAction
+    effect: GrantEffect
 
 
 @dataclass
@@ -65,6 +73,17 @@ class AdminUserAccountDetail:
     deleted_at: datetime | None = None
     created_at: datetime | None = None
     updated_at: datetime | None = None
+    role_permissions: list[RolePermissionSummary] = field(default_factory=list)
+
+
+@dataclass
+class AssignableRoleDetail:
+    id: uuid.UUID
+    name: str
+    description: str | None = None
+    is_default: bool = False
+    is_system: bool = False
+    permissions: list[RolePermissionSummary] = field(default_factory=list)
 
 
 @dataclass
@@ -79,6 +98,7 @@ class ChangeUserRoleOutput:
     user_id: uuid.UUID
     role_id: uuid.UUID
     role_name: str
+    permissions: list[RolePermissionSummary] = field(default_factory=list)
 
 
 @dataclass
@@ -102,4 +122,4 @@ class SendUserPasswordResetInput:
 
 @dataclass
 class ListAssignableRolesOutput:
-    roles: list[RoleEntity]
+    roles: list[AssignableRoleDetail]

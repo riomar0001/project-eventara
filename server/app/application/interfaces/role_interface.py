@@ -3,6 +3,7 @@ from typing import Optional, Protocol
 
 from pydantic import AwareDatetime
 
+from app.application.dto.admin_user_account_dto import RolePermissionSummary
 from app.domain.entities.authorization_entities import GrantEffect, RoleAction
 from app.domain.entities.authorization_entities import Role as RoleEntity
 from app.domain.entities.authorization_entities import UserGrant as UserGrantEntity
@@ -21,6 +22,10 @@ class IRoleRepository(Protocol):
     async def get_role_by_id(self, role_id: uuid.UUID) -> RoleEntity | None: ...
 
     async def list_roles(self) -> list[RoleEntity]: ...
+
+    async def get_role_permissions(self, role_id: uuid.UUID) -> list[RolePermissionSummary]: ...
+
+    async def list_role_permissions(self, role_ids: list[uuid.UUID]) -> dict[uuid.UUID, list[RolePermissionSummary]]: ...
 
     async def feature_exists(self, feature_id: uuid.UUID) -> bool: ...
 

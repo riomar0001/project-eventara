@@ -4,6 +4,7 @@ from typing import Annotated
 
 from pydantic import BaseModel, EmailStr, Field, PlainSerializer
 
+from app.domain.entities.authorization_entities import GrantEffect, RoleAction
 from app.domain.entities.user_entity import AgeGroup, EducationLevel, Gender, UserStatus
 
 
@@ -43,6 +44,13 @@ class AdminUserAccountListResponse(BaseModel):
     pagination: AdminUserAccountPaginationResponse
 
 
+class RolePermissionResponse(BaseModel):
+    feature_slug: str
+    feature_name: str
+    action: RoleAction
+    effect: GrantEffect
+
+
 class AdminUserAccountDetailResponse(BaseModel):
     success: bool = True
     user_id: uuid.UUID
@@ -76,6 +84,7 @@ class AdminUserAccountDetailResponse(BaseModel):
     deleted_at: UtcJsonDatetime | None = None
     created_at: UtcJsonDatetime | None = None
     updated_at: UtcJsonDatetime | None = None
+    role_permissions: list[RolePermissionResponse] = Field(default_factory=list)
 
 
 class AssignableRoleResponse(BaseModel):
@@ -84,6 +93,7 @@ class AssignableRoleResponse(BaseModel):
     description: str | None = None
     is_default: bool = False
     is_system: bool = False
+    permissions: list[RolePermissionResponse] = Field(default_factory=list)
 
 
 class AssignableRoleListResponse(BaseModel):
@@ -100,6 +110,7 @@ class ChangeUserRoleResponse(BaseModel):
     user_id: uuid.UUID
     role_id: uuid.UUID
     role_name: str
+    permissions: list[RolePermissionResponse] = Field(default_factory=list)
     message: str = "User role updated successfully."
 
 

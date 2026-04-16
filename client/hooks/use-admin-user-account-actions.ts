@@ -103,7 +103,7 @@ export function useAdminUserAccountActions() {
       }
 
       const response = result.data;
-      toast.success(response.message);
+      toast.success(response.message ?? 'User role updated successfully.');
       return response;
     } catch (error) {
       toast.error(getAdminUserAccountErrorMessage(error, 'Unable to update the user role right now.'));
@@ -131,7 +131,7 @@ export function useAdminUserAccountActions() {
       }
 
       const response = result.data;
-      toast.success(response.message);
+      toast.success(response.message ?? 'User email updated successfully.');
       return response;
     } catch (error) {
       toast.error(getAdminUserAccountErrorMessage(error, 'Unable to update the user email right now.'));
@@ -158,7 +158,7 @@ export function useAdminUserAccountActions() {
       }
 
       const response = result.data;
-      toast.success(response.message);
+      toast.success(response.message ?? 'Password reset link sent successfully.');
       return response;
     } catch (error) {
       toast.error(getAdminUserAccountErrorMessage(error, 'Unable to send the password reset link right now.'));
@@ -186,7 +186,7 @@ export function useAdminUserAccountActions() {
       }
 
       const response = result.data;
-      toast.success(response.message);
+      toast.success(response.message ?? 'Account deletion scheduled successfully.');
       return response;
     } catch (error) {
       toast.error(getAdminUserAccountErrorMessage(error, 'Unable to schedule account deletion right now.'));

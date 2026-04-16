@@ -56,25 +56,6 @@ export const zAssignRoleRequest = z.object({
 });
 
 /**
- * AssignableRoleResponse
- */
-export const zAssignableRoleResponse = z.object({
-    id: z.uuid(),
-    name: z.string(),
-    description: z.string().nullish(),
-    is_default: z.boolean().optional().default(false),
-    is_system: z.boolean().optional().default(false)
-});
-
-/**
- * AssignableRoleListResponse
- */
-export const zAssignableRoleListResponse = z.object({
-    success: z.boolean().optional().default(true),
-    data: z.array(zAssignableRoleResponse)
-});
-
-/**
  * AuditLogStatus
  */
 export const zAuditLogStatus = z.enum(['success', 'failure']);
@@ -135,17 +116,6 @@ export const zChangeUserEmailResponse = z.object({
  */
 export const zChangeUserRoleRequest = z.object({
     role_id: z.uuid()
-});
-
-/**
- * ChangeUserRoleResponse
- */
-export const zChangeUserRoleResponse = z.object({
-    success: z.boolean().optional().default(true),
-    user_id: z.uuid(),
-    role_id: z.uuid(),
-    role_name: z.string(),
-    message: z.string().optional().default('User role updated successfully.')
 });
 
 /**
@@ -520,6 +490,48 @@ export const zCreateGrantsRequest = z.object({
 });
 
 /**
+ * RolePermissionResponse
+ */
+export const zRolePermissionResponse = z.object({
+    feature_slug: z.string(),
+    feature_name: z.string(),
+    action: zRoleAction,
+    effect: zGrantEffect
+});
+
+/**
+ * AssignableRoleResponse
+ */
+export const zAssignableRoleResponse = z.object({
+    id: z.uuid(),
+    name: z.string(),
+    description: z.string().nullish(),
+    is_default: z.boolean().optional().default(false),
+    is_system: z.boolean().optional().default(false),
+    permissions: z.array(zRolePermissionResponse).optional()
+});
+
+/**
+ * AssignableRoleListResponse
+ */
+export const zAssignableRoleListResponse = z.object({
+    success: z.boolean().optional().default(true),
+    data: z.array(zAssignableRoleResponse)
+});
+
+/**
+ * ChangeUserRoleResponse
+ */
+export const zChangeUserRoleResponse = z.object({
+    success: z.boolean().optional().default(true),
+    user_id: z.uuid(),
+    role_id: z.uuid(),
+    role_name: z.string(),
+    permissions: z.array(zRolePermissionResponse).optional(),
+    message: z.string().optional().default('User role updated successfully.')
+});
+
+/**
  * SendUserPasswordResetResponse
  */
 export const zSendUserPasswordResetResponse = z.object({
@@ -680,22 +692,23 @@ export const zAdminUserAccountDetailResponse = z.object({
     occupation: z.string().nullish(),
     bio: z.string().nullish(),
     onboarding_completed: z.boolean(),
-    onboarding_completed_at: z.iso.datetime().nullish(),
+    onboarding_completed_at: z.string().nullish(),
     email_verified: z.boolean(),
-    email_verified_at: z.iso.datetime().nullish(),
-    password_change_at: z.iso.datetime().nullish(),
+    email_verified_at: z.string().nullish(),
+    password_change_at: z.string().nullish(),
     failed_login_attempts: z.int(),
-    locked_until: z.iso.datetime().nullish(),
-    last_login_at: z.iso.datetime().nullish(),
-    last_activity_at: z.iso.datetime().nullish(),
+    locked_until: z.string().nullish(),
+    last_login_at: z.string().nullish(),
+    last_activity_at: z.string().nullish(),
     login_count: z.int(),
-    deletion_requested_at: z.iso.datetime().nullish(),
-    deletion_scheduled_for: z.iso.datetime().nullish(),
+    deletion_requested_at: z.string().nullish(),
+    deletion_scheduled_for: z.string().nullish(),
     deletion_requested_by: z.uuid().nullish(),
     deletion_reason: z.string().nullish(),
-    deleted_at: z.iso.datetime().nullish(),
-    created_at: z.iso.datetime().nullish(),
-    updated_at: z.iso.datetime().nullish()
+    deleted_at: z.string().nullish(),
+    created_at: z.string().nullish(),
+    updated_at: z.string().nullish(),
+    role_permissions: z.array(zRolePermissionResponse).optional()
 });
 
 /**
@@ -708,7 +721,7 @@ export const zAdminUserAccountSummaryResponse = z.object({
     role_id: z.uuid().nullish(),
     role_name: z.string().nullish(),
     status: zUserStatus,
-    deletion_scheduled_for: z.iso.datetime().nullish()
+    deletion_scheduled_for: z.string().nullish()
 });
 
 /**

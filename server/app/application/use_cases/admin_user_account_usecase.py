@@ -26,6 +26,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application.dto.admin_user_account_dto import (
     AdminUserAccountDetail,
+    AssignableRoleDetail,
     ChangeUserEmailInput,
     ChangeUserEmailOutput,
     ChangeUserRoleInput,
@@ -110,11 +111,27 @@ class AdminUserAccountUseCase:
         detail = await self.user_repo.get_admin_user_account_detail(user_id)
         if detail is None:
             raise UserNotFoundError(str(user_id))
+        if detail.role_id is not None:
+            detail.role_permissions = await self.role_repo.get_role_permissions(detail.role_id)
         return detail
 
     async def list_roles(self) -> ListAssignableRolesOutput:
         """Return the role catalog exposed in the admin change-role dialog."""
-        return ListAssignableRolesOutput(roles=await self.role_repo.list_roles())
+        roles = await self.role_repo.list_roles()
+        permissions_by_role = await self.role_repo.list_role_permissions([role.id for role in roles])
+        return ListAssignableRolesOutput(
+            roles=[
+                AssignableRoleDetail(
+                    id=role.id,
+                    name=role.name,
+                    description=role.description,
+                    is_default=role.is_default,
+                    is_system=role.is_system,
+                    permissions=permissions_by_role.get(role.id, []),
+                )
+                for role in roles
+            ]
+        )
 
     async def change_role(self, data: ChangeUserRoleInput) -> ChangeUserRoleOutput:
         """Replace a user's current effective role with a single new role.
@@ -147,6 +164,7 @@ class AdminUserAccountUseCase:
             role = await self.role_repo.get_role_by_id(data.role_id)
             if role is None:
                 raise RoleNotFoundError(str(data.role_id))
+            permissions = await self.role_repo.get_role_permissions(role.id)
 
             active_assignments = await self.role_repo.get_active_assignments_for_user(data.user_id)
             if len(active_assignments) == 1 and active_assignments[0].role_id == data.role_id:
@@ -163,6 +181,7 @@ class AdminUserAccountUseCase:
                 user_id=data.user_id,
                 role_id=role.id,
                 role_name=role.name,
+                permissions=permissions,
             )
         except Exception:
             await self.db.rollback()

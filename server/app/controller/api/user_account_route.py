@@ -36,6 +36,7 @@ from app.controller.schemas.user_account_schema import (
     ChangeUserEmailResponse,
     ChangeUserRoleRequest,
     ChangeUserRoleResponse,
+    RolePermissionResponse,
     SendUserPasswordResetResponse,
 )
 from app.domain.entities.authorization_entities import RoleAction
@@ -78,6 +79,15 @@ async def list_roles(
                 description=role.description,
                 is_default=role.is_default,
                 is_system=role.is_system,
+                permissions=[
+                    RolePermissionResponse(
+                        feature_slug=permission.feature_slug,
+                        feature_name=permission.feature_name,
+                        action=permission.action,
+                        effect=permission.effect,
+                    )
+                    for permission in role.permissions
+                ],
             )
             for role in result.roles
         ]
@@ -188,6 +198,15 @@ async def get_user_account_detail(
         deleted_at=detail.deleted_at,
         created_at=detail.created_at,
         updated_at=detail.updated_at,
+        role_permissions=[
+            RolePermissionResponse(
+                feature_slug=permission.feature_slug,
+                feature_name=permission.feature_name,
+                action=permission.action,
+                effect=permission.effect,
+            )
+            for permission in detail.role_permissions
+        ],
     )
 
 
@@ -235,6 +254,15 @@ async def change_user_role(
         user_id=result.user_id,
         role_id=result.role_id,
         role_name=result.role_name,
+        permissions=[
+            RolePermissionResponse(
+                feature_slug=permission.feature_slug,
+                feature_name=permission.feature_name,
+                action=permission.action,
+                effect=permission.effect,
+            )
+            for permission in result.permissions
+        ],
     )
 
 

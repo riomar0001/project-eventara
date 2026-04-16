@@ -1,7 +1,14 @@
 'use client';
 
 import { ChevronLeft, ChevronRight, Eye, KeyRound, Loader2, Mail, MoreHorizontal, RefreshCcw, ShieldCheck, ShieldX, Trash2, Users } from 'lucide-react';
-import { formatDateTime, getInitials, isSoftDeleteDisabled, UserStatusBadge, UserTableSkeleton } from '@/components/admin/admin-user-management-ui';
+import {
+  formatDateTime,
+  getInitials,
+  humanizeRoleName,
+  isSoftDeleteDisabled,
+  UserStatusBadge,
+  UserTableSkeleton
+} from '@/components/admin/admin-user-management-ui';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -159,7 +166,7 @@ export function AdminUserManagementTable({
                         </td>
                         <td className="px-6 py-4">
                           <Badge variant="outline" className="text-[11px]">
-                            {user.role_name ?? 'No role assigned'}
+                            {humanizeRoleName(user.role_name)}
                           </Badge>
                         </td>
                         <td className="px-6 py-4">

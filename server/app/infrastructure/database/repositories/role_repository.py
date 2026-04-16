@@ -6,12 +6,14 @@ from pydantic import AwareDatetime
 from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.application.dto.admin_user_account_dto import RolePermissionSummary
 from app.domain.entities.authorization_entities import GrantEffect, Role as RoleEntity, RoleAction
 from app.domain.entities.authorization_entities import UserGrant as DomainUserGrant
 from app.domain.entities.authorization_entities import UserRole as DomainUserRole
 from app.infrastructure.database.models.user_models import (
     Feature,
     Role,
+    RolePermission,
     User,
     UserGrant,
     UserRole,
@@ -78,6 +80,55 @@ class RoleRepository:
         """Return all assignable system roles ordered by name."""
         result = await self.db.execute(select(Role).order_by(Role.name.asc()))
         return [self._to_domain_role_record(orm) for orm in result.scalars().all()]
+
+    async def get_role_permissions(self, role_id: uuid.UUID) -> list[RolePermissionSummary]:
+        """Return the enabled permissions attached to one role definition."""
+        result = await self.db.execute(
+            select(RolePermission.role_id, Feature.slug, Feature.name, RolePermission.action, RolePermission.effect)
+            .join(Feature, RolePermission.feature_id == Feature.id)
+            .where(
+                RolePermission.role_id == role_id,
+                Feature.is_enabled.is_(True),
+            )
+            .order_by(Feature.slug.asc(), RolePermission.action.asc())
+        )
+        return [
+            RolePermissionSummary(
+                feature_slug=feature_slug,
+                feature_name=feature_name,
+                action=RoleAction(action),
+                effect=GrantEffect(effect),
+            )
+            for _, feature_slug, feature_name, action, effect in result.all()
+        ]
+
+    async def list_role_permissions(self, role_ids: list[uuid.UUID]) -> dict[uuid.UUID, list[RolePermissionSummary]]:
+        """Return enabled permissions grouped by role for the supplied role IDs."""
+        if not role_ids:
+            return {}
+
+        result = await self.db.execute(
+            select(RolePermission.role_id, Feature.slug, Feature.name, RolePermission.action, RolePermission.effect)
+            .join(Feature, RolePermission.feature_id == Feature.id)
+            .where(
+                RolePermission.role_id.in_(role_ids),
+                Feature.is_enabled.is_(True),
+            )
+            .order_by(RolePermission.role_id.asc(), Feature.slug.asc(), RolePermission.action.asc())
+        )
+        permissions_by_role: dict[uuid.UUID, list[RolePermissionSummary]] = {role_id: [] for role_id in role_ids}
+
+        for role_id, feature_slug, feature_name, action, effect in result.all():
+            permissions_by_role.setdefault(role_id, []).append(
+                RolePermissionSummary(
+                    feature_slug=feature_slug,
+                    feature_name=feature_name,
+                    action=RoleAction(action),
+                    effect=GrantEffect(effect),
+                )
+            )
+
+        return permissions_by_role
 
     async def feature_exists(self, feature_id: uuid.UUID) -> bool:
         result = await self.db.execute(select(Feature.id).where(Feature.id == feature_id))

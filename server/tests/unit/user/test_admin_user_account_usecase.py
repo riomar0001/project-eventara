@@ -11,10 +11,11 @@ from app.application.dto.admin_user_account_dto import (
     ChangeUserEmailInput,
     ChangeUserRoleInput,
     ListUserAccountsInput,
+    RolePermissionSummary,
     SendUserPasswordResetInput,
 )
 from app.application.use_cases.admin_user_account_usecase import AdminUserAccountUseCase
-from app.domain.entities.authorization_entities import Role as RoleEntity
+from app.domain.entities.authorization_entities import GrantEffect, Role as RoleEntity, RoleAction
 from app.domain.entities.authorization_entities import UserRole as UserRoleEntity
 from app.domain.entities.user_entity import User, UserSecurity, UserStatus
 from app.domain.exceptions.role_exceptions import RoleAlreadyCurrentError
@@ -61,6 +62,39 @@ def make_use_case(
 
 
 class TestAdminUserAccountUseCase:
+    async def test_list_roles_returns_permissions(self):
+        role_id = uuid.uuid4()
+        role_repo = MagicMock()
+        role_repo.list_roles = AsyncMock(
+            return_value=[
+                RoleEntity(
+                    id=role_id,
+                    name="system_administrator",
+                    description="Full admin access",
+                    is_default=False,
+                    is_system=True,
+                )
+            ]
+        )
+        role_repo.list_role_permissions = AsyncMock(
+            return_value={
+                role_id: [
+                    RolePermissionSummary(
+                        feature_slug="user-accounts",
+                        feature_name="User Accounts",
+                        action=RoleAction.UPDATE,
+                        effect=GrantEffect.ALLOW,
+                    )
+                ]
+            }
+        )
+
+        use_case = make_use_case(role_repo=role_repo)
+
+        result = await use_case.list_roles()
+
+        assert result.roles[0].permissions[0].feature_slug == "user-accounts"
+
     async def test_list_user_accounts_returns_expected_pagination(self):
         summary = AdminUserAccountSummary(
             user_id=uuid.uuid4(),
@@ -116,6 +150,16 @@ class TestAdminUserAccountUseCase:
                 )
             ]
         )
+        role_repo.get_role_permissions = AsyncMock(
+            return_value=[
+                RolePermissionSummary(
+                    feature_slug="user-accounts",
+                    feature_name="User Accounts",
+                    action=RoleAction.UPDATE,
+                    effect=GrantEffect.ALLOW,
+                )
+            ]
+        )
         role_repo.replace_active_assignments = AsyncMock()
         user_repo = MagicMock()
         user_repo.get_by_id = AsyncMock(return_value=user)
@@ -136,9 +180,39 @@ class TestAdminUserAccountUseCase:
 
         assert result.user_id == user.id
         assert result.role_id == role_id
+        assert result.permissions[0].feature_slug == "user-accounts"
         role_repo.replace_active_assignments.assert_awaited_once()
         token_repo.stage_revoke_all_for_user.assert_awaited_once_with(user.id)
         db.commit.assert_awaited_once()
+
+    async def test_get_user_account_detail_attaches_role_permissions(self):
+        detail = AdminUserAccountDetail(
+            user_id=uuid.uuid4(),
+            name="Jane Doe",
+            email="jane@example.com",
+            status=UserStatus.ACTIVE,
+            role_id=uuid.uuid4(),
+            role_name="system_administrator",
+        )
+        user_repo = MagicMock()
+        user_repo.get_admin_user_account_detail = AsyncMock(return_value=detail)
+        role_repo = MagicMock()
+        role_repo.get_role_permissions = AsyncMock(
+            return_value=[
+                RolePermissionSummary(
+                    feature_slug="user-accounts",
+                    feature_name="User Accounts",
+                    action=RoleAction.READ,
+                    effect=GrantEffect.ALLOW,
+                )
+            ]
+        )
+
+        use_case = make_use_case(user_repo=user_repo, role_repo=role_repo)
+
+        result = await use_case.get_user_account_detail(detail.user_id)
+
+        assert result.role_permissions[0].feature_name == "User Accounts"
 
     async def test_change_role_raises_conflict_when_same_single_role(self):
         user = make_user()
@@ -154,6 +228,7 @@ class TestAdminUserAccountUseCase:
                 is_system=False,
             )
         )
+        role_repo.get_role_permissions = AsyncMock(return_value=[])
         role_repo.get_active_assignments_for_user = AsyncMock(
             return_value=[
                 UserRoleEntity(
