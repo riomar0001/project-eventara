@@ -3,7 +3,7 @@
 import type { FormEvent } from 'react';
 import { format } from 'date-fns';
 import { CalendarIcon, Check, Loader2, RefreshCcw, ShieldPlus, ShieldX } from 'lucide-react';
-import { formatDateTime, humanizeRoleName, humanizeValue } from '@/components/admin/admin-user-management-ui';
+import { formatDateTime, humanizeRoleName, humanizeValue } from '@/components/admin/user-management/user-management-ui';
 import { FieldHint } from '@/components/shared/field-hint';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { SPECIAL_PERMISSION_ACTIONS, SPECIAL_PERMISSION_EFFECTS } from '../../../constants/user-managment';
+import { SPECIAL_PERMISSION_ACTIONS, SPECIAL_PERMISSION_EFFECTS } from '../../../../constants/user-managment';
 import type {
   AdminUserAccountSummaryResponse as AdminUserAccountSummary,
   GrantEffect,

@@ -21,6 +21,7 @@ class RolePermissionSummary:
     feature_name: str
     action: RoleAction
     effect: GrantEffect
+    feature_id: uuid.UUID | None = None
 
 
 @dataclass

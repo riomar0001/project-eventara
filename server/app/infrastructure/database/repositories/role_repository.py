@@ -1,8 +1,9 @@
 import uuid
 from datetime import UTC, datetime
+from typing import cast as typing_cast
 
 from pydantic import AwareDatetime
-from sqlalchemy import delete, or_, select, update
+from sqlalchemy import CursorResult, delete, func, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application.dto.admin_user_account_dto import RolePermissionSummary
@@ -62,6 +63,68 @@ class RoleRepository:
         result = await self.db.execute(select(Role.id).where(Role.id == role_id))
         return result.scalar_one_or_none() is not None
 
+    async def get_feature_by_id(self, feature_id: uuid.UUID, for_update: bool = False) -> FeatureEntity | None:
+        query = select(Feature).where(Feature.id == feature_id)
+        if for_update:
+            query = query.with_for_update()
+        result = await self.db.execute(query)
+        orm = result.scalar_one_or_none()
+        return self._to_domain_feature(orm) if orm else None
+
+    async def get_feature_by_slug(self, slug: str) -> FeatureEntity | None:
+        result = await self.db.execute(select(Feature).where(Feature.slug == slug))
+        orm = result.scalar_one_or_none()
+        return self._to_domain_feature(orm) if orm else None
+
+    async def get_features_by_ids(self, feature_ids: list[uuid.UUID], for_update: bool = False) -> list[FeatureEntity]:
+        if not feature_ids:
+            return []
+        query = select(Feature).where(Feature.id.in_(feature_ids))
+        if for_update:
+            query = query.with_for_update()
+        result = await self.db.execute(query)
+        return [self._to_domain_feature(orm) for orm in result.scalars().all()]
+
+    async def list_all_features(self) -> list[FeatureEntity]:
+        result = await self.db.execute(select(Feature).order_by(Feature.name.asc()))
+        return [self._to_domain_feature(orm) for orm in result.scalars().all()]
+
+    async def create_feature_definition(
+        self,
+        slug: str,
+        name: str,
+        description: str | None,
+        is_enabled: bool,
+    ) -> FeatureEntity:
+        orm = Feature(slug=slug, name=name, description=description, is_enabled=is_enabled)
+        self.db.add(orm)
+        await self.db.flush()
+        return self._to_domain_feature(orm)
+
+    async def update_feature_definition(
+        self,
+        feature_id: uuid.UUID,
+        slug: str,
+        name: str,
+        description: str | None,
+        is_enabled: bool,
+    ) -> FeatureEntity | None:
+        await self.db.execute(
+            update(Feature).where(Feature.id == feature_id).values(slug=slug, name=name, description=description, is_enabled=is_enabled)
+        )
+        await self.db.flush()
+        return await self.get_feature_by_id(feature_id)
+
+    async def get_feature_dependency_counts(self, feature_id: uuid.UUID) -> tuple[int, int]:
+        role_permission_count = await self.db.scalar(select(func.count(RolePermission.id)).where(RolePermission.feature_id == feature_id))
+        user_grant_count = await self.db.scalar(select(func.count(UserGrant.id)).where(UserGrant.feature_id == feature_id))
+        return int(role_permission_count or 0), int(user_grant_count or 0)
+
+    async def delete_feature_definition(self, feature_id: uuid.UUID) -> bool:
+        result = typing_cast(CursorResult, await self.db.execute(delete(Feature).where(Feature.id == feature_id)))
+        await self.db.flush()
+        return result.rowcount > 0
+
     async def lock_user(self, user_id: uuid.UUID) -> bool:
         """Acquire a pessimistic lock on the target user row for role replacement flows.
 
@@ -71,9 +134,17 @@ class RoleRepository:
         result = await self.db.execute(select(User.id).where(User.id == user_id).with_for_update())
         return result.scalar_one_or_none() is not None
 
-    async def get_role_by_id(self, role_id: uuid.UUID) -> RoleEntity | None:
+    async def get_role_by_id(self, role_id: uuid.UUID, for_update: bool = False) -> RoleEntity | None:
         """Return a single role definition by ID."""
-        result = await self.db.execute(select(Role).where(Role.id == role_id))
+        query = select(Role).where(Role.id == role_id)
+        if for_update:
+            query = query.with_for_update()
+        result = await self.db.execute(query)
+        orm = result.scalar_one_or_none()
+        return self._to_domain_role_record(orm) if orm else None
+
+    async def get_role_by_name(self, name: str) -> RoleEntity | None:
+        result = await self.db.execute(select(Role).where(Role.name == name))
         orm = result.scalar_one_or_none()
         return self._to_domain_role_record(orm) if orm else None
 
@@ -82,25 +153,49 @@ class RoleRepository:
         result = await self.db.execute(select(Role).order_by(Role.name.asc()))
         return [self._to_domain_role_record(orm) for orm in result.scalars().all()]
 
+    async def create_role_definition(
+        self,
+        name: str,
+        description: str | None,
+        is_default: bool,
+        is_system: bool,
+    ) -> RoleEntity:
+        orm = Role(name=name, description=description, is_default=is_default, is_system=is_system)
+        self.db.add(orm)
+        await self.db.flush()
+        return self._to_domain_role_record(orm)
+
+    async def update_role_definition(
+        self,
+        role_id: uuid.UUID,
+        name: str,
+        description: str | None,
+        is_default: bool,
+        is_system: bool,
+    ) -> RoleEntity | None:
+        await self.db.execute(
+            update(Role).where(Role.id == role_id).values(name=name, description=description, is_default=is_default, is_system=is_system)
+        )
+        await self.db.flush()
+        return await self.get_role_by_id(role_id)
+
     async def get_role_permissions(self, role_id: uuid.UUID) -> list[RolePermissionSummary]:
         """Return the enabled permissions attached to one role definition."""
         result = await self.db.execute(
-            select(RolePermission.role_id, Feature.slug, Feature.name, RolePermission.action, RolePermission.effect)
+            select(RolePermission.role_id, Feature.id, Feature.slug, Feature.name, RolePermission.action, RolePermission.effect)
             .join(Feature, RolePermission.feature_id == Feature.id)
-            .where(
-                RolePermission.role_id == role_id,
-                Feature.is_enabled.is_(True),
-            )
+            .where(RolePermission.role_id == role_id)
             .order_by(Feature.slug.asc(), RolePermission.action.asc())
         )
         return [
             RolePermissionSummary(
+                feature_id=feature_id,
                 feature_slug=feature_slug,
                 feature_name=feature_name,
                 action=RoleAction(action),
                 effect=GrantEffect(effect),
             )
-            for _, feature_slug, feature_name, action, effect in result.all()
+            for _, feature_id, feature_slug, feature_name, action, effect in result.all()
         ]
 
     async def list_role_permissions(self, role_ids: list[uuid.UUID]) -> dict[uuid.UUID, list[RolePermissionSummary]]:
@@ -109,19 +204,17 @@ class RoleRepository:
             return {}
 
         result = await self.db.execute(
-            select(RolePermission.role_id, Feature.slug, Feature.name, RolePermission.action, RolePermission.effect)
+            select(RolePermission.role_id, Feature.id, Feature.slug, Feature.name, RolePermission.action, RolePermission.effect)
             .join(Feature, RolePermission.feature_id == Feature.id)
-            .where(
-                RolePermission.role_id.in_(role_ids),
-                Feature.is_enabled.is_(True),
-            )
+            .where(RolePermission.role_id.in_(role_ids))
             .order_by(RolePermission.role_id.asc(), Feature.slug.asc(), RolePermission.action.asc())
         )
         permissions_by_role: dict[uuid.UUID, list[RolePermissionSummary]] = {role_id: [] for role_id in role_ids}
 
-        for role_id, feature_slug, feature_name, action, effect in result.all():
+        for role_id, feature_id, feature_slug, feature_name, action, effect in result.all():
             permissions_by_role.setdefault(role_id, []).append(
                 RolePermissionSummary(
+                    feature_id=feature_id,
                     feature_slug=feature_slug,
                     feature_name=feature_name,
                     action=RoleAction(action),
@@ -130,6 +223,37 @@ class RoleRepository:
             )
 
         return permissions_by_role
+
+    async def replace_role_permissions(
+        self,
+        role_id: uuid.UUID,
+        permissions: list[tuple[uuid.UUID, RoleAction, GrantEffect]],
+    ) -> list[RolePermissionSummary]:
+        await self.db.execute(delete(RolePermission).where(RolePermission.role_id == role_id))
+        if permissions:
+            self.db.add_all(
+                [
+                    RolePermission(
+                        role_id=role_id,
+                        feature_id=feature_id,
+                        action=action,
+                        effect=effect,
+                    )
+                    for feature_id, action, effect in permissions
+                ]
+            )
+        await self.db.flush()
+        return await self.get_role_permissions(role_id)
+
+    async def get_role_dependency_counts(self, role_id: uuid.UUID) -> tuple[int, int]:
+        user_assignment_count = await self.db.scalar(select(func.count(UserRole.id)).where(UserRole.role_id == role_id))
+        user_grant_count = await self.db.scalar(select(func.count(UserGrant.id)).where(UserGrant.role_id == role_id))
+        return int(user_assignment_count or 0), int(user_grant_count or 0)
+
+    async def delete_role_definition(self, role_id: uuid.UUID) -> bool:
+        result = typing_cast(CursorResult, await self.db.execute(delete(Role).where(Role.id == role_id)))
+        await self.db.flush()
+        return result.rowcount > 0
 
     async def feature_exists(self, feature_id: uuid.UUID) -> bool:
         result = await self.db.execute(select(Feature.id).where(Feature.id == feature_id))
@@ -204,7 +328,7 @@ class RoleRepository:
         return self._to_domain_role(orm) if orm else None
 
     async def delete_assignment(self, assignment_id: uuid.UUID) -> bool:
-        result = await self.db.execute(delete(UserRole).where(UserRole.id == assignment_id))
+        result = typing_cast(CursorResult, await self.db.execute(delete(UserRole).where(UserRole.id == assignment_id)))
         await self.db.flush()
         return result.rowcount > 0
 
@@ -308,7 +432,7 @@ class RoleRepository:
         return self._to_domain_grant(orm) if orm else None
 
     async def delete_grant(self, grant_id: uuid.UUID) -> bool:
-        result = await self.db.execute(delete(UserGrant).where(UserGrant.id == grant_id))
+        result = typing_cast(CursorResult, await self.db.execute(delete(UserGrant).where(UserGrant.id == grant_id)))
         await self.db.flush()
         return result.rowcount > 0
 

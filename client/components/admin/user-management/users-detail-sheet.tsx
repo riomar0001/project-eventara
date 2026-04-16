@@ -1,7 +1,14 @@
 'use client';
 
 import { RefreshCcw, ShieldX } from 'lucide-react';
-import { formatDateTime, getInitials, humanizeRoleName, humanizeValue, RolePermissionList, UserStatusBadge } from '@/components/admin/admin-user-management-ui';
+import {
+  formatDateTime,
+  getInitials,
+  humanizeRoleName,
+  humanizeValue,
+  RolePermissionList,
+  UserStatusBadge
+} from '@/components/admin/user-management/user-management-ui';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';

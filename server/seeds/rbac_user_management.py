@@ -76,6 +76,18 @@ FEATURES: list[dict] = [
         "description": "Manage account-level lifecycle operations such as administrative deletion scheduling.",
         "is_enabled": True,
     },
+    {
+        "slug": "features",
+        "name": "Features",
+        "description": "Manage RBAC feature definitions used by roles and user grants.",
+        "is_enabled": True,
+    },
+    {
+        "slug": "roles",
+        "name": "Roles",
+        "description": "Manage RBAC role definitions and their feature permission matrix.",
+        "is_enabled": True,
+    },
 ]
 
 ROLES: list[dict] = [
@@ -124,6 +136,8 @@ ROLE_PERMISSIONS: dict[str, dict[str, list[RoleAction]]] = {
         "venues": [RoleAction.READ],
         "user-roles": [RoleAction.READ],
         "user-grants": [RoleAction.READ],
+        "features": [RoleAction.READ],
+        "roles": [RoleAction.READ],
         "queues": [RoleAction.READ],
         "audit-logs": [RoleAction.READ],
     },
@@ -132,6 +146,8 @@ ROLE_PERMISSIONS: dict[str, dict[str, list[RoleAction]]] = {
         "user-accounts": [RoleAction.READ, RoleAction.UPDATE, RoleAction.DELETE],
         "user-roles": ALL_ACTIONS,
         "user-grants": ALL_ACTIONS,
+        "features": ALL_ACTIONS,
+        "roles": ALL_ACTIONS,
         "queues": [RoleAction.READ, RoleAction.DELETE],
         "audit-logs": [RoleAction.READ],
     },

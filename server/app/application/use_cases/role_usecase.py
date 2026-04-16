@@ -1,5 +1,6 @@
 import uuid
 
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application.dto.role_dto import (
@@ -13,13 +14,26 @@ from app.application.dto.role_dto import (
     UpdateAssignmentInput,
     UpdateAssignmentOutput,
 )
+from app.application.dto.role_management_dto import (
+    CreateRoleInput,
+    ListRolesOutput,
+    ManagedRoleDetail,
+    RoleOutput,
+    RolePermissionInput,
+    UpdateRoleInput,
+)
 from app.application.interfaces.role_interface import IRoleRepository
+from app.domain.entities.authorization_entities import GrantEffect, RoleAction
+from app.domain.entities.authorization_entities import Role as RoleEntity
 from app.domain.entities.authorization_entities import UserRole as UserRoleEntity
 from app.domain.exceptions.role_exceptions import (
     DuplicateUserGrantError,
     FeatureNotFoundError,
+    ProtectedRoleDeletionError,
     RoleAlreadyAssignedError,
+    RoleAlreadyExistsError,
     RoleAssignmentNotFoundError,
+    RoleInUseError,
     RoleNotFoundError,
     UserGrantNotFoundError,
 )
@@ -252,3 +266,168 @@ class UserRoleUseCase:
         if not deleted:
             raise UserGrantNotFoundError()
         await self.db.commit()
+
+
+class RoleManagementUseCase:
+    """Application services for RBAC role definition management.
+
+    This module manages role records and the role-to-feature permission matrix
+    stored in ``role_permissions``.
+
+    Concurrency strategy:
+        Update and delete flows acquire ``SELECT ... FOR UPDATE`` locks on the
+        target role row before validating dependent state. PostgreSQL
+        foreign-key inserts take ``KEY SHARE`` locks on referenced parent rows,
+        so the role lock serializes concurrent assignment, grant, and
+        permission-attachment attempts while a management transaction is
+        evaluating whether a rename or delete is safe.
+
+        Create and update flows also lock every referenced feature row before
+        replacing ``role_permissions`` so a feature cannot be deleted between
+        validation and write.
+
+        Uniqueness of ``roles.name`` is enforced by the database. Integrity
+        errors are mapped into domain-specific exceptions so concurrent duplicate
+        creates or renames fail predictably.
+    """
+
+    protected_role_name = "system_administrator"
+
+    def __init__(self, repo: IRoleRepository, db: AsyncSession) -> None:
+        self.repo = repo
+        self.db = db
+
+    async def list_roles(self) -> ListRolesOutput:
+        """Return all RBAC roles together with their resolved feature permissions."""
+        roles = await self.repo.list_roles()
+        permissions_by_role = await self.repo.list_role_permissions([role.id for role in roles])
+        return ListRolesOutput(
+            roles=[
+                ManagedRoleDetail(
+                    id=role.id,
+                    name=role.name,
+                    description=role.description,
+                    is_default=role.is_default,
+                    is_system=role.is_system,
+                    permissions=permissions_by_role.get(role.id, []),
+                )
+                for role in roles
+            ]
+        )
+
+    async def get_role(self, role_id: uuid.UUID) -> RoleOutput:
+        """Return one RBAC role together with its feature permission matrix."""
+        role = await self.repo.get_role_by_id(role_id)
+        if role is None:
+            raise RoleNotFoundError(str(role_id))
+        return RoleOutput(
+            role=ManagedRoleDetail(
+                id=role.id,
+                name=role.name,
+                description=role.description,
+                is_default=role.is_default,
+                is_system=role.is_system,
+                permissions=await self.repo.get_role_permissions(role_id),
+            )
+        )
+
+    async def create_role(self, data: CreateRoleInput) -> RoleOutput:
+        """Create a role definition and atomically attach its feature permissions."""
+        try:
+            flattened_permissions = self._flatten_permissions(data.permissions)
+            await self._ensure_features_exist(flattened_permissions)
+            role = await self.repo.create_role_definition(
+                name=data.name,
+                description=data.description,
+                is_default=data.is_default,
+                is_system=data.is_system,
+            )
+            await self.repo.replace_role_permissions(role.id, flattened_permissions)
+            await self.db.commit()
+            return await self.get_role(role.id)
+        except IntegrityError as exc:
+            await self.db.rollback()
+            raise RoleAlreadyExistsError(data.name) from exc
+        except Exception:
+            await self.db.rollback()
+            raise
+
+    async def update_role(self, data: UpdateRoleInput) -> RoleOutput:
+        """Update a role definition and replace its permission matrix atomically."""
+        try:
+            existing = await self.repo.get_role_by_id(data.role_id, for_update=True)
+            if existing is None:
+                raise RoleNotFoundError(str(data.role_id))
+
+            if existing.name != data.name:
+                user_assignment_count, user_grant_count = await self.repo.get_role_dependency_counts(data.role_id)
+                if user_assignment_count or user_grant_count:
+                    raise RoleInUseError("Role name cannot change while user assignments or grants depend on it.")
+
+            flattened_permissions = self._flatten_permissions(data.permissions)
+            await self._ensure_features_exist(flattened_permissions)
+
+            role = await self.repo.update_role_definition(
+                role_id=data.role_id,
+                name=data.name,
+                description=data.description,
+                is_default=data.is_default,
+                is_system=data.is_system,
+            )
+            if role is None:
+                raise RoleNotFoundError(str(data.role_id))
+
+            await self.repo.replace_role_permissions(data.role_id, flattened_permissions)
+            await self.db.commit()
+            return await self.get_role(data.role_id)
+        except IntegrityError as exc:
+            await self.db.rollback()
+            raise RoleAlreadyExistsError(data.name) from exc
+        except Exception:
+            await self.db.rollback()
+            raise
+
+    async def delete_role(self, role_id: uuid.UUID) -> None:
+        """Delete a role only when no user assignments or grants still depend on it."""
+        try:
+            role = await self.repo.get_role_by_id(role_id, for_update=True)
+            if role is None:
+                raise RoleNotFoundError(str(role_id))
+
+            self._ensure_role_can_be_deleted(role)
+
+            user_assignment_count, user_grant_count = await self.repo.get_role_dependency_counts(role_id)
+            if user_assignment_count or user_grant_count:
+                raise RoleInUseError("Role cannot be deleted while user assignments or grants still reference it.")
+
+            deleted = await self.repo.delete_role_definition(role_id)
+            if not deleted:
+                raise RoleNotFoundError(str(role_id))
+            await self.db.commit()
+        except Exception:
+            await self.db.rollback()
+            raise
+
+    def _ensure_role_can_be_deleted(self, role: RoleEntity) -> None:
+        """Reject deletion of protected built-in roles that anchor platform administration."""
+        if role.is_system and role.name == self.protected_role_name:
+            raise ProtectedRoleDeletionError()
+
+    async def _ensure_features_exist(self, permissions: list[tuple[uuid.UUID, RoleAction, GrantEffect]]) -> None:
+        """Lock and validate every feature referenced by a role permission payload."""
+        feature_ids = sorted({feature_id for feature_id, _, _ in permissions}, key=str)
+        if not feature_ids:
+            return
+
+        features = await self.repo.get_features_by_ids(feature_ids, for_update=True)
+        features_by_id = {feature.id for feature in features}
+
+        for feature_id in feature_ids:
+            if feature_id not in features_by_id:
+                raise FeatureNotFoundError(str(feature_id))
+
+    @staticmethod
+    def _flatten_permissions(permissions: list[RolePermissionInput]) -> list[tuple[uuid.UUID, RoleAction, GrantEffect]]:
+        """Normalize nested permission payloads into unique role-permission rows."""
+        flattened = {(permission.feature_id, action, permission.effect) for permission in permissions for action in permission.actions}
+        return sorted(flattened, key=lambda value: (str(value[0]), value[1].value, value[2].value))

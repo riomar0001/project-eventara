@@ -60,13 +60,12 @@ class VenueRepository:
         await self.db.refresh(orm_venue)
         return DomainVenue.model_validate(orm_venue)
 
-    async def delete(self, venue_id: uuid.UUID) -> None:
+    async def delete(self, venue_id: uuid.UUID) -> DomainVenue:
         orm_venue = await self.db.get(Venue, venue_id)
         if not orm_venue:
             raise ValueError(f"Venue with ID {venue_id} not found")
         await self.db.delete(orm_venue)
         await self.db.commit()
-        await self.db.refresh(orm_venue)
         return DomainVenue.model_validate(orm_venue)
 
     async def get_by_id(self, venue_id: uuid.UUID) -> DomainVenue | None:

@@ -8,20 +8,40 @@ from app.application.dto.role_dto import (
     CreateGrantsInput,
     UpdateAssignmentInput,
 )
-from app.application.use_cases.role_usecase import UserRoleUseCase
+from app.application.dto.role_management_dto import (
+    CreateRoleInput,
+    RolePermissionInput,
+    UpdateRoleInput,
+)
+from app.application.use_cases.role_usecase import RoleManagementUseCase, UserRoleUseCase
 from app.controller.dependencies import get_role_use_case, require_permission
+from app.controller.dependencies.use_cases_depends import get_role_management_use_case
 from app.controller.docs.role_docs import (
     ASSIGN_ROLE_VALIDATION_ERROR,
     ASSIGNMENT_NOT_FOUND,
     CREATE_GRANTS_VALIDATION_ERROR,
     DUPLICATE_GRANT,
-    FEATURE_NOT_FOUND,
     FORBIDDEN,
     GRANT_NOT_FOUND,
     ROLE_ALREADY_ASSIGNED,
     ROLE_NOT_FOUND,
     UNAUTHORIZED,
     USER_NOT_FOUND,
+)
+from app.controller.docs.role_management_docs import (
+    FEATURE_NOT_FOUND,
+    ROLE_CONFLICT,
+    ROLE_IN_USE,
+    ROLE_PROTECTED,
+    VALIDATION_ERROR,
+)
+from app.controller.schemas.role_management_schema import (
+    RoleCreateRequest,
+    RoleListResponse,
+    RolePermissionRecordResponse,
+    RoleRecordResponse,
+    RoleResponse,
+    RoleUpdateRequest,
 )
 from app.controller.schemas.role_schema import (
     AssignRoleRequest,
@@ -39,22 +59,222 @@ from app.domain.entities.authorization_entities import RoleAction
 from app.domain.exceptions.role_exceptions import (
     DuplicateUserGrantError,
     FeatureNotFoundError,
+    ProtectedRoleDeletionError,
     RoleAlreadyAssignedError,
+    RoleAlreadyExistsError,
     RoleAssignmentNotFoundError,
+    RoleInUseError,
     RoleNotFoundError,
     UserGrantNotFoundError,
 )
 from app.domain.exceptions.user_exceptions import UserNotFoundError
 
+role_management_router = APIRouter(prefix="/roles", tags=["RBAC Roles"])
 role_router = APIRouter(prefix="/user-roles", tags=["User Role Management"])
 grant_router = APIRouter(prefix="/user-grants", tags=["User Grant Management"])
 
 
-def _as_aware_utc(value: datetime | None) -> datetime | None:
+def _as_aware_utc(value: datetime) -> datetime:
     """Normalize naive datetimes from the persistence layer into UTC-aware values."""
+    return value.replace(tzinfo=UTC) if value.tzinfo is None else value.astimezone(UTC)
+
+
+def _as_optional_aware_utc(value: datetime | None) -> datetime | None:
+    """Normalize nullable datetimes from the persistence layer into UTC-aware values."""
     if value is None:
         return None
-    return value.replace(tzinfo=UTC) if value.tzinfo is None else value.astimezone(UTC)
+    return _as_aware_utc(value)
+
+
+def _to_role_response(record) -> RoleRecordResponse:
+    return RoleRecordResponse(
+        id=record.id,
+        name=record.name,
+        description=record.description,
+        is_default=record.is_default,
+        is_system=record.is_system,
+        permissions=[
+            RolePermissionRecordResponse(
+                feature_id=permission.feature_id,
+                feature_slug=permission.feature_slug,
+                feature_name=permission.feature_name,
+                action=permission.action,
+                effect=permission.effect,
+            )
+            for permission in record.permissions
+        ],
+    )
+
+
+@role_management_router.get(
+    "",
+    response_model=RoleListResponse,
+    status_code=status.HTTP_200_OK,
+    responses={**UNAUTHORIZED, **FORBIDDEN},
+    summary="List RBAC roles",
+    description="Return every role definition together with its attached feature permissions.",
+)
+async def list_roles(
+    _: uuid.UUID = Depends(require_permission("roles", RoleAction.READ)),
+    use_case: RoleManagementUseCase = Depends(get_role_management_use_case),
+) -> RoleListResponse:
+    """Return all RBAC role definitions and their resolved permissions.
+
+    # Error mapping
+    - **401 Unauthorized** — missing, expired, or invalid Bearer token.
+    - **403 Forbidden** — caller lacks ``read`` permission on ``roles``.
+    """
+    result = await use_case.list_roles()
+    return RoleListResponse(data=[_to_role_response(role) for role in result.roles])
+
+
+@role_management_router.get(
+    "/{role_id}",
+    response_model=RoleResponse,
+    status_code=status.HTTP_200_OK,
+    responses={**UNAUTHORIZED, **FORBIDDEN, **ROLE_NOT_FOUND},
+    summary="Get one RBAC role",
+    description="Return a single role definition together with its feature permissions.",
+)
+async def get_role(
+    role_id: uuid.UUID,
+    _: uuid.UUID = Depends(require_permission("roles", RoleAction.READ)),
+    use_case: RoleManagementUseCase = Depends(get_role_management_use_case),
+) -> RoleResponse:
+    """Return one RBAC role definition.
+
+    # Error mapping
+    - **401 Unauthorized** — missing, expired, or invalid Bearer token.
+    - **403 Forbidden** — caller lacks ``read`` permission on ``roles``.
+    - **404 Not Found** — no role exists for the supplied UUID.
+    """
+    try:
+        result = await use_case.get_role(role_id)
+    except RoleNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    return RoleResponse(data=_to_role_response(result.role), message="Role loaded successfully.")
+
+
+@role_management_router.post(
+    "",
+    response_model=RoleResponse,
+    status_code=status.HTTP_201_CREATED,
+    responses={**UNAUTHORIZED, **FORBIDDEN, **ROLE_CONFLICT, **FEATURE_NOT_FOUND, **VALIDATION_ERROR},
+    summary="Create an RBAC role",
+    description="Create a role definition and atomically attach one or more feature permission sets to it.",
+)
+async def create_role(
+    body: RoleCreateRequest,
+    _: uuid.UUID = Depends(require_permission("roles", RoleAction.CREATE)),
+    use_case: RoleManagementUseCase = Depends(get_role_management_use_case),
+) -> RoleResponse:
+    """Create a new RBAC role definition.
+
+    # Error mapping
+    - **401 Unauthorized** — missing, expired, or invalid Bearer token.
+    - **403 Forbidden** — caller lacks ``create`` permission on ``roles``.
+    - **404 Not Found** — one or more referenced features do not exist.
+    - **409 Conflict** — another role already uses the requested name.
+    - **422 Unprocessable Entity** — the request body failed schema validation.
+    """
+    try:
+        result = await use_case.create_role(
+            CreateRoleInput(
+                name=body.name,
+                description=body.description,
+                is_default=body.is_default,
+                is_system=body.is_system,
+                permissions=[
+                    RolePermissionInput(
+                        feature_id=permission.feature_id,
+                        actions=permission.actions,
+                        effect=permission.effect,
+                    )
+                    for permission in body.permissions
+                ],
+            )
+        )
+    except FeatureNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except RoleAlreadyExistsError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+    return RoleResponse(data=_to_role_response(result.role), message="Role created successfully.")
+
+
+@role_management_router.patch(
+    "/{role_id}",
+    response_model=RoleResponse,
+    status_code=status.HTTP_200_OK,
+    responses={**UNAUTHORIZED, **FORBIDDEN, **ROLE_NOT_FOUND, **ROLE_CONFLICT, **ROLE_IN_USE, **FEATURE_NOT_FOUND, **VALIDATION_ERROR},
+    summary="Update an RBAC role",
+    description="Update a role definition and replace its feature permission matrix in one serialized transaction.",
+)
+async def update_role(
+    role_id: uuid.UUID,
+    body: RoleUpdateRequest,
+    _: uuid.UUID = Depends(require_permission("roles", RoleAction.UPDATE)),
+    use_case: RoleManagementUseCase = Depends(get_role_management_use_case),
+) -> RoleResponse:
+    """Update a role definition and permission matrix safely.
+
+    # Error mapping
+    - **401 Unauthorized** — missing, expired, or invalid Bearer token.
+    - **403 Forbidden** — caller lacks ``update`` permission on ``roles``.
+    - **404 Not Found** — the role or one of its referenced features does not exist.
+    - **409 Conflict** — the requested name already exists or the rename would invalidate active dependencies.
+    - **422 Unprocessable Entity** — the path or request body is invalid.
+    """
+    try:
+        result = await use_case.update_role(
+            UpdateRoleInput(
+                role_id=role_id,
+                name=body.name,
+                description=body.description,
+                is_default=body.is_default,
+                is_system=body.is_system,
+                permissions=[
+                    RolePermissionInput(
+                        feature_id=permission.feature_id,
+                        actions=permission.actions,
+                        effect=permission.effect,
+                    )
+                    for permission in body.permissions
+                ],
+            )
+        )
+    except (FeatureNotFoundError, RoleNotFoundError) as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except (RoleAlreadyExistsError, RoleInUseError) as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+    return RoleResponse(data=_to_role_response(result.role), message="Role updated successfully.")
+
+
+@role_management_router.delete(
+    "/{role_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    responses={**UNAUTHORIZED, **FORBIDDEN, **ROLE_NOT_FOUND, **ROLE_IN_USE, **ROLE_PROTECTED},
+    summary="Delete an RBAC role",
+    description="Delete a role definition when no user assignments or user grants still reference it.",
+)
+async def delete_role(
+    role_id: uuid.UUID,
+    _: uuid.UUID = Depends(require_permission("roles", RoleAction.DELETE)),
+    use_case: RoleManagementUseCase = Depends(get_role_management_use_case),
+) -> None:
+    """Delete an unused RBAC role definition.
+
+    # Error mapping
+    - **401 Unauthorized** — missing, expired, or invalid Bearer token.
+    - **403 Forbidden** — caller lacks ``delete`` permission on ``roles``.
+    - **404 Not Found** — no role exists for the supplied UUID.
+    - **409 Conflict** — the role is protected or is still referenced by user assignments or grants.
+    """
+    try:
+        await use_case.delete_role(role_id)
+    except RoleNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except (ProtectedRoleDeletionError, RoleInUseError) as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
 
 
 @role_router.post(
@@ -113,7 +333,7 @@ async def assign_role(
         id=a.id,
         user_id=a.user_id,
         role_id=a.role_id,
-        expires_at=_as_aware_utc(a.expires_at),
+        expires_at=_as_optional_aware_utc(a.expires_at),
         assigned_by=a.assigned_by,
         assigned_at=_as_aware_utc(a.assigned_at),
     )
@@ -155,7 +375,7 @@ async def list_user_roles(
             id=a.id,
             user_id=a.user_id,
             role_id=a.role_id,
-            expires_at=_as_aware_utc(a.expires_at),
+            expires_at=_as_optional_aware_utc(a.expires_at),
             assigned_by=a.assigned_by,
             assigned_at=_as_aware_utc(a.assigned_at),
         )
@@ -199,7 +419,7 @@ async def get_assignment(
         id=assignment.id,
         user_id=assignment.user_id,
         role_id=assignment.role_id,
-        expires_at=_as_aware_utc(assignment.expires_at),
+        expires_at=_as_optional_aware_utc(assignment.expires_at),
         assigned_by=assignment.assigned_by,
         assigned_at=_as_aware_utc(assignment.assigned_at),
     )
@@ -251,7 +471,7 @@ async def update_assignment(
         id=a.id,
         user_id=a.user_id,
         role_id=a.role_id,
-        expires_at=_as_aware_utc(a.expires_at),
+        expires_at=_as_optional_aware_utc(a.expires_at),
         assigned_by=a.assigned_by,
         assigned_at=_as_aware_utc(a.assigned_at),
     )
@@ -363,8 +583,8 @@ async def create_grants(
                 action=g.action,
                 effect=g.effect,
                 reason=g.reason,
-                starts_at=_as_aware_utc(g.starts_at),
-                expires_at=_as_aware_utc(g.expires_at),
+                starts_at=_as_optional_aware_utc(g.starts_at),
+                expires_at=_as_optional_aware_utc(g.expires_at),
                 granted_by=g.granted_by,
             )
             for g in result.grants
@@ -449,8 +669,8 @@ async def list_user_grants(
             action=g.action,
             effect=g.effect,
             reason=g.reason,
-            starts_at=_as_aware_utc(g.starts_at),
-            expires_at=_as_aware_utc(g.expires_at),
+            starts_at=_as_optional_aware_utc(g.starts_at),
+            expires_at=_as_optional_aware_utc(g.expires_at),
             granted_by=g.granted_by,
         )
         for g in result.grants

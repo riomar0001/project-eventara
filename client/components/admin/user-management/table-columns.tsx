@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Eye, KeyRound, Mail, MoreHorizontal, ShieldCheck, ShieldPlus, Trash2 } from 'lucide-react';
 import type { ColumnDef } from '@tanstack/react-table';
-import { formatDateTime, getInitials, humanizeRoleName, isSoftDeleteDisabled, UserStatusBadge } from '@/components/admin/admin-user-management-ui';
+import { formatDateTime, getInitials, humanizeRoleName, isSoftDeleteDisabled, UserStatusBadge } from '@/components/admin/user-management/user-management-ui';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -103,7 +103,7 @@ export function useAdminTableColumns({
           <div className="space-y-1">
             <UserStatusBadge status={row.original.status} />
             {row.original.deletion_scheduled_for ? (
-              <p className="text-muted-foreground text-xs">Scheduled {formatDateTime(row.original.deletion_scheduled_for)}</p>
+              <p className="text-muted-foreground text-xs">Scheduled Deletion on {formatDateTime(row.original.deletion_scheduled_for)}</p>
             ) : null}
           </div>
         ),
