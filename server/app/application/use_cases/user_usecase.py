@@ -1,12 +1,26 @@
+import uuid
+from datetime import UTC, datetime, timedelta
+
+from arq.connections import ArqRedis
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.application.dto.user_dto import ChangePasswordInput, GetLoginHistoryInput, GetLoginHistoryOutput, UserOnboardingInput, UserOnboardingOutput
+from app.application.dto.user_dto import (
+    ChangePasswordInput,
+    GetLoginHistoryInput,
+    GetLoginHistoryOutput,
+    RequestAccountDeletionInput,
+    RequestAccountDeletionOutput,
+    UserOnboardingInput,
+    UserOnboardingOutput,
+)
 from app.application.interfaces.user_interface import IUserRepository
 from app.core.security.hashing import hash_string, verify_hash
 from app.domain.entities.user_entity import UserProfile, UserStatus
 from app.domain.exceptions.auth_exceptions import InvalidCredentialsError
 from app.domain.exceptions.user_exceptions import (
+    AccountDeletionAlreadyScheduledError,
+    AccountDeletionGracePeriodExpiredError,
     AliasAlreadyTakenError,
     EmailNotVerifiedError,
     OnboardingAlreadyCompletedError,
@@ -195,6 +209,203 @@ class ChangePasswordUseCase:
 
         token_repo = RefreshTokenRepository(self.db)
         await token_repo.revoke_all_for_user(data.user_id)
+
+
+class DeleteAccountUseCase:
+    """Schedules account deletion and enqueues the deferred finalization job.
+
+    The HTTP request performs validation and persists the pending-deletion
+    window synchronously so the caller receives an immediate, durable result.
+    The irreversible transition is delegated to ARQ with a deferred job whose
+    payload includes the original request timestamp and deadline.  When the
+    worker later executes, it performs a compare-and-swap update against those
+    exact values so stale jobs created before a recovery login or reschedule
+    cannot finalize the wrong deletion request.
+
+    Concurrency strategy:
+        1. ``UserRepository.schedule_account_deletion`` uses a single
+           conditional ``UPDATE`` guarded by ``deletion_requested_at IS NULL``.
+           Concurrent self-service and administrator requests collapse to one
+           winner and one conflict response without row-level deadlocks.
+        2. The ARQ job is enqueued with a deterministic ``_job_id`` derived
+           from the user ID and request timestamp, which prevents duplicate
+           deferred jobs for the same scheduled request across retries.
+        3. ``UserRepository.finalize_account_deletion`` matches both the
+           original request timestamp and scheduled deadline before switching
+           the account to ``DELETED``.  If the user logs in during the grace
+           period and cancels the request, the deferred worker job naturally
+           becomes a no-op.
+    """
+
+    grace_period = timedelta(days=30)
+
+    def __init__(self, repo: IUserRepository, arq: ArqRedis) -> None:
+        self.repo = repo
+        self.arq = arq
+
+    @staticmethod
+    def _utcnow_naive() -> datetime:
+        return datetime.now(UTC).replace(tzinfo=None)
+
+    async def request_self_service_deletion(self, data: RequestAccountDeletionInput) -> RequestAccountDeletionOutput:
+        """Validate the caller's password and schedule their own account deletion.
+
+        Args:
+            data: The authenticated user's ID, their current plaintext password,
+                and an optional reason captured for auditability.
+
+        Returns:
+            A ``RequestAccountDeletionOutput`` describing the newly scheduled
+            deletion window.
+
+        Raises:
+            UserNotFoundError: No account exists for the authenticated user ID.
+            UserInactiveError: The account is already inactive or deleted.
+            InvalidCredentialsError: The supplied current password is incorrect.
+            AccountDeletionAlreadyScheduledError: A deletion window is already pending.
+            AccountDeletionGracePeriodExpiredError: The grace period has already elapsed.
+        """
+        user = await self.repo.get_by_id(data.target_user_id)
+        if not user:
+            raise UserNotFoundError()
+
+        if user.status in (UserStatus.INACTIVE, UserStatus.DELETED):
+            raise UserInactiveError()
+
+        if user.deletion_scheduled_for:
+            if user.deletion_scheduled_for <= self._utcnow_naive():
+                raise AccountDeletionGracePeriodExpiredError()
+            raise AccountDeletionAlreadyScheduledError()
+
+        if not data.current_password or not verify_hash(data.current_password, user.password):
+            raise InvalidCredentialsError()
+
+        return await self._schedule_deletion(data)
+
+    async def request_admin_deletion(self, data: RequestAccountDeletionInput) -> RequestAccountDeletionOutput:
+        """Schedule account deletion for a target user on behalf of an administrator.
+
+        Args:
+            data: The target user ID, the administrator's user ID, and an
+                optional free-form reason describing why the deletion was requested.
+
+        Returns:
+            A ``RequestAccountDeletionOutput`` describing the newly scheduled
+            deletion window.
+
+        Raises:
+            UserNotFoundError: No target account exists for the supplied ID.
+            UserInactiveError: The target account is already inactive or deleted.
+            AccountDeletionAlreadyScheduledError: A deletion window is already pending.
+            AccountDeletionGracePeriodExpiredError: The grace period has already elapsed.
+        """
+        user = await self.repo.get_by_id(data.target_user_id)
+        if not user:
+            raise UserNotFoundError()
+
+        if user.status in (UserStatus.INACTIVE, UserStatus.DELETED):
+            raise UserInactiveError()
+
+        if user.deletion_scheduled_for:
+            if user.deletion_scheduled_for <= self._utcnow_naive():
+                raise AccountDeletionGracePeriodExpiredError()
+            raise AccountDeletionAlreadyScheduledError()
+
+        return await self._schedule_deletion(data)
+
+    async def _schedule_deletion(self, data: RequestAccountDeletionInput) -> RequestAccountDeletionOutput:
+        """Persist a pending deletion window and enqueue its deferred finalization job.
+
+        Args:
+            data: Validated deletion-request input from either the self-service
+                or administrator entry point.
+
+        Returns:
+            A ``RequestAccountDeletionOutput`` with the durable deletion window.
+
+        Raises:
+            AccountDeletionAlreadyScheduledError: Another request won the race
+                and scheduled deletion for this account first.
+            AccountDeletionGracePeriodExpiredError: The account passed its grace
+                deadline between validation and persistence.
+        """
+        requested_at = self._utcnow_naive()
+        scheduled_for = requested_at + self.grace_period
+        scheduled_user = await self.repo.schedule_account_deletion(
+            data.target_user_id,
+            requested_by=data.requested_by,
+            requested_at=requested_at,
+            scheduled_for=scheduled_for,
+            reason=data.reason,
+        )
+        if not scheduled_user:
+            latest = await self.repo.get_by_id(data.target_user_id)
+            if not latest:
+                raise UserNotFoundError()
+            if latest.status in (UserStatus.INACTIVE, UserStatus.DELETED):
+                raise UserInactiveError()
+            if latest and latest.deletion_scheduled_for:
+                if latest.deletion_scheduled_for <= self._utcnow_naive():
+                    raise AccountDeletionGracePeriodExpiredError()
+                raise AccountDeletionAlreadyScheduledError()
+            raise AccountDeletionAlreadyScheduledError()
+
+        await self.arq.enqueue_job(
+            "finalize_account_deletion_job",
+            str(scheduled_user.id),
+            scheduled_user.deletion_requested_at.isoformat(),
+            scheduled_user.deletion_scheduled_for.isoformat(),
+            _job_id=f"account-deletion:{scheduled_user.id}:{scheduled_user.deletion_requested_at.isoformat()}",
+            _defer_until=scheduled_user.deletion_scheduled_for.replace(tzinfo=UTC),
+            _expires=timedelta(days=2),
+        )
+
+        return RequestAccountDeletionOutput(
+            user_id=scheduled_user.id,
+            deletion_requested_at=scheduled_user.deletion_requested_at,
+            deletion_scheduled_for=scheduled_user.deletion_scheduled_for,
+            requested_by=scheduled_user.deletion_requested_by,
+        )
+
+
+class FinalizeAccountDeletionUseCase:
+    """Executes the deferred end of the account-deletion lifecycle.
+
+    This use case runs inside the ARQ worker after the 30-day grace period has
+    elapsed.  It receives the exact request timestamp and deadline that were
+    captured at scheduling time, then relies on the repository's conditional
+    compare-and-swap update to ensure that only the still-pending deletion
+    window is finalized.
+    """
+
+    def __init__(self, repo: IUserRepository) -> None:
+        self.repo = repo
+
+    async def execute(
+        self,
+        *,
+        user_id: str,
+        requested_at: str,
+        scheduled_for: str,
+    ) -> bool:
+        """Finalize a scheduled account deletion if the original request is still valid.
+
+        Args:
+            user_id: The serialized UUID of the user to finalize.
+            requested_at: The original UTC timestamp captured when the deletion
+                request was scheduled.
+            scheduled_for: The UTC deadline at which the deletion should become final.
+
+        Returns:
+            ``True`` when the account was transitioned to ``DELETED`` and
+            ``False`` when the request had already been canceled, replaced, or
+            finalized by another worker.
+        """
+        return await self.repo.finalize_account_deletion(
+            user_id=uuid.UUID(user_id),
+            expected_requested_at=datetime.fromisoformat(requested_at),
+            expected_scheduled_for=datetime.fromisoformat(scheduled_for),
+        )
 
 
 class GetLoginHistoryUseCase:

@@ -46,3 +46,13 @@ class AliasAlreadyTakenError(Exception):
 class SamePasswordError(Exception):
     def __init__(self) -> None:
         super().__init__("New password must be different from the current password")
+
+
+class AccountDeletionAlreadyScheduledError(Exception):
+    def __init__(self) -> None:
+        super().__init__("Account deletion is already scheduled")
+
+
+class AccountDeletionGracePeriodExpiredError(Exception):
+    def __init__(self) -> None:
+        super().__init__("Account deletion grace period has expired and the account is awaiting final deletion")

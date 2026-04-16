@@ -14,6 +14,8 @@ def make_user(
     *,
     status: UserStatus = UserStatus.ACTIVE,
     onboarding_completed: bool = False,
+    deletion_requested_at: datetime | None = None,
+    deletion_scheduled_for: datetime | None = None,
 ) -> User:
     return User(
         id=uuid.uuid4(),
@@ -21,6 +23,8 @@ def make_user(
         password="hashed_password",
         status=status,
         onboarding_completed=onboarding_completed,
+        deletion_requested_at=deletion_requested_at,
+        deletion_scheduled_for=deletion_scheduled_for,
     )
 
 

@@ -68,6 +68,12 @@ FEATURES: list[dict] = [
         "description": "View system audit log entries.",
         "is_enabled": True,
     },
+    {
+        "slug": "user-accounts",
+        "name": "User Accounts",
+        "description": "Manage account-level lifecycle operations such as administrative deletion scheduling.",
+        "is_enabled": True,
+    },
 ]
 
 ROLES: list[dict] = [
@@ -121,6 +127,7 @@ ROLE_PERMISSIONS: dict[str, dict[str, list[RoleAction]]] = {
     },
     "system_administrator": {
         "venues": ALL_ACTIONS,
+        "user-accounts": [RoleAction.DELETE],
         "user-roles": ALL_ACTIONS,
         "user-grants": ALL_ACTIONS,
         "queues": [RoleAction.READ, RoleAction.DELETE],

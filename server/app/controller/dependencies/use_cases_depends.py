@@ -14,7 +14,13 @@ from app.application.use_cases.queue_usecase import (
     RetryDeadJobUseCase,
 )
 from app.application.use_cases.role_usecase import UserRoleUseCase
-from app.application.use_cases.user_usecase import ChangePasswordUseCase, CheckAliasUseCase, GetLoginHistoryUseCase, OnboardingUseCase
+from app.application.use_cases.user_usecase import (
+    ChangePasswordUseCase,
+    CheckAliasUseCase,
+    DeleteAccountUseCase,
+    GetLoginHistoryUseCase,
+    OnboardingUseCase,
+)
 from app.application.use_cases.venue_usecase import VenueUseCase
 from app.infrastructure.cache.repositories.otp_repository import OTPRepository
 from app.infrastructure.cache.repositories.password_reset_repository import PasswordResetRepository
@@ -67,6 +73,16 @@ def get_change_password_use_case(db: AsyncSession = Depends(get_db)) -> ChangePa
     within the same request lifecycle.
     """
     return ChangePasswordUseCase(UserRepository(db), db)
+
+
+def get_delete_account_use_case(request: Request, db: AsyncSession = Depends(get_db)) -> DeleteAccountUseCase:
+    """Construct a ``DeleteAccountUseCase`` backed by the request ARQ pool.
+
+    The use case persists the pending deletion synchronously, then enqueues the
+    deferred finalization job through ARQ so the 30-day grace period is
+    enforced by the message queue rather than by in-request timers.
+    """
+    return DeleteAccountUseCase(UserRepository(db), request.app.state.arq)
 
 
 def get_login_history_use_case(db: AsyncSession = Depends(get_db)) -> GetLoginHistoryUseCase:

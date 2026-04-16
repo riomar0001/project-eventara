@@ -65,3 +65,23 @@ class IUserRepository(Protocol):
     async def get_login_history(self, user_id: uuid.UUID, limit: int = 10) -> list[UserLoginHistory]: ...
 
     async def update_password(self, user_id: uuid.UUID, password_hash: str) -> bool: ...
+
+    async def schedule_account_deletion(
+        self,
+        user_id: uuid.UUID,
+        *,
+        requested_by: uuid.UUID,
+        requested_at: datetime,
+        scheduled_for: datetime,
+        reason: str | None = None,
+    ) -> User | None: ...
+
+    async def cancel_pending_account_deletion(self, user_id: uuid.UUID) -> bool: ...
+
+    async def finalize_account_deletion(
+        self,
+        user_id: uuid.UUID,
+        *,
+        expected_requested_at: datetime,
+        expected_scheduled_for: datetime,
+    ) -> bool: ...

@@ -31,6 +31,8 @@ from app.domain.exceptions.role_exceptions import (
     UserGrantNotFoundError,
 )
 from app.domain.exceptions.user_exceptions import (
+    AccountDeletionAlreadyScheduledError,
+    AccountDeletionGracePeriodExpiredError,
     AliasAlreadyTakenError,
     EmailAlreadyTakenError,
     EmailAlreadyVerifiedError,
@@ -79,6 +81,8 @@ __all__ = [
     "OnboardingAlreadyCompletedError",
     "SamePasswordError",
     "AliasAlreadyTakenError",
+    "AccountDeletionAlreadyScheduledError",
+    "AccountDeletionGracePeriodExpiredError",
     "InvalidTokenError",
     "TokenExpiredError",
     "InvalidCredentialsError",

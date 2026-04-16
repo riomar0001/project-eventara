@@ -35,6 +35,10 @@ class User(Base):
     accepted_privacy_policy: Mapped[bool] = mapped_column(default=False)
     accepted_privacy_policy_at: Mapped[datetime | None] = mapped_column(DateTime)
     status: Mapped[str] = mapped_column(Enum(UserStatus, name="user_status"), nullable=False, default="active")
+    deletion_requested_at: Mapped[datetime | None] = mapped_column(DateTime)
+    deletion_scheduled_for: Mapped[datetime | None] = mapped_column(DateTime)
+    deletion_requested_by: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    deletion_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime)
 
     # Relationships
@@ -57,6 +61,7 @@ class User(Base):
             postgresql_where=text("deleted_at IS NULL"),
         ),
         Index("idx_users_status", "status"),
+        Index("idx_users_deletion_scheduled_for", "deletion_scheduled_for"),
     )
 
 

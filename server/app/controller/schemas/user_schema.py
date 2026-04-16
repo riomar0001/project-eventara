@@ -59,6 +59,25 @@ class ChangePasswordResponse(BaseModel):
     message: str = "Password changed successfully. All active sessions have been invalidated."
 
 
+class DeleteAccountRequest(BaseModel):
+    current_password: str = Field(min_length=1)
+    reason: str | None = Field(default=None, min_length=1, max_length=500)
+
+
+class AdminDeleteAccountRequest(BaseModel):
+    reason: str = Field(min_length=1, max_length=500)
+
+
+class DeleteAccountResponse(BaseModel):
+    success: bool = True
+    user_id: uuid.UUID
+    deletion_requested_at: datetime
+    deletion_scheduled_for: datetime
+    requested_by: uuid.UUID
+    grace_period_days: int = 30
+    message: str = "Account deletion scheduled. The account will be permanently deleted after the 30-day grace period unless the user logs in before then."
+
+
 class LoginHistoryEntryResponse(BaseModel):
     id: uuid.UUID
     ip_address: str | None = None

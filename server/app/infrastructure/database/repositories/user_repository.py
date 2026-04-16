@@ -75,6 +75,10 @@ class UserRepository:
             id=orm_user.id,
             email=orm_user.email,
             password=orm_user.password,
+            deletion_requested_at=orm_user.deletion_requested_at,
+            deletion_scheduled_for=orm_user.deletion_scheduled_for,
+            deletion_requested_by=orm_user.deletion_requested_by,
+            deletion_reason=orm_user.deletion_reason,
             status=orm_user.status if isinstance(orm_user.status, UserStatus) else UserStatus(orm_user.status),
         )
 
@@ -92,6 +96,11 @@ class UserRepository:
             password=orm_user.password,
             onboarding_completed=orm_user.onboarding_completed,
             onboarding_completed_at=orm_user.onboarding_completed_at,
+            deletion_requested_at=orm_user.deletion_requested_at,
+            deletion_scheduled_for=orm_user.deletion_scheduled_for,
+            deletion_requested_by=orm_user.deletion_requested_by,
+            deletion_reason=orm_user.deletion_reason,
+            deleted_at=orm_user.deleted_at,
             status=orm_user.status if isinstance(orm_user.status, UserStatus) else UserStatus(orm_user.status),
         )
 
@@ -206,6 +215,10 @@ class UserRepository:
             id=orm_user.id,
             email=orm_user.email,
             password=orm_user.password,
+            deletion_requested_at=orm_user.deletion_requested_at,
+            deletion_scheduled_for=orm_user.deletion_scheduled_for,
+            deletion_requested_by=orm_user.deletion_requested_by,
+            deletion_reason=orm_user.deletion_reason,
             status=orm_user.status if isinstance(orm_user.status, UserStatus) else UserStatus(orm_user.status),
         )
 
@@ -433,3 +446,136 @@ class UserRepository:
         await self.db.execute(update(UserSecurity).where(UserSecurity.user_id == user_id).values(password_change_at=now))
         await self.db.commit()
         return True
+
+    async def schedule_account_deletion(
+        self,
+        user_id: uuid.UUID,
+        *,
+        requested_by: uuid.UUID,
+        requested_at: datetime,
+        scheduled_for: datetime,
+        reason: str | None = None,
+    ) -> DomainUser | None:
+        """Atomically schedule a user's account for deletion after the grace period.
+
+        A single conditional ``UPDATE`` is used so concurrent self-service and
+        administrator requests cannot both schedule separate deletion windows.
+        Only rows with no existing pending deletion are eligible; every other
+        state produces ``None`` and lets the caller map the latest persisted
+        state to a domain-specific error.
+        """
+        normalized_requested_at = self._as_naive_utc(requested_at)
+        normalized_scheduled_for = self._as_naive_utc(scheduled_for)
+        result = await self.db.execute(
+            update(User)
+            .where(
+                User.id == user_id,
+                User.deletion_requested_at.is_(None),
+                User.status == UserStatus.ACTIVE,
+            )
+            .values(
+                deletion_requested_at=normalized_requested_at,
+                deletion_scheduled_for=normalized_scheduled_for,
+                deletion_requested_by=requested_by,
+                deletion_reason=reason,
+            )
+            .returning(
+                User.id,
+                User.email,
+                User.password,
+                User.onboarding_completed,
+                User.onboarding_completed_at,
+                User.status,
+                User.deletion_requested_at,
+                User.deletion_scheduled_for,
+                User.deletion_requested_by,
+                User.deletion_reason,
+                User.deleted_at,
+            )
+        )
+        row = result.one_or_none()
+        await self.db.commit()
+        if row is None:
+            return None
+
+        return DomainUser(
+            id=row.id,
+            email=row.email,
+            password=row.password,
+            onboarding_completed=row.onboarding_completed,
+            onboarding_completed_at=row.onboarding_completed_at,
+            status=row.status if isinstance(row.status, UserStatus) else UserStatus(row.status),
+            deletion_requested_at=row.deletion_requested_at,
+            deletion_scheduled_for=row.deletion_scheduled_for,
+            deletion_requested_by=row.deletion_requested_by,
+            deletion_reason=row.deletion_reason,
+            deleted_at=row.deleted_at,
+        )
+
+    async def cancel_pending_account_deletion(self, user_id: uuid.UUID) -> bool:
+        """Atomically cancel an in-flight account deletion request.
+
+        Successful authentication is the only supported recovery path during the
+        grace period.  The conditional ``UPDATE`` guarantees that concurrent
+        login completions collapse into a single state transition while stale
+        worker jobs later observe the cleared columns and no-op safely.
+        """
+        now = self._utcnow_naive()
+        result = await self.db.execute(
+            update(User)
+            .where(
+                User.id == user_id,
+                User.deletion_requested_at.is_not(None),
+                User.deletion_scheduled_for.is_not(None),
+                User.deletion_scheduled_for > now,
+                User.status == UserStatus.ACTIVE,
+            )
+            .values(
+                deletion_requested_at=None,
+                deletion_scheduled_for=None,
+                deletion_requested_by=None,
+                deletion_reason=None,
+            )
+        )
+        await self.db.commit()
+        return cast(CursorResult, result).rowcount > 0
+
+    async def finalize_account_deletion(
+        self,
+        user_id: uuid.UUID,
+        *,
+        expected_requested_at: datetime,
+        expected_scheduled_for: datetime,
+    ) -> bool:
+        """Finalize a previously scheduled account deletion exactly once.
+
+        The ARQ worker passes back the request timestamp and scheduled deadline
+        that were captured when the deletion was first enqueued.  Matching both
+        values turns the finalization step into a compare-and-swap update: if
+        the user logs in and clears the pending deletion, or an administrator
+        later reschedules a different window, the worker's conditional update
+        matches zero rows and becomes a safe no-op.
+        """
+        now = self._utcnow_naive()
+        normalized_requested_at = self._as_naive_utc(expected_requested_at)
+        normalized_scheduled_for = self._as_naive_utc(expected_scheduled_for)
+        result = await self.db.execute(
+            update(User)
+            .where(
+                User.id == user_id,
+                User.status == UserStatus.ACTIVE,
+                User.deletion_requested_at == normalized_requested_at,
+                User.deletion_scheduled_for == normalized_scheduled_for,
+                User.deletion_scheduled_for <= now,
+            )
+            .values(
+                status=UserStatus.DELETED,
+                deleted_at=now,
+                deletion_requested_at=None,
+                deletion_scheduled_for=None,
+                deletion_requested_by=None,
+                deletion_reason=None,
+            )
+        )
+        await self.db.commit()
+        return cast(CursorResult, result).rowcount > 0
