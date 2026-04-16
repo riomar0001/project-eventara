@@ -2,6 +2,7 @@ import re
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application.dto.user_dto import ChangePasswordInput, GetLoginHistoryInput, UserOnboardingInput
 from app.application.use_cases.user_usecase import ChangePasswordUseCase, CheckAliasUseCase, GetLoginHistoryUseCase, OnboardingUseCase
@@ -37,6 +38,8 @@ from app.domain.exceptions.user_exceptions import (
     UserInactiveError,
     UserNotFoundError,
 )
+from app.infrastructure.database.repositories.user_repository import UserRepository
+from app.infrastructure.database.session import get_db
 
 _ALIAS_RE = re.compile(r"^[a-z0-9_]+$")
 
@@ -105,6 +108,7 @@ async def user_onboarding(
     body: UserOnboardingRequest,
     user_id: uuid.UUID = Depends(get_current_user_id),
     use_case: OnboardingUseCase = Depends(get_onboarding_use_case),
+    db: AsyncSession = Depends(get_db),
 ) -> UserOnboardingResponse:
     """Complete the onboarding profile for the currently authenticated user.
 
@@ -144,10 +148,12 @@ async def user_onboarding(
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error))
 
     p = result.profile
+    role_name = await UserRepository(db).get_active_role_name_by_user_id(p.user_id)
     new_token = create_access_token(
         user_id=p.user_id,
         email=p.email or "",
         done_onboarding=True,
+        role=role_name,
         user=p,
     )
     return UserOnboardingResponse(

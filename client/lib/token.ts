@@ -4,7 +4,7 @@ export interface AuthUser {
   id: string;
   email: string;
   doneOnboarding: boolean;
-  roleId?: string;
+  role?: string;
   firstName?: string;
   lastName?: string;
   alias?: string;
@@ -19,7 +19,7 @@ export interface AuthUser {
 interface RawTokenPayload extends JwtPayload {
   email?: string;
   done_onboarding?: boolean;
-  role_id?: string;
+  role?: string;
   first_name?: string;
   last_name?: string;
   alias?: string;
@@ -50,7 +50,7 @@ export function decodeTokenUser(token: string): AuthUser | null {
       id: p.sub,
       email: p.email,
       doneOnboarding: Boolean(p.done_onboarding),
-      roleId: p.role_id ?? undefined,
+      role: p.role ?? undefined,
       firstName: p.first_name ?? undefined,
       lastName: p.last_name ?? undefined,
       alias: p.alias ?? undefined,

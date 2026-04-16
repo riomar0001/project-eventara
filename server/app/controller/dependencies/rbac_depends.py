@@ -123,7 +123,7 @@ def require_permission(
             return user_id  # ALLOW grant — skip role check
 
         # Fall back to role-level permission.
-        role_name = payload.role_id
+        role_name = payload.role
         if not role_name:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,

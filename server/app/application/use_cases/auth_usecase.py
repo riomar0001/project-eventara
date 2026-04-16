@@ -139,6 +139,7 @@ class AuthUseCase:
     async def _issue_access_token_for_user(self, user: User) -> str:
         """Create an access token enriched with profile claims when available."""
         profile = None
+        role_name = await self.repo.get_active_role_name_by_user_id(user.id)
         if user.onboarding_completed:
             profile = await self.repo.get_profile_by_user_id(user.id)
 
@@ -146,6 +147,7 @@ class AuthUseCase:
             user.id,
             user.email,
             user.onboarding_completed,
+            role=role_name,
             user=profile,
         )
 

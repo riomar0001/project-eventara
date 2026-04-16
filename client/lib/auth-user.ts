@@ -47,9 +47,9 @@ export function getProfileHandle(user: AuthUser | null | undefined) {
   return `@${user.email.split('@')[0]}`;
 }
 
-export function getRoleLabel(roleId: string | undefined) {
-  if (!roleId) return 'Member';
-  return roleId.replace(/[_-]+/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase());
+export function getRoleLabel(role: string | undefined) {
+  if (!role) return 'Member';
+  return role.replace(/[_-]+/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
 export function humanizeProfileValue(value: string | undefined) {

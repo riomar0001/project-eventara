@@ -33,7 +33,7 @@ class TokenPayload(BaseModel):
     sub: str
     email: str | None = None
     done_onboarding: bool = False
-    role_id: str | None = None
+    role: str | None = None
     alias: str | None = None
     first_name: str | None = None
     last_name: str | None = None

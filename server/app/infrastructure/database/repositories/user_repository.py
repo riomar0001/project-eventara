@@ -95,6 +95,20 @@ class UserRepository:
             status=orm_user.status if isinstance(orm_user.status, UserStatus) else UserStatus(orm_user.status),
         )
 
+    async def get_active_role_name_by_user_id(self, user_id: uuid.UUID) -> str | None:
+        """Return the most recently assigned active role name for the user."""
+        now = self._utcnow_naive()
+        result = await self.db.execute(
+            select(Role.name)
+            .join(UserRole, UserRole.role_id == Role.id)
+            .where(
+                UserRole.user_id == user_id,
+                (UserRole.expires_at.is_(None) | (UserRole.expires_at > now)),
+            )
+            .order_by(UserRole.assigned_at.desc())
+        )
+        return result.scalars().first()
+
     async def get_security_by_user_id(self, user_id: uuid.UUID) -> DomainUserSecurity | None:
         """Return the security record for a user (verification status, failed attempts, lock),
         or None."""
