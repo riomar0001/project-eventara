@@ -2,13 +2,13 @@
 
 import { FormEvent, useState } from 'react';
 import { z } from 'zod';
-import { AdminUserDetailSheet } from '@/components/admin/admin-user-detail-sheet';
-import { AdminUserManagementTable } from '@/components/admin/admin-user-management-table';
-import { AdminDeleteDialog } from '@/components/admin/dialogs/delete-dialog';
-import { AdminEmailDialog } from '@/components/admin/dialogs/email-dialog';
-import { AdminPasswordResetDialog } from '@/components/admin/dialogs/password-reset-dialog';
-import { AdminRoleDialog } from '@/components/admin/dialogs/role-dialog';
-import { AdminSpecialPermissionDialog } from '@/components/admin/dialogs/special-permission-dialog';
+import { AdminUserDetailSheet } from '@/components/admin/user-management/users-detail-sheet';
+import { AdminUserManagementTable } from '@/components/admin/user-management/user-management-table';
+import { AdminDeleteDialog } from '@/components/admin/user-management/dialogs/delete-dialog';
+import { AdminEmailDialog } from '@/components/admin/user-management/dialogs/email-dialog';
+import { AdminPasswordResetDialog } from '@/components/admin/user-management/dialogs/password-reset-dialog';
+import { AdminRoleDialog } from '@/components/admin/user-management/dialogs/role-dialog';
+import { AdminSpecialPermissionDialog } from '@/components/admin/user-management/dialogs/special-permission-dialog';
 import { useAdminUserAccountActions } from '@/hooks/use-admin-user-account-actions';
 import { useAdminUserAccountDetail } from '@/hooks/use-admin-user-account-detail';
 import { useAdminUserAccounts } from '@/hooks/use-admin-user-accounts';

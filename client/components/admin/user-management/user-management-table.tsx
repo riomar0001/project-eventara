@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronLeft, ChevronRight, Loader2, RefreshCcw, Search, ShieldX, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Loader2, RefreshCcw, Search, ShieldX, Users, X } from 'lucide-react';
 import { flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
 import { Button } from '@/components/ui/button';
 import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,8 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { STATUS_OPTIONS } from '../../constants/user-managment';
-import { humanizeRoleName } from './admin-user-management-ui';
+import { STATUS_OPTIONS } from '../../../constants/user-managment';
+import { humanizeRoleName } from './user-management-ui';
 import { useAdminTableColumns, type AdminTableColumnMeta } from './table-columns';
 import type {
   AdminUserAccountPaginationResponse as AdminUserAccountPagination,
@@ -68,6 +68,7 @@ export function AdminUserManagementTable({
   const currentUserId = useAuthStore((state) => state.user?.id ?? null);
   const activeUsersCount = users.filter((user) => user.status !== 'deleted').length;
   const deletedUsersCount = users.filter((user) => user.status === 'deleted').length;
+  const roleAssignedCount = users.filter((user) => Boolean(user.role_id)).length;
   const showingFrom = users.length === 0 ? 0 : (pagination.page - 1) * pagination.page_size + 1;
   const showingTo = users.length === 0 ? 0 : showingFrom + users.length - 1;
   const pageLabel = pagination.total_pages === 0 ? 0 : pagination.page;
@@ -93,44 +94,51 @@ export function AdminUserManagementTable({
 
   return (
     <div className="space-y-6">
-      <Card className="border-0 bg-linear-to-br from-white via-white to-neutral-50 shadow-none ring-1 ring-neutral-200">
-        <CardHeader className="border-b">
-          <div className="flex items-start gap-4">
-            <div className="w-full space-y-1">
-              <div className="flex flex-row justify-between">
-                <CardTitle className="text-xl">User Management</CardTitle>
-                <CardAction>
-                  <Button variant="outline" size="sm" onClick={onRefresh} disabled={isLoading}>
-                    {isLoading ? <Loader2 className="size-4 animate-spin" /> : <RefreshCcw className="size-4" />}
-                    Refresh
-                  </Button>
-                </CardAction>
+      <Card className="border-0 bg-linear-to-br from-sky-50 via-white to-white shadow-none ring-1 ring-sky-200/80">
+        <CardHeader className="border-b border-neutral-200/80 pb-5">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="flex size-11 items-center justify-center rounded-2xl border border-neutral-200 bg-white shadow-sm">
+                  <Users className="size-5 text-neutral-900" />
+                </div>
+                <div className="space-y-1">
+                  <CardTitle className="text-2xl">User Management</CardTitle>
+                  <CardDescription className="max-w-2xl text-sm leading-6">
+                    Review accounts, update access, inspect profiles, and handle lifecycle actions from one practical admin surface.
+                  </CardDescription>
+                </div>
               </div>
-
-              <CardDescription>
-                Review user accounts, inspect complete profiles, manage access, send password reset links, and handle soft deletion within the 30-day grace
-                period.
-              </CardDescription>
             </div>
+
+            <CardAction>
+              <Button variant="outline" size="sm" onClick={onRefresh} disabled={isLoading}>
+                {isLoading ? <Loader2 className="size-4 animate-spin" /> : <RefreshCcw className="size-4" />}
+                Refresh
+              </Button>
+            </CardAction>
           </div>
         </CardHeader>
         <CardContent className="grid gap-4 pt-6 md:grid-cols-3">
-          <div className="rounded-2xl border border-neutral-200 bg-white p-4">
-            <p className="text-muted-foreground text-xs font-medium tracking-[0.18em] uppercase">Total User</p>
-            <p className="mt-3 text-2xl font-semibold md:text-3xl">{pagination.total_count}</p>
+          <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-xs">
+            <p className="text-muted-foreground text-xs font-medium tracking-[0.18em] uppercase">Total Users</p>
+            <p className="mt-3 text-3xl font-semibold tracking-tight">{pagination.total_count}</p>
+            <p className="mt-2 text-sm text-neutral-500">Accounts currently visible in the admin index.</p>
           </div>
-          <div className="rounded-2xl border border-neutral-200 bg-white p-4">
-            <p className="text-muted-foreground text-xs font-medium tracking-[0.18em] uppercase">Active User</p>
-            <p className="mt-3 text-2xl font-semibold md:text-3xl">{activeUsersCount}</p>
+          <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-xs">
+            <p className="text-muted-foreground text-xs font-medium tracking-[0.18em] uppercase">Active Users</p>
+            <p className="mt-3 text-3xl font-semibold tracking-tight">{activeUsersCount}</p>
+            <p className="mt-2 text-sm text-neutral-500">Accounts that are not scheduled as deleted.</p>
           </div>
-          <div className="rounded-2xl border border-neutral-200 bg-white p-4">
-            <p className="text-muted-foreground text-xs font-medium tracking-[0.18em] uppercase">Delete User</p>
-            <p className="mt-3 text-2xl font-semibold md:text-3xl">{deletedUsersCount}</p>
+          <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-xs">
+            <p className="text-muted-foreground text-xs font-medium tracking-[0.18em] uppercase">Assigned Roles</p>
+            <p className="mt-3 text-3xl font-semibold tracking-tight">{roleAssignedCount}</p>
+            <p className="mt-2 text-sm text-neutral-500">{deletedUsersCount} deleted accounts in the current page snapshot.</p>
           </div>
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="border-0 bg-white shadow-none ring-1 ring-neutral-200">
         <CardHeader className="flex flex-col items-start gap-4 border-b data-[slot=card-action]:grid-cols-none data-[slot=card-action]:has-[:data-[slot=card-action]]:grid-cols-none sm:flex-row sm:items-center sm:justify-between">
           <div className="w-full">
             <CardTitle>All users</CardTitle>
@@ -201,7 +209,7 @@ export function AdminUserManagementTable({
             </div>
           ) : (
             <Table className="min-w-245 text-sm">
-              <TableHeader className="bg-muted/40 border-y">
+              <TableHeader className="bg-neutral-50/80 border-y">
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id}>
                     {headerGroup.headers.map((header) => {
@@ -275,7 +283,7 @@ export function AdminUserManagementTable({
                   </TableRow>
                 ) : (
                   table.getRowModel().rows.map((row, index) => (
-                    <TableRow key={row.id} className={cn('hover:bg-neutral-50', index % 2 !== 0 && 'bg-neutral-50/40')}>
+                    <TableRow key={row.id} className={cn('hover:bg-neutral-50/80', index % 2 !== 0 && 'bg-neutral-50/35')}>
                       {row.getVisibleCells().map((cell) => {
                         const meta = cell.column.columnDef.meta as AdminTableColumnMeta | undefined;
 
