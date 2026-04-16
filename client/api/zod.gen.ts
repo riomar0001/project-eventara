@@ -262,6 +262,25 @@ export const zGender = z.enum(['male', 'female']);
 export const zGrantEffect = z.enum(['allow', 'deny']);
 
 /**
+ * GrantFeatureResponse
+ */
+export const zGrantFeatureResponse = z.object({
+    id: z.uuid(),
+    slug: z.string(),
+    name: z.string(),
+    description: z.string().nullish(),
+    is_enabled: z.boolean()
+});
+
+/**
+ * GrantFeatureListResponse
+ */
+export const zGrantFeatureListResponse = z.object({
+    success: z.boolean().optional().default(true),
+    data: z.array(zGrantFeatureResponse)
+});
+
+/**
  * ListDeadJobsResponse
  */
 export const zListDeadJobsResponse = z.object({
@@ -485,6 +504,7 @@ export const zCreateGrantsRequest = z.object({
     feature_id: z.uuid(),
     actions: z.array(zRoleAction).min(1),
     effect: zGrantEffect.optional().default('allow'),
+    starts_at: z.iso.datetime().nullish(),
     expires_at: z.iso.datetime().nullish(),
     reason: z.string().max(500).nullish()
 });
@@ -586,6 +606,7 @@ export const zUserGrantResponse = z.object({
     action: zRoleAction,
     effect: zGrantEffect,
     reason: z.string().nullable(),
+    starts_at: z.iso.datetime().nullable(),
     expires_at: z.iso.datetime().nullable(),
     granted_by: z.uuid().nullable()
 });
@@ -1074,6 +1095,11 @@ export const zCreateGrantsUserGrantsPostBody = zCreateGrantsRequest;
  * Successful Response
  */
 export const zCreateGrantsUserGrantsPostResponse = zCreateGrantsResponse;
+
+/**
+ * Successful Response
+ */
+export const zListGrantFeaturesUserGrantsFeaturesGetResponse = zGrantFeatureListResponse;
 
 export const zRevokeGrantUserGrantsGrantIdDeletePath = z.object({
     grant_id: z.uuid()

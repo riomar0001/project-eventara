@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronLeft, ChevronRight, Eye, KeyRound, Loader2, Mail, MoreHorizontal, RefreshCcw, ShieldCheck, ShieldX, Trash2, Users } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Eye, KeyRound, Loader2, Mail, MoreHorizontal, RefreshCcw, ShieldCheck, ShieldPlus, ShieldX, Trash2, Users } from 'lucide-react';
 import {
   formatDateTime,
   getInitials,
@@ -36,6 +36,7 @@ interface AdminUserManagementTableProps {
   onOpenEmailDialog: (user: AdminUserAccountSummary) => void;
   onOpenPasswordResetDialog: (user: AdminUserAccountSummary) => void;
   onOpenRoleDialog: (user: AdminUserAccountSummary) => void;
+  onOpenSpecialPermissionDialog: (user: AdminUserAccountSummary) => void;
   onPageChange: (page: number) => void;
   onRefresh: () => void;
   onSelectUser: (userId: string) => void;
@@ -51,6 +52,7 @@ export function AdminUserManagementTable({
   onOpenEmailDialog,
   onOpenPasswordResetDialog,
   onOpenRoleDialog,
+  onOpenSpecialPermissionDialog,
   onPageChange,
   onRefresh,
   onSelectUser,
@@ -196,6 +198,10 @@ export function AdminUserManagementTable({
                               <DropdownMenuItem onSelect={() => onOpenRoleDialog(user)}>
                                 <ShieldCheck className="size-4" />
                                 Change role
+                              </DropdownMenuItem>
+                              <DropdownMenuItem disabled={!user.role_id || user.status === 'deleted'} onSelect={() => onOpenSpecialPermissionDialog(user)}>
+                                <ShieldPlus className="size-4" />
+                                Special permission
                               </DropdownMenuItem>
                               <DropdownMenuItem onSelect={() => onOpenEmailDialog(user)}>
                                 <Mail className="size-4" />

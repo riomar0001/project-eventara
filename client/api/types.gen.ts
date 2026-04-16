@@ -493,6 +493,10 @@ export type CreateGrantsRequest = {
     actions: Array<RoleAction>;
     effect?: GrantEffect;
     /**
+     * Starts At
+     */
+    starts_at?: string | null;
+    /**
      * Expires At
      */
     expires_at?: string | null;
@@ -791,6 +795,46 @@ export type GetAuditLogsResponse = {
  * GrantEffect
  */
 export type GrantEffect = 'allow' | 'deny';
+
+/**
+ * GrantFeatureListResponse
+ */
+export type GrantFeatureListResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Data
+     */
+    data: Array<GrantFeatureResponse>;
+};
+
+/**
+ * GrantFeatureResponse
+ */
+export type GrantFeatureResponse = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Slug
+     */
+    slug: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Is Enabled
+     */
+    is_enabled: boolean;
+};
 
 /**
  * HTTPValidationError
@@ -1399,6 +1443,10 @@ export type UserGrantResponse = {
      * Reason
      */
     reason: string | null;
+    /**
+     * Starts At
+     */
+    starts_at: string | null;
     /**
      * Expires At
      */
@@ -2917,6 +2965,35 @@ export type CreateGrantsUserGrantsPostResponses = {
 };
 
 export type CreateGrantsUserGrantsPostResponse = CreateGrantsUserGrantsPostResponses[keyof CreateGrantsUserGrantsPostResponses];
+
+export type ListGrantFeaturesUserGrantsFeaturesGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/user-grants/features';
+};
+
+export type ListGrantFeaturesUserGrantsFeaturesGetErrors = {
+    /**
+     * Missing or invalid Bearer token
+     */
+    401: ErrorResponse;
+    /**
+     * Insufficient permissions
+     */
+    403: ErrorResponse;
+};
+
+export type ListGrantFeaturesUserGrantsFeaturesGetError = ListGrantFeaturesUserGrantsFeaturesGetErrors[keyof ListGrantFeaturesUserGrantsFeaturesGetErrors];
+
+export type ListGrantFeaturesUserGrantsFeaturesGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: GrantFeatureListResponse;
+};
+
+export type ListGrantFeaturesUserGrantsFeaturesGetResponse = ListGrantFeaturesUserGrantsFeaturesGetResponses[keyof ListGrantFeaturesUserGrantsFeaturesGetResponses];
 
 export type RevokeGrantUserGrantsGrantIdDeleteData = {
     body?: never;

@@ -1,17 +1,33 @@
 'use client';
 
 import { type FormEvent } from 'react';
-import { CalendarClock, KeyRound, Loader2, Mail, RefreshCcw, ShieldCheck, Trash2 } from 'lucide-react';
-import { humanizeRoleName, RolePermissionList } from '@/components/admin/admin-user-management-ui';
+import { format } from 'date-fns';
+import { CalendarClock, CalendarIcon, Check, KeyRound, Loader2, Mail, RefreshCcw, ShieldCheck, ShieldPlus, Trash2 } from 'lucide-react';
+import { humanizeRoleName, humanizeValue, RolePermissionList } from '@/components/admin/admin-user-management-ui';
 import { FieldHint } from '@/components/shared/field-hint';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import type { AdminUserAccountSummaryResponse as AdminUserAccountSummary, AssignableRoleResponse as AssignableRole } from '@/api/types.gen';
+import type {
+  AdminUserAccountSummaryResponse as AdminUserAccountSummary,
+  AssignableRoleResponse as AssignableRole,
+  GrantEffect,
+  GrantFeatureResponse,
+  RoleAction
+} from '@/api/types.gen';
+import { cn } from '@/lib/utils';
+
+const SPECIAL_PERMISSION_ACTIONS: RoleAction[] = ['create', 'read', 'update', 'delete'];
+const SPECIAL_PERMISSION_EFFECTS: Array<{ label: string; value: GrantEffect }> = [
+  { label: 'Allow', value: 'allow' },
+  { label: 'Deny', value: 'deny' }
+];
 
 interface AdminUserAccountDialogsProps {
   deleteDialogUser: AdminUserAccountSummary | null;
@@ -20,12 +36,18 @@ interface AdminUserAccountDialogsProps {
   emailDialogUser: AdminUserAccountSummary | null;
   emailError?: string;
   emailValue: string;
+  effectiveFromDate?: Date;
+  effectiveToDate?: Date;
+  grantFeatures: GrantFeatureResponse[];
+  grantFeaturesError: string | null;
+  isLoadingGrantFeatures: boolean;
   isLoadingRoles: boolean;
   isSubmitting: boolean;
   onCloseDeleteDialog: () => void;
   onCloseEmailDialog: () => void;
   onClosePasswordResetDialog: () => void;
   onCloseRoleDialog: () => void;
+  onCloseSpecialPermissionDialog: () => void;
   onDeleteReasonChange: (value: string) => void;
   onDeleteSubmit: (event: FormEvent<HTMLFormElement>) => void;
   onEmailChange: (value: string) => void;
@@ -33,14 +55,26 @@ interface AdminUserAccountDialogsProps {
   onPasswordResetConfirm: () => void;
   onRoleChange: (value: string) => void;
   onRoleSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  onSpecialPermissionActionToggle: (value: RoleAction) => void;
+  onSpecialPermissionEffectChange: (value: GrantEffect) => void;
+  onSpecialPermissionFromDateChange: (value: Date | undefined) => void;
+  onSpecialPermissionFeatureChange: (value: string) => void;
+  onSpecialPermissionSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  onSpecialPermissionToDateChange: (value: Date | undefined) => void;
   passwordResetUser: AdminUserAccountSummary | null;
-  pendingAction: 'role' | 'email' | 'password-reset' | 'delete' | null;
+  pendingAction: 'role' | 'email' | 'password-reset' | 'delete' | 'special-permission' | null;
+  refreshGrantFeatures: () => void;
   refreshRoles: () => void;
   roleDialogUser: AdminUserAccountSummary | null;
   roleError?: string;
   roles: AssignableRole[];
   rolesError: string | null;
   selectedRoleId: string;
+  selectedFeatureId: string;
+  selectedGrantActions: RoleAction[];
+  selectedGrantEffect: GrantEffect;
+  specialPermissionDialogUser: AdminUserAccountSummary | null;
+  specialPermissionError?: string;
 }
 
 export function AdminUserAccountDialogs({
@@ -50,12 +84,18 @@ export function AdminUserAccountDialogs({
   emailDialogUser,
   emailError,
   emailValue,
+  effectiveFromDate,
+  effectiveToDate,
+  grantFeatures,
+  grantFeaturesError,
+  isLoadingGrantFeatures,
   isLoadingRoles,
   isSubmitting,
   onCloseDeleteDialog,
   onCloseEmailDialog,
   onClosePasswordResetDialog,
   onCloseRoleDialog,
+  onCloseSpecialPermissionDialog,
   onDeleteReasonChange,
   onDeleteSubmit,
   onEmailChange,
@@ -63,16 +103,29 @@ export function AdminUserAccountDialogs({
   onPasswordResetConfirm,
   onRoleChange,
   onRoleSubmit,
+  onSpecialPermissionActionToggle,
+  onSpecialPermissionEffectChange,
+  onSpecialPermissionFromDateChange,
+  onSpecialPermissionFeatureChange,
+  onSpecialPermissionSubmit,
+  onSpecialPermissionToDateChange,
   passwordResetUser,
   pendingAction,
+  refreshGrantFeatures,
   refreshRoles,
   roleDialogUser,
   roleError,
   roles,
   rolesError,
-  selectedRoleId
+  selectedRoleId,
+  selectedFeatureId,
+  selectedGrantActions,
+  selectedGrantEffect,
+  specialPermissionDialogUser,
+  specialPermissionError
 }: AdminUserAccountDialogsProps) {
   const selectedRole = roles.find((role) => role.id === selectedRoleId);
+  const selectedGrantFeature = grantFeatures.find((feature) => feature.id === selectedFeatureId);
   const selectedRoleFeatureCount = new Set((selectedRole?.permissions ?? []).map((permission) => permission.feature_slug)).size;
   const selectedRolePermissionCount = selectedRole?.permissions?.length ?? 0;
 
@@ -209,6 +262,179 @@ export function AdminUserAccountDialogs({
               </Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={Boolean(specialPermissionDialogUser)} onOpenChange={(open) => !open && onCloseSpecialPermissionDialog()}>
+        <DialogContent className="max-h-[85vh] overflow-hidden border-0 bg-white p-0 shadow-xl shadow-neutral-900/5 sm:max-w-lg">
+          <DialogHeader className="px-5 pt-5 pb-4">
+            <DialogTitle>Add special permission</DialogTitle>
+            <DialogDescription>Override the user&apos;s role for a specific feature within a defined active window.</DialogDescription>
+          </DialogHeader>
+
+          <ScrollArea className="max-h-[calc(85vh-5.75rem)]">
+            <form className="space-y-4 px-5 pb-5" onSubmit={onSpecialPermissionSubmit}>
+              <div className="rounded-2xl bg-neutral-50 px-4 py-3">
+                <div className="space-y-1">
+                  <p className="text-sm font-semibold text-neutral-950">{specialPermissionDialogUser?.name ?? 'Selected user'}</p>
+                  <p className="text-xs text-neutral-500">Current role: {humanizeRoleName(specialPermissionDialogUser?.role_name, 'No assigned role')}</p>
+                </div>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_11rem]">
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold tracking-[0.16em] text-neutral-500 uppercase" htmlFor="admin-special-permission-feature">
+                    Feature
+                  </label>
+                  <Select value={selectedFeatureId || undefined} onValueChange={onSpecialPermissionFeatureChange}>
+                    <SelectTrigger
+                      className="h-11 rounded-xl border-0 bg-neutral-100 shadow-none"
+                      id="admin-special-permission-feature"
+                      disabled={isLoadingGrantFeatures || isSubmitting}
+                    >
+                      <SelectValue placeholder={isLoadingGrantFeatures ? 'Loading features...' : 'Select a feature'} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {grantFeatures.map((feature) => (
+                        <SelectItem key={feature.id} value={feature.id}>
+                          {feature.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold tracking-[0.16em] text-neutral-500 uppercase" htmlFor="admin-special-permission-effect">
+                    Effect
+                  </label>
+                  <Select value={selectedGrantEffect} onValueChange={(value) => onSpecialPermissionEffectChange(value as GrantEffect)}>
+                    <SelectTrigger className="h-11 rounded-xl border-0 bg-neutral-100 shadow-none" id="admin-special-permission-effect" disabled={isSubmitting}>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SPECIAL_PERMISSION_EFFECTS.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold tracking-[0.16em] text-neutral-500 uppercase" htmlFor="admin-special-permission-effective-from">
+                    Effective from
+                  </label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        id="admin-special-permission-effective-from"
+                        disabled={isSubmitting}
+                        className="h-11 w-full justify-start rounded-xl border-0 bg-neutral-100 font-normal shadow-none"
+                      >
+                        <CalendarIcon className="size-4 text-neutral-500" />
+                        {effectiveFromDate ? <span>{format(effectiveFromDate, 'PPP')}</span> : <span>Pick a start date</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar mode="single" selected={effectiveFromDate} onSelect={onSpecialPermissionFromDateChange} defaultMonth={effectiveFromDate} />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold tracking-[0.16em] text-neutral-500 uppercase" htmlFor="admin-special-permission-effective-to">
+                    Effective to
+                  </label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        id="admin-special-permission-effective-to"
+                        disabled={isSubmitting}
+                        className="h-11 w-full justify-start rounded-xl border-0 bg-neutral-100 font-normal shadow-none"
+                      >
+                        <CalendarIcon className="size-4 text-neutral-500" />
+                        {effectiveToDate ? <span>{format(effectiveToDate, 'PPP')}</span> : <span>Pick an end date</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar mode="single" selected={effectiveToDate} onSelect={onSpecialPermissionToDateChange} defaultMonth={effectiveToDate ?? effectiveFromDate} />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-xs font-semibold tracking-[0.16em] text-neutral-500 uppercase">Actions</p>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {SPECIAL_PERMISSION_ACTIONS.map((action) => {
+                    const isSelected = selectedGrantActions.includes(action);
+
+                    return (
+                      <button
+                        key={action}
+                        type="button"
+                        onClick={() => onSpecialPermissionActionToggle(action)}
+                        disabled={isSubmitting}
+                        className={cn(
+                          'flex items-center justify-between rounded-2xl px-3 py-2.5 text-left text-sm transition-colors',
+                          isSelected ? 'bg-neutral-900 text-white' : 'bg-neutral-100 text-neutral-700'
+                        )}
+                      >
+                        <span>{humanizeValue(action)}</span>
+                        {isSelected ? <Check className="size-4" /> : null}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {selectedGrantFeature ? (
+                <div className="rounded-2xl bg-neutral-50 px-4 py-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="space-y-1">
+                      <p className="text-sm font-semibold text-neutral-950">{selectedGrantFeature.name}</p>
+                      <p className="text-xs text-neutral-500">{selectedGrantFeature.description?.trim() ? selectedGrantFeature.description : 'No feature description is available.'}</p>
+                    </div>
+                    <Badge variant="secondary" className="bg-white px-2 py-0.5 text-[10px] text-neutral-600 shadow-xs">
+                      {selectedGrantFeature.slug}
+                    </Badge>
+                  </div>
+                </div>
+              ) : null}
+
+              <FieldHint
+                error={specialPermissionError ?? grantFeaturesError ?? undefined}
+                hint={
+                  specialPermissionDialogUser?.role_id
+                    ? 'The override becomes active at the start date and ends automatically at the optional end date.'
+                    : 'Assign a system role first so this user has a base role for the override.'
+                }
+              />
+
+              {grantFeaturesError ? (
+                <Button type="button" variant="outline" size="sm" onClick={refreshGrantFeatures}>
+                  <RefreshCcw className="size-4" />
+                  Reload features
+                </Button>
+              ) : null}
+
+              <DialogFooter className="pt-1">
+                <Button type="button" variant="outline" onClick={onCloseSpecialPermissionDialog} disabled={isSubmitting}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={isSubmitting || isLoadingGrantFeatures || !specialPermissionDialogUser?.role_id}>
+                  {pendingAction === 'special-permission' ? <Loader2 className="size-4 animate-spin" /> : <ShieldPlus className="size-4" />}
+                  Save permission
+                </Button>
+              </DialogFooter>
+            </form>
+          </ScrollArea>
         </DialogContent>
       </Dialog>
 

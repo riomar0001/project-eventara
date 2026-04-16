@@ -2,17 +2,21 @@
 
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { AdminUserAccounts, User } from '@/api/sdk.gen';
+import { AdminUserAccounts, User, UserGrantManagement } from '@/api/sdk.gen';
 import type {
   AssignableRoleResponse as AssignableRole,
   ChangeUserEmailResponse,
   ChangeUserRoleResponse,
+  CreateGrantsResponse,
   DeleteAccountResponse as ScheduleAccountDeletionResponse,
+  GrantEffect,
+  GrantFeatureResponse,
+  RoleAction,
   SendUserPasswordResetResponse
 } from '@/api/types.gen';
 import { getAccessToken } from '@/store/auth-store';
 
-type PendingAction = 'role' | 'email' | 'password-reset' | 'delete' | null;
+type PendingAction = 'role' | 'email' | 'password-reset' | 'delete' | 'special-permission' | null;
 
 function extractErrorMessage(payload: unknown): string | undefined {
   if (!payload || typeof payload !== 'object') return undefined;
@@ -56,10 +60,14 @@ export function useAdminUserAccountActions() {
   const [roles, setRoles] = useState<AssignableRole[]>([]);
   const [rolesError, setRolesError] = useState<string | null>(null);
   const [isLoadingRoles, setIsLoadingRoles] = useState(true);
+  const [grantFeatures, setGrantFeatures] = useState<GrantFeatureResponse[]>([]);
+  const [grantFeaturesError, setGrantFeaturesError] = useState<string | null>(null);
+  const [isLoadingGrantFeatures, setIsLoadingGrantFeatures] = useState(true);
   const [pendingAction, setPendingAction] = useState<PendingAction>(null);
 
   useEffect(() => {
     void refreshRoles();
+    void refreshGrantFeatures();
   }, []);
 
   async function refreshRoles() {
@@ -82,6 +90,29 @@ export function useAdminUserAccountActions() {
       setRolesError(getAdminUserAccountErrorMessage(error, 'Unable to load roles right now.'));
     } finally {
       setIsLoadingRoles(false);
+    }
+  }
+
+  async function refreshGrantFeatures() {
+    setIsLoadingGrantFeatures(true);
+    setGrantFeaturesError(null);
+
+    try {
+      const result = await UserGrantManagement.listGrantFeaturesUserGrantsFeaturesGet({
+        headers: { Authorization: `Bearer ${getAccessToken()}` },
+        throwOnError: false
+      });
+
+      if (!result.data) {
+        throw result.error ?? new Error('Unable to load special-permission features right now.');
+      }
+
+      setGrantFeatures(result.data.data);
+    } catch (error) {
+      setGrantFeatures([]);
+      setGrantFeaturesError(getAdminUserAccountErrorMessage(error, 'Unable to load special-permission features right now.'));
+    } finally {
+      setIsLoadingGrantFeatures(false);
     }
   }
 
@@ -196,12 +227,60 @@ export function useAdminUserAccountActions() {
     }
   }
 
+  async function createSpecialPermission(input: {
+    actions: RoleAction[];
+    effect: GrantEffect;
+    expiresAt?: string | null;
+    featureId: string;
+    roleId: string;
+    startsAt: string;
+    userId: string;
+  }): Promise<CreateGrantsResponse | null> {
+    if (pendingAction) return null;
+
+    setPendingAction('special-permission');
+
+    try {
+      const result = await UserGrantManagement.createGrantsUserGrantsPost({
+        body: {
+          user_id: input.userId,
+          role_id: input.roleId,
+          feature_id: input.featureId,
+          actions: input.actions,
+          effect: input.effect,
+          starts_at: input.startsAt,
+          expires_at: input.expiresAt ?? null
+        },
+        headers: { Authorization: `Bearer ${getAccessToken()}` },
+        throwOnError: false
+      });
+
+      if (!result.data) {
+        throw result.error ?? new Error('Unable to add the special permission right now.');
+      }
+
+      const response = result.data;
+      toast.success(response.message ?? 'Special permission added successfully.');
+      return response;
+    } catch (error) {
+      toast.error(getAdminUserAccountErrorMessage(error, 'Unable to add the special permission right now.'));
+      return null;
+    } finally {
+      setPendingAction(null);
+    }
+  }
+
   return {
     changeEmail,
     changeRole,
+    createSpecialPermission,
+    grantFeatures,
+    grantFeaturesError,
     isLoadingRoles,
+    isLoadingGrantFeatures,
     isSubmitting: pendingAction !== null,
     pendingAction,
+    refreshGrantFeatures,
     refreshRoles,
     roles,
     rolesError,
