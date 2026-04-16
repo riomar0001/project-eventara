@@ -1,7 +1,8 @@
-import { LayoutDashboard, User, ArrowLeftRight, Headphones, Settings, FlaskConical, MapPin } from 'lucide-react';
+import { LayoutDashboard, User, Users, ArrowLeftRight, Headphones, Settings, FlaskConical, MapPin } from 'lucide-react';
 
 export const dashboardNavItems = [
   { label: 'Dashboard', icon: LayoutDashboard, href: '/admin/dashboard' },
+  { label: 'Users', icon: Users, href: '/admin/users' },
   { label: 'Profile', icon: User, href: '/admin/user/profile' },
   {
     label: 'Accordion Parent',

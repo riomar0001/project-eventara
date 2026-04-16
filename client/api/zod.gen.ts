@@ -18,6 +18,25 @@ export const zActionType = z.enum([
 ]);
 
 /**
+ * AdminDeleteAccountRequest
+ */
+export const zAdminDeleteAccountRequest = z.object({
+    reason: z.string().min(1).max(500)
+});
+
+/**
+ * AdminUserAccountPaginationResponse
+ */
+export const zAdminUserAccountPaginationResponse = z.object({
+    page: z.int(),
+    page_size: z.int(),
+    total_count: z.int(),
+    total_pages: z.int(),
+    has_next: z.boolean(),
+    has_previous: z.boolean()
+});
+
+/**
  * AgeGroup
  */
 export const zAgeGroup = z.enum([
@@ -34,6 +53,25 @@ export const zAssignRoleRequest = z.object({
     user_id: z.uuid(),
     role_id: z.uuid(),
     expires_at: z.iso.datetime().nullish()
+});
+
+/**
+ * AssignableRoleResponse
+ */
+export const zAssignableRoleResponse = z.object({
+    id: z.uuid(),
+    name: z.string(),
+    description: z.string().nullish(),
+    is_default: z.boolean().optional().default(false),
+    is_system: z.boolean().optional().default(false)
+});
+
+/**
+ * AssignableRoleListResponse
+ */
+export const zAssignableRoleListResponse = z.object({
+    success: z.boolean().optional().default(true),
+    data: z.array(zAssignableRoleResponse)
 });
 
 /**
@@ -73,6 +111,41 @@ export const zChangePasswordRequest = z.object({
 export const zChangePasswordResponse = z.object({
     success: z.boolean().optional().default(true),
     message: z.string().optional().default('Password changed successfully. All active sessions have been invalidated.')
+});
+
+/**
+ * ChangeUserEmailRequest
+ */
+export const zChangeUserEmailRequest = z.object({
+    email: z.email()
+});
+
+/**
+ * ChangeUserEmailResponse
+ */
+export const zChangeUserEmailResponse = z.object({
+    success: z.boolean().optional().default(true),
+    user_id: z.uuid(),
+    email: z.email(),
+    message: z.string().optional().default('User email updated successfully. A new verification link has been sent.')
+});
+
+/**
+ * ChangeUserRoleRequest
+ */
+export const zChangeUserRoleRequest = z.object({
+    role_id: z.uuid()
+});
+
+/**
+ * ChangeUserRoleResponse
+ */
+export const zChangeUserRoleResponse = z.object({
+    success: z.boolean().optional().default(true),
+    user_id: z.uuid(),
+    role_id: z.uuid(),
+    role_name: z.string(),
+    message: z.string().optional().default('User role updated successfully.')
 });
 
 /**
@@ -125,6 +198,27 @@ export const zDeadJobResponse = z.object({
     enqueue_time: z.iso.datetime(),
     finish_time: z.iso.datetime().nullable(),
     error: z.string()
+});
+
+/**
+ * DeleteAccountRequest
+ */
+export const zDeleteAccountRequest = z.object({
+    current_password: z.string().min(1),
+    reason: z.string().min(1).max(500).nullish()
+});
+
+/**
+ * DeleteAccountResponse
+ */
+export const zDeleteAccountResponse = z.object({
+    success: z.boolean().optional().default(true),
+    user_id: z.uuid(),
+    deletion_requested_at: z.iso.datetime(),
+    deletion_scheduled_for: z.iso.datetime(),
+    requested_by: z.uuid(),
+    grace_period_days: z.int().optional().default(30),
+    message: z.string().optional().default('Account deletion scheduled. The account will be permanently deleted after the 30-day grace period unless the user logs in before then.')
 });
 
 /**
@@ -426,6 +520,14 @@ export const zCreateGrantsRequest = z.object({
 });
 
 /**
+ * SendUserPasswordResetResponse
+ */
+export const zSendUserPasswordResetResponse = z.object({
+    success: z.boolean().optional().default(true),
+    message: z.string().optional().default('Password reset link sent successfully.')
+});
+
+/**
  * UpdateAssignmentRequest
  */
 export const zUpdateAssignmentRequest = z.object({
@@ -546,6 +648,76 @@ export const zUserRoleListResponse = z.object({
     success: z.boolean().optional().default(true),
     data: z.array(zUserRoleAssignmentResponse),
     total: z.int()
+});
+
+/**
+ * UserStatus
+ */
+export const zUserStatus = z.enum([
+    'active',
+    'inactive',
+    'locked',
+    'deleted'
+]);
+
+/**
+ * AdminUserAccountDetailResponse
+ */
+export const zAdminUserAccountDetailResponse = z.object({
+    success: z.boolean().optional().default(true),
+    user_id: z.uuid(),
+    name: z.string(),
+    email: z.string(),
+    status: zUserStatus,
+    role_id: z.uuid().nullish(),
+    role_name: z.string().nullish(),
+    alias: z.string().nullish(),
+    first_name: z.string().nullish(),
+    last_name: z.string().nullish(),
+    age_group: zAgeGroup.nullish(),
+    gender: zGender.nullish(),
+    education_level: zEducationLevel.nullish(),
+    occupation: z.string().nullish(),
+    bio: z.string().nullish(),
+    onboarding_completed: z.boolean(),
+    onboarding_completed_at: z.iso.datetime().nullish(),
+    email_verified: z.boolean(),
+    email_verified_at: z.iso.datetime().nullish(),
+    password_change_at: z.iso.datetime().nullish(),
+    failed_login_attempts: z.int(),
+    locked_until: z.iso.datetime().nullish(),
+    last_login_at: z.iso.datetime().nullish(),
+    last_activity_at: z.iso.datetime().nullish(),
+    login_count: z.int(),
+    deletion_requested_at: z.iso.datetime().nullish(),
+    deletion_scheduled_for: z.iso.datetime().nullish(),
+    deletion_requested_by: z.uuid().nullish(),
+    deletion_reason: z.string().nullish(),
+    deleted_at: z.iso.datetime().nullish(),
+    created_at: z.iso.datetime().nullish(),
+    updated_at: z.iso.datetime().nullish()
+});
+
+/**
+ * AdminUserAccountSummaryResponse
+ */
+export const zAdminUserAccountSummaryResponse = z.object({
+    user_id: z.uuid(),
+    name: z.string(),
+    email: z.string(),
+    role_id: z.uuid().nullish(),
+    role_name: z.string().nullish(),
+    status: zUserStatus,
+    deletion_scheduled_for: z.iso.datetime().nullish()
+});
+
+/**
+ * AdminUserAccountListResponse
+ */
+export const zAdminUserAccountListResponse = z.object({
+    success: z.boolean().optional().default(true),
+    data: z.array(zAdminUserAccountSummaryResponse),
+    pagination: zAdminUserAccountPaginationResponse
 });
 
 /**
@@ -739,6 +911,79 @@ export const zChangePasswordUserChangePasswordPostBody = zChangePasswordRequest;
  * Successful Response
  */
 export const zChangePasswordUserChangePasswordPostResponse = zChangePasswordResponse;
+
+export const zScheduleOwnAccountDeletionUserAccountDeletionPostBody = zDeleteAccountRequest;
+
+/**
+ * Successful Response
+ */
+export const zScheduleOwnAccountDeletionUserAccountDeletionPostResponse = zDeleteAccountResponse;
+
+export const zScheduleAdminAccountDeletionUserTargetUserIdAccountDeletionPostBody = zAdminDeleteAccountRequest;
+
+export const zScheduleAdminAccountDeletionUserTargetUserIdAccountDeletionPostPath = z.object({
+    target_user_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zScheduleAdminAccountDeletionUserTargetUserIdAccountDeletionPostResponse = zDeleteAccountResponse;
+
+/**
+ * Successful Response
+ */
+export const zListRolesUserAccountsRolesGetResponse = zAssignableRoleListResponse;
+
+export const zListUserAccountsUserAccountsGetQuery = z.object({
+    page: z.int().gte(1).optional().default(1),
+    page_size: z.int().gte(1).lte(100).optional().default(10)
+});
+
+/**
+ * Successful Response
+ */
+export const zListUserAccountsUserAccountsGetResponse = zAdminUserAccountListResponse;
+
+export const zGetUserAccountDetailUserAccountsUserIdGetPath = z.object({
+    user_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zGetUserAccountDetailUserAccountsUserIdGetResponse = zAdminUserAccountDetailResponse;
+
+export const zChangeUserRoleUserAccountsUserIdRolePatchBody = zChangeUserRoleRequest;
+
+export const zChangeUserRoleUserAccountsUserIdRolePatchPath = z.object({
+    user_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zChangeUserRoleUserAccountsUserIdRolePatchResponse = zChangeUserRoleResponse;
+
+export const zChangeUserEmailUserAccountsUserIdEmailPatchBody = zChangeUserEmailRequest;
+
+export const zChangeUserEmailUserAccountsUserIdEmailPatchPath = z.object({
+    user_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zChangeUserEmailUserAccountsUserIdEmailPatchResponse = zChangeUserEmailResponse;
+
+export const zSendUserPasswordResetUserAccountsUserIdPasswordResetPostPath = z.object({
+    user_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zSendUserPasswordResetUserAccountsUserIdPasswordResetPostResponse = zSendUserPasswordResetResponse;
 
 export const zGetAuditLogsAuditLogsGetQuery = z.object({
     limit: z.int().gte(10).lte(100).optional().default(10),

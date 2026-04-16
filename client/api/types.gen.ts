@@ -10,6 +10,214 @@ export type ClientOptions = {
 export type ActionType = 'create' | 'read' | 'update' | 'delete' | 'login' | 'logout' | 'verify' | 'export' | 'import';
 
 /**
+ * AdminDeleteAccountRequest
+ */
+export type AdminDeleteAccountRequest = {
+    /**
+     * Reason
+     */
+    reason: string;
+};
+
+/**
+ * AdminUserAccountDetailResponse
+ */
+export type AdminUserAccountDetailResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * User Id
+     */
+    user_id: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Email
+     */
+    email: string;
+    status: UserStatus;
+    /**
+     * Role Id
+     */
+    role_id?: string | null;
+    /**
+     * Role Name
+     */
+    role_name?: string | null;
+    /**
+     * Alias
+     */
+    alias?: string | null;
+    /**
+     * First Name
+     */
+    first_name?: string | null;
+    /**
+     * Last Name
+     */
+    last_name?: string | null;
+    age_group?: AgeGroup | null;
+    gender?: Gender | null;
+    education_level?: EducationLevel | null;
+    /**
+     * Occupation
+     */
+    occupation?: string | null;
+    /**
+     * Bio
+     */
+    bio?: string | null;
+    /**
+     * Onboarding Completed
+     */
+    onboarding_completed: boolean;
+    /**
+     * Onboarding Completed At
+     */
+    onboarding_completed_at?: string | null;
+    /**
+     * Email Verified
+     */
+    email_verified: boolean;
+    /**
+     * Email Verified At
+     */
+    email_verified_at?: string | null;
+    /**
+     * Password Change At
+     */
+    password_change_at?: string | null;
+    /**
+     * Failed Login Attempts
+     */
+    failed_login_attempts: number;
+    /**
+     * Locked Until
+     */
+    locked_until?: string | null;
+    /**
+     * Last Login At
+     */
+    last_login_at?: string | null;
+    /**
+     * Last Activity At
+     */
+    last_activity_at?: string | null;
+    /**
+     * Login Count
+     */
+    login_count: number;
+    /**
+     * Deletion Requested At
+     */
+    deletion_requested_at?: string | null;
+    /**
+     * Deletion Scheduled For
+     */
+    deletion_scheduled_for?: string | null;
+    /**
+     * Deletion Requested By
+     */
+    deletion_requested_by?: string | null;
+    /**
+     * Deletion Reason
+     */
+    deletion_reason?: string | null;
+    /**
+     * Deleted At
+     */
+    deleted_at?: string | null;
+    /**
+     * Created At
+     */
+    created_at?: string | null;
+    /**
+     * Updated At
+     */
+    updated_at?: string | null;
+};
+
+/**
+ * AdminUserAccountListResponse
+ */
+export type AdminUserAccountListResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Data
+     */
+    data: Array<AdminUserAccountSummaryResponse>;
+    pagination: AdminUserAccountPaginationResponse;
+};
+
+/**
+ * AdminUserAccountPaginationResponse
+ */
+export type AdminUserAccountPaginationResponse = {
+    /**
+     * Page
+     */
+    page: number;
+    /**
+     * Page Size
+     */
+    page_size: number;
+    /**
+     * Total Count
+     */
+    total_count: number;
+    /**
+     * Total Pages
+     */
+    total_pages: number;
+    /**
+     * Has Next
+     */
+    has_next: boolean;
+    /**
+     * Has Previous
+     */
+    has_previous: boolean;
+};
+
+/**
+ * AdminUserAccountSummaryResponse
+ */
+export type AdminUserAccountSummaryResponse = {
+    /**
+     * User Id
+     */
+    user_id: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Email
+     */
+    email: string;
+    /**
+     * Role Id
+     */
+    role_id?: string | null;
+    /**
+     * Role Name
+     */
+    role_name?: string | null;
+    status: UserStatus;
+    /**
+     * Deletion Scheduled For
+     */
+    deletion_scheduled_for?: string | null;
+};
+
+/**
  * AgeGroup
  */
 export type AgeGroup = 'child' | 'teen' | 'adult' | 'senior';
@@ -30,6 +238,46 @@ export type AssignRoleRequest = {
      * Expires At
      */
     expires_at?: string | null;
+};
+
+/**
+ * AssignableRoleListResponse
+ */
+export type AssignableRoleListResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Data
+     */
+    data: Array<AssignableRoleResponse>;
+};
+
+/**
+ * AssignableRoleResponse
+ */
+export type AssignableRoleResponse = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Is Default
+     */
+    is_default?: boolean;
+    /**
+     * Is System
+     */
+    is_system?: boolean;
 };
 
 /**
@@ -113,6 +361,74 @@ export type ChangePasswordResponse = {
      * Success
      */
     success?: boolean;
+    /**
+     * Message
+     */
+    message?: string;
+};
+
+/**
+ * ChangeUserEmailRequest
+ */
+export type ChangeUserEmailRequest = {
+    /**
+     * Email
+     */
+    email: string;
+};
+
+/**
+ * ChangeUserEmailResponse
+ */
+export type ChangeUserEmailResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * User Id
+     */
+    user_id: string;
+    /**
+     * Email
+     */
+    email: string;
+    /**
+     * Message
+     */
+    message?: string;
+};
+
+/**
+ * ChangeUserRoleRequest
+ */
+export type ChangeUserRoleRequest = {
+    /**
+     * Role Id
+     */
+    role_id: string;
+};
+
+/**
+ * ChangeUserRoleResponse
+ */
+export type ChangeUserRoleResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * User Id
+     */
+    user_id: string;
+    /**
+     * Role Id
+     */
+    role_id: string;
+    /**
+     * Role Name
+     */
+    role_name: string;
     /**
      * Message
      */
@@ -306,6 +622,54 @@ export type DeadJobResponse = {
      * Error
      */
     error: string;
+};
+
+/**
+ * DeleteAccountRequest
+ */
+export type DeleteAccountRequest = {
+    /**
+     * Current Password
+     */
+    current_password: string;
+    /**
+     * Reason
+     */
+    reason?: string | null;
+};
+
+/**
+ * DeleteAccountResponse
+ */
+export type DeleteAccountResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * User Id
+     */
+    user_id: string;
+    /**
+     * Deletion Requested At
+     */
+    deletion_requested_at: string;
+    /**
+     * Deletion Scheduled For
+     */
+    deletion_scheduled_for: string;
+    /**
+     * Requested By
+     */
+    requested_by: string;
+    /**
+     * Grace Period Days
+     */
+    grace_period_days?: number;
+    /**
+     * Message
+     */
+    message?: string;
 };
 
 /**
@@ -854,6 +1218,20 @@ export type RetryJobResponse = {
 export type RoleAction = 'create' | 'read' | 'update' | 'delete';
 
 /**
+ * SendUserPasswordResetResponse
+ */
+export type SendUserPasswordResetResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Message
+     */
+    message?: string;
+};
+
+/**
  * UpdateAssignmentRequest
  */
 export type UpdateAssignmentRequest = {
@@ -1124,6 +1502,11 @@ export type UserRoleListResponse = {
      */
     total: number;
 };
+
+/**
+ * UserStatus
+ */
+export type UserStatus = 'active' | 'inactive' | 'locked' | 'deleted';
 
 /**
  * ValidationError
@@ -1451,6 +1834,10 @@ export type LoginVerifyAuthLoginVerifyPostErrors = {
      */
     401: ErrorResponse;
     /**
+     * Account is inactive or has been deleted
+     */
+    403: ErrorResponse;
+    /**
      * User not found
      */
     404: ErrorResponse;
@@ -1549,6 +1936,10 @@ export type RefreshTokenAuthRefreshPostErrors = {
      * The refresh token is invalid, revoked, not found, or was already rotated by a concurrent request
      */
     401: ErrorResponse;
+    /**
+     * Account is inactive or has been deleted
+     */
+    403: ErrorResponse;
     /**
      * User not found
      */
@@ -1786,6 +2177,344 @@ export type ChangePasswordUserChangePasswordPostResponses = {
 };
 
 export type ChangePasswordUserChangePasswordPostResponse = ChangePasswordUserChangePasswordPostResponses[keyof ChangePasswordUserChangePasswordPostResponses];
+
+export type ScheduleOwnAccountDeletionUserAccountDeletionPostData = {
+    body: DeleteAccountRequest;
+    path?: never;
+    query?: never;
+    url: '/user/account-deletion';
+};
+
+export type ScheduleOwnAccountDeletionUserAccountDeletionPostErrors = {
+    /**
+     * Current password is incorrect
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden — account is inactive, already deleted, or past the deletion grace period
+     */
+    403: ErrorResponse;
+    /**
+     * User not found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict — account deletion is already scheduled
+     */
+    409: ErrorResponse;
+    /**
+     * Validation error — self-service deletion requires current_password; administrator deletion requires a non-empty reason
+     */
+    422: ValidationErrorResponse;
+};
+
+export type ScheduleOwnAccountDeletionUserAccountDeletionPostError = ScheduleOwnAccountDeletionUserAccountDeletionPostErrors[keyof ScheduleOwnAccountDeletionUserAccountDeletionPostErrors];
+
+export type ScheduleOwnAccountDeletionUserAccountDeletionPostResponses = {
+    /**
+     * Successful Response
+     */
+    202: DeleteAccountResponse;
+};
+
+export type ScheduleOwnAccountDeletionUserAccountDeletionPostResponse = ScheduleOwnAccountDeletionUserAccountDeletionPostResponses[keyof ScheduleOwnAccountDeletionUserAccountDeletionPostResponses];
+
+export type ScheduleAdminAccountDeletionUserTargetUserIdAccountDeletionPostData = {
+    body: AdminDeleteAccountRequest;
+    path: {
+        /**
+         * Target User Id
+         */
+        target_user_id: string;
+    };
+    query?: never;
+    url: '/user/{target_user_id}/account-deletion';
+};
+
+export type ScheduleAdminAccountDeletionUserTargetUserIdAccountDeletionPostErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden — account is inactive, already deleted, or past the deletion grace period
+     */
+    403: ErrorResponse;
+    /**
+     * User not found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict — account deletion is already scheduled
+     */
+    409: ErrorResponse;
+    /**
+     * Validation error — self-service deletion requires current_password; administrator deletion requires a non-empty reason
+     */
+    422: ValidationErrorResponse;
+};
+
+export type ScheduleAdminAccountDeletionUserTargetUserIdAccountDeletionPostError = ScheduleAdminAccountDeletionUserTargetUserIdAccountDeletionPostErrors[keyof ScheduleAdminAccountDeletionUserTargetUserIdAccountDeletionPostErrors];
+
+export type ScheduleAdminAccountDeletionUserTargetUserIdAccountDeletionPostResponses = {
+    /**
+     * Successful Response
+     */
+    202: DeleteAccountResponse;
+};
+
+export type ScheduleAdminAccountDeletionUserTargetUserIdAccountDeletionPostResponse = ScheduleAdminAccountDeletionUserTargetUserIdAccountDeletionPostResponses[keyof ScheduleAdminAccountDeletionUserTargetUserIdAccountDeletionPostResponses];
+
+export type ListRolesUserAccountsRolesGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/user-accounts/roles';
+};
+
+export type ListRolesUserAccountsRolesGetErrors = {
+    /**
+     * Missing or invalid Bearer token
+     */
+    401: ErrorResponse;
+    /**
+     * Insufficient permissions or target account is inactive
+     */
+    403: ErrorResponse;
+};
+
+export type ListRolesUserAccountsRolesGetError = ListRolesUserAccountsRolesGetErrors[keyof ListRolesUserAccountsRolesGetErrors];
+
+export type ListRolesUserAccountsRolesGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: AssignableRoleListResponse;
+};
+
+export type ListRolesUserAccountsRolesGetResponse = ListRolesUserAccountsRolesGetResponses[keyof ListRolesUserAccountsRolesGetResponses];
+
+export type ListUserAccountsUserAccountsGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Page
+         */
+        page?: number;
+        /**
+         * Page Size
+         */
+        page_size?: number;
+    };
+    url: '/user-accounts';
+};
+
+export type ListUserAccountsUserAccountsGetErrors = {
+    /**
+     * Missing or invalid Bearer token
+     */
+    401: ErrorResponse;
+    /**
+     * Insufficient permissions or target account is inactive
+     */
+    403: ErrorResponse;
+    /**
+     * Validation error for pagination parameters
+     */
+    422: ValidationErrorResponse;
+};
+
+export type ListUserAccountsUserAccountsGetError = ListUserAccountsUserAccountsGetErrors[keyof ListUserAccountsUserAccountsGetErrors];
+
+export type ListUserAccountsUserAccountsGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: AdminUserAccountListResponse;
+};
+
+export type ListUserAccountsUserAccountsGetResponse = ListUserAccountsUserAccountsGetResponses[keyof ListUserAccountsUserAccountsGetResponses];
+
+export type GetUserAccountDetailUserAccountsUserIdGetData = {
+    body?: never;
+    path: {
+        /**
+         * User Id
+         */
+        user_id: string;
+    };
+    query?: never;
+    url: '/user-accounts/{user_id}';
+};
+
+export type GetUserAccountDetailUserAccountsUserIdGetErrors = {
+    /**
+     * Missing or invalid Bearer token
+     */
+    401: ErrorResponse;
+    /**
+     * Insufficient permissions or target account is inactive
+     */
+    403: ErrorResponse;
+    /**
+     * User not found
+     */
+    404: ErrorResponse;
+    /**
+     * Validation error for pagination parameters
+     */
+    422: ValidationErrorResponse;
+};
+
+export type GetUserAccountDetailUserAccountsUserIdGetError = GetUserAccountDetailUserAccountsUserIdGetErrors[keyof GetUserAccountDetailUserAccountsUserIdGetErrors];
+
+export type GetUserAccountDetailUserAccountsUserIdGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: AdminUserAccountDetailResponse;
+};
+
+export type GetUserAccountDetailUserAccountsUserIdGetResponse = GetUserAccountDetailUserAccountsUserIdGetResponses[keyof GetUserAccountDetailUserAccountsUserIdGetResponses];
+
+export type ChangeUserRoleUserAccountsUserIdRolePatchData = {
+    body: ChangeUserRoleRequest;
+    path: {
+        /**
+         * User Id
+         */
+        user_id: string;
+    };
+    query?: never;
+    url: '/user-accounts/{user_id}/role';
+};
+
+export type ChangeUserRoleUserAccountsUserIdRolePatchErrors = {
+    /**
+     * Missing or invalid Bearer token
+     */
+    401: ErrorResponse;
+    /**
+     * Insufficient permissions or target account is inactive
+     */
+    403: ErrorResponse;
+    /**
+     * Role not found
+     */
+    404: ErrorResponse;
+    /**
+     * Requested role is already current
+     */
+    409: ErrorResponse;
+    /**
+     * Validation error for role change payload
+     */
+    422: ValidationErrorResponse;
+};
+
+export type ChangeUserRoleUserAccountsUserIdRolePatchError = ChangeUserRoleUserAccountsUserIdRolePatchErrors[keyof ChangeUserRoleUserAccountsUserIdRolePatchErrors];
+
+export type ChangeUserRoleUserAccountsUserIdRolePatchResponses = {
+    /**
+     * Successful Response
+     */
+    200: ChangeUserRoleResponse;
+};
+
+export type ChangeUserRoleUserAccountsUserIdRolePatchResponse = ChangeUserRoleUserAccountsUserIdRolePatchResponses[keyof ChangeUserRoleUserAccountsUserIdRolePatchResponses];
+
+export type ChangeUserEmailUserAccountsUserIdEmailPatchData = {
+    body: ChangeUserEmailRequest;
+    path: {
+        /**
+         * User Id
+         */
+        user_id: string;
+    };
+    query?: never;
+    url: '/user-accounts/{user_id}/email';
+};
+
+export type ChangeUserEmailUserAccountsUserIdEmailPatchErrors = {
+    /**
+     * Missing or invalid Bearer token
+     */
+    401: ErrorResponse;
+    /**
+     * Insufficient permissions or target account is inactive
+     */
+    403: ErrorResponse;
+    /**
+     * User not found
+     */
+    404: ErrorResponse;
+    /**
+     * Email conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Validation error for email change payload
+     */
+    422: ValidationErrorResponse;
+};
+
+export type ChangeUserEmailUserAccountsUserIdEmailPatchError = ChangeUserEmailUserAccountsUserIdEmailPatchErrors[keyof ChangeUserEmailUserAccountsUserIdEmailPatchErrors];
+
+export type ChangeUserEmailUserAccountsUserIdEmailPatchResponses = {
+    /**
+     * Successful Response
+     */
+    200: ChangeUserEmailResponse;
+};
+
+export type ChangeUserEmailUserAccountsUserIdEmailPatchResponse = ChangeUserEmailUserAccountsUserIdEmailPatchResponses[keyof ChangeUserEmailUserAccountsUserIdEmailPatchResponses];
+
+export type SendUserPasswordResetUserAccountsUserIdPasswordResetPostData = {
+    body?: never;
+    path: {
+        /**
+         * User Id
+         */
+        user_id: string;
+    };
+    query?: never;
+    url: '/user-accounts/{user_id}/password-reset';
+};
+
+export type SendUserPasswordResetUserAccountsUserIdPasswordResetPostErrors = {
+    /**
+     * Missing or invalid Bearer token
+     */
+    401: ErrorResponse;
+    /**
+     * Insufficient permissions or target account is inactive
+     */
+    403: ErrorResponse;
+    /**
+     * User not found
+     */
+    404: ErrorResponse;
+    /**
+     * Target user cannot receive a password reset email
+     */
+    409: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type SendUserPasswordResetUserAccountsUserIdPasswordResetPostError = SendUserPasswordResetUserAccountsUserIdPasswordResetPostErrors[keyof SendUserPasswordResetUserAccountsUserIdPasswordResetPostErrors];
+
+export type SendUserPasswordResetUserAccountsUserIdPasswordResetPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: SendUserPasswordResetResponse;
+};
+
+export type SendUserPasswordResetUserAccountsUserIdPasswordResetPostResponse = SendUserPasswordResetUserAccountsUserIdPasswordResetPostResponses[keyof SendUserPasswordResetUserAccountsUserIdPasswordResetPostResponses];
 
 export type GetAuditLogsAuditLogsGetData = {
     body?: never;
