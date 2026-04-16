@@ -82,6 +82,8 @@ export function AdminUserManagementTable({
   users
 }: AdminUserManagementTableProps) {
   const currentUserId = useAuthStore((state) => state.user?.id ?? null);
+  const activeUsersCount = users.filter((user) => user.status !== 'deleted').length;
+  const deletedUsersCount = users.filter((user) => user.status === 'deleted').length;
   const showingFrom = users.length === 0 ? 0 : (pagination.page - 1) * pagination.page_size + 1;
   const showingTo = users.length === 0 ? 0 : showingFrom + users.length - 1;
   const pageLabel = pagination.total_pages === 0 ? 0 : pagination.page;
@@ -243,7 +245,7 @@ export function AdminUserManagementTable({
             <div className="space-y-1">
               <CardTitle className="text-xl">User Management</CardTitle>
               <CardDescription>
-                Review user accounts, inspect full profiles, update access, trigger password resets, and schedule soft deletion with the existing 30-day grace
+                Review user accounts, inspect complete profiles, manage access, send password reset links, and handle soft deletion within the 30-day grace
                 period.
               </CardDescription>
             </div>
@@ -257,18 +259,16 @@ export function AdminUserManagementTable({
         </CardHeader>
         <CardContent className="grid gap-4 pt-6 md:grid-cols-3">
           <div className="rounded-2xl border border-neutral-200 bg-white p-4">
-            <p className="text-muted-foreground text-xs font-medium tracking-[0.18em] uppercase">Total users</p>
+            <p className="text-muted-foreground text-xs font-medium tracking-[0.18em] uppercase">Total User</p>
             <p className="mt-3 text-3xl font-semibold">{pagination.total_count}</p>
           </div>
           <div className="rounded-2xl border border-neutral-200 bg-white p-4">
-            <p className="text-muted-foreground text-xs font-medium tracking-[0.18em] uppercase">Current page</p>
-            <p className="mt-3 text-3xl font-semibold">{pageLabel}</p>
+            <p className="text-muted-foreground text-xs font-medium tracking-[0.18em] uppercase">Active User</p>
+            <p className="mt-3 text-3xl font-semibold">{activeUsersCount}</p>
           </div>
           <div className="rounded-2xl border border-neutral-200 bg-white p-4">
-            <p className="text-muted-foreground text-xs font-medium tracking-[0.18em] uppercase">Deletion workflow</p>
-            <p className="mt-3 text-sm leading-6 text-neutral-700">
-              Soft delete requests keep the account recoverable for 30 days unless the user signs in again.
-            </p>
+            <p className="text-muted-foreground text-xs font-medium tracking-[0.18em] uppercase">Delete User</p>
+            <p className="mt-3 text-3xl font-semibold">{deletedUsersCount}</p>
           </div>
         </CardContent>
       </Card>
@@ -277,7 +277,7 @@ export function AdminUserManagementTable({
         <CardHeader className="border-b">
           <div>
             <CardTitle>All users</CardTitle>
-            <CardDescription>Paginated account records with quick actions for administrators.</CardDescription>
+            <CardDescription>Browse paginated user accounts and perform administrator actions quickly.</CardDescription>
           </div>
         </CardHeader>
 
