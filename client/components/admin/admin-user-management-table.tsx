@@ -43,6 +43,7 @@ import type {
   AdminUserAccountSummaryResponse as AdminUserAccountSummary
 } from '@/api/types.gen';
 import { cn } from '@/lib/utils';
+import { useAuthStore } from '@/store/auth-store';
 
 type AdminTableColumnMeta = {
   cellClassName?: string;
@@ -80,6 +81,7 @@ export function AdminUserManagementTable({
   pagination,
   users
 }: AdminUserManagementTableProps) {
+  const currentUserId = useAuthStore((state) => state.user?.id ?? null);
   const showingFrom = users.length === 0 ? 0 : (pagination.page - 1) * pagination.page_size + 1;
   const showingTo = users.length === 0 ? 0 : showingFrom + users.length - 1;
   const pageLabel = pagination.total_pages === 0 ? 0 : pagination.page;
@@ -160,6 +162,7 @@ export function AdminUserManagementTable({
         id: 'actions',
         cell: ({ row }) => {
           const user = row.original;
+          const isSelf = currentUserId === user.user_id;
 
           return (
             <div className="text-right">
@@ -185,19 +188,27 @@ export function AdminUserManagementTable({
                     <ShieldPlus className="size-4" />
                     Special permission
                   </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={() => onOpenEmailDialog(user)}>
+                  <DropdownMenuItem disabled={isSelf} onSelect={() => onOpenEmailDialog(user)}>
                     <Mail className="size-4" />
                     Change email
                   </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={() => onOpenPasswordResetDialog(user)}>
+                  <DropdownMenuItem disabled={isSelf} onSelect={() => onOpenPasswordResetDialog(user)}>
                     <KeyRound className="size-4" />
                     Reset password
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem variant="destructive" disabled={isSoftDeleteDisabled(user)} onSelect={() => onOpenDeleteDialog(user)}>
+                  <DropdownMenuItem variant="destructive" disabled={isSoftDeleteDisabled(user) || isSelf} onSelect={() => onOpenDeleteDialog(user)}>
                     <Trash2 className="size-4" />
                     Soft delete
                   </DropdownMenuItem>
+                  {isSelf ? (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem disabled className="text-muted-foreground text-xs">
+                        Manage your own account in Settings.
+                      </DropdownMenuItem>
+                    </>
+                  ) : null}
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -210,7 +221,7 @@ export function AdminUserManagementTable({
         }
       }
     ],
-    [onOpenDeleteDialog, onOpenEmailDialog, onOpenPasswordResetDialog, onOpenRoleDialog, onOpenSpecialPermissionDialog, onSelectUser]
+    [currentUserId, onOpenDeleteDialog, onOpenEmailDialog, onOpenPasswordResetDialog, onOpenRoleDialog, onOpenSpecialPermissionDialog, onSelectUser]
   );
 
   // TanStack Table is intentionally used here for the shadcn data table pattern.
