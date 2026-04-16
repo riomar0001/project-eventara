@@ -8,7 +8,7 @@ import { AdminUserManagementTable } from '@/components/admin/admin-user-manageme
 import { useAdminUserAccountActions } from '@/hooks/use-admin-user-account-actions';
 import { useAdminUserAccountDetail } from '@/hooks/use-admin-user-account-detail';
 import { useAdminUserAccounts } from '@/hooks/use-admin-user-accounts';
-import { type AdminUserAccountSummary } from '@/api/admin-user-accounts';
+import type { AdminUserAccountSummaryResponse as AdminUserAccountSummary } from '@/api/types.gen';
 
 const PAGE_SIZE = 10;
 const emailSchema = z.string().trim().email('Enter a valid email address.');

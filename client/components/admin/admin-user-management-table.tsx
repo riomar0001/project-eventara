@@ -15,7 +15,10 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { type AdminUserAccountPagination, type AdminUserAccountSummary } from '@/api/admin-user-accounts';
+import type {
+  AdminUserAccountPaginationResponse as AdminUserAccountPagination,
+  AdminUserAccountSummaryResponse as AdminUserAccountSummary
+} from '@/api/types.gen';
 import { cn } from '@/lib/utils';
 
 interface AdminUserManagementTableProps {

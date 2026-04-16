@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Skeleton } from '@/components/ui/skeleton';
-import { type AdminUserAccountDetail } from '@/api/admin-user-accounts';
+import type { AdminUserAccountDetailResponse as AdminUserAccountDetail } from '@/api/types.gen';
 
 interface AdminUserDetailSheetProps {
   detail: AdminUserAccountDetail | null;

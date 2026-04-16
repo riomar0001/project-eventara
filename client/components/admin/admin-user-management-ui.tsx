@@ -3,7 +3,10 @@
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { type AdminUserAccountDetail, type AdminUserAccountSummary } from '@/api/admin-user-accounts';
+import type {
+  AdminUserAccountDetailResponse as AdminUserAccountDetail,
+  AdminUserAccountSummaryResponse as AdminUserAccountSummary
+} from '@/api/types.gen';
 import { cn } from '@/lib/utils';
 
 export function getInitials(name: string) {

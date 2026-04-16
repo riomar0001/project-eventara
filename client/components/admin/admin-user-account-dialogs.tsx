@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { type AdminUserAccountSummary, type AssignableRole } from '@/api/admin-user-accounts';
+import type { AdminUserAccountSummaryResponse as AdminUserAccountSummary, AssignableRoleResponse as AssignableRole } from '@/api/types.gen';
 
 interface AdminUserAccountDialogsProps {
   deleteDialogUser: AdminUserAccountSummary | null;
