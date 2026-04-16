@@ -3,7 +3,7 @@ from datetime import UTC, datetime
 from typing import cast as typing_cast
 
 from pydantic import AwareDatetime
-from sqlalchemy import CursorResult, cast, delete, func, or_, select, update
+from sqlalchemy import CursorResult, delete, func, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application.dto.admin_user_account_dto import RolePermissionSummary

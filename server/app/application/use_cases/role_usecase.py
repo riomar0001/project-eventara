@@ -3,14 +3,6 @@ import uuid
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.application.dto.role_management_dto import (
-    CreateRoleInput,
-    ListRolesOutput,
-    ManagedRoleDetail,
-    RoleOutput,
-    RolePermissionInput,
-    UpdateRoleInput,
-)
 from app.application.dto.role_dto import (
     AssignRoleInput,
     AssignRoleOutput,
@@ -22,15 +14,24 @@ from app.application.dto.role_dto import (
     UpdateAssignmentInput,
     UpdateAssignmentOutput,
 )
+from app.application.dto.role_management_dto import (
+    CreateRoleInput,
+    ListRolesOutput,
+    ManagedRoleDetail,
+    RoleOutput,
+    RolePermissionInput,
+    UpdateRoleInput,
+)
 from app.application.interfaces.role_interface import IRoleRepository
-from app.domain.entities.authorization_entities import UserRole as UserRoleEntity
 from app.domain.entities.authorization_entities import GrantEffect, RoleAction
+from app.domain.entities.authorization_entities import Role as RoleEntity
+from app.domain.entities.authorization_entities import UserRole as UserRoleEntity
 from app.domain.exceptions.role_exceptions import (
     DuplicateUserGrantError,
     FeatureNotFoundError,
     ProtectedRoleDeletionError,
-    RoleAlreadyExistsError,
     RoleAlreadyAssignedError,
+    RoleAlreadyExistsError,
     RoleAssignmentNotFoundError,
     RoleInUseError,
     RoleNotFoundError,

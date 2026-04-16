@@ -18,8 +18,8 @@ from app.controller.dependencies.use_cases_depends import (
     get_otp_repository,
     get_purge_dead_jobs_use_case,
     get_queue_stats_use_case,
-    get_role_management_use_case,
     get_retry_dead_job_use_case,
+    get_role_management_use_case,
     get_role_use_case,
     get_venue_use_case,
 )

@@ -16,13 +16,6 @@ from app.application.dto.role_management_dto import (
 from app.application.use_cases.role_usecase import RoleManagementUseCase, UserRoleUseCase
 from app.controller.dependencies import get_role_use_case, require_permission
 from app.controller.dependencies.use_cases_depends import get_role_management_use_case
-from app.controller.docs.role_management_docs import (
-    FEATURE_NOT_FOUND,
-    ROLE_CONFLICT,
-    ROLE_IN_USE,
-    ROLE_PROTECTED,
-    VALIDATION_ERROR,
-)
 from app.controller.docs.role_docs import (
     ASSIGN_ROLE_VALIDATION_ERROR,
     ASSIGNMENT_NOT_FOUND,
@@ -34,6 +27,21 @@ from app.controller.docs.role_docs import (
     ROLE_NOT_FOUND,
     UNAUTHORIZED,
     USER_NOT_FOUND,
+)
+from app.controller.docs.role_management_docs import (
+    FEATURE_NOT_FOUND,
+    ROLE_CONFLICT,
+    ROLE_IN_USE,
+    ROLE_PROTECTED,
+    VALIDATION_ERROR,
+)
+from app.controller.schemas.role_management_schema import (
+    RoleCreateRequest,
+    RoleListResponse,
+    RolePermissionRecordResponse,
+    RoleRecordResponse,
+    RoleResponse,
+    RoleUpdateRequest,
 )
 from app.controller.schemas.role_schema import (
     AssignRoleRequest,
@@ -47,21 +55,13 @@ from app.controller.schemas.role_schema import (
     UserRoleAssignmentResponse,
     UserRoleListResponse,
 )
-from app.controller.schemas.role_management_schema import (
-    RoleCreateRequest,
-    RoleListResponse,
-    RolePermissionRecordResponse,
-    RoleRecordResponse,
-    RoleResponse,
-    RoleUpdateRequest,
-)
 from app.domain.entities.authorization_entities import RoleAction
 from app.domain.exceptions.role_exceptions import (
     DuplicateUserGrantError,
     FeatureNotFoundError,
     ProtectedRoleDeletionError,
-    RoleAlreadyExistsError,
     RoleAlreadyAssignedError,
+    RoleAlreadyExistsError,
     RoleAssignmentNotFoundError,
     RoleInUseError,
     RoleNotFoundError,

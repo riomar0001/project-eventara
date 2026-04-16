@@ -3,7 +3,7 @@
 import type { FormEvent } from 'react';
 import { useState } from 'react';
 import type { GrantEffect, RoleAction, RolePermissionRequest, RoleRecordResponse } from '@/api/types.gen';
-import { RBAC_COPY, RBAC_PROTECTED_ROLE_DELETE_MESSAGE } from '@/constants/rbac-management';
+import { RBAC_COPY } from '@/constants/rbac-management';
 import { useRbacFeatures } from '@/hooks/use-rbac-features';
 import { useRbacRoles } from '@/hooks/use-rbac-roles';
 import { RbacDeleteDialog } from '../shared/rbac-delete-dialog';
