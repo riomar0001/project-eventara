@@ -90,7 +90,7 @@ export default function UserProfilePage() {
   const displayName = getDisplayName(user);
   const initials = getInitials(user);
   const handle = getProfileHandle(user);
-  const roleLabel = getRoleLabel(user.roleId);
+  const roleLabel = getRoleLabel(user.role);
 
   return (
     <div className="space-y-6">
@@ -107,17 +107,6 @@ export default function UserProfilePage() {
                 <p className="text-muted-foreground text-sm">{handle}</p>
                 <div className="flex flex-wrap items-center justify-center gap-2">
                   <Badge variant="outline">{roleLabel}</Badge>
-                  {user.doneOnboarding ? (
-                    <Badge variant="outline" className="gap-1">
-                      <ShieldCheck className="size-3" />
-                      Verified profile
-                    </Badge>
-                  ) : (
-                    <Badge variant="secondary" className="gap-1">
-                      <Sparkles className="size-3" />
-                      Setup needed
-                    </Badge>
-                  )}
                 </div>
               </div>
             </div>
