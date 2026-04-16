@@ -7,6 +7,7 @@ from app.application.use_cases.audit_log_usecase import (
     GetAuditLogsUseCase,
 )
 from app.application.use_cases.auth_usecase import AuthUseCase
+from app.application.use_cases.feature_usecase import FeatureManagementUseCase
 from app.application.use_cases.queue_usecase import (
     DeleteDeadJobUseCase,
     GetQueueStatsUseCase,
@@ -14,7 +15,7 @@ from app.application.use_cases.queue_usecase import (
     PurgeDeadJobsUseCase,
     RetryDeadJobUseCase,
 )
-from app.application.use_cases.role_usecase import UserRoleUseCase
+from app.application.use_cases.role_usecase import RoleManagementUseCase, UserRoleUseCase
 from app.application.use_cases.user_usecase import (
     ChangePasswordUseCase,
     CheckAliasUseCase,
@@ -120,6 +121,16 @@ def get_audit_logs_use_case(db: AsyncSession = Depends(get_db)) -> GetAuditLogsU
 def get_role_use_case(db: AsyncSession = Depends(get_db)) -> UserRoleUseCase:
     """Construct a ``UserRoleUseCase`` for role assignment and grant management."""
     return UserRoleUseCase(RoleRepository(db), db)
+
+
+def get_feature_management_use_case(db: AsyncSession = Depends(get_db)) -> FeatureManagementUseCase:
+    """Construct a ``FeatureManagementUseCase`` for RBAC feature CRUD."""
+    return FeatureManagementUseCase(RoleRepository(db), db)
+
+
+def get_role_management_use_case(db: AsyncSession = Depends(get_db)) -> RoleManagementUseCase:
+    """Construct a ``RoleManagementUseCase`` for RBAC role CRUD."""
+    return RoleManagementUseCase(RoleRepository(db), db)
 
 
 def get_queue_stats_use_case(request: Request) -> GetQueueStatsUseCase:
