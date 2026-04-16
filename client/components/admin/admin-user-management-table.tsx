@@ -263,52 +263,52 @@ export function AdminUserManagementTable({
       <Card className="border-0 bg-linear-to-br from-white via-white to-neutral-50 shadow-none ring-1 ring-neutral-200">
         <CardHeader className="border-b">
           <div className="flex items-start gap-4">
-            <div className="flex size-12 items-center justify-center rounded-2xl bg-amber-100 text-amber-700">
-              <Users className="size-5" />
-            </div>
-            <div className="space-y-1">
-              <CardTitle className="text-xl">User Management</CardTitle>
+            <div className="w-full space-y-1">
+              <div className="flex flex-row justify-between">
+                <CardTitle className="text-xl">User Management</CardTitle>
+                <CardAction>
+                  <Button variant="outline" size="sm" onClick={onRefresh} disabled={isLoading}>
+                    {isLoading ? <Loader2 className="size-4 animate-spin" /> : <RefreshCcw className="size-4" />}
+                    Refresh
+                  </Button>
+                </CardAction>
+              </div>
+
               <CardDescription>
                 Review user accounts, inspect complete profiles, manage access, send password reset links, and handle soft deletion within the 30-day grace
                 period.
               </CardDescription>
             </div>
           </div>
-          <CardAction>
-            <Button variant="outline" size="sm" onClick={onRefresh} disabled={isLoading}>
-              {isLoading ? <Loader2 className="size-4 animate-spin" /> : <RefreshCcw className="size-4" />}
-              Refresh
-            </Button>
-          </CardAction>
         </CardHeader>
         <CardContent className="grid gap-4 pt-6 md:grid-cols-3">
           <div className="rounded-2xl border border-neutral-200 bg-white p-4">
             <p className="text-muted-foreground text-xs font-medium tracking-[0.18em] uppercase">Total User</p>
-            <p className="mt-3 text-3xl font-semibold">{pagination.total_count}</p>
+            <p className="mt-3 text-2xl font-semibold md:text-3xl">{pagination.total_count}</p>
           </div>
           <div className="rounded-2xl border border-neutral-200 bg-white p-4">
             <p className="text-muted-foreground text-xs font-medium tracking-[0.18em] uppercase">Active User</p>
-            <p className="mt-3 text-3xl font-semibold">{activeUsersCount}</p>
+            <p className="mt-3 text-2xl font-semibold md:text-3xl">{activeUsersCount}</p>
           </div>
           <div className="rounded-2xl border border-neutral-200 bg-white p-4">
             <p className="text-muted-foreground text-xs font-medium tracking-[0.18em] uppercase">Delete User</p>
-            <p className="mt-3 text-3xl font-semibold">{deletedUsersCount}</p>
+            <p className="mt-3 text-2xl font-semibold md:text-3xl">{deletedUsersCount}</p>
           </div>
         </CardContent>
       </Card>
 
       <Card>
-        <CardHeader className="border-b">
-          <div>
+        <CardHeader className="flex flex-col items-start gap-4 border-b data-[slot=card-action]:grid-cols-none data-[slot=card-action]:has-[:data-[slot=card-action]]:grid-cols-none sm:flex-row sm:items-center sm:justify-between">
+          <div className="w-full">
             <CardTitle>All users</CardTitle>
             <CardDescription>Browse paginated user accounts and perform administrator actions quickly.</CardDescription>
           </div>
-          <CardAction className="flex items-center gap-2">
-            <div className="relative">
+          <CardAction className="col-start-1 row-start-2 flex w-full flex-col gap-2 self-stretch sm:col-start-2 sm:row-span-2 sm:row-start-1 sm:w-auto sm:flex-row sm:items-center sm:self-start sm:justify-self-end">
+            <div className="relative w-full sm:w-auto">
               <Search className="text-muted-foreground absolute top-1/2 left-3 size-3.5 -translate-y-1/2" />
               <Input
                 id="admin-user-search"
-                className="h-8 w-90 pl-8 text-sm"
+                className="h-8 w-full pl-8 text-sm sm:w-90"
                 placeholder="Search name, email, alias..."
                 value={search}
                 onChange={(e) => onSearchChange(e.target.value)}
@@ -325,7 +325,7 @@ export function AdminUserManagementTable({
               )}
             </div>
             <Select value={statusFilter ?? 'all'} onValueChange={(value) => onStatusFilterChange(value === 'all' ? undefined : (value as UserStatus))}>
-              <SelectTrigger id="admin-user-status-filter" className="h-8 w-36 text-sm">
+              <SelectTrigger id="admin-user-status-filter" className="h-8 w-full text-sm sm:w-36">
                 <SelectValue placeholder="All statuses" />
               </SelectTrigger>
               <SelectContent>
@@ -338,7 +338,7 @@ export function AdminUserManagementTable({
               </SelectContent>
             </Select>
             <Select value={roleFilter ?? 'all'} onValueChange={(value) => onRoleFilterChange(value === 'all' ? undefined : value)}>
-              <SelectTrigger id="admin-user-role-filter" className="h-8 w-36 text-sm">
+              <SelectTrigger id="admin-user-role-filter" className="h-8 w-full text-sm sm:w-36">
                 <SelectValue placeholder="All roles" />
               </SelectTrigger>
               <SelectContent>
