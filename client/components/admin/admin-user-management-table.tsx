@@ -118,7 +118,7 @@ export function AdminUserManagementTable({
             </div>
           ) : (
             <ScrollArea className="w-full">
-              <table className="w-full min-w-[760px] text-sm">
+              <table className="w-full min-w-190 text-sm">
                 <thead>
                   <tr className="bg-muted/40 text-muted-foreground border-y text-xs">
                     <th className="px-6 py-3 text-left font-medium">Name</th>
