@@ -20,13 +20,71 @@ class IRoleRepository(Protocol):
 
     async def lock_user(self, user_id: uuid.UUID) -> bool: ...
 
-    async def get_role_by_id(self, role_id: uuid.UUID) -> RoleEntity | None: ...
+    async def get_feature_by_id(self, feature_id: uuid.UUID, for_update: bool = False) -> FeatureEntity | None: ...
+
+    async def get_feature_by_slug(self, slug: str) -> FeatureEntity | None: ...
+
+    async def get_features_by_ids(self, feature_ids: list[uuid.UUID], for_update: bool = False) -> list[FeatureEntity]: ...
+
+    async def list_all_features(self) -> list[FeatureEntity]: ...
+
+    async def create_feature_definition(
+        self,
+        slug: str,
+        name: str,
+        description: str | None,
+        is_enabled: bool,
+    ) -> FeatureEntity: ...
+
+    async def update_feature_definition(
+        self,
+        feature_id: uuid.UUID,
+        slug: str,
+        name: str,
+        description: str | None,
+        is_enabled: bool,
+    ) -> FeatureEntity | None: ...
+
+    async def get_feature_dependency_counts(self, feature_id: uuid.UUID) -> tuple[int, int]: ...
+
+    async def delete_feature_definition(self, feature_id: uuid.UUID) -> bool: ...
+
+    async def get_role_by_id(self, role_id: uuid.UUID, for_update: bool = False) -> RoleEntity | None: ...
+
+    async def get_role_by_name(self, name: str) -> RoleEntity | None: ...
 
     async def list_roles(self) -> list[RoleEntity]: ...
 
     async def get_role_permissions(self, role_id: uuid.UUID) -> list[RolePermissionSummary]: ...
 
     async def list_role_permissions(self, role_ids: list[uuid.UUID]) -> dict[uuid.UUID, list[RolePermissionSummary]]: ...
+
+    async def create_role_definition(
+        self,
+        name: str,
+        description: str | None,
+        is_default: bool,
+        is_system: bool,
+    ) -> RoleEntity: ...
+
+    async def update_role_definition(
+        self,
+        role_id: uuid.UUID,
+        name: str,
+        description: str | None,
+        is_default: bool,
+        is_system: bool,
+    ) -> RoleEntity | None: ...
+
+    async def replace_role_permissions(
+        self,
+        role_id: uuid.UUID,
+        permissions: list[tuple[uuid.UUID, RoleAction, GrantEffect]],
+    ) -> list[RolePermissionSummary]: ...
+
+    async def get_role_dependency_counts(self, role_id: uuid.UUID) -> tuple[int, int]: ...
+
+    async def delete_role_definition(self, role_id: uuid.UUID) -> bool: ...
 
     async def feature_exists(self, feature_id: uuid.UUID) -> bool: ...
 
