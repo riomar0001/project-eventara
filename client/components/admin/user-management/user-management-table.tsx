@@ -139,7 +139,7 @@ export function AdminUserManagementTable({
       </Card>
 
       <Card className="border-0 bg-white shadow-none ring-1 ring-neutral-200">
-        <CardHeader className="flex flex-col items-start gap-4 border-b data-[slot=card-action]:grid-cols-none data-[slot=card-action]:has-[:data-[slot=card-action]]:grid-cols-none sm:flex-row sm:items-center sm:justify-between">
+        <CardHeader className="flex flex-col items-start gap-4 border-b sm:flex-row sm:items-center sm:justify-between">
           <div className="w-full">
             <CardTitle>All users</CardTitle>
             <CardDescription>Browse paginated user accounts and perform administrator actions quickly.</CardDescription>
