@@ -157,6 +157,7 @@ export function AdminUserManagementTable({
                             </Avatar>
                             <div className="space-y-1">
                               <p className="font-medium text-neutral-900">{user.name}</p>
+                              {user.alias ? <p className="text-muted-foreground text-xs">@{user.alias}</p> : null}
                               <p className="text-muted-foreground text-xs">{user.user_id}</p>
                             </div>
                           </div>

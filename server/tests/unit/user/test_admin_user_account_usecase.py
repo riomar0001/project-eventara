@@ -99,6 +99,7 @@ class TestAdminUserAccountUseCase:
         summary = AdminUserAccountSummary(
             user_id=uuid.uuid4(),
             name="Jane Doe",
+            alias="jane",
             email="jane@example.com",
             role_id=None,
             role_name="participant",

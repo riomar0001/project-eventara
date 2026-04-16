@@ -717,6 +717,7 @@ export const zAdminUserAccountDetailResponse = z.object({
 export const zAdminUserAccountSummaryResponse = z.object({
     user_id: z.uuid(),
     name: z.string(),
+    alias: z.string().nullish(),
     email: z.string(),
     role_id: z.uuid().nullish(),
     role_name: z.string().nullish(),

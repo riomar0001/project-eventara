@@ -108,7 +108,7 @@ export function RolePermissionList({
   return (
     <div className={cn('space-y-2', className)}>
       {groupedPermissions.map((group) => (
-        <div key={group.featureSlug} className="rounded-xl bg-neutral-50 px-3 py-2.5">
+        <div key={group.featureSlug} className="rounded-xl bg-neutral-50 px-3 py-2.5 border">
           <div className="flex items-center justify-between gap-3">
             <p className="text-sm font-medium text-neutral-900">{group.featureName}</p>
             <Badge variant="secondary" className="bg-white text-[10px] text-neutral-500 shadow-xs">

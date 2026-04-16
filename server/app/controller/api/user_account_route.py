@@ -121,6 +121,7 @@ async def list_user_accounts(
             AdminUserAccountSummaryResponse(
                 user_id=user.user_id,
                 name=user.name,
+                alias=user.alias,
                 email=user.email,
                 role_id=user.role_id,
                 role_name=user.role_name,

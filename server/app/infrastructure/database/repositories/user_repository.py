@@ -223,6 +223,7 @@ class UserRepository:
                 AdminUserAccountSummary(
                     user_id=row["user_id"],
                     name=self._build_display_name(row["first_name"], row["last_name"], row["alias"], row["email"]),
+                    alias=row["alias"],
                     email=row["email"],
                     role_id=row["role_id"],
                     role_name=row["role_name"],

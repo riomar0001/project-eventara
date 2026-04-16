@@ -24,6 +24,7 @@ class RolePermissionSummary:
 class AdminUserAccountSummary:
     user_id: uuid.UUID
     name: str
+    alias: str | None
     email: str
     role_id: uuid.UUID | None
     role_name: str | None

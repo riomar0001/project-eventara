@@ -87,11 +87,10 @@ export function AdminUserAccountDialogs({
             </DialogDescription>
           </DialogHeader>
 
-          <ScrollArea className="max-h-[calc(85vh-5.75rem)] pb-10">
+          <ScrollArea className="max-h-[calc(85vh-5.75rem)]">
             <form className="space-y-4 px-5 pb-5" onSubmit={onRoleSubmit}>
               <div className="rounded-xl bg-neutral-50 px-4 py-3">
                 <div className="flex flex-col gap-1">
-                  <p className="text-xs font-semibold tracking-[0.16em] text-neutral-500 uppercase">Current account</p>
                   <div className="space-y-1">
                     <p className="text-sm font-semibold text-neutral-950">{roleDialogUser?.name ?? 'Selected user'}</p>
                     <p className="text-xs text-neutral-500">Current role: {humanizeRoleName(roleDialogUser?.role_name, 'No assigned role')}</p>
@@ -123,8 +122,8 @@ export function AdminUserAccountDialogs({
               </div>
 
               {selectedRole ? (
-                <div className="rounded-xlpx-4 py-3">
-                  <div className="space-y-3">
+                <div className="rounded-xl py-3 border p-4">
+                  <div className="space-y-10">
                     <div className="space-y-1">
                       <div className="flex flex-wrap items-center gap-2">
                         <p className="text-sm font-semibold text-neutral-950">{humanizeRoleName(selectedRole.name)}</p>
@@ -140,9 +139,13 @@ export function AdminUserAccountDialogs({
                       </p>
                     </div>
                     <div>
-                      <p className="text-xs font-semibold tracking-[0.16em] text-neutral-500 uppercase">Included permissions</p>
+                      <p className="text-xs font-semibold tracking-[0.16em] text-neutral-500 uppercase pb-3">Included permissions</p>
+                      <ScrollArea className="max-h-64 rounded-md overflow-y-auto">
+                        <div className="p-3">
+                          <RolePermissionList permissions={selectedRole.permissions} />
+                        </div>
+                      </ScrollArea>
                     </div>
-                    <RolePermissionList permissions={selectedRole.permissions} />
                   </div>
                 </div>
               ) : (

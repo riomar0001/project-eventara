@@ -22,6 +22,7 @@ UtcJsonDatetime = Annotated[
 class AdminUserAccountSummaryResponse(BaseModel):
     user_id: uuid.UUID
     name: str
+    alias: str | None = None
     email: str
     role_id: uuid.UUID | None = None
     role_name: str | None = None
