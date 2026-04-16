@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -112,7 +112,7 @@ class TestAdminUserAccountUseCase:
                     user_id=user.id,
                     role_id=uuid.uuid4(),
                     assigned_by=uuid.uuid4(),
-                    assigned_at=datetime.utcnow(),
+                    assigned_at=datetime.now(timezone.utc),
                 )
             ]
         )
@@ -161,7 +161,7 @@ class TestAdminUserAccountUseCase:
                     user_id=user.id,
                     role_id=role_id,
                     assigned_by=uuid.uuid4(),
-                    assigned_at=datetime.utcnow(),
+                    assigned_at=datetime.now(timezone.utc),
                 )
             ]
         )

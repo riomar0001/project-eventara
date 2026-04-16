@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from uuid import uuid4
 
 from sqlalchemy import (
@@ -185,7 +185,7 @@ class UserRole(Base):
     role_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("roles.id", ondelete="CASCADE"))
     expires_at: Mapped[datetime | None] = mapped_column(DateTime)
     assigned_by: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("users.id"), nullable=True)
-    assigned_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    assigned_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc).replace(tzinfo=None))
 
     # Relationships
     user: Mapped[User] = relationship(back_populates="roles", foreign_keys=[user_id])
@@ -242,7 +242,7 @@ class Token(Base):
     expires_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     last_used_at: Mapped[datetime | None] = mapped_column(DateTime)
 
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc).replace(tzinfo=None))
 
     user: Mapped[User] = relationship(back_populates="tokens", foreign_keys=[user_id])
 

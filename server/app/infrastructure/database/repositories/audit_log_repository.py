@@ -2,9 +2,11 @@ import base64
 import json
 import uuid
 from datetime import datetime
+from typing import Optional
 
 from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from pydantic import AwareDatetime
 
 from app.domain.entities.audit_log import ActionType, AuditLogStatus
 from app.domain.entities.audit_log import AuditLog as DomainAuditLog
@@ -48,8 +50,8 @@ class AuditLogRepository:
         user_id: uuid.UUID | None,
         action_type: ActionType | None,
         resource_type: str | None,
-        start_date: datetime | None,
-        end_date: datetime | None,
+        start_date: Optional[AwareDatetime],
+        end_date: Optional[AwareDatetime],
     ) -> int:
         query = select(func.count(AuditLog.id))
         filters = self._build_filters(user_id, action_type, resource_type, start_date, end_date)
@@ -67,8 +69,8 @@ class AuditLogRepository:
         user_id: uuid.UUID | None,
         action_type: ActionType | None,
         resource_type: str | None,
-        start_date: datetime | None,
-        end_date: datetime | None,
+        start_date: Optional[AwareDatetime],
+        end_date: Optional[AwareDatetime],
     ) -> tuple[list[DomainAuditLog], int, str | None, str | None]:
         query = select(AuditLog).order_by(AuditLog.timestamp.desc(), AuditLog.id.desc())
 
@@ -119,8 +121,8 @@ class AuditLogRepository:
         user_id: uuid.UUID | None,
         action_type: ActionType | None,
         resource_type: str | None,
-        start_date: datetime | None,
-        end_date: datetime | None,
+        start_date: Optional[AwareDatetime],
+        end_date: Optional[AwareDatetime],
     ) -> list:
         filters = []
 

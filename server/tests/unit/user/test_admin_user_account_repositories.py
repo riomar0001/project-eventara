@@ -1,5 +1,5 @@
 import uuid
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock
 
 from app.domain.entities.user_entity import UserStatus
@@ -16,7 +16,7 @@ class TestRoleRepositoryAdminFlows:
 
         def add_assignment(assignment):
             assignment.id = uuid.uuid4()
-            assignment.assigned_at = datetime.now(UTC)
+            assignment.assigned_at = datetime.now(timezone.utc)
 
         db.add = MagicMock(side_effect=add_assignment)
         repository = RoleRepository(db)
@@ -43,7 +43,7 @@ class TestUserRepositoryAdminFlows:
         user = User(email="old@example.com", password="hashed_password", status=UserStatus.ACTIVE)
         user.id = uuid.uuid4()
         user.onboarding_completed = False
-        security = UserSecurity(user_id=user.id, email_verified=True, email_verified_at=datetime.now(UTC))
+        security = UserSecurity(user_id=user.id, email_verified=True, email_verified_at=datetime.now(timezone.utc))
         execute_result = MagicMock()
         execute_result.scalar_one_or_none.return_value = security
         db = MagicMock()

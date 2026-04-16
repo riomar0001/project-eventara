@@ -6,6 +6,7 @@ import type {
   AdminUserAccountPaginationResponse as AdminUserAccountPagination,
   AdminUserAccountSummaryResponse as AdminUserAccountSummary
 } from '@/api/types.gen';
+import { getAccessToken } from '@/store/auth-store';
 
 function extractErrorMessage(payload: unknown): string | undefined {
   if (!payload || typeof payload !== 'object') return undefined;
@@ -71,10 +72,15 @@ export function useAdminUserAccounts(page: number, pageSize: number = 10) {
       setError(null);
 
       try {
+        const accessToken = getAccessToken();
+
         const result = await AdminUserAccounts.listUserAccountsUserAccountsGet({
           query: {
             page,
             page_size: pageSize
+          },
+          headers: {
+            Authorization: `Bearer ${accessToken}`
           },
           throwOnError: false
         });

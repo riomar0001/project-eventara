@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import StrEnum
 
 from pydantic import BaseModel, Field
@@ -53,7 +53,7 @@ class UserRole(BaseModel):
     role_id: uuid.UUID
     expires_at: datetime | None = None
     assigned_by: uuid.UUID | None = None
-    assigned_at: datetime = Field(default_factory=datetime.utcnow)
+    assigned_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
     model_config = {"from_attributes": True}
 

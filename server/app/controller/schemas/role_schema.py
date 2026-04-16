@@ -1,7 +1,8 @@
 import uuid
 from datetime import datetime
+from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import AwareDatetime, BaseModel, Field
 
 from app.domain.entities.authorization_entities import GrantEffect, RoleAction
 
@@ -9,11 +10,11 @@ from app.domain.entities.authorization_entities import GrantEffect, RoleAction
 class AssignRoleRequest(BaseModel):
     user_id: uuid.UUID
     role_id: uuid.UUID
-    expires_at: datetime | None = None
+    expires_at: Optional[AwareDatetime] = None
 
 
 class UpdateAssignmentRequest(BaseModel):
-    expires_at: datetime | None = Field(
+    expires_at: Optional[AwareDatetime] = Field(
         default=...,
         description="New expiry date for the assignment. Pass null to remove the expiry.",
     )
@@ -46,7 +47,7 @@ class CreateGrantsRequest(BaseModel):
         description="One or more role actions to grant. Duplicates within the list are ignored.",
     )
     effect: GrantEffect = GrantEffect.ALLOW
-    expires_at: datetime | None = None
+    expires_at: Optional[AwareDatetime] = None
     reason: str | None = Field(default=None, max_length=500)
 
 

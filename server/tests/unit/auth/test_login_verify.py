@@ -1,4 +1,4 @@
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import uuid
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -37,6 +37,7 @@ class TestLoginVerify:
 
         repo = MagicMock()
         repo.get_by_id = AsyncMock(return_value=user)
+        repo.get_active_role_name_by_user_id = AsyncMock(return_value=None)
         repo.get_profile_by_user_id = AsyncMock(return_value=profile)
         repo.reset_failed_login = AsyncMock()
         repo.record_login = AsyncMock()
@@ -112,8 +113,8 @@ class TestLoginVerify:
 
     async def test_raises_when_deletion_grace_period_expired(self):
         user = make_user(
-            deletion_requested_at=datetime.now(UTC) - timedelta(days=31),
-            deletion_scheduled_for=datetime.now(UTC) - timedelta(days=1),
+            deletion_requested_at=datetime.now(timezone.utc) - timedelta(days=31),
+            deletion_scheduled_for=datetime.now(timezone.utc) - timedelta(days=1),
         )
         payload = make_token_payload(user.id)
 

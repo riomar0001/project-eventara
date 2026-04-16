@@ -10,6 +10,7 @@ import type {
   DeleteAccountResponse as ScheduleAccountDeletionResponse,
   SendUserPasswordResetResponse
 } from '@/api/types.gen';
+import { getAccessToken } from '@/store/auth-store';
 
 type PendingAction = 'role' | 'email' | 'password-reset' | 'delete' | null;
 
@@ -66,7 +67,10 @@ export function useAdminUserAccountActions() {
     setRolesError(null);
 
     try {
-      const result = await AdminUserAccounts.listRolesUserAccountsRolesGet({ throwOnError: false });
+      const result = await AdminUserAccounts.listRolesUserAccountsRolesGet({
+        headers: { Authorization: `Bearer ${getAccessToken()}` },
+        throwOnError: false
+      });
 
       if (!result.data) {
         throw result.error ?? new Error('Unable to load roles right now.');
@@ -90,6 +94,7 @@ export function useAdminUserAccountActions() {
       const result = await AdminUserAccounts.changeUserRoleUserAccountsUserIdRolePatch({
         body: { role_id: roleId },
         path: { user_id: userId },
+        headers: { Authorization: `Bearer ${getAccessToken()}` },
         throwOnError: false
       });
 
@@ -117,6 +122,7 @@ export function useAdminUserAccountActions() {
       const result = await AdminUserAccounts.changeUserEmailUserAccountsUserIdEmailPatch({
         body: { email },
         path: { user_id: userId },
+        headers: { Authorization: `Bearer ${getAccessToken()}` },
         throwOnError: false
       });
 
@@ -143,6 +149,7 @@ export function useAdminUserAccountActions() {
     try {
       const result = await AdminUserAccounts.sendUserPasswordResetUserAccountsUserIdPasswordResetPost({
         path: { user_id: userId },
+        headers: { Authorization: `Bearer ${getAccessToken()}` },
         throwOnError: false
       });
 
@@ -170,6 +177,7 @@ export function useAdminUserAccountActions() {
       const result = await User.scheduleAdminAccountDeletionUserTargetUserIdAccountDeletionPost({
         body: { reason },
         path: { target_user_id: userId },
+        headers: { Authorization: `Bearer ${getAccessToken()}` },
         throwOnError: false
       });
 

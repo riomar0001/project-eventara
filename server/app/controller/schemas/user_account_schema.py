@@ -1,9 +1,21 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
+from typing import Annotated
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, PlainSerializer
 
 from app.domain.entities.user_entity import AgeGroup, EducationLevel, Gender, UserStatus
+
+
+def _serialize_datetime_as_utc_z(value: datetime) -> str:
+    normalized = value.replace(tzinfo=timezone.utc) if value.tzinfo is None else value.astimezone(timezone.utc)
+    return normalized.isoformat().replace("+00:00", "Z")
+
+
+UtcJsonDatetime = Annotated[
+    datetime,
+    PlainSerializer(_serialize_datetime_as_utc_z, return_type=str, when_used="json"),
+]
 
 
 class AdminUserAccountSummaryResponse(BaseModel):
@@ -13,7 +25,7 @@ class AdminUserAccountSummaryResponse(BaseModel):
     role_id: uuid.UUID | None = None
     role_name: str | None = None
     status: UserStatus
-    deletion_scheduled_for: datetime | None = None
+    deletion_scheduled_for: UtcJsonDatetime | None = None
 
 
 class AdminUserAccountPaginationResponse(BaseModel):
@@ -48,22 +60,22 @@ class AdminUserAccountDetailResponse(BaseModel):
     occupation: str | None = None
     bio: str | None = None
     onboarding_completed: bool
-    onboarding_completed_at: datetime | None = None
+    onboarding_completed_at: UtcJsonDatetime | None = None
     email_verified: bool
-    email_verified_at: datetime | None = None
-    password_change_at: datetime | None = None
+    email_verified_at: UtcJsonDatetime | None = None
+    password_change_at: UtcJsonDatetime | None = None
     failed_login_attempts: int
-    locked_until: datetime | None = None
-    last_login_at: datetime | None = None
-    last_activity_at: datetime | None = None
+    locked_until: UtcJsonDatetime | None = None
+    last_login_at: UtcJsonDatetime | None = None
+    last_activity_at: UtcJsonDatetime | None = None
     login_count: int
-    deletion_requested_at: datetime | None = None
-    deletion_scheduled_for: datetime | None = None
+    deletion_requested_at: UtcJsonDatetime | None = None
+    deletion_scheduled_for: UtcJsonDatetime | None = None
     deletion_requested_by: uuid.UUID | None = None
     deletion_reason: str | None = None
-    deleted_at: datetime | None = None
-    created_at: datetime | None = None
-    updated_at: datetime | None = None
+    deleted_at: UtcJsonDatetime | None = None
+    created_at: UtcJsonDatetime | None = None
+    updated_at: UtcJsonDatetime | None = None
 
 
 class AssignableRoleResponse(BaseModel):

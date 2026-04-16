@@ -20,7 +20,7 @@ signature, expiry, and the ``type`` claim in one place.
 """
 
 import uuid
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import jwt
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -60,7 +60,7 @@ def create_access_token(
     Returns:
         A signed JWT string ready to be sent in the ``Authorization: Bearer`` header.
     """
-    now = datetime.now(UTC)
+    now = datetime.now(timezone.utc)
 
     payload = {
         "sub": str(user_id),
@@ -127,7 +127,7 @@ async def create_refresh_token(user_id: uuid.UUID, db: AsyncSession) -> str:
     Returns:
         The plaintext signed JWT to be delivered to the client.
     """
-    now = datetime.now(UTC)
+    now = datetime.now(timezone.utc)
     token_id = uuid.uuid4()
     payload = {
         "sub": str(user_id),
@@ -188,7 +188,7 @@ def verification_token(user_id: uuid.UUID, email: str) -> str:
     Returns:
         A signed JWT string to be included in the verification link.
     """
-    now = datetime.now(UTC)
+    now = datetime.now(timezone.utc)
     payload = {
         "sub": str(user_id),
         "email": email,
@@ -238,7 +238,7 @@ def create_otp_token(user_id: uuid.UUID, email: str) -> str:
         A signed JWT string to be returned to the client and submitted
         alongside the OTP code at ``/auth/login/verify``.
     """
-    now = datetime.now(UTC)
+    now = datetime.now(timezone.utc)
     payload = {
         "sub": str(user_id),
         "email": email,
@@ -287,7 +287,7 @@ def create_password_reset_token(user_id: uuid.UUID, email: str) -> str:
         A signed JWT string to be included in the password reset link emailed
         to the user.
     """
-    now = datetime.now(UTC)
+    now = datetime.now(timezone.utc)
     payload = {
         "sub": str(user_id),
         "email": email,

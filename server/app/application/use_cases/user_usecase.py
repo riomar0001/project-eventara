@@ -1,5 +1,5 @@
 import uuid
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from arq.connections import ArqRedis
 from sqlalchemy.exc import IntegrityError
@@ -245,7 +245,7 @@ class DeleteAccountUseCase:
 
     @staticmethod
     def _utcnow_naive() -> datetime:
-        return datetime.now(UTC).replace(tzinfo=None)
+        return datetime.now(timezone.utc).replace(tzinfo=None)
 
     async def request_self_service_deletion(self, data: RequestAccountDeletionInput) -> RequestAccountDeletionOutput:
         """Validate the caller's password and schedule their own account deletion.
@@ -356,7 +356,7 @@ class DeleteAccountUseCase:
             scheduled_user.deletion_requested_at.isoformat(),
             scheduled_user.deletion_scheduled_for.isoformat(),
             _job_id=f"account-deletion:{scheduled_user.id}:{scheduled_user.deletion_requested_at.isoformat()}",
-            _defer_until=scheduled_user.deletion_scheduled_for.replace(tzinfo=UTC),
+            _defer_until=scheduled_user.deletion_scheduled_for.replace(tzinfo=timezone.utc),
             _expires=timedelta(days=2),
         )
 

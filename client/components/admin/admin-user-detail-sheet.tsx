@@ -1,7 +1,7 @@
 'use client';
 
 import { RefreshCcw, ShieldX } from 'lucide-react';
-import { DetailField, formatDateTime, getInitials, humanizeValue, UserStatusBadge } from '@/components/admin/admin-user-management-ui';
+import { formatDateTime, getInitials, humanizeValue, UserStatusBadge } from '@/components/admin/admin-user-management-ui';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -19,10 +19,19 @@ interface AdminUserDetailSheetProps {
   open: boolean;
 }
 
+function DetailItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="min-w-0">
+      <p className="text-muted-foreground text-xs">{label}</p>
+      <p className="mt-2 text-sm font-medium wrap-break-word text-neutral-900">{value}</p>
+    </div>
+  );
+}
+
 export function AdminUserDetailSheet({ detail, error, isLoading, onOpenChange, onRefresh, open }: AdminUserDetailSheetProps) {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="sm:max-w-2xl">
+      <SheetContent className="data-[side=right]:w-full data-[side=right]:sm:max-w-4xl">
         <SheetHeader className="border-b">
           <SheetTitle>User details</SheetTitle>
           <SheetDescription>Full administrative profile, security, activity, and deletion metadata for the selected account.</SheetDescription>
@@ -79,65 +88,79 @@ export function AdminUserDetailSheet({ detail, error, isLoading, onOpenChange, o
                 </div>
 
                 <div className="space-y-3">
-                  <div>
+                  <div className="rounded-xl border border-neutral-200 bg-white p-4">
+                    <div>
                     <p className="text-sm font-medium">Profile</p>
                     <p className="text-muted-foreground text-xs">Identity, onboarding, and personal details.</p>
+                    </div>
+                    <div className="mt-6 grid gap-x-10 gap-y-8 md:grid-cols-2">
+                      <DetailItem label="User ID" value={detail.user_id} />
+                      <DetailItem label="Alias" value={detail.alias ? `@${detail.alias}` : 'Not set'} />
+                      <DetailItem label="First Name" value={detail.first_name ?? 'Not set'} />
+                      <DetailItem label="Last Name" value={detail.last_name ?? 'Not set'} />
+                      <DetailItem label="Age Group" value={humanizeValue(detail.age_group)} />
+                      <DetailItem label="Gender" value={humanizeValue(detail.gender)} />
+                      <DetailItem label="Education" value={humanizeValue(detail.education_level)} />
+                      <DetailItem label="Occupation" value={detail.occupation ?? 'Not set'} />
+                      <DetailItem label="Onboarding" value={detail.onboarding_completed ? 'Completed' : 'Pending'} />
+                      <DetailItem label="Onboarded At" value={formatDateTime(detail.onboarding_completed_at)} />
+                    </div>
+                    <div className="mt-8 rounded-2xl bg-neutral-50 px-4 py-3">
+                      <p className="text-muted-foreground text-xs font-medium tracking-[0.16em] uppercase">Bio</p>
+                      <p className="mt-2 text-sm leading-6">{detail.bio?.trim() ? detail.bio : 'Not set'}</p>
+                    </div>
                   </div>
-                  <div className="grid gap-3 md:grid-cols-2">
-                    <DetailField label="User ID" value={detail.user_id} />
-                    <DetailField label="Alias" value={detail.alias ? `@${detail.alias}` : 'Not set'} />
-                    <DetailField label="First name" value={detail.first_name ?? 'Not set'} />
-                    <DetailField label="Last name" value={detail.last_name ?? 'Not set'} />
-                    <DetailField label="Age group" value={humanizeValue(detail.age_group)} />
-                    <DetailField label="Gender" value={humanizeValue(detail.gender)} />
-                    <DetailField label="Education" value={humanizeValue(detail.education_level)} />
-                    <DetailField label="Occupation" value={detail.occupation ?? 'Not set'} />
-                    <DetailField label="Onboarding" value={detail.onboarding_completed ? 'Completed' : 'Pending'} />
-                    <DetailField label="Onboarded at" value={formatDateTime(detail.onboarding_completed_at)} />
-                  </div>
-                  <DetailField label="Bio" value={detail.bio?.trim() ? detail.bio : 'Not set'} />
                 </div>
 
                 <div className="space-y-3">
-                  <div>
+                  <div className="rounded-xl border border-neutral-200 bg-white p-4">
+                    <div>
                     <p className="text-sm font-medium">Security</p>
                     <p className="text-muted-foreground text-xs">Verification, password, and account protection signals.</p>
-                  </div>
-                  <div className="grid gap-3 md:grid-cols-2">
-                    <DetailField label="Email verified" value={detail.email_verified ? 'Yes' : 'No'} />
-                    <DetailField label="Verified at" value={formatDateTime(detail.email_verified_at)} />
-                    <DetailField label="Password changed" value={formatDateTime(detail.password_change_at)} />
-                    <DetailField label="Failed login attempts" value={detail.failed_login_attempts.toString()} />
-                    <DetailField label="Locked until" value={formatDateTime(detail.locked_until)} />
-                    <DetailField label="Current role" value={detail.role_name ?? 'No role assigned'} />
+                    </div>
+                    <div className="mt-6 grid gap-x-10 gap-y-8 md:grid-cols-2">
+                      <DetailItem label="Email Verified" value={detail.email_verified ? 'Yes' : 'No'} />
+                      <DetailItem label="Verified At" value={formatDateTime(detail.email_verified_at)} />
+                      <DetailItem label="Password Changed" value={formatDateTime(detail.password_change_at)} />
+                      <DetailItem label="Failed Login Attempts" value={detail.failed_login_attempts.toString()} />
+                      <DetailItem label="Locked Until" value={formatDateTime(detail.locked_until)} />
+                      <DetailItem label="Current Role" value={detail.role_name ?? 'No role assigned'} />
+                    </div>
                   </div>
                 </div>
 
                 <div className="space-y-3">
-                  <div>
+                  <div className="rounded-xl border border-neutral-200 bg-white p-4">
+                    <div>
                     <p className="text-sm font-medium">Activity</p>
                     <p className="text-muted-foreground text-xs">Latest account activity and session history counters.</p>
-                  </div>
-                  <div className="grid gap-3 md:grid-cols-2">
-                    <DetailField label="Last login" value={formatDateTime(detail.last_login_at)} />
-                    <DetailField label="Last activity" value={formatDateTime(detail.last_activity_at)} />
-                    <DetailField label="Login count" value={detail.login_count.toString()} />
-                    <DetailField label="Created at" value={formatDateTime(detail.created_at)} />
-                    <DetailField label="Updated at" value={formatDateTime(detail.updated_at)} />
-                    <DetailField label="Deleted at" value={formatDateTime(detail.deleted_at)} />
+                    </div>
+                    <div className="mt-6 grid gap-x-10 gap-y-8 md:grid-cols-2">
+                      <DetailItem label="Last Login" value={formatDateTime(detail.last_login_at)} />
+                      <DetailItem label="Last Activity" value={formatDateTime(detail.last_activity_at)} />
+                      <DetailItem label="Login Count" value={detail.login_count.toString()} />
+                      <DetailItem label="Created At" value={formatDateTime(detail.created_at)} />
+                      <DetailItem label="Updated At" value={formatDateTime(detail.updated_at)} />
+                      <DetailItem label="Deleted At" value={formatDateTime(detail.deleted_at)} />
+                    </div>
                   </div>
                 </div>
 
                 <div className="space-y-3">
-                  <div>
+                  <div className="rounded-xl border border-neutral-200 bg-white p-4">
+                    <div>
                     <p className="text-sm font-medium">Deletion state</p>
                     <p className="text-muted-foreground text-xs">Pending deletion requests, reason, and final deletion timestamp.</p>
-                  </div>
-                  <div className="grid gap-3 md:grid-cols-2">
-                    <DetailField label="Requested at" value={formatDateTime(detail.deletion_requested_at)} />
-                    <DetailField label="Scheduled for" value={formatDateTime(detail.deletion_scheduled_for)} />
-                    <DetailField label="Requested by" value={detail.deletion_requested_by ?? 'Not available'} />
-                    <DetailField label="Deletion reason" value={detail.deletion_reason ?? 'Not provided'} />
+                    </div>
+                    <div className="mt-6 grid gap-x-10 gap-y-8 md:grid-cols-2">
+                      <DetailItem label="Requested At" value={formatDateTime(detail.deletion_requested_at)} />
+                      <DetailItem label="Scheduled For" value={formatDateTime(detail.deletion_scheduled_for)} />
+                      <DetailItem label="Requested By" value={detail.deletion_requested_by ?? 'Not available'} />
+                    </div>
+                    <div className="mt-8 rounded-2xl bg-neutral-50 px-4 py-3">
+                      <p className="text-muted-foreground text-xs font-medium tracking-[0.16em] uppercase">Deletion Reason</p>
+                      <p className="mt-2 text-sm leading-6">{detail.deletion_reason ?? 'Not provided'}</p>
+                    </div>
                   </div>
                 </div>
               </>

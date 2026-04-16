@@ -10,7 +10,7 @@ Usage (from server/):
 """
 
 import asyncio
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from uuid import UUID
 
 from sqlalchemy import select
@@ -45,7 +45,7 @@ def _log(msg: str) -> None:
 
 
 def _utcnow_naive() -> datetime:
-    return datetime.now(UTC).replace(tzinfo=None)
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
 async def _get_or_create_admin(session) -> UUID:

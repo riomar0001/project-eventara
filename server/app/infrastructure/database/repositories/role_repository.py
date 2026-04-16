@@ -1,6 +1,8 @@
 import uuid
-from datetime import UTC, datetime
+from datetime import datetime, timezone
+from typing import Optional
 
+from pydantic import AwareDatetime
 from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -40,14 +42,14 @@ class RoleRepository:
         self.db = db
 
     @staticmethod
-    def _as_naive_utc(value: datetime | None) -> datetime | None:
+    def _as_naive_utc(value: Optional[AwareDatetime]) -> datetime | None:
         if value is None:
             return None
-        return value.astimezone(UTC).replace(tzinfo=None) if value.tzinfo else value
+        return value.astimezone(timezone.utc).replace(tzinfo=None) if value.tzinfo else value
 
     @staticmethod
     def _utcnow_naive() -> datetime:
-        return datetime.now(UTC).replace(tzinfo=None)
+        return datetime.now(timezone.utc).replace(tzinfo=None)
 
     async def user_exists(self, user_id: uuid.UUID) -> bool:
         result = await self.db.execute(select(User.id).where(User.id == user_id))
@@ -96,7 +98,7 @@ class RoleRepository:
         self,
         user_id: uuid.UUID,
         role_id: uuid.UUID,
-        expires_at: datetime | None,
+        expires_at: Optional[AwareDatetime],
         assigned_by: uuid.UUID,
     ) -> DomainUserRole:
         orm = UserRole(
@@ -137,7 +139,7 @@ class RoleRepository:
         orm = result.scalar_one_or_none()
         return self._to_domain_role(orm) if orm else None
 
-    async def update_assignment_expiry(self, assignment_id: uuid.UUID, expires_at: datetime | None) -> DomainUserRole | None:
+    async def update_assignment_expiry(self, assignment_id: uuid.UUID, expires_at: Optional[AwareDatetime]) -> DomainUserRole | None:
         await self.db.execute(update(UserRole).where(UserRole.id == assignment_id).values(expires_at=self._as_naive_utc(expires_at)))
         await self.db.flush()
         result = await self.db.execute(select(UserRole).where(UserRole.id == assignment_id))
@@ -208,7 +210,7 @@ class RoleRepository:
         feature_id: uuid.UUID,
         actions: list[RoleAction],
         effect: GrantEffect,
-        expires_at: datetime | None,
+        expires_at: Optional[AwareDatetime],
         reason: str | None,
         granted_by: uuid.UUID,
     ) -> list[DomainUserGrant]:

@@ -1,6 +1,7 @@
 import uuid
-from datetime import datetime
-from typing import Protocol
+from typing import Optional, Protocol
+
+from pydantic import AwareDatetime
 
 from app.domain.entities.authorization_entities import GrantEffect, RoleAction
 from app.domain.entities.authorization_entities import Role as RoleEntity
@@ -31,7 +32,7 @@ class IRoleRepository(Protocol):
         self,
         user_id: uuid.UUID,
         role_id: uuid.UUID,
-        expires_at: datetime | None,
+        expires_at: Optional[AwareDatetime],
         assigned_by: uuid.UUID,
     ) -> UserRoleEntity: ...
 
@@ -39,7 +40,7 @@ class IRoleRepository(Protocol):
 
     async def get_assignment_by_id(self, assignment_id: uuid.UUID) -> UserRoleEntity | None: ...
 
-    async def update_assignment_expiry(self, assignment_id: uuid.UUID, expires_at: datetime | None) -> UserRoleEntity | None: ...
+    async def update_assignment_expiry(self, assignment_id: uuid.UUID, expires_at: Optional[AwareDatetime]) -> UserRoleEntity | None: ...
 
     async def delete_assignment(self, assignment_id: uuid.UUID) -> bool: ...
 
@@ -64,7 +65,7 @@ class IRoleRepository(Protocol):
         feature_id: uuid.UUID,
         actions: list[RoleAction],
         effect: GrantEffect,
-        expires_at: datetime | None,
+        expires_at: Optional[AwareDatetime],
         reason: str | None,
         granted_by: uuid.UUID,
     ) -> list[UserGrantEntity]: ...

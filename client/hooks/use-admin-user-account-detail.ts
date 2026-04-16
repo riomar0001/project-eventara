@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { AdminUserAccounts } from '@/api/sdk.gen';
 import type { AdminUserAccountDetailResponse as AdminUserAccountDetail } from '@/api/types.gen';
+import { getAccessToken } from '@/store/auth-store';
 
 function extractErrorMessage(payload: unknown): string | undefined {
   if (!payload || typeof payload !== 'object') return undefined;
@@ -65,8 +66,13 @@ export function useAdminUserAccountDetail(userId: string | null) {
       setError(null);
 
       try {
+        const accessToken = getAccessToken();
+
         const result = await AdminUserAccounts.getUserAccountDetailUserAccountsUserIdGet({
           path: { user_id: targetUserId },
+          headers: {
+            Authorization: `Bearer ${accessToken}`
+          },
           throwOnError: false
         });
 

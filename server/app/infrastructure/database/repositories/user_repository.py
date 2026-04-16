@@ -1,5 +1,5 @@
 import uuid
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from typing import cast
 
 from sqlalchemy import case, func, select, update
@@ -54,11 +54,11 @@ class UserRepository:
 
     @staticmethod
     def _utcnow_naive() -> datetime:
-        return datetime.now(UTC).replace(tzinfo=None)
+        return datetime.now(timezone.utc).replace(tzinfo=None)
 
     @staticmethod
     def _as_naive_utc(value: datetime) -> datetime:
-        return value.astimezone(UTC).replace(tzinfo=None) if value.tzinfo else value
+        return value.astimezone(timezone.utc).replace(tzinfo=None) if value.tzinfo else value
 
     @staticmethod
     def _build_display_name(

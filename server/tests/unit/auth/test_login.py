@@ -1,4 +1,4 @@
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -68,7 +68,7 @@ class TestLogin:
 
     async def test_raises_user_locked(self):
         user = make_user()
-        future = datetime.now(UTC) + timedelta(hours=1)
+        future = datetime.now(timezone.utc) + timedelta(hours=1)
         security = make_security(locked_until=future)
 
         repo = MagicMock()

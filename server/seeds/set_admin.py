@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import argparse
 import asyncio
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from uuid import UUID
 
 from sqlalchemy import select
@@ -36,7 +36,7 @@ def _log(message: str) -> None:
 
 
 def _utcnow_naive() -> datetime:
-    return datetime.now(UTC).replace(tzinfo=None)
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
 def parse_args() -> argparse.Namespace:
