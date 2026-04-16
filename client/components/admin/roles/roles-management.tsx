@@ -3,7 +3,7 @@
 import type { FormEvent } from 'react';
 import { useState } from 'react';
 import type { GrantEffect, RoleAction, RolePermissionRequest, RoleRecordResponse } from '@/api/types.gen';
-import { RBAC_COPY, RBAC_PROTECTED_ROLE_DELETE_MESSAGE, RBAC_PROTECTED_ROLE_NAME } from '@/constants/rbac-management';
+import { RBAC_COPY, RBAC_PROTECTED_ROLE_DELETE_MESSAGE } from '@/constants/rbac-management';
 import { useRbacFeatures } from '@/hooks/use-rbac-features';
 import { useRbacRoles } from '@/hooks/use-rbac-roles';
 import { RbacDeleteDialog } from '../shared/rbac-delete-dialog';
@@ -22,7 +22,7 @@ function buildPermissionsPayload(permissionDrafts: RolePermissionDraftMap): Role
 }
 
 function isProtectedRole(role: RoleRecordResponse) {
-  return role.is_system && role.name === RBAC_PROTECTED_ROLE_NAME;
+  return role.is_system && role.name === 'system_administrator';
 }
 
 export function RolesManagement() {
@@ -190,7 +190,7 @@ export function RolesManagement() {
       <RbacDeleteDialog
         description={
           rolePendingDelete
-            ? `${isProtectedRole(rolePendingDelete) ? RBAC_PROTECTED_ROLE_DELETE_MESSAGE : RBAC_COPY.roles.deleteDescription} Selected role: ${rolePendingDelete.name}.`
+            ? `${isProtectedRole(rolePendingDelete) ? 'System Administrator cannot be deleted.' : RBAC_COPY.roles.deleteDescription} Selected role: ${rolePendingDelete.name}.`
             : RBAC_COPY.roles.deleteDescription
         }
         isDeleting={isDeleting}

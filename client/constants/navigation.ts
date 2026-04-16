@@ -1,6 +1,6 @@
 import { ArrowLeftRight, Blocks, Calendar, FlaskConical, Headphones, LayoutDashboard, MapPin, Settings, ShieldCheck, User, Users } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import { RBAC_PAGE_PATHS } from '@/constants/rbac-management';
+import { EVENT_MANAGEMENT_PATHS } from '@/constants/event-management';
 
 type DashboardNavChild = {
   badge?: number;
@@ -31,16 +31,16 @@ export const dashboardNavGroups: DashboardNavGroup[] = [
   {
     label: 'Event Management',
     items: [
-      { label: 'Venue', icon: MapPin, href: '#' },
-      { label: 'Events', icon: Calendar, href: '#' },
-      { label: 'Volunteers', icon: Users, href: '#' }
+      { label: 'Venue', icon: MapPin, href: EVENT_MANAGEMENT_PATHS.venues },
+      { label: 'Events', icon: Calendar, href: EVENT_MANAGEMENT_PATHS.events },
+      { label: 'Volunteers', icon: Users, href: EVENT_MANAGEMENT_PATHS.volunteers }
     ]
   },
   {
     label: 'Administration',
     items: [
-      { label: 'Features', icon: Blocks, href: RBAC_PAGE_PATHS.features },
-      { label: 'Roles', icon: ShieldCheck, href: RBAC_PAGE_PATHS.roles },
+      { label: 'Features', icon: Blocks, href: '/admin/features' },
+      { label: 'Roles', icon: ShieldCheck, href: '/admin/roles' },
       { label: 'Users', icon: Users, href: '/admin/users' },
       {
         label: 'Accordion Parent',

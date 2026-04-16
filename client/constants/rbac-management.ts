@@ -1,16 +1,5 @@
 import type { GrantEffect, RoleAction } from '@/api/types.gen';
 
-export const RBAC_API_PATHS = {
-  features: '/features',
-  roles: '/roles'
-} as const;
-
-export const RBAC_PAGE_PATHS = {
-  features: '/admin/features',
-  roles: '/admin/roles'
-} as const;
-
-export const RBAC_PROTECTED_ROLE_NAME = 'system_administrator';
 export const RBAC_PROTECTED_ROLE_DELETE_MESSAGE = 'System Administrator cannot be deleted.';
 
 export const RBAC_ROLE_ACTIONS: RoleAction[] = ['create', 'read', 'update', 'delete'];

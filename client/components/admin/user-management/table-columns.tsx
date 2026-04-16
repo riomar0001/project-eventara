@@ -103,7 +103,7 @@ export function useAdminTableColumns({
           <div className="space-y-1">
             <UserStatusBadge status={row.original.status} />
             {row.original.deletion_scheduled_for ? (
-              <p className="text-muted-foreground text-xs">Scheduled {formatDateTime(row.original.deletion_scheduled_for)}</p>
+              <p className="text-muted-foreground text-xs">Scheduled Deletion on {formatDateTime(row.original.deletion_scheduled_for)}</p>
             ) : null}
           </div>
         ),

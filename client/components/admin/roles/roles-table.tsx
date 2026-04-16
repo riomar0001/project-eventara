@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import type { RoleRecordResponse } from '@/api/types.gen';
-import { RBAC_COPY, RBAC_PROTECTED_ROLE_DELETE_MESSAGE, RBAC_PROTECTED_ROLE_NAME } from '@/constants/rbac-management';
+import { RBAC_COPY, RBAC_PROTECTED_ROLE_DELETE_MESSAGE } from '@/constants/rbac-management';
 import { EmptyState, RbacHeroCard, RbacMetricStrip, averageActionsPerFeature, countAllowRules, countDenyRules, countPermissionFeatures, countPermissionRows, humanizeSlug } from '../shared/rbac-management-shared';
 
 interface RolesTableProps {
@@ -102,7 +102,7 @@ export function RolesTable({ error, isEmpty, isLoading, onCreate, onDelete, onEd
                       </TableRow>
                     ))
                   : roles.map((role) => {
-                      const isDeleteDisabled = role.is_system && role.name === RBAC_PROTECTED_ROLE_NAME;
+                      const isDeleteDisabled = role.is_system && role.name === 'system_administrator';
 
                       return (
                       <TableRow key={role.id} className="align-top hover:bg-neutral-50/70">
