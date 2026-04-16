@@ -1,13 +1,28 @@
 'use client';
 
-import { ChevronLeft, ChevronRight, Eye, KeyRound, Loader2, Mail, MoreHorizontal, RefreshCcw, ShieldCheck, ShieldPlus, ShieldX, Trash2, Users } from 'lucide-react';
+import * as React from 'react';
+import { flexRender, getCoreRowModel, useReactTable, type ColumnDef } from '@tanstack/react-table';
+import {
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+  KeyRound,
+  Loader2,
+  Mail,
+  MoreHorizontal,
+  RefreshCcw,
+  ShieldCheck,
+  ShieldPlus,
+  ShieldX,
+  Trash2,
+  Users
+} from 'lucide-react';
 import {
   formatDateTime,
   getInitials,
   humanizeRoleName,
   isSoftDeleteDisabled,
-  UserStatusBadge,
-  UserTableSkeleton
+  UserStatusBadge
 } from '@/components/admin/admin-user-management-ui';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -21,12 +36,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import type {
   AdminUserAccountPaginationResponse as AdminUserAccountPagination,
   AdminUserAccountSummaryResponse as AdminUserAccountSummary
 } from '@/api/types.gen';
 import { cn } from '@/lib/utils';
+
+type AdminTableColumnMeta = {
+  cellClassName?: string;
+  headerClassName?: string;
+};
 
 interface AdminUserManagementTableProps {
   error: string | null;
@@ -62,6 +83,143 @@ export function AdminUserManagementTable({
   const showingFrom = users.length === 0 ? 0 : (pagination.page - 1) * pagination.page_size + 1;
   const showingTo = users.length === 0 ? 0 : showingFrom + users.length - 1;
   const pageLabel = pagination.total_pages === 0 ? 0 : pagination.page;
+
+  const columns = React.useMemo<ColumnDef<AdminUserAccountSummary>[]>(
+    () => [
+      {
+        id: 'avatar',
+        cell: ({ row }) => (
+          <div className="flex items-center gap-3">
+            <Avatar>
+              <AvatarFallback>{getInitials(row.original.name)}</AvatarFallback>
+            </Avatar>
+          </div>
+        ),
+        header: () => null,
+        meta: {
+          headerClassName: 'w-16 pl-6',
+          cellClassName: 'pl-6'
+        }
+      },
+      {
+        accessorKey: 'user_id',
+        cell: ({ row }) => <p className="text-xs">{row.original.user_id}</p>,
+        header: 'ID'
+      },
+      {
+        accessorKey: 'alias',
+        cell: ({ row }) => <p className="text-sm text-neutral-900">@{row.original.alias ?? 'n/a'}</p>,
+        header: 'Alias'
+      },
+      {
+        accessorKey: 'name',
+        cell: ({ row }) => <p className="font-medium text-neutral-900">{row.original.name}</p>,
+        header: 'Name',
+        meta: {
+          cellClassName: 'px-6',
+          headerClassName: 'px-6'
+        }
+      },
+      {
+        accessorKey: 'email',
+        cell: ({ row }) => <p className="text-sm text-neutral-900">{row.original.email}</p>,
+        header: 'Email',
+        meta: {
+          cellClassName: 'px-6',
+          headerClassName: 'px-6'
+        }
+      },
+      {
+        accessorKey: 'role_name',
+        cell: ({ row }) => (
+          <Badge variant="outline" className="text-[11px]">
+            {humanizeRoleName(row.original.role_name)}
+          </Badge>
+        ),
+        header: 'Role',
+        meta: {
+          cellClassName: 'px-6',
+          headerClassName: 'px-6'
+        }
+      },
+      {
+        id: 'status',
+        cell: ({ row }) => (
+          <div className="space-y-1">
+            <UserStatusBadge status={row.original.status} />
+            {row.original.deletion_scheduled_for ? <p className="text-muted-foreground text-xs">Scheduled {formatDateTime(row.original.deletion_scheduled_for)}</p> : null}
+          </div>
+        ),
+        header: 'Status',
+        meta: {
+          cellClassName: 'px-6',
+          headerClassName: 'px-6'
+        }
+      },
+      {
+        id: 'actions',
+        cell: ({ row }) => {
+          const user = row.original;
+
+          return (
+            <div className="text-right">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon-sm">
+                    <MoreHorizontal className="size-4" />
+                    <span className="sr-only">Open actions</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-52">
+                  <DropdownMenuLabel>Account actions</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onSelect={() => onSelectUser(user.user_id)}>
+                    <Eye className="size-4" />
+                    View details
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => onOpenRoleDialog(user)}>
+                    <ShieldCheck className="size-4" />
+                    Change role
+                  </DropdownMenuItem>
+                  <DropdownMenuItem disabled={!user.role_id || user.status === 'deleted'} onSelect={() => onOpenSpecialPermissionDialog(user)}>
+                    <ShieldPlus className="size-4" />
+                    Special permission
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => onOpenEmailDialog(user)}>
+                    <Mail className="size-4" />
+                    Change email
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => onOpenPasswordResetDialog(user)}>
+                    <KeyRound className="size-4" />
+                    Reset password
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem variant="destructive" disabled={isSoftDeleteDisabled(user)} onSelect={() => onOpenDeleteDialog(user)}>
+                    <Trash2 className="size-4" />
+                    Soft delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          );
+        },
+        header: () => <div className="text-right">Actions</div>,
+        meta: {
+          cellClassName: 'px-6 text-right',
+          headerClassName: 'px-6 text-right'
+        }
+      }
+    ],
+    [onOpenDeleteDialog, onOpenEmailDialog, onOpenPasswordResetDialog, onOpenRoleDialog, onOpenSpecialPermissionDialog, onSelectUser]
+  );
+
+  // TanStack Table is intentionally used here for the shadcn data table pattern.
+  // eslint-disable-next-line react-hooks/incompatible-library
+  const table = useReactTable({
+    data: users,
+    columns,
+    getCoreRowModel: getCoreRowModel()
+  });
 
   return (
     <div className="space-y-6">
@@ -126,105 +284,79 @@ export function AdminUserManagementTable({
               </Button>
             </div>
           ) : (
-            <ScrollArea className="w-full">
-              <table className="w-full min-w-190 text-sm">
-                <thead>
-                  <tr className="bg-muted/40 text-muted-foreground border-y text-xs">
-                    <th className="px-6 py-3 text-left font-medium">Name</th>
-                    <th className="px-6 py-3 text-left font-medium">Email</th>
-                    <th className="px-6 py-3 text-left font-medium">Role</th>
-                    <th className="px-6 py-3 text-left font-medium">Status</th>
-                    <th className="px-6 py-3 text-right font-medium">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {isLoading ? (
-                    <UserTableSkeleton />
-                  ) : isEmpty ? (
-                    <tr>
-                      <td colSpan={5} className="px-6 py-14 text-center">
-                        <div className="space-y-2">
-                          <p className="text-base font-medium">No users found</p>
-                          <p className="text-muted-foreground text-sm">Try refreshing the table after new accounts are created.</p>
-                        </div>
-                      </td>
-                    </tr>
-                  ) : (
-                    users.map((user, index) => (
-                      <tr key={user.user_id} className={cn('border-b transition-colors hover:bg-neutral-50', index % 2 !== 0 && 'bg-neutral-50/40')}>
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <Avatar>
-                              <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
-                            </Avatar>
-                            <div className="space-y-1">
-                              <p className="font-medium text-neutral-900">{user.name}</p>
-                              {user.alias ? <p className="text-muted-foreground text-xs">@{user.alias}</p> : null}
-                              <p className="text-muted-foreground text-xs">{user.user_id}</p>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <p className="text-sm text-neutral-900">{user.email}</p>
-                        </td>
-                        <td className="px-6 py-4">
-                          <Badge variant="outline" className="text-[11px]">
-                            {humanizeRoleName(user.role_name)}
-                          </Badge>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="space-y-1">
-                            <UserStatusBadge status={user.status} />
-                            {user.deletion_scheduled_for ? (
-                              <p className="text-muted-foreground text-xs">Scheduled {formatDateTime(user.deletion_scheduled_for)}</p>
-                            ) : null}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon-sm">
-                                <MoreHorizontal className="size-4" />
-                                <span className="sr-only">Open actions</span>
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-52">
-                              <DropdownMenuLabel>Account actions</DropdownMenuLabel>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem onSelect={() => onSelectUser(user.user_id)}>
-                                <Eye className="size-4" />
-                                View details
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onSelect={() => onOpenRoleDialog(user)}>
-                                <ShieldCheck className="size-4" />
-                                Change role
-                              </DropdownMenuItem>
-                              <DropdownMenuItem disabled={!user.role_id || user.status === 'deleted'} onSelect={() => onOpenSpecialPermissionDialog(user)}>
-                                <ShieldPlus className="size-4" />
-                                Special permission
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onSelect={() => onOpenEmailDialog(user)}>
-                                <Mail className="size-4" />
-                                Change email
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onSelect={() => onOpenPasswordResetDialog(user)}>
-                                <KeyRound className="size-4" />
-                                Reset password
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem variant="destructive" disabled={isSoftDeleteDisabled(user)} onSelect={() => onOpenDeleteDialog(user)}>
-                                <Trash2 className="size-4" />
-                                Soft delete
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </ScrollArea>
+            <Table className="min-w-245 text-sm">
+              <TableHeader className="bg-muted/40 border-y">
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => {
+                      const meta = header.column.columnDef.meta as AdminTableColumnMeta | undefined;
+
+                      return (
+                        <TableHead key={header.id} className={cn('py-3 text-xs font-medium text-muted-foreground', meta?.headerClassName)}>
+                          {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                        </TableHead>
+                      );
+                    })}
+                  </TableRow>
+                ))}
+              </TableHeader>
+
+              <TableBody>
+                {isLoading ? (
+                  Array.from({ length: 6 }, (_, index) => (
+                    <TableRow key={`user-table-skeleton-${index}`}>
+                      <TableCell className="pl-6">
+                        <Skeleton className="size-9 rounded-full" />
+                      </TableCell>
+                      <TableCell>
+                        <Skeleton className="h-3.5 w-40" />
+                      </TableCell>
+                      <TableCell>
+                        <Skeleton className="h-3.5 w-24" />
+                      </TableCell>
+                      <TableCell className="px-6">
+                        <Skeleton className="h-4 w-28" />
+                      </TableCell>
+                      <TableCell className="px-6">
+                        <Skeleton className="h-4 w-44" />
+                      </TableCell>
+                      <TableCell className="px-6">
+                        <Skeleton className="h-5 w-28" />
+                      </TableCell>
+                      <TableCell className="px-6">
+                        <Skeleton className="h-5 w-24" />
+                      </TableCell>
+                      <TableCell className="px-6 text-right">
+                        <Skeleton className="ml-auto h-8 w-8 rounded-xl" />
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : isEmpty ? (
+                  <TableRow>
+                    <TableCell colSpan={columns.length} className="px-6 py-14 text-center">
+                      <div className="space-y-2">
+                        <p className="text-base font-medium">No users found</p>
+                        <p className="text-muted-foreground text-sm">Try refreshing the table after new accounts are created.</p>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  table.getRowModel().rows.map((row, index) => (
+                    <TableRow key={row.id} className={cn('hover:bg-neutral-50', index % 2 !== 0 && 'bg-neutral-50/40')}>
+                      {row.getVisibleCells().map((cell) => {
+                        const meta = cell.column.columnDef.meta as AdminTableColumnMeta | undefined;
+
+                        return (
+                          <TableCell key={cell.id} className={cn('py-4', meta?.cellClassName)}>
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
           )}
         </CardContent>
 
