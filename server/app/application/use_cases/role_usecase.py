@@ -429,9 +429,5 @@ class RoleManagementUseCase:
     @staticmethod
     def _flatten_permissions(permissions: list[RolePermissionInput]) -> list[tuple[uuid.UUID, RoleAction, GrantEffect]]:
         """Normalize nested permission payloads into unique role-permission rows."""
-        flattened = {
-            (permission.feature_id, action, permission.effect)
-            for permission in permissions
-            for action in permission.actions
-        }
+        flattened = {(permission.feature_id, action, permission.effect) for permission in permissions for action in permission.actions}
         return sorted(flattened, key=lambda value: (str(value[0]), value[1].value, value[2].value))

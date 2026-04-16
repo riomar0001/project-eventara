@@ -110,9 +110,7 @@ class RoleRepository:
         is_enabled: bool,
     ) -> FeatureEntity | None:
         await self.db.execute(
-            update(Feature)
-            .where(Feature.id == feature_id)
-            .values(slug=slug, name=name, description=description, is_enabled=is_enabled)
+            update(Feature).where(Feature.id == feature_id).values(slug=slug, name=name, description=description, is_enabled=is_enabled)
         )
         await self.db.flush()
         return await self.get_feature_by_id(feature_id)
@@ -123,7 +121,7 @@ class RoleRepository:
         return int(role_permission_count or 0), int(user_grant_count or 0)
 
     async def delete_feature_definition(self, feature_id: uuid.UUID) -> bool:
-        result = typing_cast(CursorResult,await self.db.execute(delete(Feature).where(Feature.id == feature_id)))
+        result = typing_cast(CursorResult, await self.db.execute(delete(Feature).where(Feature.id == feature_id)))
         await self.db.flush()
         return result.rowcount > 0
 
@@ -176,9 +174,7 @@ class RoleRepository:
         is_system: bool,
     ) -> RoleEntity | None:
         await self.db.execute(
-            update(Role)
-            .where(Role.id == role_id)
-            .values(name=name, description=description, is_default=is_default, is_system=is_system)
+            update(Role).where(Role.id == role_id).values(name=name, description=description, is_default=is_default, is_system=is_system)
         )
         await self.db.flush()
         return await self.get_role_by_id(role_id)
@@ -255,7 +251,7 @@ class RoleRepository:
         return int(user_assignment_count or 0), int(user_grant_count or 0)
 
     async def delete_role_definition(self, role_id: uuid.UUID) -> bool:
-        result = typing_cast(CursorResult,await self.db.execute(delete(Role).where(Role.id == role_id)))
+        result = typing_cast(CursorResult, await self.db.execute(delete(Role).where(Role.id == role_id)))
         await self.db.flush()
         return result.rowcount > 0
 
@@ -332,7 +328,7 @@ class RoleRepository:
         return self._to_domain_role(orm) if orm else None
 
     async def delete_assignment(self, assignment_id: uuid.UUID) -> bool:
-        result = typing_cast(CursorResult,await self.db.execute(delete(UserRole).where(UserRole.id == assignment_id)))
+        result = typing_cast(CursorResult, await self.db.execute(delete(UserRole).where(UserRole.id == assignment_id)))
         await self.db.flush()
         return result.rowcount > 0
 
@@ -436,7 +432,7 @@ class RoleRepository:
         return self._to_domain_grant(orm) if orm else None
 
     async def delete_grant(self, grant_id: uuid.UUID) -> bool:
-        result  = typing_cast(CursorResult, await self.db.execute(delete(UserGrant).where(UserGrant.id == grant_id)))
+        result = typing_cast(CursorResult, await self.db.execute(delete(UserGrant).where(UserGrant.id == grant_id)))
         await self.db.flush()
         return result.rowcount > 0
 
