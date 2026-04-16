@@ -606,8 +606,8 @@ export const zUserGrantResponse = z.object({
     action: zRoleAction,
     effect: zGrantEffect,
     reason: z.string().nullable(),
-    starts_at: z.iso.datetime().nullable(),
-    expires_at: z.iso.datetime().nullable(),
+    starts_at: z.iso.datetime().nullish(),
+    expires_at: z.iso.datetime().nullish(),
     granted_by: z.uuid().nullable()
 });
 
@@ -669,7 +669,7 @@ export const zUserRoleAssignmentResponse = z.object({
     id: z.uuid(),
     user_id: z.uuid(),
     role_id: z.uuid(),
-    expires_at: z.iso.datetime().nullable(),
+    expires_at: z.iso.datetime().nullish(),
     assigned_by: z.uuid().nullable(),
     assigned_at: z.iso.datetime()
 });

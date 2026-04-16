@@ -1,5 +1,4 @@
 import uuid
-from datetime import datetime
 from typing import Optional
 
 from pydantic import AwareDatetime, BaseModel, Field
@@ -25,9 +24,9 @@ class UserRoleAssignmentResponse(BaseModel):
     id: uuid.UUID
     user_id: uuid.UUID
     role_id: uuid.UUID
-    expires_at: datetime | None
+    expires_at: Optional[AwareDatetime] = None
     assigned_by: uuid.UUID | None
-    assigned_at: datetime
+    assigned_at: AwareDatetime
 
     model_config = {"from_attributes": True}
 
@@ -75,8 +74,8 @@ class UserGrantResponse(BaseModel):
     action: RoleAction
     effect: GrantEffect
     reason: str | None
-    starts_at: datetime | None
-    expires_at: datetime | None
+    starts_at: Optional[AwareDatetime] = None
+    expires_at: Optional[AwareDatetime] = None
     granted_by: uuid.UUID | None
 
     model_config = {"from_attributes": True}

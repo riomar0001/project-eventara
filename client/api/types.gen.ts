@@ -1446,11 +1446,11 @@ export type UserGrantResponse = {
     /**
      * Starts At
      */
-    starts_at: string | null;
+    starts_at?: string | null;
     /**
      * Expires At
      */
-    expires_at: string | null;
+    expires_at?: string | null;
     /**
      * Granted By
      */
@@ -1554,7 +1554,7 @@ export type UserRoleAssignmentResponse = {
     /**
      * Expires At
      */
-    expires_at: string | null;
+    expires_at?: string | null;
     /**
      * Assigned By
      */
