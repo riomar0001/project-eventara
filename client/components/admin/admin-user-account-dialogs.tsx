@@ -380,14 +380,14 @@ export function AdminUserAccountDialogs({
                   <p className="mt-1 text-xs text-neutral-500">Create a user-specific permission entry for a feature, action set, and active date range.</p>
                 </div>
 
-                <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_11rem]">
+                <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
                     <label className="text-xs font-semibold tracking-[0.16em] text-neutral-500 uppercase" htmlFor="admin-special-permission-feature">
                       Feature
                     </label>
                     <Select value={selectedFeatureId || undefined} onValueChange={onSpecialPermissionFeatureChange}>
                       <SelectTrigger
-                        className="h-11 rounded-xl border-0 bg-white shadow-none"
+                        className="h-11 rounded-xl border-0 bg-white shadow-none w-full"
                         id="admin-special-permission-feature"
                         disabled={isLoadingGrantFeatures || isSubmitting}
                       >
@@ -408,7 +408,7 @@ export function AdminUserAccountDialogs({
                       Effect
                     </label>
                     <Select value={selectedGrantEffect} onValueChange={(value) => onSpecialPermissionEffectChange(value as GrantEffect)}>
-                      <SelectTrigger className="h-11 rounded-xl border-0 bg-white shadow-none" id="admin-special-permission-effect" disabled={isSubmitting}>
+                      <SelectTrigger className="h-11 rounded-xl border-0 bg-white shadow-none min-w-36" id="admin-special-permission-effect" disabled={isSubmitting}>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
