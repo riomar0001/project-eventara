@@ -29,6 +29,8 @@ class Venue(Base):
         Enum(VenueType, native_enum=False),
         nullable=False,
     )
+    popularity_count: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
+    usage_count: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
 
     # Contact information
     contact_name: Mapped[str] = mapped_column(String(255), nullable=False)

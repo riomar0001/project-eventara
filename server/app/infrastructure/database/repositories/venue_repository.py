@@ -26,6 +26,8 @@ class VenueRepository:
             country=venue.country,
             capacity=venue.capacity,
             venue_type=venue.venue_type,
+            popularity_count=venue.popularity_count,
+            usage_count=venue.usage_count,
             contact_name=venue.contact_name,
             contact_phone=venue.contact_phone,
             contact_email=venue.contact_email,
@@ -49,6 +51,8 @@ class VenueRepository:
         orm_venue.country = venue.country
         orm_venue.capacity = venue.capacity
         orm_venue.venue_type = venue.venue_type
+        orm_venue.popularity_count = venue.popularity_count
+        orm_venue.usage_count = venue.usage_count
         orm_venue.contact_name = venue.contact_name
         orm_venue.contact_phone = venue.contact_phone
         orm_venue.contact_email = venue.contact_email
