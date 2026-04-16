@@ -30,10 +30,12 @@ from app.domain.entities.user_entity import (
     UserSecurity as DomainUserSecurity,
 )
 from app.infrastructure.database.models.user_models import (
+    Role,
     User,
     UserActivity,
     UserLoginHistory,
     UserProfile,
+    UserRole,
     UserSecurity,
 )
 
@@ -56,6 +58,10 @@ class UserRepository:
     @staticmethod
     def _as_naive_utc(value: datetime) -> datetime:
         return value.astimezone(UTC).replace(tzinfo=None) if value.tzinfo else value
+
+    async def _get_role_by_name(self, role_name: str) -> Role | None:
+        result = await self.db.execute(select(Role).where(Role.name == role_name))
+        return result.scalar_one_or_none()
 
     async def get_by_email(self, email: str) -> DomainUser | None:
         """Return the user with the given email address, or None if not found."""
@@ -130,7 +136,17 @@ class UserRepository:
         )
         orm_security = UserSecurity(user_id=security.user_id)
         orm_activity = UserActivity(user_id=activity.user_id)
-        self.db.add_all([orm_user, orm_security, orm_activity])
+        participant_role = await self._get_role_by_name("participant")
+        if participant_role is None:
+            raise RuntimeError("Role 'participant' not found. Run seeds.rbac_user_management first.")
+
+        orm_user_role = UserRole(
+            user_id=user.id,
+            role_id=participant_role.id,
+            assigned_at=self._utcnow_naive(),
+        )
+
+        self.db.add_all([orm_user, orm_security, orm_activity, orm_user_role])
         await self.db.commit()
         await self.db.refresh(orm_user)
         return PublicUser(

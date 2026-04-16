@@ -5,6 +5,7 @@ marks their email as verified, and assigns the system_administrator role.
 Idempotent — safe to run multiple times.
 
 Usage (from server/):
+    python .\\seeds\\system_admin.py
     python -m seeds.system_admin
 """
 
@@ -14,6 +15,13 @@ from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
+
+try:
+    from seeds._bootstrap import ensure_server_on_path
+except ModuleNotFoundError:
+    from _bootstrap import ensure_server_on_path
+
+ensure_server_on_path()
 
 from app.core.config import settings
 from app.core.security.hashing import hash_string
@@ -36,6 +44,10 @@ def _log(msg: str) -> None:
     print(f"  {msg}", flush=True)
 
 
+def _utcnow_naive() -> datetime:
+    return datetime.now(UTC).replace(tzinfo=None)
+
+
 async def _get_or_create_admin(session) -> UUID:
     """Upsert the admin User row. Returns the user id."""
     existing = await session.execute(select(User).where(User.email == settings.ADMIN_EMAIL))
@@ -45,7 +57,7 @@ async def _get_or_create_admin(session) -> UUID:
         _log(f"Admin user already exists: {settings.ADMIN_EMAIL}")
         return user.id
 
-    now = datetime.now(UTC)
+    now = _utcnow_naive()
     stmt = (
         insert(User)
         .values(
@@ -71,7 +83,7 @@ async def _get_or_create_admin(session) -> UUID:
 
 async def _ensure_security(session, user_id: UUID) -> None:
     """Upsert UserSecurity with email_verified=True."""
-    now = datetime.now(UTC)
+    now = _utcnow_naive()
     stmt = (
         insert(UserSecurity)
         .values(
@@ -115,7 +127,7 @@ async def _assign_admin_role(session, user_id: UUID) -> None:
     stmt = insert(UserRole).values(
         user_id=user_id,
         role_id=role.id,
-        assigned_at=datetime.now(UTC),
+        assigned_at=_utcnow_naive(),
     )
     await session.execute(stmt)
     _log("Assigned role: system_administrator")

@@ -9,7 +9,8 @@ const nextConfig: NextConfig = {
         destination: `${backendOrigin}/:path*`
       }
     ];
-  }
+  },
+  allowedDevOrigins: ['192.168.0.176']
 };
 
 export default nextConfig;
