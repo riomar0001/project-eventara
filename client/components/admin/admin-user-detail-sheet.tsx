@@ -37,7 +37,7 @@ export function AdminUserDetailSheet({ detail, error, isLoading, onOpenChange, o
           <SheetDescription>Full administrative profile, security, activity, and deletion metadata for the selected account.</SheetDescription>
         </SheetHeader>
 
-        <ScrollArea className="h-full">
+        <ScrollArea className="h-full overflow-y-auto">
           <div className="space-y-6 p-4">
             {isLoading ? (
               <div className="space-y-4">
