@@ -8,7 +8,8 @@ import { AdminUserManagementTable } from '@/components/admin/admin-user-manageme
 import { useAdminUserAccountActions } from '@/hooks/use-admin-user-account-actions';
 import { useAdminUserAccountDetail } from '@/hooks/use-admin-user-account-detail';
 import { useAdminUserAccounts } from '@/hooks/use-admin-user-accounts';
-import type { AdminUserAccountSummaryResponse as AdminUserAccountSummary, GrantEffect, RoleAction } from '@/api/types.gen';
+import { useDebounce } from '@/hooks/use-debounce';
+import type { AdminUserAccountSummaryResponse as AdminUserAccountSummary, GrantEffect, RoleAction, UserStatus } from '@/api/types.gen';
 
 const PAGE_SIZE = 10;
 const emailSchema = z.string().trim().email('Enter a valid email address.');
@@ -21,6 +22,9 @@ function getDefaultEffectiveFromDate() {
 
 export function AdminUserManagement() {
   const [page, setPage] = useState(1);
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<UserStatus | undefined>(undefined);
+  const debouncedSearch = useDebounce(search, 400);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [roleDialogUser, setRoleDialogUser] = useState<AdminUserAccountSummary | null>(null);
   const [specialPermissionDialogUser, setSpecialPermissionDialogUser] = useState<AdminUserAccountSummary | null>(null);
@@ -40,7 +44,7 @@ export function AdminUserManagement() {
   const [emailError, setEmailError] = useState<string | undefined>();
   const [deleteReasonError, setDeleteReasonError] = useState<string | undefined>();
 
-  const { error, isEmpty, isLoading, pagination, refresh, users } = useAdminUserAccounts(page, PAGE_SIZE);
+  const { error, isEmpty, isLoading, pagination, refresh, users } = useAdminUserAccounts(page, PAGE_SIZE, debouncedSearch || undefined, statusFilter);
   const { detail, error: detailError, isLoading: isLoadingDetail, refresh: refreshDetail } = useAdminUserAccountDetail(selectedUserId);
   const {
     changeEmail,
@@ -279,6 +283,16 @@ export function AdminUserManagement() {
     resetDeleteDialog();
   }
 
+  function handleSearchChange(value: string) {
+    setSearch(value);
+    setPage(1);
+  }
+
+  function handleStatusFilterChange(value: UserStatus | undefined) {
+    setStatusFilter(value);
+    setPage(1);
+  }
+
   return (
     <>
       <AdminUserManagementTable
@@ -292,8 +306,12 @@ export function AdminUserManagement() {
         onOpenSpecialPermissionDialog={openSpecialPermissionDialog}
         onPageChange={setPage}
         onRefresh={refresh}
+        onSearchChange={handleSearchChange}
         onSelectUser={setSelectedUserId}
+        onStatusFilterChange={handleStatusFilterChange}
         pagination={pagination}
+        search={search}
+        statusFilter={statusFilter}
         users={users}
       />
 

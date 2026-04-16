@@ -10,6 +10,7 @@ from app.domain.entities.user_entity import (
     UserLoginHistory,
     UserProfile,
     UserSecurity,
+    UserStatus,
 )
 
 
@@ -72,6 +73,8 @@ class IUserRepository(Protocol):
         *,
         page: int,
         page_size: int,
+        search: str | None = None,
+        status: UserStatus | None = None,
     ) -> tuple[list[AdminUserAccountSummary], int]: ...
 
     async def get_admin_user_account_detail(self, user_id: uuid.UUID) -> AdminUserAccountDetail | None: ...

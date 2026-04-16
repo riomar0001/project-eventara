@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import { AdminUserAccounts } from '@/api/sdk.gen';
 import type {
   AdminUserAccountPaginationResponse as AdminUserAccountPagination,
-  AdminUserAccountSummaryResponse as AdminUserAccountSummary
+  AdminUserAccountSummaryResponse as AdminUserAccountSummary,
+  UserStatus
 } from '@/api/types.gen';
 import { getAccessToken } from '@/store/auth-store';
 
@@ -57,7 +58,7 @@ function getInitialPagination(page: number, pageSize: number): AdminUserAccountP
   };
 }
 
-export function useAdminUserAccounts(page: number, pageSize: number = 10) {
+export function useAdminUserAccounts(page: number, pageSize: number = 10, search?: string, statusFilter?: UserStatus) {
   const [users, setUsers] = useState<AdminUserAccountSummary[]>([]);
   const [pagination, setPagination] = useState<AdminUserAccountPagination>(() => getInitialPagination(page, pageSize));
   const [error, setError] = useState<string | null>(null);
@@ -77,7 +78,9 @@ export function useAdminUserAccounts(page: number, pageSize: number = 10) {
         const result = await AdminUserAccounts.listUserAccountsUserAccountsGet({
           query: {
             page,
-            page_size: pageSize
+            page_size: pageSize,
+            ...(search ? { search } : {}),
+            ...(statusFilter ? { status: statusFilter } : {})
           },
           headers: {
             Authorization: `Bearer ${accessToken}`
@@ -113,7 +116,7 @@ export function useAdminUserAccounts(page: number, pageSize: number = 10) {
     return () => {
       cancelled = true;
     };
-  }, [page, pageSize, reloadToken]);
+  }, [page, pageSize, search, statusFilter, reloadToken]);
 
   function refresh() {
     setReloadToken((current) => current + 1);

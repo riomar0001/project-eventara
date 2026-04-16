@@ -2386,6 +2386,18 @@ export type ListUserAccountsUserAccountsGetData = {
          * Page Size
          */
         page_size?: number;
+        /**
+         * Search
+         *
+         * Case-insensitive text search across name, email, and alias.
+         */
+        search?: string | null;
+        /**
+         * Status
+         *
+         * Filter by exact account status.
+         */
+        status?: UserStatus | null;
     };
     url: '/user-accounts';
 };

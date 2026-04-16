@@ -40,6 +40,7 @@ from app.controller.schemas.user_account_schema import (
     SendUserPasswordResetResponse,
 )
 from app.domain.entities.authorization_entities import RoleAction
+from app.domain.entities.user_entity import UserStatus
 from app.domain.exceptions.role_exceptions import RoleAlreadyCurrentError, RoleNotFoundError
 from app.domain.exceptions.user_exceptions import (
     EmailAlreadyTakenError,
@@ -100,22 +101,37 @@ async def list_roles(
     status_code=status.HTTP_200_OK,
     responses={**UNAUTHORIZED, **FORBIDDEN, **LIST_VALIDATION_ERROR},
     summary="List user accounts",
-    description="Return a paginated administrative list of user accounts for the management table.",
+    description=(
+        "Return a paginated administrative list of user accounts for the management table. "
+        "Optionally filter by ``status`` and/or search across name, email, and alias with ``search``."
+    ),
 )
 async def list_user_accounts(
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=10, ge=1, le=100),
+    search: str | None = Query(default=None, max_length=200, description="Case-insensitive text search across name, email, and alias."),
+    user_status: UserStatus | None = Query(default=None, alias="status", description="Filter by exact account status."),
     _: uuid.UUID = Depends(require_permission("user-accounts", RoleAction.READ)),
     use_case: AdminUserAccountUseCase = Depends(get_admin_user_account_use_case),
 ) -> AdminUserAccountListResponse:
     """Return one page of user-account summaries for administrators.
 
+    Supports optional server-side search (``search``) and status filtering
+    (``status``).  Both parameters are independent and may be combined.
+
     # Error mapping
     - **401 Unauthorized** — missing, expired, or invalid Bearer token.
     - **403 Forbidden** — caller lacks ``read`` permission on ``user-accounts``.
-    - **422 Unprocessable Entity** — pagination query parameters are invalid.
+    - **422 Unprocessable Entity** — pagination or filter query parameters are invalid.
     """
-    result = await use_case.list_user_accounts(ListUserAccountsInput(page=page, page_size=page_size))
+    result = await use_case.list_user_accounts(
+        ListUserAccountsInput(
+            page=page,
+            page_size=page_size,
+            search=search,
+            status=user_status,
+        )
+    )
     return AdminUserAccountListResponse(
         data=[
             AdminUserAccountSummaryResponse(

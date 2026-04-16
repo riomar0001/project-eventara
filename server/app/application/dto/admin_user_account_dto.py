@@ -10,6 +10,8 @@ from app.domain.entities.user_entity import AgeGroup, EducationLevel, Gender, Us
 class ListUserAccountsInput:
     page: int = 1
     page_size: int = 10
+    search: str | None = None
+    status: UserStatus | None = None
 
 
 @dataclass

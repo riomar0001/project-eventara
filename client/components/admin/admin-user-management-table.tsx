@@ -11,11 +11,13 @@ import {
   Mail,
   MoreHorizontal,
   RefreshCcw,
+  Search,
   ShieldCheck,
   ShieldPlus,
   ShieldX,
   Trash2,
-  Users
+  Users,
+  X
 } from 'lucide-react';
 import {
   formatDateTime,
@@ -36,14 +38,24 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import type {
   AdminUserAccountPaginationResponse as AdminUserAccountPagination,
-  AdminUserAccountSummaryResponse as AdminUserAccountSummary
+  AdminUserAccountSummaryResponse as AdminUserAccountSummary,
+  UserStatus
 } from '@/api/types.gen';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/auth-store';
+
+const STATUS_OPTIONS: { label: string; value: UserStatus }[] = [
+  { label: 'Active', value: 'active' },
+  { label: 'Inactive', value: 'inactive' },
+  { label: 'Locked', value: 'locked' },
+  { label: 'Deleted', value: 'deleted' }
+];
 
 type AdminTableColumnMeta = {
   cellClassName?: string;
@@ -61,8 +73,12 @@ interface AdminUserManagementTableProps {
   onOpenSpecialPermissionDialog: (user: AdminUserAccountSummary) => void;
   onPageChange: (page: number) => void;
   onRefresh: () => void;
+  onSearchChange: (value: string) => void;
   onSelectUser: (userId: string) => void;
+  onStatusFilterChange: (value: UserStatus | undefined) => void;
   pagination: AdminUserAccountPagination;
+  search: string;
+  statusFilter: UserStatus | undefined;
   users: AdminUserAccountSummary[];
 }
 
@@ -77,8 +93,12 @@ export function AdminUserManagementTable({
   onOpenSpecialPermissionDialog,
   onPageChange,
   onRefresh,
+  onSearchChange,
   onSelectUser,
+  onStatusFilterChange,
   pagination,
+  search,
+  statusFilter,
   users
 }: AdminUserManagementTableProps) {
   const currentUserId = useAuthStore((state) => state.user?.id ?? null);
@@ -87,6 +107,7 @@ export function AdminUserManagementTable({
   const showingFrom = users.length === 0 ? 0 : (pagination.page - 1) * pagination.page_size + 1;
   const showingTo = users.length === 0 ? 0 : showingFrom + users.length - 1;
   const pageLabel = pagination.total_pages === 0 ? 0 : pagination.page;
+  const hasActiveFilters = Boolean(search) || Boolean(statusFilter);
 
   const columns = React.useMemo<ColumnDef<AdminUserAccountSummary>[]>(
     () => [
@@ -279,6 +300,44 @@ export function AdminUserManagementTable({
             <CardTitle>All users</CardTitle>
             <CardDescription>Browse paginated user accounts and perform administrator actions quickly.</CardDescription>
           </div>
+          <CardAction className="flex items-center gap-2">
+            <div className="relative">
+              <Search className="text-muted-foreground absolute top-1/2 left-3 size-3.5 -translate-y-1/2" />
+              <Input
+                id="admin-user-search"
+                className="h-8 w-52 pl-8 text-sm"
+                placeholder="Search name, email, alias..."
+                value={search}
+                onChange={(e) => onSearchChange(e.target.value)}
+              />
+              {search && (
+                <button
+                  className="text-muted-foreground hover:text-foreground absolute top-1/2 right-2 -translate-y-1/2 transition-colors"
+                  onClick={() => onSearchChange('')}
+                  type="button"
+                  aria-label="Clear search"
+                >
+                  <X className="size-3.5" />
+                </button>
+              )}
+            </div>
+            <Select
+              value={statusFilter ?? 'all'}
+              onValueChange={(value) => onStatusFilterChange(value === 'all' ? undefined : (value as UserStatus))}
+            >
+              <SelectTrigger id="admin-user-status-filter" className="h-8 w-36 text-sm">
+                <SelectValue placeholder="All statuses" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All statuses</SelectItem>
+                {STATUS_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </CardAction>
         </CardHeader>
 
         <CardContent className="p-0">
@@ -346,8 +405,26 @@ export function AdminUserManagementTable({
                   <TableRow>
                     <TableCell colSpan={columns.length} className="px-6 py-14 text-center">
                       <div className="space-y-2">
-                        <p className="text-base font-medium">No users found</p>
-                        <p className="text-muted-foreground text-sm">Try refreshing the table after new accounts are created.</p>
+                        <p className="text-base font-medium">{hasActiveFilters ? 'No users match your search' : 'No users found'}</p>
+                        <p className="text-muted-foreground text-sm">
+                          {hasActiveFilters
+                            ? 'Try adjusting your search term or status filter.'
+                            : 'Try refreshing the table after new accounts are created.'}
+                        </p>
+                        {hasActiveFilters && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="mt-2"
+                            onClick={() => {
+                              onSearchChange('');
+                              onStatusFilterChange(undefined);
+                            }}
+                          >
+                            <X className="size-3.5" />
+                            Clear filters
+                          </Button>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>

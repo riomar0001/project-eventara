@@ -86,7 +86,12 @@ class AdminUserAccountUseCase:
             A ``ListUserAccountsOutput`` containing the current page of users and
             aggregate pagination metadata.
         """
-        users, total_count = await self.user_repo.list_admin_user_accounts(page=data.page, page_size=data.page_size)
+        users, total_count = await self.user_repo.list_admin_user_accounts(
+            page=data.page,
+            page_size=data.page_size,
+            search=data.search,
+            status=data.status,
+        )
         total_pages = (total_count + data.page_size - 1) // data.page_size if total_count > 0 else 0
         return ListUserAccountsOutput(
             users=users,

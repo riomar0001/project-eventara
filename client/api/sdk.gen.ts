@@ -411,7 +411,7 @@ export class AdminUserAccounts {
     /**
      * List user accounts
      *
-     * Return a paginated administrative list of user accounts for the management table.
+     * Return a paginated administrative list of user accounts for the management table. Optionally filter by ``status`` and/or search across name, email, and alias with ``search``.
      */
     public static listUserAccountsUserAccountsGet<ThrowOnError extends boolean = false>(options?: Options<ListUserAccountsUserAccountsGetData, ThrowOnError>) {
         return (options?.client ?? client).get<ListUserAccountsUserAccountsGetResponses, ListUserAccountsUserAccountsGetErrors, ThrowOnError>({

@@ -2,7 +2,7 @@ import uuid
 from datetime import UTC, datetime
 from typing import cast
 
-from sqlalchemy import case, func, select, update
+from sqlalchemy import case, func, or_, select, update
 from sqlalchemy.engine import CursorResult
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -165,12 +165,24 @@ class UserRepository:
         *,
         page: int,
         page_size: int,
+        search: str | None = None,
+        status: UserStatus | None = None,
     ) -> tuple[list[AdminUserAccountSummary], int]:
-        """Return a paginated administrative view of user accounts.
+        """Return a paginated administrative view of user accounts with optional search and status filters.
 
         The role columns are resolved through correlated subqueries that select
         the most recently assigned non-expired role for each user, matching the
         effective-role semantics used by access tokens.
+
+        Search is applied as a case-insensitive ILIKE match across ``email``,
+        ``UserProfile.first_name``, ``UserProfile.last_name``, and
+        ``UserProfile.alias``.  The same predicates are applied to the COUNT
+        query so pagination metadata always reflects the filtered result set.
+
+        Concurrency strategy:
+            Both queries are read-only SELECTs.  No row-level locking or
+            additional serialisation is required beyond the per-request database
+            session already provided by the dependency injector.
         """
         now = self._utcnow_naive()
         role_id_sq = (
@@ -197,9 +209,29 @@ class UserRepository:
             .correlate(User)
             .scalar_subquery()
         )
-        total_result = await self.db.execute(select(func.count(User.id)))
+
+        filter_clauses = []
+        if status is not None:
+            filter_clauses.append(User.status == status)
+        if search:
+            pattern = f"%{search.strip()}%"
+            filter_clauses.append(
+                or_(
+                    User.email.ilike(pattern),
+                    UserProfile.first_name.ilike(pattern),
+                    UserProfile.last_name.ilike(pattern),
+                    UserProfile.alias.ilike(pattern),
+                )
+            )
+
+        base_query = select(func.count(User.id)).select_from(User).outerjoin(UserProfile, UserProfile.user_id == User.id)
+        if filter_clauses:
+            base_query = base_query.where(*filter_clauses)
+
+        total_result = await self.db.execute(base_query)
         total_count = total_result.scalar_one()
-        result = await self.db.execute(
+
+        data_query = (
             select(
                 User.id.label("user_id"),
                 User.email,
@@ -217,6 +249,10 @@ class UserRepository:
             .offset((page - 1) * page_size)
             .limit(page_size)
         )
+        if filter_clauses:
+            data_query = data_query.where(*filter_clauses)
+
+        result = await self.db.execute(data_query)
         rows = result.mappings().all()
         return (
             [
