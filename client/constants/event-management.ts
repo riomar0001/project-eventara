@@ -154,6 +154,90 @@ export const venueRecords: VenueRecord[] = [
     amenities: ['Dining kitchen', 'Skylight canopy', 'Private arrival gate', 'Workshop benches'],
     tags: ['Premium', 'Natural light', 'Smaller capacity'],
     photo: 'https://images.unsplash.com/photo-1460317442991-0ec209397118?auto=format&fit=crop&w=1400&q=80'
+  },
+  {
+    id: 'neon-loft',
+    name: 'Neon Loft',
+    neighborhood: 'Innovation District',
+    city: 'Singapore',
+    address: '88 Cyber Way, Innovation District',
+    capacity: 150,
+    venueType: 'Creative Studio',
+    setting: 'Indoor',
+    status: 'Active',
+    bookingWindow: 'Open year-round',
+    leadContact: 'Julian Brooks',
+    leadEmail: 'julian@eventara.local',
+    leadPhone: '+65 8221 9934',
+    summary: 'A sleek, modern studio space perfect for hackathons, design sprints, and product demos.',
+    description:
+      'Neon Loft offers a highly modular layout with writable walls, breakout pods, and integrated presentation tech. It is optimized for focused, collaborative work and intimate tech gatherings.',
+    amenities: ['Whiteboard walls', 'Breakout pods', 'Fiber internet', 'AV presentation suite'],
+    tags: ['Tech-friendly', 'Modular', 'Workshops'],
+    photo: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1400&q=80'
+  },
+  {
+    id: 'skyline-terrace',
+    name: 'Skyline Terrace',
+    neighborhood: 'Central Business District',
+    city: 'Singapore',
+    address: 'Level 42, 1 Financial Tower, CBD',
+    capacity: 300,
+    venueType: 'Rooftop Lounge',
+    setting: 'Hybrid',
+    status: 'Active',
+    bookingWindow: 'Requires 4-week notice',
+    leadContact: 'Sarah Chen',
+    leadEmail: 'sarah@eventara.local',
+    leadPhone: '+65 8990 1122',
+    summary: 'A premium rooftop destination offering panoramic city views for VIP mixers and cocktail receptions.',
+    description:
+      'Skyline Terrace combines a plush indoor lounge with a sprawling outdoor deck. It is the premier choice for evening networking events, investor dinners, and upscale social gatherings that demand a sophisticated backdrop.',
+    amenities: ['Full service bar', 'Outdoor heaters/fans', 'Lounge seating', 'DJ booth'],
+    tags: ['VIP', 'Scenic views', 'Evening reception'],
+    photo: 'https://images.unsplash.com/photo-1572111504281-9df91fb4fb5d?auto=format&fit=crop&w=1400&q=80'
+  },
+  {
+    id: 'heritage-hall',
+    name: 'Heritage Hall',
+    neighborhood: 'Civic District',
+    city: 'Singapore',
+    address: '12 Old Parliament Lane, Civic District',
+    capacity: 500,
+    venueType: 'Historic Auditorium',
+    setting: 'Indoor',
+    status: 'Active',
+    bookingWindow: 'Reopening January 2027',
+    leadContact: 'David Tan',
+    leadEmail: 'david@eventara.local',
+    leadPhone: '+65 8445 7710',
+    summary: 'A beautifully restored colonial-era hall designed for keynote speeches, award ceremonies, and formal banquets.',
+    description:
+      'Heritage Hall features classical architecture, high arched ceilings, and modern acoustic treatments. It provides a grand, formal atmosphere while maintaining the technical infrastructure needed for complex stage productions.',
+    amenities: ['Tiered seating options', 'Acoustic paneling', 'VIP holding rooms', 'Grand foyer'],
+    tags: ['Formal', 'Historic', 'Keynote'],
+    photo: 'https://images.unsplash.com/photo-1507676184212-d0330a15233c?auto=format&fit=crop&w=1400&q=80'
+  },
+  {
+    id: 'the-vault',
+    name: 'The Vault',
+    neighborhood: 'Marina South',
+    city: 'Singapore',
+    address: 'Sub-level 2, Marina South Bunkers',
+    capacity: 350,
+    venueType: 'Underground Club',
+    setting: 'Indoor',
+    status: 'Active',
+    bookingWindow: 'Open for weekend bookings',
+    leadContact: 'Maya Patel',
+    leadEmail: 'maya@eventara.local',
+    leadPhone: '+65 8332 9005',
+    summary: 'An edgy, subterranean space favored for secret shows, after-parties, and immersive brand activations.',
+    description:
+      'The Vault is a windowless, soundproofed bunker that gives event producers total control over lighting and atmosphere. It thrives during late-night programming and exclusive, high-energy entertainment formats.',
+    amenities: ['Club sound system', 'Dynamic light grid', 'Coat check', 'Private booths'],
+    tags: ['Late night', 'Immersive', 'High energy'],
+    photo: 'https://images.unsplash.com/photo-1566737236500-c8ac43014a67?auto=format&fit=crop&w=1400&q=80'
   }
 ];
 
@@ -229,6 +313,78 @@ export const eventRecords: EventRecord[] = [
     summary:
       'Greenhouse Donor Supper is a quieter hospitality format centered on service detail, premium staging, and a calm volunteer presence that supports guest transitions.',
     photo: 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=1400&q=80'
+  },
+  {
+    id: 'blueprint-design-summit',
+    title: 'Blueprint Design Summit',
+    headline: 'A full-day conference for designers, builders, and creative leads.',
+    venueId: 'central-conference-hall',
+    dateLabel: 'November 06, 2026',
+    status: 'On Sale',
+    audience: 'Industry professionals',
+    priceLabel: 'From $65',
+    registrationLabel: '540 / 700 registered',
+    scheduleNote: 'Doors open 8:00 AM, keynote at 9:30 AM',
+    stageCount: 2,
+    volunteerNeed: '16 session moderators and floor crew needed',
+    hostTeam: ['Programming', 'Brand Studio', 'A/V Production'],
+    summary:
+      'Blueprint Design Summit brings together practitioners across disciplines for a structured day of talks, critiques, and portfolio sessions with a strong emphasis on speaker production quality.',
+    photo: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1400&q=80'
+  },
+  {
+    id: 'ember-film-night',
+    title: 'Ember Film Night',
+    headline: 'An outdoor cinema evening with curated short films and live score.',
+    venueId: 'rooftop-terrace-east',
+    dateLabel: 'November 21, 2026',
+    status: 'On Sale',
+    audience: 'General public',
+    priceLabel: 'From $18',
+    registrationLabel: '203 / 280 registered',
+    scheduleNote: 'Arrivals from 6:30 PM, screening begins at dusk',
+    stageCount: 1,
+    volunteerNeed: '10 ushers and equipment handlers needed',
+    hostTeam: ['Programming', 'Guest Experience'],
+    summary:
+      'Ember Film Night is a single-screen, weather-dependent format that pairs curated short cinema with a live ambient score, requiring tight coordination between A/V crew and volunteer ushers.',
+    photo: 'https://images.unsplash.com/photo-1478720568477-152d9b164e26?auto=format&fit=crop&w=1400&q=80'
+  },
+  {
+    id: 'founders-roundtable',
+    title: 'Founders Roundtable',
+    headline: 'A closed-door breakfast session for early-stage founders and investors.',
+    venueId: 'private-dining-suite',
+    dateLabel: 'December 03, 2026',
+    status: 'Planning',
+    audience: 'Invitation only',
+    priceLabel: 'Complimentary',
+    registrationLabel: '31 / 48 seats confirmed',
+    scheduleNote: 'Breakfast service at 7:30 AM, discussion opens 8:00 AM',
+    stageCount: 1,
+    volunteerNeed: '4 hospitality staff for service and check-in',
+    hostTeam: ['Leadership', 'Partnerships'],
+    summary:
+      'Founders Roundtable is a high-trust, low-profile format designed around candid conversation. The priority is a seamless service environment with minimal interruption to the discussion flow.',
+    photo: 'https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=1400&q=80'
+  },
+  {
+    id: 'winter-welcome-gala',
+    title: 'Winter Welcome Gala',
+    headline: 'A year-end celebration bringing together staff, partners, and community guests.',
+    venueId: 'grand-ballroom-west',
+    dateLabel: 'December 19, 2026',
+    status: 'Draft',
+    audience: 'Staff and partners',
+    priceLabel: 'Internal event',
+    registrationLabel: '172 / 350 seats planned',
+    scheduleNote: 'Arrival from 7:00 PM, program begins 8:00 PM',
+    stageCount: 2,
+    volunteerNeed: '22 event crew across registration, floor, and wrap-up',
+    hostTeam: ['Leadership', 'Guest Experience', 'Programming'],
+    summary:
+      'Winter Welcome Gala closes the calendar year with a mixed program of recognition, live entertainment, and open mingling. Volunteer coordination spans across multiple zones and a two-stage timeline.',
+    photo: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?auto=format&fit=crop&w=1400&q=80'
   }
 ];
 

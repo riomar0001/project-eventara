@@ -1,4 +1,4 @@
-import { CalendarDays, Plus, Ticket, Users2 } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import Link from 'next/link';
 import { CatalogCard, OperationsPageIntro } from '@/components/admin/event-management/shared';
 import { Button } from '@/components/ui/button';
@@ -39,7 +39,7 @@ export function EventsCatalog() {
         }
       />
 
-      <div className="grid gap-6 xl:grid-cols-2">
+      <div className="grid gap-6 xl:grid-cols-4">
         {eventRecords.map((event) => {
           const venue = getVenueById(event.venueId);
 
@@ -75,42 +75,6 @@ export function EventsCatalog() {
             />
           );
         })}
-      </div>
-
-      <div className="grid gap-4 lg:grid-cols-3">
-        <div className="rounded-3xl border border-neutral-200 bg-white p-5 shadow-xs">
-          <div className="flex items-center gap-3">
-            <div className="flex size-10 items-center justify-center rounded-2xl bg-sky-50 text-sky-700">
-              <CalendarDays className="size-5" />
-            </div>
-            <div>
-              <p className="font-medium text-neutral-950">Detail route included</p>
-              <p className="text-sm text-neutral-500">Each event page includes a visible delete button for review.</p>
-            </div>
-          </div>
-        </div>
-        <div className="rounded-3xl border border-neutral-200 bg-white p-5 shadow-xs">
-          <div className="flex items-center gap-3">
-            <div className="flex size-10 items-center justify-center rounded-2xl bg-sky-50 text-sky-700">
-              <Ticket className="size-5" />
-            </div>
-            <div>
-              <p className="font-medium text-neutral-950">Add and edit forms</p>
-              <p className="text-sm text-neutral-500">The layouts are interactive locally and intentionally detached from APIs.</p>
-            </div>
-          </div>
-        </div>
-        <div className="rounded-3xl border border-neutral-200 bg-white p-5 shadow-xs">
-          <div className="flex items-center gap-3">
-            <div className="flex size-10 items-center justify-center rounded-2xl bg-sky-50 text-sky-700">
-              <Users2 className="size-5" />
-            </div>
-            <div>
-              <p className="font-medium text-neutral-950">Volunteer-aware</p>
-              <p className="text-sm text-neutral-500">Event detail pages connect to the same volunteer mock dataset.</p>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );

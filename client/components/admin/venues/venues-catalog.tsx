@@ -1,4 +1,4 @@
-import { Building2, CalendarRange, MapPin, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import Link from 'next/link';
 import { CatalogCard, OperationsPageIntro } from '@/components/admin/event-management/shared';
 import { Button } from '@/components/ui/button';
@@ -42,7 +42,7 @@ export function VenuesCatalog() {
         }
       />
 
-      <div className="grid gap-6 xl:grid-cols-2">
+      <div className="grid gap-6 xl:grid-cols-4">
         {venueRecords.map((venue) => (
           <CatalogCard
             key={venue.id}
@@ -74,42 +74,6 @@ export function VenuesCatalog() {
             ]}
           />
         ))}
-      </div>
-
-      <div className="grid gap-4 lg:grid-cols-3">
-        <div className="rounded-3xl border border-neutral-200 bg-white p-5 shadow-xs">
-          <div className="flex items-center gap-3">
-            <div className="flex size-10 items-center justify-center rounded-2xl bg-amber-50 text-amber-700">
-              <Building2 className="size-5" />
-            </div>
-            <div>
-              <p className="font-medium text-neutral-950">Card-first index</p>
-              <p className="text-sm text-neutral-500">Each venue presents with a large photo-led cover.</p>
-            </div>
-          </div>
-        </div>
-        <div className="rounded-3xl border border-neutral-200 bg-white p-5 shadow-xs">
-          <div className="flex items-center gap-3">
-            <div className="flex size-10 items-center justify-center rounded-2xl bg-amber-50 text-amber-700">
-              <MapPin className="size-5" />
-            </div>
-            <div>
-              <p className="font-medium text-neutral-950">Detail route</p>
-              <p className="text-sm text-neutral-500">Every venue has a dedicated view page with a delete button.</p>
-            </div>
-          </div>
-        </div>
-        <div className="rounded-3xl border border-neutral-200 bg-white p-5 shadow-xs">
-          <div className="flex items-center gap-3">
-            <div className="flex size-10 items-center justify-center rounded-2xl bg-amber-50 text-amber-700">
-              <CalendarRange className="size-5" />
-            </div>
-            <div>
-              <p className="font-medium text-neutral-950">Edit and add forms</p>
-              <p className="text-sm text-neutral-500">Both flows are interactive UI previews with local form state only.</p>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );
