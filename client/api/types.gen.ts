@@ -748,6 +748,105 @@ export type ErrorResponse = {
 };
 
 /**
+ * FeatureCreateRequest
+ */
+export type FeatureCreateRequest = {
+    /**
+     * Slug
+     */
+    slug: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Is Enabled
+     */
+    is_enabled?: boolean;
+};
+
+/**
+ * FeatureListResponse
+ */
+export type FeatureListResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Data
+     */
+    data: Array<FeatureRecordResponse>;
+};
+
+/**
+ * FeatureRecordResponse
+ */
+export type FeatureRecordResponse = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Slug
+     */
+    slug: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Is Enabled
+     */
+    is_enabled: boolean;
+};
+
+/**
+ * FeatureResponse
+ */
+export type FeatureResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    data: FeatureRecordResponse;
+    /**
+     * Message
+     */
+    message?: string;
+};
+
+/**
+ * FeatureUpdateRequest
+ */
+export type FeatureUpdateRequest = {
+    /**
+     * Slug
+     */
+    slug: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Is Enabled
+     */
+    is_enabled?: boolean;
+};
+
+/**
  * ForgotPasswordRequest
  */
 export type ForgotPasswordRequest = {
@@ -1278,6 +1377,81 @@ export type RetryJobResponse = {
 export type RoleAction = 'create' | 'read' | 'update' | 'delete';
 
 /**
+ * RoleCreateRequest
+ */
+export type RoleCreateRequest = {
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Is Default
+     */
+    is_default?: boolean;
+    /**
+     * Is System
+     */
+    is_system?: boolean;
+    /**
+     * Permissions
+     */
+    permissions?: Array<RolePermissionRequest>;
+};
+
+/**
+ * RoleListResponse
+ */
+export type RoleListResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Data
+     */
+    data: Array<RoleRecordResponse>;
+};
+
+/**
+ * RolePermissionRecordResponse
+ */
+export type RolePermissionRecordResponse = {
+    /**
+     * Feature Id
+     */
+    feature_id: string;
+    /**
+     * Feature Slug
+     */
+    feature_slug: string;
+    /**
+     * Feature Name
+     */
+    feature_name: string;
+    action: RoleAction;
+    effect: GrantEffect;
+};
+
+/**
+ * RolePermissionRequest
+ */
+export type RolePermissionRequest = {
+    /**
+     * Feature Id
+     */
+    feature_id: string;
+    /**
+     * Actions
+     */
+    actions: Array<RoleAction>;
+    effect?: GrantEffect;
+};
+
+/**
  * RolePermissionResponse
  */
 export type RolePermissionResponse = {
@@ -1291,6 +1465,77 @@ export type RolePermissionResponse = {
     feature_name: string;
     action: RoleAction;
     effect: GrantEffect;
+};
+
+/**
+ * RoleRecordResponse
+ */
+export type RoleRecordResponse = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Is Default
+     */
+    is_default?: boolean;
+    /**
+     * Is System
+     */
+    is_system?: boolean;
+    /**
+     * Permissions
+     */
+    permissions?: Array<RolePermissionRecordResponse>;
+};
+
+/**
+ * RoleResponse
+ */
+export type RoleResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    data: RoleRecordResponse;
+    /**
+     * Message
+     */
+    message?: string;
+};
+
+/**
+ * RoleUpdateRequest
+ */
+export type RoleUpdateRequest = {
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Is Default
+     */
+    is_default?: boolean;
+    /**
+     * Is System
+     */
+    is_system?: boolean;
+    /**
+     * Permissions
+     */
+    permissions?: Array<RolePermissionRequest>;
 };
 
 /**
@@ -2687,6 +2932,410 @@ export type GetAuditLogsAuditLogsGetResponses = {
 };
 
 export type GetAuditLogsAuditLogsGetResponse = GetAuditLogsAuditLogsGetResponses[keyof GetAuditLogsAuditLogsGetResponses];
+
+export type ListFeaturesFeaturesGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/features';
+};
+
+export type ListFeaturesFeaturesGetErrors = {
+    /**
+     * Missing or invalid Bearer token
+     */
+    401: ErrorResponse;
+    /**
+     * Insufficient permissions
+     */
+    403: ErrorResponse;
+};
+
+export type ListFeaturesFeaturesGetError = ListFeaturesFeaturesGetErrors[keyof ListFeaturesFeaturesGetErrors];
+
+export type ListFeaturesFeaturesGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: FeatureListResponse;
+};
+
+export type ListFeaturesFeaturesGetResponse = ListFeaturesFeaturesGetResponses[keyof ListFeaturesFeaturesGetResponses];
+
+export type CreateFeatureFeaturesPostData = {
+    body: FeatureCreateRequest;
+    path?: never;
+    query?: never;
+    url: '/features';
+};
+
+export type CreateFeatureFeaturesPostErrors = {
+    /**
+     * Missing or invalid Bearer token
+     */
+    401: ErrorResponse;
+    /**
+     * Insufficient permissions
+     */
+    403: ErrorResponse;
+    /**
+     * Feature slug already exists
+     */
+    409: ErrorResponse;
+    /**
+     * Validation error
+     */
+    422: ValidationErrorResponse;
+};
+
+export type CreateFeatureFeaturesPostError = CreateFeatureFeaturesPostErrors[keyof CreateFeatureFeaturesPostErrors];
+
+export type CreateFeatureFeaturesPostResponses = {
+    /**
+     * Successful Response
+     */
+    201: FeatureResponse;
+};
+
+export type CreateFeatureFeaturesPostResponse = CreateFeatureFeaturesPostResponses[keyof CreateFeatureFeaturesPostResponses];
+
+export type DeleteFeatureFeaturesFeatureIdDeleteData = {
+    body?: never;
+    path: {
+        /**
+         * Feature Id
+         */
+        feature_id: string;
+    };
+    query?: never;
+    url: '/features/{feature_id}';
+};
+
+export type DeleteFeatureFeaturesFeatureIdDeleteErrors = {
+    /**
+     * Missing or invalid Bearer token
+     */
+    401: ErrorResponse;
+    /**
+     * Insufficient permissions
+     */
+    403: ErrorResponse;
+    /**
+     * Feature not found
+     */
+    404: ErrorResponse;
+    /**
+     * Feature is still referenced by roles or grants
+     */
+    409: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DeleteFeatureFeaturesFeatureIdDeleteError = DeleteFeatureFeaturesFeatureIdDeleteErrors[keyof DeleteFeatureFeaturesFeatureIdDeleteErrors];
+
+export type DeleteFeatureFeaturesFeatureIdDeleteResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type DeleteFeatureFeaturesFeatureIdDeleteResponse = DeleteFeatureFeaturesFeatureIdDeleteResponses[keyof DeleteFeatureFeaturesFeatureIdDeleteResponses];
+
+export type GetFeatureFeaturesFeatureIdGetData = {
+    body?: never;
+    path: {
+        /**
+         * Feature Id
+         */
+        feature_id: string;
+    };
+    query?: never;
+    url: '/features/{feature_id}';
+};
+
+export type GetFeatureFeaturesFeatureIdGetErrors = {
+    /**
+     * Missing or invalid Bearer token
+     */
+    401: ErrorResponse;
+    /**
+     * Insufficient permissions
+     */
+    403: ErrorResponse;
+    /**
+     * Feature not found
+     */
+    404: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetFeatureFeaturesFeatureIdGetError = GetFeatureFeaturesFeatureIdGetErrors[keyof GetFeatureFeaturesFeatureIdGetErrors];
+
+export type GetFeatureFeaturesFeatureIdGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: FeatureResponse;
+};
+
+export type GetFeatureFeaturesFeatureIdGetResponse = GetFeatureFeaturesFeatureIdGetResponses[keyof GetFeatureFeaturesFeatureIdGetResponses];
+
+export type UpdateFeatureFeaturesFeatureIdPatchData = {
+    body: FeatureUpdateRequest;
+    path: {
+        /**
+         * Feature Id
+         */
+        feature_id: string;
+    };
+    query?: never;
+    url: '/features/{feature_id}';
+};
+
+export type UpdateFeatureFeaturesFeatureIdPatchErrors = {
+    /**
+     * Missing or invalid Bearer token
+     */
+    401: ErrorResponse;
+    /**
+     * Insufficient permissions
+     */
+    403: ErrorResponse;
+    /**
+     * Feature not found
+     */
+    404: ErrorResponse;
+    /**
+     * Feature is still referenced by roles or grants
+     */
+    409: ErrorResponse;
+    /**
+     * Validation error
+     */
+    422: ValidationErrorResponse;
+};
+
+export type UpdateFeatureFeaturesFeatureIdPatchError = UpdateFeatureFeaturesFeatureIdPatchErrors[keyof UpdateFeatureFeaturesFeatureIdPatchErrors];
+
+export type UpdateFeatureFeaturesFeatureIdPatchResponses = {
+    /**
+     * Successful Response
+     */
+    200: FeatureResponse;
+};
+
+export type UpdateFeatureFeaturesFeatureIdPatchResponse = UpdateFeatureFeaturesFeatureIdPatchResponses[keyof UpdateFeatureFeaturesFeatureIdPatchResponses];
+
+export type ListRolesRolesGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/roles';
+};
+
+export type ListRolesRolesGetErrors = {
+    /**
+     * Missing or invalid Bearer token
+     */
+    401: ErrorResponse;
+    /**
+     * Insufficient permissions
+     */
+    403: ErrorResponse;
+};
+
+export type ListRolesRolesGetError = ListRolesRolesGetErrors[keyof ListRolesRolesGetErrors];
+
+export type ListRolesRolesGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: RoleListResponse;
+};
+
+export type ListRolesRolesGetResponse = ListRolesRolesGetResponses[keyof ListRolesRolesGetResponses];
+
+export type CreateRoleRolesPostData = {
+    body: RoleCreateRequest;
+    path?: never;
+    query?: never;
+    url: '/roles';
+};
+
+export type CreateRoleRolesPostErrors = {
+    /**
+     * Missing or invalid Bearer token
+     */
+    401: ErrorResponse;
+    /**
+     * Insufficient permissions
+     */
+    403: ErrorResponse;
+    /**
+     * Feature not found
+     */
+    404: ErrorResponse;
+    /**
+     * Role name already exists
+     */
+    409: ErrorResponse;
+    /**
+     * Validation error
+     */
+    422: ValidationErrorResponse;
+};
+
+export type CreateRoleRolesPostError = CreateRoleRolesPostErrors[keyof CreateRoleRolesPostErrors];
+
+export type CreateRoleRolesPostResponses = {
+    /**
+     * Successful Response
+     */
+    201: RoleResponse;
+};
+
+export type CreateRoleRolesPostResponse = CreateRoleRolesPostResponses[keyof CreateRoleRolesPostResponses];
+
+export type DeleteRoleRolesRoleIdDeleteData = {
+    body?: never;
+    path: {
+        /**
+         * Role Id
+         */
+        role_id: string;
+    };
+    query?: never;
+    url: '/roles/{role_id}';
+};
+
+export type DeleteRoleRolesRoleIdDeleteErrors = {
+    /**
+     * Missing or invalid Bearer token
+     */
+    401: ErrorResponse;
+    /**
+     * Insufficient permissions
+     */
+    403: ErrorResponse;
+    /**
+     * Role not found
+     */
+    404: ErrorResponse;
+    /**
+     * Role is still referenced by assignments or grants
+     */
+    409: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DeleteRoleRolesRoleIdDeleteError = DeleteRoleRolesRoleIdDeleteErrors[keyof DeleteRoleRolesRoleIdDeleteErrors];
+
+export type DeleteRoleRolesRoleIdDeleteResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type DeleteRoleRolesRoleIdDeleteResponse = DeleteRoleRolesRoleIdDeleteResponses[keyof DeleteRoleRolesRoleIdDeleteResponses];
+
+export type GetRoleRolesRoleIdGetData = {
+    body?: never;
+    path: {
+        /**
+         * Role Id
+         */
+        role_id: string;
+    };
+    query?: never;
+    url: '/roles/{role_id}';
+};
+
+export type GetRoleRolesRoleIdGetErrors = {
+    /**
+     * Missing or invalid Bearer token
+     */
+    401: ErrorResponse;
+    /**
+     * Insufficient permissions
+     */
+    403: ErrorResponse;
+    /**
+     * Role not found
+     */
+    404: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetRoleRolesRoleIdGetError = GetRoleRolesRoleIdGetErrors[keyof GetRoleRolesRoleIdGetErrors];
+
+export type GetRoleRolesRoleIdGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: RoleResponse;
+};
+
+export type GetRoleRolesRoleIdGetResponse = GetRoleRolesRoleIdGetResponses[keyof GetRoleRolesRoleIdGetResponses];
+
+export type UpdateRoleRolesRoleIdPatchData = {
+    body: RoleUpdateRequest;
+    path: {
+        /**
+         * Role Id
+         */
+        role_id: string;
+    };
+    query?: never;
+    url: '/roles/{role_id}';
+};
+
+export type UpdateRoleRolesRoleIdPatchErrors = {
+    /**
+     * Missing or invalid Bearer token
+     */
+    401: ErrorResponse;
+    /**
+     * Insufficient permissions
+     */
+    403: ErrorResponse;
+    /**
+     * Feature not found
+     */
+    404: ErrorResponse;
+    /**
+     * Role is still referenced by assignments or grants
+     */
+    409: ErrorResponse;
+    /**
+     * Validation error
+     */
+    422: ValidationErrorResponse;
+};
+
+export type UpdateRoleRolesRoleIdPatchError = UpdateRoleRolesRoleIdPatchErrors[keyof UpdateRoleRolesRoleIdPatchErrors];
+
+export type UpdateRoleRolesRoleIdPatchResponses = {
+    /**
+     * Successful Response
+     */
+    200: RoleResponse;
+};
+
+export type UpdateRoleRolesRoleIdPatchResponse = UpdateRoleRolesRoleIdPatchResponses[keyof UpdateRoleRolesRoleIdPatchResponses];
 
 export type ListUserRolesUserRolesGetData = {
     body?: never;

@@ -237,6 +237,54 @@ export const zErrorResponse = z.object({
 });
 
 /**
+ * FeatureCreateRequest
+ */
+export const zFeatureCreateRequest = z.object({
+    slug: z.string().min(1).max(100),
+    name: z.string().min(1).max(150),
+    description: z.string().max(1000).nullish(),
+    is_enabled: z.boolean().optional().default(true)
+});
+
+/**
+ * FeatureRecordResponse
+ */
+export const zFeatureRecordResponse = z.object({
+    id: z.uuid(),
+    slug: z.string(),
+    name: z.string(),
+    description: z.string().nullish(),
+    is_enabled: z.boolean()
+});
+
+/**
+ * FeatureListResponse
+ */
+export const zFeatureListResponse = z.object({
+    success: z.boolean().optional().default(true),
+    data: z.array(zFeatureRecordResponse)
+});
+
+/**
+ * FeatureResponse
+ */
+export const zFeatureResponse = z.object({
+    success: z.boolean().optional().default(true),
+    data: zFeatureRecordResponse,
+    message: z.string().optional().default('Feature saved successfully.')
+});
+
+/**
+ * FeatureUpdateRequest
+ */
+export const zFeatureUpdateRequest = z.object({
+    slug: z.string().min(1).max(100),
+    name: z.string().min(1).max(150),
+    description: z.string().max(1000).nullish(),
+    is_enabled: z.boolean().optional().default(true)
+});
+
+/**
  * ForgotPasswordRequest
  */
 export const zForgotPasswordRequest = z.object({
@@ -510,6 +558,37 @@ export const zCreateGrantsRequest = z.object({
 });
 
 /**
+ * RolePermissionRecordResponse
+ */
+export const zRolePermissionRecordResponse = z.object({
+    feature_id: z.uuid(),
+    feature_slug: z.string(),
+    feature_name: z.string(),
+    action: zRoleAction,
+    effect: zGrantEffect
+});
+
+/**
+ * RolePermissionRequest
+ */
+export const zRolePermissionRequest = z.object({
+    feature_id: z.uuid(),
+    actions: z.array(zRoleAction).min(1),
+    effect: zGrantEffect.optional().default('allow')
+});
+
+/**
+ * RoleCreateRequest
+ */
+export const zRoleCreateRequest = z.object({
+    name: z.string().min(1).max(100),
+    description: z.string().max(1000).nullish(),
+    is_default: z.boolean().optional().default(false),
+    is_system: z.boolean().optional().default(false),
+    permissions: z.array(zRolePermissionRequest).optional()
+});
+
+/**
  * RolePermissionResponse
  */
 export const zRolePermissionResponse = z.object({
@@ -549,6 +628,46 @@ export const zChangeUserRoleResponse = z.object({
     role_name: z.string(),
     permissions: z.array(zRolePermissionResponse).optional(),
     message: z.string().optional().default('User role updated successfully.')
+});
+
+/**
+ * RoleRecordResponse
+ */
+export const zRoleRecordResponse = z.object({
+    id: z.uuid(),
+    name: z.string(),
+    description: z.string().nullish(),
+    is_default: z.boolean().optional().default(false),
+    is_system: z.boolean().optional().default(false),
+    permissions: z.array(zRolePermissionRecordResponse).optional()
+});
+
+/**
+ * RoleListResponse
+ */
+export const zRoleListResponse = z.object({
+    success: z.boolean().optional().default(true),
+    data: z.array(zRoleRecordResponse)
+});
+
+/**
+ * RoleResponse
+ */
+export const zRoleResponse = z.object({
+    success: z.boolean().optional().default(true),
+    data: zRoleRecordResponse,
+    message: z.string().optional().default('Role saved successfully.')
+});
+
+/**
+ * RoleUpdateRequest
+ */
+export const zRoleUpdateRequest = z.object({
+    name: z.string().min(1).max(100),
+    description: z.string().max(1000).nullish(),
+    is_default: z.boolean().optional().default(false),
+    is_system: z.boolean().optional().default(false),
+    permissions: z.array(zRolePermissionRequest).optional()
 });
 
 /**
@@ -1037,6 +1156,88 @@ export const zGetAuditLogsAuditLogsGetQuery = z.object({
  * Successful Response
  */
 export const zGetAuditLogsAuditLogsGetResponse = zGetAuditLogsResponse;
+
+/**
+ * Successful Response
+ */
+export const zListFeaturesFeaturesGetResponse = zFeatureListResponse;
+
+export const zCreateFeatureFeaturesPostBody = zFeatureCreateRequest;
+
+/**
+ * Successful Response
+ */
+export const zCreateFeatureFeaturesPostResponse = zFeatureResponse;
+
+export const zDeleteFeatureFeaturesFeatureIdDeletePath = z.object({
+    feature_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zDeleteFeatureFeaturesFeatureIdDeleteResponse = z.void();
+
+export const zGetFeatureFeaturesFeatureIdGetPath = z.object({
+    feature_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zGetFeatureFeaturesFeatureIdGetResponse = zFeatureResponse;
+
+export const zUpdateFeatureFeaturesFeatureIdPatchBody = zFeatureUpdateRequest;
+
+export const zUpdateFeatureFeaturesFeatureIdPatchPath = z.object({
+    feature_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zUpdateFeatureFeaturesFeatureIdPatchResponse = zFeatureResponse;
+
+/**
+ * Successful Response
+ */
+export const zListRolesRolesGetResponse = zRoleListResponse;
+
+export const zCreateRoleRolesPostBody = zRoleCreateRequest;
+
+/**
+ * Successful Response
+ */
+export const zCreateRoleRolesPostResponse = zRoleResponse;
+
+export const zDeleteRoleRolesRoleIdDeletePath = z.object({
+    role_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zDeleteRoleRolesRoleIdDeleteResponse = z.void();
+
+export const zGetRoleRolesRoleIdGetPath = z.object({
+    role_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zGetRoleRolesRoleIdGetResponse = zRoleResponse;
+
+export const zUpdateRoleRolesRoleIdPatchBody = zRoleUpdateRequest;
+
+export const zUpdateRoleRolesRoleIdPatchPath = z.object({
+    role_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zUpdateRoleRolesRoleIdPatchResponse = zRoleResponse;
 
 export const zListUserRolesUserRolesGetQuery = z.object({
     user_id: z.uuid()
