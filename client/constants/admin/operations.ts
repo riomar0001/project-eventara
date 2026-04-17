@@ -10,7 +10,8 @@ export const ADMIN_OPERATIONS_PATHS = {
   volunteers: '/admin/volunteers',
   volunteerCreate: '/admin/volunteers/new',
   volunteerDetail: (volunteerId: string) => `/admin/volunteers/${volunteerId}`,
-  volunteerEdit: (volunteerId: string) => `/admin/volunteers/${volunteerId}/edit`
+  volunteerEdit: (volunteerId: string) => `/admin/volunteers/${volunteerId}/edit`,
+  queues: '/admin/queues'
 } as const;
 
 export type VenueRecord = {

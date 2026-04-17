@@ -58,6 +58,12 @@ def _decode(value: bytes | str) -> str:
     return value.decode() if isinstance(value, bytes) else value
 
 
+def _decode_optional(value: bytes | str | None) -> str | None:
+    if value is None:
+        return None
+    return _decode(value)
+
+
 def _parse_health_entry(raw: str) -> WorkerHealthEntry:
     m = _HEALTH_RE.match(raw)
     if m:
@@ -78,6 +84,68 @@ def _safe_list(value) -> list:
         return list(value)
     except Exception:
         return [str(v) for v in value]
+
+
+async def _get_key_type(redis: ArqRedis, key: str) -> str:
+    key_type = await redis.type(key)
+    return _decode(key_type).lower()
+
+
+async def _get_collection_size(redis: ArqRedis, key: str) -> int:
+    key_type = await _get_key_type(redis, key)
+
+    if key_type == "none":
+        return 0
+    if key_type == "zset":
+        return await redis.zcard(key)
+    if key_type == "list":
+        return await redis.llen(key)
+    if key_type == "set":
+        return await redis.scard(key)
+    if key_type == "stream":
+        return await redis.xlen(key)
+    if key_type == "hash":
+        return await redis.hlen(key)
+    if key_type == "string":
+        return 1 if await redis.get(key) is not None else 0
+
+    return 0
+
+
+async def _get_key_entries(redis: ArqRedis, key: str) -> list[str]:
+    key_type = await _get_key_type(redis, key)
+
+    if key_type == "none":
+        return []
+    if key_type == "zset":
+        return [_decode(entry) for entry in await redis.zrange(key, 0, -1)]
+    if key_type == "list":
+        return [_decode(entry) for entry in await redis.lrange(key, 0, -1)]
+    if key_type == "set":
+        return sorted(_decode(entry) for entry in await redis.smembers(key))
+    if key_type == "hash":
+        return [_decode(entry) for entry in await redis.hvals(key)]
+    if key_type == "string":
+        value = _decode_optional(await redis.get(key))
+        return [value] if value else []
+
+    return []
+
+
+async def _get_health_entries(redis: ArqRedis) -> list[str]:
+    entries: list[str] = []
+    matched_keys: list[str] = []
+
+    async for key in redis.scan_iter(match=f"{_HEALTH_CHECK_KEY}*"):
+        matched_keys.append(_decode(key))
+
+    if not matched_keys:
+        matched_keys = [_HEALTH_CHECK_KEY]
+
+    for key in matched_keys:
+        entries.extend(await _get_key_entries(redis, key))
+
+    return entries
 
 
 class GetQueueStatsUseCase:
@@ -111,7 +179,7 @@ class GetQueueStatsUseCase:
 
     async def execute(self) -> QueueStatsOutput:
         try:
-            pending = await self.redis.zcard(_DEFAULT_QUEUE_NAME)
+            pending = await _get_collection_size(self.redis, _DEFAULT_QUEUE_NAME)
 
             in_progress = 0
             async for _ in self.redis.scan_iter(match=f"{_IN_PROGRESS_KEY_PREFIX}*"):
@@ -128,8 +196,8 @@ class GetQueueStatsUseCase:
                     else:
                         total_failed += 1
 
-            raw_entries = await self.redis.zrange(_HEALTH_CHECK_KEY, 0, -1)
-            worker_health = [_parse_health_entry(_decode(e)) for e in raw_entries]
+            raw_entries = await _get_health_entries(self.redis)
+            worker_health = [_parse_health_entry(entry) for entry in raw_entries]
 
             return QueueStatsOutput(
                 queue_name=_DEFAULT_QUEUE_NAME,
@@ -245,7 +313,7 @@ class RetryDeadJobUseCase:
                 new_job_id=new_job.job_id if new_job else job_id,
                 function=info.function,
             )
-        except JobNotFoundError, JobNotDeadError, JobRetryConflictError:
+        except (JobNotFoundError, JobNotDeadError, JobRetryConflictError):
             raise
         except Exception as exc:
             msg = "Failed to retry job"
@@ -289,7 +357,7 @@ class DeleteDeadJobUseCase:
 
             deleted = await self.redis.delete(f"{_RESULT_KEY_PREFIX}{job_id}")
             return DeleteJobOutput(job_id=job_id, deleted=bool(deleted))
-        except JobNotFoundError, JobNotDeadError:
+        except (JobNotFoundError, JobNotDeadError):
             raise
         except Exception as exc:
             msg = "Failed to delete job"
