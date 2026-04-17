@@ -154,8 +154,8 @@ export function EventForm({ event, mode }: { event?: EventRecord; mode: 'create'
         </Card>
 
         <div className="space-y-6">
-          <PhotoPanel photo={previewPhoto} className="min-h-[280px]">
-            <div className="flex min-h-[280px] flex-col justify-between p-6">
+          <PhotoPanel photo={previewPhoto} className="min-h-70">
+            <div className="flex min-h-70 flex-col justify-between p-6">
               <Badge variant="secondary" className="w-fit bg-white/85 text-neutral-900">
                 Event preview
               </Badge>
