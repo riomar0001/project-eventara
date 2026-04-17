@@ -1,15 +1,13 @@
 import { Plus } from 'lucide-react';
 import Link from 'next/link';
-import { CatalogCard, OperationsPageIntro } from '@/components/admin/event-management/shared';
+import { CatalogCard, OperationsPageIntro } from './events-shared';
 import { Button } from '@/components/ui/button';
-import { EVENT_MANAGEMENT_PATHS, eventRecords, getVenueById, getVolunteersByEventId } from '@/constants/event-management';
+import { ADMIN_OPERATIONS_PATHS, eventRecords, getVenueById, getVolunteersByEventId } from '@/constants/admin/operations';
 
 export function EventsCatalog() {
   return (
     <div className="space-y-6">
       <OperationsPageIntro
-        tone="event"
-        badge="Event Pages"
         title="Events Management"
         description="A photo-forward event index with individual detail pages and static add or edit flows for design review only."
         metrics={[
@@ -31,7 +29,7 @@ export function EventsCatalog() {
         ]}
         actions={
           <Button asChild>
-            <Link href={EVENT_MANAGEMENT_PATHS.eventCreate}>
+            <Link href={ADMIN_OPERATIONS_PATHS.eventCreate}>
               <Plus className="size-4" />
               Add event
             </Link>
@@ -46,13 +44,12 @@ export function EventsCatalog() {
           return (
             <CatalogCard
               key={event.id}
-              tone="event"
               title={event.title}
               subtitle={event.dateLabel}
               photo={event.photo}
               description={event.summary}
-              href={EVENT_MANAGEMENT_PATHS.eventDetail(event.id)}
-              editHref={EVENT_MANAGEMENT_PATHS.eventEdit(event.id)}
+              href={ADMIN_OPERATIONS_PATHS.eventDetail(event.id)}
+              editHref={ADMIN_OPERATIONS_PATHS.eventEdit(event.id)}
               badges={[event.status, event.audience]}
               meta={[
                 {
@@ -79,3 +76,4 @@ export function EventsCatalog() {
     </div>
   );
 }
+

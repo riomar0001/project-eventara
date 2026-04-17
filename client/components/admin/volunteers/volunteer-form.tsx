@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { Save, UserRoundPlus } from 'lucide-react';
 import Link from 'next/link';
-import { BackLink, FieldLabel } from '@/components/admin/event-management/shared';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -12,7 +11,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { EVENT_MANAGEMENT_PATHS, getVolunteerInitials, type VolunteerRecord } from '@/constants/event-management';
+import { ADMIN_OPERATIONS_PATHS, getVolunteerInitials, type VolunteerRecord } from '@/constants/admin/operations';
+import { BackLink, FieldLabel } from './volunteers-shared';
 
 const skillOptions = ['Wayfinding', 'Registration', 'VIP desk', 'Backstage', 'Accessibility escort', 'Vendor check-in', 'Radio comms', 'Hospitality'];
 
@@ -35,7 +35,7 @@ export function VolunteerForm({ mode, volunteer }: { mode: 'create' | 'edit'; vo
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center gap-2">
-        <BackLink href={EVENT_MANAGEMENT_PATHS.volunteers} label="Back to volunteers" />
+        <BackLink href={ADMIN_OPERATIONS_PATHS.volunteers} label="Back to volunteers" />
         <Badge variant="outline" className="rounded-full px-3 py-1 text-xs tracking-[0.18em] uppercase">
           UI preview only
         </Badge>
@@ -144,7 +144,7 @@ export function VolunteerForm({ mode, volunteer }: { mode: 'create' | 'edit'; vo
                   {mode === 'create' ? 'Save volunteer draft' : 'Save volunteer changes'}
                 </Button>
                 <Button type="button" variant="outline" asChild>
-                  <Link href={EVENT_MANAGEMENT_PATHS.volunteers}>Cancel</Link>
+                  <Link href={ADMIN_OPERATIONS_PATHS.volunteers}>Cancel</Link>
                 </Button>
               </div>
             </form>
@@ -202,3 +202,4 @@ export function VolunteerForm({ mode, volunteer }: { mode: 'create' | 'edit'; vo
     </div>
   );
 }
+

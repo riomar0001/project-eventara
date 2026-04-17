@@ -1,5 +1,5 @@
 import { Check } from 'lucide-react';
-import { ONBOARDING_STEPS } from '@/constants/onboarding';
+import { ONBOARDING_STEPS } from '@/constants/onboarding/onboarding';
 import { cn } from '@/lib/utils';
 
 interface StepIndicatorProps {
@@ -49,3 +49,5 @@ export function StepIndicator({ currentStep }: StepIndicatorProps) {
     </div>
   );
 }
+
+

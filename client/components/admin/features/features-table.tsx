@@ -5,9 +5,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { EmptyState, RbacHeroCard, RbacMetricStrip, countEnabledFeatures, humanizeSlug } from '../shared/rbac-management-shared';
 import type { FeatureRecordResponse } from '@/api/types.gen';
-import { RBAC_COPY } from '@/constants/rbac-management';
+import { FEATURE_ACCESS_TEXT } from '@/constants/admin/features/access-control';
+import { FeaturesEmptyState, FeaturesHeroCard, FeaturesMetricStrip, countEnabledFeatures, humanizeFeatureSlug } from './features-shared';
 
 interface FeaturesTableProps {
   error: string | null;
@@ -25,17 +25,9 @@ export function FeaturesTable({ error, features, isEmpty, isLoading, onCreate, o
 
   return (
     <div className="space-y-6">
-      <RbacHeroCard
-        badge={RBAC_COPY.features.badge}
-        description={RBAC_COPY.features.description}
-        metricLabel="Tracked Features"
-        metricValue={features.length}
-        title={RBAC_COPY.features.title}
-        tone="feature"
-      />
+      <FeaturesHeroCard description={FEATURE_ACCESS_TEXT.description} title={FEATURE_ACCESS_TEXT.title} />
 
-      <RbacMetricStrip
-        tone="feature"
+      <FeaturesMetricStrip
         items={[
           {
             label: 'Enabled',
@@ -69,16 +61,16 @@ export function FeaturesTable({ error, features, isEmpty, isLoading, onCreate, o
               </Button>
               <Button onClick={onCreate}>
                 <Plus className="size-4" />
-                {RBAC_COPY.features.addCta}
+                {FEATURE_ACCESS_TEXT.addCta}
               </Button>
             </div>
           </div>
         </CardHeader>
         <CardContent className="p-0">
           {error ? (
-            <EmptyState description={error} title="Unable to load the feature registry" />
+            <FeaturesEmptyState description={error} title="Unable to load the feature registry" />
           ) : isEmpty ? (
-            <EmptyState description={RBAC_COPY.features.emptyDescription} title={RBAC_COPY.features.emptyTitle} />
+            <FeaturesEmptyState description={FEATURE_ACCESS_TEXT.emptyDescription} title={FEATURE_ACCESS_TEXT.emptyTitle} />
           ) : (
             <Table>
               <TableHeader className="bg-neutral-50/80">
@@ -103,7 +95,7 @@ export function FeaturesTable({ error, features, isEmpty, isLoading, onCreate, o
                       <TableRow key={feature.id} className="align-top hover:bg-neutral-50/70">
                         <TableCell className="px-6 py-5">
                           <div className="space-y-1">
-                            <p className="font-medium text-neutral-950">{humanizeSlug(feature.slug)}</p>
+                            <p className="font-medium text-neutral-950">{humanizeFeatureSlug(feature.slug)}</p>
                             <p className="font-mono text-xs text-neutral-500">{feature.slug}</p>
                           </div>
                         </TableCell>

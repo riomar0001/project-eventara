@@ -2,15 +2,15 @@
 
 import type { FormEvent } from 'react';
 import { Loader2, Sparkles } from 'lucide-react';
-import { FieldHint } from '@/components/shared/field-hint';
+import { FieldHint } from '@/components/system/forms/field-hint';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import type { FeatureFormValues } from '../shared/rbac-management-shared';
 import type { FeatureRecordResponse } from '@/api/types.gen';
-import { RBAC_COPY } from '@/constants/rbac-management';
+import { FEATURE_ACCESS_TEXT } from '@/constants/admin/features/access-control';
+import type { FeatureFormValues } from '@/types/admin/features';
 
 interface FeatureFormDialogProps {
   error?: string;
@@ -25,7 +25,7 @@ interface FeatureFormDialogProps {
 }
 
 export function FeatureFormDialog({ error, isSaving, mode, onClose, onSubmit, onValuesChange, open, selectedFeature, values }: FeatureFormDialogProps) {
-  const title = mode === 'create' ? RBAC_COPY.features.createTitle : RBAC_COPY.features.editTitle;
+  const title = mode === 'create' ? FEATURE_ACCESS_TEXT.createTitle : FEATURE_ACCESS_TEXT.editTitle;
 
   return (
     <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()}>
@@ -46,22 +46,22 @@ export function FeatureFormDialog({ error, isSaving, mode, onClose, onSubmit, on
           <div className="space-y-5 px-6 py-5">
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <label className="text-xs font-semibold tracking-[0.16em] text-neutral-500 uppercase" htmlFor="rbac-feature-name">
+                <label className="text-xs font-semibold tracking-[0.16em] text-neutral-500 uppercase" htmlFor="feature-name">
                   Name
                 </label>
                 <Input
-                  id="rbac-feature-name"
+                  id="feature-name"
                   value={values.name}
                   onChange={(event) => onValuesChange({ ...values, name: event.target.value })}
                   placeholder="User Accounts"
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-xs font-semibold tracking-[0.16em] text-neutral-500 uppercase" htmlFor="rbac-feature-slug">
+                <label className="text-xs font-semibold tracking-[0.16em] text-neutral-500 uppercase" htmlFor="feature-slug">
                   Slug
                 </label>
                 <Input
-                  id="rbac-feature-slug"
+                  id="feature-slug"
                   value={values.slug}
                   onChange={(event) => onValuesChange({ ...values, slug: event.target.value })}
                   placeholder="user-accounts"
@@ -70,14 +70,14 @@ export function FeatureFormDialog({ error, isSaving, mode, onClose, onSubmit, on
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-semibold tracking-[0.16em] text-neutral-500 uppercase" htmlFor="rbac-feature-description">
+              <label className="text-xs font-semibold tracking-[0.16em] text-neutral-500 uppercase" htmlFor="feature-description">
                 Description
               </label>
               <Textarea
-                id="rbac-feature-description"
+                id="feature-description"
                 value={values.description}
                 onChange={(event) => onValuesChange({ ...values, description: event.target.value })}
-                placeholder="Describe how this feature participates in RBAC and where it is used."
+                placeholder="Describe how this feature participates in access control and where it is used."
               />
             </div>
 
@@ -85,10 +85,10 @@ export function FeatureFormDialog({ error, isSaving, mode, onClose, onSubmit, on
               <Checkbox
                 checked={values.is_enabled}
                 onCheckedChange={(checked) => onValuesChange({ ...values, is_enabled: checked === true })}
-                id="rbac-feature-enabled"
+                id="feature-enabled"
               />
               <div className="space-y-1">
-                <label className="text-sm font-medium text-neutral-900" htmlFor="rbac-feature-enabled">
+                <label className="text-sm font-medium text-neutral-900" htmlFor="feature-enabled">
                   Enabled for policy evaluation
                 </label>
                 <p className="text-sm leading-6 text-neutral-500">

@@ -1,8 +1,8 @@
 import { Plus } from 'lucide-react';
 import Link from 'next/link';
-import { CatalogCard, OperationsPageIntro } from '@/components/admin/event-management/shared';
+import { CatalogCard, OperationsPageIntro } from './venues-shared';
 import { Button } from '@/components/ui/button';
-import { EVENT_MANAGEMENT_PATHS, getEventsByVenueId, venueRecords } from '@/constants/event-management';
+import { ADMIN_OPERATIONS_PATHS, getEventsByVenueId, venueRecords } from '@/constants/admin/operations';
 
 export function VenuesCatalog() {
   const activeVenueCount = venueRecords.filter((venue) => venue.status === 'Active').length;
@@ -11,8 +11,6 @@ export function VenuesCatalog() {
   return (
     <div className="space-y-6">
       <OperationsPageIntro
-        tone="venue"
-        badge="Venue Pages"
         title="Venue Management"
         description="A UI-only venue surface for reviewing the catalog, opening detail pages, and previewing add or edit flows without touching backend integrations."
         metrics={[
@@ -34,7 +32,7 @@ export function VenuesCatalog() {
         ]}
         actions={
           <Button asChild>
-            <Link href={EVENT_MANAGEMENT_PATHS.venueCreate}>
+            <Link href={ADMIN_OPERATIONS_PATHS.venueCreate}>
               <Plus className="size-4" />
               Add venue
             </Link>
@@ -46,13 +44,12 @@ export function VenuesCatalog() {
         {venueRecords.map((venue) => (
           <CatalogCard
             key={venue.id}
-            tone="venue"
             title={venue.name}
             subtitle={venue.neighborhood}
             photo={venue.photo}
             description={venue.summary}
-            href={EVENT_MANAGEMENT_PATHS.venueDetail(venue.id)}
-            editHref={EVENT_MANAGEMENT_PATHS.venueEdit(venue.id)}
+            href={ADMIN_OPERATIONS_PATHS.venueDetail(venue.id)}
+            editHref={ADMIN_OPERATIONS_PATHS.venueEdit(venue.id)}
             badges={[venue.status, venue.setting, venue.venueType]}
             meta={[
               {
@@ -78,3 +75,4 @@ export function VenuesCatalog() {
     </div>
   );
 }
+

@@ -1,12 +1,12 @@
 import { CalendarDays, PencilLine, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { BackLink, DetailList } from '@/components/admin/event-management/shared';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { EVENT_MANAGEMENT_PATHS, getEventById, getVolunteerById, getVolunteerInitials } from '@/constants/event-management';
+import { ADMIN_OPERATIONS_PATHS, getEventById, getVolunteerById, getVolunteerInitials } from '@/constants/admin/operations';
+import { BackLink, DetailList } from './volunteers-shared';
 
 export function VolunteerProfile({ volunteerId }: { volunteerId: string }) {
   const volunteer = getVolunteerById(volunteerId);
@@ -20,9 +20,9 @@ export function VolunteerProfile({ volunteerId }: { volunteerId: string }) {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center gap-2">
-        <BackLink href={EVENT_MANAGEMENT_PATHS.volunteers} label="Back to volunteers" />
+        <BackLink href={ADMIN_OPERATIONS_PATHS.volunteers} label="Back to volunteers" />
         <Button asChild variant="outline" size="sm">
-          <Link href={EVENT_MANAGEMENT_PATHS.volunteerEdit(volunteer.id)}>
+          <Link href={ADMIN_OPERATIONS_PATHS.volunteerEdit(volunteer.id)}>
             <PencilLine className="size-4" />
             Edit volunteer
           </Link>
@@ -135,7 +135,7 @@ export function VolunteerProfile({ volunteerId }: { volunteerId: string }) {
                     {event.status}
                   </Badge>
                   <Button asChild variant="outline" size="sm">
-                    <Link href={EVENT_MANAGEMENT_PATHS.eventDetail(event.id)}>
+                    <Link href={ADMIN_OPERATIONS_PATHS.eventDetail(event.id)}>
                       <CalendarDays className="size-4" />
                       View event
                     </Link>
@@ -161,3 +161,4 @@ export function VolunteerProfile({ volunteerId }: { volunteerId: string }) {
     </div>
   );
 }
+

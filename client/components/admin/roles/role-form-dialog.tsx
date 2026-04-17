@@ -2,7 +2,7 @@
 
 import type { FormEvent } from 'react';
 import { Loader2, ShieldCheck } from 'lucide-react';
-import { FieldHint } from '@/components/shared/field-hint';
+import { FieldHint } from '@/components/system/forms/field-hint';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -10,11 +10,11 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import type { RoleFormValues, RolePermissionDraftMap } from '../shared/rbac-management-shared';
-import { humanizeAction, humanizeSlug } from '../shared/rbac-management-shared';
 import type { FeatureRecordResponse, GrantEffect, RoleAction, RoleRecordResponse } from '@/api/types.gen';
-import { RBAC_COPY, RBAC_GRANT_EFFECTS, RBAC_ROLE_ACTIONS } from '@/constants/rbac-management';
+import { ACCESS_EFFECT_OPTIONS, ROLE_ACTION_OPTIONS, ROLE_ACCESS_TEXT } from '@/constants/admin/roles/access-control';
 import { cn } from '@/lib/utils';
+import type { RoleFormValues, RolePermissionDraftMap } from '@/types/admin/roles';
+import { humanizeAction, humanizeRoleSlug } from './roles-shared';
 
 interface RoleFormDialogProps {
   availableFeatures: FeatureRecordResponse[];
@@ -49,7 +49,7 @@ export function RoleFormDialog({
   selectedRole,
   values
 }: RoleFormDialogProps) {
-  const title = mode === 'create' ? RBAC_COPY.roles.createTitle : RBAC_COPY.roles.editTitle;
+  const title = mode === 'create' ? ROLE_ACCESS_TEXT.createTitle : ROLE_ACCESS_TEXT.editTitle;
 
   return (
     <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()}>
@@ -72,11 +72,11 @@ export function RoleFormDialog({
               <div className="grid gap-4">
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <label className="text-xs font-semibold tracking-[0.16em] text-neutral-500 uppercase" htmlFor="rbac-role-name">
+                    <label className="text-xs font-semibold tracking-[0.16em] text-neutral-500 uppercase" htmlFor="role-name">
                       Name
                     </label>
                     <Input
-                      id="rbac-role-name"
+                      id="role-name"
                       value={values.name}
                       onChange={(event) => onValuesChange({ ...values, name: event.target.value })}
                       placeholder="system_auditor"
@@ -84,11 +84,11 @@ export function RoleFormDialog({
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-xs font-semibold tracking-[0.16em] text-neutral-500 uppercase" htmlFor="rbac-role-description">
+                    <label className="text-xs font-semibold tracking-[0.16em] text-neutral-500 uppercase" htmlFor="role-description">
                       Description
                     </label>
                     <Textarea
-                      id="rbac-role-description"
+                      id="role-description"
                       value={values.description}
                       onChange={(event) => onValuesChange({ ...values, description: event.target.value })}
                       placeholder="Summarize what this role can access and where it should be assigned."
@@ -101,12 +101,12 @@ export function RoleFormDialog({
                   <div className="mt-4 space-y-3">
                     <div className="flex items-center gap-3 rounded-2xl border border-amber-200/70 bg-white/80 px-4 py-3">
                       <Checkbox
-                        id="rbac-role-default"
+                        id="role-default"
                         checked={values.is_default}
                         onCheckedChange={(checked) => onValuesChange({ ...values, is_default: checked === true })}
                       />
                       <div className="space-y-1">
-                        <label className="text-sm font-medium text-neutral-900" htmlFor="rbac-role-default">
+                        <label className="text-sm font-medium text-neutral-900" htmlFor="role-default">
                           Default role
                         </label>
                         <p className="text-sm leading-6 text-neutral-500">Users without an explicit role can inherit this baseline access bundle.</p>
@@ -115,12 +115,12 @@ export function RoleFormDialog({
 
                     <div className="flex items-center gap-3 rounded-2xl border border-amber-200/70 bg-white/80 px-4 py-3">
                       <Checkbox
-                        id="rbac-role-system"
+                        id="role-system"
                         checked={values.is_system}
                         onCheckedChange={(checked) => onValuesChange({ ...values, is_system: checked === true })}
                       />
                       <div className="space-y-1">
-                        <label className="text-sm font-medium text-neutral-900" htmlFor="rbac-role-system">
+                        <label className="text-sm font-medium text-neutral-900" htmlFor="role-system">
                           System role
                         </label>
                         <p className="text-sm leading-6 text-neutral-500">
@@ -194,7 +194,7 @@ export function RoleFormDialog({
                                 </Badge>
                               </div>
                               <p className="text-sm leading-6 text-neutral-500">
-                                {feature.description?.trim() ? feature.description : humanizeSlug(feature.slug)}
+                                {feature.description?.trim() ? feature.description : humanizeRoleSlug(feature.slug)}
                               </p>
                             </div>
 
@@ -205,7 +205,7 @@ export function RoleFormDialog({
                                   <SelectValue placeholder="Select effect" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  {RBAC_GRANT_EFFECTS.map((effectOption) => (
+                                  {ACCESS_EFFECT_OPTIONS.map((effectOption) => (
                                     <SelectItem key={effectOption.value} value={effectOption.value}>
                                       {effectOption.label}
                                     </SelectItem>
@@ -216,7 +216,7 @@ export function RoleFormDialog({
                           </div>
 
                           <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                            {RBAC_ROLE_ACTIONS.map((action) => (
+                            {ROLE_ACTION_OPTIONS.map((action) => (
                               <label
                                 key={`${feature.id}-${action}`}
                                 className={cn(

@@ -8,7 +8,7 @@ import { StepIndicator } from '@/components/onboarding/step-indicator';
 import { StepProfile } from '@/components/onboarding/step-profile';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
-import { useOnboardingForm } from '@/hooks/use-onboarding-form';
+import { useOnboardingForm } from '@/hooks/onboarding/use-onboarding-form';
 import { cn } from '@/lib/utils';
 
 export default function OnboardPage() {
@@ -121,3 +121,4 @@ export default function OnboardPage() {
     </Card>
   );
 }
+

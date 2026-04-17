@@ -6,18 +6,18 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import {
-  EmptyState,
-  RbacHeroCard,
-  RbacMetricStrip,
   averageActionsPerFeature,
   countAllowRules,
   countDenyRules,
   countPermissionFeatures,
   countPermissionRows,
-  humanizeSlug
-} from '../shared/rbac-management-shared';
+  humanizeRoleSlug,
+  RolesEmptyState,
+  RolesHeroCard,
+  RolesMetricStrip
+} from './roles-shared';
 import type { RoleRecordResponse } from '@/api/types.gen';
-import { RBAC_COPY, RBAC_PROTECTED_ROLE_DELETE_MESSAGE } from '@/constants/rbac-management';
+import { PROTECTED_ROLE_DELETE_MESSAGE, ROLE_ACCESS_TEXT } from '@/constants/admin/roles/access-control';
 
 interface RolesTableProps {
   error: string | null;
@@ -37,17 +37,9 @@ export function RolesTable({ error, isEmpty, isLoading, onCreate, onDelete, onEd
 
   return (
     <div className="space-y-6">
-      <RbacHeroCard
-        badge={RBAC_COPY.roles.badge}
-        description={RBAC_COPY.roles.description}
-        metricLabel="Curated Roles"
-        metricValue={roles.length}
-        title={RBAC_COPY.roles.title}
-        tone="role"
-      />
+      <RolesHeroCard description={ROLE_ACCESS_TEXT.description} title={ROLE_ACCESS_TEXT.title} />
 
-      <RbacMetricStrip
-        tone="role"
+      <RolesMetricStrip
         items={[
           {
             label: 'Permission Rows',
@@ -72,7 +64,7 @@ export function RolesTable({ error, isEmpty, isLoading, onCreate, onDelete, onEd
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="space-y-1">
               <CardTitle>Role catalog</CardTitle>
-              <CardDescription>Bundle reusable permissions across multiple RBAC features, actions, and allow or deny effects.</CardDescription>
+              <CardDescription>Bundle reusable permissions across multiple access features, actions, and allow or deny effects.</CardDescription>
             </div>
             <div className="flex flex-col gap-2 sm:flex-row">
               <Button variant="outline" onClick={onRefresh} disabled={isLoading}>
@@ -81,16 +73,16 @@ export function RolesTable({ error, isEmpty, isLoading, onCreate, onDelete, onEd
               </Button>
               <Button onClick={onCreate}>
                 <Plus className="size-4" />
-                {RBAC_COPY.roles.addCta}
+                {ROLE_ACCESS_TEXT.addCta}
               </Button>
             </div>
           </div>
         </CardHeader>
         <CardContent className="p-0">
           {error ? (
-            <EmptyState description={error} title="Unable to load the role catalog" />
+            <RolesEmptyState description={error} title="Unable to load the role catalog" />
           ) : isEmpty ? (
-            <EmptyState description={RBAC_COPY.roles.emptyDescription} title={RBAC_COPY.roles.emptyTitle} />
+            <RolesEmptyState description={ROLE_ACCESS_TEXT.emptyDescription} title={ROLE_ACCESS_TEXT.emptyTitle} />
           ) : (
             <Table>
               <TableHeader className="bg-neutral-50/80">
@@ -118,7 +110,7 @@ export function RolesTable({ error, isEmpty, isLoading, onCreate, onDelete, onEd
                         <TableRow key={role.id} className="align-top hover:bg-neutral-50/70">
                           <TableCell className="px-6 py-5">
                             <div className="space-y-1">
-                              <p className="font-medium text-neutral-950">{humanizeSlug(role.name)}</p>
+                              <p className="font-medium text-neutral-950">{humanizeRoleSlug(role.name)}</p>
                               <p className="font-mono text-xs text-neutral-500">{role.name}</p>
                             </div>
                           </TableCell>
@@ -166,7 +158,7 @@ export function RolesTable({ error, isEmpty, isLoading, onCreate, onDelete, onEd
                                 className="text-red-600 hover:text-red-700 disabled:text-neutral-400 disabled:hover:text-neutral-400"
                                 disabled={isDeleteDisabled}
                                 onClick={() => onDelete(role)}
-                                title={isDeleteDisabled ? RBAC_PROTECTED_ROLE_DELETE_MESSAGE : undefined}
+                                title={isDeleteDisabled ? PROTECTED_ROLE_DELETE_MESSAGE : undefined}
                               >
                                 <Trash2 className="size-4" />
                                 Delete

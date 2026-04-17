@@ -2,14 +2,15 @@
 
 import type { FormEvent } from 'react';
 import { useState } from 'react';
-import { useRbacFeatures } from '@/hooks/use-rbac-features';
-import { useRbacRoles } from '@/hooks/use-rbac-roles';
-import { RbacDeleteDialog } from '../shared/rbac-delete-dialog';
-import { createEmptyRoleForm, createRolePermissionDraftMap, type RoleFormValues, type RolePermissionDraftMap } from '../shared/rbac-management-shared';
+import { useFeatureCatalog } from '@/hooks/admin/features/use-feature-catalog';
+import { useRoleCatalog } from '@/hooks/admin/roles/use-role-catalog';
 import { RoleFormDialog } from './role-form-dialog';
+import { RoleDeleteDialog } from './role-delete-dialog';
 import { RolesTable } from './roles-table';
 import type { GrantEffect, RoleAction, RolePermissionRequest, RoleRecordResponse } from '@/api/types.gen';
-import { RBAC_COPY } from '@/constants/rbac-management';
+import { ROLE_ACCESS_TEXT } from '@/constants/admin/roles/access-control';
+import type { RoleFormValues, RolePermissionDraftMap } from '@/types/admin/roles';
+import { createEmptyRoleForm, createRolePermissionDraftMap } from './roles-shared';
 
 function buildPermissionsPayload(permissionDrafts: RolePermissionDraftMap): RolePermissionRequest[] {
   return Object.entries(permissionDrafts)
@@ -26,8 +27,8 @@ function isProtectedRole(role: RoleRecordResponse) {
 }
 
 export function RolesManagement() {
-  const { createRole, deleteRole, error: rolesError, isDeleting, isEmpty, isLoading, isSaving, refresh, roles, updateRole } = useRbacRoles();
-  const { features, isLoading: isLoadingFeatures } = useRbacFeatures();
+  const { createRole, deleteRole, error: rolesError, isDeleting, isEmpty, isLoading, isSaving, refresh, roles, updateRole } = useRoleCatalog();
+  const { features, isLoading: isLoadingFeatures } = useFeatureCatalog();
   const [mode, setMode] = useState<'create' | 'edit'>('create');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [values, setValues] = useState<RoleFormValues>(createEmptyRoleForm());
@@ -175,17 +176,17 @@ export function RolesManagement() {
         values={values}
       />
 
-      <RbacDeleteDialog
+      <RoleDeleteDialog
         description={
           rolePendingDelete
-            ? `${isProtectedRole(rolePendingDelete) ? 'System Administrator cannot be deleted.' : RBAC_COPY.roles.deleteDescription} Selected role: ${rolePendingDelete.name}.`
-            : RBAC_COPY.roles.deleteDescription
+            ? `${isProtectedRole(rolePendingDelete) ? 'System Administrator cannot be deleted.' : ROLE_ACCESS_TEXT.deleteDescription} Selected role: ${rolePendingDelete.name}.`
+            : ROLE_ACCESS_TEXT.deleteDescription
         }
         isDeleting={isDeleting}
         onClose={() => setRolePendingDelete(null)}
         onConfirm={handleDelete}
         open={Boolean(rolePendingDelete)}
-        title={RBAC_COPY.roles.deleteTitle}
+        title={ROLE_ACCESS_TEXT.deleteTitle}
       />
     </>
   );

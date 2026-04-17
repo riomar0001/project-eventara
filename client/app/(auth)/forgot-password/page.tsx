@@ -6,8 +6,8 @@ import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AuthFormField } from '@/components/auth/shared/form-field';
-import { AuthStatusCard } from '@/components/auth/shared/status-card';
+import { AuthFormField } from '@/components/auth/auth-form-field';
+import { AuthStatusCard } from '@/components/auth/auth-status-card';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Authentication } from '@/api/sdk.gen';
@@ -104,3 +104,4 @@ export default function ForgotPasswordPage() {
     </Card>
   );
 }
+

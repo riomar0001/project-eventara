@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { EVENT_MANAGEMENT_PATHS, getVolunteerInitials, type VolunteerRecord } from '@/constants/event-management';
+import { ADMIN_OPERATIONS_PATHS, getVolunteerInitials, type VolunteerRecord } from '@/constants/admin/operations';
 
 export type VolunteerColumnMeta = {
   cellClassName?: string;
@@ -93,13 +93,13 @@ export const volunteerColumns: ColumnDef<VolunteerRecord>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem asChild>
-              <Link href={EVENT_MANAGEMENT_PATHS.volunteerDetail(row.original.id)}>
+              <Link href={ADMIN_OPERATIONS_PATHS.volunteerDetail(row.original.id)}>
                 <Eye className="size-4" />
                 View profile
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link href={EVENT_MANAGEMENT_PATHS.volunteerEdit(row.original.id)}>
+              <Link href={ADMIN_OPERATIONS_PATHS.volunteerEdit(row.original.id)}>
                 <PencilLine className="size-4" />
                 Edit volunteer
               </Link>
@@ -114,3 +114,4 @@ export const volunteerColumns: ColumnDef<VolunteerRecord>[] = [
     } satisfies VolunteerColumnMeta
   }
 ];
+

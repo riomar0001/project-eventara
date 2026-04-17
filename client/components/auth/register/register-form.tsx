@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AuthFormField } from '@/components/auth/shared/form-field';
+import { AuthFormField } from '@/components/auth/auth-form-field';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -144,3 +144,4 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
     </Card>
   );
 }
+

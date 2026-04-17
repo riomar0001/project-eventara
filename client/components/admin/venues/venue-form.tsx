@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { ImagePlus, Save } from 'lucide-react';
 import Link from 'next/link';
-import { BackLink, FieldLabel, PhotoPanel } from '@/components/admin/event-management/shared';
+import { BackLink, FieldLabel, PhotoPanel } from './venues-shared';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,7 +11,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { EVENT_MANAGEMENT_PATHS, type VenueRecord } from '@/constants/event-management';
+import { ADMIN_OPERATIONS_PATHS, type VenueRecord } from '@/constants/admin/operations';
 
 const amenityOptions = ['Dockside terrace', 'LED wall package', 'Vendor power drops', 'Control booth', 'Workshop benches', 'Private arrival gate'];
 
@@ -35,7 +35,7 @@ export function VenueForm({ mode, venue }: { mode: 'create' | 'edit'; venue?: Ve
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center gap-2">
-        <BackLink href={EVENT_MANAGEMENT_PATHS.venues} label="Back to venues" />
+        <BackLink href={ADMIN_OPERATIONS_PATHS.venues} label="Back to venues" />
         <Badge variant="outline" className="rounded-full px-3 py-1 text-xs tracking-[0.18em] uppercase">
           UI preview only
         </Badge>
@@ -145,7 +145,7 @@ export function VenueForm({ mode, venue }: { mode: 'create' | 'edit'; venue?: Ve
                   {mode === 'create' ? 'Save venue draft' : 'Save venue changes'}
                 </Button>
                 <Button type="button" variant="outline" asChild>
-                  <Link href={EVENT_MANAGEMENT_PATHS.venues}>Cancel</Link>
+                  <Link href={ADMIN_OPERATIONS_PATHS.venues}>Cancel</Link>
                 </Button>
               </div>
             </form>
@@ -153,7 +153,7 @@ export function VenueForm({ mode, venue }: { mode: 'create' | 'edit'; venue?: Ve
         </Card>
 
         <div className="space-y-6">
-          <PhotoPanel photo={previewPhoto} tone="venue" className="min-h-[280px]">
+          <PhotoPanel photo={previewPhoto} className="min-h-[280px]">
             <div className="flex min-h-[280px] flex-col justify-between p-6">
               <Badge variant="secondary" className="w-fit bg-white/85 text-neutral-900">
                 Preview card
@@ -189,3 +189,4 @@ export function VenueForm({ mode, venue }: { mode: 'create' | 'edit'; venue?: Ve
     </div>
   );
 }
+

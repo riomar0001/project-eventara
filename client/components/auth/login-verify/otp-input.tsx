@@ -183,3 +183,4 @@ export function OtpInput({ value, onChange, focusedIndex, onFocusChange, hasErro
     </div>
   );
 }
+

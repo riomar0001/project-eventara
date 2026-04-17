@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { VenueForm } from '@/components/admin/venues/venue-form';
-import { getVenueById } from '@/constants/event-management';
+import { getVenueById } from '@/constants/admin/operations';
 
 export default async function AdminVenueEditPage({ params }: { params: Promise<{ venueId: string }> }) {
   const { venueId } = await params;
@@ -12,3 +12,4 @@ export default async function AdminVenueEditPage({ params }: { params: Promise<{
 
   return <VenueForm mode="edit" venue={venue} />;
 }
+

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { CalendarPlus2, Save } from 'lucide-react';
 import Link from 'next/link';
-import { BackLink, FieldLabel, PhotoPanel } from '@/components/admin/event-management/shared';
+import { BackLink, FieldLabel, PhotoPanel } from './events-shared';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,7 +11,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { EVENT_MANAGEMENT_PATHS, eventRecords, type EventRecord, venueRecords } from '@/constants/event-management';
+import { ADMIN_OPERATIONS_PATHS, eventRecords, type EventRecord, venueRecords } from '@/constants/admin/operations';
 
 const hostTeamOptions = ['Programming', 'Partnerships', 'Guest Experience', 'Production', 'Registration', 'Donor Relations'];
 
@@ -35,7 +35,7 @@ export function EventForm({ event, mode }: { event?: EventRecord; mode: 'create'
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center gap-2">
-        <BackLink href={EVENT_MANAGEMENT_PATHS.events} label="Back to events" />
+        <BackLink href={ADMIN_OPERATIONS_PATHS.events} label="Back to events" />
         <Badge variant="outline" className="rounded-full px-3 py-1 text-xs tracking-[0.18em] uppercase">
           UI preview only
         </Badge>
@@ -146,7 +146,7 @@ export function EventForm({ event, mode }: { event?: EventRecord; mode: 'create'
                   {mode === 'create' ? 'Save event draft' : 'Save event changes'}
                 </Button>
                 <Button type="button" variant="outline" asChild>
-                  <Link href={EVENT_MANAGEMENT_PATHS.events}>Cancel</Link>
+                  <Link href={ADMIN_OPERATIONS_PATHS.events}>Cancel</Link>
                 </Button>
               </div>
             </form>
@@ -154,7 +154,7 @@ export function EventForm({ event, mode }: { event?: EventRecord; mode: 'create'
         </Card>
 
         <div className="space-y-6">
-          <PhotoPanel photo={previewPhoto} tone="event" className="min-h-[280px]">
+          <PhotoPanel photo={previewPhoto} className="min-h-[280px]">
             <div className="flex min-h-[280px] flex-col justify-between p-6">
               <Badge variant="secondary" className="w-fit bg-white/85 text-neutral-900">
                 Event preview
@@ -190,3 +190,4 @@ export function EventForm({ event, mode }: { event?: EventRecord; mode: 'create'
     </div>
   );
 }
+

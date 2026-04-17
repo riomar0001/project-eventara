@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AuthFormField } from '@/components/auth/shared/form-field';
+import { AuthFormField } from '@/components/auth/auth-form-field';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Authentication } from '@/api/sdk.gen';
@@ -114,3 +114,4 @@ export function LoginForm() {
     </Card>
   );
 }
+

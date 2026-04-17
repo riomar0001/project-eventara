@@ -4,15 +4,15 @@ import { useState } from 'react';
 import { Search, UserPlus, Users, X } from 'lucide-react';
 import Link from 'next/link';
 import { flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
-import { OperationsPageIntro } from '@/components/admin/event-management/shared';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { volunteerColumns, type VolunteerColumnMeta } from './volunteer-columns';
-import { EVENT_MANAGEMENT_PATHS, volunteerRecords } from '@/constants/event-management';
+import { ADMIN_OPERATIONS_PATHS, volunteerRecords } from '@/constants/admin/operations';
 import { cn } from '@/lib/utils';
+import { OperationsPageIntro } from './volunteers-shared';
 
 export function VolunteersTable() {
   const [search, setSearch] = useState('');
@@ -42,8 +42,6 @@ export function VolunteersTable() {
   return (
     <div className="space-y-6">
       <OperationsPageIntro
-        tone="volunteer"
-        badge="Volunteer Pages"
         title="Volunteer Management"
         description="A UI-only volunteer section with a shadcn-style searchable data table, profile pages, and add or edit form previews."
         metrics={[
@@ -65,7 +63,7 @@ export function VolunteersTable() {
         ]}
         actions={
           <Button asChild>
-            <Link href={EVENT_MANAGEMENT_PATHS.volunteerCreate}>
+            <Link href={ADMIN_OPERATIONS_PATHS.volunteerCreate}>
               <UserPlus className="size-4" />
               Add volunteer
             </Link>
@@ -171,3 +169,4 @@ export function VolunteersTable() {
     </div>
   );
 }
+

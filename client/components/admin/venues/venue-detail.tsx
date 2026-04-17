@@ -1,10 +1,10 @@
 import { CalendarRange, PencilLine, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { BackLink, DetailList, DetailPanel, PhotoPanel } from '@/components/admin/event-management/shared';
+import { BackLink, DetailList, DetailPanel, PhotoPanel } from './venues-shared';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { EVENT_MANAGEMENT_PATHS, getEventsByVenueId, getVenueById } from '@/constants/event-management';
+import { ADMIN_OPERATIONS_PATHS, getEventsByVenueId, getVenueById } from '@/constants/admin/operations';
 
 export function VenueDetail({ venueId }: { venueId: string }) {
   const venue = getVenueById(venueId);
@@ -18,9 +18,9 @@ export function VenueDetail({ venueId }: { venueId: string }) {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center gap-2">
-        <BackLink href={EVENT_MANAGEMENT_PATHS.venues} label="Back to venues" />
+        <BackLink href={ADMIN_OPERATIONS_PATHS.venues} label="Back to venues" />
         <Button asChild variant="outline" size="sm">
-          <Link href={EVENT_MANAGEMENT_PATHS.venueEdit(venue.id)}>
+          <Link href={ADMIN_OPERATIONS_PATHS.venueEdit(venue.id)}>
             <PencilLine className="size-4" />
             Edit venue
           </Link>
@@ -31,7 +31,7 @@ export function VenueDetail({ venueId }: { venueId: string }) {
         </Button>
       </div>
 
-      <PhotoPanel photo={venue.photo} tone="venue" className="min-h-90">
+      <PhotoPanel photo={venue.photo} className="min-h-90">
         <div className="flex min-h-90 flex-col justify-between p-7">
           <div className="flex flex-wrap gap-2">
             <Badge variant="secondary" className="bg-white/90 text-neutral-900">
@@ -100,7 +100,7 @@ export function VenueDetail({ venueId }: { venueId: string }) {
                   <p className="text-sm text-neutral-500">{event.dateLabel}</p>
                 </div>
                 <Button asChild variant="outline" size="sm">
-                  <Link href={EVENT_MANAGEMENT_PATHS.eventDetail(event.id)}>
+                  <Link href={ADMIN_OPERATIONS_PATHS.eventDetail(event.id)}>
                     <CalendarRange className="size-4" />
                     View event
                   </Link>
@@ -113,3 +113,4 @@ export function VenueDetail({ venueId }: { venueId: string }) {
     </div>
   );
 }
+

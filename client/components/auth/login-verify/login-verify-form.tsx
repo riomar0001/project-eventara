@@ -8,7 +8,7 @@ import { OtpInput, OTP_LENGTH } from '@/components/auth/login-verify/otp-input';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Authentication } from '@/api/sdk.gen';
-import { decodeTokenUser } from '@/lib/token';
+import { decodeTokenUser } from '@/lib/auth/token';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/auth-store';
 
@@ -277,3 +277,4 @@ export function LoginVerifyForm() {
     </Card>
   );
 }
+

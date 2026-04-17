@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { Authentication } from '@/api/sdk.gen';
-import { type AuthUser, decodeTokenUser, isTokenExpired } from '@/lib/token';
+import { type AuthUser, decodeTokenUser, isTokenExpired } from '@/lib/auth/token';
 
 export type { AuthUser };
 

@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { LoadingState, SuccessState, ExpiredState, AlreadyVerifiedState, InvalidState } from '@/components/auth/verify/verify-email-states';
 import { Card } from '@/components/ui/card';
 import { Authentication } from '@/api/sdk.gen';
-import { decodeTokenUser } from '@/lib/token';
+import { decodeTokenUser } from '@/lib/auth/token';
 import { useAuthStore } from '@/store/auth-store';
 
 type VerifyState = 'loading' | 'success' | 'expired' | 'already_verified' | 'invalid';
@@ -61,3 +61,4 @@ export default function VerifyEmailPage() {
     </Card>
   );
 }
+

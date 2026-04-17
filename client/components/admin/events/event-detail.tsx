@@ -1,11 +1,11 @@
 import { PencilLine, Trash2, Users } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { BackLink, DetailList, DetailPanel, PhotoPanel } from '@/components/admin/event-management/shared';
+import { BackLink, DetailList, DetailPanel, PhotoPanel } from './events-shared';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { EVENT_MANAGEMENT_PATHS, getEventById, getVenueById, getVolunteerInitials, getVolunteersByEventId } from '@/constants/event-management';
+import { ADMIN_OPERATIONS_PATHS, getEventById, getVenueById, getVolunteerInitials, getVolunteersByEventId } from '@/constants/admin/operations';
 
 export function EventDetail({ eventId }: { eventId: string }) {
   const event = getEventById(eventId);
@@ -20,9 +20,9 @@ export function EventDetail({ eventId }: { eventId: string }) {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center gap-2">
-        <BackLink href={EVENT_MANAGEMENT_PATHS.events} label="Back to events" />
+        <BackLink href={ADMIN_OPERATIONS_PATHS.events} label="Back to events" />
         <Button asChild variant="outline" size="sm">
-          <Link href={EVENT_MANAGEMENT_PATHS.eventEdit(event.id)}>
+          <Link href={ADMIN_OPERATIONS_PATHS.eventEdit(event.id)}>
             <PencilLine className="size-4" />
             Edit event
           </Link>
@@ -33,7 +33,7 @@ export function EventDetail({ eventId }: { eventId: string }) {
         </Button>
       </div>
 
-      <PhotoPanel photo={event.photo} tone="event" className="min-h-[360px]">
+      <PhotoPanel photo={event.photo} className="min-h-[360px]">
         <div className="flex min-h-[360px] flex-col justify-between p-7">
           <div className="flex flex-wrap gap-2">
             <Badge variant="secondary" className="bg-white/90 text-neutral-900">
@@ -101,7 +101,7 @@ export function EventDetail({ eventId }: { eventId: string }) {
                   </div>
                 </div>
                 <Button asChild variant="outline" size="sm">
-                  <Link href={EVENT_MANAGEMENT_PATHS.volunteerDetail(volunteer.id)}>
+                    <Link href={ADMIN_OPERATIONS_PATHS.volunteerDetail(volunteer.id)}>
                     <Users className="size-4" />
                     View volunteer
                   </Link>
@@ -114,3 +114,4 @@ export function EventDetail({ eventId }: { eventId: string }) {
     </div>
   );
 }
+
