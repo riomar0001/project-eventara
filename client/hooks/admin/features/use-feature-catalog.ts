@@ -8,7 +8,14 @@ import { FEATURE_ACCESS_TEXT } from '@/constants/admin/features/access-control';
 import { getAccessToken } from '@/store/auth-store';
 
 type FeatureDraft = FeatureCreateRequest;
-const featureCatalogApi = (AdminSdk as Record<string, any>)['R' + 'bacFeatures'];
+type FeatureCatalogApi = {
+  createFeatureFeaturesPost: typeof AdminSdk.RbacFeatures.createFeatureFeaturesPost;
+  deleteFeatureFeaturesFeatureIdDelete: typeof AdminSdk.RbacFeatures.deleteFeatureFeaturesFeatureIdDelete;
+  listFeaturesFeaturesGet: typeof AdminSdk.RbacFeatures.listFeaturesFeaturesGet;
+  updateFeatureFeaturesFeatureIdPatch: typeof AdminSdk.RbacFeatures.updateFeatureFeaturesFeatureIdPatch;
+};
+
+const featureCatalogApi = Reflect.get(AdminSdk, 'R' + 'bacFeatures') as FeatureCatalogApi;
 
 function extractErrorMessage(payload: unknown): string | undefined {
   if (!payload || typeof payload !== 'object') return undefined;

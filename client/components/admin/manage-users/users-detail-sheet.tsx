@@ -8,7 +8,7 @@ import {
   humanizeValue,
   RolePermissionList,
   UserStatusBadge
-} from '@/components/admin/users/user-management-ui';
+} from '@/components/admin/manage-users/manage-users-ui';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';

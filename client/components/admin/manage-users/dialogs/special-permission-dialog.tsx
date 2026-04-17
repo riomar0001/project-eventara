@@ -3,7 +3,7 @@
 import type { FormEvent } from 'react';
 import { format } from 'date-fns';
 import { CalendarIcon, Check, Loader2, RefreshCcw, ShieldPlus, ShieldX } from 'lucide-react';
-import { formatDateTime, humanizeRoleName, humanizeValue } from '@/components/admin/users/user-management-ui';
+import { formatDateTime, humanizeRoleName, humanizeValue } from '@/components/admin/manage-users/manage-users-ui';
 import { FieldHint } from '@/components/system/forms/field-hint';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';

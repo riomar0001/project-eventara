@@ -3,7 +3,7 @@
 import { format, formatDistanceToNow } from 'date-fns';
 import { Clock3, Globe, LaptopMinimal, MapPin, Smartphone, Tablet, TriangleAlert } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useLoginHistory, type LoginHistoryEntry } from '@/hooks/admin/user/settings/login-history/use-login-history';
+import { useLoginHistory, type LoginHistoryEntry } from '@/hooks/admin/user-settings/login-history/use-login-history';
 
 function getDeviceLabel(entry: LoginHistoryEntry) {
   const parts = [entry.browser, entry.os].filter(Boolean);

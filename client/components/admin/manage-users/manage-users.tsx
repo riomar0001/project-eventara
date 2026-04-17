@@ -2,16 +2,16 @@
 
 import { FormEvent, useState } from 'react';
 import { z } from 'zod';
-import { AdminDeleteDialog } from '@/components/admin/users/dialogs/delete-dialog';
-import { AdminEmailDialog } from '@/components/admin/users/dialogs/email-dialog';
-import { AdminPasswordResetDialog } from '@/components/admin/users/dialogs/password-reset-dialog';
-import { AdminRoleDialog } from '@/components/admin/users/dialogs/role-dialog';
-import { AdminSpecialPermissionDialog } from '@/components/admin/users/dialogs/special-permission-dialog';
-import { AdminUserManagementTable } from '@/components/admin/users/user-management-table';
-import { AdminUserDetailSheet } from '@/components/admin/users/users-detail-sheet';
-import { useAdminUserAccountActions } from '@/hooks/admin/users/use-admin-user-account-actions';
-import { useAdminUserAccountDetail } from '@/hooks/admin/users/use-admin-user-account-detail';
-import { useAdminUserAccounts } from '@/hooks/admin/users/use-admin-user-accounts';
+import { AdminDeleteDialog } from '@/components/admin/manage-users/dialogs/delete-dialog';
+import { AdminEmailDialog } from '@/components/admin/manage-users/dialogs/email-dialog';
+import { AdminPasswordResetDialog } from '@/components/admin/manage-users/dialogs/password-reset-dialog';
+import { AdminRoleDialog } from '@/components/admin/manage-users/dialogs/role-dialog';
+import { AdminSpecialPermissionDialog } from '@/components/admin/manage-users/dialogs/special-permission-dialog';
+import { AdminUserManagementTable } from '@/components/admin/manage-users/manage-users-table';
+import { AdminUserDetailSheet } from '@/components/admin/manage-users/users-detail-sheet';
+import { useAdminUserAccountActions } from '@/hooks/admin/users/use-manage-users-account-actions';
+import { useAdminUserAccountDetail } from '@/hooks/admin/users/use-manage-users-account-detail';
+import { useAdminUserAccounts } from '@/hooks/admin/users/use-manage-users-accounts';
 import { useDebounce } from '@/hooks/use-debounce';
 import type { AdminUserAccountSummaryResponse as AdminUserAccountSummary, GrantEffect, RoleAction, UserStatus } from '@/api/types.gen';
 
@@ -443,4 +443,3 @@ export function AdminUserManagement() {
     </>
   );
 }
-

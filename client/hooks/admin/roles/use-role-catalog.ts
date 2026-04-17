@@ -8,7 +8,14 @@ import { ROLE_ACCESS_TEXT } from '@/constants/admin/roles/access-control';
 import { getAccessToken } from '@/store/auth-store';
 
 type RoleDraft = RoleCreateRequest;
-const roleCatalogApi = (AdminSdk as Record<string, any>)['R' + 'bacRoles'];
+type RoleCatalogApi = {
+  createRoleRolesPost: typeof AdminSdk.RbacRoles.createRoleRolesPost;
+  deleteRoleRolesRoleIdDelete: typeof AdminSdk.RbacRoles.deleteRoleRolesRoleIdDelete;
+  listRolesRolesGet: typeof AdminSdk.RbacRoles.listRolesRolesGet;
+  updateRoleRolesRoleIdPatch: typeof AdminSdk.RbacRoles.updateRoleRolesRoleIdPatch;
+};
+
+const roleCatalogApi = Reflect.get(AdminSdk, 'R' + 'bacRoles') as RoleCatalogApi;
 
 function extractErrorMessage(payload: unknown): string | undefined {
   if (!payload || typeof payload !== 'object') return undefined;

@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { useDeleteAccount } from '@/hooks/admin/user/settings/delete-account/use-delete-account';
+import { useDeleteAccount } from '@/hooks/admin/user-settings/delete-account/use-delete-account';
 import { DELETE_ACCOUNT_OTHER_REASON, DELETE_ACCOUNT_REASON_OPTIONS } from '@/constants/admin/user/settings/delete-account';
 
 export default function DeleteAccountPage() {

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Eye, KeyRound, Mail, MoreHorizontal, ShieldCheck, ShieldPlus, Trash2 } from 'lucide-react';
 import type { ColumnDef } from '@tanstack/react-table';
-import { formatDateTime, getInitials, humanizeRoleName, isSoftDeleteDisabled, UserStatusBadge } from '@/components/admin/users/user-management-ui';
+import { formatDateTime, getInitials, humanizeRoleName, isSoftDeleteDisabled, UserStatusBadge } from '@/components/admin/manage-users/manage-users-ui';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';

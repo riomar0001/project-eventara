@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { useProfileSettingsForm } from '@/hooks/admin/user/settings/profile/use-profile-settings-form';
+import { useProfileSettingsForm } from '@/hooks/admin/user-settings/profile/use-profile-settings-form';
 import { PROFILE_AGE_GROUP_OPTIONS, PROFILE_EDUCATION_LEVEL_OPTIONS, PROFILE_GENDER_OPTIONS } from '@/constants/user/profile';
 
 export default function ProfileSettingsPage() {

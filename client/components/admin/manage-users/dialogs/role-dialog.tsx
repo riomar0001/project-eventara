@@ -2,7 +2,7 @@
 
 import type { FormEvent } from 'react';
 import { Loader2, RefreshCcw, ShieldCheck } from 'lucide-react';
-import { humanizeRoleName, RolePermissionList } from '@/components/admin/users/user-management-ui';
+import { humanizeRoleName, RolePermissionList } from '@/components/admin/manage-users/manage-users-ui';
 import { FieldHint } from '@/components/system/forms/field-hint';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
