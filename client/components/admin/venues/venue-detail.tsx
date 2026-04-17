@@ -31,8 +31,8 @@ export function VenueDetail({ venueId }: { venueId: string }) {
         </Button>
       </div>
 
-      <PhotoPanel photo={venue.photo} tone="venue" className="min-h-[360px]">
-        <div className="flex min-h-[360px] flex-col justify-between p-7">
+      <PhotoPanel photo={venue.photo} tone="venue" className="min-h-90">
+        <div className="flex min-h-90 flex-col justify-between p-7">
           <div className="flex flex-wrap gap-2">
             <Badge variant="secondary" className="bg-white/90 text-neutral-900">
               {venue.status}
