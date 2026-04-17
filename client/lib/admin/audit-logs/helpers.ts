@@ -1,5 +1,5 @@
-import type { ActionType, AuditLogResponse, AuditLogStatus } from '@/api/types.gen';
 import type { AuditLogFilterValues } from '@/types/admin/audit-logs';
+import type { ActionType, AuditLogResponse, AuditLogStatus } from '@/api/types.gen';
 
 const actionLabels: Record<ActionType, string> = {
   create: 'Create',
@@ -43,14 +43,12 @@ export function formatAuditCompactTimestamp(timestamp: string) {
 
 export function formatAuditActor(userId: string | null) {
   if (!userId) return 'System';
-  if (userId.length <= 18) return userId;
-  return `${userId.slice(0, 8)}...${userId.slice(-4)}`;
+  return userId;
 }
 
 export function formatAuditIdentifier(value: string | null) {
   if (!value) return 'Not captured';
-  if (value.length <= 18) return value;
-  return `${value.slice(0, 8)}...${value.slice(-4)}`;
+  return value;
 }
 
 export function formatAuditDateBoundary(value: string, boundary: 'start' | 'end') {

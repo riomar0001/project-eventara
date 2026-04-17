@@ -36,7 +36,7 @@ export function AuditLogsPage() {
   const summary = getAuditSummary(logs);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       <AuditLogsHero
         activeFilterCount={activeFilterCount}
         failureCount={summary.failureCount}
@@ -56,7 +56,7 @@ export function AuditLogsPage() {
         resourceSuggestions={resourceSuggestions}
       />
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_minmax(340px,0.95fr)]">
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_minmax(340px,0.95fr)] xl:items-start">
         <AuditLogsTable
           activeFilterCount={activeFilterCount}
           error={error}

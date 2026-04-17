@@ -2,6 +2,7 @@ import base64
 import json
 import uuid
 from datetime import datetime
+from typing import Literal
 
 from pydantic import AwareDatetime
 from sqlalchemy import and_, func, select
@@ -71,24 +72,40 @@ class AuditLogRepository:
         start_date: AwareDatetime | None,
         end_date: AwareDatetime | None,
     ) -> tuple[list[DomainAuditLog], int, str | None, str | None]:
-        query = select(AuditLog).order_by(AuditLog.timestamp.desc(), AuditLog.id.desc())
-
         filters = self._build_filters(user_id, action_type, resource_type, start_date, end_date)
+        direction: Literal["next", "prev"] = "next"
 
         if cursor:
             cursor_data = self._decode_cursor(cursor)
             cursor_id = uuid.UUID(cursor_data["id"])
             cursor_timestamp = datetime.fromisoformat(cursor_data["timestamp"])
+            direction = cursor_data.get("direction", "next")
 
-            filters.append(
-                (AuditLog.timestamp < cursor_timestamp)
-                | (
-                    and_(
-                        AuditLog.timestamp == cursor_timestamp,
-                        AuditLog.id < cursor_id,
+            if direction == "prev":
+                filters.append(
+                    (AuditLog.timestamp > cursor_timestamp)
+                    | (
+                        and_(
+                            AuditLog.timestamp == cursor_timestamp,
+                            AuditLog.id > cursor_id,
+                        )
                     )
                 )
-            )
+            else:
+                filters.append(
+                    (AuditLog.timestamp < cursor_timestamp)
+                    | (
+                        and_(
+                            AuditLog.timestamp == cursor_timestamp,
+                            AuditLog.id < cursor_id,
+                        )
+                    )
+                )
+
+        if direction == "prev":
+            query = select(AuditLog).order_by(AuditLog.timestamp.asc(), AuditLog.id.asc())
+        else:
+            query = select(AuditLog).order_by(AuditLog.timestamp.desc(), AuditLog.id.desc())
 
         if filters:
             query = query.where(and_(*filters))
@@ -102,14 +119,22 @@ class AuditLogRepository:
         if has_next:
             logs = logs[:limit]
 
+        if direction == "prev":
+            logs.reverse()
+
         next_cursor = None
         prev_cursor = None
 
-        if has_next and logs:
-            next_cursor = self._encode_cursor(logs[-1].id, logs[-1].timestamp)
-
-        if cursor and logs:
-            prev_cursor = self._encode_cursor(logs[0].id, logs[0].timestamp)
+        if logs:
+            if direction == "prev":
+                next_cursor = self._encode_cursor(logs[-1].id, logs[-1].timestamp, "next")
+                if has_next:
+                    prev_cursor = self._encode_cursor(logs[0].id, logs[0].timestamp, "prev")
+            else:
+                if has_next:
+                    next_cursor = self._encode_cursor(logs[-1].id, logs[-1].timestamp, "next")
+                if cursor:
+                    prev_cursor = self._encode_cursor(logs[0].id, logs[0].timestamp, "prev")
 
         total_count = await self.count_total(user_id, action_type, resource_type, start_date, end_date)
 
@@ -142,12 +167,17 @@ class AuditLogRepository:
 
         return filters
 
-    def _encode_cursor(self, log_id: uuid.UUID, timestamp: datetime) -> str:
-        cursor_data = {"id": str(log_id), "timestamp": timestamp.isoformat()}
+    def _encode_cursor(self, log_id: uuid.UUID, timestamp: datetime, direction: Literal["next", "prev"] = "next") -> str:
+        cursor_data = {"id": str(log_id), "timestamp": timestamp.isoformat(), "direction": direction}
         return base64.b64encode(json.dumps(cursor_data).encode()).decode()
 
     def _decode_cursor(self, cursor: str) -> dict:
-        return json.loads(base64.b64decode(cursor.encode()).decode())
+        decoded = json.loads(base64.b64decode(cursor.encode()).decode())
+        if decoded.get("direction") not in {"next", "prev", None}:
+            decoded["direction"] = "next"
+        elif decoded.get("direction") is None:
+            decoded["direction"] = "next"
+        return decoded
 
     def _to_domain(self, orm_log: AuditLog) -> DomainAuditLog:
         return DomainAuditLog(

@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Path, Request, Response, status
 
+from app.application.use_cases.audit_log_usecase import CreateAuditLogUseCase
 from app.application.dto.auth_dto import (
     ForgotPasswordInput,
     LoginInput,
@@ -12,7 +13,8 @@ from app.application.dto.auth_dto import (
     ResetPasswordInput,
 )
 from app.application.use_cases.auth_usecase import AuthUseCase
-from app.controller.dependencies import get_auth_use_case, login_rate_limit
+from app.controller.api.audit_helpers import safe_audit_log
+from app.controller.dependencies import get_auth_use_case, get_create_audit_log_use_case, login_rate_limit
 from app.controller.docs.auth_docs import (
     EMAIL_ALREADY_VERIFIED,
     EMAIL_CONFLICT,
@@ -65,6 +67,7 @@ from app.controller.schemas.auth_schema import (
     VerifyEmailResponse,
 )
 from app.core.config import settings
+from app.domain.entities.audit_log import ActionType, AuditLogStatus
 from app.domain.exceptions import (
     AccountDeletionGracePeriodExpiredError,
     EmailAlreadyTakenError,
@@ -135,8 +138,10 @@ def _clear_auth_cookies(response: Response) -> None:
     ),
 )
 async def register_user(
+    request: Request,
     body: RegisterRequest,
     use_case: AuthUseCase = Depends(get_auth_use_case),
+    audit_use_case: CreateAuditLogUseCase = Depends(get_create_audit_log_use_case),
 ) -> RegisterResponse:
     """Register a new user account.
 
@@ -156,6 +161,17 @@ async def register_user(
         )
     except EmailAlreadyTakenError as error:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error))
+    await safe_audit_log(
+        audit_use_case,
+        request,
+        user_id=new_user.user.id,
+        action_type=ActionType.CREATE,
+        resource_type="user-accounts",
+        resource_id=str(new_user.user.id),
+        status=AuditLogStatus.SUCCESS,
+        new_values={"email": new_user.user.email},
+        additional_context={"operation": "register"},
+    )
 
     return RegisterResponse(
         user_id=new_user.user.id,
@@ -274,8 +290,10 @@ async def resend_verification(
     ),
 )
 async def login(
+    request: Request,
     body: LoginRequest,
     use_case: AuthUseCase = Depends(get_auth_use_case),
+    audit_use_case: CreateAuditLogUseCase = Depends(get_create_audit_log_use_case),
 ) -> LoginInitResponse:
     """Validate credentials and dispatch a one-time passcode to the user's email.
 
@@ -292,13 +310,63 @@ async def login(
     try:
         result = await use_case.login(LoginInput(email=body.email, password=body.password))
     except InvalidCredentialsError as error:
+        await safe_audit_log(
+            audit_use_case,
+            request,
+            user_id=None,
+            action_type=ActionType.LOGIN,
+            resource_type="auth",
+            resource_id=body.email,
+            status=AuditLogStatus.FAILURE,
+            additional_context={"operation": "login-init"},
+        )
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(error))
     except (UserInactiveError, AccountDeletionGracePeriodExpiredError) as error:
+        await safe_audit_log(
+            audit_use_case,
+            request,
+            user_id=None,
+            action_type=ActionType.LOGIN,
+            resource_type="auth",
+            resource_id=body.email,
+            status=AuditLogStatus.FAILURE,
+            additional_context={"operation": "login-init"},
+        )
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(error))
     except UserLockedError as error:
+        await safe_audit_log(
+            audit_use_case,
+            request,
+            user_id=None,
+            action_type=ActionType.LOGIN,
+            resource_type="auth",
+            resource_id=body.email,
+            status=AuditLogStatus.FAILURE,
+            additional_context={"operation": "login-init"},
+        )
         raise HTTPException(status_code=status.HTTP_423_LOCKED, detail=str(error))
     except EmailNotVerifiedError as error:
+        await safe_audit_log(
+            audit_use_case,
+            request,
+            user_id=None,
+            action_type=ActionType.LOGIN,
+            resource_type="auth",
+            resource_id=body.email,
+            status=AuditLogStatus.FAILURE,
+            additional_context={"operation": "login-init"},
+        )
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(error))
+    await safe_audit_log(
+        audit_use_case,
+        request,
+        user_id=None,
+        action_type=ActionType.LOGIN,
+        resource_type="auth",
+        resource_id=body.email,
+        status=AuditLogStatus.SUCCESS,
+        additional_context={"operation": "login-init"},
+    )
 
     return LoginInitResponse(verification_token=result.verification_token)
 
@@ -331,6 +399,7 @@ async def login_verify(
     response: Response,
     body: LoginVerifyRequest,
     use_case: AuthUseCase = Depends(get_auth_use_case),
+    audit_use_case: CreateAuditLogUseCase = Depends(get_create_audit_log_use_case),
 ) -> LoginVerifyResponse:
     """Verify the OTP code and return JWT tokens to complete the OTP login flow.
 
@@ -356,16 +425,76 @@ async def login_verify(
             )
         )
     except TokenExpiredError as error:
+        await safe_audit_log(
+            audit_use_case,
+            request,
+            user_id=None,
+            action_type=ActionType.LOGIN,
+            resource_type="auth",
+            resource_id=None,
+            status=AuditLogStatus.FAILURE,
+            additional_context={"operation": "login-verify"},
+        )
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(error))
     except InvalidTokenError as error:
+        await safe_audit_log(
+            audit_use_case,
+            request,
+            user_id=None,
+            action_type=ActionType.LOGIN,
+            resource_type="auth",
+            resource_id=None,
+            status=AuditLogStatus.FAILURE,
+            additional_context={"operation": "login-verify"},
+        )
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error))
     except InvalidOTPError as error:
+        await safe_audit_log(
+            audit_use_case,
+            request,
+            user_id=None,
+            action_type=ActionType.LOGIN,
+            resource_type="auth",
+            resource_id=None,
+            status=AuditLogStatus.FAILURE,
+            additional_context={"operation": "login-verify"},
+        )
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(error))
     except UserNotFoundError as error:
+        await safe_audit_log(
+            audit_use_case,
+            request,
+            user_id=None,
+            action_type=ActionType.LOGIN,
+            resource_type="auth",
+            resource_id=None,
+            status=AuditLogStatus.FAILURE,
+            additional_context={"operation": "login-verify"},
+        )
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error))
     except (UserInactiveError, AccountDeletionGracePeriodExpiredError) as error:
+        await safe_audit_log(
+            audit_use_case,
+            request,
+            user_id=None,
+            action_type=ActionType.LOGIN,
+            resource_type="auth",
+            resource_id=None,
+            status=AuditLogStatus.FAILURE,
+            additional_context={"operation": "login-verify"},
+        )
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(error))
 
+    await safe_audit_log(
+        audit_use_case,
+        request,
+        user_id=None,
+        action_type=ActionType.LOGIN,
+        resource_type="auth",
+        resource_id=None,
+        status=AuditLogStatus.SUCCESS,
+        additional_context={"operation": "login-verify"},
+    )
     _set_auth_cookies(response, result.access_token, result.refresh_token)
     return LoginVerifyResponse(
         access_token=result.access_token,
@@ -437,9 +566,11 @@ async def resend_otp(
     ),
 )
 async def logout(
+    request: Request,
     response: Response,
     body: LogoutRequest,
     use_case: AuthUseCase = Depends(get_auth_use_case),
+    audit_use_case: CreateAuditLogUseCase = Depends(get_create_audit_log_use_case),
 ) -> LogoutResponse:
     """Revoke a refresh token to end the user's session.
 
@@ -452,8 +583,26 @@ async def logout(
     try:
         await use_case.logout(LogoutInput(refresh_token=body.refresh_token))
     except InvalidTokenError as error:
+        await safe_audit_log(
+            audit_use_case,
+            request,
+            user_id=None,
+            action_type=ActionType.LOGOUT,
+            resource_type="auth",
+            resource_id=None,
+            status=AuditLogStatus.FAILURE,
+        )
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error))
 
+    await safe_audit_log(
+        audit_use_case,
+        request,
+        user_id=None,
+        action_type=ActionType.LOGOUT,
+        resource_type="auth",
+        resource_id=None,
+        status=AuditLogStatus.SUCCESS,
+    )
     _clear_auth_cookies(response)
     return LogoutResponse()
 
@@ -482,9 +631,11 @@ async def logout(
     ),
 )
 async def refresh_token(
+    request: Request,
     response: Response,
     body: RefreshTokenRequest,
     use_case: AuthUseCase = Depends(get_auth_use_case),
+    audit_use_case: CreateAuditLogUseCase = Depends(get_create_audit_log_use_case),
 ) -> RefreshTokenResponse:
     """Rotate a refresh token and return a new access and refresh token pair.
 
@@ -500,14 +651,64 @@ async def refresh_token(
     try:
         result = await use_case.refresh(RefreshTokenInput(refresh_token=body.refresh_token))
     except TokenExpiredError as error:
+        await safe_audit_log(
+            audit_use_case,
+            request,
+            user_id=None,
+            action_type=ActionType.VERIFY,
+            resource_type="auth",
+            resource_id=None,
+            status=AuditLogStatus.FAILURE,
+            additional_context={"operation": "refresh"},
+        )
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(error))
     except InvalidTokenError as error:
+        await safe_audit_log(
+            audit_use_case,
+            request,
+            user_id=None,
+            action_type=ActionType.VERIFY,
+            resource_type="auth",
+            resource_id=None,
+            status=AuditLogStatus.FAILURE,
+            additional_context={"operation": "refresh"},
+        )
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(error))
     except UserNotFoundError as error:
+        await safe_audit_log(
+            audit_use_case,
+            request,
+            user_id=None,
+            action_type=ActionType.VERIFY,
+            resource_type="auth",
+            resource_id=None,
+            status=AuditLogStatus.FAILURE,
+            additional_context={"operation": "refresh"},
+        )
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error))
     except (UserInactiveError, AccountDeletionGracePeriodExpiredError) as error:
+        await safe_audit_log(
+            audit_use_case,
+            request,
+            user_id=None,
+            action_type=ActionType.VERIFY,
+            resource_type="auth",
+            resource_id=None,
+            status=AuditLogStatus.FAILURE,
+            additional_context={"operation": "refresh"},
+        )
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(error))
 
+    await safe_audit_log(
+        audit_use_case,
+        request,
+        user_id=None,
+        action_type=ActionType.VERIFY,
+        resource_type="auth",
+        resource_id=None,
+        status=AuditLogStatus.SUCCESS,
+        additional_context={"operation": "refresh"},
+    )
     _set_auth_cookies(response, result.access_token, result.refresh_token)
     return RefreshTokenResponse(
         access_token=result.access_token,

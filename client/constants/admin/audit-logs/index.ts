@@ -3,8 +3,7 @@ import type { AuditLogFilterValues } from '@/types/admin/audit-logs';
 export const AUDIT_LOGS_TEXT = {
   eyebrow: 'Admin observability',
   title: 'Audit Ledger',
-  description:
-    'Trace login events, permission edits, and record mutations through a compact forensic workspace designed for admins and auditors.',
+  description: 'Trace login events, permission edits, and record mutations through a compact forensic workspace designed for admins and auditors.',
   tableTitle: 'Recorded activity',
   tableDescription: 'Inspect the latest server-side audit trail, then open any row to review captured context and before-or-after payloads.',
   filtersTitle: 'Filter ledger',
@@ -24,7 +23,7 @@ export const AUDIT_LOGS_TEXT = {
 export const DEFAULT_AUDIT_LOG_FILTERS: AuditLogFilterValues = {
   actionType: 'all',
   endDate: '',
-  limit: 25,
+  limit: 10,
   resourceType: '',
   startDate: '',
   userId: ''
@@ -41,10 +40,4 @@ export const AUDIT_LOG_ACTION_OPTIONS = [
   { label: 'Verify', value: 'verify' },
   { label: 'Export', value: 'export' },
   { label: 'Import', value: 'import' }
-] as const;
-
-export const AUDIT_LOG_LIMIT_OPTIONS = [
-  { label: '25 rows', value: 25 },
-  { label: '50 rows', value: 50 },
-  { label: '100 rows', value: 100 }
 ] as const;

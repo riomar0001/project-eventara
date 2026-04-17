@@ -1,31 +1,84 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useDebounce } from '@/hooks/use-debounce';
+import type { AuditLogFilterValues } from '@/types/admin/audit-logs';
 import { AuditLogs } from '@/api/sdk.gen';
 import type { AuditLogResponse, PaginationMeta } from '@/api/types.gen';
 import { DEFAULT_AUDIT_LOG_FILTERS } from '@/constants/admin/audit-logs';
-import { useDebounce } from '@/hooks/use-debounce';
 import { formatAuditDateBoundary, countActiveAuditFilters } from '@/lib/admin/audit-logs/helpers';
 import { getAccessToken } from '@/store/auth-store';
-import type { AuditLogFilterValues } from '@/types/admin/audit-logs';
+
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function isUuidLike(value: string) {
+  return UUID_PATTERN.test(value);
+}
+
+function getAuditValidationMessage(detail: unknown): string | undefined {
+  if (!Array.isArray(detail) || detail.length === 0) return undefined;
+
+  for (const entry of detail) {
+    if (!entry || typeof entry !== 'object') continue;
+
+    const validationEntry = entry as { path?: unknown; loc?: unknown; message?: unknown; msg?: unknown };
+    const rawPath = Array.isArray(validationEntry.path) ? validationEntry.path : Array.isArray(validationEntry.loc) ? validationEntry.loc : [];
+
+    const message =
+      typeof validationEntry.message === 'string' ? validationEntry.message : typeof validationEntry.msg === 'string' ? validationEntry.msg : undefined;
+
+    if (rawPath.includes('user_id')) {
+      return 'Enter a valid user ID to search the audit ledger.';
+    }
+
+    if (message) {
+      return message;
+    }
+  }
+
+  return undefined;
+}
+
+function tryParseJsonString(value: string): unknown {
+  try {
+    return JSON.parse(value);
+  } catch {
+    return undefined;
+  }
+}
 
 function extractErrorMessage(payload: unknown): string | undefined {
+  if (typeof payload === 'string') {
+    const parsed = tryParseJsonString(payload);
+    if (parsed !== undefined) {
+      const parsedMessage = extractErrorMessage(parsed);
+      if (parsedMessage) return parsedMessage;
+    }
+
+    return undefined;
+  }
+
   if (!payload || typeof payload !== 'object') return undefined;
 
   const maybePayload = payload as { detail?: unknown; message?: unknown };
 
-  if (typeof maybePayload.detail === 'string') return maybePayload.detail;
+  if (typeof maybePayload.detail === 'string') {
+    const parsedDetail = tryParseJsonString(maybePayload.detail);
+    if (parsedDetail !== undefined) {
+      const parsedMessage = extractErrorMessage({ detail: parsedDetail });
+      if (parsedMessage) return parsedMessage;
+    }
+
+    return maybePayload.detail;
+  }
+
+  const validationMessage = getAuditValidationMessage(maybePayload.detail);
+  if (validationMessage) return validationMessage;
 
   if (Array.isArray(maybePayload.detail) && maybePayload.detail.length > 0) {
     const first = maybePayload.detail[0];
 
     if (typeof first === 'string') return first;
-
-    if (first && typeof first === 'object') {
-      const validationError = first as { msg?: unknown; message?: unknown };
-      if (typeof validationError.msg === 'string') return validationError.msg;
-      if (typeof validationError.message === 'string') return validationError.message;
-    }
   }
 
   if (typeof maybePayload.message === 'string') return maybePayload.message;
@@ -80,6 +133,14 @@ export function useAuditLogs() {
     let cancelled = false;
 
     async function loadAuditLogs() {
+      if (debouncedUserId && !isUuidLike(debouncedUserId)) {
+        setLogs([]);
+        setPagination(getInitialPagination(filters.limit));
+        setError('Enter a valid user ID to search the audit ledger.');
+        setIsLoading(false);
+        return;
+      }
+
       if (filters.startDate && filters.endDate && filters.startDate > filters.endDate) {
         setLogs([]);
         setPagination(getInitialPagination(filters.limit));

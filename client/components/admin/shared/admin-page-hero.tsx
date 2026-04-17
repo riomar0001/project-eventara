@@ -143,7 +143,7 @@ export function AdminPageHero({ actions, className, description, eyebrow, metric
   return (
     <Card className={cn('relative overflow-hidden border-0 py-0 shadow-none ring-1', theme.card, className)}>
       <div className={cn('pointer-events-none absolute inset-0', theme.overlay)} />
-      <div className={cn('pointer-events-none absolute -top-24 right-[-4rem] size-64 rounded-full blur-3xl', theme.glow)} />
+      <div className={cn('pointer-events-none absolute -top-24 -right-16 size-64 rounded-full blur-3xl', theme.glow)} />
       <div className={cn('pointer-events-none absolute bottom-0 left-0 h-px w-full bg-linear-to-r from-transparent to-transparent', theme.divider)} />
 
       <div className="relative px-6 py-4 sm:px-8 sm:py-5">

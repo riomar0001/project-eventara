@@ -2,7 +2,7 @@
 
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 
 from app.application.dto.admin_user_account_dto import (
     ChangeUserEmailInput,
@@ -10,8 +10,10 @@ from app.application.dto.admin_user_account_dto import (
     ListUserAccountsInput,
     SendUserPasswordResetInput,
 )
+from app.application.use_cases.audit_log_usecase import CreateAuditLogUseCase
 from app.application.use_cases.admin_user_account_usecase import AdminUserAccountUseCase
-from app.controller.dependencies import require_permission
+from app.controller.api.audit_helpers import safe_audit_log, serialize_admin_user_account
+from app.controller.dependencies import get_create_audit_log_use_case, require_permission
 from app.controller.dependencies.use_cases_depends import get_admin_user_account_use_case
 from app.controller.docs.user_account_docs import (
     EMAIL_CHANGE_VALIDATION_ERROR,
@@ -39,6 +41,7 @@ from app.controller.schemas.user_account_schema import (
     RolePermissionResponse,
     SendUserPasswordResetResponse,
 )
+from app.domain.entities.audit_log import ActionType, AuditLogStatus
 from app.domain.entities.authorization_entities import RoleAction
 from app.domain.entities.user_entity import UserStatus
 from app.domain.exceptions.role_exceptions import RoleAlreadyCurrentError, RoleNotFoundError
@@ -238,10 +241,12 @@ async def get_user_account_detail(
     description="Replace the target user's current effective role with a single new role.",
 )
 async def change_user_role(
+    request: Request,
     user_id: uuid.UUID,
     body: ChangeUserRoleRequest,
     caller_id: uuid.UUID = Depends(require_permission("user-accounts", RoleAction.UPDATE)),
     use_case: AdminUserAccountUseCase = Depends(get_admin_user_account_use_case),
+    audit_use_case: CreateAuditLogUseCase = Depends(get_create_audit_log_use_case),
 ) -> ChangeUserRoleResponse:
     """Replace a user's current role assignment set with one effective role.
 
@@ -253,6 +258,7 @@ async def change_user_role(
     - **422 Unprocessable Entity** — the path or request body is invalid.
     """
     try:
+        previous_detail = await use_case.get_user_account_detail(user_id)
         result = await use_case.change_role(
             ChangeUserRoleInput(
                 user_id=user_id,
@@ -260,6 +266,7 @@ async def change_user_role(
                 changed_by=caller_id,
             )
         )
+        current_detail = await use_case.get_user_account_detail(user_id)
     except UserNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
     except UserInactiveError as exc:
@@ -268,6 +275,18 @@ async def change_user_role(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
     except RoleAlreadyCurrentError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+    await safe_audit_log(
+        audit_use_case,
+        request,
+        user_id=caller_id,
+        action_type=ActionType.UPDATE,
+        resource_type="user-accounts",
+        resource_id=str(user_id),
+        status=AuditLogStatus.SUCCESS,
+        old_values=serialize_admin_user_account(previous_detail),
+        new_values=serialize_admin_user_account(current_detail),
+        additional_context={"operation": "change-role"},
+    )
 
     return ChangeUserRoleResponse(
         user_id=result.user_id,
@@ -294,10 +313,12 @@ async def change_user_role(
     description="Update the target user's email, clear verification status, and send a fresh verification link.",
 )
 async def change_user_email(
+    request: Request,
     user_id: uuid.UUID,
     body: ChangeUserEmailRequest,
     caller_id: uuid.UUID = Depends(require_permission("user-accounts", RoleAction.UPDATE)),
     use_case: AdminUserAccountUseCase = Depends(get_admin_user_account_use_case),
+    audit_use_case: CreateAuditLogUseCase = Depends(get_create_audit_log_use_case),
 ) -> ChangeUserEmailResponse:
     """Update a user's email address and force re-verification.
 
@@ -309,6 +330,7 @@ async def change_user_email(
     - **422 Unprocessable Entity** — the path or request body is invalid.
     """
     try:
+        previous_detail = await use_case.get_user_account_detail(user_id)
         result = await use_case.change_email(
             ChangeUserEmailInput(
                 user_id=user_id,
@@ -316,12 +338,25 @@ async def change_user_email(
                 changed_by=caller_id,
             )
         )
+        current_detail = await use_case.get_user_account_detail(user_id)
     except UserNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
     except UserInactiveError as exc:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
     except (SameEmailError, EmailAlreadyTakenError) as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+    await safe_audit_log(
+        audit_use_case,
+        request,
+        user_id=caller_id,
+        action_type=ActionType.UPDATE,
+        resource_type="user-accounts",
+        resource_id=str(user_id),
+        status=AuditLogStatus.SUCCESS,
+        old_values=serialize_admin_user_account(previous_detail),
+        new_values=serialize_admin_user_account(current_detail),
+        additional_context={"operation": "change-email"},
+    )
 
     return ChangeUserEmailResponse(user_id=result.user_id, email=result.email)
 
@@ -335,9 +370,11 @@ async def change_user_email(
     description="Dispatch the existing password-reset email flow to the target user's current verified email address.",
 )
 async def send_user_password_reset(
+    request: Request,
     user_id: uuid.UUID,
     caller_id: uuid.UUID = Depends(require_permission("user-accounts", RoleAction.UPDATE)),
     use_case: AdminUserAccountUseCase = Depends(get_admin_user_account_use_case),
+    audit_use_case: CreateAuditLogUseCase = Depends(get_create_audit_log_use_case),
 ) -> SendUserPasswordResetResponse:
     """Send the target user a password reset link through the admin workflow.
 
@@ -360,5 +397,15 @@ async def send_user_password_reset(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
     except PasswordResetEmailNotVerifiedError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+    await safe_audit_log(
+        audit_use_case,
+        request,
+        user_id=caller_id,
+        action_type=ActionType.VERIFY,
+        resource_type="user-accounts",
+        resource_id=str(user_id),
+        status=AuditLogStatus.SUCCESS,
+        additional_context={"operation": "send-password-reset"},
+    )
 
     return SendUserPasswordResetResponse()

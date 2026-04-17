@@ -1,7 +1,7 @@
 import uuid
 from datetime import UTC, datetime
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 
 from app.application.dto.role_dto import (
     AssignRoleInput,
@@ -13,8 +13,15 @@ from app.application.dto.role_management_dto import (
     RolePermissionInput,
     UpdateRoleInput,
 )
+from app.application.use_cases.audit_log_usecase import CreateAuditLogUseCase
 from app.application.use_cases.role_usecase import RoleManagementUseCase, UserRoleUseCase
-from app.controller.dependencies import get_role_use_case, require_permission
+from app.controller.api.audit_helpers import (
+    safe_audit_log,
+    serialize_assignment,
+    serialize_grant,
+    serialize_role,
+)
+from app.controller.dependencies import get_create_audit_log_use_case, get_role_use_case, require_permission
 from app.controller.dependencies.use_cases_depends import get_role_management_use_case
 from app.controller.docs.role_docs import (
     ASSIGN_ROLE_VALIDATION_ERROR,
@@ -55,6 +62,7 @@ from app.controller.schemas.role_schema import (
     UserRoleAssignmentResponse,
     UserRoleListResponse,
 )
+from app.domain.entities.audit_log import ActionType, AuditLogStatus
 from app.domain.entities.authorization_entities import RoleAction
 from app.domain.exceptions.role_exceptions import (
     DuplicateUserGrantError,
@@ -164,9 +172,11 @@ async def get_role(
     description="Create a role definition and atomically attach one or more feature permission sets to it.",
 )
 async def create_role(
+    request: Request,
     body: RoleCreateRequest,
-    _: uuid.UUID = Depends(require_permission("roles", RoleAction.CREATE)),
+    caller_id: uuid.UUID = Depends(require_permission("roles", RoleAction.CREATE)),
     use_case: RoleManagementUseCase = Depends(get_role_management_use_case),
+    audit_use_case: CreateAuditLogUseCase = Depends(get_create_audit_log_use_case),
 ) -> RoleResponse:
     """Create a new RBAC role definition.
 
@@ -198,6 +208,16 @@ async def create_role(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
     except RoleAlreadyExistsError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+    await safe_audit_log(
+        audit_use_case,
+        request,
+        user_id=caller_id,
+        action_type=ActionType.CREATE,
+        resource_type="roles",
+        resource_id=str(result.role.id),
+        status=AuditLogStatus.SUCCESS,
+        new_values=serialize_role(result.role),
+    )
     return RoleResponse(data=_to_role_response(result.role), message="Role created successfully.")
 
 
@@ -210,10 +230,12 @@ async def create_role(
     description="Update a role definition and replace its feature permission matrix in one serialized transaction.",
 )
 async def update_role(
+    request: Request,
     role_id: uuid.UUID,
     body: RoleUpdateRequest,
-    _: uuid.UUID = Depends(require_permission("roles", RoleAction.UPDATE)),
+    caller_id: uuid.UUID = Depends(require_permission("roles", RoleAction.UPDATE)),
     use_case: RoleManagementUseCase = Depends(get_role_management_use_case),
+    audit_use_case: CreateAuditLogUseCase = Depends(get_create_audit_log_use_case),
 ) -> RoleResponse:
     """Update a role definition and permission matrix safely.
 
@@ -225,6 +247,7 @@ async def update_role(
     - **422 Unprocessable Entity** — the path or request body is invalid.
     """
     try:
+        existing = await use_case.get_role(role_id)
         result = await use_case.update_role(
             UpdateRoleInput(
                 role_id=role_id,
@@ -246,6 +269,17 @@ async def update_role(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
     except (RoleAlreadyExistsError, RoleInUseError) as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+    await safe_audit_log(
+        audit_use_case,
+        request,
+        user_id=caller_id,
+        action_type=ActionType.UPDATE,
+        resource_type="roles",
+        resource_id=str(result.role.id),
+        status=AuditLogStatus.SUCCESS,
+        old_values=serialize_role(existing.role),
+        new_values=serialize_role(result.role),
+    )
     return RoleResponse(data=_to_role_response(result.role), message="Role updated successfully.")
 
 
@@ -257,9 +291,11 @@ async def update_role(
     description="Delete a role definition when no user assignments or user grants still reference it.",
 )
 async def delete_role(
+    request: Request,
     role_id: uuid.UUID,
-    _: uuid.UUID = Depends(require_permission("roles", RoleAction.DELETE)),
+    caller_id: uuid.UUID = Depends(require_permission("roles", RoleAction.DELETE)),
     use_case: RoleManagementUseCase = Depends(get_role_management_use_case),
+    audit_use_case: CreateAuditLogUseCase = Depends(get_create_audit_log_use_case),
 ) -> None:
     """Delete an unused RBAC role definition.
 
@@ -270,11 +306,22 @@ async def delete_role(
     - **409 Conflict** — the role is protected or is still referenced by user assignments or grants.
     """
     try:
+        existing = await use_case.get_role(role_id)
         await use_case.delete_role(role_id)
     except RoleNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
     except (ProtectedRoleDeletionError, RoleInUseError) as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+    await safe_audit_log(
+        audit_use_case,
+        request,
+        user_id=caller_id,
+        action_type=ActionType.DELETE,
+        resource_type="roles",
+        resource_id=str(role_id),
+        status=AuditLogStatus.SUCCESS,
+        old_values=serialize_role(existing.role),
+    )
 
 
 @role_router.post(
@@ -299,9 +346,11 @@ async def delete_role(
     ),
 )
 async def assign_role(
+    request: Request,
     body: AssignRoleRequest,
     caller_id: uuid.UUID = Depends(require_permission("user-roles", RoleAction.CREATE)),
     use_case: UserRoleUseCase = Depends(get_role_use_case),
+    audit_use_case: CreateAuditLogUseCase = Depends(get_create_audit_log_use_case),
 ) -> UserRoleAssignmentResponse:
     """Assign a role to a user.
 
@@ -327,6 +376,16 @@ async def assign_role(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
     except RoleAlreadyAssignedError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+    await safe_audit_log(
+        audit_use_case,
+        request,
+        user_id=caller_id,
+        action_type=ActionType.CREATE,
+        resource_type="user-roles",
+        resource_id=str(result.assignment.id),
+        status=AuditLogStatus.SUCCESS,
+        new_values=serialize_assignment(result.assignment),
+    )
 
     a = result.assignment
     return UserRoleAssignmentResponse(
@@ -443,10 +502,12 @@ async def get_assignment(
     ),
 )
 async def update_assignment(
+    request: Request,
     assignment_id: uuid.UUID,
     body: UpdateAssignmentRequest,
-    _: uuid.UUID = Depends(require_permission("user-roles", RoleAction.UPDATE)),
+    caller_id: uuid.UUID = Depends(require_permission("user-roles", RoleAction.UPDATE)),
     use_case: UserRoleUseCase = Depends(get_role_use_case),
+    audit_use_case: CreateAuditLogUseCase = Depends(get_create_audit_log_use_case),
 ) -> UserRoleAssignmentResponse:
     """Update the expiry date of a role assignment.
 
@@ -457,6 +518,7 @@ async def update_assignment(
     - **422 Unprocessable Entity** — request body failed schema validation.
     """
     try:
+        existing = await use_case.get_assignment(assignment_id)
         result = await use_case.update_assignment(
             UpdateAssignmentInput(
                 assignment_id=assignment_id,
@@ -465,6 +527,17 @@ async def update_assignment(
         )
     except RoleAssignmentNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    await safe_audit_log(
+        audit_use_case,
+        request,
+        user_id=caller_id,
+        action_type=ActionType.UPDATE,
+        resource_type="user-roles",
+        resource_id=str(result.assignment.id),
+        status=AuditLogStatus.SUCCESS,
+        old_values=serialize_assignment(existing),
+        new_values=serialize_assignment(result.assignment),
+    )
 
     a = result.assignment
     return UserRoleAssignmentResponse(
@@ -493,9 +566,11 @@ async def update_assignment(
     ),
 )
 async def revoke_assignment(
+    request: Request,
     assignment_id: uuid.UUID,
-    _: uuid.UUID = Depends(require_permission("user-roles", RoleAction.DELETE)),
+    caller_id: uuid.UUID = Depends(require_permission("user-roles", RoleAction.DELETE)),
     use_case: UserRoleUseCase = Depends(get_role_use_case),
+    audit_use_case: CreateAuditLogUseCase = Depends(get_create_audit_log_use_case),
 ) -> None:
     """Revoke a role assignment permanently.
 
@@ -505,9 +580,20 @@ async def revoke_assignment(
     - **404 Not Found** — no assignment found for the given ID.
     """
     try:
+        existing = await use_case.get_assignment(assignment_id)
         await use_case.revoke_assignment(assignment_id)
     except RoleAssignmentNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    await safe_audit_log(
+        audit_use_case,
+        request,
+        user_id=caller_id,
+        action_type=ActionType.DELETE,
+        resource_type="user-roles",
+        resource_id=str(assignment_id),
+        status=AuditLogStatus.SUCCESS,
+        old_values=serialize_assignment(existing),
+    )
 
 
 @grant_router.post(
@@ -535,9 +621,11 @@ async def revoke_assignment(
     ),
 )
 async def create_grants(
+    request: Request,
     body: CreateGrantsRequest,
     caller_id: uuid.UUID = Depends(require_permission("user-grants", RoleAction.CREATE)),
     use_case: UserRoleUseCase = Depends(get_role_use_case),
+    audit_use_case: CreateAuditLogUseCase = Depends(get_create_audit_log_use_case),
 ) -> CreateGrantsResponse:
     """Create per-user action grants for a feature.
 
@@ -572,6 +660,19 @@ async def create_grants(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
     except DuplicateUserGrantError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+    await safe_audit_log(
+        audit_use_case,
+        request,
+        user_id=caller_id,
+        action_type=ActionType.CREATE,
+        resource_type="user-grants",
+        resource_id=str(result.grants[0].id) if result.grants else None,
+        status=AuditLogStatus.SUCCESS,
+        new_values={
+            "grants": [serialize_grant(grant) for grant in result.grants],
+            "grant_count": len(result.grants),
+        },
+    )
 
     return CreateGrantsResponse(
         data=[
@@ -694,9 +795,11 @@ async def list_user_grants(
     ),
 )
 async def revoke_grant(
+    request: Request,
     grant_id: uuid.UUID,
-    _: uuid.UUID = Depends(require_permission("user-grants", RoleAction.DELETE)),
+    caller_id: uuid.UUID = Depends(require_permission("user-grants", RoleAction.DELETE)),
     use_case: UserRoleUseCase = Depends(get_role_use_case),
+    audit_use_case: CreateAuditLogUseCase = Depends(get_create_audit_log_use_case),
 ) -> None:
     """Revoke a user grant permanently.
 
@@ -706,6 +809,17 @@ async def revoke_grant(
     - **404 Not Found** — no grant found for the given ID.
     """
     try:
+        existing = await use_case.get_grant(grant_id)
         await use_case.revoke_grant(grant_id)
     except UserGrantNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    await safe_audit_log(
+        audit_use_case,
+        request,
+        user_id=caller_id,
+        action_type=ActionType.DELETE,
+        resource_type="user-grants",
+        resource_id=str(grant_id),
+        status=AuditLogStatus.SUCCESS,
+        old_values=serialize_grant(existing),
+    )

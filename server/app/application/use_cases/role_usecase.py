@@ -25,6 +25,7 @@ from app.application.dto.role_management_dto import (
 from app.application.interfaces.role_interface import IRoleRepository
 from app.domain.entities.authorization_entities import GrantEffect, RoleAction
 from app.domain.entities.authorization_entities import Role as RoleEntity
+from app.domain.entities.authorization_entities import UserGrant as UserGrantEntity
 from app.domain.entities.authorization_entities import UserRole as UserRoleEntity
 from app.domain.exceptions.role_exceptions import (
     DuplicateUserGrantError,
@@ -252,6 +253,13 @@ class UserRoleUseCase:
 
         grants = await self.repo.get_grants_by_user(user_id)
         return GetUserGrantsOutput(grants=grants)
+
+    async def get_grant(self, grant_id: uuid.UUID) -> UserGrantEntity:
+        """Return a single user grant by its ID."""
+        grant = await self.repo.get_grant_by_id(grant_id)
+        if not grant:
+            raise UserGrantNotFoundError()
+        return grant
 
     async def revoke_grant(self, grant_id: uuid.UUID) -> None:
         """Permanently remove a user grant.

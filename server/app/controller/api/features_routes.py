@@ -1,13 +1,15 @@
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 
 from app.application.dto.feature_management_dto import (
     CreateFeatureInput,
     UpdateFeatureInput,
 )
+from app.application.use_cases.audit_log_usecase import CreateAuditLogUseCase
 from app.application.use_cases.feature_usecase import FeatureManagementUseCase
-from app.controller.dependencies import require_permission
+from app.controller.api.audit_helpers import safe_audit_log, serialize_feature
+from app.controller.dependencies import get_create_audit_log_use_case, require_permission
 from app.controller.dependencies.use_cases_depends import get_feature_management_use_case
 from app.controller.docs.feature_management_docs import (
     FEATURE_CONFLICT,
@@ -24,6 +26,7 @@ from app.controller.schemas.feature_management_schema import (
     FeatureResponse,
     FeatureUpdateRequest,
 )
+from app.domain.entities.audit_log import ActionType, AuditLogStatus
 from app.domain.entities.authorization_entities import RoleAction
 from app.domain.exceptions.role_exceptions import (
     FeatureAlreadyExistsError,
@@ -102,9 +105,11 @@ async def get_feature(
     description="Create a feature definition that can later be attached to roles or targeted by user grants.",
 )
 async def create_feature(
+    request: Request,
     body: FeatureCreateRequest,
-    _: uuid.UUID = Depends(require_permission("features", RoleAction.CREATE)),
+    caller_id: uuid.UUID = Depends(require_permission("features", RoleAction.CREATE)),
     use_case: FeatureManagementUseCase = Depends(get_feature_management_use_case),
+    audit_use_case: CreateAuditLogUseCase = Depends(get_create_audit_log_use_case),
 ) -> FeatureResponse:
     """Create a new RBAC feature definition.
 
@@ -125,6 +130,21 @@ async def create_feature(
         )
     except FeatureAlreadyExistsError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+    await safe_audit_log(
+        audit_use_case,
+        request,
+        user_id=caller_id,
+        action_type=ActionType.CREATE,
+        resource_type="features",
+        resource_id=str(result.feature.id),
+        status=AuditLogStatus.SUCCESS,
+        new_values={
+            "slug": result.feature.slug,
+            "name": result.feature.name,
+            "description": result.feature.description,
+            "is_enabled": result.feature.is_enabled,
+        },
+    )
     return FeatureResponse(data=_to_feature_response(result.feature), message="Feature created successfully.")
 
 
@@ -137,10 +157,12 @@ async def create_feature(
     description="Update a feature definition. Slug changes are blocked while roles or user grants still depend on the feature.",
 )
 async def update_feature(
+    request: Request,
     feature_id: uuid.UUID,
     body: FeatureUpdateRequest,
-    _: uuid.UUID = Depends(require_permission("features", RoleAction.UPDATE)),
+    caller_id: uuid.UUID = Depends(require_permission("features", RoleAction.UPDATE)),
     use_case: FeatureManagementUseCase = Depends(get_feature_management_use_case),
+    audit_use_case: CreateAuditLogUseCase = Depends(get_create_audit_log_use_case),
 ) -> FeatureResponse:
     """Update an RBAC feature definition safely under concurrent traffic.
 
@@ -152,6 +174,7 @@ async def update_feature(
     - **422 Unprocessable Entity** — the path or request body is invalid.
     """
     try:
+        existing = await use_case.get_feature(feature_id)
         result = await use_case.update_feature(
             UpdateFeatureInput(
                 feature_id=feature_id,
@@ -165,6 +188,17 @@ async def update_feature(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
     except (FeatureAlreadyExistsError, FeatureInUseError) as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+    await safe_audit_log(
+        audit_use_case,
+        request,
+        user_id=caller_id,
+        action_type=ActionType.UPDATE,
+        resource_type="features",
+        resource_id=str(result.feature.id),
+        status=AuditLogStatus.SUCCESS,
+        old_values=serialize_feature(existing.feature),
+        new_values=serialize_feature(result.feature),
+    )
     return FeatureResponse(data=_to_feature_response(result.feature), message="Feature updated successfully.")
 
 
@@ -176,9 +210,11 @@ async def update_feature(
     description="Delete a feature definition when no role permissions or user grants still reference it.",
 )
 async def delete_feature(
+    request: Request,
     feature_id: uuid.UUID,
-    _: uuid.UUID = Depends(require_permission("features", RoleAction.DELETE)),
+    caller_id: uuid.UUID = Depends(require_permission("features", RoleAction.DELETE)),
     use_case: FeatureManagementUseCase = Depends(get_feature_management_use_case),
+    audit_use_case: CreateAuditLogUseCase = Depends(get_create_audit_log_use_case),
 ) -> None:
     """Delete an unused RBAC feature definition.
 
@@ -189,8 +225,19 @@ async def delete_feature(
     - **409 Conflict** — the feature is still referenced by roles or user grants.
     """
     try:
+        existing = await use_case.get_feature(feature_id)
         await use_case.delete_feature(feature_id)
     except FeatureNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
     except FeatureInUseError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+    await safe_audit_log(
+        audit_use_case,
+        request,
+        user_id=caller_id,
+        action_type=ActionType.DELETE,
+        resource_type="features",
+        resource_id=str(feature_id),
+        status=AuditLogStatus.SUCCESS,
+        old_values=serialize_feature(existing.feature),
+    )
