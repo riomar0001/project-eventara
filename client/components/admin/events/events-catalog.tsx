@@ -14,19 +14,19 @@ export function EventsCatalog() {
         description="A photo-forward event index with individual detail pages and static add or edit flows for design review only."
         metrics={[
           {
-            label: 'Event concepts',
+            label: 'Total events',
             value: eventRecords.length,
-            hint: 'Mock events currently represented in the admin surface.'
+            hint: 'Total numbers of events in the system'
           },
           {
-            label: 'On sale',
+            label: 'Upcoming events',
             value: eventRecords.filter((event) => event.status === 'On Sale').length,
-            hint: 'Programs shown as actively available to audiences.'
+            hint: 'Total numbers of upcoming events'
           },
           {
-            label: 'Volunteer links',
+            label: 'Ongoing Events',
             value: eventRecords.reduce((count, event) => count + getVolunteersByEventId(event.id).length, 0),
-            hint: 'Volunteer assignments already reflected across the event set.'
+            hint: 'Total numbers ongoing events'
           }
         ]}
         actions={

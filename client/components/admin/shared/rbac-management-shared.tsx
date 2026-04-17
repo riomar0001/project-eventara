@@ -124,31 +124,15 @@ export function RbacHeroCard({
       ? 'from-lime-50 via-white to-white text-neutral-950 ring-lime-200'
       : 'from-orange-50 via-white to-white text-neutral-950 ring-orange-200';
 
-  const metricAccentClassName = tone === 'feature' ? 'border-lime-200 bg-lime-50 text-lime-950' : 'border-orange-200 bg-orange-50 text-orange-950';
-
-  const icon = tone === 'feature' ? <Blocks className="size-5 text-neutral-900" /> : <ShieldCheck className="size-5 text-neutral-900" />;
-
   return (
     <Card className={cn('overflow-hidden border-0 bg-linear-to-br shadow-none ring-1', accentClassName)}>
-      <CardContent className="px-6 py-6 sm:px-7 sm:py-7">
+      <CardContent className="px-6 sm:px-7">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-4">
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="flex size-11 items-center justify-center rounded-2xl border border-neutral-200 bg-white shadow-sm">{icon}</div>
-              <Badge variant="secondary" className="rounded-full bg-neutral-900 px-3 py-1 text-[11px] font-semibold tracking-[0.18em] text-white uppercase">
-                {badge}
-              </Badge>
-            </div>
-
             <div className="space-y-2">
               <h1 className="font-heading text-3xl leading-tight font-semibold tracking-tight text-neutral-950 sm:text-4xl">{title}</h1>
               <p className="max-w-2xl text-sm leading-7 text-neutral-600 sm:text-[15px]">{description}</p>
             </div>
-          </div>
-
-          <div className={cn('min-w-52 rounded-[1.8rem] border px-5 py-5 shadow-sm', metricAccentClassName)}>
-            <p className="text-[11px] font-semibold tracking-[0.24em] uppercase">{metricLabel}</p>
-            <p className="mt-3 text-4xl leading-none font-semibold tracking-[-0.05em]">{metricValue}</p>
           </div>
         </div>
       </CardContent>
@@ -163,7 +147,7 @@ export function RbacMetricStrip({ items, tone }: { items: Array<{ label: string;
     <div className="grid gap-3 md:grid-cols-3">
       {items.map((item, index) => (
         <Card key={item.label} className={cn('overflow-hidden border-0 bg-linear-to-br shadow-none ring-1 ring-neutral-200', accentClassName)}>
-          <CardContent className="relative px-5 py-5">
+          <CardContent className="relative px-5">
             <p className="text-[11px] font-semibold tracking-[0.24em] text-neutral-400 uppercase">
               {String(index + 1).padStart(2, '0')} {item.label}
             </p>
@@ -179,9 +163,6 @@ export function RbacMetricStrip({ items, tone }: { items: Array<{ label: string;
 export function EmptyState({ description, title }: { description: string; title: string }) {
   return (
     <div className="flex min-h-64 flex-col items-center justify-center gap-3 px-6 py-12 text-center">
-      <div className="flex size-12 items-center justify-center rounded-2xl border border-neutral-200 bg-neutral-50 shadow-sm">
-        <Sparkles className="size-5 text-neutral-500" />
-      </div>
       <p className="text-lg font-semibold text-neutral-950">{title}</p>
       <p className="max-w-lg text-sm leading-7 text-neutral-500">{description}</p>
     </div>

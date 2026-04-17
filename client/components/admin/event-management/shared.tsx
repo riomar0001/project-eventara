@@ -44,7 +44,6 @@ const toneClasses: Record<
 
 export function OperationsPageIntro({
   actions,
-  badge,
   description,
   metrics,
   title,
@@ -62,9 +61,6 @@ export function OperationsPageIntro({
       <CardHeader className="border-b border-neutral-200/80 pb-5">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-3">
-            <Badge variant="outline" className={cn('w-fit rounded-full px-3 py-1 text-[11px] tracking-[0.18em] uppercase', toneClasses[tone].badge)}>
-              {badge}
-            </Badge>
             <div className="space-y-2">
               <CardTitle className="text-3xl font-semibold tracking-tight text-neutral-950">{title}</CardTitle>
               <CardDescription className="max-w-3xl text-sm leading-6 text-neutral-600">{description}</CardDescription>
