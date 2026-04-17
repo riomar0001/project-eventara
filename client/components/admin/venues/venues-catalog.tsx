@@ -1,7 +1,5 @@
-import { Plus } from 'lucide-react';
-import Link from 'next/link';
+import { MobileFloatingAction, PrimaryPageAction } from '@/components/admin/shared/primary-page-action';
 import { CatalogCard, OperationsPageIntro } from './venues-shared';
-import { Button } from '@/components/ui/button';
 import { ADMIN_OPERATIONS_PATHS, getEventsByVenueId, venueRecords } from '@/constants/admin/operations';
 
 export function VenuesCatalog() {
@@ -10,9 +8,12 @@ export function VenuesCatalog() {
 
   return (
     <div className="space-y-6">
+      <MobileFloatingAction cta="Add venue" href={ADMIN_OPERATIONS_PATHS.venueCreate} theme="amber" />
+
       <OperationsPageIntro
+        eyebrow="Venue Portfolio"
         title="Venue Management"
-        description="A UI-only venue surface for reviewing the catalog, opening detail pages, and previewing add or edit flows without touching backend integrations."
+        description="Shape the event footprint from a single cinematic surface, with venue health, capacity, and booking readiness visible before you ever open a detail page."
         metrics={[
           {
             label: 'Live venues',
@@ -31,12 +32,13 @@ export function VenuesCatalog() {
           }
         ]}
         actions={
-          <Button asChild>
-            <Link href={ADMIN_OPERATIONS_PATHS.venueCreate}>
-              <Plus className="size-4" />
-              Add venue
-            </Link>
-          </Button>
+          <PrimaryPageAction
+            cta="Add venue"
+            helper="Create a new space entry right from the command surface."
+            href={ADMIN_OPERATIONS_PATHS.venueCreate}
+            label="Primary Action"
+            theme="amber"
+          />
         }
       />
 
@@ -75,4 +77,3 @@ export function VenuesCatalog() {
     </div>
   );
 }
-

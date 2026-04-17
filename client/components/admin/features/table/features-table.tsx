@@ -1,11 +1,12 @@
 'use client';
 
+import { AdminPageHero } from '@/components/admin/shared/admin-page-hero';
 import { Card, CardContent } from '@/components/ui/card';
-import type { FeatureRecordResponse } from '@/api/types.gen';
-import { FEATURE_ACCESS_TEXT } from '@/constants/admin/features/access-control';
-import { FeaturesHeroCard, FeaturesMetricStrip, countEnabledFeatures } from '../features-shared';
+import { countEnabledFeatures } from '../features-shared';
 import { FeaturesTableContent } from './table-content';
 import { FeaturesTableHeader } from './table-header';
+import type { FeatureRecordResponse } from '@/api/types.gen';
+import { FEATURE_ACCESS_TEXT } from '@/constants/admin/features/access-control';
 
 interface FeaturesTableProps {
   error: string | null;
@@ -23,26 +24,29 @@ export function FeaturesTable({ error, features, isEmpty, isLoading, onCreate, o
 
   return (
     <div className="space-y-6">
-      <FeaturesHeroCard description={FEATURE_ACCESS_TEXT.description} title={FEATURE_ACCESS_TEXT.title} />
-
-      <FeaturesMetricStrip
-        items={[
+      <AdminPageHero
+        description={FEATURE_ACCESS_TEXT.description}
+        eyebrow={FEATURE_ACCESS_TEXT.badge}
+        metrics={[
           {
             label: 'Enabled',
             value: countEnabledFeatures(features),
-            detail: 'Available for permission checks and admin policy flows.'
+            hint: 'Available right now for route guards, grants, and permission checks.'
           },
           {
             label: 'Disabled',
             value: disabledFeatures,
-            detail: 'Still documented in the catalog but currently inactive.'
+            hint: 'Still modeled in the registry but intentionally inactive in policy flows.'
           },
           {
             label: 'Slugs',
             value: features.length,
-            detail: 'Unique backend identifiers used across roles and grants.'
+            hint: 'Unique backend identifiers used across reusable roles and custom grants.',
+            emphasis: 'accent'
           }
         ]}
+        title={FEATURE_ACCESS_TEXT.title}
+        tone="lime"
       />
 
       <Card className="border-0 bg-white shadow-none ring-1 ring-neutral-200">

@@ -1,14 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { UserPlus } from 'lucide-react';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
+import { MobileFloatingAction, PrimaryPageAction } from '@/components/admin/shared/primary-page-action';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ADMIN_OPERATIONS_PATHS, volunteerRecords } from '@/constants/admin/operations';
-import { OperationsPageIntro } from './volunteers-shared';
-import { VolunteersTableContent } from './table/volunteers-table';
 import { VolunteersTableToolbar } from './table/table-toolbar';
+import { VolunteersTableContent } from './table/volunteers-table';
+import { OperationsPageIntro } from './volunteers-shared';
+import { ADMIN_OPERATIONS_PATHS, volunteerRecords } from '@/constants/admin/operations';
 
 export function VolunteersPage() {
   const [search, setSearch] = useState('');
@@ -29,9 +27,12 @@ export function VolunteersPage() {
 
   return (
     <div className="space-y-6">
+      <MobileFloatingAction cta="Add volunteer" href={ADMIN_OPERATIONS_PATHS.volunteerCreate} theme="emerald" />
+
       <OperationsPageIntro
+        eyebrow="Volunteer Command"
         title="Volunteer Management"
-        description="A UI-only volunteer section with a shadcn-style searchable data table, profile pages, and add or edit form previews."
+        description="Keep the service crew legible at a glance with roster health, readiness, and contribution volume pulled into one high-visibility command surface."
         metrics={[
           {
             label: 'Roster size',
@@ -50,12 +51,13 @@ export function VolunteersPage() {
           }
         ]}
         actions={
-          <Button asChild>
-            <Link href={ADMIN_OPERATIONS_PATHS.volunteerCreate}>
-              <UserPlus className="size-4" />
-              Add volunteer
-            </Link>
-          </Button>
+          <PrimaryPageAction
+            cta="Add volunteer"
+            helper="Create a new volunteer profile right from the roster command view."
+            href={ADMIN_OPERATIONS_PATHS.volunteerCreate}
+            label="Primary Action"
+            theme="emerald"
+          />
         }
       />
 

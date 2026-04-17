@@ -1,5 +1,6 @@
 import { ArrowLeft, ArrowUpRight } from 'lucide-react';
 import Link from 'next/link';
+import { AdminPageHero, type AdminPageHeroTone } from '@/components/admin/shared/admin-page-hero';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,38 +15,19 @@ type MetricItem = {
 export function OperationsPageIntro({
   actions,
   description,
+  eyebrow = 'Event Pipeline',
   metrics,
-  title
+  title,
+  tone = 'sky'
 }: {
   actions?: React.ReactNode;
   description: string;
+  eyebrow?: React.ReactNode;
   metrics: MetricItem[];
   title: string;
+  tone?: AdminPageHeroTone;
 }) {
-  return (
-    <Card className="border-0 bg-linear-to-br from-sky-50 via-white to-cyan-50 shadow-none ring-1 ring-neutral-200">
-      <CardHeader className="border-b border-neutral-200/80 pb-5">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-          <div className="space-y-3">
-            <div className="space-y-2">
-              <CardTitle className="text-3xl font-semibold tracking-tight text-neutral-950">{title}</CardTitle>
-              <CardDescription className="max-w-3xl text-sm leading-6 text-neutral-600">{description}</CardDescription>
-            </div>
-          </div>
-          {actions ? <div className="flex flex-wrap gap-2">{actions}</div> : null}
-        </div>
-      </CardHeader>
-      <CardContent className="grid gap-4 pt-6 md:grid-cols-3">
-        {metrics.map((metric) => (
-          <div key={metric.label} className="rounded-3xl border border-neutral-200 bg-white/90 p-5 shadow-xs backdrop-blur-xs">
-            <p className="text-xs font-medium tracking-[0.18em] text-neutral-500 uppercase">{metric.label}</p>
-            <p className="mt-3 text-3xl font-semibold tracking-tight text-neutral-950">{metric.value}</p>
-            <p className="mt-2 text-sm leading-6 text-neutral-500">{metric.hint}</p>
-          </div>
-        ))}
-      </CardContent>
-    </Card>
-  );
+  return <AdminPageHero actions={actions} description={description} eyebrow={eyebrow} metrics={metrics} title={title} tone={tone} />;
 }
 
 export function BackLink({ href, label }: { href: string; label: string }) {

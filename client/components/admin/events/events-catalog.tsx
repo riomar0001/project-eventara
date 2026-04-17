@@ -1,39 +1,41 @@
-import { Plus } from 'lucide-react';
-import Link from 'next/link';
+import { MobileFloatingAction, PrimaryPageAction } from '@/components/admin/shared/primary-page-action';
 import { CatalogCard, OperationsPageIntro } from './events-shared';
-import { Button } from '@/components/ui/button';
 import { ADMIN_OPERATIONS_PATHS, eventRecords, getVenueById, getVolunteersByEventId } from '@/constants/admin/operations';
 
 export function EventsCatalog() {
   return (
     <div className="space-y-6">
+      <MobileFloatingAction cta="Add event" href={ADMIN_OPERATIONS_PATHS.eventCreate} theme="sky" />
+
       <OperationsPageIntro
+        eyebrow="Event Pipeline"
         title="Events Management"
-        description="A photo-forward event index with individual detail pages and static add or edit flows for design review only."
+        description="Steer the public calendar with a hero built for pace: launch status, venue readiness, and staffing demand surface at a glance before you scan the catalog."
         metrics={[
           {
             label: 'Total events',
             value: eventRecords.length,
-            hint: 'Total numbers of events in the system'
+            hint: 'Scheduled campaigns currently represented in this preview catalog.'
           },
           {
             label: 'Upcoming events',
             value: eventRecords.filter((event) => event.status === 'On Sale').length,
-            hint: 'Total numbers of upcoming events'
+            hint: 'Events already positioned for promotion and attendee acquisition.'
           },
           {
-            label: 'Ongoing Events',
+            label: 'Volunteer seats',
             value: eventRecords.reduce((count, event) => count + getVolunteersByEventId(event.id).length, 0),
-            hint: 'Total numbers ongoing events'
+            hint: 'Rostered volunteer placements currently tied to active event plans.'
           }
         ]}
         actions={
-          <Button asChild>
-            <Link href={ADMIN_OPERATIONS_PATHS.eventCreate}>
-              <Plus className="size-4" />
-              Add event
-            </Link>
-          </Button>
+          <PrimaryPageAction
+            cta="Add event"
+            helper="Start a new event draft without hunting through the page."
+            href={ADMIN_OPERATIONS_PATHS.eventCreate}
+            label="Primary Action"
+            theme="sky"
+          />
         }
       />
 
@@ -76,4 +78,3 @@ export function EventsCatalog() {
     </div>
   );
 }
-
