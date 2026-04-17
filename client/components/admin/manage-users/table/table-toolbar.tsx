@@ -3,8 +3,8 @@
 import { Search, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { STATUS_OPTIONS } from '../../../constants/admin/users/user-management';
-import { humanizeRoleName } from './manage-users-ui';
+import { STATUS_OPTIONS } from '../../../../constants/admin/manage-users';
+import { humanizeRoleName } from '../manage-users-ui';
 import type { AssignableRoleResponse, UserStatus } from '@/api/types.gen';
 
 interface ManageUsersTableToolbarProps {

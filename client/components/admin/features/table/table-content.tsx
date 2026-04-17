@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import type { FeatureRecordResponse } from '@/api/types.gen';
 import { FEATURE_ACCESS_TEXT } from '@/constants/admin/features/access-control';
-import { FeaturesEmptyState, humanizeFeatureSlug } from './features-shared';
+import { FeaturesEmptyState, humanizeFeatureSlug } from '../features-shared';
 import { PencilLine, Trash2 } from 'lucide-react';
 
 interface FeaturesTableContentProps {

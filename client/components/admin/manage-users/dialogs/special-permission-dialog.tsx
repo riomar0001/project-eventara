@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { SPECIAL_PERMISSION_ACTIONS, SPECIAL_PERMISSION_EFFECTS } from '../../../../constants/admin/users/user-management';
+import { SPECIAL_PERMISSION_ACTIONS, SPECIAL_PERMISSION_EFFECTS } from '../../../../constants/admin/manage-users';
 import type {
   AdminUserAccountSummaryResponse as AdminUserAccountSummary,
   GrantEffect,

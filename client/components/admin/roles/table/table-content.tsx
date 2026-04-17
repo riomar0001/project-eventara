@@ -13,7 +13,7 @@ import {
   countPermissionRows,
   humanizeRoleSlug,
   RolesEmptyState
-} from './roles-shared';
+} from '../roles-shared';
 
 interface RolesTableContentProps {
   error: string | null;

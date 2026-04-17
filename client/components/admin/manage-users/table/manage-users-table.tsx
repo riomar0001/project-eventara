@@ -10,10 +10,10 @@ import type {
   UserStatus
 } from '@/api/types.gen';
 import { useAuthStore } from '@/store/auth-store';
-import { ManageUsersOverview } from './manage-users-overview';
-import { ManageUsersTableContent } from './manage-users-table-content';
-import { ManageUsersTablePagination } from './manage-users-table-pagination';
-import { ManageUsersTableToolbar } from './manage-users-table-toolbar';
+import { ManageUsersOverview } from '../manage-users-overview';
+import { ManageUsersTableContent } from './table-content';
+import { ManageUsersTablePagination } from './table-pagination';
+import { ManageUsersTableToolbar } from './table-toolbar';
 
 interface AdminUserManagementTableProps {
   error: string | null;

@@ -1,5 +1,5 @@
-import { VolunteersTable } from '@/components/admin/volunteers/volunteers-table';
+import { VolunteersPage } from '@/components/admin/volunteers/volunteers';
 
 export default function AdminVolunteersPage() {
-  return <VolunteersTable />;
+  return <VolunteersPage />;
 }

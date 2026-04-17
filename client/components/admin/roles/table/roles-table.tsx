@@ -7,11 +7,11 @@ import {
   countPermissionRows,
   RolesHeroCard,
   RolesMetricStrip
-} from './roles-shared';
+} from '../roles-shared';
 import type { RoleRecordResponse } from '@/api/types.gen';
 import { ROLE_ACCESS_TEXT } from '@/constants/admin/roles/access-control';
-import { RolesTableContent } from './roles-table-content';
-import { RolesTableHeader } from './roles-table-header';
+import { RolesTableContent } from './table-content';
+import { RolesTableHeader } from './table-header';
 
 interface RolesTableProps {
   error: string | null;

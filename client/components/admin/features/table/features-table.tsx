@@ -3,9 +3,9 @@
 import { Card, CardContent } from '@/components/ui/card';
 import type { FeatureRecordResponse } from '@/api/types.gen';
 import { FEATURE_ACCESS_TEXT } from '@/constants/admin/features/access-control';
-import { FeaturesHeroCard, FeaturesMetricStrip, countEnabledFeatures } from './features-shared';
-import { FeaturesTableContent } from './features-table-content';
-import { FeaturesTableHeader } from './features-table-header';
+import { FeaturesHeroCard, FeaturesMetricStrip, countEnabledFeatures } from '../features-shared';
+import { FeaturesTableContent } from './table-content';
+import { FeaturesTableHeader } from './table-header';
 
 interface FeaturesTableProps {
   error: string | null;

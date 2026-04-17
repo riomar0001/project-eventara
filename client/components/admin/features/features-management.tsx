@@ -8,7 +8,7 @@ import type { FeatureFormValues } from '@/types/admin/features';
 import { FeatureDeleteDialog } from './feature-delete-dialog';
 import { createEmptyFeatureForm } from './features-shared';
 import { FeatureFormDialog } from './feature-form-dialog';
-import { FeaturesTable } from './features-table';
+import { FeaturesTable } from './table/features-table';
 import type { FeatureRecordResponse } from '@/api/types.gen';
 
 export function FeaturesManagement() {

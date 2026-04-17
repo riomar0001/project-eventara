@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { toast } from 'sonner';
 import { z } from 'zod';
-import { DELETE_ACCOUNT_OTHER_REASON } from '@/constants/admin/user/settings/delete-account';
+import { DELETE_ACCOUNT_OTHER_REASON } from '@/constants/admin/user-settings/delete-account';
 import { getAccessToken } from '@/store/auth-store';
 
 const deleteAccountResponseSchema = z.object({

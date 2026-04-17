@@ -6,7 +6,7 @@ import { useFeatureCatalog } from '@/hooks/admin/features/use-feature-catalog';
 import { useRoleCatalog } from '@/hooks/admin/roles/use-role-catalog';
 import { RoleFormDialog } from './role-form-dialog';
 import { RoleDeleteDialog } from './role-delete-dialog';
-import { RolesTable } from './roles-table';
+import { RolesTable } from './table/roles-table';
 import type { GrantEffect, RoleAction, RolePermissionRequest, RoleRecordResponse } from '@/api/types.gen';
 import { ROLE_ACCESS_TEXT } from '@/constants/admin/roles/access-control';
 import type { RoleFormValues, RolePermissionDraftMap } from '@/types/admin/roles';

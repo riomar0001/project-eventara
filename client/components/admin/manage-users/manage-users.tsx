@@ -7,11 +7,11 @@ import { AdminEmailDialog } from '@/components/admin/manage-users/dialogs/email-
 import { AdminPasswordResetDialog } from '@/components/admin/manage-users/dialogs/password-reset-dialog';
 import { AdminRoleDialog } from '@/components/admin/manage-users/dialogs/role-dialog';
 import { AdminSpecialPermissionDialog } from '@/components/admin/manage-users/dialogs/special-permission-dialog';
-import { AdminUserManagementTable } from '@/components/admin/manage-users/manage-users-table';
+import { AdminUserManagementTable } from '@/components/admin/manage-users/table/manage-users-table';
 import { AdminUserDetailSheet } from '@/components/admin/manage-users/users-detail-sheet';
-import { useAdminUserAccountActions } from '@/hooks/admin/users/use-manage-users-account-actions';
-import { useAdminUserAccountDetail } from '@/hooks/admin/users/use-manage-users-account-detail';
-import { useAdminUserAccounts } from '@/hooks/admin/users/use-manage-users-accounts';
+import { useAdminUserAccountActions } from '@/hooks/admin/manage-users/use-account-actions';
+import { useAdminUserAccountDetail } from '@/hooks/admin/manage-users/use-account-detail';
+import { useAdminUserAccounts } from '@/hooks/admin/manage-users/use-accounts';
 import { useDebounce } from '@/hooks/use-debounce';
 import type { AdminUserAccountSummaryResponse as AdminUserAccountSummary, GrantEffect, RoleAction, UserStatus } from '@/api/types.gen';
 
@@ -24,7 +24,7 @@ function getDefaultEffectiveFromDate() {
   return today;
 }
 
-export function AdminUserManagement() {
+export function ManageUser() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<UserStatus | undefined>(undefined);
