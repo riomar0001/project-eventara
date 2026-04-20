@@ -79,7 +79,7 @@ export function CatalogCard({
   title: string;
 }) {
   return (
-    <Card className="border-0 bg-white py-0 shadow-none ring-1 ring-neutral-200">
+    <Card className="group border-0 bg-white py-0 shadow-none ring-1 ring-neutral-200 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-neutral-200/80 hover:ring-neutral-300">
       <PhotoPanel photo={photo} className="h-64 rounded-t-xl rounded-b-[28px]">
         <div className="flex h-full flex-col justify-between p-5">
           <div className="flex flex-wrap gap-2">
@@ -97,11 +97,11 @@ export function CatalogCard({
       </PhotoPanel>
       <CardContent className="space-y-5 py-6">
         <p className="text-sm leading-6 text-neutral-600">{description}</p>
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-y-3 gap-x-6 sm:grid-cols-2">
           {meta.map((item) => (
-            <div key={item.label} className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3">
-              <p className="text-[11px] tracking-[0.16em] text-neutral-500 uppercase">{item.label}</p>
-              <p className="mt-1 text-sm font-medium text-neutral-950">{item.value}</p>
+            <div key={item.label}>
+              <p className="text-[11px] tracking-[0.16em] text-neutral-400 uppercase">{item.label}</p>
+              <p className="mt-0.5 text-sm font-medium text-neutral-950">{item.value}</p>
             </div>
           ))}
         </div>
@@ -124,11 +124,11 @@ export function CatalogCard({
 export function DetailPanel({ children, description, title }: { children: React.ReactNode; description?: string; title: string }) {
   return (
     <Card className="border-0 bg-white shadow-none ring-1 ring-neutral-200">
-      <CardHeader className="border-b border-neutral-200/80 pb-4">
+      <CardHeader className="pb-4">
         <CardTitle>{title}</CardTitle>
         {description ? <CardDescription>{description}</CardDescription> : null}
       </CardHeader>
-      <CardContent className="pt-6">{children}</CardContent>
+      <CardContent>{children}</CardContent>
     </Card>
   );
 }
@@ -143,11 +143,11 @@ export function FieldLabel({ children, htmlFor }: { children: React.ReactNode; h
 
 export function DetailList({ items }: { items: { label: string; value: string }[] }) {
   return (
-    <div className="grid gap-3 sm:grid-cols-2">
+    <div className="divide-y divide-neutral-100">
       {items.map((item) => (
-        <div key={item.label} className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3">
-          <p className="text-[11px] tracking-[0.16em] text-neutral-500 uppercase">{item.label}</p>
-          <p className="mt-1 text-sm leading-6 font-medium text-neutral-950">{item.value}</p>
+        <div key={item.label} className="flex items-center justify-between py-2.5 first:pt-0 last:pb-0">
+          <p className="text-[11px] tracking-[0.16em] text-neutral-400 uppercase">{item.label}</p>
+          <p className="text-sm font-medium text-neutral-950">{item.value}</p>
         </div>
       ))}
     </div>

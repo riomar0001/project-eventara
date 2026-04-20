@@ -63,10 +63,6 @@ export function EventsCatalog() {
                   value: event.registrationLabel
                 },
                 {
-                  label: 'Pricing',
-                  value: event.priceLabel
-                },
-                {
                   label: 'Volunteer need',
                   value: event.volunteerNeed
                 }
