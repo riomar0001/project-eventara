@@ -53,6 +53,7 @@ class User(Base):
     events = relationship("Event", back_populates="creator", foreign_keys="Event.created_by")
     volunteer = relationship("Volunteer", back_populates="user", uselist=False)
     volunteer_applications = relationship("VolunteerApplication", back_populates="user", foreign_keys="VolunteerApplication.user_id")
+    event_ratings = relationship("EventRating", back_populates="user", foreign_keys="EventRating.user_id")
 
     __table_args__ = (
         Index(

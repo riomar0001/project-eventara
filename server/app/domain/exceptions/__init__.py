@@ -15,12 +15,26 @@ from app.domain.exceptions.event_exceptions import (
     EventValidationError,
     UnauthorizedEventOperationError,
 )
+from app.domain.exceptions.event_rating_exceptions import (
+    DuplicateEventRatingError,
+    EventNotRatableError,
+    EventRatingNotFoundError,
+    EventRatingValidationError,
+    UnauthorizedEventRatingOperationError,
+)
 from app.domain.exceptions.event_volunteer_exceptions import (
     EventVolunteerAlreadyExistsError,
     EventVolunteerNotFoundError,
     EventVolunteerValidationError,
     InvalidEventVolunteerStatusTransitionError,
     UnauthorizedEventVolunteerOperationError,
+)
+from app.domain.exceptions.feedback_report_exceptions import (
+    DuplicateFeedbackReportError,
+    FeedbackReportNotFoundError,
+    FeedbackReportValidationError,
+    InvalidFeedbackStatusTransitionError,
+    UnauthorizedFeedbackReportOperationError,
 )
 from app.domain.exceptions.role_exceptions import (
     DuplicateUserGrantError,
@@ -130,4 +144,15 @@ __all__ = [
     "EventVolunteerAlreadyExistsError",
     "UnauthorizedEventVolunteerOperationError",
     "InvalidEventVolunteerStatusTransitionError",
+    "EventRatingNotFoundError",
+    "EventRatingValidationError",
+    "DuplicateEventRatingError",
+    "UnauthorizedEventRatingOperationError",
+    "EventNotRatableError",
+    "InvalidEventRatingStatusTransitionError",
+    "FeedbackReportNotFoundError",
+    "FeedbackReportValidationError",
+    "DuplicateFeedbackReportError",
+    "UnauthorizedFeedbackReportOperationError",
+    "InvalidFeedbackStatusTransitionError",
 ]
