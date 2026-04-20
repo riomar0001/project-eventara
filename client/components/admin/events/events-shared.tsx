@@ -97,7 +97,7 @@ export function CatalogCard({
       </PhotoPanel>
       <CardContent className="space-y-5 py-6">
         <p className="text-sm leading-6 text-neutral-600">{description}</p>
-        <div className="grid gap-y-3 gap-x-6 sm:grid-cols-2">
+        <div className="grid gap-x-6 gap-y-3 sm:grid-cols-2">
           {meta.map((item) => (
             <div key={item.label}>
               <p className="text-[11px] tracking-[0.16em] text-neutral-400 uppercase">{item.label}</p>

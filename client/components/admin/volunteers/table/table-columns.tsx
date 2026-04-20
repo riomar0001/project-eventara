@@ -114,4 +114,3 @@ export const volunteerColumns: ColumnDef<VolunteerRecord>[] = [
     } satisfies VolunteerColumnMeta
   }
 ];
-

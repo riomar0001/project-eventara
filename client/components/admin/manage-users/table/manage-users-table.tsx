@@ -2,7 +2,11 @@
 
 import { getCoreRowModel, useReactTable } from '@tanstack/react-table';
 import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { ManageUsersOverview } from '../manage-users-overview';
 import { useAdminTableColumns } from './table-columns';
+import { ManageUsersTableContent } from './table-content';
+import { ManageUsersTablePagination } from './table-pagination';
+import { ManageUsersTableToolbar } from './table-toolbar';
 import type {
   AdminUserAccountPaginationResponse as AdminUserAccountPagination,
   AdminUserAccountSummaryResponse as AdminUserAccountSummary,
@@ -10,10 +14,6 @@ import type {
   UserStatus
 } from '@/api/types.gen';
 import { useAuthStore } from '@/store/auth-store';
-import { ManageUsersOverview } from '../manage-users-overview';
-import { ManageUsersTableContent } from './table-content';
-import { ManageUsersTablePagination } from './table-pagination';
-import { ManageUsersTableToolbar } from './table-toolbar';
 
 interface AdminUserManagementTableProps {
   error: string | null;

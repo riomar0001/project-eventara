@@ -51,7 +51,11 @@ function UserTableSkeletonRows() {
   ));
 }
 
-function UsersTableEmptyState({ columnsLength, hasActiveFilters, onClearFilters }: Pick<ManageUsersTableContentProps, 'columnsLength' | 'hasActiveFilters' | 'onClearFilters'>) {
+function UsersTableEmptyState({
+  columnsLength,
+  hasActiveFilters,
+  onClearFilters
+}: Pick<ManageUsersTableContentProps, 'columnsLength' | 'hasActiveFilters' | 'onClearFilters'>) {
   return (
     <TableRow>
       <TableCell colSpan={columnsLength} className="px-6 py-14 text-center">

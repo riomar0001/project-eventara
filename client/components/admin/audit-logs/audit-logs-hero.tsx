@@ -1,6 +1,6 @@
 'use client';
 
-import { Fingerprint, Radar } from 'lucide-react';
+import { Fingerprint } from 'lucide-react';
 import { AdminPageHero } from '@/components/admin/shared/admin-page-hero';
 import { Button } from '@/components/ui/button';
 import { AUDIT_LOGS_TEXT } from '@/constants/admin/audit-logs';
@@ -24,11 +24,7 @@ export function AuditLogsHero({ activeFilterCount, failureCount, isLoading, load
         </Button>
       }
       description={AUDIT_LOGS_TEXT.description}
-      eyebrow={
-        <>
-          {AUDIT_LOGS_TEXT.eyebrow}
-        </>
-      }
+      eyebrow={<>{AUDIT_LOGS_TEXT.eyebrow}</>}
       metrics={[
         {
           label: 'Loaded Records',

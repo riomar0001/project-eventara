@@ -78,4 +78,3 @@ export function StepAbout({ values, onChange, errors }: StepAboutProps) {
     </div>
   );
 }
-

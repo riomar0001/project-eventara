@@ -12,4 +12,3 @@ export default async function AdminVenueEditPage({ params }: { params: Promise<{
 
   return <VenueForm mode="edit" venue={venue} />;
 }
-

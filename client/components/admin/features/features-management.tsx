@@ -2,14 +2,14 @@
 
 import type { FormEvent } from 'react';
 import { useState } from 'react';
-import { FEATURE_ACCESS_TEXT } from '@/constants/admin/features/access-control';
 import { useFeatureCatalog } from '@/hooks/admin/features/use-feature-catalog';
 import type { FeatureFormValues } from '@/types/admin/features';
 import { FeatureDeleteDialog } from './feature-delete-dialog';
-import { createEmptyFeatureForm } from './features-shared';
 import { FeatureFormDialog } from './feature-form-dialog';
+import { createEmptyFeatureForm } from './features-shared';
 import { FeaturesTable } from './table/features-table';
 import type { FeatureRecordResponse } from '@/api/types.gen';
+import { FEATURE_ACCESS_TEXT } from '@/constants/admin/features/access-control';
 
 export function FeaturesManagement() {
   const { createFeature, deleteFeature, error, features, isDeleting, isEmpty, isLoading, isSaving, refresh, updateFeature } = useFeatureCatalog();

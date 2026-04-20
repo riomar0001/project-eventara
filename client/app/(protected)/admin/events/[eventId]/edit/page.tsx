@@ -12,4 +12,3 @@ export default async function AdminEventEditPage({ params }: { params: Promise<{
 
   return <EventForm mode="edit" event={event} />;
 }
-

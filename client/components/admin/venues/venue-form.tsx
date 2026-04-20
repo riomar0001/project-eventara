@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { ImagePlus, Save } from 'lucide-react';
 import Link from 'next/link';
-import { BackLink, FieldLabel, PhotoPanel } from './venues-shared';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,6 +10,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { BackLink, FieldLabel, PhotoPanel } from './venues-shared';
 import { ADMIN_OPERATIONS_PATHS, type VenueRecord } from '@/constants/admin/operations';
 
 const amenityOptions = ['Dockside terrace', 'LED wall package', 'Vendor power drops', 'Control booth', 'Workshop benches', 'Private arrival gate'];
@@ -189,4 +189,3 @@ export function VenueForm({ mode, venue }: { mode: 'create' | 'edit'; venue?: Ve
     </div>
   );
 }
-

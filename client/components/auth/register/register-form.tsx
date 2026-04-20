@@ -144,4 +144,3 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
     </Card>
   );
 }
-

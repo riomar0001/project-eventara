@@ -35,6 +35,7 @@ from app.controller.docs.user_docs import (
     USER_NOT_FOUND,
 )
 from app.controller.schemas.user_schema import (
+    _ALIAS_RE,
     AdminDeleteAccountRequest,
     ChangePasswordRequest,
     ChangePasswordResponse,
@@ -45,7 +46,6 @@ from app.controller.schemas.user_schema import (
     LoginHistoryListResponse,
     UserOnboardingRequest,
     UserOnboardingResponse,
-    _ALIAS_RE,
 )
 from app.core.security.token_service import create_access_token
 from app.domain.entities.authorization_entities import RoleAction

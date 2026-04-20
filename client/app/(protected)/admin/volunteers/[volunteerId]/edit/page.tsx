@@ -12,4 +12,3 @@ export default async function AdminVolunteerEditPage({ params }: { params: Promi
 
   return <VolunteerForm mode="edit" volunteer={volunteer} />;
 }
-

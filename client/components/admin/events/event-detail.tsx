@@ -1,10 +1,10 @@
 import { PencilLine, Trash2, Users } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { BackLink, DetailList, DetailPanel, PhotoPanel } from './events-shared';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { BackLink, DetailList, DetailPanel, PhotoPanel } from './events-shared';
 import { ADMIN_OPERATIONS_PATHS, getEventById, getVenueById, getVolunteerInitials, getVolunteersByEventId } from '@/constants/admin/operations';
 
 export function EventDetail({ eventId }: { eventId: string }) {
@@ -41,8 +41,12 @@ export function EventDetail({ eventId }: { eventId: string }) {
             <div className="flex flex-wrap items-center gap-2.5">
               <p className="text-xs tracking-[0.2em] text-white/60 uppercase">{event.dateLabel}</p>
               <span className="text-white/25">·</span>
-              <Badge variant="secondary" className="border-0 bg-white/15 text-white backdrop-blur-sm">{event.status}</Badge>
-              <Badge variant="secondary" className="border-0 bg-white/15 text-white backdrop-blur-sm">{event.audience}</Badge>
+              <Badge variant="secondary" className="border-0 bg-white/15 text-white backdrop-blur-sm">
+                {event.status}
+              </Badge>
+              <Badge variant="secondary" className="border-0 bg-white/15 text-white backdrop-blur-sm">
+                {event.audience}
+              </Badge>
             </div>
             <h1 className="text-4xl font-semibold tracking-tight text-white">{event.title}</h1>
             <p className="max-w-2xl text-sm leading-6 text-white/80">{event.headline}</p>
@@ -66,7 +70,9 @@ export function EventDetail({ eventId }: { eventId: string }) {
         <DetailPanel title="Host teams">
           <div className="divide-y divide-neutral-100">
             {event.hostTeam.map((team) => (
-              <p key={team} className="py-2.5 text-sm text-neutral-950 first:pt-0 last:pb-0">{team}</p>
+              <p key={team} className="py-2.5 text-sm text-neutral-950 first:pt-0 last:pb-0">
+                {team}
+              </p>
             ))}
           </div>
         </DetailPanel>
@@ -88,7 +94,9 @@ export function EventDetail({ eventId }: { eventId: string }) {
                   </Avatar>
                   <div>
                     <p className="font-medium text-neutral-950">{volunteer.name}</p>
-                    <p className="text-sm text-neutral-500">{volunteer.primaryRole} · {volunteer.availability}</p>
+                    <p className="text-sm text-neutral-500">
+                      {volunteer.primaryRole} · {volunteer.availability}
+                    </p>
                   </div>
                 </div>
                 <Button asChild variant="ghost" size="sm">
@@ -105,4 +113,3 @@ export function EventDetail({ eventId }: { eventId: string }) {
     </div>
   );
 }
-

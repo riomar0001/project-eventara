@@ -1,12 +1,12 @@
 'use client';
 
+import { PencilLine, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { FeaturesEmptyState, humanizeFeatureSlug } from '../features-shared';
 import type { FeatureRecordResponse } from '@/api/types.gen';
 import { FEATURE_ACCESS_TEXT } from '@/constants/admin/features/access-control';
-import { FeaturesEmptyState, humanizeFeatureSlug } from '../features-shared';
-import { PencilLine, Trash2 } from 'lucide-react';
 
 interface FeaturesTableContentProps {
   error: string | null;

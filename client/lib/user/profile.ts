@@ -68,4 +68,3 @@ export function getProfileCompletion(user: AuthUser | null | undefined) {
 
   return Math.round((completedFields / PROFILE_COMPLETION_FIELDS.length) * 100);
 }
-

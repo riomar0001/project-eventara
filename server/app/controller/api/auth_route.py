@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Path, Request, Response, status
 
-from app.application.use_cases.audit_log_usecase import CreateAuditLogUseCase
 from app.application.dto.auth_dto import (
     ForgotPasswordInput,
     LoginInput,
@@ -12,6 +11,7 @@ from app.application.dto.auth_dto import (
     ResendVerificationInput,
     ResetPasswordInput,
 )
+from app.application.use_cases.audit_log_usecase import CreateAuditLogUseCase
 from app.application.use_cases.auth_usecase import AuthUseCase
 from app.controller.api.audit_helpers import get_client_ip, safe_audit_log
 from app.controller.dependencies import get_auth_use_case, get_create_audit_log_use_case, login_rate_limit

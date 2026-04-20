@@ -1,8 +1,8 @@
 'use client';
 
 import { Card, CardContent } from '@/components/ui/card';
-import type { RolePermissionRecordResponse } from '@/api/types.gen';
 import type { RoleFormValues, RolePermissionDraftMap } from '@/types/admin/roles';
+import type { RolePermissionRecordResponse } from '@/api/types.gen';
 import { cn } from '@/lib/utils';
 
 export function createEmptyRoleForm(): RoleFormValues {

@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { CalendarPlus2, Save } from 'lucide-react';
 import Link from 'next/link';
-import { BackLink, FieldLabel, PhotoPanel } from './events-shared';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,6 +10,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { BackLink, FieldLabel, PhotoPanel } from './events-shared';
 import { ADMIN_OPERATIONS_PATHS, eventRecords, type EventRecord, venueRecords } from '@/constants/admin/operations';
 
 const hostTeamOptions = ['Programming', 'Partnerships', 'Guest Experience', 'Production', 'Registration', 'Donor Relations'];
@@ -190,4 +190,3 @@ export function EventForm({ event, mode }: { event?: EventRecord; mode: 'create'
     </div>
   );
 }
-

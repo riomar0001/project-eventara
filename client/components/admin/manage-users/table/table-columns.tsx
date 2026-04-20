@@ -179,4 +179,3 @@ export function useAdminTableColumns({
     [currentUserId, onOpenDeleteDialog, onOpenEmailDialog, onOpenPasswordResetDialog, onOpenRoleDialog, onOpenSpecialPermissionDialog, onSelectUser]
   );
 }
-

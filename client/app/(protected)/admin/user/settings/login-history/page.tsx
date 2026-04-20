@@ -5,4 +5,3 @@ import { LoginHistoryList } from '@/components/admin/user-settings/login-history
 export default function LoginHistoryPage() {
   return <LoginHistoryList />;
 }
-

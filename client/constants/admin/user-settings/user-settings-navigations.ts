@@ -1,4 +1,3 @@
-
 import { Clock3, Shield, Trash2, UserRound } from 'lucide-react';
 
 export const settingsItems = [

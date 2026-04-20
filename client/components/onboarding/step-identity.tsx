@@ -99,4 +99,3 @@ export function StepIdentity({ values, onChange, errors, aliasStatus }: StepIden
     </div>
   );
 }
-

@@ -1,6 +1,6 @@
 'use client';
 
-import { Loader2, RefreshCcw, Users } from 'lucide-react';
+import { Loader2, RefreshCcw } from 'lucide-react';
 import { AdminPageHero } from '@/components/admin/shared/admin-page-hero';
 import { Button } from '@/components/ui/button';
 import type {
@@ -29,11 +29,7 @@ export function ManageUsersOverview({ isLoading, onRefresh, pagination, users }:
         </Button>
       }
       description="Review accounts, adjust access, inspect profiles, and handle account lifecycle work from a single high-signal operations surface."
-      eyebrow={
-        <>
-          User Operations
-        </>
-      }
+      eyebrow={<>User Operations</>}
       metrics={[
         {
           label: 'Total Users',

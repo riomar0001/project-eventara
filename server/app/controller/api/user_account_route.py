@@ -10,8 +10,8 @@ from app.application.dto.admin_user_account_dto import (
     ListUserAccountsInput,
     SendUserPasswordResetInput,
 )
-from app.application.use_cases.audit_log_usecase import CreateAuditLogUseCase
 from app.application.use_cases.admin_user_account_usecase import AdminUserAccountUseCase
+from app.application.use_cases.audit_log_usecase import CreateAuditLogUseCase
 from app.controller.api.audit_helpers import safe_audit_log, serialize_admin_user_account
 from app.controller.dependencies import get_create_audit_log_use_case, require_permission
 from app.controller.dependencies.use_cases_depends import get_admin_user_account_use_case

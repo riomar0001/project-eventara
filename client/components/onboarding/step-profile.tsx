@@ -71,4 +71,3 @@ export function StepProfile({ values, onChange, errors }: StepProfileProps) {
     </div>
   );
 }
-

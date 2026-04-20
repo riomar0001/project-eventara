@@ -18,4 +18,3 @@ export function FieldHint({ error, hint, errorClassName, hintClassName }: FieldH
 
   return null;
 }
-

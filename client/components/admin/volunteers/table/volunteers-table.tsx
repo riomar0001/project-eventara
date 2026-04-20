@@ -4,8 +4,8 @@ import { Users } from 'lucide-react';
 import { flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { volunteerColumns, type VolunteerColumnMeta } from './table-columns';
-import { cn } from '@/lib/utils';
 import type { VolunteerRecord } from '@/constants/admin/operations';
+import { cn } from '@/lib/utils';
 
 interface VolunteersTableContentProps {
   volunteers: VolunteerRecord[];

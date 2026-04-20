@@ -1,8 +1,8 @@
 'use client';
 
 import { Card, CardContent } from '@/components/ui/card';
-import type { FeatureRecordResponse } from '@/api/types.gen';
 import type { FeatureFormValues } from '@/types/admin/features';
+import type { FeatureRecordResponse } from '@/api/types.gen';
 import { cn } from '@/lib/utils';
 
 export function createEmptyFeatureForm(): FeatureFormValues {

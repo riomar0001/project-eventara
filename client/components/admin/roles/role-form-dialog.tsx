@@ -10,11 +10,11 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import type { RoleFormValues, RolePermissionDraftMap } from '@/types/admin/roles';
+import { humanizeAction, humanizeRoleSlug } from './roles-shared';
 import type { FeatureRecordResponse, GrantEffect, RoleAction, RoleRecordResponse } from '@/api/types.gen';
 import { ACCESS_EFFECT_OPTIONS, ROLE_ACTION_OPTIONS, ROLE_ACCESS_TEXT } from '@/constants/admin/roles/access-control';
 import { cn } from '@/lib/utils';
-import type { RoleFormValues, RolePermissionDraftMap } from '@/types/admin/roles';
-import { humanizeAction, humanizeRoleSlug } from './roles-shared';
 
 interface RoleFormDialogProps {
   availableFeatures: FeatureRecordResponse[];

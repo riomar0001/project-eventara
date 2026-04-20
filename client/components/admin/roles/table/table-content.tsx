@@ -4,16 +4,9 @@ import { PencilLine, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { averageActionsPerFeature, countAllowRules, countPermissionFeatures, countPermissionRows, humanizeRoleSlug, RolesEmptyState } from '../roles-shared';
 import type { RoleRecordResponse } from '@/api/types.gen';
 import { PROTECTED_ROLE_DELETE_MESSAGE, ROLE_ACCESS_TEXT } from '@/constants/admin/roles/access-control';
-import {
-  averageActionsPerFeature,
-  countAllowRules,
-  countPermissionFeatures,
-  countPermissionRows,
-  humanizeRoleSlug,
-  RolesEmptyState
-} from '../roles-shared';
 
 interface RolesTableContentProps {
   error: string | null;

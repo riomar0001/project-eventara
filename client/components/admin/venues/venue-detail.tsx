@@ -1,9 +1,9 @@
 import { CalendarRange, PencilLine, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { BackLink, DetailList, DetailPanel, PhotoPanel } from './venues-shared';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { BackLink, DetailList, DetailPanel, PhotoPanel } from './venues-shared';
 import { ADMIN_OPERATIONS_PATHS, getEventsByVenueId, getVenueById } from '@/constants/admin/operations';
 
 export function VenueDetail({ venueId }: { venueId: string }) {
@@ -113,4 +113,3 @@ export function VenueDetail({ venueId }: { venueId: string }) {
     </div>
   );
 }
-

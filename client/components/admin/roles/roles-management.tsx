@@ -4,13 +4,13 @@ import type { FormEvent } from 'react';
 import { useState } from 'react';
 import { useFeatureCatalog } from '@/hooks/admin/features/use-feature-catalog';
 import { useRoleCatalog } from '@/hooks/admin/roles/use-role-catalog';
-import { RoleFormDialog } from './role-form-dialog';
+import type { RoleFormValues, RolePermissionDraftMap } from '@/types/admin/roles';
 import { RoleDeleteDialog } from './role-delete-dialog';
+import { RoleFormDialog } from './role-form-dialog';
+import { createEmptyRoleForm, createRolePermissionDraftMap } from './roles-shared';
 import { RolesTable } from './table/roles-table';
 import type { GrantEffect, RoleAction, RolePermissionRequest, RoleRecordResponse } from '@/api/types.gen';
 import { ROLE_ACCESS_TEXT } from '@/constants/admin/roles/access-control';
-import type { RoleFormValues, RolePermissionDraftMap } from '@/types/admin/roles';
-import { createEmptyRoleForm, createRolePermissionDraftMap } from './roles-shared';
 
 function buildPermissionsPayload(permissionDrafts: RolePermissionDraftMap): RolePermissionRequest[] {
   return Object.entries(permissionDrafts)

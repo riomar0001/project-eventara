@@ -2,9 +2,8 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { cn } from '@/lib/utils';
 import { settingsItems } from '@/constants/admin/user-settings/user-settings-navigations';
-
+import { cn } from '@/lib/utils';
 
 function isActivePath(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
@@ -58,4 +57,3 @@ export function SettingsShell({ title, description, children }: { title?: string
     </div>
   );
 }
-

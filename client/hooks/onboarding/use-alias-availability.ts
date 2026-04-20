@@ -64,4 +64,3 @@ export function useAliasAvailability(alias: string, options: UseAliasAvailabilit
     normalizedAlias
   };
 }
-

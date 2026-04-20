@@ -11,8 +11,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { ADMIN_OPERATIONS_PATHS, getVolunteerInitials, type VolunteerRecord } from '@/constants/admin/operations';
 import { BackLink, FieldLabel } from './volunteers-shared';
+import { ADMIN_OPERATIONS_PATHS, getVolunteerInitials, type VolunteerRecord } from '@/constants/admin/operations';
 
 const skillOptions = ['Wayfinding', 'Registration', 'VIP desk', 'Backstage', 'Accessibility escort', 'Vendor check-in', 'Radio comms', 'Hospitality'];
 
@@ -202,4 +202,3 @@ export function VolunteerForm({ mode, volunteer }: { mode: 'create' | 'edit'; vo
     </div>
   );
 }
-
