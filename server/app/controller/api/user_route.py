@@ -1,4 +1,3 @@
-import re
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -46,6 +45,7 @@ from app.controller.schemas.user_schema import (
     LoginHistoryListResponse,
     UserOnboardingRequest,
     UserOnboardingResponse,
+    _ALIAS_RE,
 )
 from app.core.security.token_service import create_access_token
 from app.domain.entities.authorization_entities import RoleAction
@@ -62,8 +62,6 @@ from app.domain.exceptions.user_exceptions import (
 )
 from app.infrastructure.database.repositories.user_repository import UserRepository
 from app.infrastructure.database.session import get_db
-
-_ALIAS_RE = re.compile(r"^[a-z0-9_]+$")
 
 router = APIRouter(prefix="/user", tags=["User"])
 

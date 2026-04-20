@@ -45,13 +45,14 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     if settings.DEBUG:
         return JSONResponse(
             status_code=422,
-            content={"success": False, "detail": exc.errors()},
+            content={"success": False, "message": "Validation failed.", "errors": exc.errors()},
         )
     return JSONResponse(
         status_code=422,
         content={
             "success": False,
-            "detail": [{"loc": err.get("loc"), "msg": err.get("msg"), "type": err.get("type")} for err in exc.errors()],
+            "message": "Validation failed.",
+            "errors": [{"loc": err.get("loc"), "msg": err.get("msg"), "type": err.get("type")} for err in exc.errors()],
         },
     )
 

@@ -44,6 +44,7 @@ class LoginRequest(BaseModel):
 
 
 class LoginResponse(BaseModel):
+    success: bool = True
     access_token: str
     refresh_token: str
     token_type: str = "bearer"
@@ -72,6 +73,7 @@ class LoginVerifyRequest(BaseModel):
 
 
 class LoginVerifyResponse(BaseModel):
+    success: bool = True
     access_token: str
     refresh_token: str
     token_type: str = "bearer"
@@ -92,6 +94,7 @@ class RefreshTokenRequest(BaseModel):
 
 
 class RefreshTokenResponse(BaseModel):
+    success: bool = True
     access_token: str
     refresh_token: str
     token_type: str = "bearer"

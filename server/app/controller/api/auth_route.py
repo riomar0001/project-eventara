@@ -13,7 +13,7 @@ from app.application.dto.auth_dto import (
     ResetPasswordInput,
 )
 from app.application.use_cases.auth_usecase import AuthUseCase
-from app.controller.api.audit_helpers import safe_audit_log
+from app.controller.api.audit_helpers import get_client_ip, safe_audit_log
 from app.controller.dependencies import get_auth_use_case, get_create_audit_log_use_case, login_rate_limit
 from app.controller.docs.auth_docs import (
     EMAIL_ALREADY_VERIFIED,
@@ -79,25 +79,10 @@ from app.domain.exceptions import (
     TokenExpiredError,
     UserInactiveError,
     UserLockedError,
+    UserNotFoundError,
 )
-from app.domain.exceptions.user_exceptions import UserNotFoundError
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
-
-
-def _get_client_ip(request: Request) -> str | None:
-    forwarded_for = request.headers.get("x-forwarded-for")
-    if forwarded_for:
-        return forwarded_for.split(",")[0].strip()
-
-    real_ip = request.headers.get("x-real-ip")
-    if real_ip:
-        return real_ip.strip()
-
-    if request.client and request.client.host:
-        return request.client.host
-
-    return None
 
 
 def _set_auth_cookies(response: Response, access_token: str, refresh_token: str) -> None:
@@ -420,7 +405,7 @@ async def login_verify(
             LoginVerifyInput(
                 token=body.token,
                 code=body.code,
-                ip_address=_get_client_ip(request),
+                ip_address=get_client_ip(request),
                 user_agent=request.headers.get("user-agent"),
             )
         )

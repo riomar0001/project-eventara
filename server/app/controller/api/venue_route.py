@@ -18,11 +18,11 @@ from app.controller.docs.venue_docs import (
 from app.controller.schemas.venue_schema import (
     CreateVenueRequest,
     CreateVenueResponse,
-    DeleteVenueResponse,
     UpdateVenueRequest,
     UpdateVenueResponse,
     VenueResponse,
 )
+from app.core.config import settings
 from app.domain.entities.authorization_entities import RoleAction
 from app.domain.entities.venue_entities import VenueType
 from app.domain.exceptions import (
@@ -57,9 +57,9 @@ router = APIRouter(prefix="/venues", tags=["Venues"])
 )
 async def create_venue(
     body: CreateVenueRequest,
-    use_case: VenueUseCase = Depends(get_venue_use_case),
-    creator_id: uuid.UUID = Depends(get_current_user_id),
     _: uuid.UUID = Depends(require_permission("venues", RoleAction.CREATE)),
+    creator_id: uuid.UUID = Depends(get_current_user_id),
+    use_case: VenueUseCase = Depends(get_venue_use_case),
 ) -> CreateVenueResponse:
     """Create a new event venue.
 
@@ -95,8 +95,8 @@ async def create_venue(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error))
     except VenueAlreadyExistsError as error:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error))
-    except Exception:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to create venue")
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e) if settings.DEBUG else "An unexpected error occurred")
 
 
 @router.patch(
@@ -124,9 +124,9 @@ async def create_venue(
 async def update_venue(
     venue_id: uuid.UUID,
     body: UpdateVenueRequest,
-    use_case: VenueUseCase = Depends(get_venue_use_case),
-    creator_id: uuid.UUID = Depends(get_current_user_id),
     _: uuid.UUID = Depends(require_permission("venues", RoleAction.UPDATE)),
+    creator_id: uuid.UUID = Depends(get_current_user_id),
+    use_case: VenueUseCase = Depends(get_venue_use_case),
 ) -> UpdateVenueResponse:
     """Update an existing event venue.
 
@@ -168,14 +168,13 @@ async def update_venue(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error))
     except VenueAlreadyExistsError as error:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error))
-    except Exception:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to update venue")
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e) if settings.DEBUG else "An unexpected error occurred")
 
 
 @router.delete(
     "/{venue_id}",
-    response_model=DeleteVenueResponse,
-    status_code=status.HTTP_200_OK,
+    status_code=status.HTTP_204_NO_CONTENT,
     responses={
         **UNAUTHORIZED,
         **FORBIDDEN,
@@ -193,10 +192,10 @@ async def update_venue(
 )
 async def delete_venue(
     venue_id: uuid.UUID,
-    use_case: VenueUseCase = Depends(get_venue_use_case),
-    creator_id: uuid.UUID = Depends(get_current_user_id),
     _: uuid.UUID = Depends(require_permission("venues", RoleAction.DELETE)),
-) -> DeleteVenueResponse:
+    creator_id: uuid.UUID = Depends(get_current_user_id),
+    use_case: VenueUseCase = Depends(get_venue_use_case),
+) -> None:
     """Delete a venue permanently.
 
     # Error mapping
@@ -206,16 +205,15 @@ async def delete_venue(
     - **404 Not Found** — venue does not exist.
     """
     try:
-        result = await use_case.delete(venue_id, creator_id)
-        return DeleteVenueResponse(venue_id=result.venue.id)
+        await use_case.delete(venue_id, creator_id)
     except VenueNotFoundError as error:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error))
     except UnauthorizedVenueOperationError as error:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(error))
     except VenueValidationError as error:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error))
-    except Exception:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to delete venue")
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e) if settings.DEBUG else "An unexpected error occurred")
 
 
 @router.get(
@@ -236,8 +234,8 @@ async def delete_venue(
 )
 async def get_venue(
     venue_id: uuid.UUID,
-    use_case: VenueUseCase = Depends(get_venue_use_case),
     _: uuid.UUID = Depends(require_permission("venues", RoleAction.READ)),
+    use_case: VenueUseCase = Depends(get_venue_use_case),
 ) -> VenueResponse:
     """Retrieve a single venue by ID.
 
@@ -266,8 +264,8 @@ async def get_venue(
         )
     except VenueNotFoundError as error:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error))
-    except Exception:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to retrieve venue")
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e) if settings.DEBUG else "An unexpected error occurred")
 
 
 @router.get(
@@ -288,8 +286,8 @@ async def get_venue(
 )
 async def get_user_venues(
     creator_id: uuid.UUID,
-    use_case: VenueUseCase = Depends(get_venue_use_case),
     _: uuid.UUID = Depends(require_permission("venues", RoleAction.READ)),
+    use_case: VenueUseCase = Depends(get_venue_use_case),
 ) -> list[VenueResponse]:
     """List all venues created by a user.
 
@@ -323,5 +321,5 @@ async def get_user_venues(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(error))
     except VenueValidationError as error:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error))
-    except Exception:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to retrieve user venues")
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e) if settings.DEBUG else "An unexpected error occurred")
