@@ -55,15 +55,15 @@ export function VolunteerProfile({ volunteerId }: { volunteerId: string }) {
               </div>
             </div>
             <div className="grid gap-3 sm:grid-cols-3">
-              <div className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-xs">
+              <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-xs">
                 <p className="text-xs tracking-[0.16em] text-neutral-500 uppercase">Hours</p>
                 <p className="mt-2 text-2xl font-semibold text-neutral-950">{volunteer.hoursContributed}</p>
               </div>
-              <div className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-xs">
+              <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-xs">
                 <p className="text-xs tracking-[0.16em] text-neutral-500 uppercase">Assigned events</p>
                 <p className="mt-2 text-2xl font-semibold text-neutral-950">{assignedEvents.length}</p>
               </div>
-              <div className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-xs">
+              <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-xs">
                 <p className="text-xs tracking-[0.16em] text-neutral-500 uppercase">Joined</p>
                 <p className="mt-2 text-lg font-semibold text-neutral-950">{volunteer.joinedOn}</p>
               </div>
@@ -117,14 +117,14 @@ export function VolunteerProfile({ volunteerId }: { volunteerId: string }) {
         </CardHeader>
         <CardContent className="space-y-3 pt-6">
           {assignedEvents.length === 0 ? (
-            <div className="rounded-3xl border border-dashed border-neutral-200 px-5 py-8 text-sm text-neutral-500">
+            <div className="rounded-xl border border-dashed border-neutral-200 px-5 py-8 text-sm text-neutral-500">
               This volunteer does not have a sample event assignment yet.
             </div>
           ) : (
             assignedEvents.map((event) => (
               <div
                 key={event.id}
-                className="flex flex-col gap-3 rounded-3xl border border-neutral-200 bg-neutral-50 p-4 sm:flex-row sm:items-center sm:justify-between"
+                className="flex flex-col gap-3 rounded-xl border border-neutral-200 bg-neutral-50 p-4 sm:flex-row sm:items-center sm:justify-between"
               >
                 <div className="space-y-1">
                   <p className="font-medium text-neutral-950">{event.title}</p>
@@ -149,7 +149,7 @@ export function VolunteerProfile({ volunteerId }: { volunteerId: string }) {
 
       <Card className="border-0 bg-white shadow-none ring-1 ring-neutral-200">
         <CardContent className="flex items-center gap-3 py-6">
-          <div className="flex size-11 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700">
+          <div className="flex size-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
             <Sparkles className="size-5" />
           </div>
           <div>

@@ -40,7 +40,7 @@ export function AdminDeleteDialog({
         </DialogHeader>
 
         <form className="space-y-4" onSubmit={onDeleteSubmit}>
-          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+          <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
             <div className="flex items-start gap-3">
               <CalendarClock className="mt-0.5 size-4 shrink-0" />
               <p>{deleteDialogUser ? `${deleteDialogUser.name} will be scheduled for deletion after 30 days.` : null}</p>

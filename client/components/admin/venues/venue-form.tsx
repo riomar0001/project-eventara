@@ -130,7 +130,7 @@ export function VenueForm({ mode, venue }: { mode: 'create' | 'edit'; venue?: Ve
                   {amenityOptions.map((amenity) => (
                     <label
                       key={amenity}
-                      className="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-700"
+                      className="flex items-center gap-3 rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-700"
                     >
                       <Checkbox checked={selectedAmenities.includes(amenity)} onCheckedChange={() => toggleAmenity(amenity)} />
                       <span>{amenity}</span>
@@ -172,11 +172,11 @@ export function VenueForm({ mode, venue }: { mode: 'create' | 'edit'; venue?: Ve
               <CardDescription>This side panel helps review the visual tone before API work begins.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3 pt-6 text-sm leading-6 text-neutral-600">
-              <div className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3">
+              <div className="rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3">
                 <p className="font-medium text-neutral-950">Selected amenities</p>
                 <p className="mt-1">{selectedAmenities.length > 0 ? selectedAmenities.join(', ') : 'No amenities selected yet.'}</p>
               </div>
-              <div className="rounded-2xl border border-dashed border-neutral-200 px-4 py-4 text-neutral-500">
+              <div className="rounded-xl border border-dashed border-neutral-200 px-4 py-4 text-neutral-500">
                 <div className="flex items-center gap-2">
                   <ImagePlus className="size-4" />
                   Photo upload is intentionally mocked for this design-only pass.

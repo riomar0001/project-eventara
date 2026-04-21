@@ -39,6 +39,9 @@ class DeadJobInfo:
 class ListDeadJobsOutput:
     jobs: list[DeadJobInfo]
     total: int
+    page: int
+    limit: int
+    total_pages: int
 
 
 @dataclass

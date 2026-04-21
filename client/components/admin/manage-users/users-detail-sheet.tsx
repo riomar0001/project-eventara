@@ -48,9 +48,9 @@ export function AdminUserDetailSheet({ detail, error, isLoading, onOpenChange, o
           <div className="space-y-6 p-4">
             {isLoading ? (
               <div className="space-y-4">
-                <Skeleton className="h-24 w-full rounded-3xl" />
-                <Skeleton className="h-48 w-full rounded-3xl" />
-                <Skeleton className="h-48 w-full rounded-3xl" />
+                <Skeleton className="h-24 w-full rounded-xl" />
+                <Skeleton className="h-48 w-full rounded-xl" />
+                <Skeleton className="h-48 w-full rounded-xl" />
               </div>
             ) : error ? (
               <div className="flex min-h-[40vh] flex-col items-center justify-center gap-4 text-center">
@@ -66,7 +66,7 @@ export function AdminUserDetailSheet({ detail, error, isLoading, onOpenChange, o
               </div>
             ) : detail ? (
               <>
-                <div className="rounded-3xl border border-neutral-200 bg-linear-to-br from-white to-neutral-50 p-5">
+                <div className="rounded-xl border border-neutral-200 bg-linear-to-br from-white to-neutral-50 p-5">
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div className="flex items-center gap-4">
                       <Avatar className="size-12">
@@ -87,7 +87,7 @@ export function AdminUserDetailSheet({ detail, error, isLoading, onOpenChange, o
                       </div>
                     </div>
                     {detail.deletion_scheduled_for ? (
-                      <div className="rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+                      <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
                         Deletion scheduled for {formatDateTime(detail.deletion_scheduled_for)}
                       </div>
                     ) : null}
@@ -112,7 +112,7 @@ export function AdminUserDetailSheet({ detail, error, isLoading, onOpenChange, o
                       <DetailItem label="Onboarding" value={detail.onboarding_completed ? 'Completed' : 'Pending'} />
                       <DetailItem label="Onboarded At" value={formatDateTime(detail.onboarding_completed_at)} />
                     </div>
-                    <div className="mt-8 rounded-2xl bg-neutral-50 px-4 py-3">
+                    <div className="mt-8 rounded-xl bg-neutral-50 px-4 py-3">
                       <p className="text-muted-foreground text-xs font-medium tracking-[0.16em] uppercase">Bio</p>
                       <p className="mt-2 text-sm leading-6">{detail.bio?.trim() ? detail.bio : 'Not set'}</p>
                     </div>
@@ -181,7 +181,7 @@ export function AdminUserDetailSheet({ detail, error, isLoading, onOpenChange, o
                       <DetailItem label="Scheduled For" value={formatDateTime(detail.deletion_scheduled_for)} />
                       <DetailItem label="Requested By" value={detail.deletion_requested_by ?? 'Not available'} />
                     </div>
-                    <div className="mt-8 rounded-2xl bg-neutral-50 px-4 py-3">
+                    <div className="mt-8 rounded-xl bg-neutral-50 px-4 py-3">
                       <p className="text-muted-foreground text-xs font-medium tracking-[0.16em] uppercase">Deletion Reason</p>
                       <p className="mt-2 text-sm leading-6">{detail.deletion_reason ?? 'Not provided'}</p>
                     </div>

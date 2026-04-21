@@ -19,7 +19,7 @@ export function RoleDeleteDialog({ description, isDeleting, onClose, onConfirm, 
       <DialogContent className="max-w-md border-0 bg-white p-0 shadow-xl shadow-neutral-950/10">
         <form onSubmit={onConfirm}>
           <DialogHeader className="border-b px-6 pt-6 pb-4">
-            <div className="mb-3 flex size-11 items-center justify-center rounded-2xl bg-red-50 text-red-600">
+            <div className="mb-3 flex size-11 items-center justify-center rounded-xl bg-red-50 text-red-600">
               <AlertTriangle className="size-5" />
             </div>
             <DialogTitle>{title}</DialogTitle>

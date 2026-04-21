@@ -82,7 +82,7 @@ export function AuditLogsTable({
       <CardContent className="p-0 xl:flex-1 xl:overflow-hidden">
         {error ? (
           <div className="flex min-h-72 flex-col items-center justify-center gap-4 px-6 py-12 text-center xl:h-full">
-            <div className="flex size-14 items-center justify-center rounded-3xl bg-rose-50 text-rose-600">
+            <div className="flex size-14 items-center justify-center rounded-xl bg-rose-50 text-rose-600">
               <FileWarning className="size-6" />
             </div>
             <div className="space-y-1">
@@ -110,7 +110,7 @@ export function AuditLogsTable({
                   <TableRow>
                     <TableCell colSpan={6} className="px-6 py-16 text-center">
                       <div className="mx-auto max-w-md space-y-3">
-                        <div className="mx-auto flex size-14 items-center justify-center rounded-3xl bg-cyan-50 text-cyan-700">
+                        <div className="mx-auto flex size-14 items-center justify-center rounded-xl bg-cyan-50 text-cyan-700">
                           <Loader2 className="size-6" />
                         </div>
                         <p className="text-base font-medium text-neutral-950">{AUDIT_LOGS_TEXT.emptyTitle}</p>

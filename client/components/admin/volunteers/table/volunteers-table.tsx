@@ -42,7 +42,7 @@ export function VolunteersTableContent({ volunteers }: VolunteersTableContentPro
           <TableRow>
             <TableCell colSpan={volunteerColumns.length} className="px-6 py-16 text-center">
               <div className="space-y-2">
-                <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700">
+                <div className="mx-auto flex size-12 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
                   <Users className="size-5" />
                 </div>
                 <p className="font-medium text-neutral-950">No volunteers match this filter set</p>

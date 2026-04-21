@@ -36,14 +36,14 @@ function DetailRow({ icon: Icon, label, value }: { icon: React.ComponentType<{ c
 export function AuditLogDetails({ selectedLog }: AuditLogDetailsProps) {
   if (!selectedLog) {
     return (
-      <Card className="border-0 bg-white shadow-none ring-1 ring-neutral-200 xl:sticky xl:top-6 xl:flex xl:h-[760px] xl:min-h-[760px] xl:flex-col">
+      <Card className="border-0 bg-white shadow-none ring-1 ring-neutral-200 xl:sticky xl:top-6 xl:flex xl:h-190 xl:min-h-190 xl:flex-col">
         <CardHeader className="border-b border-neutral-200/80 pb-4">
           <CardTitle>{AUDIT_LOGS_TEXT.detailPlaceholderTitle}</CardTitle>
           <CardDescription>{AUDIT_LOGS_TEXT.detailPlaceholderDescription}</CardDescription>
         </CardHeader>
         <CardContent className="flex min-h-64 items-center justify-center px-6 py-10 xl:flex-1">
           <div className="max-w-sm space-y-2.5 text-center">
-            <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-neutral-100 text-neutral-500">
+            <div className="mx-auto flex size-12 items-center justify-center rounded-xl bg-neutral-100 text-neutral-500">
               <FileSearch className="size-5" />
             </div>
             <p className="text-base font-medium text-neutral-950">Nothing selected yet</p>
@@ -55,7 +55,7 @@ export function AuditLogDetails({ selectedLog }: AuditLogDetailsProps) {
   }
 
   return (
-    <Card className="border-0 bg-white shadow-none ring-1 ring-neutral-200 xl:sticky xl:top-6 xl:flex xl:h-[760px] xl:min-h-[760px] xl:flex-col">
+    <Card className="border-0 bg-white shadow-none ring-1 ring-neutral-200 xl:sticky xl:top-6 xl:flex xl:h-190 xl:min-h-190 xl:flex-col">
       <CardHeader className="border-b border-neutral-200/80">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="space-y-1.5">
@@ -71,7 +71,7 @@ export function AuditLogDetails({ selectedLog }: AuditLogDetailsProps) {
       </CardHeader>
 
       <CardContent className="space-y-3 overflow-y-auto p-4 xl:flex-1">
-        <div className="rounded-2xl border border-neutral-200 bg-neutral-950 px-3.5 py-3 text-white">
+        <div className="rounded-xl border border-neutral-200 bg-neutral-950 px-3.5 py-3 text-white">
           <p className="text-[11px] font-semibold tracking-[0.22em] text-neutral-300 uppercase">{formatAuditActionType(selectedLog.action_type)}</p>
           <p className="mt-1.5 text-lg font-semibold tracking-tight">{formatAuditResourceType(selectedLog.resource_type)}</p>
           <p className="mt-1 text-[13px] leading-5 text-neutral-300">{formatAuditTimestamp(selectedLog.timestamp)}</p>

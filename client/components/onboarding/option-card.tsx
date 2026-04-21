@@ -15,7 +15,7 @@ export function OptionCard({ value, label, description, selected, onSelect }: Op
       type="button"
       onClick={() => onSelect(value)}
       className={cn(
-        'group relative flex flex-col items-center justify-center gap-0.5 rounded-lg border-2 px-2 py-2 text-center sm:rounded-2xl sm:px-3 sm:py-3.5',
+        'group relative flex flex-col items-center justify-center gap-0.5 rounded-lg border-2 px-2 py-2 text-center sm:rounded-xl sm:px-3 sm:py-3.5',
         'cursor-pointer transition-all duration-150 select-none',
         'hover:-translate-y-px hover:shadow-sm',
         selected ? 'border-primary bg-primary/8 shadow-primary/15 shadow-sm' : 'border-border bg-background hover:border-primary/40 hover:bg-primary/5'

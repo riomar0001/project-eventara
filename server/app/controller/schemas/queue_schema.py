@@ -38,6 +38,9 @@ class ListDeadJobsResponse(BaseModel):
     success: bool = True
     data: list[DeadJobResponse]
     total: int
+    page: int
+    limit: int
+    total_pages: int
 
 
 class RetryJobResponse(BaseModel):

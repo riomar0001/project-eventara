@@ -56,7 +56,7 @@ export function RoleFormDialog({
       <DialogContent className="flex max-h-[90vh] flex-col overflow-hidden border-0 bg-white p-0 shadow-xl shadow-neutral-950/10 sm:max-w-4xl">
         <form onSubmit={onSubmit} className="flex min-h-0 flex-1 flex-col">
           <DialogHeader className="border-b px-6 pt-6 pb-4">
-            <div className="mb-3 flex size-11 items-center justify-center rounded-2xl bg-amber-100 text-amber-900">
+            <div className="mb-3 flex size-11 items-center justify-center rounded-xl bg-amber-100 text-amber-900">
               <ShieldCheck className="size-5" />
             </div>
             <DialogTitle>{title}</DialogTitle>
@@ -96,10 +96,10 @@ export function RoleFormDialog({
                   </div>
                 </div>
 
-                <div className="rounded-3xl border border-amber-200 bg-amber-50/80 p-4">
+                <div className="rounded-xl border border-amber-200 bg-amber-50/80 p-4">
                   <p className="text-xs font-semibold tracking-[0.16em] text-amber-800 uppercase">Role posture</p>
                   <div className="mt-4 space-y-3">
-                    <div className="flex items-center gap-3 rounded-2xl border border-amber-200/70 bg-white/80 px-4 py-3">
+                    <div className="flex items-center gap-3 rounded-xl border border-amber-200/70 bg-white/80 px-4 py-3">
                       <Checkbox
                         id="role-default"
                         checked={values.is_default}
@@ -113,7 +113,7 @@ export function RoleFormDialog({
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3 rounded-2xl border border-amber-200/70 bg-white/80 px-4 py-3">
+                    <div className="flex items-center gap-3 rounded-xl border border-amber-200/70 bg-white/80 px-4 py-3">
                       <Checkbox
                         id="role-system"
                         checked={values.is_system}
@@ -131,14 +131,14 @@ export function RoleFormDialog({
                   </div>
                 </div>
 
-                <div className="rounded-3xl border border-neutral-200 bg-neutral-50 p-4">
+                <div className="rounded-xl border border-neutral-200 bg-neutral-50 p-4">
                   <p className="text-xs font-semibold tracking-[0.16em] text-neutral-500 uppercase">Coverage snapshot</p>
                   <div className="mt-4 grid grid-cols-2 gap-3">
-                    <div className="rounded-2xl bg-white p-3 ring-1 ring-neutral-200">
+                    <div className="rounded-xl bg-white p-3 ring-1 ring-neutral-200">
                       <p className="text-xs text-neutral-500">Features</p>
                       <p className="mt-2 text-2xl font-semibold text-neutral-950">{Object.keys(permissionDrafts).length}</p>
                     </div>
-                    <div className="rounded-2xl bg-white p-3 ring-1 ring-neutral-200">
+                    <div className="rounded-xl bg-white p-3 ring-1 ring-neutral-200">
                       <p className="text-xs text-neutral-500">Actions</p>
                       <p className="mt-2 text-2xl font-semibold text-neutral-950">
                         {Object.values(permissionDrafts).reduce((count, permission) => count + permission.actions.length, 0)}
@@ -163,9 +163,9 @@ export function RoleFormDialog({
 
                 <div className="grid gap-3">
                   {isLoadingFeatures ? (
-                    <div className="rounded-3xl border border-dashed border-neutral-200 px-5 py-8 text-sm text-neutral-500">Loading feature catalog...</div>
+                    <div className="rounded-xl border border-dashed border-neutral-200 px-5 py-8 text-sm text-neutral-500">Loading feature catalog...</div>
                   ) : availableFeatures.length === 0 ? (
-                    <div className="rounded-3xl border border-dashed border-neutral-200 px-5 py-8 text-sm text-neutral-500">
+                    <div className="rounded-xl border border-dashed border-neutral-200 px-5 py-8 text-sm text-neutral-500">
                       Create at least one feature before assigning role permissions.
                     </div>
                   ) : (
@@ -178,7 +178,7 @@ export function RoleFormDialog({
                         <div
                           key={feature.id}
                           className={cn(
-                            'rounded-3xl border px-4 py-4 transition-colors',
+                            'rounded-xl border px-4 py-4 transition-colors',
                             selectedActions.length > 0 ? 'border-amber-300 bg-amber-50/60' : 'border-neutral-200 bg-white'
                           )}
                         >
@@ -220,7 +220,7 @@ export function RoleFormDialog({
                               <label
                                 key={`${feature.id}-${action}`}
                                 className={cn(
-                                  'flex items-center gap-3 rounded-2xl border px-3 py-3 text-sm transition-colors',
+                                  'flex items-center gap-3 rounded-xl border px-3 py-3 text-sm transition-colors',
                                   selectedActions.includes(action)
                                     ? 'border-amber-300 bg-white text-neutral-950'
                                     : 'border-neutral-200 bg-neutral-50 text-neutral-600'

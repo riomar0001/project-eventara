@@ -15,7 +15,7 @@ export default function DeleteAccountPage() {
 
   return (
     <div className="max-w-3xl space-y-6">
-      <div className="rounded-2xl border border-red-200 bg-red-50 p-5">
+      <div className="rounded-xl border border-red-200 bg-red-50 p-5">
         <div className="flex items-start gap-3">
           <AlertTriangle className="mt-0.5 size-4 shrink-0 text-red-600" />
           <div>
@@ -28,7 +28,7 @@ export default function DeleteAccountPage() {
       </div>
 
       {scheduledDeletion ? (
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
+        <div className="rounded-xl border border-amber-200 bg-amber-50 p-5">
           <div className="flex items-start gap-3">
             <CalendarClock className="mt-0.5 size-4 shrink-0 text-amber-700" />
             <div className="space-y-2">
@@ -43,7 +43,7 @@ export default function DeleteAccountPage() {
       ) : null}
 
       <form className="space-y-5" onSubmit={handleSubmit}>
-        <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-4">
+        <div className="rounded-xl border border-neutral-200 bg-neutral-50 p-4">
           <div className="flex items-start gap-3">
             <ShieldAlert className="mt-0.5 size-4 shrink-0 text-neutral-700" />
             <div className="text-sm text-neutral-700">

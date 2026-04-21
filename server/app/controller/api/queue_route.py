@@ -19,7 +19,7 @@ Error mapping summary:
   - 500  Redis / ARQ communication failure
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from app.application.use_cases.queue_usecase import (
     DeleteDeadJobUseCase,
@@ -141,14 +141,16 @@ async def get_queue_stats(
     ),
 )
 async def list_dead_jobs(
+    page: int = Query(default=1, ge=1, description="Page number (1-based)"),
+    limit: int = Query(default=10, ge=1, le=100, description="Items per page"),
     _: object = Depends(require_permission("queues", RoleAction.READ)),
     use_case: ListDeadJobsUseCase = Depends(get_list_dead_jobs_use_case),
 ) -> ListDeadJobsResponse:
-    """List all permanently failed jobs in the dead-letter store.
+    """List permanently failed jobs in the dead-letter store with pagination.
 
     Scans ``arq:result:*`` and returns entries where ``JobResult.success``
-    is ``False``.  Results that have already expired (ARQ TTL elapsed) will
-    not appear in this list.
+    is ``False``, sliced to the requested page.  Results that have already
+    expired (ARQ TTL elapsed) will not appear in this list.
 
     Error mapping:
     - **401 Unauthorized** — missing, expired, or invalid Bearer token.
@@ -156,7 +158,7 @@ async def list_dead_jobs(
     - **500 Internal Server Error** — Redis or deserialisation failure.
     """
     try:
-        output = await use_case.execute()
+        output = await use_case.execute(page=page, limit=limit)
         return ListDeadJobsResponse(
             data=[
                 DeadJobResponse(
@@ -172,6 +174,9 @@ async def list_dead_jobs(
                 for j in output.jobs
             ],
             total=output.total,
+            page=output.page,
+            limit=output.limit,
+            total_pages=output.total_pages,
         )
     except QueueInspectionError as exc:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(exc))

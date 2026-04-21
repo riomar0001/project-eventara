@@ -25,7 +25,7 @@ export function PurgeDeadJobsDialog({ deadJobCount, isPurging, onClose, onConfir
             </DialogDescription>
           </DialogHeader>
 
-          <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm leading-6 text-neutral-700">
+          <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm leading-6 text-neutral-700">
             Purging the dead-letter queue only clears the archived failure records. It does not retry the jobs and it cannot be undone later.
           </div>
 

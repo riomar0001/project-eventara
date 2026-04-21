@@ -52,6 +52,8 @@ function getRequestHeaders() {
   return accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined;
 }
 
+const PAGE_LIMIT = 10;
+
 export function useQueueManagement() {
   const [queueStats, setQueueStats] = useState<QueueStatsResponse | null>(null);
   const [deadJobs, setDeadJobs] = useState<DeadJobResponse[]>([]);
@@ -63,6 +65,9 @@ export function useQueueManagement() {
   const [actionJobId, setActionJobId] = useState<string | null>(null);
   const [actionKind, setActionKind] = useState<QueueActionKind>(null);
   const [isPurging, setIsPurging] = useState(false);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalJobs, setTotalJobs] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -103,6 +108,7 @@ export function useQueueManagement() {
       try {
         const result = await QueueManagement.listDeadJobsQueuesDlqGet({
           headers: getRequestHeaders(),
+          query: { page, limit: PAGE_LIMIT },
           throwOnError: false
         });
 
@@ -112,6 +118,8 @@ export function useQueueManagement() {
 
         if (!cancelled) {
           setDeadJobs(result.data.data);
+          setTotalPages(result.data.total_pages);
+          setTotalJobs(result.data.total);
         }
       } catch (nextError) {
         if (!cancelled) {
@@ -130,9 +138,10 @@ export function useQueueManagement() {
     return () => {
       cancelled = true;
     };
-  }, [reloadToken]);
+  }, [reloadToken, page]);
 
   function refresh() {
+    setPage(1);
     setReloadToken((current) => current + 1);
   }
 
@@ -226,15 +235,19 @@ export function useQueueManagement() {
     deadJobs,
     deleteDeadJob,
     isBusy: isLoadingStats || isLoadingJobs || isPurging || Boolean(actionJobId),
-    isEmpty: !isLoadingJobs && !jobsError && deadJobs.length === 0,
+    isEmpty: !isLoadingJobs && !jobsError && totalJobs === 0,
     isLoadingJobs,
     isLoadingStats,
     isPurging,
     jobsError,
+    page,
     purgeDeadJobs,
     queueStats,
     refresh,
     retryDeadJob,
-    statsError
+    setPage,
+    statsError,
+    totalJobs,
+    totalPages,
   };
 }

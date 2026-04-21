@@ -36,13 +36,13 @@ export function PrimaryPageAction({ cta, helper, href, label, theme = 'sky' }: P
   const styles = panelThemes[theme];
 
   return (
-    <div className={cn('w-full max-w-[18rem] rounded-[24px] border p-3.5 backdrop-blur-sm xl:max-w-[19rem]', styles.panel)}>
+    <div className={cn('w-full max-w-[18rem] rounded-[24px] border p-3.5 backdrop-blur-sm xl:max-w-76', styles.panel)}>
       <p className={cn('text-[10px] font-semibold tracking-[0.24em] uppercase', styles.label)}>{label}</p>
       <p className={cn('mt-1 text-[13px] leading-5', styles.helper)}>{helper}</p>
       <Button
         asChild
         size="lg"
-        className={cn('mt-3 h-11 w-full rounded-2xl border-0 font-semibold shadow-[0_14px_35px_-18px_rgba(15,23,42,0.45)]', styles.button)}
+        className={cn('mt-3 h-11 w-full rounded-xl border-0 font-semibold shadow-[0_14px_35px_-18px_rgba(15,23,42,0.45)]', styles.button)}
       >
         <Link href={href}>
           {cta}

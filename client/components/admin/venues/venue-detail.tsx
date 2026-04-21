@@ -81,7 +81,7 @@ export function VenueDetail({ venueId }: { venueId: string }) {
         <DetailPanel title="Venue tags" description="Quick descriptors used in the design preview.">
           <div className="space-y-3">
             {venue.tags.map((tag) => (
-              <div key={tag} className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm font-medium text-neutral-700">
+              <div key={tag} className="rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm font-medium text-neutral-700">
                 {tag}
               </div>
             ))}
@@ -93,7 +93,7 @@ export function VenueDetail({ venueId }: { venueId: string }) {
             {relatedEvents.map((event) => (
               <div
                 key={event.id}
-                className="flex flex-col gap-3 rounded-3xl border border-neutral-200 bg-neutral-50 p-4 sm:flex-row sm:items-center sm:justify-between"
+                className="flex flex-col gap-3 rounded-xl border border-neutral-200 bg-neutral-50 p-4 sm:flex-row sm:items-center sm:justify-between"
               >
                 <div className="space-y-1">
                   <p className="font-medium text-neutral-950">{event.title}</p>

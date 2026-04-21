@@ -137,7 +137,7 @@ export function RolePermissionList({
 
 export function DetailField({ label, value }: { label: string; value: string }) {
   return (
-    <div className="space-y-1 rounded-2xl border border-neutral-200 bg-white p-4">
+    <div className="space-y-1 rounded-xl border border-neutral-200 bg-white p-4">
       <p className="text-muted-foreground text-xs font-medium tracking-[0.16em] uppercase">{label}</p>
       <p className="text-sm font-medium text-neutral-900">{value}</p>
     </div>

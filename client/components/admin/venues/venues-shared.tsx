@@ -99,7 +99,7 @@ export function CatalogCard({
         <p className="text-sm leading-6 text-neutral-600">{description}</p>
         <div className="grid gap-3 sm:grid-cols-2">
           {meta.map((item) => (
-            <div key={item.label} className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3">
+            <div key={item.label} className="rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3">
               <p className="text-[11px] tracking-[0.16em] text-neutral-500 uppercase">{item.label}</p>
               <p className="mt-1 text-sm font-medium text-neutral-950">{item.value}</p>
             </div>
@@ -145,7 +145,7 @@ export function DetailList({ items }: { items: { label: string; value: string }[
   return (
     <div className="grid gap-3 sm:grid-cols-2">
       {items.map((item) => (
-        <div key={item.label} className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3">
+        <div key={item.label} className="rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3">
           <p className="text-[11px] tracking-[0.16em] text-neutral-500 uppercase">{item.label}</p>
           <p className="mt-1 text-sm leading-6 font-medium text-neutral-950">{item.value}</p>
         </div>

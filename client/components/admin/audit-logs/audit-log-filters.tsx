@@ -19,6 +19,14 @@ interface AuditLogFiltersProps {
   resourceSuggestions: string[];
 }
 
+function FilterLabel({ htmlFor, children }: { htmlFor: string; children: React.ReactNode }) {
+  return (
+    <label htmlFor={htmlFor} className="text-[10px] font-semibold tracking-[0.18em] text-neutral-500 uppercase">
+      {children}
+    </label>
+  );
+}
+
 export function AuditLogFilters({ activeFilterCount, filters, isLoading, onClear, onRefresh, onUpdateFilter, resourceSuggestions }: AuditLogFiltersProps) {
   return (
     <Card className="border-0 bg-white shadow-none ring-1 ring-neutral-200">
@@ -51,74 +59,73 @@ export function AuditLogFilters({ activeFilterCount, filters, isLoading, onClear
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-2.5 pt-3">
-        <div className="grid gap-2 lg:grid-cols-12">
-          <div className="space-y-1 lg:col-span-5">
-            <label htmlFor="audit-log-user-id" className="text-xs font-semibold tracking-[0.18em] text-neutral-500 uppercase">
-              User ID
-            </label>
+      <CardContent className="pt-3">
+        <div className="grid gap-x-3 gap-y-2.5 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_160px_160px_160px]">
+          {/* User ID */}
+          <div className="space-y-1.5">
+            <FilterLabel htmlFor="audit-log-user-id">User ID</FilterLabel>
             <Input
               id="audit-log-user-id"
-              placeholder="Filter by actor id"
+              placeholder="Filter by actor ID"
               value={filters.userId}
-              onChange={(event) => onUpdateFilter('userId', event.target.value)}
+              onChange={(e) => onUpdateFilter('userId', e.target.value)}
             />
           </div>
 
-          <div className="space-y-1 lg:col-span-5">
-            <label htmlFor="audit-log-resource-type" className="text-xs font-semibold tracking-[0.18em] text-neutral-500 uppercase">
-              Resource type
-            </label>
+          {/* Resource type */}
+          <div className="space-y-1.5">
+            <FilterLabel htmlFor="audit-log-resource-type">Resource type</FilterLabel>
             <Input
               id="audit-log-resource-type"
               list="audit-log-resource-suggestions"
-              placeholder="users, roles, sessions..."
+              placeholder="users, roles, sessions…"
               value={filters.resourceType}
-              onChange={(event) => onUpdateFilter('resourceType', event.target.value)}
+              onChange={(e) => onUpdateFilter('resourceType', e.target.value)}
             />
             <datalist id="audit-log-resource-suggestions">
-              {resourceSuggestions.map((resourceType) => (
-                <option key={resourceType} value={resourceType} />
+              {resourceSuggestions.map((r) => (
+                <option key={r} value={r} />
               ))}
             </datalist>
           </div>
 
-          <div className="space-y-1 lg:col-span-2">
-            <label htmlFor="audit-log-action-type" className="text-xs font-semibold tracking-[0.18em] text-neutral-500 uppercase">
-              Action
-            </label>
-            <Select value={filters.actionType} onValueChange={(value) => onUpdateFilter('actionType', value as AuditLogFilterValues['actionType'])}>
+          {/* Action */}
+          <div className="space-y-1.5">
+            <FilterLabel htmlFor="audit-log-action-type">Action</FilterLabel>
+            <Select value={filters.actionType} onValueChange={(v) => onUpdateFilter('actionType', v as AuditLogFilterValues['actionType'])}>
               <SelectTrigger id="audit-log-action-type">
                 <SelectValue placeholder="All actions" />
               </SelectTrigger>
               <SelectContent>
-                {AUDIT_LOG_ACTION_OPTIONS.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
+                {AUDIT_LOG_ACTION_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
-        </div>
 
-        <div className="grid gap-2 sm:grid-cols-2">
-          <div className="rounded-lg border border-neutral-200 bg-neutral-50/70 p-2">
-            <div className="space-y-1">
-              <label htmlFor="audit-log-start-date" className="text-xs font-semibold tracking-[0.18em] text-neutral-500 uppercase">
-                Start date
-              </label>
-              <Input id="audit-log-start-date" type="date" value={filters.startDate} onChange={(event) => onUpdateFilter('startDate', event.target.value)} />
-            </div>
+          {/* Start date */}
+          <div className="space-y-1.5">
+            <FilterLabel htmlFor="audit-log-start-date">Start date</FilterLabel>
+            <Input
+              id="audit-log-start-date"
+              type="date"
+              value={filters.startDate}
+              onChange={(e) => onUpdateFilter('startDate', e.target.value)}
+            />
           </div>
 
-          <div className="rounded-lg border border-neutral-200 bg-neutral-50/70 p-2">
-            <div className="space-y-1">
-              <label htmlFor="audit-log-end-date" className="text-xs font-semibold tracking-[0.18em] text-neutral-500 uppercase">
-                End date
-              </label>
-              <Input id="audit-log-end-date" type="date" value={filters.endDate} onChange={(event) => onUpdateFilter('endDate', event.target.value)} />
-            </div>
+          {/* End date */}
+          <div className="space-y-1.5">
+            <FilterLabel htmlFor="audit-log-end-date">End date</FilterLabel>
+            <Input
+              id="audit-log-end-date"
+              type="date"
+              value={filters.endDate}
+              onChange={(e) => onUpdateFilter('endDate', e.target.value)}
+            />
           </div>
         </div>
       </CardContent>

@@ -28,7 +28,7 @@ export function AdminPasswordResetDialog({
           <DialogDescription>Send the standard password reset link to the user&apos;s current verified email address.</DialogDescription>
         </DialogHeader>
 
-        <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-4 text-sm text-neutral-700">
+        <div className="rounded-xl border border-neutral-200 bg-neutral-50 p-4 text-sm text-neutral-700">
           {passwordResetUser ? `A reset link will be sent to ${passwordResetUser.email}. This action requires the address to already be verified.` : null}
         </div>
 

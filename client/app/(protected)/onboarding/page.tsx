@@ -38,7 +38,7 @@ export default function OnboardPage() {
           className="flex flex-col items-center gap-4 px-6 py-8 text-center sm:gap-6 sm:px-8 sm:py-12"
           style={{ animation: 'auth-card-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both' }}
         >
-          <div className="bg-primary/10 relative flex size-14 items-center justify-center rounded-2xl sm:size-20 sm:rounded-3xl">
+          <div className="bg-primary/10 relative flex size-14 items-center justify-center rounded-xl sm:size-20 sm:rounded-xl">
             <Sparkles className="text-primary size-6 sm:size-9" />
             <div className="bg-primary absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full sm:size-5">
               <span className="text-[9px] font-bold text-black sm:text-[10px]">✓</span>

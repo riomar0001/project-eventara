@@ -78,7 +78,7 @@ export default function UserProfilePage() {
 
   if (!user) {
     return (
-      <div className="flex min-h-[40vh] items-center justify-center rounded-2xl border border-dashed bg-white p-8 text-center">
+      <div className="flex min-h-[40vh] items-center justify-center rounded-xl border border-dashed bg-white p-8 text-center">
         <div className="space-y-2">
           <p className="text-lg font-semibold">No profile data available</p>
           <p className="text-muted-foreground text-sm">Sign in again to reload your profile.</p>
@@ -156,7 +156,7 @@ export default function UserProfilePage() {
                 <DetailRow label="Education" value={humanizeProfileValue(user.educationLevel)} />
               </div>
 
-              <div className="mt-8 rounded-2xl bg-neutral-50 px-4 py-3">
+              <div className="mt-8 rounded-xl bg-neutral-50 px-4 py-3">
                 <p className="text-muted-foreground text-xs font-medium tracking-[0.16em] uppercase">Bio</p>
                 <p className="mt-2 text-sm leading-6">{user.bio?.trim() ? user.bio : 'No bio added yet.'}</p>
               </div>
@@ -182,10 +182,10 @@ export default function UserProfilePage() {
                 {profileEvents.map((event, index) => (
                   <div
                     key={`${event.title}-${event.day}`}
-                    className="flex flex-col gap-4 rounded-2xl px-2 py-4 transition-colors hover:bg-neutral-50 sm:flex-row sm:items-center"
+                    className="flex flex-col gap-4 rounded-xl px-2 py-4 transition-colors hover:bg-neutral-50 sm:flex-row sm:items-center"
                   >
                     <div className="flex items-center gap-4 sm:w-28 sm:flex-none">
-                      <div className="flex size-12.5 flex-col items-center justify-center overflow-hidden rounded-2xl border bg-amber-100 text-center shadow-xs">
+                      <div className="flex size-12.5 flex-col items-center justify-center overflow-hidden rounded-xl border bg-amber-100 text-center shadow-xs">
                         <div className="text-muted-foreground w-full border-b text-[10px] font-semibold tracking-[0.18em]">{event.month}</div>
                         <div className="h-full w-full bg-white text-lg font-semibold">{event.day}</div>
                       </div>

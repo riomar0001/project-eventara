@@ -32,7 +32,7 @@ export function FeatureFormDialog({ error, isSaving, mode, onClose, onSubmit, on
       <DialogContent className="max-w-2xl border-0 bg-white p-0 shadow-xl shadow-neutral-950/10">
         <form onSubmit={onSubmit}>
           <DialogHeader className="border-b px-6 pt-6 pb-4">
-            <div className="mb-3 flex size-11 items-center justify-center rounded-2xl bg-lime-100 text-lime-900">
+            <div className="mb-3 flex size-11 items-center justify-center rounded-xl bg-lime-100 text-lime-900">
               <Sparkles className="size-5" />
             </div>
             <DialogTitle>{title}</DialogTitle>
@@ -81,7 +81,7 @@ export function FeatureFormDialog({ error, isSaving, mode, onClose, onSubmit, on
               />
             </div>
 
-            <div className="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3">
+            <div className="flex items-center gap-3 rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3">
               <Checkbox
                 checked={values.is_enabled}
                 onCheckedChange={(checked) => onValuesChange({ ...values, is_enabled: checked === true })}

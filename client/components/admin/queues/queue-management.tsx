@@ -21,11 +21,15 @@ export function QueueManagementPage() {
     isLoadingStats,
     isPurging,
     jobsError,
+    page,
     purgeDeadJobs,
     queueStats,
     refresh,
     retryDeadJob,
-    statsError
+    setPage,
+    statsError,
+    totalJobs,
+    totalPages,
   } = useQueueManagement();
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
   const [isPurgeDialogOpen, setIsPurgeDialogOpen] = useState(false);
@@ -65,23 +69,29 @@ export function QueueManagementPage() {
           workerCount={queueStats?.worker_health.length ?? 0}
         />
 
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(360px,0.95fr)] xl:items-start">
-          <QueueLiveOverview isLoading={isLoadingStats} stats={queueStats} statsError={statsError} />
+        {/* Queue Pulse — full width */}
+        <QueueLiveOverview isLoading={isLoadingStats} stats={queueStats} statsError={statsError} />
+
+        {/* Dead-letter table + job detail — side by side, equal height */}
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,1.4fr)_minmax(320px,1fr)] xl:items-stretch" style={{ minHeight: '520px' }}>
+          <DeadLetterQueueTable
+            actionJobId={actionJobId}
+            actionKind={actionKind}
+            deadJobs={deadJobs}
+            isEmpty={isEmpty}
+            isLoading={isLoadingJobs}
+            jobsError={jobsError}
+            onDelete={handleDelete}
+            onRetry={handleRetry}
+            onSelectJob={setSelectedJobId}
+            onPageChange={setPage}
+            page={page}
+            selectedJobId={effectiveJobId}
+            totalJobs={totalJobs}
+            totalPages={totalPages}
+          />
           <DeadLetterJobDetail selectedJob={selectedJob} />
         </div>
-
-        <DeadLetterQueueTable
-          actionJobId={actionJobId}
-          actionKind={actionKind}
-          deadJobs={deadJobs}
-          isEmpty={isEmpty}
-          isLoading={isLoadingJobs}
-          jobsError={jobsError}
-          onDelete={handleDelete}
-          onRetry={handleRetry}
-          onSelectJob={setSelectedJobId}
-          selectedJobId={effectiveJobId}
-        />
       </div>
 
       <PurgeDeadJobsDialog

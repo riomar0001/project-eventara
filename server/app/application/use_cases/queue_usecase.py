@@ -234,7 +234,7 @@ class ListDeadJobsUseCase:
     def __init__(self, redis: ArqRedis) -> None:
         self.redis = redis
 
-    async def execute(self) -> ListDeadJobsOutput:
+    async def execute(self, page: int = 1, limit: int = 10) -> ListDeadJobsOutput:
         dead: list[DeadJobInfo] = []
         try:
             async for key in self.redis.scan_iter(match=f"{_RESULT_KEY_PREFIX}*"):
@@ -258,7 +258,11 @@ class ListDeadJobsUseCase:
             if settings.DEBUG:
                 msg = f"Failed to list dead jobs: {exc}"
             raise QueueInspectionError(msg) from exc
-        return ListDeadJobsOutput(jobs=dead, total=len(dead))
+
+        total = len(dead)
+        total_pages = max(1, -(-total // limit))  # ceiling division
+        offset = (page - 1) * limit
+        return ListDeadJobsOutput(jobs=dead[offset : offset + limit], total=total, page=page, limit=limit, total_pages=total_pages)
 
 
 class RetryDeadJobUseCase:

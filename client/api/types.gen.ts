@@ -943,6 +943,18 @@ export type ListDeadJobsResponse = {
      * Total
      */
     total: number;
+    /**
+     * Page
+     */
+    page: number;
+    /**
+     * Limit
+     */
+    limit: number;
+    /**
+     * Total Pages
+     */
+    total_pages: number;
 };
 
 /**
@@ -3812,7 +3824,20 @@ export type PurgeDeadJobsQueuesDlqDeleteResponse = PurgeDeadJobsQueuesDlqDeleteR
 export type ListDeadJobsQueuesDlqGetData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Page
+         *
+         * Page number (1-based)
+         */
+        page?: number;
+        /**
+         * Limit
+         *
+         * Items per page
+         */
+        limit?: number;
+    };
     url: '/queues/dlq';
 };
 
@@ -3826,10 +3851,16 @@ export type ListDeadJobsQueuesDlqGetErrors = {
      */
     403: unknown;
     /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+    /**
      * Unexpected Redis or ARQ error during queue inspection
      */
     500: unknown;
 };
+
+export type ListDeadJobsQueuesDlqGetError = ListDeadJobsQueuesDlqGetErrors[keyof ListDeadJobsQueuesDlqGetErrors];
 
 export type ListDeadJobsQueuesDlqGetResponses = {
     /**

@@ -88,7 +88,7 @@ export function AdminSpecialPermissionDialog({
 
         <ScrollArea className="max-h-[calc(85vh-5.75rem)]">
           <div className="space-y-5 px-5 pb-5">
-            <div className="rounded-2xl bg-neutral-50 px-4 py-3">
+            <div className="rounded-xl bg-neutral-50 px-4 py-3">
               <div className="space-y-1.5">
                 <p className="text-sm font-semibold text-neutral-950">{specialPermissionDialogUser?.name ?? 'Selected user'}</p>
                 <p className="text-xs text-neutral-500">Base role: {humanizeRoleName(specialPermissionDialogUser?.role_name, 'No assigned role')}</p>
@@ -110,16 +110,16 @@ export function AdminSpecialPermissionDialog({
               </div>
 
               {specialPermissionsError ? (
-                <div className="rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700">{specialPermissionsError}</div>
+                <div className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{specialPermissionsError}</div>
               ) : isLoadingSpecialPermissions ? (
-                <div className="rounded-2xl bg-neutral-50 px-4 py-8">
+                <div className="rounded-xl bg-neutral-50 px-4 py-8">
                   <div className="flex items-center justify-center gap-2 text-sm text-neutral-500">
                     <Loader2 className="size-4 animate-spin" />
                     Loading special permissions...
                   </div>
                 </div>
               ) : specialPermissions.length === 0 ? (
-                <div className="rounded-2xl bg-neutral-50 px-4 py-8 text-center">
+                <div className="rounded-xl bg-neutral-50 px-4 py-8 text-center">
                   <p className="text-sm font-medium text-neutral-800">No special permissions yet.</p>
                   <p className="mt-1 text-xs text-neutral-500">Use the form below to add the first user-specific permission for this account.</p>
                 </div>
@@ -129,7 +129,7 @@ export function AdminSpecialPermissionDialog({
                     const feature = grantFeatureMap.get(permission.feature_id);
 
                     return (
-                      <div key={permission.id} className="rounded-2xl bg-neutral-50 px-4 py-3">
+                      <div key={permission.id} className="rounded-xl bg-neutral-50 px-4 py-3">
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                           <div className="space-y-2">
                             <div className="flex flex-wrap items-center gap-2">
@@ -178,7 +178,7 @@ export function AdminSpecialPermissionDialog({
               )}
             </div>
 
-            <form className="space-y-4 rounded-3xl bg-neutral-50 px-4 py-4" onSubmit={onSpecialPermissionSubmit}>
+            <form className="space-y-4 rounded-xl bg-neutral-50 px-4 py-4" onSubmit={onSpecialPermissionSubmit}>
               <div>
                 <p className="text-sm font-medium text-neutral-950">Add special permission</p>
                 <p className="mt-1 text-xs text-neutral-500">Create a user-specific permission entry for a feature, action set, and active date range.</p>
@@ -294,7 +294,7 @@ export function AdminSpecialPermissionDialog({
                         onClick={() => onSpecialPermissionActionToggle(action)}
                         disabled={isSubmitting}
                         className={cn(
-                          'flex items-center justify-between rounded-2xl px-3 py-2.5 text-left text-sm transition-colors',
+                          'flex items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm transition-colors',
                           isSelected ? 'bg-neutral-900 text-white' : 'bg-white text-neutral-700'
                         )}
                       >
@@ -307,7 +307,7 @@ export function AdminSpecialPermissionDialog({
               </div>
 
               {selectedGrantFeature ? (
-                <div className="rounded-2xl bg-white px-4 py-3">
+                <div className="rounded-xl bg-white px-4 py-3">
                   <div className="flex items-start justify-between gap-3">
                     <div className="space-y-1">
                       <p className="text-sm font-semibold text-neutral-950">{selectedGrantFeature.name}</p>

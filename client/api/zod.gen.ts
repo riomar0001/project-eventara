@@ -325,7 +325,10 @@ export const zGrantFeatureListResponse = z.object({
 export const zListDeadJobsResponse = z.object({
     success: z.boolean().optional().default(true),
     data: z.array(zDeadJobResponse),
-    total: z.int()
+    total: z.int(),
+    page: z.int(),
+    limit: z.int(),
+    total_pages: z.int()
 });
 
 /**
@@ -1331,6 +1334,11 @@ export const zGetQueueStatsQueuesGetResponse = zQueueStatsResponse;
  * Successful Response
  */
 export const zPurgeDeadJobsQueuesDlqDeleteResponse = zPurgeDeadJobsResponse;
+
+export const zListDeadJobsQueuesDlqGetQuery = z.object({
+    page: z.int().gte(1).optional().default(1),
+    limit: z.int().gte(1).lte(100).optional().default(10)
+});
 
 /**
  * Successful Response

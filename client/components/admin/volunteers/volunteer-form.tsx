@@ -129,7 +129,7 @@ export function VolunteerForm({ mode, volunteer }: { mode: 'create' | 'edit'; vo
                   {skillOptions.map((skill) => (
                     <label
                       key={skill}
-                      className="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-700"
+                      className="flex items-center gap-3 rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-700"
                     >
                       <Checkbox checked={skills.includes(skill)} onCheckedChange={() => toggleSkill(skill)} />
                       <span>{skill}</span>
@@ -185,11 +185,11 @@ export function VolunteerForm({ mode, volunteer }: { mode: 'create' | 'edit'; vo
               <CardDescription>UI-only helper panel for the volunteer form.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3 pt-6 text-sm leading-6 text-neutral-600">
-              <div className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3">
+              <div className="rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3">
                 <p className="font-medium text-neutral-950">Selected skills</p>
                 <p className="mt-1">{skills.length > 0 ? skills.join(', ') : 'No skills selected yet.'}</p>
               </div>
-              <div className="rounded-2xl border border-dashed border-neutral-200 px-4 py-4 text-neutral-500">
+              <div className="rounded-xl border border-dashed border-neutral-200 px-4 py-4 text-neutral-500">
                 <div className="flex items-center gap-2">
                   <UserRoundPlus className="size-4" />
                   Profile creation, assignment logic, and save actions are intentionally not integrated yet.

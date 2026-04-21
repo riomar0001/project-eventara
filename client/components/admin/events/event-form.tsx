@@ -131,7 +131,7 @@ export function EventForm({ event, mode }: { event?: EventRecord; mode: 'create'
                   {hostTeamOptions.map((host) => (
                     <label
                       key={host}
-                      className="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-700"
+                      className="flex items-center gap-3 rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-700"
                     >
                       <Checkbox checked={selectedHosts.includes(host)} onCheckedChange={() => toggleHost(host)} />
                       <span>{host}</span>
@@ -173,11 +173,11 @@ export function EventForm({ event, mode }: { event?: EventRecord; mode: 'create'
               <CardDescription>A quick reference panel for the mock event surface.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3 pt-6 text-sm leading-6 text-neutral-600">
-              <div className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3">
+              <div className="rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3">
                 <p className="font-medium text-neutral-950">Selected host teams</p>
                 <p className="mt-1">{selectedHosts.length > 0 ? selectedHosts.join(', ') : 'No host teams selected yet.'}</p>
               </div>
-              <div className="rounded-2xl border border-dashed border-neutral-200 px-4 py-4 text-neutral-500">
+              <div className="rounded-xl border border-dashed border-neutral-200 px-4 py-4 text-neutral-500">
                 <div className="flex items-center gap-2">
                   <CalendarPlus2 className="size-4" />
                   Scheduling and publishing actions are intentionally left disconnected in this UI pass.

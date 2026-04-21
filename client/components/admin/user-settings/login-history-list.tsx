@@ -26,7 +26,7 @@ function LoginHistoryRow({ entry }: { entry: LoginHistoryEntry }) {
   const absoluteTime = format(new Date(entry.created_at), 'PPP p');
 
   return (
-    <div className="rounded-2xl border bg-white p-4 shadow-xs">
+    <div className="rounded-xl border bg-white p-4 shadow-xs">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-3">
           <div className="flex items-center gap-2 text-sm font-medium text-neutral-900">
@@ -64,7 +64,7 @@ function LoginHistoryLoadingState() {
   return (
     <div className="space-y-3">
       {Array.from({ length: 3 }).map((_, index) => (
-        <div key={index} className="animate-pulse rounded-2xl border bg-white p-4">
+        <div key={index} className="animate-pulse rounded-xl border bg-white p-4">
           <div className="h-4 w-48 rounded bg-neutral-200" />
           <div className="mt-3 h-3 w-64 rounded bg-neutral-100" />
           <div className="mt-2 h-3 w-36 rounded bg-neutral-100" />
@@ -83,7 +83,7 @@ export function LoginHistoryList() {
 
   if (error) {
     return (
-      <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
+      <div className="rounded-xl border border-amber-200 bg-amber-50 p-5">
         <div className="flex items-start gap-3">
           <TriangleAlert className="mt-0.5 size-4 shrink-0 text-amber-600" />
           <div>
@@ -97,7 +97,7 @@ export function LoginHistoryList() {
 
   if (isEmpty) {
     return (
-      <div className="rounded-2xl border border-dashed p-5">
+      <div className="rounded-xl border border-dashed p-5">
         <div className="flex items-start gap-3">
           <Clock3 className="text-muted-foreground mt-0.5 size-4 shrink-0" />
           <div>
