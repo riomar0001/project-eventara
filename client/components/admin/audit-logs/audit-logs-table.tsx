@@ -73,7 +73,7 @@ export function AuditLogsTable({
   selectedLogId
 }: AuditLogsTableProps) {
   return (
-    <Card className="border-0 bg-white shadow-none ring-1 ring-neutral-200 xl:flex xl:h-[760px] xl:min-h-[760px] xl:flex-col">
+    <Card className="border-0 bg-white shadow-none ring-1 ring-neutral-200 xl:flex xl:h-190 xl:min-h-190 xl:flex-col">
       <CardHeader className="border-b border-neutral-200/80 pb-5">
         <CardTitle className="text-2xl tracking-tight">{AUDIT_LOGS_TEXT.tableTitle}</CardTitle>
         <CardDescription className="max-w-2xl text-sm leading-6">{AUDIT_LOGS_TEXT.tableDescription}</CardDescription>
@@ -89,6 +89,21 @@ export function AuditLogsTable({
               <p className="text-base font-medium text-neutral-950">{AUDIT_LOGS_TEXT.errorTitle}</p>
               <p className="text-sm leading-6 text-neutral-500">{error}</p>
             </div>
+          </div>
+        ) : isEmpty && !isLoading ? (
+          <div className="flex min-h-72 flex-col items-center justify-center gap-4 px-6 py-12 text-center xl:h-full">
+            <div className="flex size-14 items-center justify-center rounded-xl bg-cyan-50 text-cyan-700">
+              <Loader2 className="size-6" />
+            </div>
+            <div className="space-y-1">
+              <p className="text-base font-medium text-neutral-950">{AUDIT_LOGS_TEXT.emptyTitle}</p>
+              <p className="text-sm leading-6 text-neutral-500">{AUDIT_LOGS_TEXT.emptyDescription}</p>
+            </div>
+            {activeFilterCount > 0 && (
+              <Button variant="outline" size="sm" onClick={onClearFilters}>
+                Clear filters
+              </Button>
+            )}
           </div>
         ) : (
           <div className="overflow-x-auto xl:h-full xl:overflow-y-auto">
@@ -106,23 +121,6 @@ export function AuditLogsTable({
               <TableBody>
                 {isLoading ? (
                   <LoadingRows />
-                ) : isEmpty ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="px-6 py-16 text-center">
-                      <div className="mx-auto max-w-md space-y-3">
-                        <div className="mx-auto flex size-14 items-center justify-center rounded-xl bg-cyan-50 text-cyan-700">
-                          <Loader2 className="size-6" />
-                        </div>
-                        <p className="text-base font-medium text-neutral-950">{AUDIT_LOGS_TEXT.emptyTitle}</p>
-                        <p className="text-sm leading-6 text-neutral-500">{AUDIT_LOGS_TEXT.emptyDescription}</p>
-                        {activeFilterCount > 0 ? (
-                          <Button variant="outline" size="sm" onClick={onClearFilters}>
-                            Clear filters
-                          </Button>
-                        ) : null}
-                      </div>
-                    </TableCell>
-                  </TableRow>
                 ) : (
                   logs.map((log, index) => (
                     <TableRow
@@ -161,6 +159,7 @@ export function AuditLogsTable({
             </Table>
           </div>
         )}
+
       </CardContent>
 
       <CardFooter className="flex flex-col gap-3 border-t border-neutral-200/80 pt-4 sm:flex-row sm:items-center sm:justify-between">
