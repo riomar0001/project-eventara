@@ -12,7 +12,7 @@ suites = {
 
 
 def run(path: str) -> int:
-    result = subprocess.run(["uv", "run", "pytest", path, "-v"], cwd=ROOT)
+    result = subprocess.run([sys.executable, "-m", "pytest", path, "-v"], cwd=ROOT)
     return result.returncode
 
 
