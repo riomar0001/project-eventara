@@ -7,6 +7,7 @@ from app.controller.api.queue_route import router as queue_router
 from app.controller.api.role_route import grant_router, role_management_router, role_router
 from app.controller.api.user_account_route import router as user_account_router
 from app.controller.api.user_route import router as user_router
+from app.controller.api.venue_route import venue_router
 
 router = APIRouter()
 router.include_router(auth_router)
@@ -18,3 +19,4 @@ router.include_router(role_management_router)
 router.include_router(role_router)
 router.include_router(grant_router)
 router.include_router(queue_router)
+router.include_router(venue_router)

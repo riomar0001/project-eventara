@@ -15,7 +15,9 @@ from app.application.use_cases.queue_usecase import (
 )
 from app.application.use_cases.role_usecase import RoleManagementUseCase, UserRoleUseCase
 from app.application.use_cases.users_usecase import AdminUserAccountUseCase
+from app.application.use_cases.venue_usecase import VenueManagementUseCase
 from app.infrastructure.cache.repositories.otp_repository import OTPRepository
+from app.infrastructure.database.repositories.venue_repository import VenueRepository as VenueRepo
 from app.infrastructure.cache.repositories.password_reset_repository import PasswordResetRepository
 from app.infrastructure.database.repositories.audit_log_repository import (
     AuditLogRepository,
@@ -141,3 +143,8 @@ def get_delete_dead_job_use_case(request: Request) -> DeleteDeadJobUseCase:
 def get_purge_dead_jobs_use_case(request: Request) -> PurgeDeadJobsUseCase:
     """Construct a ``PurgeDeadJobsUseCase`` backed by the application ARQ pool."""
     return PurgeDeadJobsUseCase(request.app.state.arq)
+
+
+def get_venue_management_use_case(db: AsyncSession = Depends(get_db)) -> VenueManagementUseCase:
+    """Construct a ``VenueManagementUseCase`` for admin venue CRUD."""
+    return VenueManagementUseCase(VenueRepo(db), db)

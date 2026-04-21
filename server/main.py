@@ -46,6 +46,10 @@ _OPENAPI_TAGS = [
         "description": "Immutable audit trail — query who did what, when, and on which resource across the platform.",
     },
     {
+        "name": "Venues",
+        "description": "Venue catalog — create, update, search, and delete venues with amenity normalisation and event-session cascade protection.",
+    },
+    {
         "name": "Volunteers",
         "description": "Volunteer management — registration, role assignments, availability, and event participation tracking.",
     },

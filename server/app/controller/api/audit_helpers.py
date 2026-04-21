@@ -10,6 +10,7 @@ from app.application.dto.users_dto import AdminUserAccountDetail
 from app.application.use_cases.audit_log_usecase import CreateAuditLogUseCase
 from app.domain.entities.audit_log import ActionType, AuditLogStatus
 from app.domain.entities.authorization_entities import Feature, UserGrant, UserRole
+from app.domain.entities.venue_entities import Venue
 
 
 def _isoformat_or_none(value: datetime | None) -> str | None:
@@ -74,6 +75,28 @@ def serialize_grant(grant: UserGrant) -> dict:
         "starts_at": _isoformat_or_none(grant.starts_at),
         "expires_at": _isoformat_or_none(grant.expires_at),
         "granted_by": str(grant.granted_by) if grant.granted_by else None,
+    }
+
+
+def serialize_venue(venue: Venue) -> dict:
+    return {
+        "id": str(venue.id),
+        "creator_id": str(venue.creator_id),
+        "name": venue.name,
+        "description": venue.description,
+        "address_line": venue.address_line,
+        "city": venue.city,
+        "province": venue.province,
+        "postal_code": venue.postal_code,
+        "region": venue.region,
+        "country": venue.country,
+        "capacity": venue.capacity,
+        "venue_type": venue.venue_type.value,
+        "is_partner": venue.is_partner,
+        "amenities": venue.amenities,
+        "contact_name": venue.contact_name,
+        "contact_phone": venue.contact_phone,
+        "contact_email": venue.contact_email,
     }
 
 

@@ -35,7 +35,7 @@ class Venue(BaseModel):
     popularity_count: int = Field(default=0, ge=0)
     usage_count: int = Field(default=0, ge=0)
     is_partner: bool = False
-    amenities: dict | None = None
+    amenities: list[str] | None = None
     contact_name: str = Field(min_length=1, max_length=255)
     contact_phone: str = Field(min_length=1, max_length=20)
     contact_email: str = Field(min_length=1, max_length=255)

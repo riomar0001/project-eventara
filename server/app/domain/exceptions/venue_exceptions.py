@@ -23,3 +23,12 @@ class VenueAlreadyExistsError(Exception):
 class VenueInvalidTypeError(Exception):
     def __init__(self, venue_type: str) -> None:
         super().__init__(f"Invalid venue type: {venue_type}")
+
+
+class VenueInUseError(Exception):
+    def __init__(self, venue_id: str = "") -> None:
+        super().__init__(
+            f"Venue cannot be deleted while event sessions still reference it: {venue_id}"
+            if venue_id
+            else "Venue cannot be deleted while event sessions still reference it."
+        )
