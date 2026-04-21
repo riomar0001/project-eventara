@@ -248,6 +248,6 @@ export function useQueueManagement() {
     setPage,
     statsError,
     totalJobs,
-    totalPages,
+    totalPages
   };
 }

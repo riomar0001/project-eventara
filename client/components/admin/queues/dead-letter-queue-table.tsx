@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { ChevronLeft, ChevronRight, RotateCcw, Trash2, TriangleAlert } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -79,7 +78,7 @@ export function DeadLetterQueueTable({
   page,
   selectedJobId,
   totalJobs,
-  totalPages,
+  totalPages
 }: DeadLetterQueueTableProps) {
   return (
     <Card className="flex flex-col border-0 bg-white shadow-none ring-1 ring-neutral-200">
@@ -158,13 +157,9 @@ export function DeadLetterQueueTable({
                           <p className="mt-0.5 max-w-64 truncate text-[11px] text-neutral-400">{job.job_id}</p>
                         </TableCell>
 
-                        <TableCell className="py-3.5 text-xs text-neutral-500 tabular-nums">
-                          {formatQueueTime(job.enqueue_time)}
-                        </TableCell>
+                        <TableCell className="py-3.5 text-xs text-neutral-500 tabular-nums">{formatQueueTime(job.enqueue_time)}</TableCell>
 
-                        <TableCell className="py-3.5 text-center text-xs font-semibold text-neutral-800 tabular-nums">
-                          {job.job_try}
-                        </TableCell>
+                        <TableCell className="py-3.5 text-center text-xs font-semibold text-neutral-800 tabular-nums">{job.job_try}</TableCell>
 
                         <TableCell className="px-5 py-3.5">
                           <div className="flex items-center justify-end gap-2">
@@ -172,7 +167,10 @@ export function DeadLetterQueueTable({
                               variant="outline"
                               size="sm"
                               className="h-7 border-emerald-200 bg-emerald-50 px-3 text-[11px] text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800"
-                              onClick={(e) => { e.stopPropagation(); void onRetry(job.job_id); }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                void onRetry(job.job_id);
+                              }}
                               disabled={Boolean(actionJobId)}
                             >
                               <RotateCcw className="size-3" />
@@ -182,7 +180,10 @@ export function DeadLetterQueueTable({
                               variant="outline"
                               size="sm"
                               className="h-7 border-rose-200 bg-rose-50 px-3 text-[11px] text-rose-700 hover:bg-rose-100 hover:text-rose-800"
-                              onClick={(e) => { e.stopPropagation(); void onDelete(job.job_id); }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                void onDelete(job.job_id);
+                              }}
                               disabled={Boolean(actionJobId)}
                             >
                               <Trash2 className="size-3" />
@@ -207,8 +208,7 @@ export function DeadLetterQueueTable({
                 <span className="inline-block h-3.5 w-24 animate-pulse rounded bg-neutral-200" />
               ) : (
                 <>
-                  Page <span className="font-medium text-neutral-800">{page}</span> of{' '}
-                  <span className="font-medium text-neutral-800">{totalPages}</span>
+                  Page <span className="font-medium text-neutral-800">{page}</span> of <span className="font-medium text-neutral-800">{totalPages}</span>
                   {' · '}
                   <span className="font-medium text-neutral-800">{totalJobs}</span> total
                 </>
