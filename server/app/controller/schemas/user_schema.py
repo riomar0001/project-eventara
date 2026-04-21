@@ -99,3 +99,8 @@ class LoginHistoryEntryResponse(BaseModel):
 class LoginHistoryListResponse(BaseModel):
     success: bool = True
     data: list[LoginHistoryEntryResponse]
+
+
+class UserPermissionsResponse(BaseModel):
+    success: bool = True
+    permissions: dict[str, bool]

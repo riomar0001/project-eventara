@@ -23,6 +23,7 @@ import {
   useSidebar
 } from '@/components/ui/sidebar';
 import { dashboardNavGroups, dashboardBottomNavItems } from '@/constants/admin/navigation';
+import { usePermissions } from '@/context/permissions-context';
 import { cn } from '@/lib/utils';
 
 export function AppSidebar() {
@@ -30,6 +31,7 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const pathname = usePathname();
   const isCollapsed = state === 'collapsed';
+  const { can } = usePermissions();
 
   function isActiveHref(href: string) {
     if (!href.startsWith('/')) return false;
@@ -53,12 +55,17 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent className="bg-white px-4 group-data-[collapsible=icon]:px-0">
-        {dashboardNavGroups.map((group) => (
+        {dashboardNavGroups.map((group) => {
+          const visibleItems = group.items.filter(
+            (item) => !item.permission || can(item.permission.feature, item.permission.action)
+          );
+          if (visibleItems.length === 0) return null;
+          return (
           <SidebarGroup key={group.label}>
             {group.label && <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">{group.label}</SidebarGroupLabel>}
             <SidebarGroupContent>
               <SidebarMenu className="gap-2">
-                {group.items.map((item) =>
+                {visibleItems.map((item) =>
                   item.children ? (
                     <Collapsible key={item.label} open={transactionsOpen} onOpenChange={setTransactionsOpen} asChild>
                       <SidebarMenuItem>
@@ -108,7 +115,8 @@ export function AppSidebar() {
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
-        ))}
+          );
+        })}
       </SidebarContent>
 
       <SidebarFooter className="bg-white px-4 group-data-[collapsible=icon]:px-0">
