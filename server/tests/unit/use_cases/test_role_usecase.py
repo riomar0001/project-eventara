@@ -79,6 +79,7 @@ def _make_repo(**kwargs) -> MagicMock:
 
 # ─── UserRoleUseCase ──────────────────────────────────────────────────────────
 
+
 class TestAssignRole:
     def _data(self):
         return AssignRoleInput(user_id=USER_ID, role_id=ROLE_ID, assigned_by=ADMIN_ID)
@@ -144,9 +145,7 @@ class TestUpdateAssignment:
     async def test_success(self):
         repo = _make_repo()
         db = AsyncMock()
-        result = await UserRoleUseCase(repo, db).update_assignment(
-            UpdateAssignmentInput(assignment_id=ASSIGNMENT_ID, expires_at=None)
-        )
+        result = await UserRoleUseCase(repo, db).update_assignment(UpdateAssignmentInput(assignment_id=ASSIGNMENT_ID, expires_at=None))
         assert result.assignment is repo.update_assignment_expiry.return_value
         db.commit.assert_awaited_once()
 
@@ -176,8 +175,12 @@ class TestRevokeAssignment:
 class TestCreateGrants:
     def _data(self):
         return CreateGrantsInput(
-            user_id=USER_ID, role_id=ROLE_ID, feature_id=FEATURE_ID,
-            actions=[RoleAction.READ], effect=GrantEffect.ALLOW, granted_by=ADMIN_ID,
+            user_id=USER_ID,
+            role_id=ROLE_ID,
+            feature_id=FEATURE_ID,
+            actions=[RoleAction.READ],
+            effect=GrantEffect.ALLOW,
+            granted_by=ADMIN_ID,
         )
 
     @pytest.mark.asyncio
@@ -256,6 +259,7 @@ class TestRevokeGrant:
 
 # ─── RoleManagementUseCase ────────────────────────────────────────────────────
 
+
 class TestListRoles:
     @pytest.mark.asyncio
     async def test_returns_roles_with_permissions(self):
@@ -298,9 +302,7 @@ class TestCreateRole:
     @pytest.mark.asyncio
     async def test_duplicate_name_raises_already_exists(self):
         repo = _make_repo()
-        repo.create_role_definition = AsyncMock(
-            side_effect=IntegrityError(None, None, Exception("unique_name"))
-        )
+        repo.create_role_definition = AsyncMock(side_effect=IntegrityError(None, None, Exception("unique_name")))
         db = AsyncMock()
         with pytest.raises(RoleAlreadyExistsError):
             await RoleManagementUseCase(repo, db).create_role(self._data())
@@ -310,10 +312,7 @@ class TestCreateRole:
     async def test_feature_not_found_rolls_back(self):
         repo = _make_repo()
         repo.get_features_by_ids = AsyncMock(return_value=[])
-        data = CreateRoleInput(
-            name="editor",
-            permissions=[RolePermissionInput(feature_id=FEATURE_ID, actions=[RoleAction.READ])]
-        )
+        data = CreateRoleInput(name="editor", permissions=[RolePermissionInput(feature_id=FEATURE_ID, actions=[RoleAction.READ])])
         db = AsyncMock()
         with pytest.raises(FeatureNotFoundError):
             await RoleManagementUseCase(repo, db).create_role(data)
@@ -363,9 +362,7 @@ class TestUpdateRole:
     @pytest.mark.asyncio
     async def test_integrity_error_raises_already_exists(self):
         repo = _make_repo()
-        repo.update_role_definition = AsyncMock(
-            side_effect=IntegrityError(None, None, Exception("unique_name"))
-        )
+        repo.update_role_definition = AsyncMock(side_effect=IntegrityError(None, None, Exception("unique_name")))
         db = AsyncMock()
         with pytest.raises(RoleAlreadyExistsError):
             await RoleManagementUseCase(repo, db).update_role(self._data())

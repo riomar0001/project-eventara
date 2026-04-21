@@ -16,12 +16,12 @@ from app.domain.entities.user_entity import (
     AgeGroup,
     EducationLevel,
     Gender,
+    User,
     UserLoginHistory,
     UserProfile,
     UserSecurity,
     UserStatus,
 )
-from app.domain.entities.user_entity import User
 from app.domain.exceptions.user_exceptions import (
     AliasAlreadyTakenError,
     EmailNotVerifiedError,
@@ -88,6 +88,7 @@ def _make_repo(*, user=None, security=None, alias_taken=False, profile=None, log
 
 
 # ─── OnboardingUseCase ────────────────────────────────────────────────────────
+
 
 class TestOnboardingUseCase:
     def _make_uc(self, repo) -> OnboardingUseCase:
@@ -167,6 +168,7 @@ class TestOnboardingUseCase:
 
 # ─── CheckAliasUseCase ────────────────────────────────────────────────────────
 
+
 class TestCheckAliasUseCase:
     @pytest.mark.asyncio
     async def test_alias_available(self):
@@ -182,6 +184,7 @@ class TestCheckAliasUseCase:
 
 
 # ─── GetLoginHistoryUseCase ───────────────────────────────────────────────────
+
 
 class TestGetLoginHistoryUseCase:
     @pytest.mark.asyncio

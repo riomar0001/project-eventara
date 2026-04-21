@@ -23,7 +23,7 @@ from app.application.dto.auth_dto import (
     ResetPasswordInput,
 )
 from app.application.use_cases.auth_usecase import AuthUseCase
-from app.domain.entities.user_entity import PublicUser, User, UserActivity, UserSecurity, UserStatus
+from app.domain.entities.user_entity import User, UserSecurity, UserStatus
 from app.domain.exceptions import (
     AccountDeletionGracePeriodExpiredError,
     EmailAlreadyTakenError,
@@ -111,6 +111,7 @@ def _make_repo(
 
 # ─── _parse_user_agent ────────────────────────────────────────────────────────
 
+
 class TestParseUserAgent:
     def test_none_returns_all_none(self):
         assert AuthUseCase._parse_user_agent(None) == (None, None, None)
@@ -163,6 +164,7 @@ class TestParseUserAgent:
 
 # ─── _is_deletion_grace_expired ───────────────────────────────────────────────
 
+
 class TestIsDeletionGraceExpired:
     def test_no_scheduled_deletion(self):
         user = _make_user(deletion_scheduled_for=None)
@@ -178,6 +180,7 @@ class TestIsDeletionGraceExpired:
 
 
 # ─── register_user ────────────────────────────────────────────────────────────
+
 
 class TestRegisterUser:
     @pytest.fixture
@@ -231,6 +234,7 @@ class TestRegisterUser:
 
 
 # ─── verify_email ─────────────────────────────────────────────────────────────
+
 
 class TestVerifyEmail:
     TOKEN = "valid.verification.token"
@@ -291,6 +295,7 @@ class TestVerifyEmail:
 
 
 # ─── login ────────────────────────────────────────────────────────────────────
+
 
 class TestLogin:
     def _make_otp_repo(self) -> AsyncMock:
@@ -380,6 +385,7 @@ class TestLogin:
 
 # ─── login_verify ─────────────────────────────────────────────────────────────
 
+
 class TestLoginVerify:
     def _mock_payload(self):
         p = MagicMock()
@@ -460,6 +466,7 @@ class TestLoginVerify:
 
 # ─── resend_otp ───────────────────────────────────────────────────────────────
 
+
 class TestResendOtp:
     def _mock_payload(self):
         p = MagicMock()
@@ -509,6 +516,7 @@ class TestResendOtp:
 
 # ─── logout ───────────────────────────────────────────────────────────────────
 
+
 class TestLogout:
     @pytest.mark.asyncio
     async def test_success(self):
@@ -541,6 +549,7 @@ class TestLogout:
 
 # ─── refresh ──────────────────────────────────────────────────────────────────
 
+
 class TestRefresh:
     def _mock_payload(self):
         p = MagicMock()
@@ -554,7 +563,11 @@ class TestRefresh:
         uc = _make_usecase(repo=repo)
 
         with (
-            patch("app.application.use_cases.auth_usecase.verify_refresh_token", new_callable=AsyncMock, return_value=(self._mock_payload(), token_record)),
+            patch(
+                "app.application.use_cases.auth_usecase.verify_refresh_token",
+                new_callable=AsyncMock,
+                return_value=(self._mock_payload(), token_record),
+            ),
             patch("app.application.use_cases.auth_usecase.RefreshTokenRepository") as MockRepo,
             patch("app.application.use_cases.auth_usecase.create_access_token", return_value="new_access"),
             patch("app.application.use_cases.auth_usecase.create_refresh_token", new_callable=AsyncMock, return_value="new_refresh"),
@@ -588,7 +601,11 @@ class TestRefresh:
         uc = _make_usecase()
 
         with (
-            patch("app.application.use_cases.auth_usecase.verify_refresh_token", new_callable=AsyncMock, return_value=(self._mock_payload(), token_record)),
+            patch(
+                "app.application.use_cases.auth_usecase.verify_refresh_token",
+                new_callable=AsyncMock,
+                return_value=(self._mock_payload(), token_record),
+            ),
             patch("app.application.use_cases.auth_usecase.RefreshTokenRepository") as MockRepo,
         ):
             mock_token_repo = AsyncMock()
@@ -605,7 +622,11 @@ class TestRefresh:
         uc = _make_usecase(repo=repo)
 
         with (
-            patch("app.application.use_cases.auth_usecase.verify_refresh_token", new_callable=AsyncMock, return_value=(self._mock_payload(), token_record)),
+            patch(
+                "app.application.use_cases.auth_usecase.verify_refresh_token",
+                new_callable=AsyncMock,
+                return_value=(self._mock_payload(), token_record),
+            ),
             patch("app.application.use_cases.auth_usecase.RefreshTokenRepository") as MockRepo,
         ):
             mock_token_repo = AsyncMock()
@@ -622,7 +643,11 @@ class TestRefresh:
         uc = _make_usecase(repo=repo)
 
         with (
-            patch("app.application.use_cases.auth_usecase.verify_refresh_token", new_callable=AsyncMock, return_value=(self._mock_payload(), token_record)),
+            patch(
+                "app.application.use_cases.auth_usecase.verify_refresh_token",
+                new_callable=AsyncMock,
+                return_value=(self._mock_payload(), token_record),
+            ),
             patch("app.application.use_cases.auth_usecase.RefreshTokenRepository") as MockRepo,
         ):
             mock_token_repo = AsyncMock()
@@ -640,7 +665,11 @@ class TestRefresh:
         uc = _make_usecase(repo=repo)
 
         with (
-            patch("app.application.use_cases.auth_usecase.verify_refresh_token", new_callable=AsyncMock, return_value=(self._mock_payload(), token_record)),
+            patch(
+                "app.application.use_cases.auth_usecase.verify_refresh_token",
+                new_callable=AsyncMock,
+                return_value=(self._mock_payload(), token_record),
+            ),
             patch("app.application.use_cases.auth_usecase.RefreshTokenRepository") as MockRepo,
         ):
             mock_token_repo = AsyncMock()
@@ -652,6 +681,7 @@ class TestRefresh:
 
 
 # ─── resend_verification ──────────────────────────────────────────────────────
+
 
 class TestResendVerification:
     @pytest.mark.asyncio
@@ -693,6 +723,7 @@ class TestResendVerification:
 
 
 # ─── forgot_password ──────────────────────────────────────────────────────────
+
 
 class TestForgotPassword:
     def _make_pr_repo(self) -> AsyncMock:
@@ -748,6 +779,7 @@ class TestForgotPassword:
 
 
 # ─── reset_password ───────────────────────────────────────────────────────────
+
 
 class TestResetPassword:
     def _mock_payload(self):

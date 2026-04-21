@@ -40,7 +40,7 @@ def _make_redis(*, scan_keys=None, job_type="string", key_value=b"1") -> MagicMo
     redis = MagicMock()
 
     async def _scan_iter(match="*"):
-        for key in (scan_keys or []):
+        for key in scan_keys or []:
             yield key.encode() if isinstance(key, str) else key
 
     redis.scan_iter = _scan_iter
@@ -56,6 +56,7 @@ def _make_redis(*, scan_keys=None, job_type="string", key_value=b"1") -> MagicMo
 
 
 # ─── GetQueueStatsUseCase ─────────────────────────────────────────────────────
+
 
 class TestGetQueueStatsUseCase:
     @pytest.mark.asyncio
@@ -87,6 +88,7 @@ class TestGetQueueStatsUseCase:
 
 
 # ─── ListDeadJobsUseCase ──────────────────────────────────────────────────────
+
 
 class TestListDeadJobsUseCase:
     @pytest.mark.asyncio
@@ -149,6 +151,7 @@ class TestListDeadJobsUseCase:
 
 # ─── RetryDeadJobUseCase ──────────────────────────────────────────────────────
 
+
 class TestRetryDeadJobUseCase:
     @pytest.mark.asyncio
     async def test_success(self):
@@ -192,6 +195,7 @@ class TestRetryDeadJobUseCase:
 
 # ─── DeleteDeadJobUseCase ─────────────────────────────────────────────────────
 
+
 class TestDeleteDeadJobUseCase:
     @pytest.mark.asyncio
     async def test_success(self):
@@ -226,6 +230,7 @@ class TestDeleteDeadJobUseCase:
 
 # ─── PurgeDeadJobsUseCase ─────────────────────────────────────────────────────
 
+
 class TestPurgeDeadJobsUseCase:
     @pytest.mark.asyncio
     async def test_purges_all_dead_jobs(self):
@@ -253,7 +258,6 @@ class TestPurgeDeadJobsUseCase:
 
             async def _scan(match="*"):
                 return
-                yield  # noqa: unreachable
 
             redis.scan_iter = _scan
             result = await PurgeDeadJobsUseCase(redis).execute()

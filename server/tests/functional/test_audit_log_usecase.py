@@ -15,20 +15,30 @@ USER_ID = uuid.uuid4()
 
 def _make_create_input() -> CreateAuditLogInput:
     return CreateAuditLogInput(
-        user_id=USER_ID, ip_address="127.0.0.1", user_agent="TestAgent/1.0",
-        action_type=ActionType.CREATE, resource_type="events",
-        resource_id=str(uuid.uuid4()), status=AuditLogStatus.SUCCESS,
+        user_id=USER_ID,
+        ip_address="127.0.0.1",
+        user_agent="TestAgent/1.0",
+        action_type=ActionType.CREATE,
+        resource_type="events",
+        resource_id=str(uuid.uuid4()),
+        status=AuditLogStatus.SUCCESS,
     )
 
 
 def _make_get_input(limit=50, cursor=None) -> GetAuditLogsInput:
     return GetAuditLogsInput(
-        limit=limit, cursor=cursor, user_id=None,
-        action_type=None, resource_type=None, start_date=None, end_date=None,
+        limit=limit,
+        cursor=cursor,
+        user_id=None,
+        action_type=None,
+        resource_type=None,
+        start_date=None,
+        end_date=None,
     )
 
 
 # ─── CreateAuditLogUseCase ────────────────────────────────────────────────────
+
 
 class TestCreateAuditLogUseCase:
     @pytest.mark.asyncio
@@ -71,6 +81,7 @@ class TestCreateAuditLogUseCase:
 
 # ─── GetAuditLogsUseCase ──────────────────────────────────────────────────────
 
+
 class TestGetAuditLogsUseCase:
     def _make_repo(self, *, logs=None, total=0, next_cursor=None, prev_cursor=None):
         repo = MagicMock()
@@ -111,13 +122,21 @@ class TestGetAuditLogsUseCase:
         """Forwards all filter parameters (user_id, action_type, resource_type, cursor) to the repository"""
         repo = self._make_repo()
         inp = GetAuditLogsInput(
-            limit=10, cursor="c1", user_id=USER_ID,
-            action_type=ActionType.DELETE, resource_type="users",
-            start_date=None, end_date=None,
+            limit=10,
+            cursor="c1",
+            user_id=USER_ID,
+            action_type=ActionType.DELETE,
+            resource_type="users",
+            start_date=None,
+            end_date=None,
         )
         await GetAuditLogsUseCase(repo).execute(inp)
         repo.get_paginated.assert_awaited_once_with(
-            limit=10, cursor="c1", user_id=USER_ID,
-            action_type=ActionType.DELETE, resource_type="users",
-            start_date=None, end_date=None,
+            limit=10,
+            cursor="c1",
+            user_id=USER_ID,
+            action_type=ActionType.DELETE,
+            resource_type="users",
+            start_date=None,
+            end_date=None,
         )

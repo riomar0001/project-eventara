@@ -29,8 +29,7 @@ USER_EMAIL = "user@example.com"
 
 
 def _make_user(*, status=UserStatus.ACTIVE, deletion_scheduled_for=None) -> User:
-    return User(id=USER_ID, email=USER_EMAIL, password="hashed", status=status,
-                deletion_scheduled_for=deletion_scheduled_for)
+    return User(id=USER_ID, email=USER_EMAIL, password="hashed", status=status, deletion_scheduled_for=deletion_scheduled_for)
 
 
 def _make_security(*, email_verified=True) -> UserSecurity:
@@ -58,6 +57,7 @@ def _scheduled_user():
 
 # ─── ChangePasswordUseCase ────────────────────────────────────────────────────
 
+
 class TestChangePasswordUseCase:
     def _data(self, current="current", new="newpass") -> ChangePasswordInput:
         return ChangePasswordInput(user_id=USER_ID, current_password=current, new_password=new)
@@ -69,9 +69,11 @@ class TestChangePasswordUseCase:
     async def test_success(self):
         """Hashes the new password, updates the database, and revokes all active refresh tokens"""
         repo = _make_repo(user=_make_user(), security=_make_security())
-        with (patch("app.application.use_cases.account_settings_usecase.verify_hash", side_effect=[True, False]),
-              patch("app.application.use_cases.account_settings_usecase.hash_string", return_value="new_hash"),
-              patch("app.application.use_cases.account_settings_usecase.RefreshTokenRepository", return_value=AsyncMock())):
+        with (
+            patch("app.application.use_cases.account_settings_usecase.verify_hash", side_effect=[True, False]),
+            patch("app.application.use_cases.account_settings_usecase.hash_string", return_value="new_hash"),
+            patch("app.application.use_cases.account_settings_usecase.RefreshTokenRepository", return_value=AsyncMock()),
+        ):
             await self._make_uc(repo).change_password(self._data())
         repo.update_password.assert_awaited_once_with(USER_ID, "new_hash")
 
@@ -126,13 +128,16 @@ class TestChangePasswordUseCase:
     async def test_update_returns_false_raises_not_found(self):
         """Raises UserNotFoundError when the password UPDATE matches no row"""
         repo = _make_repo(user=_make_user(), security=_make_security(), updated=False)
-        with (patch("app.application.use_cases.account_settings_usecase.verify_hash", side_effect=[True, False]),
-              patch("app.application.use_cases.account_settings_usecase.hash_string", return_value="h")):
+        with (
+            patch("app.application.use_cases.account_settings_usecase.verify_hash", side_effect=[True, False]),
+            patch("app.application.use_cases.account_settings_usecase.hash_string", return_value="h"),
+        ):
             with pytest.raises(UserNotFoundError):
                 await self._make_uc(repo).change_password(self._data())
 
 
 # ─── DeleteAccountUseCase ─────────────────────────────────────────────────────
+
 
 class TestDeleteAccountUseCase:
     def _self_data(self, password="correct") -> RequestAccountDeletionInput:
@@ -221,6 +226,7 @@ class TestDeleteAccountUseCase:
 
 
 # ─── FinalizeAccountDeletionUseCase ───────────────────────────────────────────
+
 
 class TestFinalizeAccountDeletionUseCase:
     @pytest.mark.asyncio

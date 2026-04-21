@@ -27,12 +27,18 @@ def _make_create_input() -> CreateAuditLogInput:
 
 def _make_get_input(limit=50, cursor=None) -> GetAuditLogsInput:
     return GetAuditLogsInput(
-        limit=limit, cursor=cursor, user_id=None,
-        action_type=None, resource_type=None, start_date=None, end_date=None,
+        limit=limit,
+        cursor=cursor,
+        user_id=None,
+        action_type=None,
+        resource_type=None,
+        start_date=None,
+        end_date=None,
     )
 
 
 # ─── CreateAuditLogUseCase ────────────────────────────────────────────────────
+
 
 class TestCreateAuditLogUseCase:
     @pytest.mark.asyncio
@@ -75,6 +81,7 @@ class TestCreateAuditLogUseCase:
 
 # ─── GetAuditLogsUseCase ──────────────────────────────────────────────────────
 
+
 class TestGetAuditLogsUseCase:
     def _make_repo(self, *, logs=None, total=0, next_cursor=None, prev_cursor=None):
         repo = MagicMock()
@@ -114,13 +121,21 @@ class TestGetAuditLogsUseCase:
     async def test_passes_filters_to_repo(self):
         repo = self._make_repo()
         inp = GetAuditLogsInput(
-            limit=10, cursor="c1", user_id=USER_ID,
-            action_type=ActionType.DELETE, resource_type="users",
-            start_date=None, end_date=None,
+            limit=10,
+            cursor="c1",
+            user_id=USER_ID,
+            action_type=ActionType.DELETE,
+            resource_type="users",
+            start_date=None,
+            end_date=None,
         )
         await GetAuditLogsUseCase(repo).execute(inp)
         repo.get_paginated.assert_awaited_once_with(
-            limit=10, cursor="c1", user_id=USER_ID,
-            action_type=ActionType.DELETE, resource_type="users",
-            start_date=None, end_date=None,
+            limit=10,
+            cursor="c1",
+            user_id=USER_ID,
+            action_type=ActionType.DELETE,
+            resource_type="users",
+            start_date=None,
+            end_date=None,
         )

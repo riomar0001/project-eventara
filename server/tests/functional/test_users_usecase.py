@@ -78,11 +78,14 @@ def _make_uc(*, user_repo=None, role_repo=None, pr_repo=None) -> AdminUserAccoun
     return AdminUserAccountUseCase(
         user_repo=user_repo or _make_user_repo(),
         role_repo=role_repo or _make_role_repo(),
-        db=AsyncMock(), arq=AsyncMock(), password_reset_repo=pr,
+        db=AsyncMock(),
+        arq=AsyncMock(),
+        password_reset_repo=pr,
     )
 
 
 # ─── list_user_accounts ───────────────────────────────────────────────────────
+
 
 class TestListUserAccounts:
     @pytest.mark.asyncio
@@ -118,12 +121,11 @@ class TestListUserAccounts:
         await _make_uc(user_repo=user_repo).list_user_accounts(
             ListUserAccountsInput(page=2, page_size=5, search="mario", status=UserStatus.ACTIVE, role_name="admin")
         )
-        user_repo.list_admin_user_accounts.assert_awaited_once_with(
-            page=2, page_size=5, search="mario", status=UserStatus.ACTIVE, role_name="admin"
-        )
+        user_repo.list_admin_user_accounts.assert_awaited_once_with(page=2, page_size=5, search="mario", status=UserStatus.ACTIVE, role_name="admin")
 
 
 # ─── get_user_account_detail ──────────────────────────────────────────────────
+
 
 class TestGetUserAccountDetail:
     @pytest.mark.asyncio
@@ -155,6 +157,7 @@ class TestGetUserAccountDetail:
 
 # ─── list_roles ───────────────────────────────────────────────────────────────
 
+
 class TestListRoles:
     @pytest.mark.asyncio
     async def test_returns_roles_with_permissions(self):
@@ -174,6 +177,7 @@ class TestListRoles:
 
 # ─── change_role ──────────────────────────────────────────────────────────────
 
+
 class TestChangeRole:
     def _data(self, role_id=None) -> ChangeUserRoleInput:
         return ChangeUserRoleInput(user_id=USER_ID, role_id=role_id or ROLE_ID, changed_by=ADMIN_ID)
@@ -184,8 +188,7 @@ class TestChangeRole:
         role = _make_role()
         with patch("app.application.use_cases.users_usecase.RefreshTokenRepository", return_value=AsyncMock()):
             result = await _make_uc(
-                user_repo=_make_user_repo(user=_make_user()),
-                role_repo=_make_role_repo(locked=True, role=role, assignments=[])
+                user_repo=_make_user_repo(user=_make_user()), role_repo=_make_role_repo(locked=True, role=role, assignments=[])
             ).change_role(self._data())
         assert result.role_id == role.id
 
@@ -199,37 +202,29 @@ class TestChangeRole:
     async def test_user_not_found(self):
         """Raises UserNotFoundError when the account does not exist after acquiring the lock"""
         with pytest.raises(UserNotFoundError):
-            await _make_uc(
-                user_repo=_make_user_repo(user=None),
-                role_repo=_make_role_repo(locked=True)
-            ).change_role(self._data())
+            await _make_uc(user_repo=_make_user_repo(user=None), role_repo=_make_role_repo(locked=True)).change_role(self._data())
 
     @pytest.mark.asyncio
     async def test_inactive_user(self):
         """Raises UserInactiveError when the target account is deactivated"""
         with pytest.raises(UserInactiveError):
             await _make_uc(
-                user_repo=_make_user_repo(user=_make_user(status=UserStatus.INACTIVE)),
-                role_repo=_make_role_repo(locked=True)
+                user_repo=_make_user_repo(user=_make_user(status=UserStatus.INACTIVE)), role_repo=_make_role_repo(locked=True)
             ).change_role(self._data())
 
     @pytest.mark.asyncio
     async def test_deleted_user(self):
         """Raises UserInactiveError when the target account is soft-deleted"""
         with pytest.raises(UserInactiveError):
-            await _make_uc(
-                user_repo=_make_user_repo(user=_make_user(status=UserStatus.DELETED)),
-                role_repo=_make_role_repo(locked=True)
-            ).change_role(self._data())
+            await _make_uc(user_repo=_make_user_repo(user=_make_user(status=UserStatus.DELETED)), role_repo=_make_role_repo(locked=True)).change_role(
+                self._data()
+            )
 
     @pytest.mark.asyncio
     async def test_role_not_found(self):
         """Raises RoleNotFoundError when the requested replacement role does not exist"""
         with pytest.raises(RoleNotFoundError):
-            await _make_uc(
-                user_repo=_make_user_repo(user=_make_user()),
-                role_repo=_make_role_repo(locked=True, role=None)
-            ).change_role(self._data())
+            await _make_uc(user_repo=_make_user_repo(user=_make_user()), role_repo=_make_role_repo(locked=True, role=None)).change_role(self._data())
 
     @pytest.mark.asyncio
     async def test_role_already_current(self):
@@ -239,8 +234,7 @@ class TestChangeRole:
         assignment.role_id = role.id
         with pytest.raises(RoleAlreadyCurrentError):
             await _make_uc(
-                user_repo=_make_user_repo(user=_make_user()),
-                role_repo=_make_role_repo(locked=True, role=role, assignments=[assignment])
+                user_repo=_make_user_repo(user=_make_user()), role_repo=_make_role_repo(locked=True, role=role, assignments=[assignment])
             ).change_role(self._data(role_id=role.id))
 
     @pytest.mark.asyncio
@@ -250,8 +244,7 @@ class TestChangeRole:
         role_repo.replace_active_assignments = AsyncMock(side_effect=RuntimeError("db error"))
         db = AsyncMock()
         uc = AdminUserAccountUseCase(
-            user_repo=_make_user_repo(user=_make_user()), role_repo=role_repo,
-            db=db, arq=AsyncMock(), password_reset_repo=AsyncMock()
+            user_repo=_make_user_repo(user=_make_user()), role_repo=role_repo, db=db, arq=AsyncMock(), password_reset_repo=AsyncMock()
         )
         with pytest.raises(RuntimeError):
             await uc.change_role(self._data())
@@ -259,6 +252,7 @@ class TestChangeRole:
 
 
 # ─── change_email ─────────────────────────────────────────────────────────────
+
 
 class TestChangeEmail:
     def _data(self, email=NEW_EMAIL) -> ChangeUserEmailInput:
@@ -270,9 +264,11 @@ class TestChangeEmail:
         updated = _make_user(email=NEW_EMAIL)
         updated.id = USER_ID
         user_repo = _make_user_repo(user=_make_user(), updated_user=updated)
-        with (patch("app.application.use_cases.users_usecase.verification_token", return_value="vtok"),
-              patch("app.application.use_cases.users_usecase.send_email", new_callable=AsyncMock),
-              patch("app.application.use_cases.users_usecase.RefreshTokenRepository", return_value=AsyncMock())):
+        with (
+            patch("app.application.use_cases.users_usecase.verification_token", return_value="vtok"),
+            patch("app.application.use_cases.users_usecase.send_email", new_callable=AsyncMock),
+            patch("app.application.use_cases.users_usecase.RefreshTokenRepository", return_value=AsyncMock()),
+        ):
             result = await _make_uc(user_repo=user_repo).change_email(self._data())
         assert result.email == NEW_EMAIL
 
@@ -306,11 +302,8 @@ class TestChangeEmail:
     async def test_integrity_error_raises_email_taken(self):
         """Raises EmailAlreadyTakenError and rolls back when the new email belongs to another account"""
         user_repo = _make_user_repo(user=_make_user())
-        user_repo.update_email_and_clear_verification = AsyncMock(
-            side_effect=IntegrityError(None, None, Exception("unique_email"))
-        )
-        with (patch("app.application.use_cases.users_usecase.RefreshTokenRepository", return_value=AsyncMock()),
-              pytest.raises(EmailAlreadyTakenError)):
+        user_repo.update_email_and_clear_verification = AsyncMock(side_effect=IntegrityError(None, None, Exception("unique_email")))
+        with patch("app.application.use_cases.users_usecase.RefreshTokenRepository", return_value=AsyncMock()), pytest.raises(EmailAlreadyTakenError):
             await _make_uc(user_repo=user_repo).change_email(self._data())
 
     @pytest.mark.asyncio
@@ -319,16 +312,14 @@ class TestChangeEmail:
         user_repo = _make_user_repo(user=_make_user())
         user_repo.update_email_and_clear_verification = AsyncMock(side_effect=RuntimeError("db error"))
         db = AsyncMock()
-        uc = AdminUserAccountUseCase(
-            user_repo=user_repo, role_repo=_make_role_repo(),
-            db=db, arq=AsyncMock(), password_reset_repo=AsyncMock()
-        )
+        uc = AdminUserAccountUseCase(user_repo=user_repo, role_repo=_make_role_repo(), db=db, arq=AsyncMock(), password_reset_repo=AsyncMock())
         with pytest.raises(RuntimeError):
             await uc.change_email(self._data())
         db.rollback.assert_awaited_once()
 
 
 # ─── send_password_reset ──────────────────────────────────────────────────────
+
 
 class TestSendPasswordReset:
     def _data(self) -> SendUserPasswordResetInput:
@@ -341,8 +332,10 @@ class TestSendPasswordReset:
         user_repo.get_security_by_user_id = AsyncMock(return_value=_make_security())
         pr_repo = AsyncMock()
         pr_repo.store = AsyncMock()
-        with (patch("app.application.use_cases.users_usecase.create_password_reset_token", return_value="rst"),
-              patch("app.application.use_cases.users_usecase.send_email", new_callable=AsyncMock) as mock_send):
+        with (
+            patch("app.application.use_cases.users_usecase.create_password_reset_token", return_value="rst"),
+            patch("app.application.use_cases.users_usecase.send_email", new_callable=AsyncMock) as mock_send,
+        ):
             await _make_uc(user_repo=user_repo, pr_repo=pr_repo).send_password_reset(self._data())
         mock_send.assert_awaited_once()
         pr_repo.store.assert_awaited_once()

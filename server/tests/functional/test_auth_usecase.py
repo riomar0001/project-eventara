@@ -43,8 +43,14 @@ HASHED_PASSWORD = "hashed_password123"
 
 
 def _make_user(*, status=UserStatus.ACTIVE, onboarding_completed=False, deletion_scheduled_for=None) -> User:
-    return User(id=USER_ID, email=USER_EMAIL, password=HASHED_PASSWORD, status=status,
-                onboarding_completed=onboarding_completed, deletion_scheduled_for=deletion_scheduled_for)
+    return User(
+        id=USER_ID,
+        email=USER_EMAIL,
+        password=HASHED_PASSWORD,
+        status=status,
+        onboarding_completed=onboarding_completed,
+        deletion_scheduled_for=deletion_scheduled_for,
+    )
 
 
 def _make_security(*, email_verified=True, locked_until=None) -> UserSecurity:
@@ -80,6 +86,7 @@ def _make_usecase(*, repo=None, otp_repo=None, password_reset_repo=None):
 
 # ─── Parse User Agent ─────────────────────────────────────────────────────────
 
+
 class TestParseUserAgent:
     def test_none_returns_all_none(self):
         """Returns (None, None, None) for missing user agent"""
@@ -87,26 +94,22 @@ class TestParseUserAgent:
 
     def test_chrome_windows_desktop(self):
         """Returns browser=Chrome, os=Windows, device=desktop"""
-        browser, os, device = AuthUseCase._parse_user_agent(
-            "Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36")
+        browser, os, device = AuthUseCase._parse_user_agent("Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36")
         assert browser == "Google Chrome" and os == "Windows" and device == "desktop"
 
     def test_firefox_macos_desktop(self):
         """Returns browser=Firefox, os=macOS, device=desktop"""
-        browser, os, device = AuthUseCase._parse_user_agent(
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15) Gecko/20100101 Firefox/120.0")
+        browser, os, device = AuthUseCase._parse_user_agent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15) Gecko/20100101 Firefox/120.0")
         assert browser == "Mozilla Firefox" and os == "macOS" and device == "desktop"
 
     def test_safari_ios_mobile(self):
         """Returns browser=Safari, os=iOS, device=mobile"""
-        browser, os, device = AuthUseCase._parse_user_agent(
-            "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) Mobile/15E148 Safari/604.1")
+        browser, os, device = AuthUseCase._parse_user_agent("Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) Mobile/15E148 Safari/604.1")
         assert browser == "Safari" and os == "iOS" and device == "mobile"
 
     def test_edge_windows_desktop(self):
         """Returns browser=Microsoft Edge, os=Windows, device=desktop"""
-        browser, os, device = AuthUseCase._parse_user_agent(
-            "Mozilla/5.0 (Windows NT 10.0) Chrome/120.0 Safari/537.36 Edg/120.0")
+        browser, os, device = AuthUseCase._parse_user_agent("Mozilla/5.0 (Windows NT 10.0) Chrome/120.0 Safari/537.36 Edg/120.0")
         assert browser == "Microsoft Edge" and os == "Windows" and device == "desktop"
 
     def test_android_mobile(self):
@@ -116,8 +119,7 @@ class TestParseUserAgent:
 
     def test_ipad_tablet(self):
         """Returns device=tablet for iPad user agent"""
-        _, _, device = AuthUseCase._parse_user_agent(
-            "Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X) AppleWebKit/605.1.15")
+        _, _, device = AuthUseCase._parse_user_agent("Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X) AppleWebKit/605.1.15")
         assert device == "tablet"
 
     def test_unknown_agent(self):
@@ -127,6 +129,7 @@ class TestParseUserAgent:
 
 
 # ─── Deletion Grace Period ────────────────────────────────────────────────────
+
 
 class TestIsDeletionGraceExpired:
     def test_no_scheduled_deletion(self):
@@ -146,9 +149,9 @@ class TestIsDeletionGraceExpired:
 
 # ─── Register User ────────────────────────────────────────────────────────────
 
+
 class TestRegisterUser:
-    _data = RegisterUserInput(email=USER_EMAIL, password=RAW_PASSWORD,
-                              accepted_terms=True, accepted_privacy_policy=True)
+    _data = RegisterUserInput(email=USER_EMAIL, password=RAW_PASSWORD, accepted_terms=True, accepted_privacy_policy=True)
 
     @pytest.mark.asyncio
     async def test_success(self):
@@ -156,9 +159,11 @@ class TestRegisterUser:
         repo = _make_repo(user=_make_user())
         repo.get_by_email = AsyncMock(return_value=None)
         uc = _make_usecase(repo=repo)
-        with (patch("app.application.use_cases.auth_usecase.hash_string", return_value=HASHED_PASSWORD),
-              patch("app.application.use_cases.auth_usecase.verification_token", return_value="vtok"),
-              patch("app.application.use_cases.auth_usecase.send_email", new_callable=AsyncMock)):
+        with (
+            patch("app.application.use_cases.auth_usecase.hash_string", return_value=HASHED_PASSWORD),
+            patch("app.application.use_cases.auth_usecase.verification_token", return_value="vtok"),
+            patch("app.application.use_cases.auth_usecase.send_email", new_callable=AsyncMock),
+        ):
             result = await uc.register_user(self._data)
         assert result.verification_token == "vtok"
 
@@ -176,13 +181,16 @@ class TestRegisterUser:
         repo.get_by_email = AsyncMock(return_value=None)
         repo.create = AsyncMock(side_effect=IntegrityError(None, None, Exception("duplicate key")))
         uc = _make_usecase(repo=repo)
-        with (patch("app.application.use_cases.auth_usecase.hash_string", return_value=HASHED_PASSWORD),
-              patch("app.application.use_cases.auth_usecase.verification_token", return_value="vtok")):
+        with (
+            patch("app.application.use_cases.auth_usecase.hash_string", return_value=HASHED_PASSWORD),
+            patch("app.application.use_cases.auth_usecase.verification_token", return_value="vtok"),
+        ):
             with pytest.raises(EmailAlreadyTakenError):
                 await uc.register_user(self._data)
 
 
 # ─── Verify Email ─────────────────────────────────────────────────────────────
+
 
 class TestVerifyEmail:
     def _payload(self):
@@ -195,10 +203,12 @@ class TestVerifyEmail:
         """Verifies email and returns access_token and refresh_token"""
         repo = _make_repo(user=_make_user(), security=_make_security())
         uc = _make_usecase(repo=repo)
-        with (patch("app.application.use_cases.auth_usecase.verify_verification_token", return_value=self._payload()),
-              patch("app.application.use_cases.auth_usecase.send_email", new_callable=AsyncMock),
-              patch("app.application.use_cases.auth_usecase.create_access_token", return_value="access"),
-              patch("app.application.use_cases.auth_usecase.create_refresh_token", new_callable=AsyncMock, return_value="refresh")):
+        with (
+            patch("app.application.use_cases.auth_usecase.verify_verification_token", return_value=self._payload()),
+            patch("app.application.use_cases.auth_usecase.send_email", new_callable=AsyncMock),
+            patch("app.application.use_cases.auth_usecase.create_access_token", return_value="access"),
+            patch("app.application.use_cases.auth_usecase.create_refresh_token", new_callable=AsyncMock, return_value="refresh"),
+        ):
             result = await uc.verify_email("tok")
         assert result.access_token == "access" and result.refresh_token == "refresh"
 
@@ -239,6 +249,7 @@ class TestVerifyEmail:
 
 # ─── Login ────────────────────────────────────────────────────────────────────
 
+
 class TestLogin:
     def _otp_repo(self):
         otp = AsyncMock()
@@ -250,9 +261,11 @@ class TestLogin:
         """Sends OTP email and returns verification_token for the second step"""
         repo = _make_repo(user=_make_user(), security=_make_security())
         uc = _make_usecase(repo=repo, otp_repo=self._otp_repo())
-        with (patch("app.application.use_cases.auth_usecase.verify_hash", return_value=True),
-              patch("app.application.use_cases.auth_usecase.send_email", new_callable=AsyncMock),
-              patch("app.application.use_cases.auth_usecase.create_otp_token", return_value="otp_tok")):
+        with (
+            patch("app.application.use_cases.auth_usecase.verify_hash", return_value=True),
+            patch("app.application.use_cases.auth_usecase.send_email", new_callable=AsyncMock),
+            patch("app.application.use_cases.auth_usecase.create_otp_token", return_value="otp_tok"),
+        ):
             result = await uc.login(LoginInput(email=USER_EMAIL, password=RAW_PASSWORD))
         assert result.verification_token == "otp_tok"
 
@@ -323,6 +336,7 @@ class TestLogin:
 
 # ─── Login Verify ─────────────────────────────────────────────────────────────
 
+
 class TestLoginVerify:
     def _payload(self):
         p = MagicMock()
@@ -342,9 +356,11 @@ class TestLoginVerify:
         """Returns access_token and refresh_token on valid OTP and resets failed-login counter"""
         repo = _make_repo(user=_make_user(), security=_make_security())
         uc = _make_usecase(repo=repo, otp_repo=self._otp_repo())
-        with (patch("app.application.use_cases.auth_usecase.verify_otp_token", return_value=self._payload()),
-              patch("app.application.use_cases.auth_usecase.create_access_token", return_value="access"),
-              patch("app.application.use_cases.auth_usecase.create_refresh_token", new_callable=AsyncMock, return_value="refresh")):
+        with (
+            patch("app.application.use_cases.auth_usecase.verify_otp_token", return_value=self._payload()),
+            patch("app.application.use_cases.auth_usecase.create_access_token", return_value="access"),
+            patch("app.application.use_cases.auth_usecase.create_refresh_token", new_callable=AsyncMock, return_value="refresh"),
+        ):
             result = await uc.login_verify(self._data())
         assert result.access_token == "access" and result.refresh_token == "refresh"
         repo.reset_failed_login.assert_awaited_once()
@@ -401,6 +417,7 @@ class TestLoginVerify:
 
 # ─── Resend OTP ───────────────────────────────────────────────────────────────
 
+
 class TestResendOtp:
     def _payload(self):
         p = MagicMock()
@@ -414,9 +431,11 @@ class TestResendOtp:
         otp_repo = AsyncMock()
         otp_repo.create_for_user = AsyncMock(return_value="654321")
         uc = _make_usecase(repo=_make_repo(user=_make_user()), otp_repo=otp_repo)
-        with (patch("app.application.use_cases.auth_usecase.verify_otp_token", return_value=self._payload()),
-              patch("app.application.use_cases.auth_usecase.send_email", new_callable=AsyncMock),
-              patch("app.application.use_cases.auth_usecase.create_otp_token", return_value="new_tok")):
+        with (
+            patch("app.application.use_cases.auth_usecase.verify_otp_token", return_value=self._payload()),
+            patch("app.application.use_cases.auth_usecase.send_email", new_callable=AsyncMock),
+            patch("app.application.use_cases.auth_usecase.create_otp_token", return_value="new_tok"),
+        ):
             result = await uc.resend_otp(ResendOtpInput(token="old.tok"))
         assert result.verification_token == "new_tok" and result.otp == "654321"
 
@@ -447,14 +466,17 @@ class TestResendOtp:
 
 # ─── Logout ───────────────────────────────────────────────────────────────────
 
+
 class TestLogout:
     @pytest.mark.asyncio
     async def test_success(self):
         """Revokes the submitted refresh token and terminates the session"""
         token_record = MagicMock()
         uc = _make_usecase()
-        with (patch("app.application.use_cases.auth_usecase.verify_refresh_token", new_callable=AsyncMock, return_value=(MagicMock(), token_record)),
-              patch("app.application.use_cases.auth_usecase.RefreshTokenRepository") as MockRepo):
+        with (
+            patch("app.application.use_cases.auth_usecase.verify_refresh_token", new_callable=AsyncMock, return_value=(MagicMock(), token_record)),
+            patch("app.application.use_cases.auth_usecase.RefreshTokenRepository") as MockRepo,
+        ):
             mock_repo = AsyncMock()
             MockRepo.return_value = mock_repo
             await uc.logout(LogoutInput(refresh_token="valid.tok"))
@@ -478,6 +500,7 @@ class TestLogout:
 
 # ─── Refresh Token ────────────────────────────────────────────────────────────
 
+
 class TestRefresh:
     def _payload(self):
         p = MagicMock()
@@ -493,10 +516,12 @@ class TestRefresh:
     async def test_success(self):
         """Rotates the refresh token and returns a new access_token and refresh_token"""
         uc = _make_usecase(repo=_make_repo(user=_make_user()))
-        with (patch("app.application.use_cases.auth_usecase.verify_refresh_token", new_callable=AsyncMock, return_value=(self._payload(), MagicMock())),
-              patch("app.application.use_cases.auth_usecase.RefreshTokenRepository", return_value=self._patched()),
-              patch("app.application.use_cases.auth_usecase.create_access_token", return_value="new_access"),
-              patch("app.application.use_cases.auth_usecase.create_refresh_token", new_callable=AsyncMock, return_value="new_refresh")):
+        with (
+            patch("app.application.use_cases.auth_usecase.verify_refresh_token", new_callable=AsyncMock, return_value=(self._payload(), MagicMock())),
+            patch("app.application.use_cases.auth_usecase.RefreshTokenRepository", return_value=self._patched()),
+            patch("app.application.use_cases.auth_usecase.create_access_token", return_value="new_access"),
+            patch("app.application.use_cases.auth_usecase.create_refresh_token", new_callable=AsyncMock, return_value="new_refresh"),
+        ):
             result = await uc.refresh(RefreshTokenInput(refresh_token="old.tok"))
         assert result.access_token == "new_access" and result.refresh_token == "new_refresh"
 
@@ -520,8 +545,10 @@ class TestRefresh:
     async def test_already_revoked(self):
         """Raises InvalidTokenError when token was already rotated or revoked"""
         uc = _make_usecase()
-        with (patch("app.application.use_cases.auth_usecase.verify_refresh_token", new_callable=AsyncMock, return_value=(self._payload(), MagicMock())),
-              patch("app.application.use_cases.auth_usecase.RefreshTokenRepository", return_value=self._patched(revoked=False))):
+        with (
+            patch("app.application.use_cases.auth_usecase.verify_refresh_token", new_callable=AsyncMock, return_value=(self._payload(), MagicMock())),
+            patch("app.application.use_cases.auth_usecase.RefreshTokenRepository", return_value=self._patched(revoked=False)),
+        ):
             with pytest.raises(InvalidTokenError):
                 await uc.refresh(RefreshTokenInput(refresh_token="revoked.tok"))
 
@@ -529,8 +556,10 @@ class TestRefresh:
     async def test_user_not_found(self):
         """Raises UserNotFoundError when token subject has no matching account"""
         uc = _make_usecase(repo=_make_repo(user=None))
-        with (patch("app.application.use_cases.auth_usecase.verify_refresh_token", new_callable=AsyncMock, return_value=(self._payload(), MagicMock())),
-              patch("app.application.use_cases.auth_usecase.RefreshTokenRepository", return_value=self._patched())):
+        with (
+            patch("app.application.use_cases.auth_usecase.verify_refresh_token", new_callable=AsyncMock, return_value=(self._payload(), MagicMock())),
+            patch("app.application.use_cases.auth_usecase.RefreshTokenRepository", return_value=self._patched()),
+        ):
             with pytest.raises(UserNotFoundError):
                 await uc.refresh(RefreshTokenInput(refresh_token="tok"))
 
@@ -538,8 +567,10 @@ class TestRefresh:
     async def test_inactive_user(self):
         """Raises UserInactiveError when account is deactivated"""
         uc = _make_usecase(repo=_make_repo(user=_make_user(status=UserStatus.INACTIVE)))
-        with (patch("app.application.use_cases.auth_usecase.verify_refresh_token", new_callable=AsyncMock, return_value=(self._payload(), MagicMock())),
-              patch("app.application.use_cases.auth_usecase.RefreshTokenRepository", return_value=self._patched())):
+        with (
+            patch("app.application.use_cases.auth_usecase.verify_refresh_token", new_callable=AsyncMock, return_value=(self._payload(), MagicMock())),
+            patch("app.application.use_cases.auth_usecase.RefreshTokenRepository", return_value=self._patched()),
+        ):
             with pytest.raises(UserInactiveError):
                 await uc.refresh(RefreshTokenInput(refresh_token="tok"))
 
@@ -548,13 +579,16 @@ class TestRefresh:
         """Raises AccountDeletionGracePeriodExpiredError when account grace window has passed"""
         user = _make_user(deletion_scheduled_for=datetime.now(UTC) - timedelta(seconds=1))
         uc = _make_usecase(repo=_make_repo(user=user))
-        with (patch("app.application.use_cases.auth_usecase.verify_refresh_token", new_callable=AsyncMock, return_value=(self._payload(), MagicMock())),
-              patch("app.application.use_cases.auth_usecase.RefreshTokenRepository", return_value=self._patched())):
+        with (
+            patch("app.application.use_cases.auth_usecase.verify_refresh_token", new_callable=AsyncMock, return_value=(self._payload(), MagicMock())),
+            patch("app.application.use_cases.auth_usecase.RefreshTokenRepository", return_value=self._patched()),
+        ):
             with pytest.raises(AccountDeletionGracePeriodExpiredError):
                 await uc.refresh(RefreshTokenInput(refresh_token="tok"))
 
 
 # ─── Resend Verification ──────────────────────────────────────────────────────
+
 
 class TestResendVerification:
     @pytest.mark.asyncio
@@ -562,8 +596,10 @@ class TestResendVerification:
         """Sends a fresh verification email to an unverified account"""
         repo = _make_repo(user=_make_user(), security=_make_security(email_verified=False))
         uc = _make_usecase(repo=repo)
-        with (patch("app.application.use_cases.auth_usecase.verification_token", return_value="vtok"),
-              patch("app.application.use_cases.auth_usecase.send_email", new_callable=AsyncMock) as mock_send):
+        with (
+            patch("app.application.use_cases.auth_usecase.verification_token", return_value="vtok"),
+            patch("app.application.use_cases.auth_usecase.send_email", new_callable=AsyncMock) as mock_send,
+        ):
             await uc.resend_verification(ResendVerificationInput(email=USER_EMAIL))
         mock_send.assert_awaited_once()
 
@@ -594,6 +630,7 @@ class TestResendVerification:
 
 # ─── Forgot Password ──────────────────────────────────────────────────────────
 
+
 class TestForgotPassword:
     def _pr_repo(self):
         pr = AsyncMock()
@@ -606,8 +643,10 @@ class TestForgotPassword:
         repo = _make_repo(user=_make_user(), security=_make_security())
         pr_repo = self._pr_repo()
         uc = _make_usecase(repo=repo, password_reset_repo=pr_repo)
-        with (patch("app.application.use_cases.auth_usecase.create_password_reset_token", return_value="rst"),
-              patch("app.application.use_cases.auth_usecase.send_email", new_callable=AsyncMock) as mock_send):
+        with (
+            patch("app.application.use_cases.auth_usecase.create_password_reset_token", return_value="rst"),
+            patch("app.application.use_cases.auth_usecase.send_email", new_callable=AsyncMock) as mock_send,
+        ):
             await uc.forgot_password(ForgotPasswordInput(email=USER_EMAIL))
         mock_send.assert_awaited_once()
         pr_repo.store.assert_awaited_once()
@@ -646,6 +685,7 @@ class TestForgotPassword:
 
 # ─── Reset Password ───────────────────────────────────────────────────────────
 
+
 class TestResetPassword:
     def _payload(self):
         p = MagicMock()
@@ -661,8 +701,10 @@ class TestResetPassword:
     async def test_success(self):
         """Atomically consumes reset token and updates password hash"""
         uc = _make_usecase(repo=_make_repo(user=_make_user()), password_reset_repo=self._pr_repo())
-        with (patch("app.application.use_cases.auth_usecase.verify_password_reset_token", return_value=self._payload()),
-              patch("app.application.use_cases.auth_usecase.hash_string", return_value="new_hash")):
+        with (
+            patch("app.application.use_cases.auth_usecase.verify_password_reset_token", return_value=self._payload()),
+            patch("app.application.use_cases.auth_usecase.hash_string", return_value="new_hash"),
+        ):
             await uc.reset_password(ResetPasswordInput(token="rst.tok", new_password="newpass123"))
 
     @pytest.mark.asyncio
@@ -703,7 +745,9 @@ class TestResetPassword:
         repo = _make_repo(user=_make_user())
         repo.update_password = AsyncMock(return_value=False)
         uc = _make_usecase(repo=repo, password_reset_repo=self._pr_repo())
-        with (patch("app.application.use_cases.auth_usecase.verify_password_reset_token", return_value=self._payload()),
-              patch("app.application.use_cases.auth_usecase.hash_string", return_value="new_hash")):
+        with (
+            patch("app.application.use_cases.auth_usecase.verify_password_reset_token", return_value=self._payload()),
+            patch("app.application.use_cases.auth_usecase.hash_string", return_value="new_hash"),
+        ):
             with pytest.raises(UserNotFoundError):
                 await uc.reset_password(ResetPasswordInput(token="tok", new_password="pass"))

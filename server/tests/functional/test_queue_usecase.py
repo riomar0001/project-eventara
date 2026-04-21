@@ -41,7 +41,7 @@ def _make_redis(*, lock_acquired=True) -> MagicMock:
 
     async def _empty_scan(match="*"):
         return
-        yield  # noqa: unreachable
+        yield  # makes this an async generator
 
     redis.scan_iter = _empty_scan
     redis.type = AsyncMock(return_value=b"string")
@@ -54,6 +54,7 @@ def _make_redis(*, lock_acquired=True) -> MagicMock:
 
 
 # ─── GetQueueStatsUseCase ─────────────────────────────────────────────────────
+
 
 class TestGetQueueStatsUseCase:
     @pytest.mark.asyncio
@@ -85,6 +86,7 @@ class TestGetQueueStatsUseCase:
 
 
 # ─── ListDeadJobsUseCase ──────────────────────────────────────────────────────
+
 
 class TestListDeadJobsUseCase:
     @pytest.mark.asyncio
@@ -139,6 +141,7 @@ class TestListDeadJobsUseCase:
 
 # ─── RetryDeadJobUseCase ──────────────────────────────────────────────────────
 
+
 class TestRetryDeadJobUseCase:
     @pytest.mark.asyncio
     async def test_success(self):
@@ -180,6 +183,7 @@ class TestRetryDeadJobUseCase:
 
 # ─── DeleteDeadJobUseCase ─────────────────────────────────────────────────────
 
+
 class TestDeleteDeadJobUseCase:
     @pytest.mark.asyncio
     async def test_success(self):
@@ -211,6 +215,7 @@ class TestDeleteDeadJobUseCase:
 
 # ─── PurgeDeadJobsUseCase ─────────────────────────────────────────────────────
 
+
 class TestPurgeDeadJobsUseCase:
     @pytest.mark.asyncio
     async def test_purges_all_dead_jobs(self):
@@ -237,7 +242,7 @@ class TestPurgeDeadJobsUseCase:
 
         async def _scan(match="*"):
             return
-            yield  # noqa: unreachable
+            yield  # makes this an async generator
 
         redis.scan_iter = _scan
         result = await PurgeDeadJobsUseCase(redis).execute()

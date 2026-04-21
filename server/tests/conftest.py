@@ -53,23 +53,22 @@ def pytest_runtest_makereport(item, call):
         result = "SKIP"
 
     filepath = _file_label(item.nodeid)
-    _BY_FILE.setdefault(filepath, []).append({
-        "scenario": _format_scenario(item.nodeid),
-        "expected": doc,
-        "actual":   actual,
-        "result":   result,
-        "action":   "",
-    })
+    _BY_FILE.setdefault(filepath, []).append(
+        {
+            "scenario": _format_scenario(item.nodeid),
+            "expected": doc,
+            "actual": actual,
+            "result": result,
+            "action": "",
+        }
+    )
 
 
 def _print_table(title: str, rows: list[dict]) -> None:
     keys = ["scenario", "expected", "actual", "result", "action"]
     headers = ["SCENARIOS", "EXPECTED RESULT", "ACTUAL RESULT", "TEST RESULT", "ACTION"]
 
-    col_w = {
-        k: max(len(h), max(len(r[k]) for r in rows))
-        for k, h in zip(keys, headers)
-    }
+    col_w = {k: max(len(h), max(len(r[k]) for r in rows)) for k, h in zip(keys, headers)}
 
     def _pad(text: str, key: str) -> str:
         return text.ljust(col_w[key])

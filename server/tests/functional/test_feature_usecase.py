@@ -39,6 +39,7 @@ def _make_uc(repo=None) -> FeatureManagementUseCase:
 
 # ─── list_features ────────────────────────────────────────────────────────────
 
+
 class TestListFeatures:
     @pytest.mark.asyncio
     async def test_returns_all_features(self):
@@ -56,6 +57,7 @@ class TestListFeatures:
 
 # ─── get_feature ──────────────────────────────────────────────────────────────
 
+
 class TestGetFeature:
     @pytest.mark.asyncio
     async def test_success(self):
@@ -72,6 +74,7 @@ class TestGetFeature:
 
 
 # ─── create_feature ───────────────────────────────────────────────────────────
+
 
 class TestCreateFeature:
     def _data(self, slug="events") -> CreateFeatureInput:
@@ -91,9 +94,7 @@ class TestCreateFeature:
     async def test_duplicate_slug_raises_already_exists(self):
         """Raises FeatureAlreadyExistsError and rolls back when slug is not unique"""
         repo = _make_repo()
-        repo.create_feature_definition = AsyncMock(
-            side_effect=IntegrityError(None, None, Exception("unique_slug"))
-        )
+        repo.create_feature_definition = AsyncMock(side_effect=IntegrityError(None, None, Exception("unique_slug")))
         db = AsyncMock()
         with pytest.raises(FeatureAlreadyExistsError):
             await FeatureManagementUseCase(repo=repo, db=db).create_feature(self._data())
@@ -112,11 +113,15 @@ class TestCreateFeature:
 
 # ─── update_feature ───────────────────────────────────────────────────────────
 
+
 class TestUpdateFeature:
     def _data(self, slug="events") -> UpdateFeatureInput:
         return UpdateFeatureInput(
-            feature_id=FEATURE_ID, slug=slug, name="Events Updated",
-            description="Updated", is_enabled=True,
+            feature_id=FEATURE_ID,
+            slug=slug,
+            name="Events Updated",
+            description="Updated",
+            is_enabled=True,
         )
 
     @pytest.mark.asyncio
@@ -173,9 +178,7 @@ class TestUpdateFeature:
     async def test_integrity_error_raises_already_exists(self):
         """Raises FeatureAlreadyExistsError and rolls back when new slug conflicts with another feature"""
         repo = _make_repo(feature=_make_feature(slug="events"))
-        repo.update_feature_definition = AsyncMock(
-            side_effect=IntegrityError(None, None, Exception("unique_slug"))
-        )
+        repo.update_feature_definition = AsyncMock(side_effect=IntegrityError(None, None, Exception("unique_slug")))
         db = AsyncMock()
         with pytest.raises(FeatureAlreadyExistsError):
             await FeatureManagementUseCase(repo=repo, db=db).update_feature(self._data(slug="events"))
@@ -193,6 +196,7 @@ class TestUpdateFeature:
 
 
 # ─── delete_feature ───────────────────────────────────────────────────────────
+
 
 class TestDeleteFeature:
     @pytest.mark.asyncio

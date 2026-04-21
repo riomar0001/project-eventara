@@ -49,6 +49,7 @@ def _make_uc(repo=None) -> FeatureManagementUseCase:
 
 # ─── list_features ────────────────────────────────────────────────────────────
 
+
 class TestListFeatures:
     @pytest.mark.asyncio
     async def test_returns_all_features(self):
@@ -64,6 +65,7 @@ class TestListFeatures:
 
 # ─── get_feature ──────────────────────────────────────────────────────────────
 
+
 class TestGetFeature:
     @pytest.mark.asyncio
     async def test_success(self):
@@ -78,6 +80,7 @@ class TestGetFeature:
 
 
 # ─── create_feature ───────────────────────────────────────────────────────────
+
 
 class TestCreateFeature:
     def _data(self, slug="events") -> CreateFeatureInput:
@@ -96,9 +99,7 @@ class TestCreateFeature:
     @pytest.mark.asyncio
     async def test_duplicate_slug_raises_already_exists(self):
         repo = _make_repo()
-        repo.create_feature_definition = AsyncMock(
-            side_effect=IntegrityError(None, None, Exception("unique_slug"))
-        )
+        repo.create_feature_definition = AsyncMock(side_effect=IntegrityError(None, None, Exception("unique_slug")))
         db = AsyncMock()
         uc = FeatureManagementUseCase(repo=repo, db=db)
         with pytest.raises(FeatureAlreadyExistsError):
@@ -118,11 +119,15 @@ class TestCreateFeature:
 
 # ─── update_feature ───────────────────────────────────────────────────────────
 
+
 class TestUpdateFeature:
     def _data(self, slug="events") -> UpdateFeatureInput:
         return UpdateFeatureInput(
-            feature_id=FEATURE_ID, slug=slug, name="Events Updated",
-            description="Updated", is_enabled=True,
+            feature_id=FEATURE_ID,
+            slug=slug,
+            name="Events Updated",
+            description="Updated",
+            is_enabled=True,
         )
 
     @pytest.mark.asyncio
@@ -178,9 +183,7 @@ class TestUpdateFeature:
     async def test_integrity_error_raises_already_exists(self):
         feature = _make_feature(slug="events")
         repo = _make_repo(feature=feature)
-        repo.update_feature_definition = AsyncMock(
-            side_effect=IntegrityError(None, None, Exception("unique_slug"))
-        )
+        repo.update_feature_definition = AsyncMock(side_effect=IntegrityError(None, None, Exception("unique_slug")))
         db = AsyncMock()
         uc = FeatureManagementUseCase(repo=repo, db=db)
         with pytest.raises(FeatureAlreadyExistsError):
@@ -200,6 +203,7 @@ class TestUpdateFeature:
 
 
 # ─── delete_feature ───────────────────────────────────────────────────────────
+
 
 class TestDeleteFeature:
     @pytest.mark.asyncio

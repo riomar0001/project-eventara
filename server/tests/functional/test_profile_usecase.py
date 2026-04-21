@@ -35,8 +35,7 @@ USER_EMAIL = "user@example.com"
 
 
 def _make_user(*, status=UserStatus.ACTIVE, onboarding_completed=False) -> User:
-    return User(id=USER_ID, email=USER_EMAIL, password="hashed",
-                status=status, onboarding_completed=onboarding_completed)
+    return User(id=USER_ID, email=USER_EMAIL, password="hashed", status=status, onboarding_completed=onboarding_completed)
 
 
 def _make_security(*, email_verified=True) -> UserSecurity:
@@ -44,16 +43,29 @@ def _make_security(*, email_verified=True) -> UserSecurity:
 
 
 def _make_profile() -> UserProfile:
-    return UserProfile(user_id=USER_ID, alias="riomar", first_name="Mario",
-                       last_name="Inguito", age_group=AgeGroup.ADULT,
-                       gender=Gender.MALE, education_level=EducationLevel.BACHELORS_DEGREE)
+    return UserProfile(
+        user_id=USER_ID,
+        alias="riomar",
+        first_name="Mario",
+        last_name="Inguito",
+        age_group=AgeGroup.ADULT,
+        gender=Gender.MALE,
+        education_level=EducationLevel.BACHELORS_DEGREE,
+    )
 
 
 def _make_input(alias="riomar") -> UserOnboardingInput:
-    return UserOnboardingInput(user_id=USER_ID, alias=alias, first_name="Mario",
-                               last_name="Inguito", age_group=AgeGroup.ADULT,
-                               gender=Gender.MALE, education_level=EducationLevel.BACHELORS_DEGREE,
-                               occupation="Engineer", bio="Hello")
+    return UserOnboardingInput(
+        user_id=USER_ID,
+        alias=alias,
+        first_name="Mario",
+        last_name="Inguito",
+        age_group=AgeGroup.ADULT,
+        gender=Gender.MALE,
+        education_level=EducationLevel.BACHELORS_DEGREE,
+        occupation="Engineer",
+        bio="Hello",
+    )
 
 
 def _make_repo(*, user=None, security=None, alias_taken=False, profile=None, login_history=None):
@@ -68,6 +80,7 @@ def _make_repo(*, user=None, security=None, alias_taken=False, profile=None, log
 
 
 # ─── OnboardingUseCase ────────────────────────────────────────────────────────
+
 
 class TestOnboardingUseCase:
     def _make_uc(self, repo):
@@ -155,6 +168,7 @@ class TestOnboardingUseCase:
 
 # ─── CheckAliasUseCase ────────────────────────────────────────────────────────
 
+
 class TestCheckAliasUseCase:
     @pytest.mark.asyncio
     async def test_alias_available(self):
@@ -171,12 +185,12 @@ class TestCheckAliasUseCase:
 
 # ─── GetLoginHistoryUseCase ───────────────────────────────────────────────────
 
+
 class TestGetLoginHistoryUseCase:
     @pytest.mark.asyncio
     async def test_returns_entries(self):
         """Returns the login history entries retrieved from the repository"""
-        entries = [UserLoginHistory(user_id=USER_ID, successful=True),
-                   UserLoginHistory(user_id=USER_ID, successful=False)]
+        entries = [UserLoginHistory(user_id=USER_ID, successful=True), UserLoginHistory(user_id=USER_ID, successful=False)]
         repo = _make_repo(login_history=entries)
         result = await GetLoginHistoryUseCase(repo).execute(GetLoginHistoryInput(user_id=USER_ID, limit=10))
         assert result.entries == entries
@@ -184,8 +198,7 @@ class TestGetLoginHistoryUseCase:
     @pytest.mark.asyncio
     async def test_empty_history(self):
         """Returns an empty list when the user has no login history"""
-        result = await GetLoginHistoryUseCase(_make_repo(login_history=[])).execute(
-            GetLoginHistoryInput(user_id=USER_ID, limit=5))
+        result = await GetLoginHistoryUseCase(_make_repo(login_history=[])).execute(GetLoginHistoryInput(user_id=USER_ID, limit=5))
         assert result.entries == []
 
     @pytest.mark.asyncio
