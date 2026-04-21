@@ -21,7 +21,7 @@ import uuid
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.application.dto.feature_management_dto import (
+from app.application.dto.features_dto import (
     CreateFeatureInput,
     FeatureOutput,
     ListFeaturesOutput,

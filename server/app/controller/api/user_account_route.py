@@ -4,7 +4,7 @@ import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 
-from app.application.dto.admin_user_account_dto import (
+from app.application.dto.users_dto import (
     ChangeUserEmailInput,
     ChangeUserRoleInput,
     ListUserAccountsInput,

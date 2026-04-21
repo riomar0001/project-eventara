@@ -2,6 +2,7 @@ import uuid
 from dataclasses import dataclass, field
 from datetime import datetime
 
+from app.application.dto.roles_dto import RolePermissionSummary
 from app.domain.entities.authorization_entities import GrantEffect, RoleAction
 from app.domain.entities.user_entity import AgeGroup, EducationLevel, Gender, UserStatus
 
@@ -13,15 +14,6 @@ class ListUserAccountsInput:
     search: str | None = None
     status: UserStatus | None = None
     role_name: str | None = None
-
-
-@dataclass
-class RolePermissionSummary:
-    feature_slug: str
-    feature_name: str
-    action: RoleAction
-    effect: GrantEffect
-    feature_id: uuid.UUID | None = None
 
 
 @dataclass

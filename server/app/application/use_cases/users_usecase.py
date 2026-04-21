@@ -24,7 +24,7 @@ Concurrency strategy:
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.application.dto.admin_user_account_dto import (
+from app.application.dto.users_dto import (
     AdminUserAccountDetail,
     AssignableRoleDetail,
     ChangeUserEmailInput,

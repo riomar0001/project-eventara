@@ -3,7 +3,8 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.application.dto.user_dto import ChangePasswordInput, GetLoginHistoryInput, RequestAccountDeletionInput, UserOnboardingInput
+from app.application.dto.account_settings_dto import ChangePasswordInput, RequestAccountDeletionInput
+from app.application.dto.profile_dto import GetLoginHistoryInput, UserOnboardingInput
 from app.application.use_cases.account_settings_usecase import ChangePasswordUseCase, DeleteAccountUseCase
 from app.application.use_cases.profile_usecase import CheckAliasUseCase, GetLoginHistoryUseCase, OnboardingUseCase
 from app.controller.dependencies import get_current_user_id, get_onboarding_use_case, require_permission

@@ -3,7 +3,7 @@ import uuid
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.application.dto.role_dto import (
+from app.application.dto.roles_dto import (
     AssignRoleInput,
     AssignRoleOutput,
     CreateGrantsInput,
@@ -14,7 +14,7 @@ from app.application.dto.role_dto import (
     UpdateAssignmentInput,
     UpdateAssignmentOutput,
 )
-from app.application.dto.role_management_dto import (
+from app.application.dto.roles_dto import (
     CreateRoleInput,
     ListRolesOutput,
     ManagedRoleDetail,

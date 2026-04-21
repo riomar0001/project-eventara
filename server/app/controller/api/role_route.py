@@ -3,12 +3,12 @@ from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 
-from app.application.dto.role_dto import (
+from app.application.dto.roles_dto import (
     AssignRoleInput,
     CreateGrantsInput,
     UpdateAssignmentInput,
 )
-from app.application.dto.role_management_dto import (
+from app.application.dto.roles_dto import (
     CreateRoleInput,
     RolePermissionInput,
     UpdateRoleInput,

@@ -4,7 +4,7 @@ from datetime import UTC, datetime, timedelta
 from arq.connections import ArqRedis
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.application.dto.user_dto import (
+from app.application.dto.account_settings_dto import (
     ChangePasswordInput,
     RequestAccountDeletionInput,
     RequestAccountDeletionOutput,
@@ -213,7 +213,7 @@ class DeleteAccountUseCase:
             _expires=timedelta(days=2),
         )
 
-        from app.application.dto.user_dto import RequestAccountDeletionOutput
+        from app.application.dto.account_settings_dto import RequestAccountDeletionOutput
         return RequestAccountDeletionOutput(
             user_id=scheduled_user.id,
             deletion_requested_at=scheduled_user.deletion_requested_at,

@@ -2,7 +2,7 @@ import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 
-from app.application.dto.feature_management_dto import (
+from app.application.dto.features_dto import (
     CreateFeatureInput,
     UpdateFeatureInput,
 )

@@ -2,7 +2,7 @@ from fastapi import APIRouter
 
 from app.controller.api.audit_log_route import router as audit_log_router
 from app.controller.api.auth_route import router as auth_router
-from app.controller.api.features_routes import feature_router
+from app.controller.api.features_route import feature_router
 from app.controller.api.queue_route import router as queue_router
 from app.controller.api.role_route import grant_router, role_management_router, role_router
 from app.controller.api.user_account_route import router as user_account_router

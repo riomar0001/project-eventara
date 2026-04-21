@@ -4,7 +4,7 @@ from datetime import UTC, datetime, timedelta
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.application.dto.user_dto import (
+from app.application.dto.profile_dto import (
     GetLoginHistoryInput,
     GetLoginHistoryOutput,
     UserOnboardingInput,

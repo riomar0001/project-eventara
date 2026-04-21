@@ -6,7 +6,7 @@ from pydantic import AwareDatetime
 from sqlalchemy import CursorResult, delete, func, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.application.dto.admin_user_account_dto import RolePermissionSummary
+from app.application.dto.roles_dto import RolePermissionSummary
 from app.domain.entities.authorization_entities import Feature as FeatureEntity
 from app.domain.entities.authorization_entities import GrantEffect, RoleAction
 from app.domain.entities.authorization_entities import Role as RoleEntity
