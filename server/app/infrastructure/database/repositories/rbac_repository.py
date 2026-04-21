@@ -166,9 +166,7 @@ class RBACRepository:
                 or_(UserGrant.expires_at.is_(None), UserGrant.expires_at > now),
             )
         )
-        grant_map: dict[str, GrantEffect] = {
-            f"{slug}:{action}": effect for slug, action, effect in grants_result.all()
-        }
+        grant_map: dict[str, GrantEffect] = {f"{slug}:{action}": effect for slug, action, effect in grants_result.all()}
 
         # All role-level permissions
         role_map: dict[str, GrantEffect] = {}
@@ -182,9 +180,7 @@ class RBACRepository:
                     Feature.is_enabled.is_(True),
                 )
             )
-            role_map = {
-                f"{slug}:{action}": effect for slug, action, effect in perms_result.all()
-            }
+            role_map = {f"{slug}:{action}": effect for slug, action, effect in perms_result.all()}
 
         # Resolve: user grants win; role perms are fallback
         resolved: dict[str, bool] = {}
