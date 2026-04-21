@@ -5,7 +5,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.controller.dependencies.auth_depends import _CookieOrBearer, _auth_detail
+from app.controller.dependencies.auth_depends import _auth_detail, _CookieOrBearer
 from app.core.security.token_service import verify_access_token
 from app.domain.entities.authorization_entities import GrantEffect, RoleAction
 from app.infrastructure.database.repositories.rbac_repository import RBACRepository
