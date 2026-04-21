@@ -39,7 +39,7 @@ class FeedbackReport(Base):
         nullable=False,
         default="medium",
     )
-    metadata: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    extra_metadata: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
     # Relationships
     user = relationship("User", back_populates="feedback_reports")
