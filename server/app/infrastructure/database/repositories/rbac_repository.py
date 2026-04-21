@@ -4,7 +4,7 @@ from datetime import UTC, datetime
 from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.domain.entities.authorization_entities import RoleAction
+from app.domain.entities.authorization_entities import GrantEffect, RoleAction
 from app.infrastructure.database.models.user_models import (
     Feature,
     Role,
@@ -143,3 +143,51 @@ class RBACRepository:
             )
         )
         return result.scalar_one_or_none()
+
+    async def get_effective_permissions(
+        self,
+        user_id: uuid.UUID,
+        role_name: str | None,
+    ) -> dict[str, bool]:
+        """Return a flat map of 'feature_slug:action' → allowed for the given user.
+
+        User grants take precedence over role permissions. Two queries total.
+        """
+        now = self._utcnow_naive()
+
+        # All active user-level grants
+        grants_result = await self.db.execute(
+            select(Feature.slug, UserGrant.action, UserGrant.effect)
+            .join(Feature, UserGrant.feature_id == Feature.id)
+            .where(
+                UserGrant.user_id == user_id,
+                Feature.is_enabled.is_(True),
+                or_(UserGrant.starts_at.is_(None), UserGrant.starts_at <= now),
+                or_(UserGrant.expires_at.is_(None), UserGrant.expires_at > now),
+            )
+        )
+        grant_map: dict[str, GrantEffect] = {f"{slug}:{action}": effect for slug, action, effect in grants_result.all()}
+
+        # All role-level permissions
+        role_map: dict[str, GrantEffect] = {}
+        if role_name:
+            perms_result = await self.db.execute(
+                select(Feature.slug, RolePermission.action, RolePermission.effect)
+                .join(Role, RolePermission.role_id == Role.id)
+                .join(Feature, RolePermission.feature_id == Feature.id)
+                .where(
+                    Role.name == role_name,
+                    Feature.is_enabled.is_(True),
+                )
+            )
+            role_map = {f"{slug}:{action}": effect for slug, action, effect in perms_result.all()}
+
+        # Resolve: user grants win; role perms are fallback
+        resolved: dict[str, bool] = {}
+        for key in set(grant_map) | set(role_map):
+            if key in grant_map:
+                resolved[key] = grant_map[key] == GrantEffect.ALLOW
+            else:
+                resolved[key] = role_map[key] == GrantEffect.ALLOW
+
+        return resolved

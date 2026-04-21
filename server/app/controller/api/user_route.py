@@ -46,6 +46,7 @@ from app.controller.schemas.user_schema import (
     LoginHistoryListResponse,
     UserOnboardingRequest,
     UserOnboardingResponse,
+    UserPermissionsResponse,
 )
 from app.core.security.token_service import create_access_token
 from app.domain.entities.authorization_entities import RoleAction
@@ -60,6 +61,7 @@ from app.domain.exceptions.user_exceptions import (
     UserInactiveError,
     UserNotFoundError,
 )
+from app.infrastructure.database.repositories.rbac_repository import RBACRepository
 from app.infrastructure.database.repositories.user_repository import UserRepository
 from app.infrastructure.database.session import get_db
 
@@ -81,6 +83,27 @@ async def get_login_history(
 ) -> LoginHistoryListResponse:
     result = await use_case.execute(GetLoginHistoryInput(user_id=user_id, limit=limit))
     return LoginHistoryListResponse(data=[LoginHistoryEntryResponse.model_validate(entry) for entry in result.entries])
+
+
+@router.get(
+    "/me/permissions",
+    response_model=UserPermissionsResponse,
+    status_code=status.HTTP_200_OK,
+    responses={**UNAUTHORIZED},
+    summary="Get effective permissions for the current user",
+    description=(
+        "Returns a flat map of 'feature_slug:action' → allowed (bool) for the authenticated user. "
+        "User-level grants take precedence over role permissions. "
+        "Used by the client to gate UI elements without exposing the full permission model."
+    ),
+)
+async def get_my_permissions(
+    user_id: uuid.UUID = Depends(get_current_user_id),
+    db: AsyncSession = Depends(get_db),
+) -> UserPermissionsResponse:
+    role_name = await UserRepository(db).get_active_role_name_by_user_id(user_id)
+    permissions = await RBACRepository(db).get_effective_permissions(user_id, role_name)
+    return UserPermissionsResponse(permissions=permissions)
 
 
 @router.get(
