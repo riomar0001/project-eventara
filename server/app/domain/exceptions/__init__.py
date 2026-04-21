@@ -22,6 +22,13 @@ from app.domain.exceptions.event_rating_exceptions import (
     EventRatingValidationError,
     UnauthorizedEventRatingOperationError,
 )
+from app.domain.exceptions.event_session_exceptions import (
+    EventSessionNotFoundError,
+    EventSessionStatusTransitionError,
+    EventSessionValidationError,
+    InvalidEventSessionDateError,
+    UnauthorizedEventSessionOperationError,
+)
 from app.domain.exceptions.event_volunteer_exceptions import (
     EventVolunteerAlreadyExistsError,
     EventVolunteerNotFoundError,
@@ -150,6 +157,11 @@ __all__ = [
     "UnauthorizedEventRatingOperationError",
     "EventNotRatableError",
     "InvalidEventRatingStatusTransitionError",
+    "EventSessionNotFoundError",
+    "EventSessionValidationError",
+    "InvalidEventSessionDateError",
+    "EventSessionStatusTransitionError",
+    "UnauthorizedEventSessionOperationError",
     "FeedbackReportNotFoundError",
     "FeedbackReportValidationError",
     "DuplicateFeedbackReportError",

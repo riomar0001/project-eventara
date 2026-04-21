@@ -1,7 +1,7 @@
 """Add population count and usage count to venues
 
 Revision ID: 3e41f7c2a125
-Revises: 4b0c233e36cc
+Revises: f2f2f8660cdf
 Create Date: 2026-04-14 00:27:48.502344
 
 """
@@ -13,7 +13,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision: str = '3e41f7c2a125'
-down_revision: Union[str, Sequence[str], None] = '4b0c233e36cc'
+down_revision: Union[str, Sequence[str], None] = 'f2f2f8660cdf'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

@@ -1,5 +1,6 @@
 from app.domain.entities.event_entity import Event, EventStatus
 from app.domain.entities.event_rating_entity import EventRating
+from app.domain.entities.event_session_entity import EventSession, EventSessionStatus
 from app.domain.entities.event_volunteer_entity import EventVolunteer, EventVolunteerStatus
 from app.domain.entities.feedback_report_entity import EntityType, FeedbackReport, FeedbackStatus, FeedbackType, SeverityLevel
 from app.domain.entities.user_entity import AgeGroup, EducationLevel, Gender, PublicUser, User, UserActivity, UserProfile, UserSecurity, UserStatus
@@ -27,6 +28,8 @@ __all__ = [
     "VolunteerApplication",
     "ApplicationStatus",
     "EventRating",
+    "EventSession",
+    "EventSessionStatus",
     "FeedbackReport",
     "FeedbackType",
     "FeedbackEntityType",
