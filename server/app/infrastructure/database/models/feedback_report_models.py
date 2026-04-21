@@ -3,7 +3,7 @@ from __future__ import annotations
 from uuid import UUID
 
 from sqlalchemy import JSON, Enum, ForeignKey, Index, Text
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column
 
 from app.domain.entities.feedback_report_entity import (
     EntityType,
@@ -40,9 +40,6 @@ class FeedbackReport(Base):
         default="medium",
     )
     extra_metadata: Mapped[dict | None] = mapped_column(JSON, nullable=True)
-
-    # Relationships
-    user = relationship("User", back_populates="feedback_reports")
 
     __table_args__ = (
         Index("idx_feedback_reports_created_by", "created_by"),

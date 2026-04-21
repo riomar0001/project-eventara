@@ -1,12 +1,8 @@
 import uuid
 from datetime import datetime
-from enum import StrEnum
+from enum import IntEnum, StrEnum
 
 from pydantic import BaseModel, Field
-
-"""Venue classification init
-   will ask the team for more details on the classification of venues and update this file accordingly 
-"""
 
 
 class VenueType(StrEnum):
@@ -15,7 +11,12 @@ class VenueType(StrEnum):
     HYBRID = "hybrid"
 
 
-"""Venue entity definition"""
+class RatingValue(IntEnum):
+    ONE = 1
+    TWO = 2
+    THREE = 3
+    FOUR = 4
+    FIVE = 5
 
 
 class Venue(BaseModel):
@@ -23,29 +24,21 @@ class Venue(BaseModel):
     creator_id: uuid.UUID
     name: str = Field(min_length=1, max_length=255)
     description: str | None = Field(default=None, max_length=1000)
-
-    # Address fields
     address_line: str = Field(min_length=1, max_length=255)
     city: str = Field(min_length=1, max_length=100)
     province: str = Field(min_length=1, max_length=100)
     postal_code: str = Field(min_length=1, max_length=20)
     region: str = Field(min_length=1, max_length=100)
     country: str = Field(min_length=1, max_length=100)
-
-    # Venue details
-    capacity: int = Field(gt=0)  # Must be greater than 0
+    capacity: int = Field(gt=0)
     venue_type: VenueType
     popularity_count: int = Field(default=0, ge=0)
     usage_count: int = Field(default=0, ge=0)
     is_partner: bool = False
     amenities: dict | None = None
-
-    # Contact information
     contact_name: str = Field(min_length=1, max_length=255)
     contact_phone: str = Field(min_length=1, max_length=20)
     contact_email: str = Field(min_length=1, max_length=255)
-
-    # Timestamps
     created_at: datetime | None = None
     updated_at: datetime | None = None
 
@@ -53,8 +46,6 @@ class Venue(BaseModel):
 
 
 class PublicVenue(BaseModel):
-    """Public venue view (without sensitive info)"""
-
     id: uuid.UUID
     name: str
     description: str | None
@@ -70,5 +61,17 @@ class PublicVenue(BaseModel):
     contact_phone: str
     contact_email: str
     created_at: datetime | None
+
+    model_config = {"from_attributes": True}
+
+
+class VenueRating(BaseModel):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4)
+    user_id: uuid.UUID
+    venue_id: uuid.UUID
+    rating: int = Field(ge=1, le=5)
+    comment: str | None = None
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
 
     model_config = {"from_attributes": True}

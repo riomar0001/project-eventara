@@ -1,12 +1,33 @@
 import uuid
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.core.config import settings
 from app.core.security.token_service import verify_access_token
 
-_bearer = HTTPBearer()
+
+class _CookieOrBearer(HTTPBearer):
+    """HTTPBearer that also accepts the token from the ``access_token`` cookie.
+
+    Precedence: Authorization header → access_token cookie.
+    """
+
+    async def __call__(self, request: Request) -> HTTPAuthorizationCredentials | None:
+        try:
+            return await super().__call__(request)
+        except HTTPException:
+            token = request.cookies.get("access_token")
+            if not token:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Not authenticated",
+                    headers={"WWW-Authenticate": "Bearer"},
+                )
+            return HTTPAuthorizationCredentials(scheme="Bearer", credentials=token)
+
+
+_bearer = _CookieOrBearer()
 
 
 def _auth_detail(exc: ValueError) -> str:

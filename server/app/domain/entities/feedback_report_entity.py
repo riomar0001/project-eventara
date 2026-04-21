@@ -41,6 +41,7 @@ class FeedbackReport(BaseModel):
     """Feedback Report entity definition"""
 
     id: uuid.UUID = Field(default_factory=uuid.uuid4)
+    created_by: uuid.UUID
     feedback_type: FeedbackType
     title: str = Field(min_length=5, max_length=255)
     description: str = Field(min_length=10, max_length=5000)
@@ -48,7 +49,7 @@ class FeedbackReport(BaseModel):
     entity_id: uuid.UUID | None = None
     status: FeedbackStatus = FeedbackStatus.OPEN
     severity: SeverityLevel = SeverityLevel.MEDIUM
-    metadata: dict | None = None
+    extra_metadata: dict | None = None
 
     # Timestamps
     created_at: datetime | None = None
