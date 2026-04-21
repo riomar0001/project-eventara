@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { AdminUserAccounts, User, UserGrantManagement } from '@/api/sdk.gen';
+import { Roles, Users } from '@/api/sdk.gen';
 import type {
   AssignableRoleResponse as AssignableRole,
   ChangeUserEmailResponse,
@@ -79,7 +79,7 @@ export function useAdminUserAccountActions() {
     setRolesError(null);
 
     try {
-      const result = await AdminUserAccounts.listRolesUserAccountsRolesGet({
+      const result = await Users.listRolesUserAccountsRolesGet({
         headers: { Authorization: `Bearer ${getAccessToken()}` },
         throwOnError: false
       });
@@ -102,7 +102,7 @@ export function useAdminUserAccountActions() {
     setGrantFeaturesError(null);
 
     try {
-      const result = await UserGrantManagement.listGrantFeaturesUserGrantsFeaturesGet({
+      const result = await Roles.listGrantFeaturesUserGrantsFeaturesGet({
         headers: { Authorization: `Bearer ${getAccessToken()}` },
         throwOnError: false
       });
@@ -126,7 +126,7 @@ export function useAdminUserAccountActions() {
     setPendingAction('role');
 
     try {
-      const result = await AdminUserAccounts.changeUserRoleUserAccountsUserIdRolePatch({
+      const result = await Users.changeUserRoleUserAccountsUserIdRolePatch({
         body: { role_id: roleId },
         path: { user_id: userId },
         headers: { Authorization: `Bearer ${getAccessToken()}` },
@@ -154,7 +154,7 @@ export function useAdminUserAccountActions() {
     setPendingAction('email');
 
     try {
-      const result = await AdminUserAccounts.changeUserEmailUserAccountsUserIdEmailPatch({
+      const result = await Users.changeUserEmailUserAccountsUserIdEmailPatch({
         body: { email },
         path: { user_id: userId },
         headers: { Authorization: `Bearer ${getAccessToken()}` },
@@ -182,7 +182,7 @@ export function useAdminUserAccountActions() {
     setPendingAction('password-reset');
 
     try {
-      const result = await AdminUserAccounts.sendUserPasswordResetUserAccountsUserIdPasswordResetPost({
+      const result = await Users.sendUserPasswordResetUserAccountsUserIdPasswordResetPost({
         path: { user_id: userId },
         headers: { Authorization: `Bearer ${getAccessToken()}` },
         throwOnError: false
@@ -209,9 +209,9 @@ export function useAdminUserAccountActions() {
     setPendingAction('delete');
 
     try {
-      const result = await User.scheduleAdminAccountDeletionUserTargetUserIdAccountDeletionPost({
+      const result = await Users.scheduleAdminAccountDeletionUserAccountsUserIdAccountDeletionPost({
         body: { reason },
-        path: { target_user_id: userId },
+        path: { user_id: userId },
         headers: { Authorization: `Bearer ${getAccessToken()}` },
         throwOnError: false
       });
@@ -245,7 +245,7 @@ export function useAdminUserAccountActions() {
     setPendingAction('special-permission');
 
     try {
-      const result = await UserGrantManagement.createGrantsUserGrantsPost({
+      const result = await Roles.createGrantsUserGrantsPost({
         body: {
           user_id: input.userId,
           role_id: input.roleId,
@@ -279,7 +279,7 @@ export function useAdminUserAccountActions() {
     setSpecialPermissionsError(null);
 
     try {
-      const result = await UserGrantManagement.listUserGrantsUserGrantsGet({
+      const result = await Roles.listUserGrantsUserGrantsGet({
         query: { user_id: userId },
         headers: { Authorization: `Bearer ${getAccessToken()}` },
         throwOnError: false
@@ -310,7 +310,7 @@ export function useAdminUserAccountActions() {
     setPendingAction('delete-special-permission');
 
     try {
-      const result = await UserGrantManagement.revokeGrantUserGrantsGrantIdDelete({
+      const result = await Roles.revokeGrantUserGrantsGrantIdDelete({
         path: { grant_id: grantId },
         headers: { Authorization: `Bearer ${getAccessToken()}` },
         throwOnError: false

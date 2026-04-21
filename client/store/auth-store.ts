@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
-import { Authentication } from '@/api/sdk.gen';
+import { Auth } from '@/api/sdk.gen';
 import { type AuthUser, decodeTokenUser, isTokenExpired } from '@/lib/auth/token';
 
 export type { AuthUser };
@@ -72,7 +72,7 @@ export const useAuthStore = create<AuthStore>()(
         if (!refreshToken) return false;
 
         try {
-          const { data, error } = await Authentication.refreshTokenAuthRefreshPost({
+          const { data, error } = await Auth.refreshTokenAuthRefreshPost({
             body: { refresh_token: refreshToken }
           });
 

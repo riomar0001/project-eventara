@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Mail, CheckCircle2, RotateCcw, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Authentication } from '@/api/sdk.gen';
+import { Auth } from '@/api/sdk.gen';
 
 interface VerifyEmailCardProps {
   email: string;
@@ -16,7 +16,7 @@ export function VerifyEmailCard({ email, onBack }: VerifyEmailCardProps) {
 
   async function handleResend() {
     setResendState('loading');
-    const { error } = await Authentication.resendVerificationAuthResendVerificationPost({
+    const { error } = await Auth.resendVerificationAuthResendVerificationPost({
       body: { email },
       throwOnError: false
     });

@@ -1,7 +1,7 @@
 'use client';
 
 import type { FormEvent } from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { Loader2, RotateCcw, Sparkles } from 'lucide-react';
 import { FieldHint } from '@/components/system/forms/field-hint';
 import { Button } from '@/components/ui/button';
@@ -9,8 +9,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { sanitizeSlugInput, toKebabSlug } from './features-shared';
 import type { FeatureFormValues } from '@/types/admin/features';
+import { sanitizeSlugInput, toKebabSlug } from './features-shared';
 import type { FeatureRecordResponse } from '@/api/types.gen';
 import { FEATURE_ACCESS_TEXT } from '@/constants/admin/features/access-control';
 
@@ -29,17 +29,15 @@ interface FeatureFormDialogProps {
 export function FeatureFormDialog({ error, isSaving, mode, onClose, onSubmit, onValuesChange, open, selectedFeature, values }: FeatureFormDialogProps) {
   const title = mode === 'create' ? FEATURE_ACCESS_TEXT.createTitle : FEATURE_ACCESS_TEXT.editTitle;
 
-  // Track whether the slug is still auto-synced to the name field.
-  // True only in create mode; resets whenever the dialog (re)opens.
+  const [prevOpen, setPrevOpen] = useState(open);
   const [slugSynced, setSlugSynced] = useState(mode === 'create');
-  const prevOpenRef = useRef(open);
 
-  useEffect(() => {
-    if (open && !prevOpenRef.current) {
+  if (prevOpen !== open) {
+    setPrevOpen(open);
+    if (open) {
       setSlugSynced(mode === 'create');
     }
-    prevOpenRef.current = open;
-  }, [open, mode]);
+  }
 
   function handleNameChange(name: string) {
     if (slugSynced) {
@@ -81,12 +79,7 @@ export function FeatureFormDialog({ error, isSaving, mode, onClose, onSubmit, on
                 <label className="text-xs font-semibold tracking-[0.16em] text-neutral-500 uppercase" htmlFor="feature-name">
                   Name
                 </label>
-                <Input
-                  id="feature-name"
-                  value={values.name}
-                  onChange={(e) => handleNameChange(e.target.value)}
-                  placeholder="User Accounts"
-                />
+                <Input id="feature-name" value={values.name} onChange={(e) => handleNameChange(e.target.value)} placeholder="User Accounts" />
               </div>
 
               <div className="space-y-2">
@@ -118,9 +111,7 @@ export function FeatureFormDialog({ error, isSaving, mode, onClose, onSubmit, on
                     </button>
                   ) : null}
                 </div>
-                <p className="text-[11px] text-neutral-400">
-                  Lowercase letters, numbers, and hyphens only.
-                </p>
+                <p className="text-[11px] text-neutral-400">Lowercase letters, numbers, and hyphens only.</p>
               </div>
             </div>
 

@@ -1,5 +1,5 @@
-import { PermissionGate } from '@/components/auth/permission-gate';
 import { RolesManagement } from '@/components/admin/roles/roles-management';
+import { PermissionGate } from '@/components/auth/permission-gate';
 
 export default function AdminRolesPage() {
   return (

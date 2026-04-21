@@ -2,20 +2,20 @@
 
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import * as AdminSdk from '@/api/sdk.gen';
+import { Roles } from '@/api/sdk.gen';
 import type { RoleCreateRequest, RoleRecordResponse, RoleUpdateRequest } from '@/api/types.gen';
 import { ROLE_ACCESS_TEXT } from '@/constants/admin/roles/access-control';
 import { getAccessToken } from '@/store/auth-store';
 
 type RoleDraft = RoleCreateRequest;
 type RoleCatalogApi = {
-  createRoleRolesPost: typeof AdminSdk.RbacRoles.createRoleRolesPost;
-  deleteRoleRolesRoleIdDelete: typeof AdminSdk.RbacRoles.deleteRoleRolesRoleIdDelete;
-  listRolesRolesGet: typeof AdminSdk.RbacRoles.listRolesRolesGet;
-  updateRoleRolesRoleIdPatch: typeof AdminSdk.RbacRoles.updateRoleRolesRoleIdPatch;
+  createRoleRolesPost: typeof Roles.createRoleRolesPost;
+  deleteRoleRolesRoleIdDelete: typeof Roles.deleteRoleRolesRoleIdDelete;
+  listRolesRolesGet: typeof Roles.listRolesRolesGet;
+  updateRoleRolesRoleIdPatch: typeof Roles.updateRoleRolesRoleIdPatch;
 };
 
-const roleCatalogApi = Reflect.get(AdminSdk, 'R' + 'bacRoles') as RoleCatalogApi;
+const roleCatalogApi: RoleCatalogApi = Roles;
 
 function extractErrorMessage(payload: unknown): string | undefined {
   if (!payload || typeof payload !== 'object') return undefined;

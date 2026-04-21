@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { LoadingState, SuccessState, ExpiredState, AlreadyVerifiedState, InvalidState } from '@/components/auth/verify/verify-email-states';
 import { Card } from '@/components/ui/card';
-import { Authentication } from '@/api/sdk.gen';
+import { Auth } from '@/api/sdk.gen';
 import { decodeTokenUser } from '@/lib/auth/token';
 import { useAuthStore } from '@/store/auth-store';
 
@@ -19,7 +19,7 @@ export default function VerifyEmailPage() {
   useEffect(() => {
     if (!token) return;
 
-    Authentication.verifyEmailAuthVerifyTokenGet({ path: { token }, throwOnError: false }).then((result) => {
+    Auth.verifyEmailAuthVerifyTokenGet({ path: { token }, throwOnError: false }).then((result) => {
       if (result.data) {
         const user = decodeTokenUser(result.data.access_token);
 

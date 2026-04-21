@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { AdminUserAccounts } from '@/api/sdk.gen';
+import { Users } from '@/api/sdk.gen';
 import type { AdminUserAccountDetailResponse as AdminUserAccountDetail } from '@/api/types.gen';
 import { getAccessToken } from '@/store/auth-store';
 
@@ -68,7 +68,7 @@ export function useAdminUserAccountDetail(userId: string | null) {
       try {
         const accessToken = getAccessToken();
 
-        const result = await AdminUserAccounts.getUserAccountDetailUserAccountsUserIdGet({
+        const result = await Users.getUserAccountDetailUserAccountsUserIdGet({
           path: { user_id: targetUserId },
           headers: {
             Authorization: `Bearer ${accessToken}`

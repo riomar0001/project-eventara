@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { toast } from 'sonner';
 import { type AliasStatus, normalizeAlias, useAliasAvailability } from '@/hooks/onboarding/use-alias-availability';
-import { User } from '@/api/sdk.gen';
+import { Profile } from '@/api/sdk.gen';
 import type { AgeGroup, EducationLevel, Gender } from '@/api/types.gen';
 import { PROFILE_ALIAS_MIN_LENGTH, PROFILE_ALIAS_PATTERN, PROFILE_COMPLETION_FIELDS } from '@/constants/user/profile';
 import { decodeTokenUser } from '@/lib/auth/token';
@@ -165,7 +165,7 @@ export function useProfileSettingsForm() {
 
     try {
       if (!user.doneOnboarding) {
-        const result = await User.userOnboardingUserOnboardPost({
+        const result = await Profile.userOnboardingUserOnboardPost({
           body: {
             alias: normalizedProfile.alias ?? '',
             first_name: normalizedProfile.firstName ?? '',
