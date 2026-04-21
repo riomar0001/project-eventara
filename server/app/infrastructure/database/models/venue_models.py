@@ -41,6 +41,7 @@ class Venue(Base):
     # Relationships
     creator = relationship("User", back_populates="venues")
     venue_ratings = relationship("VenueRating", back_populates="venue")
+    event_sessions = relationship("EventSession", back_populates="venue")
 
     # name, city, venue_type
     __table_args__ = (
