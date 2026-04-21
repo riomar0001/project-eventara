@@ -87,3 +87,36 @@ class VenueListResponse(BaseModel):
     success: bool = True
     data: list[VenueRecordResponse]
     pagination: VenuePaginationResponse
+
+
+class PublicVenueRecordResponse(BaseModel):
+    id: uuid.UUID
+    name: str
+    description: str | None
+    address_line: str
+    city: str
+    province: str
+    postal_code: str
+    region: str
+    country: str
+    capacity: int
+    venue_type: VenueType
+    popularity_count: int
+    usage_count: int
+    is_partner: bool
+    amenities: list[str] | None
+    created_at: datetime | None
+    updated_at: datetime | None
+
+    model_config = {"from_attributes": True}
+
+
+class PublicVenueResponse(BaseModel):
+    success: bool = True
+    data: PublicVenueRecordResponse
+
+
+class PublicVenueListResponse(BaseModel):
+    success: bool = True
+    data: list[PublicVenueRecordResponse]
+    pagination: VenuePaginationResponse

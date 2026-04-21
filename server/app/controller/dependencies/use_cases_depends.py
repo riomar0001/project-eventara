@@ -17,13 +17,13 @@ from app.application.use_cases.role_usecase import RoleManagementUseCase, UserRo
 from app.application.use_cases.users_usecase import AdminUserAccountUseCase
 from app.application.use_cases.venue_usecase import VenueManagementUseCase
 from app.infrastructure.cache.repositories.otp_repository import OTPRepository
-from app.infrastructure.database.repositories.venue_repository import VenueRepository as VenueRepo
 from app.infrastructure.cache.repositories.password_reset_repository import PasswordResetRepository
 from app.infrastructure.database.repositories.audit_log_repository import (
     AuditLogRepository,
 )
 from app.infrastructure.database.repositories.role_repository import RoleRepository
 from app.infrastructure.database.repositories.user_repository import UserRepository
+from app.infrastructure.database.repositories.venue_repository import VenueRepository as VenueRepo
 from app.infrastructure.database.session import get_db
 
 

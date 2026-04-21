@@ -35,11 +35,7 @@ VENUE_CONFLICT = {
     409: {
         "description": "A venue with that name already exists in the same city",
         "model": ErrorResponse,
-        "content": {
-            "application/json": {
-                "example": {"success": False, "message": "Venue with this name already exists: Davao Convention Center"}
-            }
-        },
+        "content": {"application/json": {"example": {"success": False, "message": "Venue with this name already exists: Davao Convention Center"}}},
     }
 }
 

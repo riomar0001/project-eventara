@@ -128,35 +128,6 @@ export const zCheckAliasResponse = z.object({
 });
 
 /**
- * CreateVenueRequest
- */
-export const zCreateVenueRequest = z.object({
-    name: z.string().min(1).max(255),
-    description: z.string().nullish(),
-    address_line: z.string().min(1).max(255),
-    city: z.string().min(1).max(100),
-    province: z.string().min(1).max(100),
-    postal_code: z.string().min(1).max(20),
-    region: z.string().min(1).max(100),
-    country: z.string().min(1).max(100),
-    capacity: z.int().gt(0),
-    venue_type: z.string(),
-    contact_name: z.string().min(1).max(255),
-    contact_phone: z.string().min(1).max(20),
-    contact_email: z.string().min(1).max(255)
-});
-
-/**
- * CreateVenueResponse
- */
-export const zCreateVenueResponse = z.object({
-    success: z.boolean().optional().default(true),
-    venue_id: z.uuid(),
-    name: z.string(),
-    message: z.string().optional().default('Venue created successfully.')
-});
-
-/**
  * DeadJobResponse
  */
 export const zDeadJobResponse = z.object({
@@ -684,35 +655,6 @@ export const zUpdateAssignmentRequest = z.object({
 });
 
 /**
- * UpdateVenueRequest
- */
-export const zUpdateVenueRequest = z.object({
-    name: z.string().nullish(),
-    description: z.string().nullish(),
-    address_line: z.string().nullish(),
-    city: z.string().nullish(),
-    province: z.string().nullish(),
-    postal_code: z.string().nullish(),
-    country: z.string().nullish(),
-    region: z.string().nullish(),
-    capacity: z.int().nullish(),
-    venue_type: z.string().nullish(),
-    contact_name: z.string().nullish(),
-    contact_phone: z.string().nullish(),
-    contact_email: z.string().nullish()
-});
-
-/**
- * UpdateVenueResponse
- */
-export const zUpdateVenueResponse = z.object({
-    success: z.boolean().optional().default(true),
-    venue_id: z.uuid(),
-    name: z.string().nullish(),
-    message: z.string().optional().default('Venue updated successfully.')
-});
-
-/**
  * UserGrantResponse
  */
 export const zUserGrantResponse = z.object({
@@ -907,9 +849,30 @@ export const zValidationErrorResponse = z.object({
 });
 
 /**
- * VenueResponse
+ * VenuePaginationResponse
  */
-export const zVenueResponse = z.object({
+export const zVenuePaginationResponse = z.object({
+    page: z.int(),
+    page_size: z.int(),
+    total_count: z.int(),
+    total_pages: z.int(),
+    has_next: z.boolean(),
+    has_previous: z.boolean()
+});
+
+/**
+ * VenueType
+ */
+export const zVenueType = z.enum([
+    'indoor',
+    'outdoor',
+    'hybrid'
+]);
+
+/**
+ * PublicVenueRecordResponse
+ */
+export const zPublicVenueRecordResponse = z.object({
     id: z.uuid(),
     name: z.string(),
     description: z.string().nullable(),
@@ -920,11 +883,117 @@ export const zVenueResponse = z.object({
     region: z.string(),
     country: z.string(),
     capacity: z.int(),
-    venue_type: z.string(),
+    venue_type: zVenueType,
+    popularity_count: z.int(),
+    usage_count: z.int(),
+    is_partner: z.boolean(),
+    amenities: z.array(z.string()).nullable(),
+    created_at: z.iso.datetime().nullable(),
+    updated_at: z.iso.datetime().nullable()
+});
+
+/**
+ * PublicVenueListResponse
+ */
+export const zPublicVenueListResponse = z.object({
+    success: z.boolean().optional().default(true),
+    data: z.array(zPublicVenueRecordResponse),
+    pagination: zVenuePaginationResponse
+});
+
+/**
+ * PublicVenueResponse
+ */
+export const zPublicVenueResponse = z.object({
+    success: z.boolean().optional().default(true),
+    data: zPublicVenueRecordResponse
+});
+
+/**
+ * VenueCreateRequest
+ */
+export const zVenueCreateRequest = z.object({
+    name: z.string().min(1).max(255),
+    description: z.string().max(1000).nullish(),
+    address_line: z.string().min(1).max(255),
+    city: z.string().min(1).max(100),
+    province: z.string().min(1).max(100),
+    postal_code: z.string().min(1).max(20),
+    region: z.string().min(1).max(100),
+    country: z.string().min(1).max(100),
+    capacity: z.int().gt(0),
+    venue_type: zVenueType,
+    is_partner: z.boolean().optional().default(false),
+    amenities: z.array(z.string()).nullish(),
+    contact_name: z.string().min(1).max(255),
+    contact_phone: z.string().min(1).max(20),
+    contact_email: z.email()
+});
+
+/**
+ * VenueRecordResponse
+ */
+export const zVenueRecordResponse = z.object({
+    id: z.uuid(),
+    creator_id: z.uuid(),
+    name: z.string(),
+    description: z.string().nullable(),
+    address_line: z.string(),
+    city: z.string(),
+    province: z.string(),
+    postal_code: z.string(),
+    region: z.string(),
+    country: z.string(),
+    capacity: z.int(),
+    venue_type: zVenueType,
+    popularity_count: z.int(),
+    usage_count: z.int(),
+    is_partner: z.boolean(),
+    amenities: z.array(z.string()).nullable(),
     contact_name: z.string(),
     contact_phone: z.string(),
     contact_email: z.string(),
-    created_at: z.iso.datetime().nullable()
+    created_at: z.iso.datetime().nullable(),
+    updated_at: z.iso.datetime().nullable()
+});
+
+/**
+ * VenueListResponse
+ */
+export const zVenueListResponse = z.object({
+    success: z.boolean().optional().default(true),
+    data: z.array(zVenueRecordResponse),
+    pagination: zVenuePaginationResponse
+});
+
+/**
+ * VenueResponse
+ */
+export const zVenueResponse = z.object({
+    success: z.boolean().optional().default(true),
+    data: zVenueRecordResponse,
+    message: z.string().optional().default('Venue saved successfully.')
+});
+
+/**
+ * VenueUpdateRequest
+ */
+export const zVenueUpdateRequest = z.object({
+    name: z.string().min(1).max(255),
+    description: z.string().max(1000).nullish(),
+    address_line: z.string().min(1).max(255),
+    city: z.string().min(1).max(100),
+    province: z.string().min(1).max(100),
+    postal_code: z.string().min(1).max(20),
+    region: z.string().min(1).max(100),
+    country: z.string().min(1).max(100),
+    capacity: z.int().gt(0),
+    venue_type: zVenueType,
+    is_partner: z.boolean().optional().default(false),
+    amenities: z.array(z.string()).nullish(),
+    contact_name: z.string().min(1).max(255),
+    contact_phone: z.string().min(1).max(20),
+    contact_email: z.email()
 });
 
 /**
@@ -1363,12 +1432,67 @@ export const zDeleteDeadJobQueuesDlqJobIdDeletePath = z.object({
  */
 export const zDeleteDeadJobQueuesDlqJobIdDeleteResponse = zDeleteJobResponse;
 
-export const zCreateVenueVenuesPostBody = zCreateVenueRequest;
+export const zListPartnerVenuesVenuesPublicPartnersGetQuery = z.object({
+    page: z.int().gte(1).optional().default(1),
+    page_size: z.int().gte(1).lte(100).optional().default(10),
+    search: z.string().max(200).nullish(),
+    venue_type: zVenueType.nullish()
+});
 
 /**
  * Successful Response
  */
-export const zCreateVenueVenuesPostResponse = zCreateVenueResponse;
+export const zListPartnerVenuesVenuesPublicPartnersGetResponse = zPublicVenueListResponse;
+
+export const zGetPartnerVenueVenuesPublicPartnersVenueIdGetPath = z.object({
+    venue_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zGetPartnerVenueVenuesPublicPartnersVenueIdGetResponse = zPublicVenueResponse;
+
+export const zListCommunityVenuesVenuesPublicCommunityGetQuery = z.object({
+    page: z.int().gte(1).optional().default(1),
+    page_size: z.int().gte(1).lte(100).optional().default(10),
+    search: z.string().max(200).nullish(),
+    venue_type: zVenueType.nullish()
+});
+
+/**
+ * Successful Response
+ */
+export const zListCommunityVenuesVenuesPublicCommunityGetResponse = zPublicVenueListResponse;
+
+export const zGetCommunityVenueVenuesPublicCommunityVenueIdGetPath = z.object({
+    venue_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zGetCommunityVenueVenuesPublicCommunityVenueIdGetResponse = zPublicVenueResponse;
+
+export const zListVenuesVenuesGetQuery = z.object({
+    page: z.int().gte(1).optional().default(1),
+    page_size: z.int().gte(1).lte(100).optional().default(10),
+    search: z.string().max(200).nullish(),
+    venue_type: zVenueType.nullish(),
+    is_partner: z.boolean().nullish()
+});
+
+/**
+ * Successful Response
+ */
+export const zListVenuesVenuesGetResponse = zVenueListResponse;
+
+export const zCreateVenueVenuesPostBody = zVenueCreateRequest;
+
+/**
+ * Successful Response
+ */
+export const zCreateVenueVenuesPostResponse = zVenueResponse;
 
 export const zDeleteVenueVenuesVenueIdDeletePath = z.object({
     venue_id: z.uuid()
@@ -1388,7 +1512,7 @@ export const zGetVenueVenuesVenueIdGetPath = z.object({
  */
 export const zGetVenueVenuesVenueIdGetResponse = zVenueResponse;
 
-export const zUpdateVenueVenuesVenueIdPatchBody = zUpdateVenueRequest;
+export const zUpdateVenueVenuesVenueIdPatchBody = zVenueUpdateRequest;
 
 export const zUpdateVenueVenuesVenueIdPatchPath = z.object({
     venue_id: z.uuid()
@@ -1397,15 +1521,4 @@ export const zUpdateVenueVenuesVenueIdPatchPath = z.object({
 /**
  * Successful Response
  */
-export const zUpdateVenueVenuesVenueIdPatchResponse = zUpdateVenueResponse;
-
-export const zGetUserVenuesVenuesCreatorCreatorIdGetPath = z.object({
-    creator_id: z.uuid()
-});
-
-/**
- * Response Get User Venues Venues Creator  Creator Id  Get
- *
- * Successful Response
- */
-export const zGetUserVenuesVenuesCreatorCreatorIdGetResponse = z.array(zVenueResponse);
+export const zUpdateVenueVenuesVenueIdPatchResponse = zVenueResponse;

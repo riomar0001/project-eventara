@@ -36,13 +36,17 @@ from app.controller.docs.venue_management_docs import (
     VENUE_NOT_FOUND,
 )
 from app.controller.schemas.venue_management_schema import (
+    PublicVenueListResponse,
+    PublicVenueRecordResponse,
+    PublicVenueResponse,
     VenueCreateRequest,
     VenueListResponse,
-    VenuePaginationResponse,
+    VenuePaginationResponse,  # used in _build_pagination
     VenueRecordResponse,
     VenueResponse,
     VenueUpdateRequest,
 )
+from app.domain.entities.audit_log import ActionType, AuditLogStatus
 from app.domain.entities.authorization_entities import RoleAction
 from app.domain.entities.venue_entities import VenueType
 from app.domain.exceptions.venue_exceptions import (
@@ -50,7 +54,6 @@ from app.domain.exceptions.venue_exceptions import (
     VenueInUseError,
     VenueNotFoundError,
 )
-from app.domain.entities.audit_log import ActionType, AuditLogStatus
 
 venue_router = APIRouter(prefix="/venues", tags=["Venues"])
 
@@ -81,6 +84,160 @@ def _to_venue_response(venue) -> VenueRecordResponse:
     )
 
 
+def _to_public_venue_response(venue) -> PublicVenueRecordResponse:
+    return PublicVenueRecordResponse(
+        id=venue.id,
+        name=venue.name,
+        description=venue.description,
+        address_line=venue.address_line,
+        city=venue.city,
+        province=venue.province,
+        postal_code=venue.postal_code,
+        region=venue.region,
+        country=venue.country,
+        capacity=venue.capacity,
+        venue_type=venue.venue_type,
+        popularity_count=venue.popularity_count,
+        usage_count=venue.usage_count,
+        is_partner=venue.is_partner,
+        amenities=venue.amenities,
+        created_at=venue.created_at,
+        updated_at=venue.updated_at,
+    )
+
+
+def _build_pagination(result) -> VenuePaginationResponse:
+    return VenuePaginationResponse(
+        page=result.page,
+        page_size=result.page_size,
+        total_count=result.total_count,
+        total_pages=result.total_pages,
+        has_next=result.page < result.total_pages,
+        has_previous=result.page > 1 and result.total_pages > 0,
+    )
+
+
+# ─── Public endpoints (no authentication required) ────────────────────────────
+
+
+@venue_router.get(
+    "/public/partners",
+    response_model=PublicVenueListResponse,
+    status_code=status.HTTP_200_OK,
+    summary="List partner venues (public)",
+    description=("Return a paginated list of partner venues visible to the public. Contact information is excluded from all records."),
+)
+async def list_partner_venues(
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=10, ge=1, le=100),
+    search: str | None = Query(default=None, max_length=200),
+    venue_type: VenueType | None = Query(default=None),
+    use_case: VenueManagementUseCase = Depends(get_venue_management_use_case),
+) -> PublicVenueListResponse:
+    """Return one paginated page of partner venue records without contact details.
+
+    This endpoint is public and requires no authentication.
+    """
+    result = await use_case.list_venues(ListVenuesInput(page=page, page_size=page_size, search=search, venue_type=venue_type, is_partner=True))
+    return PublicVenueListResponse(
+        data=[_to_public_venue_response(v) for v in result.venues],
+        pagination=_build_pagination(result),
+    )
+
+
+@venue_router.get(
+    "/public/partners/{venue_id}",
+    response_model=PublicVenueResponse,
+    status_code=status.HTTP_200_OK,
+    responses={**VENUE_NOT_FOUND},
+    summary="Get one partner venue (public)",
+    description=(
+        "Return a single partner venue by UUID. Returns 404 when the venue does not exist or is not a partner. Contact information is excluded."
+    ),
+)
+async def get_partner_venue(
+    venue_id: uuid.UUID,
+    use_case: VenueManagementUseCase = Depends(get_venue_management_use_case),
+) -> PublicVenueResponse:
+    """Return a single partner venue record without contact details.
+
+    This endpoint is public and requires no authentication.
+
+    # Error mapping
+    - **404 Not Found** — no venue exists for the UUID, or the venue is not a partner.
+    """
+    try:
+        result = await use_case.get_venue(venue_id)
+    except VenueNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+
+    if not result.venue.is_partner:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Venue not found.")
+
+    return PublicVenueResponse(data=_to_public_venue_response(result.venue))
+
+
+@venue_router.get(
+    "/public/community",
+    response_model=PublicVenueListResponse,
+    status_code=status.HTTP_200_OK,
+    summary="List community suggested venues (public)",
+    description=("Return a paginated list of community suggested venues visible to the public. Contact information is excluded from all records."),
+)
+async def list_community_venues(
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=10, ge=1, le=100),
+    search: str | None = Query(default=None, max_length=200),
+    venue_type: VenueType | None = Query(default=None),
+    use_case: VenueManagementUseCase = Depends(get_venue_management_use_case),
+) -> PublicVenueListResponse:
+    """Return one paginated page of community suggested venue records without contact details.
+
+    This endpoint is public and requires no authentication.
+    """
+    result = await use_case.list_venues(ListVenuesInput(page=page, page_size=page_size, search=search, venue_type=venue_type, is_partner=False))
+    return PublicVenueListResponse(
+        data=[_to_public_venue_response(v) for v in result.venues],
+        pagination=_build_pagination(result),
+    )
+
+
+@venue_router.get(
+    "/public/community/{venue_id}",
+    response_model=PublicVenueResponse,
+    status_code=status.HTTP_200_OK,
+    responses={**VENUE_NOT_FOUND},
+    summary="Get one community suggested venue (public)",
+    description=(
+        "Return a single community suggested venue by UUID. Returns 404 when the venue "
+        "does not exist or is a partner venue. Contact information is excluded."
+    ),
+)
+async def get_community_venue(
+    venue_id: uuid.UUID,
+    use_case: VenueManagementUseCase = Depends(get_venue_management_use_case),
+) -> PublicVenueResponse:
+    """Return a single community suggested venue record without contact details.
+
+    This endpoint is public and requires no authentication.
+
+    # Error mapping
+    - **404 Not Found** — no venue exists for the UUID, or the venue is a partner venue.
+    """
+    try:
+        result = await use_case.get_venue(venue_id)
+    except VenueNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+
+    if result.venue.is_partner:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Venue not found.")
+
+    return PublicVenueResponse(data=_to_public_venue_response(result.venue))
+
+
+# ─── Admin endpoints (authentication + RBAC required) ─────────────────────────
+
+
 @venue_router.get(
     "",
     response_model=VenueListResponse,
@@ -88,8 +245,7 @@ def _to_venue_response(venue) -> VenueRecordResponse:
     responses={**UNAUTHORIZED, **FORBIDDEN},
     summary="List venues",
     description=(
-        "Return a paginated list of all venues. Supports optional text search "
-        "across name and city, and filtering by venue type and partner status."
+        "Return a paginated list of all venues. Supports optional text search across name and city, and filtering by venue type and partner status."
     ),
 )
 async def list_venues(
@@ -118,14 +274,7 @@ async def list_venues(
     )
     return VenueListResponse(
         data=[_to_venue_response(v) for v in result.venues],
-        pagination=VenuePaginationResponse(
-            page=result.page,
-            page_size=result.page_size,
-            total_count=result.total_count,
-            total_pages=result.total_pages,
-            has_next=result.page < result.total_pages,
-            has_previous=result.page > 1 and result.total_pages > 0,
-        ),
+        pagination=_build_pagination(result),
     )
 
 
@@ -295,10 +444,7 @@ async def update_venue(
     status_code=status.HTTP_204_NO_CONTENT,
     responses={**UNAUTHORIZED, **FORBIDDEN, **VENUE_NOT_FOUND, **VENUE_IN_USE},
     summary="Delete a venue",
-    description=(
-        "Permanently delete a venue when no event sessions reference it. "
-        "This action is irreversible."
-    ),
+    description=("Permanently delete a venue when no event sessions reference it. This action is irreversible."),
 )
 async def delete_venue(
     request: Request,

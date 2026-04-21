@@ -525,86 +525,6 @@ export type CreateGrantsResponse = {
 };
 
 /**
- * CreateVenueRequest
- */
-export type CreateVenueRequest = {
-    /**
-     * Name
-     */
-    name: string;
-    /**
-     * Description
-     */
-    description?: string | null;
-    /**
-     * Address Line
-     */
-    address_line: string;
-    /**
-     * City
-     */
-    city: string;
-    /**
-     * Province
-     */
-    province: string;
-    /**
-     * Postal Code
-     */
-    postal_code: string;
-    /**
-     * Region
-     */
-    region: string;
-    /**
-     * Country
-     */
-    country: string;
-    /**
-     * Capacity
-     */
-    capacity: number;
-    /**
-     * Venue Type
-     */
-    venue_type: string;
-    /**
-     * Contact Name
-     */
-    contact_name: string;
-    /**
-     * Contact Phone
-     */
-    contact_phone: string;
-    /**
-     * Contact Email
-     */
-    contact_email: string;
-};
-
-/**
- * CreateVenueResponse
- */
-export type CreateVenueResponse = {
-    /**
-     * Success
-     */
-    success?: boolean;
-    /**
-     * Venue Id
-     */
-    venue_id: string;
-    /**
-     * Name
-     */
-    name: string;
-    /**
-     * Message
-     */
-    message?: string;
-};
-
-/**
  * DeadJobResponse
  */
 export type DeadJobResponse = {
@@ -1150,6 +1070,103 @@ export type PaginationMeta = {
 };
 
 /**
+ * PublicVenueListResponse
+ */
+export type PublicVenueListResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Data
+     */
+    data: Array<PublicVenueRecordResponse>;
+    pagination: VenuePaginationResponse;
+};
+
+/**
+ * PublicVenueRecordResponse
+ */
+export type PublicVenueRecordResponse = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Description
+     */
+    description: string | null;
+    /**
+     * Address Line
+     */
+    address_line: string;
+    /**
+     * City
+     */
+    city: string;
+    /**
+     * Province
+     */
+    province: string;
+    /**
+     * Postal Code
+     */
+    postal_code: string;
+    /**
+     * Region
+     */
+    region: string;
+    /**
+     * Country
+     */
+    country: string;
+    /**
+     * Capacity
+     */
+    capacity: number;
+    venue_type: VenueType;
+    /**
+     * Popularity Count
+     */
+    popularity_count: number;
+    /**
+     * Usage Count
+     */
+    usage_count: number;
+    /**
+     * Is Partner
+     */
+    is_partner: boolean;
+    /**
+     * Amenities
+     */
+    amenities: Array<string> | null;
+    /**
+     * Created At
+     */
+    created_at: string | null;
+    /**
+     * Updated At
+     */
+    updated_at: string | null;
+};
+
+/**
+ * PublicVenueResponse
+ */
+export type PublicVenueResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    data: PublicVenueRecordResponse;
+};
+
+/**
  * PurgeDeadJobsResponse
  */
 export type PurgeDeadJobsResponse = {
@@ -1579,86 +1596,6 @@ export type UpdateAssignmentRequest = {
 };
 
 /**
- * UpdateVenueRequest
- */
-export type UpdateVenueRequest = {
-    /**
-     * Name
-     */
-    name?: string | null;
-    /**
-     * Description
-     */
-    description?: string | null;
-    /**
-     * Address Line
-     */
-    address_line?: string | null;
-    /**
-     * City
-     */
-    city?: string | null;
-    /**
-     * Province
-     */
-    province?: string | null;
-    /**
-     * Postal Code
-     */
-    postal_code?: string | null;
-    /**
-     * Country
-     */
-    country?: string | null;
-    /**
-     * Region
-     */
-    region?: string | null;
-    /**
-     * Capacity
-     */
-    capacity?: number | null;
-    /**
-     * Venue Type
-     */
-    venue_type?: string | null;
-    /**
-     * Contact Name
-     */
-    contact_name?: string | null;
-    /**
-     * Contact Phone
-     */
-    contact_phone?: string | null;
-    /**
-     * Contact Email
-     */
-    contact_email?: string | null;
-};
-
-/**
- * UpdateVenueResponse
- */
-export type UpdateVenueResponse = {
-    /**
-     * Success
-     */
-    success?: boolean;
-    /**
-     * Venue Id
-     */
-    venue_id: string;
-    /**
-     * Name
-     */
-    name?: string | null;
-    /**
-     * Message
-     */
-    message?: string;
-};
-
-/**
  * UserGrantListResponse
  */
 export type UserGrantListResponse = {
@@ -1906,13 +1843,125 @@ export type ValidationErrorResponse = {
 };
 
 /**
- * VenueResponse
+ * VenueCreateRequest
  */
-export type VenueResponse = {
+export type VenueCreateRequest = {
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Address Line
+     */
+    address_line: string;
+    /**
+     * City
+     */
+    city: string;
+    /**
+     * Province
+     */
+    province: string;
+    /**
+     * Postal Code
+     */
+    postal_code: string;
+    /**
+     * Region
+     */
+    region: string;
+    /**
+     * Country
+     */
+    country: string;
+    /**
+     * Capacity
+     */
+    capacity: number;
+    venue_type: VenueType;
+    /**
+     * Is Partner
+     */
+    is_partner?: boolean;
+    /**
+     * Amenities
+     */
+    amenities?: Array<string> | null;
+    /**
+     * Contact Name
+     */
+    contact_name: string;
+    /**
+     * Contact Phone
+     */
+    contact_phone: string;
+    /**
+     * Contact Email
+     */
+    contact_email: string;
+};
+
+/**
+ * VenueListResponse
+ */
+export type VenueListResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Data
+     */
+    data: Array<VenueRecordResponse>;
+    pagination: VenuePaginationResponse;
+};
+
+/**
+ * VenuePaginationResponse
+ */
+export type VenuePaginationResponse = {
+    /**
+     * Page
+     */
+    page: number;
+    /**
+     * Page Size
+     */
+    page_size: number;
+    /**
+     * Total Count
+     */
+    total_count: number;
+    /**
+     * Total Pages
+     */
+    total_pages: number;
+    /**
+     * Has Next
+     */
+    has_next: boolean;
+    /**
+     * Has Previous
+     */
+    has_previous: boolean;
+};
+
+/**
+ * VenueRecordResponse
+ */
+export type VenueRecordResponse = {
     /**
      * Id
      */
     id: string;
+    /**
+     * Creator Id
+     */
+    creator_id: string;
     /**
      * Name
      */
@@ -1949,10 +1998,23 @@ export type VenueResponse = {
      * Capacity
      */
     capacity: number;
+    venue_type: VenueType;
     /**
-     * Venue Type
+     * Popularity Count
      */
-    venue_type: string;
+    popularity_count: number;
+    /**
+     * Usage Count
+     */
+    usage_count: number;
+    /**
+     * Is Partner
+     */
+    is_partner: boolean;
+    /**
+     * Amenities
+     */
+    amenities: Array<string> | null;
     /**
      * Contact Name
      */
@@ -1969,6 +2031,93 @@ export type VenueResponse = {
      * Created At
      */
     created_at: string | null;
+    /**
+     * Updated At
+     */
+    updated_at: string | null;
+};
+
+/**
+ * VenueResponse
+ */
+export type VenueResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    data: VenueRecordResponse;
+    /**
+     * Message
+     */
+    message?: string;
+};
+
+/**
+ * VenueType
+ */
+export type VenueType = 'indoor' | 'outdoor' | 'hybrid';
+
+/**
+ * VenueUpdateRequest
+ */
+export type VenueUpdateRequest = {
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Address Line
+     */
+    address_line: string;
+    /**
+     * City
+     */
+    city: string;
+    /**
+     * Province
+     */
+    province: string;
+    /**
+     * Postal Code
+     */
+    postal_code: string;
+    /**
+     * Region
+     */
+    region: string;
+    /**
+     * Country
+     */
+    country: string;
+    /**
+     * Capacity
+     */
+    capacity: number;
+    venue_type: VenueType;
+    /**
+     * Is Partner
+     */
+    is_partner?: boolean;
+    /**
+     * Amenities
+     */
+    amenities?: Array<string> | null;
+    /**
+     * Contact Name
+     */
+    contact_name: string;
+    /**
+     * Contact Phone
+     */
+    contact_phone: string;
+    /**
+     * Contact Email
+     */
+    contact_email: string;
 };
 
 /**
@@ -3971,32 +4120,234 @@ export type DeleteDeadJobQueuesDlqJobIdDeleteResponses = {
 
 export type DeleteDeadJobQueuesDlqJobIdDeleteResponse = DeleteDeadJobQueuesDlqJobIdDeleteResponses[keyof DeleteDeadJobQueuesDlqJobIdDeleteResponses];
 
+export type ListPartnerVenuesVenuesPublicPartnersGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Page
+         */
+        page?: number;
+        /**
+         * Page Size
+         */
+        page_size?: number;
+        /**
+         * Search
+         */
+        search?: string | null;
+        /**
+         * Venue Type
+         */
+        venue_type?: VenueType | null;
+    };
+    url: '/venues/public/partners';
+};
+
+export type ListPartnerVenuesVenuesPublicPartnersGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListPartnerVenuesVenuesPublicPartnersGetError = ListPartnerVenuesVenuesPublicPartnersGetErrors[keyof ListPartnerVenuesVenuesPublicPartnersGetErrors];
+
+export type ListPartnerVenuesVenuesPublicPartnersGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: PublicVenueListResponse;
+};
+
+export type ListPartnerVenuesVenuesPublicPartnersGetResponse = ListPartnerVenuesVenuesPublicPartnersGetResponses[keyof ListPartnerVenuesVenuesPublicPartnersGetResponses];
+
+export type GetPartnerVenueVenuesPublicPartnersVenueIdGetData = {
+    body?: never;
+    path: {
+        /**
+         * Venue Id
+         */
+        venue_id: string;
+    };
+    query?: never;
+    url: '/venues/public/partners/{venue_id}';
+};
+
+export type GetPartnerVenueVenuesPublicPartnersVenueIdGetErrors = {
+    /**
+     * Venue not found
+     */
+    404: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetPartnerVenueVenuesPublicPartnersVenueIdGetError = GetPartnerVenueVenuesPublicPartnersVenueIdGetErrors[keyof GetPartnerVenueVenuesPublicPartnersVenueIdGetErrors];
+
+export type GetPartnerVenueVenuesPublicPartnersVenueIdGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: PublicVenueResponse;
+};
+
+export type GetPartnerVenueVenuesPublicPartnersVenueIdGetResponse = GetPartnerVenueVenuesPublicPartnersVenueIdGetResponses[keyof GetPartnerVenueVenuesPublicPartnersVenueIdGetResponses];
+
+export type ListCommunityVenuesVenuesPublicCommunityGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Page
+         */
+        page?: number;
+        /**
+         * Page Size
+         */
+        page_size?: number;
+        /**
+         * Search
+         */
+        search?: string | null;
+        /**
+         * Venue Type
+         */
+        venue_type?: VenueType | null;
+    };
+    url: '/venues/public/community';
+};
+
+export type ListCommunityVenuesVenuesPublicCommunityGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListCommunityVenuesVenuesPublicCommunityGetError = ListCommunityVenuesVenuesPublicCommunityGetErrors[keyof ListCommunityVenuesVenuesPublicCommunityGetErrors];
+
+export type ListCommunityVenuesVenuesPublicCommunityGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: PublicVenueListResponse;
+};
+
+export type ListCommunityVenuesVenuesPublicCommunityGetResponse = ListCommunityVenuesVenuesPublicCommunityGetResponses[keyof ListCommunityVenuesVenuesPublicCommunityGetResponses];
+
+export type GetCommunityVenueVenuesPublicCommunityVenueIdGetData = {
+    body?: never;
+    path: {
+        /**
+         * Venue Id
+         */
+        venue_id: string;
+    };
+    query?: never;
+    url: '/venues/public/community/{venue_id}';
+};
+
+export type GetCommunityVenueVenuesPublicCommunityVenueIdGetErrors = {
+    /**
+     * Venue not found
+     */
+    404: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetCommunityVenueVenuesPublicCommunityVenueIdGetError = GetCommunityVenueVenuesPublicCommunityVenueIdGetErrors[keyof GetCommunityVenueVenuesPublicCommunityVenueIdGetErrors];
+
+export type GetCommunityVenueVenuesPublicCommunityVenueIdGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: PublicVenueResponse;
+};
+
+export type GetCommunityVenueVenuesPublicCommunityVenueIdGetResponse = GetCommunityVenueVenuesPublicCommunityVenueIdGetResponses[keyof GetCommunityVenueVenuesPublicCommunityVenueIdGetResponses];
+
+export type ListVenuesVenuesGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Page
+         */
+        page?: number;
+        /**
+         * Page Size
+         */
+        page_size?: number;
+        /**
+         * Search
+         */
+        search?: string | null;
+        /**
+         * Venue Type
+         */
+        venue_type?: VenueType | null;
+        /**
+         * Is Partner
+         */
+        is_partner?: boolean | null;
+    };
+    url: '/venues';
+};
+
+export type ListVenuesVenuesGetErrors = {
+    /**
+     * Missing or invalid Bearer token
+     */
+    401: ErrorResponse;
+    /**
+     * Insufficient permissions
+     */
+    403: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListVenuesVenuesGetError = ListVenuesVenuesGetErrors[keyof ListVenuesVenuesGetErrors];
+
+export type ListVenuesVenuesGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: VenueListResponse;
+};
+
+export type ListVenuesVenuesGetResponse = ListVenuesVenuesGetResponses[keyof ListVenuesVenuesGetResponses];
+
 export type CreateVenueVenuesPostData = {
-    body: CreateVenueRequest;
+    body: VenueCreateRequest;
     path?: never;
     query?: never;
-    url: '/venues/';
+    url: '/venues';
 };
 
 export type CreateVenueVenuesPostErrors = {
     /**
-     * Invalid venue type
-     */
-    400: ErrorResponse;
-    /**
-     * Unauthorized
+     * Missing or invalid Bearer token
      */
     401: ErrorResponse;
     /**
-     * Forbidden
+     * Insufficient permissions
      */
     403: ErrorResponse;
     /**
-     * Venue already exists
+     * A venue with that name already exists in the same city
      */
     409: ErrorResponse;
     /**
-     * Validation error
+     * Request body failed schema validation
      */
     422: ValidationErrorResponse;
 };
@@ -4007,7 +4358,7 @@ export type CreateVenueVenuesPostResponses = {
     /**
      * Successful Response
      */
-    201: CreateVenueResponse;
+    201: VenueResponse;
 };
 
 export type CreateVenueVenuesPostResponse = CreateVenueVenuesPostResponses[keyof CreateVenueVenuesPostResponses];
@@ -4026,21 +4377,21 @@ export type DeleteVenueVenuesVenueIdDeleteData = {
 
 export type DeleteVenueVenuesVenueIdDeleteErrors = {
     /**
-     * Venue validation failed
-     */
-    400: ErrorResponse;
-    /**
-     * Unauthorized
+     * Missing or invalid Bearer token
      */
     401: ErrorResponse;
     /**
-     * Unauthorized venue operation
+     * Insufficient permissions
      */
     403: ErrorResponse;
     /**
      * Venue not found
      */
     404: ErrorResponse;
+    /**
+     * Venue is still referenced by one or more event sessions
+     */
+    409: ErrorResponse;
     /**
      * Validation Error
      */
@@ -4072,11 +4423,11 @@ export type GetVenueVenuesVenueIdGetData = {
 
 export type GetVenueVenuesVenueIdGetErrors = {
     /**
-     * Unauthorized
+     * Missing or invalid Bearer token
      */
     401: ErrorResponse;
     /**
-     * Forbidden
+     * Insufficient permissions
      */
     403: ErrorResponse;
     /**
@@ -4101,7 +4452,7 @@ export type GetVenueVenuesVenueIdGetResponses = {
 export type GetVenueVenuesVenueIdGetResponse = GetVenueVenuesVenueIdGetResponses[keyof GetVenueVenuesVenueIdGetResponses];
 
 export type UpdateVenueVenuesVenueIdPatchData = {
-    body: UpdateVenueRequest;
+    body: VenueUpdateRequest;
     path: {
         /**
          * Venue Id
@@ -4114,15 +4465,11 @@ export type UpdateVenueVenuesVenueIdPatchData = {
 
 export type UpdateVenueVenuesVenueIdPatchErrors = {
     /**
-     * Invalid venue type
-     */
-    400: ErrorResponse;
-    /**
-     * Unauthorized
+     * Missing or invalid Bearer token
      */
     401: ErrorResponse;
     /**
-     * Unauthorized venue operation
+     * Insufficient permissions
      */
     403: ErrorResponse;
     /**
@@ -4130,11 +4477,11 @@ export type UpdateVenueVenuesVenueIdPatchErrors = {
      */
     404: ErrorResponse;
     /**
-     * Venue already exists
+     * A venue with that name already exists in the same city
      */
     409: ErrorResponse;
     /**
-     * Validation error
+     * Request body failed schema validation
      */
     422: ValidationErrorResponse;
 };
@@ -4145,54 +4492,10 @@ export type UpdateVenueVenuesVenueIdPatchResponses = {
     /**
      * Successful Response
      */
-    200: UpdateVenueResponse;
+    200: VenueResponse;
 };
 
 export type UpdateVenueVenuesVenueIdPatchResponse = UpdateVenueVenuesVenueIdPatchResponses[keyof UpdateVenueVenuesVenueIdPatchResponses];
-
-export type GetUserVenuesVenuesCreatorCreatorIdGetData = {
-    body?: never;
-    path: {
-        /**
-         * Creator Id
-         */
-        creator_id: string;
-    };
-    query?: never;
-    url: '/venues/creator/{creator_id}';
-};
-
-export type GetUserVenuesVenuesCreatorCreatorIdGetErrors = {
-    /**
-     * Venue validation failed
-     */
-    400: ErrorResponse;
-    /**
-     * Unauthorized
-     */
-    401: ErrorResponse;
-    /**
-     * Forbidden
-     */
-    403: ErrorResponse;
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type GetUserVenuesVenuesCreatorCreatorIdGetError = GetUserVenuesVenuesCreatorCreatorIdGetErrors[keyof GetUserVenuesVenuesCreatorCreatorIdGetErrors];
-
-export type GetUserVenuesVenuesCreatorCreatorIdGetResponses = {
-    /**
-     * Response Get User Venues Venues Creator  Creator Id  Get
-     *
-     * Successful Response
-     */
-    200: Array<VenueResponse>;
-};
-
-export type GetUserVenuesVenuesCreatorCreatorIdGetResponse = GetUserVenuesVenuesCreatorCreatorIdGetResponses[keyof GetUserVenuesVenuesCreatorCreatorIdGetResponses];
 
 export type RootGetData = {
     body?: never;

@@ -4,8 +4,8 @@ import * as z from 'zod';
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { AssignRoleUserRolesPostData, AssignRoleUserRolesPostErrors, AssignRoleUserRolesPostResponses, ChangePasswordUserChangePasswordPostData, ChangePasswordUserChangePasswordPostErrors, ChangePasswordUserChangePasswordPostResponses, ChangeUserEmailUserAccountsUserIdEmailPatchData, ChangeUserEmailUserAccountsUserIdEmailPatchErrors, ChangeUserEmailUserAccountsUserIdEmailPatchResponses, ChangeUserRoleUserAccountsUserIdRolePatchData, ChangeUserRoleUserAccountsUserIdRolePatchErrors, ChangeUserRoleUserAccountsUserIdRolePatchResponses, CheckAliasUserCheckAliasGetData, CheckAliasUserCheckAliasGetErrors, CheckAliasUserCheckAliasGetResponses, CreateFeatureFeaturesPostData, CreateFeatureFeaturesPostErrors, CreateFeatureFeaturesPostResponses, CreateGrantsUserGrantsPostData, CreateGrantsUserGrantsPostErrors, CreateGrantsUserGrantsPostResponses, CreateRoleRolesPostData, CreateRoleRolesPostErrors, CreateRoleRolesPostResponses, CreateVenueVenuesPostData, CreateVenueVenuesPostErrors, CreateVenueVenuesPostResponses, DeleteDeadJobQueuesDlqJobIdDeleteData, DeleteDeadJobQueuesDlqJobIdDeleteErrors, DeleteDeadJobQueuesDlqJobIdDeleteResponses, DeleteFeatureFeaturesFeatureIdDeleteData, DeleteFeatureFeaturesFeatureIdDeleteErrors, DeleteFeatureFeaturesFeatureIdDeleteResponses, DeleteRoleRolesRoleIdDeleteData, DeleteRoleRolesRoleIdDeleteErrors, DeleteRoleRolesRoleIdDeleteResponses, DeleteVenueVenuesVenueIdDeleteData, DeleteVenueVenuesVenueIdDeleteErrors, DeleteVenueVenuesVenueIdDeleteResponses, ForgotPasswordAuthForgotPasswordPostData, ForgotPasswordAuthForgotPasswordPostErrors, ForgotPasswordAuthForgotPasswordPostResponses, GetAssignmentUserRolesAssignmentIdGetData, GetAssignmentUserRolesAssignmentIdGetErrors, GetAssignmentUserRolesAssignmentIdGetResponses, GetAuditLogsAuditLogsGetData, GetAuditLogsAuditLogsGetErrors, GetAuditLogsAuditLogsGetResponses, GetFeatureFeaturesFeatureIdGetData, GetFeatureFeaturesFeatureIdGetErrors, GetFeatureFeaturesFeatureIdGetResponses, GetLoginHistoryUserLoginHistoryGetData, GetLoginHistoryUserLoginHistoryGetErrors, GetLoginHistoryUserLoginHistoryGetResponses, GetMyPermissionsUserMePermissionsGetData, GetMyPermissionsUserMePermissionsGetErrors, GetMyPermissionsUserMePermissionsGetResponses, GetQueueStatsQueuesGetData, GetQueueStatsQueuesGetErrors, GetQueueStatsQueuesGetResponses, GetRoleRolesRoleIdGetData, GetRoleRolesRoleIdGetErrors, GetRoleRolesRoleIdGetResponses, GetUserAccountDetailUserAccountsUserIdGetData, GetUserAccountDetailUserAccountsUserIdGetErrors, GetUserAccountDetailUserAccountsUserIdGetResponses, GetUserVenuesVenuesCreatorCreatorIdGetData, GetUserVenuesVenuesCreatorCreatorIdGetErrors, GetUserVenuesVenuesCreatorCreatorIdGetResponses, GetVenueVenuesVenueIdGetData, GetVenueVenuesVenueIdGetErrors, GetVenueVenuesVenueIdGetResponses, HealthCheckHealthGetData, HealthCheckHealthGetResponses, ListDeadJobsQueuesDlqGetData, ListDeadJobsQueuesDlqGetErrors, ListDeadJobsQueuesDlqGetResponses, ListFeaturesFeaturesGetData, ListFeaturesFeaturesGetErrors, ListFeaturesFeaturesGetResponses, ListGrantFeaturesUserGrantsFeaturesGetData, ListGrantFeaturesUserGrantsFeaturesGetErrors, ListGrantFeaturesUserGrantsFeaturesGetResponses, ListRolesRolesGetData, ListRolesRolesGetErrors, ListRolesRolesGetResponses, ListRolesUserAccountsRolesGetData, ListRolesUserAccountsRolesGetErrors, ListRolesUserAccountsRolesGetResponses, ListUserAccountsUserAccountsGetData, ListUserAccountsUserAccountsGetErrors, ListUserAccountsUserAccountsGetResponses, ListUserGrantsUserGrantsGetData, ListUserGrantsUserGrantsGetErrors, ListUserGrantsUserGrantsGetResponses, ListUserRolesUserRolesGetData, ListUserRolesUserRolesGetErrors, ListUserRolesUserRolesGetResponses, LoginAuthLoginPostData, LoginAuthLoginPostErrors, LoginAuthLoginPostResponses, LoginVerifyAuthLoginVerifyPostData, LoginVerifyAuthLoginVerifyPostErrors, LoginVerifyAuthLoginVerifyPostResponses, LogoutAuthLogoutPostData, LogoutAuthLogoutPostErrors, LogoutAuthLogoutPostResponses, PurgeDeadJobsQueuesDlqDeleteData, PurgeDeadJobsQueuesDlqDeleteErrors, PurgeDeadJobsQueuesDlqDeleteResponses, RefreshTokenAuthRefreshPostData, RefreshTokenAuthRefreshPostErrors, RefreshTokenAuthRefreshPostResponses, RegisterUserAuthRegisterPostData, RegisterUserAuthRegisterPostErrors, RegisterUserAuthRegisterPostResponses, ResendOtpAuthLoginResendOtpPostData, ResendOtpAuthLoginResendOtpPostErrors, ResendOtpAuthLoginResendOtpPostResponses, ResendVerificationAuthResendVerificationPostData, ResendVerificationAuthResendVerificationPostErrors, ResendVerificationAuthResendVerificationPostResponses, ResetPasswordAuthResetPasswordTokenPostData, ResetPasswordAuthResetPasswordTokenPostErrors, ResetPasswordAuthResetPasswordTokenPostResponses, RetryDeadJobQueuesDlqJobIdRetryPostData, RetryDeadJobQueuesDlqJobIdRetryPostErrors, RetryDeadJobQueuesDlqJobIdRetryPostResponses, RevokeAssignmentUserRolesAssignmentIdDeleteData, RevokeAssignmentUserRolesAssignmentIdDeleteErrors, RevokeAssignmentUserRolesAssignmentIdDeleteResponses, RevokeGrantUserGrantsGrantIdDeleteData, RevokeGrantUserGrantsGrantIdDeleteErrors, RevokeGrantUserGrantsGrantIdDeleteResponses, RootGetData, RootGetResponses, ScheduleAdminAccountDeletionUserTargetUserIdAccountDeletionPostData, ScheduleAdminAccountDeletionUserTargetUserIdAccountDeletionPostErrors, ScheduleAdminAccountDeletionUserTargetUserIdAccountDeletionPostResponses, ScheduleOwnAccountDeletionUserAccountDeletionPostData, ScheduleOwnAccountDeletionUserAccountDeletionPostErrors, ScheduleOwnAccountDeletionUserAccountDeletionPostResponses, SendUserPasswordResetUserAccountsUserIdPasswordResetPostData, SendUserPasswordResetUserAccountsUserIdPasswordResetPostErrors, SendUserPasswordResetUserAccountsUserIdPasswordResetPostResponses, UpdateAssignmentUserRolesAssignmentIdPatchData, UpdateAssignmentUserRolesAssignmentIdPatchErrors, UpdateAssignmentUserRolesAssignmentIdPatchResponses, UpdateFeatureFeaturesFeatureIdPatchData, UpdateFeatureFeaturesFeatureIdPatchErrors, UpdateFeatureFeaturesFeatureIdPatchResponses, UpdateRoleRolesRoleIdPatchData, UpdateRoleRolesRoleIdPatchErrors, UpdateRoleRolesRoleIdPatchResponses, UpdateVenueVenuesVenueIdPatchData, UpdateVenueVenuesVenueIdPatchErrors, UpdateVenueVenuesVenueIdPatchResponses, UserOnboardingUserOnboardPostData, UserOnboardingUserOnboardPostErrors, UserOnboardingUserOnboardPostResponses, VerifyEmailAuthVerifyTokenGetData, VerifyEmailAuthVerifyTokenGetErrors, VerifyEmailAuthVerifyTokenGetResponses } from './types.gen';
-import { zAssignRoleUserRolesPostBody, zAssignRoleUserRolesPostResponse, zChangePasswordUserChangePasswordPostBody, zChangePasswordUserChangePasswordPostResponse, zChangeUserEmailUserAccountsUserIdEmailPatchBody, zChangeUserEmailUserAccountsUserIdEmailPatchPath, zChangeUserEmailUserAccountsUserIdEmailPatchResponse, zChangeUserRoleUserAccountsUserIdRolePatchBody, zChangeUserRoleUserAccountsUserIdRolePatchPath, zChangeUserRoleUserAccountsUserIdRolePatchResponse, zCheckAliasUserCheckAliasGetQuery, zCheckAliasUserCheckAliasGetResponse, zCreateFeatureFeaturesPostBody, zCreateFeatureFeaturesPostResponse, zCreateGrantsUserGrantsPostBody, zCreateGrantsUserGrantsPostResponse, zCreateRoleRolesPostBody, zCreateRoleRolesPostResponse, zCreateVenueVenuesPostBody, zCreateVenueVenuesPostResponse, zDeleteDeadJobQueuesDlqJobIdDeletePath, zDeleteDeadJobQueuesDlqJobIdDeleteResponse, zDeleteFeatureFeaturesFeatureIdDeletePath, zDeleteFeatureFeaturesFeatureIdDeleteResponse, zDeleteRoleRolesRoleIdDeletePath, zDeleteRoleRolesRoleIdDeleteResponse, zDeleteVenueVenuesVenueIdDeletePath, zDeleteVenueVenuesVenueIdDeleteResponse, zForgotPasswordAuthForgotPasswordPostBody, zForgotPasswordAuthForgotPasswordPostResponse, zGetAssignmentUserRolesAssignmentIdGetPath, zGetAssignmentUserRolesAssignmentIdGetResponse, zGetAuditLogsAuditLogsGetQuery, zGetAuditLogsAuditLogsGetResponse, zGetFeatureFeaturesFeatureIdGetPath, zGetFeatureFeaturesFeatureIdGetResponse, zGetLoginHistoryUserLoginHistoryGetQuery, zGetLoginHistoryUserLoginHistoryGetResponse, zGetMyPermissionsUserMePermissionsGetResponse, zGetQueueStatsQueuesGetResponse, zGetRoleRolesRoleIdGetPath, zGetRoleRolesRoleIdGetResponse, zGetUserAccountDetailUserAccountsUserIdGetPath, zGetUserAccountDetailUserAccountsUserIdGetResponse, zGetUserVenuesVenuesCreatorCreatorIdGetPath, zGetUserVenuesVenuesCreatorCreatorIdGetResponse, zGetVenueVenuesVenueIdGetPath, zGetVenueVenuesVenueIdGetResponse, zListDeadJobsQueuesDlqGetQuery, zListDeadJobsQueuesDlqGetResponse, zListFeaturesFeaturesGetResponse, zListGrantFeaturesUserGrantsFeaturesGetResponse, zListRolesRolesGetResponse, zListRolesUserAccountsRolesGetResponse, zListUserAccountsUserAccountsGetQuery, zListUserAccountsUserAccountsGetResponse, zListUserGrantsUserGrantsGetQuery, zListUserGrantsUserGrantsGetResponse, zListUserRolesUserRolesGetQuery, zListUserRolesUserRolesGetResponse, zLoginAuthLoginPostBody, zLoginAuthLoginPostResponse, zLoginVerifyAuthLoginVerifyPostBody, zLoginVerifyAuthLoginVerifyPostResponse, zLogoutAuthLogoutPostBody, zLogoutAuthLogoutPostResponse, zPurgeDeadJobsQueuesDlqDeleteResponse, zRefreshTokenAuthRefreshPostBody, zRefreshTokenAuthRefreshPostResponse, zRegisterUserAuthRegisterPostBody, zRegisterUserAuthRegisterPostResponse, zResendOtpAuthLoginResendOtpPostBody, zResendOtpAuthLoginResendOtpPostResponse, zResendVerificationAuthResendVerificationPostBody, zResendVerificationAuthResendVerificationPostResponse, zResetPasswordAuthResetPasswordTokenPostBody, zResetPasswordAuthResetPasswordTokenPostPath, zResetPasswordAuthResetPasswordTokenPostResponse, zRetryDeadJobQueuesDlqJobIdRetryPostPath, zRetryDeadJobQueuesDlqJobIdRetryPostResponse, zRevokeAssignmentUserRolesAssignmentIdDeletePath, zRevokeAssignmentUserRolesAssignmentIdDeleteResponse, zRevokeGrantUserGrantsGrantIdDeletePath, zRevokeGrantUserGrantsGrantIdDeleteResponse, zScheduleAdminAccountDeletionUserTargetUserIdAccountDeletionPostBody, zScheduleAdminAccountDeletionUserTargetUserIdAccountDeletionPostPath, zScheduleAdminAccountDeletionUserTargetUserIdAccountDeletionPostResponse, zScheduleOwnAccountDeletionUserAccountDeletionPostBody, zScheduleOwnAccountDeletionUserAccountDeletionPostResponse, zSendUserPasswordResetUserAccountsUserIdPasswordResetPostPath, zSendUserPasswordResetUserAccountsUserIdPasswordResetPostResponse, zUpdateAssignmentUserRolesAssignmentIdPatchBody, zUpdateAssignmentUserRolesAssignmentIdPatchPath, zUpdateAssignmentUserRolesAssignmentIdPatchResponse, zUpdateFeatureFeaturesFeatureIdPatchBody, zUpdateFeatureFeaturesFeatureIdPatchPath, zUpdateFeatureFeaturesFeatureIdPatchResponse, zUpdateRoleRolesRoleIdPatchBody, zUpdateRoleRolesRoleIdPatchPath, zUpdateRoleRolesRoleIdPatchResponse, zUpdateVenueVenuesVenueIdPatchBody, zUpdateVenueVenuesVenueIdPatchPath, zUpdateVenueVenuesVenueIdPatchResponse, zUserOnboardingUserOnboardPostBody, zUserOnboardingUserOnboardPostResponse, zVerifyEmailAuthVerifyTokenGetPath, zVerifyEmailAuthVerifyTokenGetResponse } from './zod.gen';
+import type { AssignRoleUserRolesPostData, AssignRoleUserRolesPostErrors, AssignRoleUserRolesPostResponses, ChangePasswordUserChangePasswordPostData, ChangePasswordUserChangePasswordPostErrors, ChangePasswordUserChangePasswordPostResponses, ChangeUserEmailUserAccountsUserIdEmailPatchData, ChangeUserEmailUserAccountsUserIdEmailPatchErrors, ChangeUserEmailUserAccountsUserIdEmailPatchResponses, ChangeUserRoleUserAccountsUserIdRolePatchData, ChangeUserRoleUserAccountsUserIdRolePatchErrors, ChangeUserRoleUserAccountsUserIdRolePatchResponses, CheckAliasUserCheckAliasGetData, CheckAliasUserCheckAliasGetErrors, CheckAliasUserCheckAliasGetResponses, CreateFeatureFeaturesPostData, CreateFeatureFeaturesPostErrors, CreateFeatureFeaturesPostResponses, CreateGrantsUserGrantsPostData, CreateGrantsUserGrantsPostErrors, CreateGrantsUserGrantsPostResponses, CreateRoleRolesPostData, CreateRoleRolesPostErrors, CreateRoleRolesPostResponses, CreateVenueVenuesPostData, CreateVenueVenuesPostErrors, CreateVenueVenuesPostResponses, DeleteDeadJobQueuesDlqJobIdDeleteData, DeleteDeadJobQueuesDlqJobIdDeleteErrors, DeleteDeadJobQueuesDlqJobIdDeleteResponses, DeleteFeatureFeaturesFeatureIdDeleteData, DeleteFeatureFeaturesFeatureIdDeleteErrors, DeleteFeatureFeaturesFeatureIdDeleteResponses, DeleteRoleRolesRoleIdDeleteData, DeleteRoleRolesRoleIdDeleteErrors, DeleteRoleRolesRoleIdDeleteResponses, DeleteVenueVenuesVenueIdDeleteData, DeleteVenueVenuesVenueIdDeleteErrors, DeleteVenueVenuesVenueIdDeleteResponses, ForgotPasswordAuthForgotPasswordPostData, ForgotPasswordAuthForgotPasswordPostErrors, ForgotPasswordAuthForgotPasswordPostResponses, GetAssignmentUserRolesAssignmentIdGetData, GetAssignmentUserRolesAssignmentIdGetErrors, GetAssignmentUserRolesAssignmentIdGetResponses, GetAuditLogsAuditLogsGetData, GetAuditLogsAuditLogsGetErrors, GetAuditLogsAuditLogsGetResponses, GetCommunityVenueVenuesPublicCommunityVenueIdGetData, GetCommunityVenueVenuesPublicCommunityVenueIdGetErrors, GetCommunityVenueVenuesPublicCommunityVenueIdGetResponses, GetFeatureFeaturesFeatureIdGetData, GetFeatureFeaturesFeatureIdGetErrors, GetFeatureFeaturesFeatureIdGetResponses, GetLoginHistoryUserLoginHistoryGetData, GetLoginHistoryUserLoginHistoryGetErrors, GetLoginHistoryUserLoginHistoryGetResponses, GetMyPermissionsUserMePermissionsGetData, GetMyPermissionsUserMePermissionsGetErrors, GetMyPermissionsUserMePermissionsGetResponses, GetPartnerVenueVenuesPublicPartnersVenueIdGetData, GetPartnerVenueVenuesPublicPartnersVenueIdGetErrors, GetPartnerVenueVenuesPublicPartnersVenueIdGetResponses, GetQueueStatsQueuesGetData, GetQueueStatsQueuesGetErrors, GetQueueStatsQueuesGetResponses, GetRoleRolesRoleIdGetData, GetRoleRolesRoleIdGetErrors, GetRoleRolesRoleIdGetResponses, GetUserAccountDetailUserAccountsUserIdGetData, GetUserAccountDetailUserAccountsUserIdGetErrors, GetUserAccountDetailUserAccountsUserIdGetResponses, GetVenueVenuesVenueIdGetData, GetVenueVenuesVenueIdGetErrors, GetVenueVenuesVenueIdGetResponses, HealthCheckHealthGetData, HealthCheckHealthGetResponses, ListCommunityVenuesVenuesPublicCommunityGetData, ListCommunityVenuesVenuesPublicCommunityGetErrors, ListCommunityVenuesVenuesPublicCommunityGetResponses, ListDeadJobsQueuesDlqGetData, ListDeadJobsQueuesDlqGetErrors, ListDeadJobsQueuesDlqGetResponses, ListFeaturesFeaturesGetData, ListFeaturesFeaturesGetErrors, ListFeaturesFeaturesGetResponses, ListGrantFeaturesUserGrantsFeaturesGetData, ListGrantFeaturesUserGrantsFeaturesGetErrors, ListGrantFeaturesUserGrantsFeaturesGetResponses, ListPartnerVenuesVenuesPublicPartnersGetData, ListPartnerVenuesVenuesPublicPartnersGetErrors, ListPartnerVenuesVenuesPublicPartnersGetResponses, ListRolesRolesGetData, ListRolesRolesGetErrors, ListRolesRolesGetResponses, ListRolesUserAccountsRolesGetData, ListRolesUserAccountsRolesGetErrors, ListRolesUserAccountsRolesGetResponses, ListUserAccountsUserAccountsGetData, ListUserAccountsUserAccountsGetErrors, ListUserAccountsUserAccountsGetResponses, ListUserGrantsUserGrantsGetData, ListUserGrantsUserGrantsGetErrors, ListUserGrantsUserGrantsGetResponses, ListUserRolesUserRolesGetData, ListUserRolesUserRolesGetErrors, ListUserRolesUserRolesGetResponses, ListVenuesVenuesGetData, ListVenuesVenuesGetErrors, ListVenuesVenuesGetResponses, LoginAuthLoginPostData, LoginAuthLoginPostErrors, LoginAuthLoginPostResponses, LoginVerifyAuthLoginVerifyPostData, LoginVerifyAuthLoginVerifyPostErrors, LoginVerifyAuthLoginVerifyPostResponses, LogoutAuthLogoutPostData, LogoutAuthLogoutPostErrors, LogoutAuthLogoutPostResponses, PurgeDeadJobsQueuesDlqDeleteData, PurgeDeadJobsQueuesDlqDeleteErrors, PurgeDeadJobsQueuesDlqDeleteResponses, RefreshTokenAuthRefreshPostData, RefreshTokenAuthRefreshPostErrors, RefreshTokenAuthRefreshPostResponses, RegisterUserAuthRegisterPostData, RegisterUserAuthRegisterPostErrors, RegisterUserAuthRegisterPostResponses, ResendOtpAuthLoginResendOtpPostData, ResendOtpAuthLoginResendOtpPostErrors, ResendOtpAuthLoginResendOtpPostResponses, ResendVerificationAuthResendVerificationPostData, ResendVerificationAuthResendVerificationPostErrors, ResendVerificationAuthResendVerificationPostResponses, ResetPasswordAuthResetPasswordTokenPostData, ResetPasswordAuthResetPasswordTokenPostErrors, ResetPasswordAuthResetPasswordTokenPostResponses, RetryDeadJobQueuesDlqJobIdRetryPostData, RetryDeadJobQueuesDlqJobIdRetryPostErrors, RetryDeadJobQueuesDlqJobIdRetryPostResponses, RevokeAssignmentUserRolesAssignmentIdDeleteData, RevokeAssignmentUserRolesAssignmentIdDeleteErrors, RevokeAssignmentUserRolesAssignmentIdDeleteResponses, RevokeGrantUserGrantsGrantIdDeleteData, RevokeGrantUserGrantsGrantIdDeleteErrors, RevokeGrantUserGrantsGrantIdDeleteResponses, RootGetData, RootGetResponses, ScheduleAdminAccountDeletionUserTargetUserIdAccountDeletionPostData, ScheduleAdminAccountDeletionUserTargetUserIdAccountDeletionPostErrors, ScheduleAdminAccountDeletionUserTargetUserIdAccountDeletionPostResponses, ScheduleOwnAccountDeletionUserAccountDeletionPostData, ScheduleOwnAccountDeletionUserAccountDeletionPostErrors, ScheduleOwnAccountDeletionUserAccountDeletionPostResponses, SendUserPasswordResetUserAccountsUserIdPasswordResetPostData, SendUserPasswordResetUserAccountsUserIdPasswordResetPostErrors, SendUserPasswordResetUserAccountsUserIdPasswordResetPostResponses, UpdateAssignmentUserRolesAssignmentIdPatchData, UpdateAssignmentUserRolesAssignmentIdPatchErrors, UpdateAssignmentUserRolesAssignmentIdPatchResponses, UpdateFeatureFeaturesFeatureIdPatchData, UpdateFeatureFeaturesFeatureIdPatchErrors, UpdateFeatureFeaturesFeatureIdPatchResponses, UpdateRoleRolesRoleIdPatchData, UpdateRoleRolesRoleIdPatchErrors, UpdateRoleRolesRoleIdPatchResponses, UpdateVenueVenuesVenueIdPatchData, UpdateVenueVenuesVenueIdPatchErrors, UpdateVenueVenuesVenueIdPatchResponses, UserOnboardingUserOnboardPostData, UserOnboardingUserOnboardPostErrors, UserOnboardingUserOnboardPostResponses, VerifyEmailAuthVerifyTokenGetData, VerifyEmailAuthVerifyTokenGetErrors, VerifyEmailAuthVerifyTokenGetResponses } from './types.gen';
+import { zAssignRoleUserRolesPostBody, zAssignRoleUserRolesPostResponse, zChangePasswordUserChangePasswordPostBody, zChangePasswordUserChangePasswordPostResponse, zChangeUserEmailUserAccountsUserIdEmailPatchBody, zChangeUserEmailUserAccountsUserIdEmailPatchPath, zChangeUserEmailUserAccountsUserIdEmailPatchResponse, zChangeUserRoleUserAccountsUserIdRolePatchBody, zChangeUserRoleUserAccountsUserIdRolePatchPath, zChangeUserRoleUserAccountsUserIdRolePatchResponse, zCheckAliasUserCheckAliasGetQuery, zCheckAliasUserCheckAliasGetResponse, zCreateFeatureFeaturesPostBody, zCreateFeatureFeaturesPostResponse, zCreateGrantsUserGrantsPostBody, zCreateGrantsUserGrantsPostResponse, zCreateRoleRolesPostBody, zCreateRoleRolesPostResponse, zCreateVenueVenuesPostBody, zCreateVenueVenuesPostResponse, zDeleteDeadJobQueuesDlqJobIdDeletePath, zDeleteDeadJobQueuesDlqJobIdDeleteResponse, zDeleteFeatureFeaturesFeatureIdDeletePath, zDeleteFeatureFeaturesFeatureIdDeleteResponse, zDeleteRoleRolesRoleIdDeletePath, zDeleteRoleRolesRoleIdDeleteResponse, zDeleteVenueVenuesVenueIdDeletePath, zDeleteVenueVenuesVenueIdDeleteResponse, zForgotPasswordAuthForgotPasswordPostBody, zForgotPasswordAuthForgotPasswordPostResponse, zGetAssignmentUserRolesAssignmentIdGetPath, zGetAssignmentUserRolesAssignmentIdGetResponse, zGetAuditLogsAuditLogsGetQuery, zGetAuditLogsAuditLogsGetResponse, zGetCommunityVenueVenuesPublicCommunityVenueIdGetPath, zGetCommunityVenueVenuesPublicCommunityVenueIdGetResponse, zGetFeatureFeaturesFeatureIdGetPath, zGetFeatureFeaturesFeatureIdGetResponse, zGetLoginHistoryUserLoginHistoryGetQuery, zGetLoginHistoryUserLoginHistoryGetResponse, zGetMyPermissionsUserMePermissionsGetResponse, zGetPartnerVenueVenuesPublicPartnersVenueIdGetPath, zGetPartnerVenueVenuesPublicPartnersVenueIdGetResponse, zGetQueueStatsQueuesGetResponse, zGetRoleRolesRoleIdGetPath, zGetRoleRolesRoleIdGetResponse, zGetUserAccountDetailUserAccountsUserIdGetPath, zGetUserAccountDetailUserAccountsUserIdGetResponse, zGetVenueVenuesVenueIdGetPath, zGetVenueVenuesVenueIdGetResponse, zListCommunityVenuesVenuesPublicCommunityGetQuery, zListCommunityVenuesVenuesPublicCommunityGetResponse, zListDeadJobsQueuesDlqGetQuery, zListDeadJobsQueuesDlqGetResponse, zListFeaturesFeaturesGetResponse, zListGrantFeaturesUserGrantsFeaturesGetResponse, zListPartnerVenuesVenuesPublicPartnersGetQuery, zListPartnerVenuesVenuesPublicPartnersGetResponse, zListRolesRolesGetResponse, zListRolesUserAccountsRolesGetResponse, zListUserAccountsUserAccountsGetQuery, zListUserAccountsUserAccountsGetResponse, zListUserGrantsUserGrantsGetQuery, zListUserGrantsUserGrantsGetResponse, zListUserRolesUserRolesGetQuery, zListUserRolesUserRolesGetResponse, zListVenuesVenuesGetQuery, zListVenuesVenuesGetResponse, zLoginAuthLoginPostBody, zLoginAuthLoginPostResponse, zLoginVerifyAuthLoginVerifyPostBody, zLoginVerifyAuthLoginVerifyPostResponse, zLogoutAuthLogoutPostBody, zLogoutAuthLogoutPostResponse, zPurgeDeadJobsQueuesDlqDeleteResponse, zRefreshTokenAuthRefreshPostBody, zRefreshTokenAuthRefreshPostResponse, zRegisterUserAuthRegisterPostBody, zRegisterUserAuthRegisterPostResponse, zResendOtpAuthLoginResendOtpPostBody, zResendOtpAuthLoginResendOtpPostResponse, zResendVerificationAuthResendVerificationPostBody, zResendVerificationAuthResendVerificationPostResponse, zResetPasswordAuthResetPasswordTokenPostBody, zResetPasswordAuthResetPasswordTokenPostPath, zResetPasswordAuthResetPasswordTokenPostResponse, zRetryDeadJobQueuesDlqJobIdRetryPostPath, zRetryDeadJobQueuesDlqJobIdRetryPostResponse, zRevokeAssignmentUserRolesAssignmentIdDeletePath, zRevokeAssignmentUserRolesAssignmentIdDeleteResponse, zRevokeGrantUserGrantsGrantIdDeletePath, zRevokeGrantUserGrantsGrantIdDeleteResponse, zScheduleAdminAccountDeletionUserTargetUserIdAccountDeletionPostBody, zScheduleAdminAccountDeletionUserTargetUserIdAccountDeletionPostPath, zScheduleAdminAccountDeletionUserTargetUserIdAccountDeletionPostResponse, zScheduleOwnAccountDeletionUserAccountDeletionPostBody, zScheduleOwnAccountDeletionUserAccountDeletionPostResponse, zSendUserPasswordResetUserAccountsUserIdPasswordResetPostPath, zSendUserPasswordResetUserAccountsUserIdPasswordResetPostResponse, zUpdateAssignmentUserRolesAssignmentIdPatchBody, zUpdateAssignmentUserRolesAssignmentIdPatchPath, zUpdateAssignmentUserRolesAssignmentIdPatchResponse, zUpdateFeatureFeaturesFeatureIdPatchBody, zUpdateFeatureFeaturesFeatureIdPatchPath, zUpdateFeatureFeaturesFeatureIdPatchResponse, zUpdateRoleRolesRoleIdPatchBody, zUpdateRoleRolesRoleIdPatchPath, zUpdateRoleRolesRoleIdPatchResponse, zUpdateVenueVenuesVenueIdPatchBody, zUpdateVenueVenuesVenueIdPatchPath, zUpdateVenueVenuesVenueIdPatchResponse, zUserOnboardingUserOnboardPostBody, zUserOnboardingUserOnboardPostResponse, zVerifyEmailAuthVerifyTokenGetPath, zVerifyEmailAuthVerifyTokenGetResponse } from './zod.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -21,7 +21,7 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
     meta?: Record<string, unknown>;
 };
 
-export class Authentication {
+export class Auth {
     /**
      * Register a new user
      *
@@ -249,7 +249,7 @@ export class Authentication {
     }
 }
 
-export class User {
+export class Profile {
     /**
      * Retrieve recent login history
      *
@@ -407,7 +407,7 @@ export class User {
     }
 }
 
-export class AdminUserAccounts {
+export class Users {
     /**
      * List assignable system roles
      *
@@ -561,7 +561,7 @@ export class AuditLogs {
     }
 }
 
-export class RbacFeatures {
+export class Features {
     /**
      * List RBAC features
      *
@@ -670,7 +670,7 @@ export class RbacFeatures {
     }
 }
 
-export class RbacRoles {
+export class Roles {
     /**
      * List RBAC roles
      *
@@ -777,9 +777,7 @@ export class RbacRoles {
             }
         });
     }
-}
-
-export class UserRoleManagement {
+    
     /**
      * List role assignments for a user
      *
@@ -886,9 +884,7 @@ export class UserRoleManagement {
             }
         });
     }
-}
-
-export class UserGrantManagement {
+    
     /**
      * List grants for a user
      *
@@ -973,7 +969,7 @@ export class UserGrantManagement {
     }
 }
 
-export class QueueManagement {
+export class Queue {
     /**
      * Get queue statistics
      *
@@ -1087,9 +1083,105 @@ export class QueueManagement {
 
 export class Venues {
     /**
-     * Create a new venue
+     * List partner venues (public)
      *
-     * Create a new event venue with location details, contact information, and capacity. The authenticated user becomes the creator and owner of the venue. Requires ``create`` permission on the ``venues`` feature.
+     * Return a paginated list of partner venues visible to the public. Contact information is excluded from all records.
+     */
+    public static listPartnerVenuesVenuesPublicPartnersGet<ThrowOnError extends boolean = false>(options?: Options<ListPartnerVenuesVenuesPublicPartnersGetData, ThrowOnError>) {
+        return (options?.client ?? client).get<ListPartnerVenuesVenuesPublicPartnersGetResponses, ListPartnerVenuesVenuesPublicPartnersGetErrors, ThrowOnError>({
+            requestValidator: async (data) => await z.object({
+                body: z.never().optional(),
+                path: z.never().optional(),
+                query: zListPartnerVenuesVenuesPublicPartnersGetQuery.optional()
+            }).parseAsync(data),
+            responseType: 'json',
+            responseValidator: async (data) => await zListPartnerVenuesVenuesPublicPartnersGetResponse.parseAsync(data),
+            url: '/venues/public/partners',
+            ...options
+        });
+    }
+    
+    /**
+     * Get one partner venue (public)
+     *
+     * Return a single partner venue by UUID. Returns 404 when the venue does not exist or is not a partner. Contact information is excluded.
+     */
+    public static getPartnerVenueVenuesPublicPartnersVenueIdGet<ThrowOnError extends boolean = false>(options: Options<GetPartnerVenueVenuesPublicPartnersVenueIdGetData, ThrowOnError>) {
+        return (options.client ?? client).get<GetPartnerVenueVenuesPublicPartnersVenueIdGetResponses, GetPartnerVenueVenuesPublicPartnersVenueIdGetErrors, ThrowOnError>({
+            requestValidator: async (data) => await z.object({
+                body: z.never().optional(),
+                path: zGetPartnerVenueVenuesPublicPartnersVenueIdGetPath,
+                query: z.never().optional()
+            }).parseAsync(data),
+            responseType: 'json',
+            responseValidator: async (data) => await zGetPartnerVenueVenuesPublicPartnersVenueIdGetResponse.parseAsync(data),
+            url: '/venues/public/partners/{venue_id}',
+            ...options
+        });
+    }
+    
+    /**
+     * List community suggested venues (public)
+     *
+     * Return a paginated list of community suggested venues visible to the public. Contact information is excluded from all records.
+     */
+    public static listCommunityVenuesVenuesPublicCommunityGet<ThrowOnError extends boolean = false>(options?: Options<ListCommunityVenuesVenuesPublicCommunityGetData, ThrowOnError>) {
+        return (options?.client ?? client).get<ListCommunityVenuesVenuesPublicCommunityGetResponses, ListCommunityVenuesVenuesPublicCommunityGetErrors, ThrowOnError>({
+            requestValidator: async (data) => await z.object({
+                body: z.never().optional(),
+                path: z.never().optional(),
+                query: zListCommunityVenuesVenuesPublicCommunityGetQuery.optional()
+            }).parseAsync(data),
+            responseType: 'json',
+            responseValidator: async (data) => await zListCommunityVenuesVenuesPublicCommunityGetResponse.parseAsync(data),
+            url: '/venues/public/community',
+            ...options
+        });
+    }
+    
+    /**
+     * Get one community suggested venue (public)
+     *
+     * Return a single community suggested venue by UUID. Returns 404 when the venue does not exist or is a partner venue. Contact information is excluded.
+     */
+    public static getCommunityVenueVenuesPublicCommunityVenueIdGet<ThrowOnError extends boolean = false>(options: Options<GetCommunityVenueVenuesPublicCommunityVenueIdGetData, ThrowOnError>) {
+        return (options.client ?? client).get<GetCommunityVenueVenuesPublicCommunityVenueIdGetResponses, GetCommunityVenueVenuesPublicCommunityVenueIdGetErrors, ThrowOnError>({
+            requestValidator: async (data) => await z.object({
+                body: z.never().optional(),
+                path: zGetCommunityVenueVenuesPublicCommunityVenueIdGetPath,
+                query: z.never().optional()
+            }).parseAsync(data),
+            responseType: 'json',
+            responseValidator: async (data) => await zGetCommunityVenueVenuesPublicCommunityVenueIdGetResponse.parseAsync(data),
+            url: '/venues/public/community/{venue_id}',
+            ...options
+        });
+    }
+    
+    /**
+     * List venues
+     *
+     * Return a paginated list of all venues. Supports optional text search across name and city, and filtering by venue type and partner status.
+     */
+    public static listVenuesVenuesGet<ThrowOnError extends boolean = false>(options?: Options<ListVenuesVenuesGetData, ThrowOnError>) {
+        return (options?.client ?? client).get<ListVenuesVenuesGetResponses, ListVenuesVenuesGetErrors, ThrowOnError>({
+            requestValidator: async (data) => await z.object({
+                body: z.never().optional(),
+                path: z.never().optional(),
+                query: zListVenuesVenuesGetQuery.optional()
+            }).parseAsync(data),
+            responseType: 'json',
+            responseValidator: async (data) => await zListVenuesVenuesGetResponse.parseAsync(data),
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/venues',
+            ...options
+        });
+    }
+    
+    /**
+     * Create a venue
+     *
+     * Create a new venue record. Amenity names are automatically normalised to Title Case before storage (e.g. ``air conditioning`` → ``Air Conditioning``). Venue names must be unique within the same city.
      */
     public static createVenueVenuesPost<ThrowOnError extends boolean = false>(options: Options<CreateVenueVenuesPostData, ThrowOnError>) {
         return (options.client ?? client).post<CreateVenueVenuesPostResponses, CreateVenueVenuesPostErrors, ThrowOnError>({
@@ -1101,7 +1193,7 @@ export class Venues {
             responseType: 'json',
             responseValidator: async (data) => await zCreateVenueVenuesPostResponse.parseAsync(data),
             security: [{ scheme: 'bearer', type: 'http' }],
-            url: '/venues/',
+            url: '/venues',
             ...options,
             headers: {
                 'Content-Type': 'application/json',
@@ -1113,7 +1205,7 @@ export class Venues {
     /**
      * Delete a venue
      *
-     * Permanently delete a venue and all associated event data. This action is irreversible. Only the venue creator can delete the venue. Requires ``delete`` permission on the ``venues`` feature.
+     * Permanently delete a venue when no event sessions reference it. This action is irreversible.
      */
     public static deleteVenueVenuesVenueIdDelete<ThrowOnError extends boolean = false>(options: Options<DeleteVenueVenuesVenueIdDeleteData, ThrowOnError>) {
         return (options.client ?? client).delete<DeleteVenueVenuesVenueIdDeleteResponses, DeleteVenueVenuesVenueIdDeleteErrors, ThrowOnError>({
@@ -1130,9 +1222,9 @@ export class Venues {
     }
     
     /**
-     * Get venue details
+     * Get one venue
      *
-     * Retrieve detailed information about a specific venue including location, contact details, capacity, and type. Requires ``read`` permission on the ``venues`` feature.
+     * Return the full record for a single venue by its UUID.
      */
     public static getVenueVenuesVenueIdGet<ThrowOnError extends boolean = false>(options: Options<GetVenueVenuesVenueIdGetData, ThrowOnError>) {
         return (options.client ?? client).get<GetVenueVenuesVenueIdGetResponses, GetVenueVenuesVenueIdGetErrors, ThrowOnError>({
@@ -1150,9 +1242,9 @@ export class Venues {
     }
     
     /**
-     * Update an existing venue
+     * Update a venue
      *
-     * Update one or more fields of an existing venue. Only the venue creator can update venue details. All fields are optional — only provide fields you wish to change. Requires ``update`` permission on the ``venues`` feature.
+     * Update an existing venue record. All fields are replaced. Amenity names are normalised to Title Case. Name uniqueness is re-checked against the city value supplied in this request.
      */
     public static updateVenueVenuesVenueIdPatch<ThrowOnError extends boolean = false>(options: Options<UpdateVenueVenuesVenueIdPatchData, ThrowOnError>) {
         return (options.client ?? client).patch<UpdateVenueVenuesVenueIdPatchResponses, UpdateVenueVenuesVenueIdPatchErrors, ThrowOnError>({
@@ -1170,26 +1262,6 @@ export class Venues {
                 'Content-Type': 'application/json',
                 ...options.headers
             }
-        });
-    }
-    
-    /**
-     * List venues by creator
-     *
-     * Retrieve all venues created by a specific user. Returns an empty list if the user has no venues. Requires ``read`` permission on the ``venues`` feature.
-     */
-    public static getUserVenuesVenuesCreatorCreatorIdGet<ThrowOnError extends boolean = false>(options: Options<GetUserVenuesVenuesCreatorCreatorIdGetData, ThrowOnError>) {
-        return (options.client ?? client).get<GetUserVenuesVenuesCreatorCreatorIdGetResponses, GetUserVenuesVenuesCreatorCreatorIdGetErrors, ThrowOnError>({
-            requestValidator: async (data) => await z.object({
-                body: z.never().optional(),
-                path: zGetUserVenuesVenuesCreatorCreatorIdGetPath,
-                query: z.never().optional()
-            }).parseAsync(data),
-            responseType: 'json',
-            responseValidator: async (data) => await zGetUserVenuesVenuesCreatorCreatorIdGetResponse.parseAsync(data),
-            security: [{ scheme: 'bearer', type: 'http' }],
-            url: '/venues/creator/{creator_id}',
-            ...options
         });
     }
 }

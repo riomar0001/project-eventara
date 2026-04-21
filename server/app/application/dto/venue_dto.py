@@ -1,6 +1,6 @@
 import math
 import uuid
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from app.domain.entities.venue_entities import Venue as VenueEntity
 from app.domain.entities.venue_entities import VenueType
