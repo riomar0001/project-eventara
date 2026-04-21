@@ -353,7 +353,10 @@ async def login(
         additional_context={"operation": "login-init"},
     )
 
-    return LoginInitResponse(verification_token=result.verification_token)
+    return LoginInitResponse(
+        verification_token=result.verification_token,
+        debug_otp=result.otp if settings.DEBUG else None,
+    )
 
 
 @router.post(
@@ -529,7 +532,10 @@ async def resend_otp(
     except UserNotFoundError as error:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error))
 
-    return ResendOtpResponse(verification_token=result.verification_token)
+    return ResendOtpResponse(
+        verification_token=result.verification_token,
+        debug_otp=result.otp if settings.DEBUG else None,
+    )
 
 
 @router.post(

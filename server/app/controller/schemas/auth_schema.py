@@ -55,6 +55,7 @@ class LoginInitResponse(BaseModel):
     success: bool = True
     verification_token: str
     message: str = "OTP sent to your email."
+    debug_otp: str | None = Field(default=None, description="Only included in DEBUG mode")
 
 
 class ResendOtpRequest(BaseModel):
@@ -65,6 +66,7 @@ class ResendOtpResponse(BaseModel):
     success: bool = True
     verification_token: str
     message: str = "A new OTP has been sent to your email."
+    debug_otp: str | None = Field(default=None, description="Only included in DEBUG mode")
 
 
 class LoginVerifyRequest(BaseModel):

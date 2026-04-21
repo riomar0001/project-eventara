@@ -15,12 +15,40 @@ from app.domain.exceptions.event_exceptions import (
     EventValidationError,
     UnauthorizedEventOperationError,
 )
+from app.domain.exceptions.event_participant_exceptions import (
+    DuplicateEventParticipantError,
+    EventParticipantNotFoundError,
+    EventParticipantValidationError,
+    InvalidEventParticipantStatusTransitionError,
+    UnauthorizedEventParticipantOperationError,
+)
+from app.domain.exceptions.event_rating_exceptions import (
+    DuplicateEventRatingError,
+    EventNotRatableError,
+    EventRatingNotFoundError,
+    EventRatingValidationError,
+    UnauthorizedEventRatingOperationError,
+)
+from app.domain.exceptions.event_session_exceptions import (
+    EventSessionNotFoundError,
+    EventSessionStatusTransitionError,
+    EventSessionValidationError,
+    InvalidEventSessionDateError,
+    UnauthorizedEventSessionOperationError,
+)
 from app.domain.exceptions.event_volunteer_exceptions import (
     EventVolunteerAlreadyExistsError,
     EventVolunteerNotFoundError,
     EventVolunteerValidationError,
     InvalidEventVolunteerStatusTransitionError,
     UnauthorizedEventVolunteerOperationError,
+)
+from app.domain.exceptions.feedback_report_exceptions import (
+    DuplicateFeedbackReportError,
+    FeedbackReportNotFoundError,
+    FeedbackReportValidationError,
+    InvalidFeedbackStatusTransitionError,
+    UnauthorizedFeedbackReportOperationError,
 )
 from app.domain.exceptions.role_exceptions import (
     DuplicateUserGrantError,
@@ -130,4 +158,25 @@ __all__ = [
     "EventVolunteerAlreadyExistsError",
     "UnauthorizedEventVolunteerOperationError",
     "InvalidEventVolunteerStatusTransitionError",
+    "EventRatingNotFoundError",
+    "EventRatingValidationError",
+    "DuplicateEventRatingError",
+    "UnauthorizedEventRatingOperationError",
+    "EventNotRatableError",
+    "InvalidEventRatingStatusTransitionError",
+    "EventSessionNotFoundError",
+    "EventSessionValidationError",
+    "InvalidEventSessionDateError",
+    "EventSessionStatusTransitionError",
+    "UnauthorizedEventSessionOperationError",
+    "EventParticipantNotFoundError",
+    "EventParticipantValidationError",
+    "DuplicateEventParticipantError",
+    "UnauthorizedEventParticipantOperationError",
+    "InvalidEventParticipantStatusTransitionError",
+    "FeedbackReportNotFoundError",
+    "FeedbackReportValidationError",
+    "DuplicateFeedbackReportError",
+    "UnauthorizedFeedbackReportOperationError",
+    "InvalidFeedbackStatusTransitionError",
 ]

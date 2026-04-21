@@ -50,7 +50,10 @@ export function LoginForm() {
       return;
     }
 
-    router.push(`/login/verify?token=${result.data.verification_token}`);
+    const url = new URL('/login/verify', window.location.origin);
+    url.searchParams.set('token', result.data.verification_token);
+    if (result.data.debug_otp) url.searchParams.set('debug_otp', result.data.debug_otp);
+    router.push(url.pathname + url.search);
   }
 
   return (

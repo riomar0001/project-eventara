@@ -34,6 +34,7 @@ export function LoginVerifyForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialToken = searchParams.get('token') ?? '';
+  const initialDebugOtp = searchParams.get('debug_otp');
   const setAuth = useAuthStore((s) => s.setAuth);
 
   // activeToken can update after a resend — kept in state so the interval effect re-runs
@@ -51,6 +52,7 @@ export function LoginVerifyForm() {
     return secondsUntil(getOrCreateExpiry(initialToken));
   });
   const [shake, setShake] = useState(false);
+  const [debugOtp, setDebugOtp] = useState<string | null>(initialDebugOtp);
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -167,6 +169,7 @@ export function LoginVerifyForm() {
     setDigits(Array(OTP_LENGTH).fill(''));
     setFocusedIndex(0);
     setActiveToken(newToken);
+    setDebugOtp(result.data.debug_otp ?? null);
     setResendSuccess(true);
     setTimeout(() => setResendSuccess(false), 4000);
   };
@@ -228,6 +231,14 @@ export function LoginVerifyForm() {
                 <span className="text-muted-foreground">remaining</span>
               </>
             )}
+          </div>
+        )}
+
+        {debugOtp && (
+          <div className="rounded-md border border-dashed border-yellow-500 bg-yellow-50 px-3 py-2 text-center dark:bg-yellow-950/30">
+            <p className="text-xs font-medium text-yellow-700 dark:text-yellow-400">
+              Debug mode — OTP: <span className="font-mono tracking-widest">{debugOtp}</span>
+            </p>
           </div>
         )}
       </div>
