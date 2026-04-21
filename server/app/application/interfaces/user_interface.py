@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from typing import Protocol
 
-from app.application.dto.admin_user_account_dto import AdminUserAccountDetail, AdminUserAccountSummary
+from app.application.dto.users_dto import AdminUserAccountDetail, AdminUserAccountSummary
 from app.domain.entities.user_entity import (
     PublicUser,
     User,

@@ -7,7 +7,7 @@ from sqlalchemy.engine import CursorResult
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.application.dto.admin_user_account_dto import AdminUserAccountDetail, AdminUserAccountSummary
+from app.application.dto.users_dto import AdminUserAccountDetail, AdminUserAccountSummary
 from app.domain.entities.user_entity import (
     AgeGroup,
     EducationLevel,

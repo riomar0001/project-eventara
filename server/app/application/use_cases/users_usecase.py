@@ -1,6 +1,6 @@
 """Administrative user-account application services.
 
-This module implements the account-management operations used by the new admin
+This module implements the account-management operations used by the admin
 UI: paginated listing, detailed inspection, role replacement, email changes,
 role catalog retrieval, and password-reset dispatch.
 
@@ -24,7 +24,7 @@ Concurrency strategy:
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.application.dto.admin_user_account_dto import (
+from app.application.dto.users_dto import (
     AdminUserAccountDetail,
     AssignableRoleDetail,
     ChangeUserEmailInput,
@@ -77,15 +77,6 @@ class AdminUserAccountUseCase:
         self.password_reset_repo = password_reset_repo
 
     async def list_user_accounts(self, data: ListUserAccountsInput) -> ListUserAccountsOutput:
-        """Return one page of user-account summaries for the admin table.
-
-        Args:
-            data: Pagination input carrying the one-based page index and page size.
-
-        Returns:
-            A ``ListUserAccountsOutput`` containing the current page of users and
-            aggregate pagination metadata.
-        """
         users, total_count = await self.user_repo.list_admin_user_accounts(
             page=data.page,
             page_size=data.page_size,
@@ -103,17 +94,6 @@ class AdminUserAccountUseCase:
         )
 
     async def get_user_account_detail(self, user_id) -> AdminUserAccountDetail:
-        """Return the full administrative detail payload for a single account.
-
-        Args:
-            user_id: The target account identifier.
-
-        Returns:
-            The detailed admin view of the account.
-
-        Raises:
-            UserNotFoundError: The target account does not exist.
-        """
         detail = await self.user_repo.get_admin_user_account_detail(user_id)
         if detail is None:
             raise UserNotFoundError(str(user_id))
@@ -122,7 +102,6 @@ class AdminUserAccountUseCase:
         return detail
 
     async def list_roles(self) -> ListAssignableRolesOutput:
-        """Return the role catalog exposed in the admin change-role dialog."""
         roles = await self.role_repo.list_roles()
         permissions_by_role = await self.role_repo.list_role_permissions([role.id for role in roles])
         return ListAssignableRolesOutput(
@@ -140,21 +119,6 @@ class AdminUserAccountUseCase:
         )
 
     async def change_role(self, data: ChangeUserRoleInput) -> ChangeUserRoleOutput:
-        """Replace a user's current effective role with a single new role.
-
-        Args:
-            data: The target user, replacement role, and administrator identity.
-
-        Returns:
-            A ``ChangeUserRoleOutput`` describing the new effective role.
-
-        Raises:
-            UserNotFoundError: The target account does not exist.
-            UserInactiveError: The target account is inactive or deleted.
-            RoleNotFoundError: The requested replacement role does not exist.
-            RoleAlreadyCurrentError: The requested role is already the user's only
-                current effective role.
-        """
         try:
             locked = await self.role_repo.lock_user(data.user_id)
             if not locked:
@@ -194,20 +158,6 @@ class AdminUserAccountUseCase:
             raise
 
     async def change_email(self, data: ChangeUserEmailInput) -> ChangeUserEmailOutput:
-        """Update a user's email, clear verification state, and send a new verification link.
-
-        Args:
-            data: The target user, replacement email address, and administrator identity.
-
-        Returns:
-            A ``ChangeUserEmailOutput`` containing the persisted email value.
-
-        Raises:
-            UserNotFoundError: The target account does not exist.
-            UserInactiveError: The target account is inactive or deleted.
-            SameEmailError: The replacement email matches the current address.
-            EmailAlreadyTakenError: Another account already owns the requested email.
-        """
         try:
             locked_user = await self.user_repo.get_by_id_for_update(data.user_id)
             if locked_user is None:
@@ -242,17 +192,6 @@ class AdminUserAccountUseCase:
         return ChangeUserEmailOutput(user_id=updated_user.id, email=updated_user.email)
 
     async def send_password_reset(self, data: SendUserPasswordResetInput) -> None:
-        """Send a reset-password link to the target user's verified email address.
-
-        Args:
-            data: The target user and the administrator triggering the action.
-
-        Raises:
-            UserNotFoundError: The target account does not exist.
-            UserInactiveError: The target account is inactive or deleted.
-            PasswordResetEmailNotVerifiedError: The target account does not have a
-                verified email address to receive the reset link.
-        """
         user = await self.user_repo.get_by_id(data.user_id)
         if user is None:
             raise UserNotFoundError(str(data.user_id))
