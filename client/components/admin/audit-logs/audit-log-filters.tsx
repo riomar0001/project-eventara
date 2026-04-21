@@ -64,12 +64,7 @@ export function AuditLogFilters({ activeFilterCount, filters, isLoading, onClear
           {/* User ID */}
           <div className="space-y-1.5">
             <FilterLabel htmlFor="audit-log-user-id">User ID</FilterLabel>
-            <Input
-              id="audit-log-user-id"
-              placeholder="Filter by actor ID"
-              value={filters.userId}
-              onChange={(e) => onUpdateFilter('userId', e.target.value)}
-            />
+            <Input id="audit-log-user-id" placeholder="Filter by actor ID" value={filters.userId} onChange={(e) => onUpdateFilter('userId', e.target.value)} />
           </div>
 
           {/* Resource type */}
@@ -109,23 +104,13 @@ export function AuditLogFilters({ activeFilterCount, filters, isLoading, onClear
           {/* Start date */}
           <div className="space-y-1.5">
             <FilterLabel htmlFor="audit-log-start-date">Start date</FilterLabel>
-            <Input
-              id="audit-log-start-date"
-              type="date"
-              value={filters.startDate}
-              onChange={(e) => onUpdateFilter('startDate', e.target.value)}
-            />
+            <Input id="audit-log-start-date" type="date" value={filters.startDate} onChange={(e) => onUpdateFilter('startDate', e.target.value)} />
           </div>
 
           {/* End date */}
           <div className="space-y-1.5">
             <FilterLabel htmlFor="audit-log-end-date">End date</FilterLabel>
-            <Input
-              id="audit-log-end-date"
-              type="date"
-              value={filters.endDate}
-              onChange={(e) => onUpdateFilter('endDate', e.target.value)}
-            />
+            <Input id="audit-log-end-date" type="date" value={filters.endDate} onChange={(e) => onUpdateFilter('endDate', e.target.value)} />
           </div>
         </div>
       </CardContent>
