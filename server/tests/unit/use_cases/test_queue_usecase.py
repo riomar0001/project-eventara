@@ -258,6 +258,7 @@ class TestPurgeDeadJobsUseCase:
 
             async def _scan(match="*"):
                 return
+                yield  # makes this an async generator
 
             redis.scan_iter = _scan
             result = await PurgeDeadJobsUseCase(redis).execute()
