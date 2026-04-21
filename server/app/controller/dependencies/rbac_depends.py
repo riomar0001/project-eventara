@@ -2,16 +2,16 @@ import uuid
 from collections.abc import Callable, Coroutine
 
 from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from fastapi.security import HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.controller.dependencies.auth_depends import _auth_detail
+from app.controller.dependencies.auth_depends import _CookieOrBearer, _auth_detail
 from app.core.security.token_service import verify_access_token
 from app.domain.entities.authorization_entities import GrantEffect, RoleAction
 from app.infrastructure.database.repositories.rbac_repository import RBACRepository
 from app.infrastructure.database.session import get_db
 
-_bearer = HTTPBearer()
+_bearer = _CookieOrBearer()
 
 
 def require_permission(
