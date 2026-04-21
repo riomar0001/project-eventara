@@ -3,7 +3,6 @@ from dataclasses import dataclass, field
 from datetime import datetime
 
 from app.application.dto.roles_dto import RolePermissionSummary
-from app.domain.entities.authorization_entities import GrantEffect, RoleAction
 from app.domain.entities.user_entity import AgeGroup, EducationLevel, Gender, UserStatus
 
 

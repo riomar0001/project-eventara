@@ -4,10 +4,9 @@ from datetime import datetime
 
 from fastapi import Request
 
-from app.application.dto.roles_dto import RolePermissionSummary
-from app.application.dto.users_dto import AdminUserAccountDetail
 from app.application.dto.audit_log_dto import CreateAuditLogInput
-from app.application.dto.roles_dto import ManagedRoleDetail
+from app.application.dto.roles_dto import ManagedRoleDetail, RolePermissionSummary
+from app.application.dto.users_dto import AdminUserAccountDetail
 from app.application.use_cases.audit_log_usecase import CreateAuditLogUseCase
 from app.domain.entities.audit_log import ActionType, AuditLogStatus
 from app.domain.entities.authorization_entities import Feature, UserGrant, UserRole

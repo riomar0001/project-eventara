@@ -8,18 +8,16 @@ from app.application.dto.roles_dto import (
     AssignRoleOutput,
     CreateGrantsInput,
     CreateGrantsOutput,
+    CreateRoleInput,
     GetUserGrantsOutput,
     GetUserRolesOutput,
     ListGrantFeaturesOutput,
-    UpdateAssignmentInput,
-    UpdateAssignmentOutput,
-)
-from app.application.dto.roles_dto import (
-    CreateRoleInput,
     ListRolesOutput,
     ManagedRoleDetail,
     RoleOutput,
     RolePermissionInput,
+    UpdateAssignmentInput,
+    UpdateAssignmentOutput,
     UpdateRoleInput,
 )
 from app.application.interfaces.role_interface import IRoleRepository
