@@ -32,7 +32,9 @@ export function PermissionsProvider({ children }: { children: React.ReactNode })
     }
 
     fetchPermissions();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   function can(feature: string, action: string): boolean {
@@ -41,11 +43,7 @@ export function PermissionsProvider({ children }: { children: React.ReactNode })
 
   if (isLoading) return null;
 
-  return (
-    <PermissionsContext.Provider value={{ can, isLoading }}>
-      {children}
-    </PermissionsContext.Provider>
-  );
+  return <PermissionsContext.Provider value={{ can, isLoading }}>{children}</PermissionsContext.Provider>;
 }
 
 export function usePermissions() {
