@@ -15,6 +15,13 @@ from app.domain.exceptions.event_exceptions import (
     EventValidationError,
     UnauthorizedEventOperationError,
 )
+from app.domain.exceptions.event_participant_exceptions import (
+    DuplicateEventParticipantError,
+    EventParticipantNotFoundError,
+    EventParticipantValidationError,
+    InvalidEventParticipantStatusTransitionError,
+    UnauthorizedEventParticipantOperationError,
+)
 from app.domain.exceptions.event_rating_exceptions import (
     DuplicateEventRatingError,
     EventNotRatableError,
@@ -162,6 +169,11 @@ __all__ = [
     "InvalidEventSessionDateError",
     "EventSessionStatusTransitionError",
     "UnauthorizedEventSessionOperationError",
+    "EventParticipantNotFoundError",
+    "EventParticipantValidationError",
+    "DuplicateEventParticipantError",
+    "UnauthorizedEventParticipantOperationError",
+    "InvalidEventParticipantStatusTransitionError",
     "FeedbackReportNotFoundError",
     "FeedbackReportValidationError",
     "DuplicateFeedbackReportError",

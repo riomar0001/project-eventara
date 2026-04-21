@@ -1,4 +1,5 @@
 from app.domain.entities.event_entity import Event, EventStatus
+from app.domain.entities.event_participant_entity import EventParticipant, EventParticipantStatus
 from app.domain.entities.event_rating_entity import EventRating
 from app.domain.entities.event_session_entity import EventSession, EventSessionStatus
 from app.domain.entities.event_volunteer_entity import EventVolunteer, EventVolunteerStatus
@@ -30,6 +31,8 @@ __all__ = [
     "EventRating",
     "EventSession",
     "EventSessionStatus",
+    "EventParticipant",
+    "EventParticipantStatus",
     "FeedbackReport",
     "FeedbackType",
     "FeedbackEntityType",
