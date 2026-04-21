@@ -37,6 +37,7 @@ class EventSession(Base):
     # Relationships
     event = relationship("Event", back_populates="sessions")
     venue = relationship("Venue", back_populates="event_sessions")
+    participants = relationship("EventParticipant", back_populates="event_session")
 
     __table_args__ = (
         Index("idx_event_sessions_event_id", "event_id"),

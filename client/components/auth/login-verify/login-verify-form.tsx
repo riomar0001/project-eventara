@@ -236,7 +236,9 @@ export function LoginVerifyForm() {
 
         {debugOtp && (
           <div className="rounded-md border border-dashed border-yellow-500 bg-yellow-50 px-3 py-2 text-center dark:bg-yellow-950/30">
-            <p className="text-xs font-medium text-yellow-700 dark:text-yellow-400">Debug mode — OTP: <span className="font-mono tracking-widest">{debugOtp}</span></p>
+            <p className="text-xs font-medium text-yellow-700 dark:text-yellow-400">
+              Debug mode — OTP: <span className="font-mono tracking-widest">{debugOtp}</span>
+            </p>
           </div>
         )}
       </div>
