@@ -4,17 +4,19 @@ import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 
+from app.application.dto.account_settings_dto import RequestAccountDeletionInput
 from app.application.dto.users_dto import (
     ChangeUserEmailInput,
     ChangeUserRoleInput,
     ListUserAccountsInput,
     SendUserPasswordResetInput,
 )
+from app.application.use_cases.account_settings_usecase import DeleteAccountUseCase
 from app.application.use_cases.audit_log_usecase import CreateAuditLogUseCase
 from app.application.use_cases.users_usecase import AdminUserAccountUseCase
 from app.controller.api.audit_helpers import safe_audit_log, serialize_admin_user_account
 from app.controller.dependencies import get_create_audit_log_use_case, require_permission
-from app.controller.dependencies.use_cases_depends import get_admin_user_account_use_case
+from app.controller.dependencies.use_cases_depends import get_admin_user_account_use_case, get_delete_account_use_case
 from app.controller.docs.user_account_docs import (
     EMAIL_CHANGE_VALIDATION_ERROR,
     EMAIL_CONFLICT,
@@ -27,6 +29,12 @@ from app.controller.docs.user_account_docs import (
     UNAUTHORIZED,
     USER_NOT_FOUND,
 )
+from app.controller.docs.user_docs import (
+    ACCOUNT_DELETION_CONFLICT,
+    ACCOUNT_DELETION_FORBIDDEN,
+    ACCOUNT_DELETION_VALIDATION_ERROR,
+)
+from app.controller.schemas.user_schema import AdminDeleteAccountRequest, DeleteAccountResponse
 from app.controller.schemas.user_account_schema import (
     AdminUserAccountDetailResponse,
     AdminUserAccountListResponse,
@@ -46,6 +54,8 @@ from app.domain.entities.authorization_entities import RoleAction
 from app.domain.entities.user_entity import UserStatus
 from app.domain.exceptions.role_exceptions import RoleAlreadyCurrentError, RoleNotFoundError
 from app.domain.exceptions.user_exceptions import (
+    AccountDeletionAlreadyScheduledError,
+    AccountDeletionGracePeriodExpiredError,
     EmailAlreadyTakenError,
     PasswordResetEmailNotVerifiedError,
     SameEmailError,
@@ -409,3 +419,63 @@ async def send_user_password_reset(
     )
 
     return SendUserPasswordResetResponse()
+
+
+@router.post(
+    "/{user_id}/account-deletion",
+    response_model=DeleteAccountResponse,
+    status_code=status.HTTP_202_ACCEPTED,
+    responses={
+        **UNAUTHORIZED,
+        **FORBIDDEN,
+        **ACCOUNT_DELETION_FORBIDDEN,
+        **USER_NOT_FOUND,
+        **ACCOUNT_DELETION_CONFLICT,
+        **ACCOUNT_DELETION_VALIDATION_ERROR,
+    },
+    summary="Schedule deletion of a user account as a system administrator",
+    description=(
+        "Schedule account deletion for a target user after the same 30-day grace period used by self-service deletion. "
+        "The caller must hold ``delete`` permission on the ``user-accounts`` feature. "
+        "A required reason is captured in the request payload, the pending deletion is stored "
+        "immediately, and a deferred ARQ job is queued to finalize it when the grace "
+        "period expires unless the user logs in first."
+    ),
+)
+async def schedule_admin_account_deletion(
+    user_id: uuid.UUID,
+    body: AdminDeleteAccountRequest,
+    caller_id: uuid.UUID = Depends(require_permission("user-accounts", RoleAction.DELETE)),
+    use_case: DeleteAccountUseCase = Depends(get_delete_account_use_case),
+) -> DeleteAccountResponse:
+    """Schedule deletion of another user's account through the administrator workflow.
+
+    # Error mapping
+    - **401 Unauthorized** — missing, expired, or invalid Bearer token.
+    - **403 Forbidden** — caller lacks ``delete`` permission on ``user-accounts``,
+      or the target account is inactive, already deleted, or past its grace period.
+    - **404 Not Found** — no target user exists for ``user_id``.
+    - **409 Conflict** — a deletion request is already pending for the target account.
+    - **422 Unprocessable Entity** — request body failed schema validation.
+    """
+    try:
+        result = await use_case.request_admin_deletion(
+            RequestAccountDeletionInput(
+                target_user_id=user_id,
+                requested_by=caller_id,
+                reason=body.reason,
+            )
+        )
+    except UserNotFoundError as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error))
+    except (UserInactiveError, AccountDeletionGracePeriodExpiredError) as error:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(error))
+    except AccountDeletionAlreadyScheduledError as error:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error))
+
+    return DeleteAccountResponse(
+        user_id=result.user_id,
+        deletion_requested_at=result.deletion_requested_at,
+        deletion_scheduled_for=result.deletion_scheduled_for,
+        requested_by=result.requested_by,
+    )
