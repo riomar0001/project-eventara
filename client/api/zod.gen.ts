@@ -201,15 +201,6 @@ export const zDeleteJobResponse = z.object({
 });
 
 /**
- * DeleteVenueResponse
- */
-export const zDeleteVenueResponse = z.object({
-    success: z.boolean().optional().default(true),
-    venue_id: z.uuid(),
-    message: z.string().optional().default('Venue deleted successfully.')
-});
-
-/**
  * EducationLevel
  */
 export const zEducationLevel = z.enum([
@@ -368,7 +359,8 @@ export const zLoginHistoryListResponse = z.object({
 export const zLoginInitResponse = z.object({
     success: z.boolean().optional().default(true),
     verification_token: z.string(),
-    message: z.string().optional().default('OTP sent to your email.')
+    message: z.string().optional().default('OTP sent to your email.'),
+    debug_otp: z.string().nullish()
 });
 
 /**
@@ -391,6 +383,7 @@ export const zLoginVerifyRequest = z.object({
  * LoginVerifyResponse
  */
 export const zLoginVerifyResponse = z.object({
+    success: z.boolean().optional().default(true),
     access_token: z.string(),
     refresh_token: z.string(),
     token_type: z.string().optional().default('bearer'),
@@ -451,6 +444,7 @@ export const zRefreshTokenRequest = z.object({
  * RefreshTokenResponse
  */
 export const zRefreshTokenResponse = z.object({
+    success: z.boolean().optional().default(true),
     access_token: z.string(),
     refresh_token: z.string(),
     token_type: z.string().optional().default('bearer'),
@@ -490,7 +484,8 @@ export const zResendOtpRequest = z.object({
 export const zResendOtpResponse = z.object({
     success: z.boolean().optional().default(true),
     verification_token: z.string(),
-    message: z.string().optional().default('A new OTP has been sent to your email.')
+    message: z.string().optional().default('A new OTP has been sent to your email.'),
+    debug_otp: z.string().nullish()
 });
 
 /**
@@ -781,6 +776,14 @@ export const zUserOnboardingResponse = z.object({
 });
 
 /**
+ * UserPermissionsResponse
+ */
+export const zUserPermissionsResponse = z.object({
+    success: z.boolean().optional().default(true),
+    permissions: z.record(z.string(), z.boolean())
+});
+
+/**
  * UserRoleAssignmentResponse
  */
 export const zUserRoleAssignmentResponse = z.object({
@@ -1042,6 +1045,11 @@ export const zGetLoginHistoryUserLoginHistoryGetQuery = z.object({
  * Successful Response
  */
 export const zGetLoginHistoryUserLoginHistoryGetResponse = zLoginHistoryListResponse;
+
+/**
+ * Successful Response
+ */
+export const zGetMyPermissionsUserMePermissionsGetResponse = zUserPermissionsResponse;
 
 export const zCheckAliasUserCheckAliasGetQuery = z.object({
     alias: z.string().min(3).max(100)
@@ -1361,7 +1369,7 @@ export const zDeleteVenueVenuesVenueIdDeletePath = z.object({
 /**
  * Successful Response
  */
-export const zDeleteVenueVenuesVenueIdDeleteResponse = zDeleteVenueResponse;
+export const zDeleteVenueVenuesVenueIdDeleteResponse = z.void();
 
 export const zGetVenueVenuesVenueIdGetPath = z.object({
     venue_id: z.uuid()

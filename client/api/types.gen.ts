@@ -711,24 +711,6 @@ export type DeleteJobResponse = {
 };
 
 /**
- * DeleteVenueResponse
- */
-export type DeleteVenueResponse = {
-    /**
-     * Success
-     */
-    success?: boolean;
-    /**
-     * Venue Id
-     */
-    venue_id: string;
-    /**
-     * Message
-     */
-    message?: string;
-};
-
-/**
  * EducationLevel
  */
 export type EducationLevel = 'no_formal_education' | 'elementary_level' | 'elementary_graduate' | 'junior_high_school_level' | 'junior_high_school_graduate' | 'senior_high_school_level' | 'senior_high_school_graduate' | 'vocational_trade_certificate' | 'college_level_undergraduate' | 'associate_degree' | 'bachelors_degree' | 'masters_degree' | 'doctorate_degree';
@@ -1045,6 +1027,8 @@ export type LoginInitResponse = {
     message?: string;
     /**
      * Debug Otp
+     *
+     * Only included in DEBUG mode
      */
     debug_otp?: string | null;
 };
@@ -1081,6 +1065,10 @@ export type LoginVerifyRequest = {
  * LoginVerifyResponse
  */
 export type LoginVerifyResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
     /**
      * Access Token
      */
@@ -1212,6 +1200,10 @@ export type RefreshTokenRequest = {
  */
 export type RefreshTokenResponse = {
     /**
+     * Success
+     */
+    success?: boolean;
+    /**
      * Access Token
      */
     access_token: string;
@@ -1305,6 +1297,8 @@ export type ResendOtpResponse = {
     message?: string;
     /**
      * Debug Otp
+     *
+     * Only included in DEBUG mode
      */
     debug_otp?: string | null;
 };
@@ -1782,6 +1776,22 @@ export type UserOnboardingResponse = {
      * Access Token
      */
     access_token: string;
+};
+
+/**
+ * UserPermissionsResponse
+ */
+export type UserPermissionsResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Permissions
+     */
+    permissions: {
+        [key: string]: boolean;
+    };
 };
 
 /**
@@ -2394,6 +2404,31 @@ export type GetLoginHistoryUserLoginHistoryGetResponses = {
 };
 
 export type GetLoginHistoryUserLoginHistoryGetResponse = GetLoginHistoryUserLoginHistoryGetResponses[keyof GetLoginHistoryUserLoginHistoryGetResponses];
+
+export type GetMyPermissionsUserMePermissionsGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/user/me/permissions';
+};
+
+export type GetMyPermissionsUserMePermissionsGetErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+};
+
+export type GetMyPermissionsUserMePermissionsGetError = GetMyPermissionsUserMePermissionsGetErrors[keyof GetMyPermissionsUserMePermissionsGetErrors];
+
+export type GetMyPermissionsUserMePermissionsGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: UserPermissionsResponse;
+};
+
+export type GetMyPermissionsUserMePermissionsGetResponse = GetMyPermissionsUserMePermissionsGetResponses[keyof GetMyPermissionsUserMePermissionsGetResponses];
 
 export type CheckAliasUserCheckAliasGetData = {
     body?: never;
@@ -3237,7 +3272,7 @@ export type DeleteRoleRolesRoleIdDeleteErrors = {
      */
     404: ErrorResponse;
     /**
-     * Role is still referenced by assignments or grants
+     * Protected role cannot be deleted
      */
     409: ErrorResponse;
     /**
@@ -3987,7 +4022,7 @@ export type DeleteVenueVenuesVenueIdDeleteResponses = {
     /**
      * Successful Response
      */
-    200: DeleteVenueResponse;
+    204: void;
 };
 
 export type DeleteVenueVenuesVenueIdDeleteResponse = DeleteVenueVenuesVenueIdDeleteResponses[keyof DeleteVenueVenuesVenueIdDeleteResponses];

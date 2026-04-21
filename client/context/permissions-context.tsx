@@ -1,7 +1,7 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState } from 'react';
-import { client } from '@/api/client.gen';
+import { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { User as UserApi } from '@/api/sdk.gen';
 
 type PermissionsMap = Record<string, boolean>;
 
@@ -12,28 +12,36 @@ interface PermissionsContextValue {
 
 const PermissionsContext = createContext<PermissionsContextValue | null>(null);
 
+// Module-level promise so Strict Mode's double-invoke shares one in-flight request.
+let _inflight: Promise<PermissionsMap> | null = null;
+
+function loadPermissions(): Promise<PermissionsMap> {
+  if (!_inflight) {
+    _inflight = UserApi.getMyPermissionsUserMePermissionsGet()
+      .then((r) => r.data?.permissions ?? {})
+      .catch(() => ({}))
+      .finally(() => {
+        _inflight = null;
+      });
+  }
+  return _inflight;
+}
+
 export function PermissionsProvider({ children }: { children: React.ReactNode }) {
   const [permissions, setPermissions] = useState<PermissionsMap>({});
   const [isLoading, setIsLoading] = useState(true);
+  const mounted = useRef(true);
 
   useEffect(() => {
-    let cancelled = false;
-
-    async function fetchPermissions() {
-      try {
-        const response = await client.instance.get<{ permissions: PermissionsMap }>('/user/me/permissions');
-        if (!cancelled) setPermissions(response.data.permissions);
-      } catch {
-        // Server will enforce — empty map means all gates deny, which is safe
-        if (!cancelled) setPermissions({});
-      } finally {
-        if (!cancelled) setIsLoading(false);
+    mounted.current = true;
+    loadPermissions().then((map) => {
+      if (mounted.current) {
+        setPermissions(map);
+        setIsLoading(false);
       }
-    }
-
-    fetchPermissions();
+    });
     return () => {
-      cancelled = true;
+      mounted.current = false;
     };
   }, []);
 
