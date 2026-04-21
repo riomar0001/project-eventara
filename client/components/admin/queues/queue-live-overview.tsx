@@ -97,7 +97,7 @@ function WorkerHealthRow({ entry }: { entry: WorkerHealthEntrySchema }) {
 
 export function QueueLiveOverview({ isLoading, stats, statsError }: QueueLiveOverviewProps) {
   return (
-    <Card className="border-0 bg-white shadow-none ring-1 ring-neutral-200 xl:flex xl:min-h-[620px] xl:flex-col">
+    <Card className="border-0 bg-white shadow-none ring-1 ring-neutral-200 xl:flex xl:min-h-155 xl:flex-col">
       <CardHeader className="border-b border-neutral-200/80 pb-4">
         <CardTitle className="text-xl tracking-tight">{QUEUE_MANAGEMENT_TEXT.liveOverviewTitle}</CardTitle>
         <CardDescription className="max-w-2xl text-sm leading-6">{QUEUE_MANAGEMENT_TEXT.liveOverviewDescription}</CardDescription>
