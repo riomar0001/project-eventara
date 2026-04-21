@@ -1,13 +1,15 @@
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application.dto.account_settings_dto import ChangePasswordInput, RequestAccountDeletionInput
-from app.application.dto.profile_dto import GetLoginHistoryInput, UserOnboardingInput
+from app.application.dto.profile_dto import GetLoginHistoryInput, UpdateProfileInput, UserOnboardingInput
 from app.application.use_cases.account_settings_usecase import ChangePasswordUseCase, DeleteAccountUseCase
-from app.application.use_cases.profile_usecase import CheckAliasUseCase, GetLoginHistoryUseCase, OnboardingUseCase
-from app.controller.dependencies import get_current_user_id, get_onboarding_use_case
+from app.application.use_cases.audit_log_usecase import CreateAuditLogUseCase
+from app.application.use_cases.profile_usecase import CheckAliasUseCase, GetLoginHistoryUseCase, OnboardingUseCase, UpdateProfileUseCase
+from app.controller.api.audit_helpers import safe_audit_log, serialize_profile
+from app.controller.dependencies import get_create_audit_log_use_case, get_current_user_id, get_onboarding_use_case, get_update_profile_use_case
 from app.controller.dependencies.use_cases_depends import (
     get_change_password_use_case,
     get_check_alias_use_case,
@@ -25,8 +27,12 @@ from app.controller.docs.user_docs import (
     INVALID_CURRENT_PASSWORD,
     ONBOARDING_CONFLICT,
     ONBOARDING_VALIDATION_ERROR,
+    PROFILE_NOT_FOUND,
     SAME_PASSWORD_ERROR,
     UNAUTHORIZED,
+    UPDATE_PROFILE_CONFLICT,
+    UPDATE_PROFILE_FORBIDDEN,
+    UPDATE_PROFILE_VALIDATION_ERROR,
     USER_NOT_FOUND,
 )
 from app.controller.schemas.user_schema import (
@@ -38,11 +44,14 @@ from app.controller.schemas.user_schema import (
     DeleteAccountResponse,
     LoginHistoryEntryResponse,
     LoginHistoryListResponse,
+    UpdateProfileRequest,
+    UpdateProfileResponse,
     UserOnboardingRequest,
     UserOnboardingResponse,
     UserPermissionsResponse,
 )
 from app.core.security.token_service import create_access_token
+from app.domain.entities.audit_log import ActionType, AuditLogStatus
 from app.domain.exceptions.auth_exceptions import InvalidCredentialsError
 from app.domain.exceptions.user_exceptions import (
     AccountDeletionAlreadyScheduledError,
@@ -50,6 +59,7 @@ from app.domain.exceptions.user_exceptions import (
     AliasAlreadyTakenError,
     EmailNotVerifiedError,
     OnboardingAlreadyCompletedError,
+    ProfileNotFoundError,
     SamePasswordError,
     UserInactiveError,
     UserNotFoundError,
@@ -60,6 +70,99 @@ from app.infrastructure.database.session import get_db
 
 router = APIRouter(prefix="/user", tags=["Profile"])
 account_settings_router = APIRouter(prefix="/user", tags=["Account Settings"])
+
+
+@account_settings_router.patch(
+    "/profile",
+    response_model=UpdateProfileResponse,
+    status_code=status.HTTP_200_OK,
+    responses={
+        **UNAUTHORIZED,
+        **UPDATE_PROFILE_FORBIDDEN,
+        **PROFILE_NOT_FOUND,
+        **UPDATE_PROFILE_CONFLICT,
+        **UPDATE_PROFILE_VALIDATION_ERROR,
+    },
+    summary="Update account profile",
+    description=(
+        "Update the authenticated user's public profile — alias, display name, demographics, and bio. "
+        "If the alias is changed, it is checked for uniqueness before the update is applied. "
+        "A refreshed access token is returned on success to reflect the new profile state."
+    ),
+)
+async def update_profile(
+    request: Request,
+    body: UpdateProfileRequest,
+    user_id: uuid.UUID = Depends(get_current_user_id),
+    use_case: UpdateProfileUseCase = Depends(get_update_profile_use_case),
+    audit_use_case: CreateAuditLogUseCase = Depends(get_create_audit_log_use_case),
+    db: AsyncSession = Depends(get_db),
+) -> UpdateProfileResponse:
+    """Update the authenticated user's mutable profile fields.
+
+    # Error mapping
+    - **401 Unauthorized** — missing, expired, or invalid Bearer token.
+    - **403 Forbidden** — account is inactive or deleted.
+    - **404 Not Found** — no user or profile found for the authenticated account
+      (profile requires completed onboarding).
+    - **409 Conflict** — the requested alias is already owned by another account.
+    - **422 Unprocessable Entity** — request body failed schema validation.
+    """
+    try:
+        result = await use_case.update_profile(
+            UpdateProfileInput(
+                user_id=user_id,
+                alias=body.alias,
+                first_name=body.first_name,
+                last_name=body.last_name,
+                age_group=body.age_group,
+                gender=body.gender,
+                education_level=body.education_level,
+                occupation=body.occupation,
+                bio=body.bio,
+            )
+        )
+    except UserNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except UserInactiveError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
+    except ProfileNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except AliasAlreadyTakenError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+
+    p = result.profile
+    role_name = await UserRepository(db).get_active_role_name_by_user_id(user_id)
+    new_token = create_access_token(
+        user_id=p.user_id,
+        email=p.email or "",
+        done_onboarding=True,
+        role=role_name,
+        user=p,
+    )
+    await safe_audit_log(
+        audit_use_case,
+        request,
+        user_id=user_id,
+        action_type=ActionType.UPDATE,
+        resource_type="profile",
+        resource_id=str(user_id),
+        status=AuditLogStatus.SUCCESS,
+        old_values=serialize_profile(result.previous_profile),
+        new_values=serialize_profile(p),
+    )
+    return UpdateProfileResponse(
+        user_id=p.user_id,
+        alias=p.alias,
+        first_name=p.first_name,
+        last_name=p.last_name,
+        age_group=p.age_group,
+        gender=p.gender,
+        education_level=p.education_level,
+        occupation=p.occupation,
+        bio=p.bio,
+        access_token=new_token,
+    )
 
 
 @account_settings_router.get(

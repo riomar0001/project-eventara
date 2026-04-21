@@ -263,6 +263,86 @@ ACCOUNT_DELETION_CONFLICT = {
     }
 }
 
+UPDATE_PROFILE_VALIDATION_ERROR = {
+    422: {
+        "description": "Validation error — alias contains invalid characters, or required fields are missing or out of range",
+        "model": ValidationErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "detail": [
+                        {
+                            "loc": ["body", "alias"],
+                            "msg": "Alias may only contain lowercase letters, numbers, and underscores",
+                            "type": "value_error",
+                        },
+                        {
+                            "loc": ["body", "first_name"],
+                            "msg": "String should have at least 1 character",
+                            "type": "string_too_short",
+                        },
+                    ],
+                }
+            }
+        },
+    }
+}
+
+UPDATE_PROFILE_CONFLICT = {
+    409: {
+        "description": "Conflict — the requested alias is already taken by another account",
+        "model": ErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "message": "Alias 'johndoe' is already taken",
+                }
+            }
+        },
+    }
+}
+
+UPDATE_PROFILE_FORBIDDEN = {
+    403: {
+        "description": "Forbidden — account is inactive or deleted",
+        "model": ErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "message": "Account is inactive or has been deleted",
+                }
+            }
+        },
+    }
+}
+
+PROFILE_NOT_FOUND = {
+    404: {
+        "description": "Not found — no user or profile exists for the authenticated account",
+        "model": ErrorResponse,
+        "content": {
+            "application/json": {
+                "examples": {
+                    "user_not_found": {
+                        "summary": "User not found",
+                        "value": {"success": False, "message": "User not found"},
+                    },
+                    "profile_not_found": {
+                        "summary": "Profile not found",
+                        "value": {
+                            "success": False,
+                            "message": "Profile not found — onboarding must be completed before updating the profile",
+                        },
+                    },
+                }
+            }
+        },
+    }
+}
+
 ACCOUNT_DELETION_FORBIDDEN = {
     403: {
         "description": "Forbidden — account is inactive, already deleted, or past the deletion grace period",

@@ -15,6 +15,7 @@ from app.controller.dependencies.use_cases_depends import (
     get_list_dead_jobs_use_case,
     get_login_history_use_case,
     get_onboarding_use_case,
+    get_update_profile_use_case,
     get_otp_repository,
     get_purge_dead_jobs_use_case,
     get_queue_stats_use_case,
@@ -46,4 +47,5 @@ __all__ = [
     "get_delete_dead_job_use_case",
     "get_purge_dead_jobs_use_case",
     "get_venue_management_use_case",
+    "get_update_profile_use_case",
 ]

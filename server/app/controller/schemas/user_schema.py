@@ -101,6 +101,40 @@ class LoginHistoryListResponse(BaseModel):
     data: list[LoginHistoryEntryResponse]
 
 
+class UpdateProfileRequest(BaseModel):
+    alias: str = Field(min_length=3, max_length=100)
+    first_name: str = Field(min_length=1, max_length=100)
+    last_name: str = Field(min_length=1, max_length=100)
+    age_group: AgeGroup
+    gender: Gender
+    education_level: EducationLevel
+    occupation: str | None = Field(default=None, max_length=150)
+    bio: str | None = Field(default=None, max_length=500)
+
+    @field_validator("alias")
+    @classmethod
+    def alias_valid(cls, v: str) -> str:
+        lowered = v.lower()
+        if not _ALIAS_RE.match(lowered):
+            raise ValueError("Alias may only contain lowercase letters, numbers, and underscores")
+        return lowered
+
+
+class UpdateProfileResponse(BaseModel):
+    success: bool = True
+    user_id: uuid.UUID
+    alias: str
+    first_name: str
+    last_name: str
+    age_group: AgeGroup
+    gender: Gender
+    education_level: EducationLevel
+    occupation: str | None = None
+    bio: str | None = None
+    message: str = "Profile updated successfully."
+    access_token: str
+
+
 class UserPermissionsResponse(BaseModel):
     success: bool = True
     permissions: dict[str, bool]

@@ -66,3 +66,8 @@ class AccountDeletionGracePeriodExpiredError(Exception):
 class PasswordResetEmailNotVerifiedError(Exception):
     def __init__(self) -> None:
         super().__init__("The user's email address must be verified before sending a password reset link")
+
+
+class ProfileNotFoundError(Exception):
+    def __init__(self) -> None:
+        super().__init__("Profile not found — onboarding must be completed before updating the profile")

@@ -466,6 +466,107 @@ class UserRepository:
             preferences=orm_profile.preferences,
         )
 
+    async def get_profile_by_user_id_for_update(self, user_id: uuid.UUID) -> DomainUserProfile | None:
+        """Return the profile while holding a row-level write lock.
+
+        Uses ``SELECT … FOR UPDATE`` so concurrent profile-update requests for
+        the same account are serialised at the database level.  The alias
+        uniqueness check inside the use case is therefore safe against the TOCTOU
+        race where two simultaneous requests both pass the pre-update availability
+        check before either commits.
+        """
+        result = await self.db.execute(select(UserProfile).where(UserProfile.user_id == user_id).with_for_update())
+        orm_profile = result.scalar_one_or_none()
+
+        if orm_profile is None:
+            return None
+
+        return DomainUserProfile(
+            user_id=orm_profile.user_id,
+            email="",
+            alias=orm_profile.alias,
+            first_name=orm_profile.first_name,
+            last_name=orm_profile.last_name,
+            image_file_id=orm_profile.image_file_id,
+            age_group=orm_profile.age_group if isinstance(orm_profile.age_group, AgeGroup) else AgeGroup(orm_profile.age_group),
+            gender=orm_profile.gender if isinstance(orm_profile.gender, Gender) else Gender(orm_profile.gender),
+            education_level=orm_profile.education_level
+            if isinstance(orm_profile.education_level, EducationLevel)
+            else EducationLevel(orm_profile.education_level),
+            occupation=orm_profile.occupation,
+            bio=orm_profile.bio,
+            preferences=orm_profile.preferences,
+        )
+
+    async def update_profile(
+        self,
+        user_id: uuid.UUID,
+        *,
+        alias: str,
+        first_name: str,
+        last_name: str,
+        age_group: AgeGroup,
+        gender: Gender,
+        education_level: EducationLevel,
+        occupation: str | None,
+        bio: str | None,
+    ) -> DomainUserProfile | None:
+        """Apply mutable field changes to an existing profile row.
+
+        Uses ``UPDATE … RETURNING`` so the persisted state (including unchanged
+        columns such as ``image_file_id`` and ``preferences``) is returned in one
+        round-trip without a follow-up SELECT.  Returns ``None`` if no row with
+        ``user_id`` exists, which the use case maps to ``ProfileNotFoundError``.
+        The caller is responsible for committing or rolling back the transaction.
+        """
+        result = await self.db.execute(
+            update(UserProfile)
+            .where(UserProfile.user_id == user_id)
+            .values(
+                alias=alias,
+                first_name=first_name,
+                last_name=last_name,
+                age_group=age_group,
+                gender=gender,
+                education_level=education_level,
+                occupation=occupation,
+                bio=bio,
+            )
+            .returning(
+                UserProfile.user_id,
+                UserProfile.alias,
+                UserProfile.first_name,
+                UserProfile.last_name,
+                UserProfile.image_file_id,
+                UserProfile.age_group,
+                UserProfile.gender,
+                UserProfile.education_level,
+                UserProfile.occupation,
+                UserProfile.bio,
+                UserProfile.preferences,
+            )
+        )
+        row = result.one_or_none()
+        if row is None:
+            return None
+
+        return DomainUserProfile(
+            user_id=row.user_id,
+            email="",
+            alias=row.alias,
+            first_name=row.first_name,
+            last_name=row.last_name,
+            image_file_id=row.image_file_id,
+            age_group=row.age_group if isinstance(row.age_group, AgeGroup) else AgeGroup(row.age_group),
+            gender=row.gender if isinstance(row.gender, Gender) else Gender(row.gender),
+            education_level=row.education_level
+            if isinstance(row.education_level, EducationLevel)
+            else EducationLevel(row.education_level),
+            occupation=row.occupation,
+            bio=row.bio,
+            preferences=row.preferences,
+        )
+
     async def get_by_alias(self, alias: str) -> DomainUser | None:
         """Return the user who owns the given profile alias, or None if unclaimed."""
         result = await self.db.execute(select(User).join(UserProfile, User.id == UserProfile.user_id).where(UserProfile.alias == alias))

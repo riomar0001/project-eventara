@@ -4,6 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.application.dto.profile_dto import (
     GetLoginHistoryInput,
     GetLoginHistoryOutput,
+    UpdateProfileInput,
+    UpdateProfileOutput,
     UserOnboardingInput,
     UserOnboardingOutput,
 )
@@ -13,6 +15,7 @@ from app.domain.exceptions.user_exceptions import (
     AliasAlreadyTakenError,
     EmailNotVerifiedError,
     OnboardingAlreadyCompletedError,
+    ProfileNotFoundError,
     UserInactiveError,
     UserNotFoundError,
 )
@@ -97,6 +100,81 @@ class OnboardingUseCase:
             raise OnboardingAlreadyCompletedError()
 
         return UserOnboardingOutput(profile=created_profile)
+
+
+class UpdateProfileUseCase:
+    """Handles updating an authenticated user's mutable profile fields.
+
+    Serialises concurrent edits through a pessimistic ``SELECT FOR UPDATE`` lock
+    on the profile row.  Alias changes are checked for uniqueness before the
+    ``UPDATE``; the database unique constraint is the final integrity guard if two
+    requests for different accounts slip through simultaneously.
+    """
+
+    def __init__(self, repo: IUserRepository, db: AsyncSession) -> None:
+        self.repo = repo
+        self.db = db
+
+    async def update_profile(self, data: UpdateProfileInput) -> UpdateProfileOutput:
+        """Apply mutable field changes to the authenticated user's profile.
+
+        Concurrency strategy:
+            ``get_profile_by_user_id_for_update`` acquires a row-level write lock
+            before the alias check and the ``UPDATE``.  This collapses concurrent
+            requests into a serial queue so only one can read a stale alias and
+            pass the pre-update uniqueness check at a time.  The database ``UNIQUE``
+            constraint on ``alias`` remains the authoritative integrity guard.
+
+        Args:
+            data: ``UpdateProfileInput`` containing the user ID and all mutable
+                profile fields.
+
+        Returns:
+            ``UpdateProfileOutput`` with the updated profile and the pre-update
+            snapshot for audit log construction.
+
+        Raises:
+            UserNotFoundError: No user exists for the given ID.
+            UserInactiveError: The account is inactive or deleted.
+            ProfileNotFoundError: The user has not completed onboarding.
+            AliasAlreadyTakenError: The requested alias belongs to another account.
+        """
+        user = await self.repo.get_by_id(data.user_id)
+        if not user:
+            raise UserNotFoundError()
+        if user.status in (UserStatus.INACTIVE, UserStatus.DELETED):
+            raise UserInactiveError()
+
+        current_profile = await self.repo.get_profile_by_user_id_for_update(data.user_id)
+        if not current_profile:
+            raise ProfileNotFoundError()
+
+        if data.alias != current_profile.alias:
+            if await self.repo.get_by_alias(data.alias):
+                raise AliasAlreadyTakenError(data.alias)
+
+        try:
+            updated_profile = await self.repo.update_profile(
+                data.user_id,
+                alias=data.alias,
+                first_name=data.first_name,
+                last_name=data.last_name,
+                age_group=data.age_group,
+                gender=data.gender,
+                education_level=data.education_level,
+                occupation=data.occupation,
+                bio=data.bio,
+            )
+        except IntegrityError:
+            await self.db.rollback()
+            raise AliasAlreadyTakenError(data.alias)
+
+        if updated_profile is None:
+            await self.db.rollback()
+            raise ProfileNotFoundError()
+
+        await self.db.commit()
+        return UpdateProfileOutput(profile=updated_profile, previous_profile=current_profile)
 
 
 class CheckAliasUseCase:

@@ -4,6 +4,9 @@ from typing import Protocol
 
 from app.application.dto.users_dto import AdminUserAccountDetail, AdminUserAccountSummary
 from app.domain.entities.user_entity import (
+    AgeGroup,
+    EducationLevel,
+    Gender,
     PublicUser,
     User,
     UserActivity,
@@ -24,6 +27,22 @@ class IUserRepository(Protocol):
     async def get_security_by_user_id(self, user_id: uuid.UUID) -> UserSecurity | None: ...
 
     async def get_profile_by_user_id(self, user_id: uuid.UUID) -> UserProfile | None: ...
+
+    async def get_profile_by_user_id_for_update(self, user_id: uuid.UUID) -> UserProfile | None: ...
+
+    async def update_profile(
+        self,
+        user_id: uuid.UUID,
+        *,
+        alias: str,
+        first_name: str,
+        last_name: str,
+        age_group: AgeGroup,
+        gender: Gender,
+        education_level: EducationLevel,
+        occupation: str | None,
+        bio: str | None,
+    ) -> UserProfile | None: ...
 
     async def get_by_alias(self, alias: str) -> User | None: ...
 

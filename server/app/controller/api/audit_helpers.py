@@ -10,6 +10,7 @@ from app.application.dto.users_dto import AdminUserAccountDetail
 from app.application.use_cases.audit_log_usecase import CreateAuditLogUseCase
 from app.domain.entities.audit_log import ActionType, AuditLogStatus
 from app.domain.entities.authorization_entities import Feature, UserGrant, UserRole
+from app.domain.entities.user_entity import UserProfile
 from app.domain.entities.venue_entities import Venue
 
 
@@ -75,6 +76,20 @@ def serialize_grant(grant: UserGrant) -> dict:
         "starts_at": _isoformat_or_none(grant.starts_at),
         "expires_at": _isoformat_or_none(grant.expires_at),
         "granted_by": str(grant.granted_by) if grant.granted_by else None,
+    }
+
+
+def serialize_profile(profile: UserProfile) -> dict:
+    return {
+        "user_id": str(profile.user_id),
+        "alias": profile.alias,
+        "first_name": profile.first_name,
+        "last_name": profile.last_name,
+        "age_group": profile.age_group.value if profile.age_group else None,
+        "gender": profile.gender.value if profile.gender else None,
+        "education_level": profile.education_level.value if profile.education_level else None,
+        "occupation": profile.occupation,
+        "bio": profile.bio,
     }
 
 

@@ -5,7 +5,7 @@ from app.application.use_cases.account_settings_usecase import ChangePasswordUse
 from app.application.use_cases.audit_log_usecase import CreateAuditLogUseCase, GetAuditLogsUseCase
 from app.application.use_cases.auth_usecase import AuthUseCase
 from app.application.use_cases.feature_usecase import FeatureManagementUseCase
-from app.application.use_cases.profile_usecase import CheckAliasUseCase, GetLoginHistoryUseCase, OnboardingUseCase
+from app.application.use_cases.profile_usecase import CheckAliasUseCase, GetLoginHistoryUseCase, OnboardingUseCase, UpdateProfileUseCase
 from app.application.use_cases.queue_usecase import (
     DeleteDeadJobUseCase,
     GetQueueStatsUseCase,
@@ -52,6 +52,11 @@ def get_check_alias_use_case(db: AsyncSession = Depends(get_db)) -> CheckAliasUs
 def get_onboarding_use_case(db: AsyncSession = Depends(get_db)) -> OnboardingUseCase:
     """Construct an ``OnboardingUseCase`` for the current request."""
     return OnboardingUseCase(UserRepository(db), db)
+
+
+def get_update_profile_use_case(db: AsyncSession = Depends(get_db)) -> UpdateProfileUseCase:
+    """Construct an ``UpdateProfileUseCase`` for the current request."""
+    return UpdateProfileUseCase(UserRepository(db), db)
 
 
 def get_change_password_use_case(db: AsyncSession = Depends(get_db)) -> ChangePasswordUseCase:
