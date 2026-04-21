@@ -16,6 +16,7 @@ class EventVolunteer(BaseModel):
     """Event Volunteer entity definition"""
 
     id: uuid.UUID = Field(default_factory=uuid.uuid4)
+    volunteer_id: uuid.UUID
     event_id: uuid.UUID
     status: EventVolunteerStatus = EventVolunteerStatus.PENDING
 

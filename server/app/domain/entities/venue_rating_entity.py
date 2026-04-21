@@ -22,6 +22,7 @@ class VenueRating(BaseModel):
     user_id: uuid.UUID
     venue_id: uuid.UUID
     rating: int = Field(ge=1, le=5, description="Rating value from 1 to 5")
+    comment: str | None = None
 
     # Timestamps
     created_at: datetime | None = None
