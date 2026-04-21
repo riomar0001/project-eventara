@@ -380,7 +380,7 @@ class AuthUseCase:
 
         token = create_otp_token(user.id, user.email)
 
-        return LoginOutput(verification_token=token)
+        return LoginOutput(verification_token=token, otp=code)
 
     async def login_verify(self, data: LoginVerifyInput) -> LoginVerifyOutput:
         """Verify the OTP code and issue JWT tokens to complete the OTP login flow.
@@ -518,7 +518,7 @@ class AuthUseCase:
 
         new_token = create_otp_token(user_id, user.email)
 
-        return ResendOtpOutput(verification_token=new_token)
+        return ResendOtpOutput(verification_token=new_token, otp=code)
 
     async def logout(self, data: LogoutInput) -> None:
         """Revoke a refresh token, terminating the associated session.
