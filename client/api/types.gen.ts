@@ -1043,6 +1043,10 @@ export type LoginInitResponse = {
      * Message
      */
     message?: string;
+    /**
+     * Debug Otp
+     */
+    debug_otp?: string | null;
 };
 
 /**
@@ -1299,6 +1303,10 @@ export type ResendOtpResponse = {
      * Message
      */
     message?: string;
+    /**
+     * Debug Otp
+     */
+    debug_otp?: string | null;
 };
 
 /**

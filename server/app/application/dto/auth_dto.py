@@ -32,6 +32,7 @@ class LoginInput:
 @dataclass
 class LoginOutput:
     verification_token: str
+    otp: str | None = None
 
 
 @dataclass
@@ -72,6 +73,7 @@ class ResendOtpInput:
 @dataclass
 class ResendOtpOutput:
     verification_token: str
+    otp: str | None = None
 
 
 @dataclass
