@@ -53,7 +53,7 @@ from app.domain.exceptions.user_exceptions import (
     UserNotFoundError,
 )
 
-router = APIRouter(prefix="/user-accounts", tags=["Admin User Accounts"])
+router = APIRouter(prefix="/user-accounts", tags=["Users"])
 
 
 @router.get(

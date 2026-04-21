@@ -34,7 +34,7 @@ from app.domain.exceptions.role_exceptions import (
     FeatureNotFoundError,
 )
 
-feature_router = APIRouter(prefix="/features", tags=["RBAC Features"])
+feature_router = APIRouter(prefix="/features", tags=["Features"])
 
 
 def _to_feature_response(record) -> FeatureRecordResponse:

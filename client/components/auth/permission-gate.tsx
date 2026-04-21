@@ -1,7 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import { usePermissions } from '@/context/permissions-context';
 
 interface PermissionGateProps {
@@ -12,14 +11,8 @@ interface PermissionGateProps {
 
 export function PermissionGate({ feature, action, children }: PermissionGateProps) {
   const { can } = usePermissions();
-  const router = useRouter();
-  const allowed = can(feature, action);
 
-  useEffect(() => {
-    if (!allowed) router.replace('/unauthorized');
-  }, [allowed, router]);
-
-  if (!allowed) return null;
+  if (!can(feature, action)) notFound();
 
   return <>{children}</>;
 }

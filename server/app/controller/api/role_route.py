@@ -75,9 +75,9 @@ from app.domain.exceptions.role_exceptions import (
 )
 from app.domain.exceptions.user_exceptions import UserNotFoundError
 
-role_management_router = APIRouter(prefix="/roles", tags=["RBAC Roles"])
-role_router = APIRouter(prefix="/user-roles", tags=["User Role Management"])
-grant_router = APIRouter(prefix="/user-grants", tags=["User Grant Management"])
+role_management_router = APIRouter(prefix="/roles", tags=["Roles"])
+role_router = APIRouter(prefix="/user-roles", tags=["Roles"])
+grant_router = APIRouter(prefix="/user-grants", tags=["Roles"])
 
 
 def _as_aware_utc(value: datetime) -> datetime:

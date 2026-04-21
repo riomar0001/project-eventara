@@ -82,7 +82,7 @@ from app.domain.exceptions import (
     UserNotFoundError,
 )
 
-router = APIRouter(prefix="/auth", tags=["Authentication"])
+router = APIRouter(prefix="/auth", tags=["Auth"])
 
 
 def _set_auth_cookies(response: Response, access_token: str, refresh_token: str) -> None:

@@ -61,7 +61,7 @@ from app.infrastructure.database.repositories.rbac_repository import RBACReposit
 from app.infrastructure.database.repositories.user_repository import UserRepository
 from app.infrastructure.database.session import get_db
 
-router = APIRouter(prefix="/user", tags=["User"])
+router = APIRouter(prefix="/user", tags=["Profile"])
 
 
 @router.get(

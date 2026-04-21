@@ -61,7 +61,7 @@ from app.domain.exceptions.queue_exceptions import (
     QueueInspectionError,
 )
 
-router = APIRouter(prefix="/queues", tags=["Queue Management"])
+router = APIRouter(prefix="/queues", tags=["Queue"])
 
 
 @router.get(

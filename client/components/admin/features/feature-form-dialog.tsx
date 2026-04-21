@@ -1,13 +1,15 @@
 'use client';
 
 import type { FormEvent } from 'react';
-import { Loader2, Sparkles } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Loader2, RotateCcw, Sparkles } from 'lucide-react';
 import { FieldHint } from '@/components/system/forms/field-hint';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { sanitizeSlugInput, toKebabSlug } from './features-shared';
 import type { FeatureFormValues } from '@/types/admin/features';
 import type { FeatureRecordResponse } from '@/api/types.gen';
 import { FEATURE_ACCESS_TEXT } from '@/constants/admin/features/access-control';
@@ -26,6 +28,36 @@ interface FeatureFormDialogProps {
 
 export function FeatureFormDialog({ error, isSaving, mode, onClose, onSubmit, onValuesChange, open, selectedFeature, values }: FeatureFormDialogProps) {
   const title = mode === 'create' ? FEATURE_ACCESS_TEXT.createTitle : FEATURE_ACCESS_TEXT.editTitle;
+
+  // Track whether the slug is still auto-synced to the name field.
+  // True only in create mode; resets whenever the dialog (re)opens.
+  const [slugSynced, setSlugSynced] = useState(mode === 'create');
+  const prevOpenRef = useRef(open);
+
+  useEffect(() => {
+    if (open && !prevOpenRef.current) {
+      setSlugSynced(mode === 'create');
+    }
+    prevOpenRef.current = open;
+  }, [open, mode]);
+
+  function handleNameChange(name: string) {
+    if (slugSynced) {
+      onValuesChange({ ...values, name, slug: toKebabSlug(name) });
+    } else {
+      onValuesChange({ ...values, name });
+    }
+  }
+
+  function handleSlugChange(raw: string) {
+    setSlugSynced(false);
+    onValuesChange({ ...values, slug: sanitizeSlugInput(raw) });
+  }
+
+  function handleResync() {
+    setSlugSynced(true);
+    onValuesChange({ ...values, slug: toKebabSlug(values.name) });
+  }
 
   return (
     <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()}>
@@ -52,20 +84,43 @@ export function FeatureFormDialog({ error, isSaving, mode, onClose, onSubmit, on
                 <Input
                   id="feature-name"
                   value={values.name}
-                  onChange={(event) => onValuesChange({ ...values, name: event.target.value })}
+                  onChange={(e) => handleNameChange(e.target.value)}
                   placeholder="User Accounts"
                 />
               </div>
+
               <div className="space-y-2">
                 <label className="text-xs font-semibold tracking-[0.16em] text-neutral-500 uppercase" htmlFor="feature-slug">
                   Slug
                 </label>
-                <Input
-                  id="feature-slug"
-                  value={values.slug}
-                  onChange={(event) => onValuesChange({ ...values, slug: event.target.value })}
-                  placeholder="user-accounts"
-                />
+                <div className="relative">
+                  <Input
+                    id="feature-slug"
+                    value={values.slug}
+                    onChange={(e) => handleSlugChange(e.target.value)}
+                    placeholder="user-accounts"
+                    className={slugSynced ? 'pr-14' : values.name ? 'pr-8' : undefined}
+                    spellCheck={false}
+                    autoComplete="off"
+                  />
+                  {slugSynced ? (
+                    <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 rounded bg-lime-50 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-lime-700">
+                      auto
+                    </span>
+                  ) : values.name ? (
+                    <button
+                      type="button"
+                      onClick={handleResync}
+                      title="Regenerate from name"
+                      className="absolute top-1/2 right-2.5 -translate-y-1/2 text-neutral-400 transition-colors hover:text-neutral-700"
+                    >
+                      <RotateCcw className="size-3.5" />
+                    </button>
+                  ) : null}
+                </div>
+                <p className="text-[11px] text-neutral-400">
+                  Lowercase letters, numbers, and hyphens only.
+                </p>
               </div>
             </div>
 
@@ -97,7 +152,7 @@ export function FeatureFormDialog({ error, isSaving, mode, onClose, onSubmit, on
               </div>
             </div>
 
-            <FieldHint error={error} hint="Use lowercase kebab-case slugs to keep permission checks stable." />
+            <FieldHint error={error} hint="Slugs are permanent identifiers — changing them will break any roles or grants that reference this feature." />
           </div>
 
           <DialogFooter className="border-t px-6 py-5">

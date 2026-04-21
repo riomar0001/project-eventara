@@ -6,7 +6,7 @@ import { useFeatureCatalog } from '@/hooks/admin/features/use-feature-catalog';
 import type { FeatureFormValues } from '@/types/admin/features';
 import { FeatureDeleteDialog } from './feature-delete-dialog';
 import { FeatureFormDialog } from './feature-form-dialog';
-import { createEmptyFeatureForm } from './features-shared';
+import { createEmptyFeatureForm, isValidKebabSlug } from './features-shared';
 import { FeaturesTable } from './table/features-table';
 import type { FeatureRecordResponse } from '@/api/types.gen';
 import { FEATURE_ACCESS_TEXT } from '@/constants/admin/features/access-control';
@@ -66,6 +66,11 @@ export function FeaturesManagement() {
 
     if (!payload.slug) {
       setFormError('Feature slug is required.');
+      return;
+    }
+
+    if (!isValidKebabSlug(payload.slug)) {
+      setFormError('Slug must be lowercase kebab-case (e.g. user-accounts). Only a-z, 0-9, and hyphens are allowed.');
       return;
     }
 

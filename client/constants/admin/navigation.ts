@@ -47,8 +47,8 @@ export const dashboardNavGroups: DashboardNavGroup[] = [
     label: 'Event Management',
     items: [
       { label: 'Venue', icon: MapPin, href: ADMIN_OPERATIONS_PATHS.venues, permission: { feature: 'venues', action: 'read' } },
-      { label: 'Events', icon: Calendar, href: ADMIN_OPERATIONS_PATHS.events },
-      { label: 'Volunteers', icon: Users, href: ADMIN_OPERATIONS_PATHS.volunteers }
+      { label: 'Events', icon: Calendar, href: ADMIN_OPERATIONS_PATHS.events, permission: { feature: 'events', action: 'read' } },
+      { label: 'Volunteers', icon: Users, href: ADMIN_OPERATIONS_PATHS.volunteers, permission: { feature: 'volunteers', action: 'read' } }
     ]
   },
   {

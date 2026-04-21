@@ -12,6 +12,45 @@ from app.core.security.headers import SecurityHeadersMiddleware
 
 logger = logging.getLogger(__name__)
 
+_OPENAPI_TAGS = [
+    {
+        "name": "Auth",
+        "description": "Registration, login, email verification, password reset, and session management.",
+    },
+    {
+        "name": "Profile",
+        "description": "Authenticated user's own profile — read and update personal info, onboarding, and account preferences.",
+    },
+    {
+        "name": "Users",
+        "description": "Admin-level management of user accounts — list, search, change roles, update emails, and trigger password resets.",
+    },
+    {
+        "name": "Features",
+        "description": "RBAC feature definitions — create, update, enable/disable, and delete the permission features used across roles and grants.",
+    },
+    {
+        "name": "Roles",
+        "description": "RBAC roles, user role assignments, and per-user permission grants — full lifecycle management for access control.",
+    },
+    {
+        "name": "Queue",
+        "description": "Background job queue monitoring — inspect live stats, list failed jobs, retry or discard dead-letter entries.",
+    },
+    {
+        "name": "Account Settings",
+        "description": "User-facing account settings — notification preferences, security options, and connected integrations.",
+    },
+    {
+        "name": "Audit Logs",
+        "description": "Immutable audit trail — query who did what, when, and on which resource across the platform.",
+    },
+    {
+        "name": "Volunteers",
+        "description": "Volunteer management — registration, role assignments, availability, and event participation tracking.",
+    },
+]
+
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.APP_VERSION,
@@ -19,6 +58,7 @@ app = FastAPI(
     docs_url=None,
     redoc_url=None,
     lifespan=lifespan,
+    openapi_tags=_OPENAPI_TAGS,
 )
 
 app.add_middleware(SecurityHeadersMiddleware)

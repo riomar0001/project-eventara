@@ -22,6 +22,30 @@ export function humanizeFeatureSlug(value: string) {
     .join(' ');
 }
 
+/** Convert an arbitrary name string into a valid kebab-case slug. */
+export function toKebabSlug(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/[\s]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+/** Strip any character that isn't a-z, 0-9, or hyphen (for direct slug input). */
+export function sanitizeSlugInput(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9-]/g, '')
+    .replace(/-+/g, '-');
+}
+
+const KEBAB_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+export function isValidKebabSlug(value: string): boolean {
+  return KEBAB_RE.test(value);
+}
+
 export function countEnabledFeatures(features: FeatureRecordResponse[]) {
   return features.filter((feature) => feature.is_enabled).length;
 }
