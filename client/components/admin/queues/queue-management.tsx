@@ -29,7 +29,7 @@ export function QueueManagementPage() {
     setPage,
     statsError,
     totalJobs,
-    totalPages,
+    totalPages
   } = useQueueManagement();
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
   const [isPurgeDialogOpen, setIsPurgeDialogOpen] = useState(false);

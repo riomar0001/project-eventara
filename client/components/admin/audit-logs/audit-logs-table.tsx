@@ -159,7 +159,6 @@ export function AuditLogsTable({
             </Table>
           </div>
         )}
-
       </CardContent>
 
       <CardFooter className="flex flex-col gap-3 border-t border-neutral-200/80 pt-4 sm:flex-row sm:items-center sm:justify-between">

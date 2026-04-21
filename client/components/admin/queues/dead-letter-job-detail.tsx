@@ -66,9 +66,7 @@ export function DeadLetterJobDetail({ selectedJob }: DeadLetterJobDetailProps) {
       <CardHeader className="shrink-0 border-b border-neutral-200/80 pb-4">
         <div className="flex items-center justify-between gap-3">
           <CardTitle className="text-base">{QUEUE_MANAGEMENT_TEXT.detailTitle}</CardTitle>
-          <span className="rounded-full bg-rose-100 px-2.5 py-1 text-[10px] font-semibold tracking-[0.18em] text-rose-700 uppercase">
-            dead letter
-          </span>
+          <span className="rounded-full bg-rose-100 px-2.5 py-1 text-[10px] font-semibold tracking-[0.18em] text-rose-700 uppercase">dead letter</span>
         </div>
       </CardHeader>
 
@@ -85,7 +83,7 @@ export function DeadLetterJobDetail({ selectedJob }: DeadLetterJobDetailProps) {
         </div>
 
         {/* Stats row */}
-        <div className="shrink-0 grid grid-cols-4 gap-2">
+        <div className="grid shrink-0 grid-cols-4 gap-2">
           {[
             { label: 'Attempt', value: selectedJob.job_try },
             { label: 'Args', value: selectedJob.args.length },
@@ -94,7 +92,7 @@ export function DeadLetterJobDetail({ selectedJob }: DeadLetterJobDetailProps) {
           ].map(({ label, value, small }) => (
             <div key={label} className="rounded-xl border border-neutral-200 bg-neutral-50 px-2.5 py-2">
               <p className="text-[10px] tracking-[0.16em] text-neutral-400 uppercase">{label}</p>
-              <p className={cn('mt-1 font-semibold text-neutral-900 leading-tight', small ? 'text-[11px]' : 'text-lg')}>{value}</p>
+              <p className={cn('mt-1 leading-tight font-semibold text-neutral-900', small ? 'text-[11px]' : 'text-lg')}>{value}</p>
             </div>
           ))}
         </div>
@@ -136,9 +134,7 @@ export function DeadLetterJobDetail({ selectedJob }: DeadLetterJobDetailProps) {
             </TooltipProvider>
           </div>
           <ScrollArea className="flex-1 overflow-y-auto">
-            <pre className="px-4 py-3 text-[11px] leading-5 whitespace-pre-wrap wrap-break-word text-neutral-700">
-              {JSON.stringify(activePayload, null, 2)}
-            </pre>
+            <pre className="px-4 py-3 text-[11px] leading-5 wrap-break-word whitespace-pre-wrap text-neutral-700">{JSON.stringify(activePayload, null, 2)}</pre>
           </ScrollArea>
         </div>
       </CardContent>
