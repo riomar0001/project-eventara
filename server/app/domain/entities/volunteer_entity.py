@@ -4,8 +4,6 @@ from enum import StrEnum
 
 from pydantic import BaseModel, EmailStr, Field
 
-"""Will update this when we have more details on the volunteer roles and statuses"""
-
 
 class VolunteerRole(StrEnum):
     ORGANIZER = "organizer"
@@ -19,17 +17,31 @@ class VolunteerStatus(StrEnum):
     SUSPENDED = "suspended"
 
 
-class Volunteer(BaseModel):
-    """Volunteer entity definition"""
+class ApplicationStatus(StrEnum):
+    PENDING = "pending"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+    WITHDRAWN = "withdrawn"
 
+
+class Volunteer(BaseModel):
     id: uuid.UUID = Field(default_factory=uuid.uuid4)
     user_id: uuid.UUID
     email: EmailStr
     contact_phone: str = Field(min_length=7, max_length=20)
     role: VolunteerRole
     status: VolunteerStatus = VolunteerStatus.ACTIVE
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
 
-    # Timestamps
+    model_config = {"from_attributes": True}
+
+
+class VolunteerApplication(BaseModel):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4)
+    user_id: uuid.UUID
+    status: ApplicationStatus = ApplicationStatus.PENDING
+    application_data: dict | None = Field(default=None)
     created_at: datetime | None = None
     updated_at: datetime | None = None
 
