@@ -203,13 +203,19 @@ class DeleteAccountUseCase:
                 raise AccountDeletionAlreadyScheduledError()
             raise AccountDeletionAlreadyScheduledError()
 
+        deletion_requested_at = scheduled_user.deletion_requested_at
+        deletion_scheduled_for = scheduled_user.deletion_scheduled_for
+        deletion_requested_by = scheduled_user.deletion_requested_by
+        if deletion_requested_at is None or deletion_scheduled_for is None or deletion_requested_by is None:
+            raise AccountDeletionAlreadyScheduledError()
+
         await self.arq.enqueue_job(
             "finalize_account_deletion_job",
             str(scheduled_user.id),
-            scheduled_user.deletion_requested_at.isoformat(),
-            scheduled_user.deletion_scheduled_for.isoformat(),
-            _job_id=f"account-deletion:{scheduled_user.id}:{scheduled_user.deletion_requested_at.isoformat()}",
-            _defer_until=scheduled_user.deletion_scheduled_for.replace(tzinfo=UTC),
+            deletion_requested_at.isoformat(),
+            deletion_scheduled_for.isoformat(),
+            _job_id=f"account-deletion:{scheduled_user.id}:{deletion_requested_at.isoformat()}",
+            _defer_until=deletion_scheduled_for.replace(tzinfo=UTC),
             _expires=timedelta(days=2),
         )
 
@@ -217,9 +223,9 @@ class DeleteAccountUseCase:
 
         return RequestAccountDeletionOutput(
             user_id=scheduled_user.id,
-            deletion_requested_at=scheduled_user.deletion_requested_at,
-            deletion_scheduled_for=scheduled_user.deletion_scheduled_for,
-            requested_by=scheduled_user.deletion_requested_by,
+            deletion_requested_at=deletion_requested_at,
+            deletion_scheduled_for=deletion_scheduled_for,
+            requested_by=deletion_requested_by,
         )
 
 

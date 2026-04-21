@@ -158,6 +158,9 @@ class UserRoleUseCase:
             assignment_id=data.assignment_id,
             expires_at=data.expires_at,
         )
+        if updated is None:
+            await self.db.rollback()
+            raise RoleAssignmentNotFoundError()
         await self.db.commit()
         return UpdateAssignmentOutput(assignment=updated)
 

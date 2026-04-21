@@ -22,6 +22,7 @@ class RatingValue(IntEnum):
 class Venue(BaseModel):
     id: uuid.UUID = Field(default_factory=uuid.uuid4)
     creator_id: uuid.UUID
+    image_file_id: uuid.UUID | None = None
     name: str = Field(min_length=1, max_length=255)
     description: str | None = Field(default=None, max_length=1000)
     address_line: str = Field(min_length=1, max_length=255)

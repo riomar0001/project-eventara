@@ -23,6 +23,7 @@ Concurrency strategy — distributed Redis lock for retry:
 """
 
 import re
+from typing import Awaitable, cast
 
 from arq.connections import ArqRedis
 from arq.jobs import Job
@@ -54,8 +55,10 @@ _RETRY_LOCK_TTL = 30
 _HEALTH_RE = re.compile(r"(\S+\s+\S+)\s+j_complete=(\d+)\s+j_failed=(\d+)\s+j_retried=(\d+)\s+j_ongoing=(\d+)\s+queued=(\d+)")
 
 
-def _decode(value: bytes | str) -> str:
-    return value.decode() if isinstance(value, bytes) else value
+def _decode(value: bytes | bytearray | memoryview | str) -> str:
+    if isinstance(value, str):
+        return value
+    return bytes(value).decode()
 
 
 def _decode_optional(value: bytes | str | None) -> str | None:
@@ -97,15 +100,15 @@ async def _get_collection_size(redis: ArqRedis, key: str) -> int:
     if key_type == "none":
         return 0
     if key_type == "zset":
-        return await redis.zcard(key)
+        return await cast(Awaitable[int], redis.zcard(key))
     if key_type == "list":
-        return await redis.llen(key)
+        return await cast(Awaitable[int], redis.llen(key))
     if key_type == "set":
-        return await redis.scard(key)
+        return await cast(Awaitable[int], redis.scard(key))
     if key_type == "stream":
-        return await redis.xlen(key)
+        return await cast(Awaitable[int], redis.xlen(key))
     if key_type == "hash":
-        return await redis.hlen(key)
+        return await cast(Awaitable[int], redis.hlen(key))
     if key_type == "string":
         return 1 if await redis.get(key) is not None else 0
 
@@ -118,13 +121,13 @@ async def _get_key_entries(redis: ArqRedis, key: str) -> list[str]:
     if key_type == "none":
         return []
     if key_type == "zset":
-        return [_decode(entry) for entry in await redis.zrange(key, 0, -1)]
+        return [_decode(entry) for entry in await cast(Awaitable[list], redis.zrange(key, 0, -1))]
     if key_type == "list":
-        return [_decode(entry) for entry in await redis.lrange(key, 0, -1)]
+        return [_decode(entry) for entry in await cast(Awaitable[list], redis.lrange(key, 0, -1))]
     if key_type == "set":
-        return sorted(_decode(entry) for entry in await redis.smembers(key))
+        return sorted(_decode(entry) for entry in await cast(Awaitable[set], redis.smembers(key)))
     if key_type == "hash":
-        return [_decode(entry) for entry in await redis.hvals(key)]
+        return [_decode(entry) for entry in await cast(Awaitable[list], redis.hvals(key))]
     if key_type == "string":
         value = _decode_optional(await redis.get(key))
         return [value] if value else []

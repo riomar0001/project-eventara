@@ -113,7 +113,7 @@ class AuditLogRepository:
         query = query.limit(limit + 1)
 
         result = await self.db.execute(query)
-        logs = result.scalars().all()
+        logs = list(result.scalars().all())
 
         has_next = len(logs) > limit
         if has_next:
