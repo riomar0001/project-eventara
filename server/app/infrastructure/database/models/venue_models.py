@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from uuid import UUID
 
-from sqlalchemy import Enum, ForeignKey, Index, Integer, String, Text
+from sqlalchemy import JSON, Boolean, Enum, ForeignKey, Index, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.domain.entities.venue_entities import VenueType
@@ -32,6 +32,8 @@ class Venue(Base):
     )
     popularity_count: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
     usage_count: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
+    is_partner: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    amenities: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
     # Contact information
     contact_name: Mapped[str] = mapped_column(String(255), nullable=False)
@@ -47,6 +49,7 @@ class Venue(Base):
     __table_args__ = (
         Index("idx_venues_name", "name"),
         Index("idx_venues_city", "city"),
+        Index("idx_venues_is_partner", "is_partner"),
         Index("idx_venues_venue_type", "venue_type"),
         Index("idx_venues_name_city", "name", "city"),
     )
