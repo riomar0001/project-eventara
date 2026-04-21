@@ -8,7 +8,7 @@ This keeps the API responsive while still giving the deletion lifecycle a
 single serialized execution path in the worker layer.
 """
 
-from app.application.use_cases.user_usecase import FinalizeAccountDeletionUseCase
+from app.application.use_cases.account_settings_usecase import FinalizeAccountDeletionUseCase
 from app.infrastructure.database.repositories.user_repository import UserRepository
 from app.infrastructure.database.session import AsyncSessionLocal
 

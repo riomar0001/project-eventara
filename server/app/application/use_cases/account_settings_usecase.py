@@ -2,125 +2,26 @@ import uuid
 from datetime import UTC, datetime, timedelta
 
 from arq.connections import ArqRedis
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application.dto.user_dto import (
     ChangePasswordInput,
-    GetLoginHistoryInput,
-    GetLoginHistoryOutput,
     RequestAccountDeletionInput,
     RequestAccountDeletionOutput,
-    UserOnboardingInput,
-    UserOnboardingOutput,
 )
 from app.application.interfaces.user_interface import IUserRepository
 from app.core.security.hashing import hash_string, verify_hash
-from app.domain.entities.user_entity import UserProfile, UserStatus
+from app.domain.entities.user_entity import UserStatus
 from app.domain.exceptions.auth_exceptions import InvalidCredentialsError
 from app.domain.exceptions.user_exceptions import (
     AccountDeletionAlreadyScheduledError,
     AccountDeletionGracePeriodExpiredError,
-    AliasAlreadyTakenError,
     EmailNotVerifiedError,
-    OnboardingAlreadyCompletedError,
     SamePasswordError,
     UserInactiveError,
     UserNotFoundError,
 )
 from app.infrastructure.database.repositories.refresh_token_repository import RefreshTokenRepository
-
-
-class OnboardingUseCase:
-    """Handles user onboarding after email verification.
-
-    Onboarding collects the user's profile details (alias, name, demographics)
-    and marks the account as fully set up. It can only be completed once.
-    """
-
-    def __init__(self, repo: IUserRepository, db: AsyncSession) -> None:
-        self.repo = repo
-        self.db = db
-
-    async def complete_onboarding(self, data: UserOnboardingInput) -> UserOnboardingOutput:
-        """Create the user's profile and mark onboarding as complete.
-
-        Concurrency note:
-            Alias uniqueness is checked optimistically before the INSERT, and the
-            database unique constraint acts as the final guard.  ``complete_onboarding``
-            uses a conditional UPDATE (``WHERE onboarding_completed = FALSE``) so
-            concurrent requests for the same user cannot both succeed.
-
-        Args:
-            data: A ``UserOnboardingInput`` with the user ID and all profile fields.
-
-        Returns:
-            A ``UserOnboardingOutput`` containing the newly created profile.
-
-        Raises:
-            UserNotFoundError: No user exists for the given ID.
-            EmailNotVerifiedError: The user has not yet verified their email address.
-            OnboardingAlreadyCompletedError: Onboarding was already completed, or a
-                concurrent request completed it just before this one.
-            AliasAlreadyTakenError: The requested alias is already in use by another user.
-        """
-        user = await self.repo.get_by_id(data.user_id)
-        if not user:
-            raise UserNotFoundError()
-
-        if user.status in (UserStatus.INACTIVE, UserStatus.DELETED):
-            raise UserInactiveError()
-
-        security = await self.repo.get_security_by_user_id(data.user_id)
-        if not security or not security.email_verified:
-            raise EmailNotVerifiedError()
-
-        if user.onboarding_completed:
-            raise OnboardingAlreadyCompletedError()
-
-        existing_alias = await self.repo.get_by_alias(data.alias)
-        if existing_alias:
-            raise AliasAlreadyTakenError(data.alias)
-
-        profile = UserProfile(
-            user_id=data.user_id,
-            email=user.email,
-            alias=data.alias,
-            first_name=data.first_name,
-            last_name=data.last_name,
-            age_group=data.age_group,
-            gender=data.gender,
-            education_level=data.education_level,
-            occupation=data.occupation,
-            bio=data.bio,
-        )
-
-        try:
-            created_profile = await self.repo.create_profile(profile)
-        except IntegrityError as exc:
-            await self.db.rollback()
-            orig = str(getattr(exc, "orig", exc)).lower()
-            if "alias" in orig:
-                raise AliasAlreadyTakenError(data.alias)
-            raise OnboardingAlreadyCompletedError()
-
-        updated = await self.repo.complete_onboarding(data.user_id)
-        if not updated:
-            await self.db.rollback()
-            raise OnboardingAlreadyCompletedError()
-
-        return UserOnboardingOutput(profile=created_profile)
-
-
-class CheckAliasUseCase:
-    """Checks whether a given alias is available."""
-
-    def __init__(self, repo: IUserRepository) -> None:
-        self.repo = repo
-
-    async def is_available(self, alias: str) -> bool:
-        existing = await self.repo.get_by_alias(alias)
-        return existing is None
 
 
 class ChangePasswordUseCase:
@@ -248,23 +149,6 @@ class DeleteAccountUseCase:
         return datetime.now(UTC).replace(tzinfo=None)
 
     async def request_self_service_deletion(self, data: RequestAccountDeletionInput) -> RequestAccountDeletionOutput:
-        """Validate the caller's password and schedule their own account deletion.
-
-        Args:
-            data: The authenticated user's ID, their current plaintext password,
-                and an optional reason captured for auditability.
-
-        Returns:
-            A ``RequestAccountDeletionOutput`` describing the newly scheduled
-            deletion window.
-
-        Raises:
-            UserNotFoundError: No account exists for the authenticated user ID.
-            UserInactiveError: The account is already inactive or deleted.
-            InvalidCredentialsError: The supplied current password is incorrect.
-            AccountDeletionAlreadyScheduledError: A deletion window is already pending.
-            AccountDeletionGracePeriodExpiredError: The grace period has already elapsed.
-        """
         user = await self.repo.get_by_id(data.target_user_id)
         if not user:
             raise UserNotFoundError()
@@ -283,22 +167,6 @@ class DeleteAccountUseCase:
         return await self._schedule_deletion(data)
 
     async def request_admin_deletion(self, data: RequestAccountDeletionInput) -> RequestAccountDeletionOutput:
-        """Schedule account deletion for a target user on behalf of an administrator.
-
-        Args:
-            data: The target user ID, the administrator's user ID, and an
-                optional free-form reason describing why the deletion was requested.
-
-        Returns:
-            A ``RequestAccountDeletionOutput`` describing the newly scheduled
-            deletion window.
-
-        Raises:
-            UserNotFoundError: No target account exists for the supplied ID.
-            UserInactiveError: The target account is already inactive or deleted.
-            AccountDeletionAlreadyScheduledError: A deletion window is already pending.
-            AccountDeletionGracePeriodExpiredError: The grace period has already elapsed.
-        """
         user = await self.repo.get_by_id(data.target_user_id)
         if not user:
             raise UserNotFoundError()
@@ -314,21 +182,6 @@ class DeleteAccountUseCase:
         return await self._schedule_deletion(data)
 
     async def _schedule_deletion(self, data: RequestAccountDeletionInput) -> RequestAccountDeletionOutput:
-        """Persist a pending deletion window and enqueue its deferred finalization job.
-
-        Args:
-            data: Validated deletion-request input from either the self-service
-                or administrator entry point.
-
-        Returns:
-            A ``RequestAccountDeletionOutput`` with the durable deletion window.
-
-        Raises:
-            AccountDeletionAlreadyScheduledError: Another request won the race
-                and scheduled deletion for this account first.
-            AccountDeletionGracePeriodExpiredError: The account passed its grace
-                deadline between validation and persistence.
-        """
         requested_at = self._utcnow_naive()
         scheduled_for = requested_at + self.grace_period
         scheduled_user = await self.repo.schedule_account_deletion(
@@ -360,6 +213,7 @@ class DeleteAccountUseCase:
             _expires=timedelta(days=2),
         )
 
+        from app.application.dto.user_dto import RequestAccountDeletionOutput
         return RequestAccountDeletionOutput(
             user_id=scheduled_user.id,
             deletion_requested_at=scheduled_user.deletion_requested_at,
@@ -381,39 +235,9 @@ class FinalizeAccountDeletionUseCase:
     def __init__(self, repo: IUserRepository) -> None:
         self.repo = repo
 
-    async def execute(
-        self,
-        *,
-        user_id: str,
-        requested_at: str,
-        scheduled_for: str,
-    ) -> bool:
-        """Finalize a scheduled account deletion if the original request is still valid.
-
-        Args:
-            user_id: The serialized UUID of the user to finalize.
-            requested_at: The original UTC timestamp captured when the deletion
-                request was scheduled.
-            scheduled_for: The UTC deadline at which the deletion should become final.
-
-        Returns:
-            ``True`` when the account was transitioned to ``DELETED`` and
-            ``False`` when the request had already been canceled, replaced, or
-            finalized by another worker.
-        """
+    async def execute(self, *, user_id: str, requested_at: str, scheduled_for: str) -> bool:
         return await self.repo.finalize_account_deletion(
             user_id=uuid.UUID(user_id),
             expected_requested_at=datetime.fromisoformat(requested_at),
             expected_scheduled_for=datetime.fromisoformat(scheduled_for),
         )
-
-
-class GetLoginHistoryUseCase:
-    """Retrieves recent login history entries for the authenticated user."""
-
-    def __init__(self, repo: IUserRepository) -> None:
-        self.repo = repo
-
-    async def execute(self, data: GetLoginHistoryInput) -> GetLoginHistoryOutput:
-        entries = await self.repo.get_login_history(data.user_id, data.limit)
-        return GetLoginHistoryOutput(entries=entries)

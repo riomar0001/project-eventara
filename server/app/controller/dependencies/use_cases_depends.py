@@ -1,13 +1,11 @@
 from fastapi import Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.application.use_cases.admin_user_account_usecase import AdminUserAccountUseCase
-from app.application.use_cases.audit_log_usecase import (
-    CreateAuditLogUseCase,
-    GetAuditLogsUseCase,
-)
+from app.application.use_cases.account_settings_usecase import ChangePasswordUseCase, DeleteAccountUseCase
+from app.application.use_cases.audit_log_usecase import CreateAuditLogUseCase, GetAuditLogsUseCase
 from app.application.use_cases.auth_usecase import AuthUseCase
 from app.application.use_cases.feature_usecase import FeatureManagementUseCase
+from app.application.use_cases.profile_usecase import CheckAliasUseCase, GetLoginHistoryUseCase, OnboardingUseCase
 from app.application.use_cases.queue_usecase import (
     DeleteDeadJobUseCase,
     GetQueueStatsUseCase,
@@ -16,13 +14,7 @@ from app.application.use_cases.queue_usecase import (
     RetryDeadJobUseCase,
 )
 from app.application.use_cases.role_usecase import RoleManagementUseCase, UserRoleUseCase
-from app.application.use_cases.user_usecase import (
-    ChangePasswordUseCase,
-    CheckAliasUseCase,
-    DeleteAccountUseCase,
-    GetLoginHistoryUseCase,
-    OnboardingUseCase,
-)
+from app.application.use_cases.users_usecase import AdminUserAccountUseCase
 from app.application.use_cases.venue_usecase import VenueUseCase
 from app.infrastructure.cache.repositories.otp_repository import OTPRepository
 from app.infrastructure.cache.repositories.password_reset_repository import PasswordResetRepository
