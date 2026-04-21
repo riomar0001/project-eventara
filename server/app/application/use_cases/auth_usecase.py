@@ -461,6 +461,7 @@ class AuthUseCase:
         return LoginVerifyOutput(
             access_token=access_token,
             refresh_token=refresh_token,
+            user_id=user.id,
         )
 
     async def resend_otp(self, data: ResendOtpInput) -> ResendOtpOutput:

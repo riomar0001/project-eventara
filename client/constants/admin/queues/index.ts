@@ -1,19 +1,19 @@
 export const QUEUE_MANAGEMENT_TEXT = {
   eyebrow: 'Background operations',
   description:
-    'Inspect live ARQ queue pressure, monitor worker heartbeat signals, and recover permanently failed jobs from the dead-letter queue without leaving the admin workspace.',
+    'See what tasks are running in the background, check if workers are active, and manually retry or clean up any tasks that failed.',
   liveOverviewTitle: 'Queue pulse',
-  liveOverviewDescription: 'A live read on worker throughput, backlog pressure, and the current failure footprint in the async job system.',
+  liveOverviewDescription: 'A live snapshot of how many tasks are waiting, running, finished, and how many workers are currently active.',
   deadLetterTitle: 'Dead-letter queue',
   deadLetterDescription:
-    'Failed jobs are parked here after exhausting their retry budget. Review the payload, retry the work, or discard the record if it is no longer relevant.',
+    'Tasks that failed too many times end up here. You can review what went wrong, try running them again, or remove them if they are no longer needed.',
   detailTitle: 'Failed job detail',
-  detailPlaceholderTitle: 'Choose a dead-letter job',
-  detailPlaceholderDescription: 'Select a failed job to inspect its arguments, timing, and final exception payload before taking action.',
-  emptyTitle: 'No dead-letter jobs right now',
-  emptyDescription: 'The queue is clean at the moment. Failed jobs will appear here after they exhaust their worker retry budget.',
+  detailPlaceholderTitle: 'Choose a failed task',
+  detailPlaceholderDescription: 'Select a failed task from the list to see what it was trying to do, when it ran, and why it failed.',
+  emptyTitle: 'No failed tasks right now',
+  emptyDescription: 'Everything looks good. Any tasks that fail after multiple retries will show up here.',
   statsErrorTitle: 'Unable to inspect queue state',
-  dlqErrorTitle: 'Unable to load dead-letter jobs',
-  purgeTitle: 'Purge dead-letter queue',
-  purgeDescription: 'This permanently removes every failed job from the dead-letter store. The action cannot be undone.'
+  dlqErrorTitle: 'Unable to load failed tasks',
+  purgeTitle: 'Clear all failed tasks',
+  purgeDescription: 'This will permanently delete every failed task from the list. This cannot be undone.'
 } as const;

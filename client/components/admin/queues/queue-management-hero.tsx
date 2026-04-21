@@ -42,22 +42,22 @@ export function QueueManagementHero({ deadJobs, inProgress, isBusy, onPurge, onR
         {
           label: 'Queued Jobs',
           value: pending,
-          hint: 'Jobs currently waiting inside the primary ARQ queue.'
+          hint: 'Tasks waiting to be picked up and processed.'
         },
         {
-          label: 'In Flight',
+          label: 'In Progress',
           value: inProgress,
-          hint: 'Work actively being processed by running workers right now.'
+          hint: 'Tasks currently being worked on right now.'
         },
         {
           label: 'Completed',
           value: totalCompleted,
-          hint: 'Finished jobs still visible in the current Redis result window.'
+          hint: 'Tasks that have finished successfully.'
         },
         {
-          label: 'Dead Letter',
+          label: 'Failed',
           value: deadJobs,
-          hint: `${workerCount} worker heartbeat${workerCount === 1 ? '' : 's'} detected in this snapshot.`,
+          hint: `${workerCount} active worker${workerCount === 1 ? '' : 's'} detected.`,
           emphasis: 'accent'
         }
       ]}

@@ -1,3 +1,4 @@
+import uuid
 from dataclasses import dataclass
 
 from app.domain.entities.user_entity import PublicUser
@@ -47,6 +48,7 @@ class LoginVerifyInput:
 class LoginVerifyOutput:
     access_token: str
     refresh_token: str
+    user_id: uuid.UUID | None = None
 
 
 @dataclass

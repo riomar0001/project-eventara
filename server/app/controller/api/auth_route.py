@@ -154,7 +154,11 @@ async def register_user(
         resource_type="user-accounts",
         resource_id=str(new_user.user.id),
         status=AuditLogStatus.SUCCESS,
-        new_values={"email": new_user.user.email},
+        new_values={
+            "user_id": str(new_user.user.id),
+            "email": new_user.user.email,
+            "status": new_user.user.status.value,
+        },
         additional_context={"operation": "register"},
     )
 
@@ -476,10 +480,10 @@ async def login_verify(
     await safe_audit_log(
         audit_use_case,
         request,
-        user_id=None,
+        user_id=result.user_id,
         action_type=ActionType.LOGIN,
         resource_type="auth",
-        resource_id=None,
+        resource_id=str(result.user_id) if result.user_id else None,
         status=AuditLogStatus.SUCCESS,
         additional_context={"operation": "login-verify"},
     )

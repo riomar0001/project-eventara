@@ -138,12 +138,7 @@ async def create_feature(
         resource_type="features",
         resource_id=str(result.feature.id),
         status=AuditLogStatus.SUCCESS,
-        new_values={
-            "slug": result.feature.slug,
-            "name": result.feature.name,
-            "description": result.feature.description,
-            "is_enabled": result.feature.is_enabled,
-        },
+        new_values=serialize_feature(result.feature),
     )
     return FeatureResponse(data=_to_feature_response(result.feature), message="Feature created successfully.")
 
