@@ -6,11 +6,9 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from app.application.dto.roles_dto import (
     AssignRoleInput,
     CreateGrantsInput,
-    UpdateAssignmentInput,
-)
-from app.application.dto.roles_dto import (
     CreateRoleInput,
     RolePermissionInput,
+    UpdateAssignmentInput,
     UpdateRoleInput,
 )
 from app.application.use_cases.audit_log_usecase import CreateAuditLogUseCase

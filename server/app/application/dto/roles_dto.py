@@ -8,8 +8,8 @@ from app.domain.entities.authorization_entities import GrantEffect, RoleAction
 from app.domain.entities.authorization_entities import UserGrant as UserGrantEntity
 from app.domain.entities.authorization_entities import UserRole as UserRoleEntity
 
-
 # ─── Shared ───────────────────────────────────────────────────────────────────
+
 
 @dataclass
 class RolePermissionSummary:
@@ -21,6 +21,7 @@ class RolePermissionSummary:
 
 
 # ─── Role assignments ─────────────────────────────────────────────────────────
+
 
 @dataclass
 class AssignRoleInput:
@@ -53,6 +54,7 @@ class UpdateAssignmentOutput:
 
 # ─── User grants ──────────────────────────────────────────────────────────────
 
+
 @dataclass
 class CreateGrantsInput:
     user_id: uuid.UUID
@@ -82,6 +84,7 @@ class ListGrantFeaturesOutput:
 
 
 # ─── Role management ──────────────────────────────────────────────────────────
+
 
 @dataclass
 class RolePermissionInput:

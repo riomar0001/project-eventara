@@ -214,6 +214,7 @@ class DeleteAccountUseCase:
         )
 
         from app.application.dto.account_settings_dto import RequestAccountDeletionOutput
+
         return RequestAccountDeletionOutput(
             user_id=scheduled_user.id,
             deletion_requested_at=scheduled_user.deletion_requested_at,
