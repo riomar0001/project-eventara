@@ -1,19 +1,14 @@
-"""Admin-side venue management API routes.
+"""Venue management and rating API routes.
 
-Exposes CRUD endpoints for the venue catalog. All routes require an
-authenticated caller with the appropriate RBAC permission on the ``venues``
-feature:
-
-  - ``read``   — GET endpoints (list, detail)
-  - ``create`` — POST endpoint
-  - ``update`` — PATCH endpoint
-  - ``delete`` — DELETE endpoint
+Admin CRUD endpoints require an authenticated caller with the appropriate RBAC
+permission on the ``venues`` feature.  Rating endpoints only require a valid
+access token — no feature permission is needed.
 
 Error mapping summary:
   - 401  missing, expired, or invalid Bearer token
-  - 403  RBAC denial
-  - 404  venue not found
-  - 409  name conflict within the same city, or venue still referenced by events
+  - 403  RBAC denial (admin endpoints only)
+  - 404  venue or rating not found
+  - 409  name conflict (admin), or duplicate rating (user)
   - 422  request body failed schema validation
 """
 
@@ -22,11 +17,17 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 
 from app.application.dto.venue_dto import CreateVenueInput, ListVenuesInput, UpdateVenueInput
+from app.application.dto.venue_rating_dto import (
+    CreateVenueRatingInput,
+    ListVenueRatingsInput,
+    UpdateVenueRatingInput,
+)
 from app.application.use_cases.audit_log_usecase import CreateAuditLogUseCase
+from app.application.use_cases.venue_rating_usecase import VenueRatingUseCase
 from app.application.use_cases.venue_usecase import VenueManagementUseCase
-from app.controller.api.audit_helpers import safe_audit_log, serialize_venue
-from app.controller.dependencies import get_create_audit_log_use_case, require_permission
-from app.controller.dependencies.use_cases_depends import get_venue_management_use_case
+from app.controller.api.audit_helpers import safe_audit_log, serialize_venue, serialize_venue_rating
+from app.controller.dependencies import get_create_audit_log_use_case, get_current_user_id, require_permission
+from app.controller.dependencies.use_cases_depends import get_venue_management_use_case, get_venue_rating_use_case
 from app.controller.docs.venue_management_docs import (
     FORBIDDEN,
     UNAUTHORIZED,
@@ -35,16 +36,33 @@ from app.controller.docs.venue_management_docs import (
     VENUE_IN_USE,
     VENUE_NOT_FOUND,
 )
+from app.controller.docs.venue_rating_docs import (
+    RATING_CONFLICT,
+    RATING_NOT_FOUND,
+    RATING_VALIDATION_ERROR,
+    UNAUTHORIZED as RATING_UNAUTHORIZED,
+)
 from app.controller.schemas.venue_management_schema import (
     PublicVenueListResponse,
     PublicVenueRecordResponse,
     PublicVenueResponse,
     VenueCreateRequest,
     VenueListResponse,
-    VenuePaginationResponse,  # used in _build_pagination
+    VenuePaginationResponse,
     VenueRecordResponse,
     VenueResponse,
     VenueUpdateRequest,
+)
+from app.controller.schemas.venue_rating_schema import (
+    VenueRatingAverageData,
+    VenueRatingAverageResponse,
+    VenueRatingCreateRequest,
+    VenueRatingDeleteResponse,
+    VenueRatingListResponse,
+    VenueRatingPaginationResponse,
+    VenueRatingRecordResponse,
+    VenueRatingResponse,
+    VenueRatingUpdateRequest,
 )
 from app.domain.entities.audit_log import ActionType, AuditLogStatus
 from app.domain.entities.authorization_entities import RoleAction
@@ -53,6 +71,10 @@ from app.domain.exceptions.venue_exceptions import (
     VenueAlreadyExistsError,
     VenueInUseError,
     VenueNotFoundError,
+)
+from app.domain.exceptions.venue_rating_exceptions import (
+    VenueRatingAlreadyExistsError,
+    VenueRatingNotFoundError,
 )
 
 venue_router = APIRouter(prefix="/venues", tags=["Venues"])
@@ -479,3 +501,286 @@ async def delete_venue(
         status=AuditLogStatus.SUCCESS,
         old_values=serialize_venue(existing.venue),
     )
+
+
+# ─── Venue Rating Endpoints ───────────────────────────────────────────────────
+
+
+def _to_rating_response(rating) -> VenueRatingRecordResponse:
+    return VenueRatingRecordResponse(
+        id=rating.id,
+        user_id=rating.user_id,
+        venue_id=rating.venue_id,
+        rating=rating.rating,
+        comment=rating.comment,
+        created_at=rating.created_at,
+        updated_at=rating.updated_at,
+    )
+
+
+def _build_rating_pagination(output) -> VenueRatingPaginationResponse:
+    return VenueRatingPaginationResponse(
+        page=output.page,
+        page_size=output.page_size,
+        total_count=output.total_count,
+        total_pages=output.total_pages,
+        has_next=output.page < output.total_pages,
+        has_previous=output.page > 1 and output.total_pages > 0,
+    )
+
+
+@venue_router.post(
+    "/{venue_id}/ratings",
+    response_model=VenueRatingResponse,
+    status_code=status.HTTP_201_CREATED,
+    responses={
+        **RATING_UNAUTHORIZED,
+        **VENUE_NOT_FOUND,
+        **RATING_CONFLICT,
+        **RATING_VALIDATION_ERROR,
+    },
+    summary="Submit a rating for a venue",
+    description=(
+        "Submit a 1–5 star rating with an optional comment for the specified venue. "
+        "Each authenticated user may rate a venue only once. "
+        "The venue's popularity count is incremented automatically on success."
+    ),
+)
+async def create_venue_rating(
+    request: Request,
+    venue_id: uuid.UUID,
+    body: VenueRatingCreateRequest,
+    user_id: uuid.UUID = Depends(get_current_user_id),
+    use_case: VenueRatingUseCase = Depends(get_venue_rating_use_case),
+    audit_use_case: CreateAuditLogUseCase = Depends(get_create_audit_log_use_case),
+) -> VenueRatingResponse:
+    """Submit a new venue rating for the authenticated user.
+
+    # Error mapping
+    - **401 Unauthorized** — missing, expired, or invalid Bearer token.
+    - **404 Not Found** — no venue exists for ``venue_id``.
+    - **409 Conflict** — the user has already rated this venue.
+    - **422 Unprocessable Entity** — rating value out of range or body invalid.
+    """
+    try:
+        result = await use_case.create_rating(
+            CreateVenueRatingInput(
+                user_id=user_id,
+                venue_id=venue_id,
+                rating=body.rating,
+                comment=body.comment,
+            )
+        )
+    except VenueNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except VenueRatingAlreadyExistsError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+
+    await safe_audit_log(
+        audit_use_case,
+        request,
+        user_id=user_id,
+        action_type=ActionType.CREATE,
+        resource_type="venue-ratings",
+        resource_id=str(result.rating.id),
+        status=AuditLogStatus.SUCCESS,
+        new_values=serialize_venue_rating(result.rating),
+    )
+    return VenueRatingResponse(data=_to_rating_response(result.rating))
+
+
+@venue_router.get(
+    "/{venue_id}/ratings",
+    response_model=VenueRatingListResponse,
+    status_code=status.HTTP_200_OK,
+    responses={**VENUE_NOT_FOUND},
+    summary="List all ratings for a venue",
+    description="Return a paginated list of ratings for the specified venue, newest first. No authentication required.",
+)
+async def list_venue_ratings(
+    venue_id: uuid.UUID,
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=10, ge=1, le=100),
+    use_case: VenueRatingUseCase = Depends(get_venue_rating_use_case),
+) -> VenueRatingListResponse:
+    """Return paginated ratings for a venue.
+
+    # Error mapping
+    - **404 Not Found** — no venue exists for ``venue_id``.
+    - **422 Unprocessable Entity** — pagination query params are invalid.
+    """
+    try:
+        result = await use_case.list_ratings(
+            ListVenueRatingsInput(venue_id=venue_id, page=page, page_size=page_size)
+        )
+    except VenueNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+
+    return VenueRatingListResponse(
+        data=[_to_rating_response(r) for r in result.ratings],
+        pagination=_build_rating_pagination(result),
+    )
+
+
+@venue_router.get(
+    "/{venue_id}/ratings/average",
+    response_model=VenueRatingAverageResponse,
+    status_code=status.HTTP_200_OK,
+    responses={**VENUE_NOT_FOUND},
+    summary="Get the average rating for a venue",
+    description=(
+        "Return the mean star rating and total submission count for the specified venue. "
+        "``average`` is ``null`` when the venue has not yet received any ratings. "
+        "No authentication required."
+    ),
+)
+async def get_venue_rating_average(
+    venue_id: uuid.UUID,
+    use_case: VenueRatingUseCase = Depends(get_venue_rating_use_case),
+) -> VenueRatingAverageResponse:
+    """Return the computed average rating for a venue.
+
+    # Error mapping
+    - **404 Not Found** — no venue exists for ``venue_id``.
+    """
+    try:
+        result = await use_case.get_average_rating(venue_id)
+    except VenueNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+
+    return VenueRatingAverageResponse(
+        data=VenueRatingAverageData(
+            venue_id=result.venue_id,
+            average=result.average,
+            count=result.count,
+        )
+    )
+
+
+@venue_router.get(
+    "/{venue_id}/ratings/me",
+    response_model=VenueRatingResponse,
+    status_code=status.HTTP_200_OK,
+    responses={**RATING_UNAUTHORIZED, **RATING_NOT_FOUND},
+    summary="Get the authenticated user's rating for a venue",
+    description="Return the rating the authenticated user has submitted for the specified venue.",
+)
+async def get_my_venue_rating(
+    venue_id: uuid.UUID,
+    user_id: uuid.UUID = Depends(get_current_user_id),
+    use_case: VenueRatingUseCase = Depends(get_venue_rating_use_case),
+) -> VenueRatingResponse:
+    """Return the authenticated user's own rating for a venue.
+
+    # Error mapping
+    - **401 Unauthorized** — missing, expired, or invalid Bearer token.
+    - **404 Not Found** — venue not found, or the user has not rated this venue.
+    """
+    try:
+        result = await use_case.get_my_rating(user_id, venue_id)
+    except VenueNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except VenueRatingNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+
+    return VenueRatingResponse(data=_to_rating_response(result.rating))
+
+
+@venue_router.patch(
+    "/{venue_id}/ratings/me",
+    response_model=VenueRatingResponse,
+    status_code=status.HTTP_200_OK,
+    responses={**RATING_UNAUTHORIZED, **RATING_NOT_FOUND, **RATING_VALIDATION_ERROR},
+    summary="Update the authenticated user's rating for a venue",
+    description="Replace the rating value and/or comment for the authenticated user's existing venue rating.",
+)
+async def update_my_venue_rating(
+    request: Request,
+    venue_id: uuid.UUID,
+    body: VenueRatingUpdateRequest,
+    user_id: uuid.UUID = Depends(get_current_user_id),
+    use_case: VenueRatingUseCase = Depends(get_venue_rating_use_case),
+    audit_use_case: CreateAuditLogUseCase = Depends(get_create_audit_log_use_case),
+) -> VenueRatingResponse:
+    """Update the authenticated user's venue rating.
+
+    # Error mapping
+    - **401 Unauthorized** — missing, expired, or invalid Bearer token.
+    - **404 Not Found** — venue not found, or the user has not rated this venue.
+    - **422 Unprocessable Entity** — rating value out of range or body invalid.
+    """
+    try:
+        previous = await use_case.get_my_rating(user_id, venue_id)
+        result = await use_case.update_rating(
+            UpdateVenueRatingInput(
+                user_id=user_id,
+                venue_id=venue_id,
+                rating=body.rating,
+                comment=body.comment,
+            )
+        )
+    except VenueNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except VenueRatingNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+
+    await safe_audit_log(
+        audit_use_case,
+        request,
+        user_id=user_id,
+        action_type=ActionType.UPDATE,
+        resource_type="venue-ratings",
+        resource_id=str(result.rating.id),
+        status=AuditLogStatus.SUCCESS,
+        old_values=serialize_venue_rating(previous.rating),
+        new_values=serialize_venue_rating(result.rating),
+    )
+    return VenueRatingResponse(
+        data=_to_rating_response(result.rating),
+        message="Rating updated successfully.",
+    )
+
+
+@venue_router.delete(
+    "/{venue_id}/ratings/me",
+    response_model=VenueRatingDeleteResponse,
+    status_code=status.HTTP_200_OK,
+    responses={**RATING_UNAUTHORIZED, **RATING_NOT_FOUND},
+    summary="Delete the authenticated user's rating for a venue",
+    description=(
+        "Remove the authenticated user's rating from the specified venue. "
+        "The venue's popularity count is decremented automatically on success."
+    ),
+)
+async def delete_my_venue_rating(
+    request: Request,
+    venue_id: uuid.UUID,
+    user_id: uuid.UUID = Depends(get_current_user_id),
+    use_case: VenueRatingUseCase = Depends(get_venue_rating_use_case),
+    audit_use_case: CreateAuditLogUseCase = Depends(get_create_audit_log_use_case),
+) -> VenueRatingDeleteResponse:
+    """Remove the authenticated user's venue rating.
+
+    # Error mapping
+    - **401 Unauthorized** — missing, expired, or invalid Bearer token.
+    - **404 Not Found** — venue not found, or the user has not rated this venue.
+    """
+    try:
+        existing = await use_case.get_my_rating(user_id, venue_id)
+        await use_case.delete_rating(user_id, venue_id)
+    except VenueNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except VenueRatingNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+
+    await safe_audit_log(
+        audit_use_case,
+        request,
+        user_id=user_id,
+        action_type=ActionType.DELETE,
+        resource_type="venue-ratings",
+        resource_id=str(existing.rating.id),
+        status=AuditLogStatus.SUCCESS,
+        old_values=serialize_venue_rating(existing.rating),
+    )
+    return VenueRatingDeleteResponse()
