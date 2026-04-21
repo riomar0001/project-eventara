@@ -148,9 +148,12 @@ class TestDeleteAccountUseCase:
     async def test_self_service_success(self):
         """Validates password, persists the deletion window, and enqueues the deferred finalization job"""
         repo = _make_repo(user=_make_user(), scheduled_user=_scheduled_user())
+        arq = AsyncMock()
+        uc = DeleteAccountUseCase(repo=repo, arq=arq)
         with patch("app.application.use_cases.account_settings_usecase.verify_hash", return_value=True):
-            result = await self._make_uc(repo).request_self_service_deletion(self._self_data())
+            result = await uc.request_self_service_deletion(self._self_data())
         assert result.user_id == USER_ID
+        arq.enqueue_job.assert_awaited_once()
 
     @pytest.mark.asyncio
     async def test_self_service_user_not_found(self):
@@ -189,8 +192,11 @@ class TestDeleteAccountUseCase:
     async def test_admin_deletion_success(self):
         """Persists the deletion window without a password check and enqueues the finalization job"""
         repo = _make_repo(user=_make_user(), scheduled_user=_scheduled_user())
-        result = await self._make_uc(repo).request_admin_deletion(self._admin_data())
+        arq = AsyncMock()
+        uc = DeleteAccountUseCase(repo=repo, arq=arq)
+        result = await uc.request_admin_deletion(self._admin_data())
         assert result.user_id == USER_ID
+        arq.enqueue_job.assert_awaited_once()
 
     @pytest.mark.asyncio
     async def test_admin_deletion_user_not_found(self):

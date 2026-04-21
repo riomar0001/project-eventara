@@ -91,7 +91,7 @@ class TestAssignRole:
         repo = _make_repo()
         result = await self._make_uc(repo).assign_role(self._data())
         repo.create_assignment.assert_awaited_once()
-        assert result.assignment is not None
+        assert result.assignment is repo.create_assignment.return_value
 
     @pytest.mark.asyncio
     async def test_user_not_found(self):
@@ -147,7 +147,7 @@ class TestUpdateAssignment:
         result = await UserRoleUseCase(repo, db).update_assignment(
             UpdateAssignmentInput(assignment_id=ASSIGNMENT_ID, expires_at=None)
         )
-        assert result.assignment is not None
+        assert result.assignment is repo.update_assignment_expiry.return_value
         db.commit.assert_awaited_once()
 
     @pytest.mark.asyncio
@@ -161,8 +161,10 @@ class TestUpdateAssignment:
 class TestRevokeAssignment:
     @pytest.mark.asyncio
     async def test_success(self):
+        repo = _make_repo(deleted_assignment=True)
         db = AsyncMock()
-        await UserRoleUseCase(_make_repo(deleted_assignment=True), db).revoke_assignment(ASSIGNMENT_ID)
+        await UserRoleUseCase(repo, db).revoke_assignment(ASSIGNMENT_ID)
+        repo.delete_assignment.assert_awaited_once_with(ASSIGNMENT_ID)
         db.commit.assert_awaited_once()
 
     @pytest.mark.asyncio
@@ -240,8 +242,10 @@ class TestGetGrant:
 class TestRevokeGrant:
     @pytest.mark.asyncio
     async def test_success(self):
+        repo = _make_repo(deleted_grant=True)
         db = AsyncMock()
-        await UserRoleUseCase(_make_repo(deleted_grant=True), db).revoke_grant(GRANT_ID)
+        await UserRoleUseCase(repo, db).revoke_grant(GRANT_ID)
+        repo.delete_grant.assert_awaited_once_with(GRANT_ID)
         db.commit.assert_awaited_once()
 
     @pytest.mark.asyncio
@@ -334,7 +338,7 @@ class TestUpdateRole:
         db = AsyncMock()
         result = await RoleManagementUseCase(_make_repo(), db).update_role(self._data(name="editor"))
         db.commit.assert_awaited_once()
-        assert result is not None
+        assert result.role.name == "editor"
 
     @pytest.mark.asyncio
     async def test_name_change_with_dependencies_raises_in_use(self):
@@ -371,8 +375,10 @@ class TestUpdateRole:
 class TestDeleteRole:
     @pytest.mark.asyncio
     async def test_success(self):
+        repo = _make_repo()
         db = AsyncMock()
-        await RoleManagementUseCase(_make_repo(), db).delete_role(ROLE_ID)
+        await RoleManagementUseCase(repo, db).delete_role(ROLE_ID)
+        repo.delete_role_definition.assert_awaited_once_with(ROLE_ID)
         db.commit.assert_awaited_once()
 
     @pytest.mark.asyncio
