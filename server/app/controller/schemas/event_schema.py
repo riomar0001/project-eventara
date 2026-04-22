@@ -1,7 +1,9 @@
 import uuid
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
+
+from app.core.sanitize import sanitize_html, strip_html
 
 
 class EventSessionCreateRequest(BaseModel):
@@ -11,6 +13,13 @@ class EventSessionCreateRequest(BaseModel):
     start_datetime: datetime
     end_datetime: datetime
 
+    @field_validator("description", mode="before")
+    @classmethod
+    def sanitize_description(cls, v: str | None) -> str | None:
+        if v is None:
+            return None
+        return strip_html(v) or None
+
 
 class EventCreateRequest(BaseModel):
     title: str = Field(min_length=1, max_length=255)
@@ -18,6 +27,11 @@ class EventCreateRequest(BaseModel):
     start_date: datetime
     end_date: datetime
     sessions: list[EventSessionCreateRequest] = Field(min_length=1)
+
+    @field_validator("description", mode="before")
+    @classmethod
+    def sanitize_description(cls, v: str) -> str:
+        return sanitize_html(v)
 
 
 class EventSessionRecordResponse(BaseModel):

@@ -1,14 +1,15 @@
 import uuid
 from datetime import datetime
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, field_validator
 
+from app.core.sanitize import sanitize_html
 from app.domain.entities.venue_entities import VenueType
 
 
 class VenueCreateRequest(BaseModel):
     name: str = Field(min_length=1, max_length=255)
-    description: str | None = Field(default=None, max_length=1000)
+    description: str | None = Field(default=None)
     address_line: str = Field(min_length=1, max_length=255)
     city: str = Field(min_length=1, max_length=100)
     province: str = Field(min_length=1, max_length=100)
@@ -22,11 +23,18 @@ class VenueCreateRequest(BaseModel):
     contact_name: str = Field(min_length=1, max_length=255)
     contact_phone: str = Field(min_length=1, max_length=20)
     contact_email: EmailStr
+
+    @field_validator("description", mode="before")
+    @classmethod
+    def sanitize_description(cls, v: str | None) -> str | None:
+        if v is None:
+            return None
+        return sanitize_html(v) or None
 
 
 class VenueUpdateRequest(BaseModel):
     name: str = Field(min_length=1, max_length=255)
-    description: str | None = Field(default=None, max_length=1000)
+    description: str | None = Field(default=None)
     address_line: str = Field(min_length=1, max_length=255)
     city: str = Field(min_length=1, max_length=100)
     province: str = Field(min_length=1, max_length=100)
@@ -40,6 +48,13 @@ class VenueUpdateRequest(BaseModel):
     contact_name: str = Field(min_length=1, max_length=255)
     contact_phone: str = Field(min_length=1, max_length=20)
     contact_email: EmailStr
+
+    @field_validator("description", mode="before")
+    @classmethod
+    def sanitize_description(cls, v: str | None) -> str | None:
+        if v is None:
+            return None
+        return sanitize_html(v) or None
 
 
 class VenueRecordResponse(BaseModel):
