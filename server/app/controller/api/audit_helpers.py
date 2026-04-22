@@ -10,6 +10,7 @@ from app.application.dto.users_dto import AdminUserAccountDetail
 from app.application.use_cases.audit_log_usecase import CreateAuditLogUseCase
 from app.domain.entities.audit_log import ActionType, AuditLogStatus
 from app.domain.entities.authorization_entities import Feature, UserGrant, UserRole
+from app.domain.entities.event_entity import Event, EventSession
 from app.domain.entities.user_entity import UserProfile
 from app.domain.entities.venue_entities import Venue, VenueRating
 
@@ -123,6 +124,33 @@ def serialize_venue(venue: Venue) -> dict:
         "contact_phone": venue.contact_phone,
         "contact_email": venue.contact_email,
     }
+
+
+def serialize_event(event: Event) -> dict:
+    return {
+        "id": str(event.id),
+        "title": event.title,
+        "description": event.description,
+        "start_date": event.start_date.isoformat() if event.start_date else None,
+        "end_date": event.end_date.isoformat() if event.end_date else None,
+        "status": event.status.value if hasattr(event.status, "value") else event.status,
+        "created_by": str(event.created_by),
+    }
+
+
+def serialize_event_sessions(sessions: list[EventSession]) -> list[dict]:
+    return [
+        {
+            "id": str(s.id),
+            "event_id": str(s.event_id),
+            "venue_id": str(s.venue_id),
+            "title": s.title,
+            "start_datetime": s.start_datetime.isoformat() if s.start_datetime else None,
+            "end_datetime": s.end_datetime.isoformat() if s.end_datetime else None,
+            "status": s.status.value if hasattr(s.status, "value") else s.status,
+        }
+        for s in sessions
+    ]
 
 
 def serialize_admin_user_account(detail: AdminUserAccountDetail) -> dict:

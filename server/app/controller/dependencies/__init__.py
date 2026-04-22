@@ -9,6 +9,7 @@ from app.controller.dependencies.use_cases_depends import (
     get_audit_logs_use_case,
     get_auth_use_case,
     get_create_audit_log_use_case,
+    get_create_event_use_case,
     get_delete_account_use_case,
     get_delete_dead_job_use_case,
     get_feature_management_use_case,
@@ -50,4 +51,5 @@ __all__ = [
     "get_venue_management_use_case",
     "get_venue_rating_use_case",
     "get_update_profile_use_case",
+    "get_create_event_use_case",
 ]

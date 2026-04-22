@@ -2,6 +2,7 @@ from fastapi import APIRouter
 
 from app.controller.api.audit_log_route import router as audit_log_router
 from app.controller.api.auth_route import router as auth_router
+from app.controller.api.event_route import event_router
 from app.controller.api.features_route import feature_router
 from app.controller.api.queue_route import router as queue_router
 from app.controller.api.role_route import grant_router, role_management_router, role_router
@@ -22,3 +23,4 @@ router.include_router(role_router)
 router.include_router(grant_router)
 router.include_router(queue_router)
 router.include_router(venue_router)
+router.include_router(event_router)

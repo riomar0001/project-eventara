@@ -36,7 +36,7 @@ class EventVolunteerStatus(StrEnum):
 class Event(BaseModel):
     id: uuid.UUID = Field(default_factory=uuid.uuid4)
     title: str = Field(min_length=1, max_length=255)
-    description: str = Field(min_length=1, max_length=2000)
+    description: str = Field(min_length=1)
     start_date: datetime
     end_date: datetime
     status: EventStatus = EventStatus.DRAFT
