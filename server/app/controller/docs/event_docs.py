@@ -1,5 +1,6 @@
 from app.controller.schemas.auth_schema import ErrorResponse, ValidationErrorResponse
 
+
 UNAUTHORIZED = {
     401: {
         "description": "Missing or invalid Bearer token",
@@ -63,6 +64,46 @@ EVENT_VALIDATION_ERROR = {
                             "type": "too_short",
                         }
                     ],
+                }
+            }
+        },
+    }
+}
+
+EVENT_UNAUTHORIZED_OPERATION = {
+    403: {
+        "description": "Caller is not the event creator",
+        "model": ErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "message": "You do not have permission to perform this operation on this event",
+                }
+            }
+        },
+    }
+}
+
+EVENT_UPDATE_NOT_FOUND = {
+    404: {
+        "description": "Event or session not found",
+        "model": ErrorResponse,
+        "content": {
+            "application/json": {
+                "examples": {
+                    "event_not_found": {
+                        "summary": "Event not found",
+                        "value": {"success": False, "message": "Event not found"},
+                    },
+                    "session_not_found": {
+                        "summary": "Session ID not found on this event",
+                        "value": {"success": False, "message": "Event session not found"},
+                    },
+                    "venue_not_found": {
+                        "summary": "Venue not found",
+                        "value": {"success": False, "message": "Venue not found"},
+                    },
                 }
             }
         },

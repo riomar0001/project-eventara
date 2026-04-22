@@ -15,7 +15,7 @@ from app.application.use_cases.queue_usecase import (
 )
 from app.application.use_cases.role_usecase import RoleManagementUseCase, UserRoleUseCase
 from app.application.use_cases.users_usecase import AdminUserAccountUseCase
-from app.application.use_cases.event_usecase import CreateEventUseCase
+from app.application.use_cases.event_usecase import CreateEventUseCase, UpdateEventUseCase
 from app.application.use_cases.venue_rating_usecase import VenueRatingUseCase
 from app.application.use_cases.venue_usecase import VenueManagementUseCase
 from app.infrastructure.cache.repositories.otp_repository import OTPRepository
@@ -167,3 +167,8 @@ def get_venue_rating_use_case(db: AsyncSession = Depends(get_db)) -> VenueRating
 def get_create_event_use_case(db: AsyncSession = Depends(get_db)) -> CreateEventUseCase:
     """Construct a ``CreateEventUseCase`` for the current request."""
     return CreateEventUseCase(EventRepository(db), db)
+
+
+def get_update_event_use_case(db: AsyncSession = Depends(get_db)) -> UpdateEventUseCase:
+    """Construct an ``UpdateEventUseCase`` for the current request."""
+    return UpdateEventUseCase(EventRepository(db), db)
