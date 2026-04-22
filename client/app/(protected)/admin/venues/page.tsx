@@ -1,5 +1,5 @@
-import { PermissionGate } from '@/components/auth/permission-gate';
 import { VenuesCatalog } from '@/components/admin/venues/venues-catalog';
+import { PermissionGate } from '@/components/auth/permission-gate';
 
 export default function AdminVenuesPage() {
   return (

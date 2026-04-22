@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { AdminUserAccounts } from '@/api/sdk.gen';
+import { Users } from '@/api/sdk.gen';
 import type {
   AdminUserAccountPaginationResponse as AdminUserAccountPagination,
   AdminUserAccountSummaryResponse as AdminUserAccountSummary,
@@ -75,7 +75,7 @@ export function useAdminUserAccounts(page: number, pageSize: number = 10, search
       try {
         const accessToken = getAccessToken();
 
-        const result = await AdminUserAccounts.listUserAccountsUserAccountsGet({
+        const result = await Users.listUserAccountsUserAccountsGet({
           query: {
             page,
             page_size: pageSize,

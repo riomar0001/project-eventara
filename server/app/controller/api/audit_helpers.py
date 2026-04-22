@@ -11,7 +11,7 @@ from app.application.use_cases.audit_log_usecase import CreateAuditLogUseCase
 from app.domain.entities.audit_log import ActionType, AuditLogStatus
 from app.domain.entities.authorization_entities import Feature, UserGrant, UserRole
 from app.domain.entities.user_entity import UserProfile
-from app.domain.entities.venue_entities import Venue
+from app.domain.entities.venue_entities import Venue, VenueRating
 
 
 def _isoformat_or_none(value: datetime | None) -> str | None:
@@ -90,6 +90,16 @@ def serialize_profile(profile: UserProfile) -> dict:
         "education_level": profile.education_level.value if profile.education_level else None,
         "occupation": profile.occupation,
         "bio": profile.bio,
+    }
+
+
+def serialize_venue_rating(rating: VenueRating) -> dict:
+    return {
+        "id": str(rating.id),
+        "user_id": str(rating.user_id),
+        "venue_id": str(rating.venue_id),
+        "rating": rating.rating,
+        "comment": rating.comment,
     }
 
 

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { useAliasAvailability } from '@/hooks/onboarding/use-alias-availability';
-import { User } from '@/api/sdk.gen';
+import { Profile } from '@/api/sdk.gen';
 import type { AgeGroup, EducationLevel, Gender } from '@/api/types.gen';
 import { ONBOARDING_STEPS } from '@/constants/onboarding/onboarding';
 import { PROFILE_ALIAS_MIN_LENGTH, PROFILE_ALIAS_PATTERN } from '@/constants/user/profile';
@@ -114,7 +114,7 @@ export function useOnboardingForm() {
   async function handleSubmit() {
     setIsSubmitting(true);
 
-    const result = await User.userOnboardingUserOnboardPost({
+    const result = await Profile.userOnboardingUserOnboardPost({
       body: {
         alias: form.alias,
         first_name: form.first_name,

@@ -1,7 +1,6 @@
 export const QUEUE_MANAGEMENT_TEXT = {
   eyebrow: 'Background operations',
-  description:
-    'See what tasks are running in the background, check if workers are active, and manually retry or clean up any tasks that failed.',
+  description: 'See what tasks are running in the background, check if workers are active, and manually retry or clean up any tasks that failed.',
   liveOverviewTitle: 'Queue pulse',
   liveOverviewDescription: 'A live snapshot of how many tasks are waiting, running, finished, and how many workers are currently active.',
   deadLetterTitle: 'Dead-letter queue',

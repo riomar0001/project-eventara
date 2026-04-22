@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
-import { User as UserApi } from '@/api/sdk.gen';
+import { Profile as UserApi } from '@/api/sdk.gen';
 
 type PermissionsMap = Record<string, boolean>;
 
@@ -18,7 +18,7 @@ let _inflight: Promise<PermissionsMap> | null = null;
 function loadPermissions(): Promise<PermissionsMap> {
   if (!_inflight) {
     _inflight = UserApi.getMyPermissionsUserMePermissionsGet()
-      .then((r) => r.data?.permissions ?? {})
+      .then((r: { data?: { permissions: Record<string, boolean> } }) => r.data?.permissions ?? {})
       .catch(() => ({}))
       .finally(() => {
         _inflight = null;

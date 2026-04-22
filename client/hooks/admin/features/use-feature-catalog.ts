@@ -2,20 +2,20 @@
 
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import * as AdminSdk from '@/api/sdk.gen';
+import { Features } from '@/api/sdk.gen';
 import type { FeatureCreateRequest, FeatureRecordResponse, FeatureUpdateRequest } from '@/api/types.gen';
 import { FEATURE_ACCESS_TEXT } from '@/constants/admin/features/access-control';
 import { getAccessToken } from '@/store/auth-store';
 
 type FeatureDraft = FeatureCreateRequest;
 type FeatureCatalogApi = {
-  createFeatureFeaturesPost: typeof AdminSdk.RbacFeatures.createFeatureFeaturesPost;
-  deleteFeatureFeaturesFeatureIdDelete: typeof AdminSdk.RbacFeatures.deleteFeatureFeaturesFeatureIdDelete;
-  listFeaturesFeaturesGet: typeof AdminSdk.RbacFeatures.listFeaturesFeaturesGet;
-  updateFeatureFeaturesFeatureIdPatch: typeof AdminSdk.RbacFeatures.updateFeatureFeaturesFeatureIdPatch;
+  createFeatureFeaturesPost: typeof Features.createFeatureFeaturesPost;
+  deleteFeatureFeaturesFeatureIdDelete: typeof Features.deleteFeatureFeaturesFeatureIdDelete;
+  listFeaturesFeaturesGet: typeof Features.listFeaturesFeaturesGet;
+  updateFeatureFeaturesFeatureIdPatch: typeof Features.updateFeatureFeaturesFeatureIdPatch;
 };
 
-const featureCatalogApi = Reflect.get(AdminSdk, 'R' + 'bacFeatures') as FeatureCatalogApi;
+const featureCatalogApi: FeatureCatalogApi = Features;
 
 function extractErrorMessage(payload: unknown): string | undefined {
   if (!payload || typeof payload !== 'object') return undefined;

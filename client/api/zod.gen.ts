@@ -655,6 +655,38 @@ export const zUpdateAssignmentRequest = z.object({
 });
 
 /**
+ * UpdateProfileRequest
+ */
+export const zUpdateProfileRequest = z.object({
+    alias: z.string().min(3).max(100),
+    first_name: z.string().min(1).max(100),
+    last_name: z.string().min(1).max(100),
+    age_group: zAgeGroup,
+    gender: zGender,
+    education_level: zEducationLevel,
+    occupation: z.string().max(150).nullish(),
+    bio: z.string().max(500).nullish()
+});
+
+/**
+ * UpdateProfileResponse
+ */
+export const zUpdateProfileResponse = z.object({
+    success: z.boolean().optional().default(true),
+    user_id: z.uuid(),
+    alias: z.string(),
+    first_name: z.string(),
+    last_name: z.string(),
+    age_group: zAgeGroup,
+    gender: zGender,
+    education_level: zEducationLevel,
+    occupation: z.string().nullish(),
+    bio: z.string().nullish(),
+    message: z.string().optional().default('Profile updated successfully.'),
+    access_token: z.string()
+});
+
+/**
  * UserGrantResponse
  */
 export const zUserGrantResponse = z.object({
@@ -858,6 +890,90 @@ export const zVenuePaginationResponse = z.object({
     total_pages: z.int(),
     has_next: z.boolean(),
     has_previous: z.boolean()
+});
+
+/**
+ * VenueRatingAverageData
+ */
+export const zVenueRatingAverageData = z.object({
+    venue_id: z.uuid(),
+    average: z.number().nullable(),
+    count: z.int()
+});
+
+/**
+ * VenueRatingAverageResponse
+ */
+export const zVenueRatingAverageResponse = z.object({
+    success: z.boolean().optional().default(true),
+    data: zVenueRatingAverageData
+});
+
+/**
+ * VenueRatingCreateRequest
+ */
+export const zVenueRatingCreateRequest = z.object({
+    rating: z.int().gte(1).lte(5),
+    comment: z.string().max(1000).nullish()
+});
+
+/**
+ * VenueRatingDeleteResponse
+ */
+export const zVenueRatingDeleteResponse = z.object({
+    success: z.boolean().optional().default(true),
+    message: z.string().optional().default('Rating removed successfully.')
+});
+
+/**
+ * VenueRatingPaginationResponse
+ */
+export const zVenueRatingPaginationResponse = z.object({
+    page: z.int(),
+    page_size: z.int(),
+    total_count: z.int(),
+    total_pages: z.int(),
+    has_next: z.boolean(),
+    has_previous: z.boolean()
+});
+
+/**
+ * VenueRatingRecordResponse
+ */
+export const zVenueRatingRecordResponse = z.object({
+    id: z.uuid(),
+    user_id: z.uuid(),
+    venue_id: z.uuid(),
+    rating: z.int(),
+    comment: z.string().nullable(),
+    created_at: z.iso.datetime().nullable(),
+    updated_at: z.iso.datetime().nullable()
+});
+
+/**
+ * VenueRatingListResponse
+ */
+export const zVenueRatingListResponse = z.object({
+    success: z.boolean().optional().default(true),
+    data: z.array(zVenueRatingRecordResponse),
+    pagination: zVenueRatingPaginationResponse
+});
+
+/**
+ * VenueRatingResponse
+ */
+export const zVenueRatingResponse = z.object({
+    success: z.boolean().optional().default(true),
+    data: zVenueRatingRecordResponse,
+    message: z.string().optional().default('Rating saved successfully.')
+});
+
+/**
+ * VenueRatingUpdateRequest
+ */
+export const zVenueRatingUpdateRequest = z.object({
+    rating: z.int().gte(1).lte(5),
+    comment: z.string().max(1000).nullish()
 });
 
 /**
@@ -1109,15 +1225,6 @@ export const zResetPasswordAuthResetPasswordTokenPostPath = z.object({
  */
 export const zResetPasswordAuthResetPasswordTokenPostResponse = zResetPasswordResponse;
 
-export const zGetLoginHistoryUserLoginHistoryGetQuery = z.object({
-    limit: z.int().gte(1).lte(50).optional().default(10)
-});
-
-/**
- * Successful Response
- */
-export const zGetLoginHistoryUserLoginHistoryGetResponse = zLoginHistoryListResponse;
-
 /**
  * Successful Response
  */
@@ -1139,6 +1246,22 @@ export const zUserOnboardingUserOnboardPostBody = zUserOnboardingRequest;
  */
 export const zUserOnboardingUserOnboardPostResponse = zUserOnboardingResponse;
 
+export const zUpdateProfileUserProfilePatchBody = zUpdateProfileRequest;
+
+/**
+ * Successful Response
+ */
+export const zUpdateProfileUserProfilePatchResponse = zUpdateProfileResponse;
+
+export const zGetLoginHistoryUserLoginHistoryGetQuery = z.object({
+    limit: z.int().gte(1).lte(50).optional().default(10)
+});
+
+/**
+ * Successful Response
+ */
+export const zGetLoginHistoryUserLoginHistoryGetResponse = zLoginHistoryListResponse;
+
 export const zChangePasswordUserChangePasswordPostBody = zChangePasswordRequest;
 
 /**
@@ -1152,17 +1275,6 @@ export const zScheduleOwnAccountDeletionUserAccountDeletionPostBody = zDeleteAcc
  * Successful Response
  */
 export const zScheduleOwnAccountDeletionUserAccountDeletionPostResponse = zDeleteAccountResponse;
-
-export const zScheduleAdminAccountDeletionUserTargetUserIdAccountDeletionPostBody = zAdminDeleteAccountRequest;
-
-export const zScheduleAdminAccountDeletionUserTargetUserIdAccountDeletionPostPath = z.object({
-    target_user_id: z.uuid()
-});
-
-/**
- * Successful Response
- */
-export const zScheduleAdminAccountDeletionUserTargetUserIdAccountDeletionPostResponse = zDeleteAccountResponse;
 
 /**
  * Successful Response
@@ -1221,6 +1333,17 @@ export const zSendUserPasswordResetUserAccountsUserIdPasswordResetPostPath = z.o
  * Successful Response
  */
 export const zSendUserPasswordResetUserAccountsUserIdPasswordResetPostResponse = zSendUserPasswordResetResponse;
+
+export const zScheduleAdminAccountDeletionUserAccountsUserIdAccountDeletionPostBody = zAdminDeleteAccountRequest;
+
+export const zScheduleAdminAccountDeletionUserAccountsUserIdAccountDeletionPostPath = z.object({
+    user_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zScheduleAdminAccountDeletionUserAccountsUserIdAccountDeletionPostResponse = zDeleteAccountResponse;
 
 export const zGetAuditLogsAuditLogsGetQuery = z.object({
     limit: z.int().gte(10).lte(100).optional().default(10),
@@ -1522,3 +1645,66 @@ export const zUpdateVenueVenuesVenueIdPatchPath = z.object({
  * Successful Response
  */
 export const zUpdateVenueVenuesVenueIdPatchResponse = zVenueResponse;
+
+export const zListVenueRatingsVenuesVenueIdRatingsGetPath = z.object({
+    venue_id: z.uuid()
+});
+
+export const zListVenueRatingsVenuesVenueIdRatingsGetQuery = z.object({
+    page: z.int().gte(1).optional().default(1),
+    page_size: z.int().gte(1).lte(100).optional().default(10)
+});
+
+/**
+ * Successful Response
+ */
+export const zListVenueRatingsVenuesVenueIdRatingsGetResponse = zVenueRatingListResponse;
+
+export const zCreateVenueRatingVenuesVenueIdRatingsPostBody = zVenueRatingCreateRequest;
+
+export const zCreateVenueRatingVenuesVenueIdRatingsPostPath = z.object({
+    venue_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zCreateVenueRatingVenuesVenueIdRatingsPostResponse = zVenueRatingResponse;
+
+export const zGetVenueRatingAverageVenuesVenueIdRatingsAverageGetPath = z.object({
+    venue_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zGetVenueRatingAverageVenuesVenueIdRatingsAverageGetResponse = zVenueRatingAverageResponse;
+
+export const zDeleteMyVenueRatingVenuesVenueIdRatingsMeDeletePath = z.object({
+    venue_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zDeleteMyVenueRatingVenuesVenueIdRatingsMeDeleteResponse = zVenueRatingDeleteResponse;
+
+export const zGetMyVenueRatingVenuesVenueIdRatingsMeGetPath = z.object({
+    venue_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zGetMyVenueRatingVenuesVenueIdRatingsMeGetResponse = zVenueRatingResponse;
+
+export const zUpdateMyVenueRatingVenuesVenueIdRatingsMePatchBody = zVenueRatingUpdateRequest;
+
+export const zUpdateMyVenueRatingVenuesVenueIdRatingsMePatchPath = z.object({
+    venue_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zUpdateMyVenueRatingVenuesVenueIdRatingsMePatchResponse = zVenueRatingResponse;

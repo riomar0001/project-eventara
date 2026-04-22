@@ -1596,6 +1596,80 @@ export type UpdateAssignmentRequest = {
 };
 
 /**
+ * UpdateProfileRequest
+ */
+export type UpdateProfileRequest = {
+    /**
+     * Alias
+     */
+    alias: string;
+    /**
+     * First Name
+     */
+    first_name: string;
+    /**
+     * Last Name
+     */
+    last_name: string;
+    age_group: AgeGroup;
+    gender: Gender;
+    education_level: EducationLevel;
+    /**
+     * Occupation
+     */
+    occupation?: string | null;
+    /**
+     * Bio
+     */
+    bio?: string | null;
+};
+
+/**
+ * UpdateProfileResponse
+ */
+export type UpdateProfileResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * User Id
+     */
+    user_id: string;
+    /**
+     * Alias
+     */
+    alias: string;
+    /**
+     * First Name
+     */
+    first_name: string;
+    /**
+     * Last Name
+     */
+    last_name: string;
+    age_group: AgeGroup;
+    gender: Gender;
+    education_level: EducationLevel;
+    /**
+     * Occupation
+     */
+    occupation?: string | null;
+    /**
+     * Bio
+     */
+    bio?: string | null;
+    /**
+     * Message
+     */
+    message?: string;
+    /**
+     * Access Token
+     */
+    access_token: string;
+};
+
+/**
  * UserGrantListResponse
  */
 export type UserGrantListResponse = {
@@ -1948,6 +2022,171 @@ export type VenuePaginationResponse = {
      * Has Previous
      */
     has_previous: boolean;
+};
+
+/**
+ * VenueRatingAverageData
+ */
+export type VenueRatingAverageData = {
+    /**
+     * Venue Id
+     */
+    venue_id: string;
+    /**
+     * Average
+     */
+    average: number | null;
+    /**
+     * Count
+     */
+    count: number;
+};
+
+/**
+ * VenueRatingAverageResponse
+ */
+export type VenueRatingAverageResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    data: VenueRatingAverageData;
+};
+
+/**
+ * VenueRatingCreateRequest
+ */
+export type VenueRatingCreateRequest = {
+    /**
+     * Rating
+     */
+    rating: number;
+    /**
+     * Comment
+     */
+    comment?: string | null;
+};
+
+/**
+ * VenueRatingDeleteResponse
+ */
+export type VenueRatingDeleteResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Message
+     */
+    message?: string;
+};
+
+/**
+ * VenueRatingListResponse
+ */
+export type VenueRatingListResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Data
+     */
+    data: Array<VenueRatingRecordResponse>;
+    pagination: VenueRatingPaginationResponse;
+};
+
+/**
+ * VenueRatingPaginationResponse
+ */
+export type VenueRatingPaginationResponse = {
+    /**
+     * Page
+     */
+    page: number;
+    /**
+     * Page Size
+     */
+    page_size: number;
+    /**
+     * Total Count
+     */
+    total_count: number;
+    /**
+     * Total Pages
+     */
+    total_pages: number;
+    /**
+     * Has Next
+     */
+    has_next: boolean;
+    /**
+     * Has Previous
+     */
+    has_previous: boolean;
+};
+
+/**
+ * VenueRatingRecordResponse
+ */
+export type VenueRatingRecordResponse = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * User Id
+     */
+    user_id: string;
+    /**
+     * Venue Id
+     */
+    venue_id: string;
+    /**
+     * Rating
+     */
+    rating: number;
+    /**
+     * Comment
+     */
+    comment: string | null;
+    /**
+     * Created At
+     */
+    created_at: string | null;
+    /**
+     * Updated At
+     */
+    updated_at: string | null;
+};
+
+/**
+ * VenueRatingResponse
+ */
+export type VenueRatingResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    data: VenueRatingRecordResponse;
+    /**
+     * Message
+     */
+    message?: string;
+};
+
+/**
+ * VenueRatingUpdateRequest
+ */
+export type VenueRatingUpdateRequest = {
+    /**
+     * Rating
+     */
+    rating: number;
+    /**
+     * Comment
+     */
+    comment?: string | null;
 };
 
 /**
@@ -2532,40 +2771,6 @@ export type ResetPasswordAuthResetPasswordTokenPostResponses = {
 
 export type ResetPasswordAuthResetPasswordTokenPostResponse = ResetPasswordAuthResetPasswordTokenPostResponses[keyof ResetPasswordAuthResetPasswordTokenPostResponses];
 
-export type GetLoginHistoryUserLoginHistoryGetData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * Limit
-         */
-        limit?: number;
-    };
-    url: '/user/login-history';
-};
-
-export type GetLoginHistoryUserLoginHistoryGetErrors = {
-    /**
-     * Unauthorized
-     */
-    401: ErrorResponse;
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type GetLoginHistoryUserLoginHistoryGetError = GetLoginHistoryUserLoginHistoryGetErrors[keyof GetLoginHistoryUserLoginHistoryGetErrors];
-
-export type GetLoginHistoryUserLoginHistoryGetResponses = {
-    /**
-     * Successful Response
-     */
-    200: LoginHistoryListResponse;
-};
-
-export type GetLoginHistoryUserLoginHistoryGetResponse = GetLoginHistoryUserLoginHistoryGetResponses[keyof GetLoginHistoryUserLoginHistoryGetResponses];
-
 export type GetMyPermissionsUserMePermissionsGetData = {
     body?: never;
     path?: never;
@@ -2666,6 +2871,81 @@ export type UserOnboardingUserOnboardPostResponses = {
 
 export type UserOnboardingUserOnboardPostResponse = UserOnboardingUserOnboardPostResponses[keyof UserOnboardingUserOnboardPostResponses];
 
+export type UpdateProfileUserProfilePatchData = {
+    body: UpdateProfileRequest;
+    path?: never;
+    query?: never;
+    url: '/user/profile';
+};
+
+export type UpdateProfileUserProfilePatchErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden — account is inactive or deleted
+     */
+    403: ErrorResponse;
+    /**
+     * Not found — no user or profile exists for the authenticated account
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict — the requested alias is already taken by another account
+     */
+    409: ErrorResponse;
+    /**
+     * Validation error — alias contains invalid characters, or required fields are missing or out of range
+     */
+    422: ValidationErrorResponse;
+};
+
+export type UpdateProfileUserProfilePatchError = UpdateProfileUserProfilePatchErrors[keyof UpdateProfileUserProfilePatchErrors];
+
+export type UpdateProfileUserProfilePatchResponses = {
+    /**
+     * Successful Response
+     */
+    200: UpdateProfileResponse;
+};
+
+export type UpdateProfileUserProfilePatchResponse = UpdateProfileUserProfilePatchResponses[keyof UpdateProfileUserProfilePatchResponses];
+
+export type GetLoginHistoryUserLoginHistoryGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Limit
+         */
+        limit?: number;
+    };
+    url: '/user/login-history';
+};
+
+export type GetLoginHistoryUserLoginHistoryGetErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetLoginHistoryUserLoginHistoryGetError = GetLoginHistoryUserLoginHistoryGetErrors[keyof GetLoginHistoryUserLoginHistoryGetErrors];
+
+export type GetLoginHistoryUserLoginHistoryGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: LoginHistoryListResponse;
+};
+
+export type GetLoginHistoryUserLoginHistoryGetResponse = GetLoginHistoryUserLoginHistoryGetResponses[keyof GetLoginHistoryUserLoginHistoryGetResponses];
+
 export type ChangePasswordUserChangePasswordPostData = {
     body: ChangePasswordRequest;
     path?: never;
@@ -2747,52 +3027,6 @@ export type ScheduleOwnAccountDeletionUserAccountDeletionPostResponses = {
 };
 
 export type ScheduleOwnAccountDeletionUserAccountDeletionPostResponse = ScheduleOwnAccountDeletionUserAccountDeletionPostResponses[keyof ScheduleOwnAccountDeletionUserAccountDeletionPostResponses];
-
-export type ScheduleAdminAccountDeletionUserTargetUserIdAccountDeletionPostData = {
-    body: AdminDeleteAccountRequest;
-    path: {
-        /**
-         * Target User Id
-         */
-        target_user_id: string;
-    };
-    query?: never;
-    url: '/user/{target_user_id}/account-deletion';
-};
-
-export type ScheduleAdminAccountDeletionUserTargetUserIdAccountDeletionPostErrors = {
-    /**
-     * Unauthorized
-     */
-    401: ErrorResponse;
-    /**
-     * Forbidden — account is inactive, already deleted, or past the deletion grace period
-     */
-    403: ErrorResponse;
-    /**
-     * User not found
-     */
-    404: ErrorResponse;
-    /**
-     * Conflict — account deletion is already scheduled
-     */
-    409: ErrorResponse;
-    /**
-     * Validation error — self-service deletion requires current_password; administrator deletion requires a non-empty reason
-     */
-    422: ValidationErrorResponse;
-};
-
-export type ScheduleAdminAccountDeletionUserTargetUserIdAccountDeletionPostError = ScheduleAdminAccountDeletionUserTargetUserIdAccountDeletionPostErrors[keyof ScheduleAdminAccountDeletionUserTargetUserIdAccountDeletionPostErrors];
-
-export type ScheduleAdminAccountDeletionUserTargetUserIdAccountDeletionPostResponses = {
-    /**
-     * Successful Response
-     */
-    202: DeleteAccountResponse;
-};
-
-export type ScheduleAdminAccountDeletionUserTargetUserIdAccountDeletionPostResponse = ScheduleAdminAccountDeletionUserTargetUserIdAccountDeletionPostResponses[keyof ScheduleAdminAccountDeletionUserTargetUserIdAccountDeletionPostResponses];
 
 export type ListRolesUserAccountsRolesGetData = {
     body?: never;
@@ -3062,6 +3296,52 @@ export type SendUserPasswordResetUserAccountsUserIdPasswordResetPostResponses = 
 };
 
 export type SendUserPasswordResetUserAccountsUserIdPasswordResetPostResponse = SendUserPasswordResetUserAccountsUserIdPasswordResetPostResponses[keyof SendUserPasswordResetUserAccountsUserIdPasswordResetPostResponses];
+
+export type ScheduleAdminAccountDeletionUserAccountsUserIdAccountDeletionPostData = {
+    body: AdminDeleteAccountRequest;
+    path: {
+        /**
+         * User Id
+         */
+        user_id: string;
+    };
+    query?: never;
+    url: '/user-accounts/{user_id}/account-deletion';
+};
+
+export type ScheduleAdminAccountDeletionUserAccountsUserIdAccountDeletionPostErrors = {
+    /**
+     * Missing or invalid Bearer token
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden — account is inactive, already deleted, or past the deletion grace period
+     */
+    403: ErrorResponse;
+    /**
+     * User not found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict — account deletion is already scheduled
+     */
+    409: ErrorResponse;
+    /**
+     * Validation error — self-service deletion requires current_password; administrator deletion requires a non-empty reason
+     */
+    422: ValidationErrorResponse;
+};
+
+export type ScheduleAdminAccountDeletionUserAccountsUserIdAccountDeletionPostError = ScheduleAdminAccountDeletionUserAccountsUserIdAccountDeletionPostErrors[keyof ScheduleAdminAccountDeletionUserAccountsUserIdAccountDeletionPostErrors];
+
+export type ScheduleAdminAccountDeletionUserAccountsUserIdAccountDeletionPostResponses = {
+    /**
+     * Successful Response
+     */
+    202: DeleteAccountResponse;
+};
+
+export type ScheduleAdminAccountDeletionUserAccountsUserIdAccountDeletionPostResponse = ScheduleAdminAccountDeletionUserAccountsUserIdAccountDeletionPostResponses[keyof ScheduleAdminAccountDeletionUserAccountsUserIdAccountDeletionPostResponses];
 
 export type GetAuditLogsAuditLogsGetData = {
     body?: never;
@@ -4496,6 +4776,239 @@ export type UpdateVenueVenuesVenueIdPatchResponses = {
 };
 
 export type UpdateVenueVenuesVenueIdPatchResponse = UpdateVenueVenuesVenueIdPatchResponses[keyof UpdateVenueVenuesVenueIdPatchResponses];
+
+export type ListVenueRatingsVenuesVenueIdRatingsGetData = {
+    body?: never;
+    path: {
+        /**
+         * Venue Id
+         */
+        venue_id: string;
+    };
+    query?: {
+        /**
+         * Page
+         */
+        page?: number;
+        /**
+         * Page Size
+         */
+        page_size?: number;
+    };
+    url: '/venues/{venue_id}/ratings';
+};
+
+export type ListVenueRatingsVenuesVenueIdRatingsGetErrors = {
+    /**
+     * Venue not found
+     */
+    404: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListVenueRatingsVenuesVenueIdRatingsGetError = ListVenueRatingsVenuesVenueIdRatingsGetErrors[keyof ListVenueRatingsVenuesVenueIdRatingsGetErrors];
+
+export type ListVenueRatingsVenuesVenueIdRatingsGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: VenueRatingListResponse;
+};
+
+export type ListVenueRatingsVenuesVenueIdRatingsGetResponse = ListVenueRatingsVenuesVenueIdRatingsGetResponses[keyof ListVenueRatingsVenuesVenueIdRatingsGetResponses];
+
+export type CreateVenueRatingVenuesVenueIdRatingsPostData = {
+    body: VenueRatingCreateRequest;
+    path: {
+        /**
+         * Venue Id
+         */
+        venue_id: string;
+    };
+    query?: never;
+    url: '/venues/{venue_id}/ratings';
+};
+
+export type CreateVenueRatingVenuesVenueIdRatingsPostErrors = {
+    /**
+     * Missing or invalid Bearer token
+     */
+    401: ErrorResponse;
+    /**
+     * Venue not found
+     */
+    404: ErrorResponse;
+    /**
+     * The authenticated user has already submitted a rating for this venue
+     */
+    409: ErrorResponse;
+    /**
+     * Request body failed schema validation
+     */
+    422: ValidationErrorResponse;
+};
+
+export type CreateVenueRatingVenuesVenueIdRatingsPostError = CreateVenueRatingVenuesVenueIdRatingsPostErrors[keyof CreateVenueRatingVenuesVenueIdRatingsPostErrors];
+
+export type CreateVenueRatingVenuesVenueIdRatingsPostResponses = {
+    /**
+     * Successful Response
+     */
+    201: VenueRatingResponse;
+};
+
+export type CreateVenueRatingVenuesVenueIdRatingsPostResponse = CreateVenueRatingVenuesVenueIdRatingsPostResponses[keyof CreateVenueRatingVenuesVenueIdRatingsPostResponses];
+
+export type GetVenueRatingAverageVenuesVenueIdRatingsAverageGetData = {
+    body?: never;
+    path: {
+        /**
+         * Venue Id
+         */
+        venue_id: string;
+    };
+    query?: never;
+    url: '/venues/{venue_id}/ratings/average';
+};
+
+export type GetVenueRatingAverageVenuesVenueIdRatingsAverageGetErrors = {
+    /**
+     * Venue not found
+     */
+    404: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetVenueRatingAverageVenuesVenueIdRatingsAverageGetError = GetVenueRatingAverageVenuesVenueIdRatingsAverageGetErrors[keyof GetVenueRatingAverageVenuesVenueIdRatingsAverageGetErrors];
+
+export type GetVenueRatingAverageVenuesVenueIdRatingsAverageGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: VenueRatingAverageResponse;
+};
+
+export type GetVenueRatingAverageVenuesVenueIdRatingsAverageGetResponse = GetVenueRatingAverageVenuesVenueIdRatingsAverageGetResponses[keyof GetVenueRatingAverageVenuesVenueIdRatingsAverageGetResponses];
+
+export type DeleteMyVenueRatingVenuesVenueIdRatingsMeDeleteData = {
+    body?: never;
+    path: {
+        /**
+         * Venue Id
+         */
+        venue_id: string;
+    };
+    query?: never;
+    url: '/venues/{venue_id}/ratings/me';
+};
+
+export type DeleteMyVenueRatingVenuesVenueIdRatingsMeDeleteErrors = {
+    /**
+     * Missing or invalid Bearer token
+     */
+    401: ErrorResponse;
+    /**
+     * Rating not found — the authenticated user has not rated this venue
+     */
+    404: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DeleteMyVenueRatingVenuesVenueIdRatingsMeDeleteError = DeleteMyVenueRatingVenuesVenueIdRatingsMeDeleteErrors[keyof DeleteMyVenueRatingVenuesVenueIdRatingsMeDeleteErrors];
+
+export type DeleteMyVenueRatingVenuesVenueIdRatingsMeDeleteResponses = {
+    /**
+     * Successful Response
+     */
+    200: VenueRatingDeleteResponse;
+};
+
+export type DeleteMyVenueRatingVenuesVenueIdRatingsMeDeleteResponse = DeleteMyVenueRatingVenuesVenueIdRatingsMeDeleteResponses[keyof DeleteMyVenueRatingVenuesVenueIdRatingsMeDeleteResponses];
+
+export type GetMyVenueRatingVenuesVenueIdRatingsMeGetData = {
+    body?: never;
+    path: {
+        /**
+         * Venue Id
+         */
+        venue_id: string;
+    };
+    query?: never;
+    url: '/venues/{venue_id}/ratings/me';
+};
+
+export type GetMyVenueRatingVenuesVenueIdRatingsMeGetErrors = {
+    /**
+     * Missing or invalid Bearer token
+     */
+    401: ErrorResponse;
+    /**
+     * Rating not found — the authenticated user has not rated this venue
+     */
+    404: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetMyVenueRatingVenuesVenueIdRatingsMeGetError = GetMyVenueRatingVenuesVenueIdRatingsMeGetErrors[keyof GetMyVenueRatingVenuesVenueIdRatingsMeGetErrors];
+
+export type GetMyVenueRatingVenuesVenueIdRatingsMeGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: VenueRatingResponse;
+};
+
+export type GetMyVenueRatingVenuesVenueIdRatingsMeGetResponse = GetMyVenueRatingVenuesVenueIdRatingsMeGetResponses[keyof GetMyVenueRatingVenuesVenueIdRatingsMeGetResponses];
+
+export type UpdateMyVenueRatingVenuesVenueIdRatingsMePatchData = {
+    body: VenueRatingUpdateRequest;
+    path: {
+        /**
+         * Venue Id
+         */
+        venue_id: string;
+    };
+    query?: never;
+    url: '/venues/{venue_id}/ratings/me';
+};
+
+export type UpdateMyVenueRatingVenuesVenueIdRatingsMePatchErrors = {
+    /**
+     * Missing or invalid Bearer token
+     */
+    401: ErrorResponse;
+    /**
+     * Rating not found — the authenticated user has not rated this venue
+     */
+    404: ErrorResponse;
+    /**
+     * Request body failed schema validation
+     */
+    422: ValidationErrorResponse;
+};
+
+export type UpdateMyVenueRatingVenuesVenueIdRatingsMePatchError = UpdateMyVenueRatingVenuesVenueIdRatingsMePatchErrors[keyof UpdateMyVenueRatingVenuesVenueIdRatingsMePatchErrors];
+
+export type UpdateMyVenueRatingVenuesVenueIdRatingsMePatchResponses = {
+    /**
+     * Successful Response
+     */
+    200: VenueRatingResponse;
+};
+
+export type UpdateMyVenueRatingVenuesVenueIdRatingsMePatchResponse = UpdateMyVenueRatingVenuesVenueIdRatingsMePatchResponses[keyof UpdateMyVenueRatingVenuesVenueIdRatingsMePatchResponses];
 
 export type RootGetData = {
     body?: never;

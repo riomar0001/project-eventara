@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { User as UserApi } from '@/api/sdk.gen';
+import { AccountSettings } from '@/api/sdk.gen';
 import { useAuthStore } from '@/store/auth-store';
 
 function getErrorMessage(error: unknown) {
@@ -39,7 +39,7 @@ export default function SecurityPage() {
     setIsSubmitting(true);
 
     try {
-      const result = await UserApi.changePasswordUserChangePasswordPost({
+      const result = await AccountSettings.changePasswordUserChangePasswordPost({
         body: {
           current_password: currentPassword,
           new_password: newPassword

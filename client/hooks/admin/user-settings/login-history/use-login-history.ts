@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { z } from 'zod';
-import { User } from '@/api';
+import { AccountSettings } from '@/api';
 import { getAccessToken } from '@/store/auth-store';
 
 const loginHistoryEntrySchema = z.object({
@@ -72,7 +72,7 @@ export function useLoginHistory(limit: number = DEFAULT_LOGIN_HISTORY_LIMIT) {
       setError(null);
 
       try {
-        const result = await User.getLoginHistoryUserLoginHistoryGet({
+        const result = await AccountSettings.getLoginHistoryUserLoginHistoryGet({
           query: { limit },
           headers: {
             Authorization: `Bearer ${accessToken}`

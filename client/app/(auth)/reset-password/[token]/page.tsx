@@ -11,7 +11,7 @@ import { AuthFormField } from '@/components/auth/auth-form-field';
 import { AuthStatusCard } from '@/components/auth/auth-status-card';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Authentication } from '@/api/sdk.gen';
+import { Auth } from '@/api/sdk.gen';
 
 const schema = z
   .object({
@@ -37,7 +37,7 @@ export default function ResetPasswordPage() {
   } = useForm<FormValues>({ resolver: zodResolver(schema) });
 
   async function onSubmit(values: FormValues) {
-    const result = await Authentication.resetPasswordAuthResetPasswordTokenPost({
+    const result = await Auth.resetPasswordAuthResetPasswordTokenPost({
       body: { new_password: values.password },
       path: { token },
       throwOnError: false

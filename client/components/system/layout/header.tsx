@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import { Authentication } from '@/api/sdk.gen';
+import { Auth } from '@/api/sdk.gen';
 import { notifications } from '@/constants/system/notifications';
 import { getDisplayName, getInitials } from '@/lib/user/profile';
 import { useAuthStore } from '@/store/auth-store';
@@ -40,7 +40,7 @@ export function Header() {
 
     try {
       if (refreshToken) {
-        const result = await Authentication.logoutAuthLogoutPost({
+        const result = await Auth.logoutAuthLogoutPost({
           body: { refresh_token: refreshToken },
           throwOnError: false
         });

@@ -7,7 +7,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { OtpInput, OTP_LENGTH } from '@/components/auth/login-verify/otp-input';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Authentication } from '@/api/sdk.gen';
+import { Auth } from '@/api/sdk.gen';
 import { decodeTokenUser } from '@/lib/auth/token';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/auth-store';
@@ -96,7 +96,7 @@ export function LoginVerifyForm() {
     setError(null);
     setRootError(null);
 
-    const result = await Authentication.loginVerifyAuthLoginVerifyPost({
+    const result = await Auth.loginVerifyAuthLoginVerifyPost({
       body: { token: activeToken, code },
       throwOnError: false
     });
@@ -141,7 +141,7 @@ export function LoginVerifyForm() {
     setRootError(null);
     setResendSuccess(false);
 
-    const result = await Authentication.resendOtpAuthLoginResendOtpPost({
+    const result = await Auth.resendOtpAuthLoginResendOtpPost({
       body: { token: activeToken },
       throwOnError: false
     });

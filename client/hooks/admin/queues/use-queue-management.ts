@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { QueueManagement } from '@/api/sdk.gen';
+import { Queue } from '@/api/sdk.gen';
 import type { DeadJobResponse, QueueStatsResponse } from '@/api/types.gen';
 import { getAccessToken } from '@/store/auth-store';
 
@@ -77,7 +77,7 @@ export function useQueueManagement() {
       setStatsError(null);
 
       try {
-        const result = await QueueManagement.getQueueStatsQueuesGet({
+        const result = await Queue.getQueueStatsQueuesGet({
           headers: getRequestHeaders(),
           throwOnError: false
         });
@@ -106,7 +106,7 @@ export function useQueueManagement() {
       setJobsError(null);
 
       try {
-        const result = await QueueManagement.listDeadJobsQueuesDlqGet({
+        const result = await Queue.listDeadJobsQueuesDlqGet({
           headers: getRequestHeaders(),
           query: { page, limit: PAGE_LIMIT },
           throwOnError: false
@@ -152,7 +152,7 @@ export function useQueueManagement() {
     setActionKind('retry');
 
     try {
-      const result = await QueueManagement.retryDeadJobQueuesDlqJobIdRetryPost({
+      const result = await Queue.retryDeadJobQueuesDlqJobIdRetryPost({
         headers: getRequestHeaders(),
         path: { job_id: jobId },
         throwOnError: false
@@ -181,7 +181,7 @@ export function useQueueManagement() {
     setActionKind('delete');
 
     try {
-      const result = await QueueManagement.deleteDeadJobQueuesDlqJobIdDelete({
+      const result = await Queue.deleteDeadJobQueuesDlqJobIdDelete({
         headers: getRequestHeaders(),
         path: { job_id: jobId },
         throwOnError: false
@@ -209,7 +209,7 @@ export function useQueueManagement() {
     setIsPurging(true);
 
     try {
-      const result = await QueueManagement.purgeDeadJobsQueuesDlqDelete({
+      const result = await Queue.purgeDeadJobsQueuesDlqDelete({
         headers: getRequestHeaders(),
         throwOnError: false
       });

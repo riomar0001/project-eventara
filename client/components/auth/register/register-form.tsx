@@ -9,7 +9,7 @@ import { AuthFormField } from '@/components/auth/auth-form-field';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Authentication } from '@/api/sdk.gen';
+import { Auth } from '@/api/sdk.gen';
 
 const schema = z
   .object({
@@ -39,7 +39,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
   } = useForm<FormValues>({ resolver: zodResolver(schema) });
 
   async function onSubmit(values: FormValues) {
-    const result = await Authentication.registerUserAuthRegisterPost({
+    const result = await Auth.registerUserAuthRegisterPost({
       body: {
         email: values.email,
         password: values.password,
