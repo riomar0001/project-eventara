@@ -6,7 +6,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from app.application.dto.audit_log_dto import CreateAuditLogInput, GetAuditLogsInput
-from app.application.use_cases.audit_log_usecase import CreateAuditLogUseCase, GetAuditLogsUseCase
+from app.application.use_cases.audit_log_usecase import AuditLogUseCase
 from app.domain.entities.audit_log import ActionType, AuditLogStatus
 from app.domain.exceptions.audit_exceptions import AuditLogWriteError
 
@@ -47,7 +47,7 @@ class TestCreateAuditLogUseCase:
         repo = MagicMock()
         redis = AsyncMock()
         redis.enqueue_job = AsyncMock()
-        await CreateAuditLogUseCase(repository=repo, redis=redis).execute(_make_create_input())
+        await AuditLogUseCase(repository=repo, redis=redis).create(_make_create_input())
         redis.enqueue_job.assert_awaited_once()
 
     @pytest.mark.asyncio
@@ -57,7 +57,7 @@ class TestCreateAuditLogUseCase:
         repo.create = AsyncMock()
         redis = AsyncMock()
         redis.enqueue_job = AsyncMock(side_effect=RuntimeError("redis down"))
-        await CreateAuditLogUseCase(repository=repo, redis=redis).execute(_make_create_input())
+        await AuditLogUseCase(repository=repo, redis=redis).create(_make_create_input())
         repo.create.assert_awaited_once()
 
     @pytest.mark.asyncio
@@ -65,7 +65,7 @@ class TestCreateAuditLogUseCase:
         """Writes directly to the database repository when no Redis connection is configured"""
         repo = MagicMock()
         repo.create = AsyncMock()
-        await CreateAuditLogUseCase(repository=repo, redis=None).execute(_make_create_input())
+        await AuditLogUseCase(repository=repo, redis=None).create(_make_create_input())
         repo.create.assert_awaited_once()
 
     @pytest.mark.asyncio
@@ -76,7 +76,7 @@ class TestCreateAuditLogUseCase:
         with patch("app.core.config.settings") as mock_settings:
             mock_settings.DEBUG = False
             with pytest.raises(AuditLogWriteError):
-                await CreateAuditLogUseCase(repository=repo, redis=None).execute(_make_create_input())
+                await AuditLogUseCase(repository=repo, redis=None).create(_make_create_input())
 
 
 # ─── GetAuditLogsUseCase ──────────────────────────────────────────────────────
@@ -92,29 +92,29 @@ class TestGetAuditLogsUseCase:
     async def test_returns_paginated_logs(self):
         """Returns the log entries, total count, cursors, and has_next flag from the repository"""
         logs = [MagicMock(), MagicMock()]
-        result = await GetAuditLogsUseCase(self._make_repo(logs=logs, total=2, next_cursor="c1")).execute(_make_get_input())
+        result = await AuditLogUseCase(self._make_repo(logs=logs, total=2, next_cursor="c1")).get_logs(_make_get_input())
         assert result.logs == logs and result.total_count == 2 and result.has_next is True
 
     @pytest.mark.asyncio
     async def test_clamps_limit_to_max(self):
         """Caps the effective limit at MAX_LIMIT (1000) regardless of the requested value"""
         repo = self._make_repo()
-        await GetAuditLogsUseCase(repo).execute(_make_get_input(limit=9999))
+        await AuditLogUseCase(repo).get_logs(_make_get_input(limit=9999))
         _, kwargs = repo.get_paginated.call_args
-        assert kwargs["limit"] == GetAuditLogsUseCase.MAX_LIMIT
+        assert kwargs["limit"] == AuditLogUseCase.MAX_LIMIT
 
     @pytest.mark.asyncio
     async def test_applies_default_limit_when_none(self):
         """Uses DEFAULT_LIMIT (100) when the caller does not specify a limit"""
         repo = self._make_repo()
-        await GetAuditLogsUseCase(repo).execute(_make_get_input(limit=None))
+        await AuditLogUseCase(repo).get_logs(_make_get_input(limit=None))
         _, kwargs = repo.get_paginated.call_args
-        assert kwargs["limit"] == GetAuditLogsUseCase.DEFAULT_LIMIT
+        assert kwargs["limit"] == AuditLogUseCase.DEFAULT_LIMIT
 
     @pytest.mark.asyncio
     async def test_has_next_false_when_no_cursor(self):
         """Sets has_next to False when the repository returns no next cursor"""
-        result = await GetAuditLogsUseCase(self._make_repo(next_cursor=None)).execute(_make_get_input())
+        result = await AuditLogUseCase(self._make_repo(next_cursor=None)).get_logs(_make_get_input())
         assert result.has_next is False
 
     @pytest.mark.asyncio
@@ -130,7 +130,7 @@ class TestGetAuditLogsUseCase:
             start_date=None,
             end_date=None,
         )
-        await GetAuditLogsUseCase(repo).execute(inp)
+        await AuditLogUseCase(repo).get_logs(inp)
         repo.get_paginated.assert_awaited_once_with(
             limit=10,
             cursor="c1",

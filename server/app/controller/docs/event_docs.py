@@ -85,19 +85,59 @@ EVENT_UNAUTHORIZED_OPERATION = {
     }
 }
 
-EVENT_UPDATE_NOT_FOUND = {
+EVENT_METADATA_DATE_INVALID = {
+    400: {
+        "description": "Event date range constraint violated",
+        "model": ErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {"success": False, "message": "Event end_date must be after start_date"},
+            }
+        },
+    }
+}
+
+EVENT_METADATA_NOT_FOUND = {
     404: {
-        "description": "Event or session not found",
+        "description": "Event not found",
+        "model": ErrorResponse,
+        "content": {"application/json": {"example": {"success": False, "message": "Event not found"}}},
+    }
+}
+
+EVENT_SESSION_DATE_INVALID = {
+    400: {
+        "description": "Session date constraints violated",
         "model": ErrorResponse,
         "content": {
             "application/json": {
                 "examples": {
-                    "event_not_found": {
-                        "summary": "Event not found",
-                        "value": {"success": False, "message": "Event not found"},
+                    "session_date_range": {
+                        "summary": "Session end before start",
+                        "value": {
+                            "success": False,
+                            "message": "Invalid session dates: end_datetime cannot be before start_datetime",
+                        },
                     },
+                    "session_exceeds_bounds": {
+                        "summary": "Session outside event window",
+                        "value": {"success": False, "message": "Session dates must fall within the event date range"},
+                    },
+                }
+            }
+        },
+    }
+}
+
+EVENT_SESSION_NOT_FOUND = {
+    404: {
+        "description": "Session or venue not found",
+        "model": ErrorResponse,
+        "content": {
+            "application/json": {
+                "examples": {
                     "session_not_found": {
-                        "summary": "Session ID not found on this event",
+                        "summary": "Session not found",
                         "value": {"success": False, "message": "Event session not found"},
                     },
                     "venue_not_found": {

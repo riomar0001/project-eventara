@@ -5,11 +5,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application.dto.account_settings_dto import ChangePasswordInput, RequestAccountDeletionInput
 from app.application.dto.profile_dto import GetLoginHistoryInput, UpdateProfileInput, UserOnboardingInput
-from app.application.use_cases.account_settings_usecase import ChangePasswordUseCase, DeleteAccountUseCase
-from app.application.use_cases.audit_log_usecase import CreateAuditLogUseCase
+from app.application.use_cases.account_settings_usecase import AccountSettingsUseCase
+from app.application.use_cases.audit_log_usecase import AuditLogUseCase
 from app.application.use_cases.profile_usecase import CheckAliasUseCase, GetLoginHistoryUseCase, OnboardingUseCase, UpdateProfileUseCase
 from app.controller.api.audit_helpers import safe_audit_log, serialize_profile
-from app.controller.dependencies import get_create_audit_log_use_case, get_current_user_id, get_onboarding_use_case, get_update_profile_use_case
+from app.controller.dependencies import get_audit_log_use_case, get_current_user_id, get_onboarding_use_case, get_update_profile_use_case
 from app.controller.dependencies.use_cases_depends import (
     get_change_password_use_case,
     get_check_alias_use_case,
@@ -95,7 +95,7 @@ async def update_profile(
     body: UpdateProfileRequest,
     user_id: uuid.UUID = Depends(get_current_user_id),
     use_case: UpdateProfileUseCase = Depends(get_update_profile_use_case),
-    audit_use_case: CreateAuditLogUseCase = Depends(get_create_audit_log_use_case),
+    audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
     db: AsyncSession = Depends(get_db),
 ) -> UpdateProfileResponse:
     """Update the authenticated user's mutable profile fields.
@@ -336,7 +336,7 @@ async def user_onboarding(
 async def change_password(
     body: ChangePasswordRequest,
     user_id: uuid.UUID = Depends(get_current_user_id),
-    use_case: ChangePasswordUseCase = Depends(get_change_password_use_case),
+    use_case: AccountSettingsUseCase = Depends(get_change_password_use_case),
 ) -> ChangePasswordResponse:
     """Verify the current password and replace it with the new one.
 
@@ -392,7 +392,7 @@ async def change_password(
 async def schedule_own_account_deletion(
     body: DeleteAccountRequest,
     user_id: uuid.UUID = Depends(get_current_user_id),
-    use_case: DeleteAccountUseCase = Depends(get_delete_account_use_case),
+    use_case: AccountSettingsUseCase = Depends(get_delete_account_use_case),
 ) -> DeleteAccountResponse:
     """Schedule deletion of the currently authenticated account.
 

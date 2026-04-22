@@ -11,7 +11,7 @@ from app.application.dto.roles_dto import (
     UpdateAssignmentInput,
     UpdateRoleInput,
 )
-from app.application.use_cases.audit_log_usecase import CreateAuditLogUseCase
+from app.application.use_cases.audit_log_usecase import AuditLogUseCase
 from app.application.use_cases.role_usecase import RoleManagementUseCase, UserRoleUseCase
 from app.controller.api.audit_helpers import (
     safe_audit_log,
@@ -19,7 +19,7 @@ from app.controller.api.audit_helpers import (
     serialize_grant,
     serialize_role,
 )
-from app.controller.dependencies import get_create_audit_log_use_case, get_role_use_case, require_permission
+from app.controller.dependencies import get_audit_log_use_case, get_role_use_case, require_permission
 from app.controller.dependencies.use_cases_depends import get_role_management_use_case
 from app.controller.docs.role_docs import (
     ASSIGN_ROLE_VALIDATION_ERROR,
@@ -174,7 +174,7 @@ async def create_role(
     body: RoleCreateRequest,
     caller_id: uuid.UUID = Depends(require_permission("roles", RoleAction.CREATE)),
     use_case: RoleManagementUseCase = Depends(get_role_management_use_case),
-    audit_use_case: CreateAuditLogUseCase = Depends(get_create_audit_log_use_case),
+    audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> RoleResponse:
     """Create a new RBAC role definition.
 
@@ -233,7 +233,7 @@ async def update_role(
     body: RoleUpdateRequest,
     caller_id: uuid.UUID = Depends(require_permission("roles", RoleAction.UPDATE)),
     use_case: RoleManagementUseCase = Depends(get_role_management_use_case),
-    audit_use_case: CreateAuditLogUseCase = Depends(get_create_audit_log_use_case),
+    audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> RoleResponse:
     """Update a role definition and permission matrix safely.
 
@@ -293,7 +293,7 @@ async def delete_role(
     role_id: uuid.UUID,
     caller_id: uuid.UUID = Depends(require_permission("roles", RoleAction.DELETE)),
     use_case: RoleManagementUseCase = Depends(get_role_management_use_case),
-    audit_use_case: CreateAuditLogUseCase = Depends(get_create_audit_log_use_case),
+    audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> None:
     """Delete an unused RBAC role definition.
 
@@ -348,7 +348,7 @@ async def assign_role(
     body: AssignRoleRequest,
     caller_id: uuid.UUID = Depends(require_permission("user-roles", RoleAction.CREATE)),
     use_case: UserRoleUseCase = Depends(get_role_use_case),
-    audit_use_case: CreateAuditLogUseCase = Depends(get_create_audit_log_use_case),
+    audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> UserRoleAssignmentResponse:
     """Assign a role to a user.
 
@@ -505,7 +505,7 @@ async def update_assignment(
     body: UpdateAssignmentRequest,
     caller_id: uuid.UUID = Depends(require_permission("user-roles", RoleAction.UPDATE)),
     use_case: UserRoleUseCase = Depends(get_role_use_case),
-    audit_use_case: CreateAuditLogUseCase = Depends(get_create_audit_log_use_case),
+    audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> UserRoleAssignmentResponse:
     """Update the expiry date of a role assignment.
 
@@ -568,7 +568,7 @@ async def revoke_assignment(
     assignment_id: uuid.UUID,
     caller_id: uuid.UUID = Depends(require_permission("user-roles", RoleAction.DELETE)),
     use_case: UserRoleUseCase = Depends(get_role_use_case),
-    audit_use_case: CreateAuditLogUseCase = Depends(get_create_audit_log_use_case),
+    audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> None:
     """Revoke a role assignment permanently.
 
@@ -623,7 +623,7 @@ async def create_grants(
     body: CreateGrantsRequest,
     caller_id: uuid.UUID = Depends(require_permission("user-grants", RoleAction.CREATE)),
     use_case: UserRoleUseCase = Depends(get_role_use_case),
-    audit_use_case: CreateAuditLogUseCase = Depends(get_create_audit_log_use_case),
+    audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> CreateGrantsResponse:
     """Create per-user action grants for a feature.
 
@@ -797,7 +797,7 @@ async def revoke_grant(
     grant_id: uuid.UUID,
     caller_id: uuid.UUID = Depends(require_permission("user-grants", RoleAction.DELETE)),
     use_case: UserRoleUseCase = Depends(get_role_use_case),
-    audit_use_case: CreateAuditLogUseCase = Depends(get_create_audit_log_use_case),
+    audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> None:
     """Revoke a user grant permanently.
 

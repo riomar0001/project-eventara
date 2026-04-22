@@ -24,38 +24,27 @@ from app.domain.exceptions.user_exceptions import (
 from app.infrastructure.database.repositories.refresh_token_repository import RefreshTokenRepository
 
 
-class ChangePasswordUseCase:
-    """Handles authenticated password changes for an existing user account.
+class AccountSettingsUseCase:
+    """Handles authenticated account-management operations: password changes, account deletion scheduling, and deletion finalization.
 
-    Requires a valid access token — the caller must already be authenticated.
-    On success, all refresh tokens belonging to the account are revoked so
-    every other active session is immediately invalidated, limiting the damage
-    window if credentials were compromised.
-
-    Concurrency strategy — sequential atomic updates:
-        Two concurrent change-password requests from the same authenticated user
-        require no distributed lock because both operations are inherently atomic
-        at the database level:
-
-        1. ``UserRepository.update_password`` executes a single SQL ``UPDATE``
-           on ``users`` followed by an ``UPDATE`` on ``user_security``, both
-           within the same transaction.  If two requests race, the second write
-           simply overwrites the first — both originate from the authenticated
-           owner, so the final state is always a valid password.
-
-        2. ``RefreshTokenRepository.revoke_all_for_user`` executes a single bulk
-           ``UPDATE … WHERE is_active = TRUE``.  If the two requests overlap, the
-           second call matches zero rows (already revoked) and commits a no-op,
-           which is the correct outcome.
-
-        Pessimistic locking (``SELECT … FOR UPDATE``) is deliberately avoided
-        because the naturally idempotent semantics of both updates make it
-        unnecessary overhead for this particular flow.
+    Concurrency notes — see individual method docstrings for per-operation details.
     """
 
-    def __init__(self, repo: IUserRepository, db: AsyncSession) -> None:
+    grace_period = timedelta(days=30)
+
+    def __init__(
+        self,
+        repo: IUserRepository,
+        db: AsyncSession | None = None,
+        arq: ArqRedis | None = None,
+    ) -> None:
         self.repo = repo
         self.db = db
+        self.arq = arq
+
+    @staticmethod
+    def _utcnow_naive() -> datetime:
+        return datetime.now(UTC).replace(tzinfo=None)
 
     async def change_password(self, data: ChangePasswordInput) -> None:
         """Verify the current password and replace it with a new bcrypt hash.
@@ -110,43 +99,6 @@ class ChangePasswordUseCase:
 
         token_repo = RefreshTokenRepository(self.db)
         await token_repo.revoke_all_for_user(data.user_id)
-
-
-class DeleteAccountUseCase:
-    """Schedules account deletion and enqueues the deferred finalization job.
-
-    The HTTP request performs validation and persists the pending-deletion
-    window synchronously so the caller receives an immediate, durable result.
-    The irreversible transition is delegated to ARQ with a deferred job whose
-    payload includes the original request timestamp and deadline.  When the
-    worker later executes, it performs a compare-and-swap update against those
-    exact values so stale jobs created before a recovery login or reschedule
-    cannot finalize the wrong deletion request.
-
-    Concurrency strategy:
-        1. ``UserRepository.schedule_account_deletion`` uses a single
-           conditional ``UPDATE`` guarded by ``deletion_requested_at IS NULL``.
-           Concurrent self-service and administrator requests collapse to one
-           winner and one conflict response without row-level deadlocks.
-        2. The ARQ job is enqueued with a deterministic ``_job_id`` derived
-           from the user ID and request timestamp, which prevents duplicate
-           deferred jobs for the same scheduled request across retries.
-        3. ``UserRepository.finalize_account_deletion`` matches both the
-           original request timestamp and scheduled deadline before switching
-           the account to ``DELETED``.  If the user logs in during the grace
-           period and cancels the request, the deferred worker job naturally
-           becomes a no-op.
-    """
-
-    grace_period = timedelta(days=30)
-
-    def __init__(self, repo: IUserRepository, arq: ArqRedis) -> None:
-        self.repo = repo
-        self.arq = arq
-
-    @staticmethod
-    def _utcnow_naive() -> datetime:
-        return datetime.now(UTC).replace(tzinfo=None)
 
     async def request_self_service_deletion(self, data: RequestAccountDeletionInput) -> RequestAccountDeletionOutput:
         user = await self.repo.get_by_id(data.target_user_id)
@@ -219,8 +171,6 @@ class DeleteAccountUseCase:
             _expires=timedelta(days=2),
         )
 
-        from app.application.dto.account_settings_dto import RequestAccountDeletionOutput
-
         return RequestAccountDeletionOutput(
             user_id=scheduled_user.id,
             deletion_requested_at=deletion_requested_at,
@@ -228,21 +178,7 @@ class DeleteAccountUseCase:
             requested_by=deletion_requested_by,
         )
 
-
-class FinalizeAccountDeletionUseCase:
-    """Executes the deferred end of the account-deletion lifecycle.
-
-    This use case runs inside the ARQ worker after the 30-day grace period has
-    elapsed.  It receives the exact request timestamp and deadline that were
-    captured at scheduling time, then relies on the repository's conditional
-    compare-and-swap update to ensure that only the still-pending deletion
-    window is finalized.
-    """
-
-    def __init__(self, repo: IUserRepository) -> None:
-        self.repo = repo
-
-    async def execute(self, *, user_id: str, requested_at: str, scheduled_for: str) -> bool:
+    async def finalize_account_deletion(self, *, user_id: str, requested_at: str, scheduled_for: str) -> bool:
         return await self.repo.finalize_account_deletion(
             user_id=uuid.UUID(user_id),
             expected_requested_at=datetime.fromisoformat(requested_at),

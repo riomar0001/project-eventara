@@ -22,11 +22,11 @@ from app.application.dto.venue_rating_dto import (
     ListVenueRatingsInput,
     UpdateVenueRatingInput,
 )
-from app.application.use_cases.audit_log_usecase import CreateAuditLogUseCase
+from app.application.use_cases.audit_log_usecase import AuditLogUseCase
 from app.application.use_cases.venue_rating_usecase import VenueRatingUseCase
 from app.application.use_cases.venue_usecase import VenueManagementUseCase
 from app.controller.api.audit_helpers import safe_audit_log, serialize_venue, serialize_venue_rating
-from app.controller.dependencies import get_create_audit_log_use_case, get_current_user_id, require_permission
+from app.controller.dependencies import get_audit_log_use_case, get_current_user_id, require_permission
 from app.controller.dependencies.use_cases_depends import get_venue_management_use_case, get_venue_rating_use_case
 from app.controller.docs.venue_management_docs import (
     FORBIDDEN,
@@ -346,7 +346,7 @@ async def create_venue(
     body: VenueCreateRequest,
     caller_id: uuid.UUID = Depends(require_permission("venues", RoleAction.CREATE)),
     use_case: VenueManagementUseCase = Depends(get_venue_management_use_case),
-    audit_use_case: CreateAuditLogUseCase = Depends(get_create_audit_log_use_case),
+    audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> VenueResponse:
     """Create a new venue.
 
@@ -411,7 +411,7 @@ async def update_venue(
     body: VenueUpdateRequest,
     caller_id: uuid.UUID = Depends(require_permission("venues", RoleAction.UPDATE)),
     use_case: VenueManagementUseCase = Depends(get_venue_management_use_case),
-    audit_use_case: CreateAuditLogUseCase = Depends(get_create_audit_log_use_case),
+    audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> VenueResponse:
     """Update a venue's details.
 
@@ -475,7 +475,7 @@ async def delete_venue(
     venue_id: uuid.UUID,
     caller_id: uuid.UUID = Depends(require_permission("venues", RoleAction.DELETE)),
     use_case: VenueManagementUseCase = Depends(get_venue_management_use_case),
-    audit_use_case: CreateAuditLogUseCase = Depends(get_create_audit_log_use_case),
+    audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> None:
     """Delete an unused venue record.
 
@@ -554,7 +554,7 @@ async def create_venue_rating(
     body: VenueRatingCreateRequest,
     user_id: uuid.UUID = Depends(get_current_user_id),
     use_case: VenueRatingUseCase = Depends(get_venue_rating_use_case),
-    audit_use_case: CreateAuditLogUseCase = Depends(get_create_audit_log_use_case),
+    audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> VenueRatingResponse:
     """Submit a new venue rating for the authenticated user.
 
@@ -700,7 +700,7 @@ async def update_my_venue_rating(
     body: VenueRatingUpdateRequest,
     user_id: uuid.UUID = Depends(get_current_user_id),
     use_case: VenueRatingUseCase = Depends(get_venue_rating_use_case),
-    audit_use_case: CreateAuditLogUseCase = Depends(get_create_audit_log_use_case),
+    audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> VenueRatingResponse:
     """Update the authenticated user's venue rating.
 
@@ -756,7 +756,7 @@ async def delete_my_venue_rating(
     venue_id: uuid.UUID,
     user_id: uuid.UUID = Depends(get_current_user_id),
     use_case: VenueRatingUseCase = Depends(get_venue_rating_use_case),
-    audit_use_case: CreateAuditLogUseCase = Depends(get_create_audit_log_use_case),
+    audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> VenueRatingDeleteResponse:
     """Remove the authenticated user's venue rating.
 

@@ -5,9 +5,9 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import AwareDatetime
 
 from app.application.dto.audit_log_dto import GetAuditLogsInput
-from app.application.use_cases.audit_log_usecase import GetAuditLogsUseCase
+from app.application.use_cases.audit_log_usecase import AuditLogUseCase
 from app.controller.dependencies import (
-    get_audit_logs_use_case,
+    get_audit_log_use_case,
     require_permission,
 )
 from app.controller.docs.audit_log_docs import (
@@ -50,7 +50,7 @@ async def get_audit_logs(
     start_date: AwareDatetime | None = Query(default=None, description="Filter by start date (UTC)"),
     end_date: AwareDatetime | None = Query(default=None, description="Filter by end date (UTC)"),
     _: uuid.UUID = Depends(require_permission("audit-logs", RoleAction.READ)),
-    use_case: GetAuditLogsUseCase = Depends(get_audit_logs_use_case),
+    use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> GetAuditLogsResponse:
     """Retrieve paginated audit logs with comprehensive pagination metadata.
 
@@ -97,7 +97,7 @@ async def get_audit_logs(
             end_date=end_date,
         )
 
-        output = await use_case.execute(input_dto)
+        output = await use_case.get_logs(input_dto)
 
         total_pages = math.ceil(output.total_count / limit) if output.total_count > 0 else 0
 

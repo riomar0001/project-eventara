@@ -6,13 +6,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from app.application.use_cases.queue_usecase import (
-    DeleteDeadJobUseCase,
-    GetQueueStatsUseCase,
-    ListDeadJobsUseCase,
-    PurgeDeadJobsUseCase,
-    RetryDeadJobUseCase,
-)
+from app.application.use_cases.queue_usecase import QueueUseCase
 from app.domain.exceptions.queue_exceptions import (
     JobNotDeadError,
     JobNotFoundError,
@@ -74,7 +68,7 @@ class TestGetQueueStatsUseCase:
                     yield b"arq:in-progress:abc"
 
             redis.scan_iter = _scan
-            result = await GetQueueStatsUseCase(redis).execute()
+            result = await QueueUseCase(redis).get_stats()
 
         assert result.total_failed == 1
         assert result.in_progress == 1
@@ -84,7 +78,7 @@ class TestGetQueueStatsUseCase:
         redis = MagicMock()
         redis.scan_iter = MagicMock(side_effect=RuntimeError("redis down"))
         with pytest.raises(QueueInspectionError):
-            await GetQueueStatsUseCase(redis).execute()
+            await QueueUseCase(redis).get_stats()
 
 
 # ─── ListDeadJobsUseCase ──────────────────────────────────────────────────────
@@ -105,7 +99,7 @@ class TestListDeadJobsUseCase:
                 yield b"arq:result:" + JOB_ID.encode()
 
             redis.scan_iter = _scan
-            result = await ListDeadJobsUseCase(redis).execute(page=1, limit=10)
+            result = await QueueUseCase(redis).list_dead_jobs(page=1, limit=10)
 
         assert result.total == 1
         assert len(result.jobs) == 1
@@ -124,7 +118,7 @@ class TestListDeadJobsUseCase:
                 yield b"arq:result:abc"
 
             redis.scan_iter = _scan
-            result = await ListDeadJobsUseCase(redis).execute(page=1, limit=10)
+            result = await QueueUseCase(redis).list_dead_jobs(page=1, limit=10)
 
         assert result.total == 0
 
@@ -141,7 +135,7 @@ class TestListDeadJobsUseCase:
                     yield f"arq:result:job{i}".encode()
 
             redis.scan_iter = _scan
-            result = await ListDeadJobsUseCase(redis).execute(page=2, limit=10)
+            result = await QueueUseCase(redis).list_dead_jobs(page=2, limit=10)
 
         assert result.total == 15
         assert len(result.jobs) == 5
@@ -160,7 +154,7 @@ class TestRetryDeadJobUseCase:
             mock_job = MagicMock()
             mock_job.result_info = AsyncMock(return_value=_make_result_info(success=False))
             MockJob.return_value = mock_job
-            result = await RetryDeadJobUseCase(redis).execute(JOB_ID)
+            result = await QueueUseCase(redis).retry_dead_job(JOB_ID)
 
         assert result.original_job_id == JOB_ID
         redis.delete.assert_awaited()
@@ -170,7 +164,7 @@ class TestRetryDeadJobUseCase:
         redis = _make_redis()
         redis.set = AsyncMock(return_value=False)
         with pytest.raises(JobRetryConflictError):
-            await RetryDeadJobUseCase(redis).execute(JOB_ID)
+            await QueueUseCase(redis).retry_dead_job(JOB_ID)
 
     @pytest.mark.asyncio
     async def test_job_not_found(self):
@@ -180,7 +174,7 @@ class TestRetryDeadJobUseCase:
             mock_job.result_info = AsyncMock(return_value=None)
             MockJob.return_value = mock_job
             with pytest.raises(JobNotFoundError):
-                await RetryDeadJobUseCase(redis).execute(JOB_ID)
+                await QueueUseCase(redis).retry_dead_job(JOB_ID)
 
     @pytest.mark.asyncio
     async def test_job_not_dead(self):
@@ -190,7 +184,7 @@ class TestRetryDeadJobUseCase:
             mock_job.result_info = AsyncMock(return_value=_make_result_info(success=True))
             MockJob.return_value = mock_job
             with pytest.raises(JobNotDeadError):
-                await RetryDeadJobUseCase(redis).execute(JOB_ID)
+                await QueueUseCase(redis).retry_dead_job(JOB_ID)
 
 
 # ─── DeleteDeadJobUseCase ─────────────────────────────────────────────────────
@@ -204,7 +198,7 @@ class TestDeleteDeadJobUseCase:
             mock_job = MagicMock()
             mock_job.result_info = AsyncMock(return_value=_make_result_info(success=False))
             MockJob.return_value = mock_job
-            result = await DeleteDeadJobUseCase(redis).execute(JOB_ID)
+            result = await QueueUseCase(redis).delete_dead_job(JOB_ID)
         assert result.deleted is True
 
     @pytest.mark.asyncio
@@ -215,7 +209,7 @@ class TestDeleteDeadJobUseCase:
             mock_job.result_info = AsyncMock(return_value=None)
             MockJob.return_value = mock_job
             with pytest.raises(JobNotFoundError):
-                await DeleteDeadJobUseCase(redis).execute(JOB_ID)
+                await QueueUseCase(redis).delete_dead_job(JOB_ID)
 
     @pytest.mark.asyncio
     async def test_job_not_dead(self):
@@ -225,7 +219,7 @@ class TestDeleteDeadJobUseCase:
             mock_job.result_info = AsyncMock(return_value=_make_result_info(success=True))
             MockJob.return_value = mock_job
             with pytest.raises(JobNotDeadError):
-                await DeleteDeadJobUseCase(redis).execute(JOB_ID)
+                await QueueUseCase(redis).delete_dead_job(JOB_ID)
 
 
 # ─── PurgeDeadJobsUseCase ─────────────────────────────────────────────────────
@@ -245,7 +239,7 @@ class TestPurgeDeadJobsUseCase:
                 yield b"arq:result:job2"
 
             redis.scan_iter = _scan
-            result = await PurgeDeadJobsUseCase(redis).execute()
+            result = await QueueUseCase(redis).purge_dead_jobs()
 
         assert result.deleted_count == 2
         redis.delete.assert_awaited_once()
@@ -261,6 +255,6 @@ class TestPurgeDeadJobsUseCase:
                 yield  # makes this an async generator
 
             redis.scan_iter = _scan
-            result = await PurgeDeadJobsUseCase(redis).execute()
+            result = await QueueUseCase(redis).purge_dead_jobs()
 
         assert result.deleted_count == 0

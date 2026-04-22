@@ -21,21 +21,9 @@ Error mapping summary:
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
-from app.application.use_cases.queue_usecase import (
-    DeleteDeadJobUseCase,
-    GetQueueStatsUseCase,
-    ListDeadJobsUseCase,
-    PurgeDeadJobsUseCase,
-    RetryDeadJobUseCase,
-)
+from app.application.use_cases.queue_usecase import QueueUseCase
 from app.controller.dependencies import require_permission
-from app.controller.dependencies.use_cases_depends import (
-    get_delete_dead_job_use_case,
-    get_list_dead_jobs_use_case,
-    get_purge_dead_jobs_use_case,
-    get_queue_stats_use_case,
-    get_retry_dead_job_use_case,
-)
+from app.controller.dependencies.use_cases_depends import get_queue_use_case
 from app.controller.docs.queue_docs import (
     QUEUE_FORBIDDEN,
     QUEUE_INTERNAL_ERROR,
@@ -83,7 +71,7 @@ router = APIRouter(prefix="/queues", tags=["Queue"])
 )
 async def get_queue_stats(
     _: object = Depends(require_permission("queues", RoleAction.READ)),
-    use_case: GetQueueStatsUseCase = Depends(get_queue_stats_use_case),
+    use_case: QueueUseCase = Depends(get_queue_use_case),
 ) -> QueueStatsResponse:
     """Return a live queue activity snapshot.
 
@@ -98,7 +86,7 @@ async def get_queue_stats(
     - **500 Internal Server Error** — Redis connection failure or ARQ error.
     """
     try:
-        output = await use_case.execute()
+        output = await use_case.get_stats()
         return QueueStatsResponse(
             queue_name=output.queue_name,
             pending=output.pending,
@@ -144,7 +132,7 @@ async def list_dead_jobs(
     page: int = Query(default=1, ge=1, description="Page number (1-based)"),
     limit: int = Query(default=10, ge=1, le=100, description="Items per page"),
     _: object = Depends(require_permission("queues", RoleAction.READ)),
-    use_case: ListDeadJobsUseCase = Depends(get_list_dead_jobs_use_case),
+    use_case: QueueUseCase = Depends(get_queue_use_case),
 ) -> ListDeadJobsResponse:
     """List permanently failed jobs in the dead-letter store with pagination.
 
@@ -158,7 +146,7 @@ async def list_dead_jobs(
     - **500 Internal Server Error** — Redis or deserialisation failure.
     """
     try:
-        output = await use_case.execute(page=page, limit=limit)
+        output = await use_case.list_dead_jobs(page=page, limit=limit)
         return ListDeadJobsResponse(
             data=[
                 DeadJobResponse(
@@ -206,7 +194,7 @@ async def list_dead_jobs(
 async def retry_dead_job(
     job_id: str,
     _: object = Depends(require_permission("queues", RoleAction.DELETE)),
-    use_case: RetryDeadJobUseCase = Depends(get_retry_dead_job_use_case),
+    use_case: QueueUseCase = Depends(get_queue_use_case),
 ) -> RetryJobResponse:
     """Re-enqueue a failed job from the dead-letter store.
 
@@ -223,7 +211,7 @@ async def retry_dead_job(
     - **500 Internal Server Error** — unexpected Redis or ARQ failure.
     """
     try:
-        output = await use_case.execute(job_id)
+        output = await use_case.retry_dead_job(job_id)
         return RetryJobResponse(
             original_job_id=output.original_job_id,
             new_job_id=output.new_job_id,
@@ -259,7 +247,7 @@ async def retry_dead_job(
 async def delete_dead_job(
     job_id: str,
     _: object = Depends(require_permission("queues", RoleAction.DELETE)),
-    use_case: DeleteDeadJobUseCase = Depends(get_delete_dead_job_use_case),
+    use_case: QueueUseCase = Depends(get_queue_use_case),
 ) -> DeleteJobResponse:
     """Delete a single failed job from the dead-letter store.
 
@@ -274,7 +262,7 @@ async def delete_dead_job(
     - **500 Internal Server Error** — unexpected Redis failure.
     """
     try:
-        output = await use_case.execute(job_id)
+        output = await use_case.delete_dead_job(job_id)
         return DeleteJobResponse(job_id=output.job_id, deleted=output.deleted)
     except JobNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
@@ -303,7 +291,7 @@ async def delete_dead_job(
 )
 async def purge_dead_jobs(
     _: object = Depends(require_permission("queues", RoleAction.DELETE)),
-    use_case: PurgeDeadJobsUseCase = Depends(get_purge_dead_jobs_use_case),
+    use_case: QueueUseCase = Depends(get_queue_use_case),
 ) -> PurgeDeadJobsResponse:
     """Purge all failed jobs from the dead-letter store.
 
@@ -316,7 +304,7 @@ async def purge_dead_jobs(
     - **500 Internal Server Error** — Redis scan or delete failure.
     """
     try:
-        output = await use_case.execute()
+        output = await use_case.purge_dead_jobs()
         return PurgeDeadJobsResponse(deleted_count=output.deleted_count)
     except QueueInspectionError as exc:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(exc))

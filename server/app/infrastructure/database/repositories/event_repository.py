@@ -93,6 +93,19 @@ class EventRepository:
         orm = result.scalar_one_or_none()
         return self._to_event_entity(orm) if orm else None
 
+    async def get_session_by_id(self, session_id: uuid.UUID) -> EventSessionEntity | None:
+        """Return the session entity for the given ID, or ``None`` if not found.
+
+        Args:
+            session_id: UUID of the target session.
+
+        Returns:
+            The matching entity, or ``None`` if no row exists.
+        """
+        result = await self.db.execute(select(EventSession).where(EventSession.id == session_id))
+        orm = result.scalar_one_or_none()
+        return self._to_session_entity(orm) if orm else None
+
     async def get_sessions_by_event_id(self, event_id: uuid.UUID) -> list[EventSessionEntity]:
         """Return all sessions belonging to an event, ordered by start time.
 

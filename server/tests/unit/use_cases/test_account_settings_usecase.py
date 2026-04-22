@@ -1,4 +1,4 @@
-"""Unit tests for ChangePasswordUseCase, DeleteAccountUseCase, FinalizeAccountDeletionUseCase."""
+"""Unit tests for AccountSettingsUseCase."""
 
 import uuid
 from datetime import UTC, datetime, timedelta
@@ -7,11 +7,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from app.application.dto.account_settings_dto import ChangePasswordInput, RequestAccountDeletionInput
-from app.application.use_cases.account_settings_usecase import (
-    ChangePasswordUseCase,
-    DeleteAccountUseCase,
-    FinalizeAccountDeletionUseCase,
-)
+from app.application.use_cases.account_settings_usecase import AccountSettingsUseCase
 from app.domain.entities.user_entity import User, UserSecurity, UserStatus
 from app.domain.exceptions.auth_exceptions import InvalidCredentialsError
 from app.domain.exceptions.user_exceptions import (
@@ -46,7 +42,7 @@ def _make_repo(*, user=None, security=None, updated=True, scheduled_user=None) -
     return repo
 
 
-# ─── ChangePasswordUseCase ────────────────────────────────────────────────────
+# ─── change_password ──────────────────────────────────────────────────────────
 
 
 class TestChangePasswordUseCase:
@@ -54,7 +50,7 @@ class TestChangePasswordUseCase:
         return ChangePasswordInput(user_id=USER_ID, current_password=current, new_password=new)
 
     def _make_uc(self, repo):
-        return ChangePasswordUseCase(repo=repo, db=AsyncMock())
+        return AccountSettingsUseCase(repo=repo, db=AsyncMock())
 
     @pytest.mark.asyncio
     async def test_success(self):
@@ -129,7 +125,7 @@ class TestChangePasswordUseCase:
                 await uc.change_password(self._data())
 
 
-# ─── DeleteAccountUseCase ─────────────────────────────────────────────────────
+# ─── request_*_deletion ───────────────────────────────────────────────────────
 
 
 class TestDeleteAccountUseCase:
@@ -140,7 +136,7 @@ class TestDeleteAccountUseCase:
         return RequestAccountDeletionInput(target_user_id=USER_ID, requested_by=ADMIN_ID)
 
     def _make_uc(self, repo):
-        return DeleteAccountUseCase(repo=repo, arq=AsyncMock())
+        return AccountSettingsUseCase(repo=repo, arq=AsyncMock())
 
     def _make_scheduled_user(self):
         u = MagicMock()
@@ -155,7 +151,7 @@ class TestDeleteAccountUseCase:
         scheduled = self._make_scheduled_user()
         repo = _make_repo(user=_make_user(), scheduled_user=scheduled)
         arq = AsyncMock()
-        uc = DeleteAccountUseCase(repo=repo, arq=arq)
+        uc = AccountSettingsUseCase(repo=repo, arq=arq)
         with patch("app.application.use_cases.account_settings_usecase.verify_hash", return_value=True):
             result = await uc.request_self_service_deletion(self._self_data())
         assert result.user_id == USER_ID
@@ -195,7 +191,7 @@ class TestDeleteAccountUseCase:
         scheduled = self._make_scheduled_user()
         repo = _make_repo(user=_make_user(), scheduled_user=scheduled)
         arq = AsyncMock()
-        uc = DeleteAccountUseCase(repo=repo, arq=arq)
+        uc = AccountSettingsUseCase(repo=repo, arq=arq)
         result = await uc.request_admin_deletion(self._admin_data())
         assert result.user_id == USER_ID
         arq.enqueue_job.assert_awaited_once()
@@ -219,14 +215,14 @@ class TestDeleteAccountUseCase:
             await self._make_uc(repo).request_admin_deletion(self._admin_data())
 
 
-# ─── FinalizeAccountDeletionUseCase ───────────────────────────────────────────
+# ─── finalize_account_deletion ────────────────────────────────────────────────
 
 
 class TestFinalizeAccountDeletionUseCase:
     @pytest.mark.asyncio
     async def test_returns_true_when_finalized(self):
         repo = _make_repo()
-        result = await FinalizeAccountDeletionUseCase(repo=repo).execute(
+        result = await AccountSettingsUseCase(repo=repo).finalize_account_deletion(
             user_id=str(USER_ID),
             requested_at=datetime.now(UTC).isoformat(),
             scheduled_for=datetime.now(UTC).isoformat(),
@@ -237,7 +233,7 @@ class TestFinalizeAccountDeletionUseCase:
     async def test_returns_false_when_already_canceled(self):
         repo = _make_repo()
         repo.finalize_account_deletion = AsyncMock(return_value=False)
-        result = await FinalizeAccountDeletionUseCase(repo=repo).execute(
+        result = await AccountSettingsUseCase(repo=repo).finalize_account_deletion(
             user_id=str(USER_ID),
             requested_at=datetime.now(UTC).isoformat(),
             scheduled_for=datetime.now(UTC).isoformat(),

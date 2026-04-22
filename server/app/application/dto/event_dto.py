@@ -31,29 +31,33 @@ class EventWithSessionsOutput:
 
 
 @dataclass
-class UpdateEventSessionInput:
-    venue_id: uuid.UUID
-    title: str
-    description: str | None
-    start_datetime: datetime
-    end_datetime: datetime
-    id: uuid.UUID | None = None
-
-
-@dataclass
-class UpdateEventInput:
+class UpdateEventMetadataInput:
     event_id: uuid.UUID
     updated_by: uuid.UUID
     title: str
     description: str
     start_date: datetime
     end_date: datetime
-    sessions: list[UpdateEventSessionInput] = field(default_factory=list)
 
 
 @dataclass
-class UpdateEventOutput:
+class UpdateEventMetadataOutput:
     event: Event
-    sessions: list[EventSession]
     old_event: Event
-    old_sessions: list[EventSession]
+
+
+@dataclass
+class UpdateEventSessionInput:
+    session_id: uuid.UUID
+    updated_by: uuid.UUID
+    venue_id: uuid.UUID
+    title: str
+    description: str | None
+    start_datetime: datetime
+    end_datetime: datetime
+
+
+@dataclass
+class UpdateEventSessionOutput:
+    session: EventSession
+    old_session: EventSession

@@ -7,7 +7,7 @@ from fastapi import Request
 from app.application.dto.audit_log_dto import CreateAuditLogInput
 from app.application.dto.roles_dto import ManagedRoleDetail, RolePermissionSummary
 from app.application.dto.users_dto import AdminUserAccountDetail
-from app.application.use_cases.audit_log_usecase import CreateAuditLogUseCase
+from app.application.use_cases.audit_log_usecase import AuditLogUseCase
 from app.domain.entities.audit_log import ActionType, AuditLogStatus
 from app.domain.entities.authorization_entities import Feature, UserGrant, UserRole
 from app.domain.entities.event_entity import Event, EventSession
@@ -183,7 +183,7 @@ def get_client_ip(request: Request) -> str | None:
 
 
 async def safe_audit_log(
-    audit_use_case: CreateAuditLogUseCase,
+    audit_use_case: AuditLogUseCase,
     request: Request,
     *,
     user_id,
@@ -204,7 +204,7 @@ async def safe_audit_log(
         context.update(additional_context)
 
     try:
-        await audit_use_case.execute(
+        await audit_use_case.create(
             CreateAuditLogInput(
                 user_id=user_id,
                 ip_address=get_client_ip(request),

@@ -70,8 +70,25 @@ class EventWithSessionsResponse(BaseModel):
     sessions: list[EventSessionRecordResponse]
 
 
+class EventUpdateRequest(BaseModel):
+    title: str = Field(min_length=1, max_length=255)
+    description: str = Field(min_length=1)
+    start_date: datetime
+    end_date: datetime
+
+    @field_validator("description", mode="before")
+    @classmethod
+    def sanitize_description(cls, v: str) -> str:
+        return sanitize_html(v)
+
+
+class EventMetadataUpdatedResponse(BaseModel):
+    success: bool = True
+    message: str = "Event updated successfully."
+    data: EventRecordResponse
+
+
 class EventSessionUpdateRequest(BaseModel):
-    id: uuid.UUID | None = Field(default=None)
     venue_id: uuid.UUID
     title: str = Field(min_length=5, max_length=255)
     description: str | None = Field(default=None, max_length=5000)
@@ -86,21 +103,7 @@ class EventSessionUpdateRequest(BaseModel):
         return strip_html(v) or None
 
 
-class EventUpdateRequest(BaseModel):
-    title: str = Field(min_length=1, max_length=255)
-    description: str = Field(min_length=1)
-    start_date: datetime
-    end_date: datetime
-    sessions: list[EventSessionUpdateRequest] = Field(min_length=1)
-
-    @field_validator("description", mode="before")
-    @classmethod
-    def sanitize_description(cls, v: str) -> str:
-        return sanitize_html(v)
-
-
-class EventUpdatedResponse(BaseModel):
+class EventSessionUpdatedResponse(BaseModel):
     success: bool = True
-    message: str = "Event updated successfully."
-    data: EventRecordResponse
-    sessions: list[EventSessionRecordResponse]
+    message: str = "Event session updated successfully."
+    data: EventSessionRecordResponse

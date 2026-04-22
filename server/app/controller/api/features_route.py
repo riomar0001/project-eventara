@@ -6,10 +6,10 @@ from app.application.dto.features_dto import (
     CreateFeatureInput,
     UpdateFeatureInput,
 )
-from app.application.use_cases.audit_log_usecase import CreateAuditLogUseCase
+from app.application.use_cases.audit_log_usecase import AuditLogUseCase
 from app.application.use_cases.feature_usecase import FeatureManagementUseCase
 from app.controller.api.audit_helpers import safe_audit_log, serialize_feature
-from app.controller.dependencies import get_create_audit_log_use_case, require_permission
+from app.controller.dependencies import get_audit_log_use_case, require_permission
 from app.controller.dependencies.use_cases_depends import get_feature_management_use_case
 from app.controller.docs.feature_management_docs import (
     FEATURE_CONFLICT,
@@ -109,7 +109,7 @@ async def create_feature(
     body: FeatureCreateRequest,
     caller_id: uuid.UUID = Depends(require_permission("features", RoleAction.CREATE)),
     use_case: FeatureManagementUseCase = Depends(get_feature_management_use_case),
-    audit_use_case: CreateAuditLogUseCase = Depends(get_create_audit_log_use_case),
+    audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> FeatureResponse:
     """Create a new RBAC feature definition.
 
@@ -157,7 +157,7 @@ async def update_feature(
     body: FeatureUpdateRequest,
     caller_id: uuid.UUID = Depends(require_permission("features", RoleAction.UPDATE)),
     use_case: FeatureManagementUseCase = Depends(get_feature_management_use_case),
-    audit_use_case: CreateAuditLogUseCase = Depends(get_create_audit_log_use_case),
+    audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> FeatureResponse:
     """Update an RBAC feature definition safely under concurrent traffic.
 
@@ -209,7 +209,7 @@ async def delete_feature(
     feature_id: uuid.UUID,
     caller_id: uuid.UUID = Depends(require_permission("features", RoleAction.DELETE)),
     use_case: FeatureManagementUseCase = Depends(get_feature_management_use_case),
-    audit_use_case: CreateAuditLogUseCase = Depends(get_create_audit_log_use_case),
+    audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> None:
     """Delete an unused RBAC feature definition.
 

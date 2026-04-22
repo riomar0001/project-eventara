@@ -8,7 +8,7 @@ This keeps the API responsive while still giving the deletion lifecycle a
 single serialized execution path in the worker layer.
 """
 
-from app.application.use_cases.account_settings_usecase import FinalizeAccountDeletionUseCase
+from app.application.use_cases.account_settings_usecase import AccountSettingsUseCase
 from app.infrastructure.database.repositories.user_repository import UserRepository
 from app.infrastructure.database.session import AsyncSessionLocal
 
@@ -28,8 +28,8 @@ async def finalize_account_deletion_job(
         scheduled_for: Original grace-period deadline captured at scheduling time.
     """
     async with AsyncSessionLocal() as session:
-        use_case = FinalizeAccountDeletionUseCase(UserRepository(session))
-        await use_case.execute(
+        use_case = AccountSettingsUseCase(UserRepository(session))
+        await use_case.finalize_account_deletion(
             user_id=user_id,
             requested_at=requested_at,
             scheduled_for=scheduled_for,

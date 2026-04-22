@@ -11,10 +11,10 @@ from app.application.dto.auth_dto import (
     ResendVerificationInput,
     ResetPasswordInput,
 )
-from app.application.use_cases.audit_log_usecase import CreateAuditLogUseCase
+from app.application.use_cases.audit_log_usecase import AuditLogUseCase
 from app.application.use_cases.auth_usecase import AuthUseCase
 from app.controller.api.audit_helpers import get_client_ip, safe_audit_log
-from app.controller.dependencies import get_auth_use_case, get_create_audit_log_use_case, login_rate_limit
+from app.controller.dependencies import get_auth_use_case, get_audit_log_use_case, login_rate_limit
 from app.controller.docs.auth_docs import (
     EMAIL_ALREADY_VERIFIED,
     EMAIL_CONFLICT,
@@ -126,7 +126,7 @@ async def register_user(
     request: Request,
     body: RegisterRequest,
     use_case: AuthUseCase = Depends(get_auth_use_case),
-    audit_use_case: CreateAuditLogUseCase = Depends(get_create_audit_log_use_case),
+    audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> RegisterResponse:
     """Register a new user account.
 
@@ -282,7 +282,7 @@ async def login(
     request: Request,
     body: LoginRequest,
     use_case: AuthUseCase = Depends(get_auth_use_case),
-    audit_use_case: CreateAuditLogUseCase = Depends(get_create_audit_log_use_case),
+    audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> LoginInitResponse:
     """Validate credentials and dispatch a one-time passcode to the user's email.
 
@@ -391,7 +391,7 @@ async def login_verify(
     response: Response,
     body: LoginVerifyRequest,
     use_case: AuthUseCase = Depends(get_auth_use_case),
-    audit_use_case: CreateAuditLogUseCase = Depends(get_create_audit_log_use_case),
+    audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> LoginVerifyResponse:
     """Verify the OTP code and return JWT tokens to complete the OTP login flow.
 
@@ -565,7 +565,7 @@ async def logout(
     response: Response,
     body: LogoutRequest,
     use_case: AuthUseCase = Depends(get_auth_use_case),
-    audit_use_case: CreateAuditLogUseCase = Depends(get_create_audit_log_use_case),
+    audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> LogoutResponse:
     """Revoke a refresh token to end the user's session.
 
@@ -630,7 +630,7 @@ async def refresh_token(
     response: Response,
     body: RefreshTokenRequest,
     use_case: AuthUseCase = Depends(get_auth_use_case),
-    audit_use_case: CreateAuditLogUseCase = Depends(get_create_audit_log_use_case),
+    audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> RefreshTokenResponse:
     """Rotate a refresh token and return a new access and refresh token pair.
 

@@ -1,14 +1,19 @@
-"""Functional test cases for CreateEventUseCase and UpdateEventUseCase."""
+"""Functional test cases for CreateEventUseCase, UpdateEventMetadataUseCase, and UpdateEventSessionUseCase."""
 
 import uuid
 from datetime import datetime, timezone
-from typing import Any
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.application.dto.event_dto import CreateEventInput, CreateEventSessionInput, UpdateEventInput, UpdateEventSessionInput
-from app.application.use_cases.event_usecase import CreateEventUseCase, UpdateEventUseCase
+from app.application.dto.event_dto import (
+    CreateEventInput,
+    CreateEventSessionInput,
+    UpdateEventMetadataInput,
+    UpdateEventSessionInput,
+)
+from app.application.use_cases.event_usecase import EventUseCase
 from app.domain.entities.event_entity import Event, EventSession, EventSessionStatus, EventStatus
 from app.domain.exceptions.event_exceptions import (
     EventDateValidationError,
@@ -22,428 +27,496 @@ from app.domain.exceptions.event_session_exceptions import (
     InvalidEventSessionDateError,
 )
 from app.domain.exceptions.venue_exceptions import VenueNotFoundError
+from app.infrastructure.database.repositories.event_repository import EventRepository
 
-# ─── Constants ────────────────────────────────────────────────────────────────
-
-USER_ID = uuid.uuid4()
+EVENT_ID = uuid.UUID("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
+CREATOR_ID = uuid.UUID("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
+OTHER_ID = uuid.UUID("cccccccc-cccc-cccc-cccc-cccccccccccc")
 VENUE_ID = uuid.uuid4()
-EVENT_ID = uuid.uuid4()
-SESSION_ID = uuid.uuid4()
+SESSION_ID = uuid.UUID("dddddddd-dddd-dddd-dddd-dddddddddddd")
 
-_T = datetime(2025, 6, 1, 9, 0, tzinfo=timezone.utc)
-_T2 = datetime(2025, 6, 1, 18, 0, tzinfo=timezone.utc)
-_T3 = datetime(2025, 6, 3, 18, 0, tzinfo=timezone.utc)
-
-# ─── Helpers ──────────────────────────────────────────────────────────────────
+EVENT_START = datetime(2025, 6, 1, tzinfo=timezone.utc)
+EVENT_END = datetime(2025, 6, 10, tzinfo=timezone.utc)
+SESSION_START = datetime(2025, 6, 2, tzinfo=timezone.utc)
+SESSION_END = datetime(2025, 6, 3, tzinfo=timezone.utc)
 
 
-def _make_event(**overrides: Any) -> Event:
-    defaults: dict[str, Any] = dict(
+def _sample_event(**overrides) -> Event:
+    defaults = dict(
         id=EVENT_ID,
-        title="Hackathon 2025",
-        description="<p>Annual hackathon</p>",
-        start_date=_T,
-        end_date=_T3,
+        title="Test Event",
+        description="<p>desc</p>",
+        start_date=EVENT_START,
+        end_date=EVENT_END,
         status=EventStatus.DRAFT,
-        created_by=USER_ID,
+        created_by=CREATOR_ID,
+        created_at=None,
+        updated_at=None,
     )
     defaults.update(overrides)
     return Event(**defaults)
 
 
-def _make_session(**overrides: Any) -> EventSession:
-    defaults: dict[str, Any] = dict(
+def _sample_session(**overrides) -> EventSession:
+    defaults = dict(
         id=SESSION_ID,
         event_id=EVENT_ID,
         venue_id=VENUE_ID,
-        title="Ideation Phase",
+        title="Session Title",
         description=None,
-        start_datetime=_T,
-        end_datetime=_T2,
+        start_datetime=SESSION_START,
+        end_datetime=SESSION_END,
         status=EventSessionStatus.SCHEDULED,
+        created_at=None,
+        updated_at=None,
     )
     defaults.update(overrides)
     return EventSession(**defaults)
 
 
-def _make_repo(
-    *,
-    venue_exists: bool = True,
-    created_event: Event | None = None,
-    created_session: EventSession | None = None,
-) -> MagicMock:
-    repo = MagicMock()
-    repo.venue_exists = AsyncMock(return_value=venue_exists)
-    repo.create_event = AsyncMock(return_value=created_event or _make_event())
-    repo.create_session = AsyncMock(return_value=created_session or _make_session())
+# ---------------------------------------------------------------------------
+# CreateEventUseCase
+# ---------------------------------------------------------------------------
+
+def _make_create_repo():
+    repo = MagicMock(spec=EventRepository)
+    repo.venue_exists = AsyncMock(return_value=True)
+    repo.create_event = AsyncMock(return_value=_sample_event())
+    repo.create_session = AsyncMock(return_value=_sample_session())
     return repo
 
 
-def _make_uc(repo: MagicMock | None = None) -> CreateEventUseCase:
-    return CreateEventUseCase(repo=repo or _make_repo(), db=AsyncMock())
+def _make_create_uc(repo=None):
+    repo = repo or _make_create_repo()
+    db = AsyncMock(spec=AsyncSession)
+    return EventUseCase(repo, db), repo, db
 
 
-def _session_input(**overrides: Any) -> CreateEventSessionInput:
-    defaults: dict[str, Any] = dict(
-        venue_id=VENUE_ID,
-        title="Ideation Phase",
-        description=None,
-        start_datetime=_T,
-        end_datetime=_T2,
-    )
-    defaults.update(overrides)
-    return CreateEventSessionInput(**defaults)
-
-
-def _event_input(**overrides: Any) -> CreateEventInput:
-    defaults: dict[str, Any] = dict(
-        title="Hackathon 2025",
-        description="<p>Annual hackathon</p>",
-        start_date=_T,
-        end_date=_T3,
-        created_by=USER_ID,
-        sessions=[_session_input()],
+def _create_input(**overrides):
+    sessions = overrides.pop("sessions", [_create_session_input()])
+    defaults = dict(
+        title="Hackathon",
+        description="<p>desc</p>",
+        start_date=EVENT_START,
+        end_date=EVENT_END,
+        created_by=CREATOR_ID,
+        sessions=sessions,
     )
     defaults.update(overrides)
     return CreateEventInput(**defaults)
 
 
-# ─── CreateEventUseCase.execute ───────────────────────────────────────────────
+def _create_session_input(**overrides):
+    defaults = dict(
+        venue_id=VENUE_ID,
+        title="Session One",
+        description=None,
+        start_datetime=SESSION_START,
+        end_datetime=SESSION_END,
+    )
+    defaults.update(overrides)
+    return CreateEventSessionInput(**defaults)
 
 
-class TestCreateEvent:
-    @pytest.mark.asyncio
-    async def test_success_commits_and_returns_event_with_sessions(self):
-        """Commits the transaction and returns the created event with sessions on success"""
-        event = _make_event()
-        session = _make_session()
-        repo = _make_repo(created_event=event, created_session=session)
-        db = AsyncMock()
-        result = await CreateEventUseCase(repo=repo, db=db).execute(_event_input())
-        assert result.event is event
-        assert result.sessions == [session]
-        db.commit.assert_awaited_once()
-
-    @pytest.mark.asyncio
-    async def test_creates_one_session_per_input(self):
-        """Calls create_session once for every session descriptor in the input"""
-        repo = _make_repo()
-        db = AsyncMock()
-        inputs = _event_input(sessions=[_session_input(), _session_input(title="Building Phase")])
-        result = await CreateEventUseCase(repo=repo, db=db).execute(inputs)
-        assert repo.create_session.await_count == 2
-        assert len(result.sessions) == 2
-
-    @pytest.mark.asyncio
-    async def test_raises_event_date_error_when_end_not_after_start(self):
-        """Raises EventDateValidationError when event end_date equals start_date"""
-        with pytest.raises(EventDateValidationError):
-            await _make_uc().execute(_event_input(end_date=_T, start_date=_T))
-
-    @pytest.mark.asyncio
-    async def test_raises_event_date_error_when_end_before_start(self):
-        """Raises EventDateValidationError when event end_date precedes start_date"""
-        with pytest.raises(EventDateValidationError):
-            await _make_uc().execute(_event_input(start_date=_T3, end_date=_T))
-
-    @pytest.mark.asyncio
-    async def test_raises_validation_error_when_sessions_list_is_empty(self):
-        """Raises EventValidationError when no sessions are provided"""
-        with pytest.raises(EventValidationError):
-            await _make_uc().execute(_event_input(sessions=[]))
-
-    @pytest.mark.asyncio
-    async def test_raises_invalid_session_date_when_session_end_equals_start(self):
-        """Raises InvalidEventSessionDateError when session end_datetime equals start_datetime"""
-        bad_session = _session_input(start_datetime=_T, end_datetime=_T)
-        with pytest.raises(InvalidEventSessionDateError):
-            await _make_uc().execute(_event_input(sessions=[bad_session]))
-
-    @pytest.mark.asyncio
-    async def test_raises_invalid_session_date_when_session_end_before_start(self):
-        """Raises InvalidEventSessionDateError when session end_datetime precedes start_datetime"""
-        bad_session = _session_input(start_datetime=_T2, end_datetime=_T)
-        with pytest.raises(InvalidEventSessionDateError):
-            await _make_uc().execute(_event_input(sessions=[bad_session]))
-
-    @pytest.mark.asyncio
-    async def test_raises_exceeds_bounds_when_session_starts_before_event(self):
-        """Raises EventSessionExceedsEventBoundsError when session starts before the event"""
-        before_event = datetime(2025, 5, 31, 9, 0, tzinfo=timezone.utc)
-        bad_session = _session_input(start_datetime=before_event, end_datetime=_T2)
-        with pytest.raises(EventSessionExceedsEventBoundsError):
-            await _make_uc().execute(_event_input(sessions=[bad_session]))
-
-    @pytest.mark.asyncio
-    async def test_raises_exceeds_bounds_when_session_ends_after_event(self):
-        """Raises EventSessionExceedsEventBoundsError when session ends after the event"""
-        after_event = datetime(2025, 6, 4, 18, 0, tzinfo=timezone.utc)
-        bad_session = _session_input(start_datetime=_T, end_datetime=after_event)
-        with pytest.raises(EventSessionExceedsEventBoundsError):
-            await _make_uc().execute(_event_input(sessions=[bad_session]))
-
-    @pytest.mark.asyncio
-    async def test_raises_venue_not_found_when_venue_missing(self):
-        """Raises VenueNotFoundError when a session references a non-existent venue"""
-        repo = _make_repo(venue_exists=False)
-        with pytest.raises(VenueNotFoundError):
-            await _make_uc(repo).execute(_event_input())
-
-    @pytest.mark.asyncio
-    async def test_rolls_back_and_reraises_on_create_event_failure(self):
-        """Rolls back the transaction and re-raises when the event insert fails"""
-        repo = _make_repo()
-        repo.create_event = AsyncMock(side_effect=RuntimeError("db failure"))
-        db = AsyncMock()
-        with pytest.raises(RuntimeError):
-            await CreateEventUseCase(repo=repo, db=db).execute(_event_input())
-        db.rollback.assert_awaited_once()
-
-    @pytest.mark.asyncio
-    async def test_rolls_back_and_reraises_on_create_session_failure(self):
-        """Rolls back the transaction and re-raises when a session insert fails"""
-        repo = _make_repo()
-        repo.create_session = AsyncMock(side_effect=RuntimeError("session db failure"))
-        db = AsyncMock()
-        with pytest.raises(RuntimeError):
-            await CreateEventUseCase(repo=repo, db=db).execute(_event_input())
-        db.rollback.assert_awaited_once()
-
-    @pytest.mark.asyncio
-    async def test_does_not_commit_when_event_creation_fails(self):
-        """Never commits when the event insert raises an exception"""
-        repo = _make_repo()
-        repo.create_event = AsyncMock(side_effect=RuntimeError("db failure"))
-        db = AsyncMock()
-        with pytest.raises(RuntimeError):
-            await CreateEventUseCase(repo=repo, db=db).execute(_event_input())
-        db.commit.assert_not_awaited()
-
-    @pytest.mark.asyncio
-    async def test_checks_venue_existence_for_each_session(self):
-        """Calls venue_exists once per session to validate all venue references"""
-        repo = _make_repo(venue_exists=True)
-        second_venue = uuid.uuid4()
-        sessions = [_session_input(), _session_input(venue_id=second_venue)]
-        await _make_uc(repo).execute(_event_input(sessions=sessions))
-        assert repo.venue_exists.await_count == 2
+@pytest.mark.asyncio
+async def test_create_raises_date_error_when_end_before_start():
+    """Rejects event when end_date is before start_date."""
+    uc, _, _ = _make_create_uc()
+    with pytest.raises(EventDateValidationError):
+        await uc.create_event(_create_input(start_date=EVENT_END, end_date=EVENT_START))
 
 
-# ─── UpdateEventUseCase helpers ───────────────────────────────────────────────
+@pytest.mark.asyncio
+async def test_create_raises_date_error_when_end_equals_start():
+    """Rejects event when end_date equals start_date."""
+    uc, _, _ = _make_create_uc()
+    with pytest.raises(EventDateValidationError):
+        await uc.create_event(_create_input(start_date=EVENT_START, end_date=EVENT_START))
 
-OTHER_USER_ID = uuid.uuid4()
+
+@pytest.mark.asyncio
+async def test_create_raises_validation_error_when_sessions_empty():
+    """Rejects event with no sessions."""
+    uc, _, _ = _make_create_uc()
+    with pytest.raises(EventValidationError):
+        await uc.create_event(_create_input(sessions=[]))
 
 
-def _make_update_repo(
-    *,
-    event: Event | None = None,
-    existing_sessions: list[EventSession] | None = None,
-    venue_exists: bool = True,
-    updated_event: Event | None = None,
-    updated_session: EventSession | None = None,
-    created_session: EventSession | None = None,
-) -> MagicMock:
-    base_event = event or _make_event()
-    repo = MagicMock()
-    repo.get_event_by_id = AsyncMock(return_value=base_event)
-    repo.get_sessions_by_event_id = AsyncMock(return_value=existing_sessions if existing_sessions is not None else [_make_session()])
-    repo.venue_exists = AsyncMock(return_value=venue_exists)
-    repo.update_event = AsyncMock(return_value=updated_event or _make_event())
-    repo.update_session = AsyncMock(return_value=updated_session or _make_session())
-    repo.create_session = AsyncMock(return_value=created_session or _make_session())
-    repo.delete_session = AsyncMock(return_value=True)
+@pytest.mark.asyncio
+async def test_create_raises_invalid_session_date_when_end_before_start():
+    """Rejects session when its end_datetime is before start_datetime."""
+    uc, _, _ = _make_create_uc()
+    with pytest.raises(InvalidEventSessionDateError):
+        await uc.create_event(_create_input(sessions=[_create_session_input(start_datetime=SESSION_END, end_datetime=SESSION_START)]))
+
+
+@pytest.mark.asyncio
+async def test_create_raises_invalid_session_date_when_end_equals_start():
+    """Rejects session when its end_datetime equals start_datetime."""
+    uc, _, _ = _make_create_uc()
+    with pytest.raises(InvalidEventSessionDateError):
+        await uc.create_event(_create_input(sessions=[_create_session_input(start_datetime=SESSION_START, end_datetime=SESSION_START)]))
+
+
+@pytest.mark.asyncio
+async def test_create_raises_bounds_error_when_session_start_before_event():
+    """Rejects session whose start_datetime falls before the event start."""
+    uc, _, _ = _make_create_uc()
+    early = datetime(2025, 5, 31, tzinfo=timezone.utc)
+    with pytest.raises(EventSessionExceedsEventBoundsError):
+        await uc.create_event(_create_input(sessions=[_create_session_input(start_datetime=early, end_datetime=SESSION_END)]))
+
+
+@pytest.mark.asyncio
+async def test_create_raises_bounds_error_when_session_end_after_event():
+    """Rejects session whose end_datetime falls after the event end."""
+    uc, _, _ = _make_create_uc()
+    late = datetime(2025, 6, 11, tzinfo=timezone.utc)
+    with pytest.raises(EventSessionExceedsEventBoundsError):
+        await uc.create_event(_create_input(sessions=[_create_session_input(start_datetime=SESSION_START, end_datetime=late)]))
+
+
+@pytest.mark.asyncio
+async def test_create_raises_venue_not_found():
+    """Rejects event when a session references a non-existent venue."""
+    repo = _make_create_repo()
+    repo.venue_exists = AsyncMock(return_value=False)
+    uc, _, _ = _make_create_uc(repo)
+    with pytest.raises(VenueNotFoundError):
+        await uc.create_event(_create_input())
+
+
+@pytest.mark.asyncio
+async def test_create_persists_event_and_sessions():
+    """Calls create_event and create_session when all inputs are valid."""
+    uc, repo, _ = _make_create_uc()
+    await uc.create_event(_create_input())
+    repo.create_event.assert_called_once()
+    repo.create_session.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_create_persists_multiple_sessions():
+    """Calls create_session once per session in the input list."""
+    uc, repo, _ = _make_create_uc()
+    await uc.create_event(_create_input(sessions=[_create_session_input(), _create_session_input()]))
+    assert repo.create_session.call_count == 2
+
+
+@pytest.mark.asyncio
+async def test_create_commits_transaction_on_success():
+    """Commits the database transaction after successful creation."""
+    uc, _, db = _make_create_uc()
+    await uc.create_event(_create_input())
+    db.commit.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_create_rolls_back_on_failure():
+    """Rolls back the transaction when a repository operation raises."""
+    repo = _make_create_repo()
+    repo.create_event = AsyncMock(side_effect=RuntimeError("db error"))
+    uc, _, db = _make_create_uc(repo)
+    with pytest.raises(RuntimeError):
+        await uc.create_event(_create_input())
+    db.rollback.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_create_returns_event_with_all_sessions():
+    """Returns the created event and full session list in the output."""
+    uc, _, _ = _make_create_uc()
+    result = await uc.create_event(_create_input())
+    assert result.event.id == EVENT_ID
+    assert len(result.sessions) == 1
+
+
+@pytest.mark.asyncio
+async def test_create_does_not_commit_when_venue_not_found():
+    """Does not commit when venue validation fails before any DB write."""
+    repo = _make_create_repo()
+    repo.venue_exists = AsyncMock(return_value=False)
+    uc, _, db = _make_create_uc(repo)
+    with pytest.raises(VenueNotFoundError):
+        await uc.create_event(_create_input())
+    db.commit.assert_not_called()
+
+
+# ---------------------------------------------------------------------------
+# UpdateEventMetadataUseCase
+# ---------------------------------------------------------------------------
+
+def _make_meta_repo():
+    repo = MagicMock(spec=EventRepository)
+    repo.get_event_by_id = AsyncMock(return_value=_sample_event())
+    repo.update_event = AsyncMock(return_value=_sample_event(title="Updated"))
     return repo
 
 
-def _make_update_uc(repo: MagicMock | None = None) -> UpdateEventUseCase:
-    return UpdateEventUseCase(repo=repo or _make_update_repo(), db=AsyncMock())
+def _make_meta_uc(repo=None):
+    repo = repo or _make_meta_repo()
+    db = AsyncMock(spec=AsyncSession)
+    return EventUseCase(repo, db), repo, db
 
 
-def _update_session_input(*, with_id: uuid.UUID | None = SESSION_ID, **overrides: Any) -> UpdateEventSessionInput:
-    defaults: dict[str, Any] = dict(
-        id=with_id,
+def _meta_input(**overrides):
+    defaults = dict(
+        event_id=EVENT_ID,
+        updated_by=CREATOR_ID,
+        title="Updated Title",
+        description="<p>updated</p>",
+        start_date=EVENT_START,
+        end_date=EVENT_END,
+    )
+    defaults.update(overrides)
+    return UpdateEventMetadataInput(**defaults)
+
+
+@pytest.mark.asyncio
+async def test_meta_raises_not_found_when_event_missing():
+    """Raises EventNotFoundError when the target event does not exist."""
+    repo = _make_meta_repo()
+    repo.get_event_by_id = AsyncMock(return_value=None)
+    uc, _, _ = _make_meta_uc(repo)
+    with pytest.raises(EventNotFoundError):
+        await uc.update_event_metadata(_meta_input())
+
+
+@pytest.mark.asyncio
+async def test_meta_raises_unauthorized_when_not_creator():
+    """Raises UnauthorizedEventOperationError when caller is not the creator."""
+    uc, _, _ = _make_meta_uc()
+    with pytest.raises(UnauthorizedEventOperationError):
+        await uc.update_event_metadata(_meta_input(updated_by=OTHER_ID))
+
+
+@pytest.mark.asyncio
+async def test_meta_raises_date_error_when_end_before_start():
+    """Rejects update when new end_date is before start_date."""
+    uc, _, _ = _make_meta_uc()
+    with pytest.raises(EventDateValidationError):
+        await uc.update_event_metadata(_meta_input(start_date=EVENT_END, end_date=EVENT_START))
+
+
+@pytest.mark.asyncio
+async def test_meta_raises_date_error_when_end_equals_start():
+    """Rejects update when new end_date equals start_date."""
+    uc, _, _ = _make_meta_uc()
+    with pytest.raises(EventDateValidationError):
+        await uc.update_event_metadata(_meta_input(start_date=EVENT_START, end_date=EVENT_START))
+
+
+@pytest.mark.asyncio
+async def test_meta_acquires_row_lock_before_read():
+    """Fetches the event with FOR UPDATE to serialise concurrent updates."""
+    uc, repo, _ = _make_meta_uc()
+    await uc.update_event_metadata(_meta_input())
+    repo.get_event_by_id.assert_called_once_with(EVENT_ID, for_update=True)
+
+
+@pytest.mark.asyncio
+async def test_meta_calls_update_event_with_new_values():
+    """Calls update_event with all supplied field values."""
+    uc, repo, _ = _make_meta_uc()
+    await uc.update_event_metadata(_meta_input())
+    repo.update_event.assert_called_once_with(
+        event_id=EVENT_ID,
+        title="Updated Title",
+        description="<p>updated</p>",
+        start_date=EVENT_START,
+        end_date=EVENT_END,
+    )
+
+
+@pytest.mark.asyncio
+async def test_meta_commits_transaction_on_success():
+    """Commits the database transaction after successful update."""
+    uc, _, db = _make_meta_uc()
+    await uc.update_event_metadata(_meta_input())
+    db.commit.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_meta_rolls_back_on_repo_failure():
+    """Rolls back the transaction when the repository update raises."""
+    repo = _make_meta_repo()
+    repo.update_event = AsyncMock(side_effect=RuntimeError("db error"))
+    uc, _, db = _make_meta_uc(repo)
+    with pytest.raises(RuntimeError):
+        await uc.update_event_metadata(_meta_input())
+    db.rollback.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_meta_returns_updated_event_and_pre_update_snapshot():
+    """Returns both the updated event and the old event for audit logging."""
+    uc, _, _ = _make_meta_uc()
+    result = await uc.update_event_metadata(_meta_input())
+    assert result.event.title == "Updated"
+    assert result.old_event.id == EVENT_ID
+
+
+# ---------------------------------------------------------------------------
+# UpdateEventSessionUseCase
+# ---------------------------------------------------------------------------
+
+def _make_session_repo():
+    repo = MagicMock(spec=EventRepository)
+    repo.get_session_by_id = AsyncMock(return_value=_sample_session())
+    repo.get_event_by_id = AsyncMock(return_value=_sample_event())
+    repo.venue_exists = AsyncMock(return_value=True)
+    repo.update_session = AsyncMock(return_value=_sample_session(title="Updated Session"))
+    return repo
+
+
+def _make_session_uc(repo=None):
+    repo = repo or _make_session_repo()
+    db = AsyncMock(spec=AsyncSession)
+    return EventUseCase(repo, db), repo, db
+
+
+def _session_input(**overrides):
+    defaults = dict(
+        session_id=SESSION_ID,
+        updated_by=CREATOR_ID,
         venue_id=VENUE_ID,
-        title="Ideation Phase",
+        title="Updated Session",
         description=None,
-        start_datetime=_T,
-        end_datetime=_T2,
+        start_datetime=SESSION_START,
+        end_datetime=SESSION_END,
     )
     defaults.update(overrides)
     return UpdateEventSessionInput(**defaults)
 
 
-def _update_input(**overrides: Any) -> UpdateEventInput:
-    defaults: dict[str, Any] = dict(
-        event_id=EVENT_ID,
-        updated_by=USER_ID,
-        title="Hackathon 2025 Updated",
-        description="<p>Updated</p>",
-        start_date=_T,
-        end_date=_T3,
-        sessions=[_update_session_input()],
+@pytest.mark.asyncio
+async def test_session_raises_not_found_when_session_missing():
+    """Raises EventSessionNotFoundError when the session does not exist."""
+    repo = _make_session_repo()
+    repo.get_session_by_id = AsyncMock(return_value=None)
+    uc, _, _ = _make_session_uc(repo)
+    with pytest.raises(EventSessionNotFoundError):
+        await uc.update_event_session(_session_input())
+
+
+@pytest.mark.asyncio
+async def test_session_raises_not_found_when_parent_event_missing():
+    """Raises EventNotFoundError when the session's parent event no longer exists."""
+    repo = _make_session_repo()
+    repo.get_event_by_id = AsyncMock(return_value=None)
+    uc, _, _ = _make_session_uc(repo)
+    with pytest.raises(EventNotFoundError):
+        await uc.update_event_session(_session_input())
+
+
+@pytest.mark.asyncio
+async def test_session_raises_unauthorized_when_not_creator():
+    """Raises UnauthorizedEventOperationError when caller is not the event creator."""
+    uc, _, _ = _make_session_uc()
+    with pytest.raises(UnauthorizedEventOperationError):
+        await uc.update_event_session(_session_input(updated_by=OTHER_ID))
+
+
+@pytest.mark.asyncio
+async def test_session_raises_invalid_date_when_end_before_start():
+    """Rejects update when session end_datetime is before start_datetime."""
+    uc, _, _ = _make_session_uc()
+    with pytest.raises(InvalidEventSessionDateError):
+        await uc.update_event_session(_session_input(start_datetime=SESSION_END, end_datetime=SESSION_START))
+
+
+@pytest.mark.asyncio
+async def test_session_raises_invalid_date_when_end_equals_start():
+    """Rejects update when session end_datetime equals start_datetime."""
+    uc, _, _ = _make_session_uc()
+    with pytest.raises(InvalidEventSessionDateError):
+        await uc.update_event_session(_session_input(start_datetime=SESSION_START, end_datetime=SESSION_START))
+
+
+@pytest.mark.asyncio
+async def test_session_raises_bounds_error_when_start_before_event():
+    """Rejects update when session start falls before the parent event start."""
+    uc, _, _ = _make_session_uc()
+    early = datetime(2025, 5, 31, tzinfo=timezone.utc)
+    with pytest.raises(EventSessionExceedsEventBoundsError):
+        await uc.update_event_session(_session_input(start_datetime=early, end_datetime=SESSION_END))
+
+
+@pytest.mark.asyncio
+async def test_session_raises_bounds_error_when_end_after_event():
+    """Rejects update when session end falls after the parent event end."""
+    uc, _, _ = _make_session_uc()
+    late = datetime(2025, 6, 11, tzinfo=timezone.utc)
+    with pytest.raises(EventSessionExceedsEventBoundsError):
+        await uc.update_event_session(_session_input(start_datetime=SESSION_START, end_datetime=late))
+
+
+@pytest.mark.asyncio
+async def test_session_raises_venue_not_found():
+    """Raises VenueNotFoundError when the referenced venue does not exist."""
+    repo = _make_session_repo()
+    repo.venue_exists = AsyncMock(return_value=False)
+    uc, _, _ = _make_session_uc(repo)
+    with pytest.raises(VenueNotFoundError):
+        await uc.update_event_session(_session_input())
+
+
+@pytest.mark.asyncio
+async def test_session_raises_not_found_when_concurrent_delete_wins():
+    """Raises EventSessionNotFoundError when update_session returns None (concurrent delete)."""
+    repo = _make_session_repo()
+    repo.update_session = AsyncMock(return_value=None)
+    uc, _, _ = _make_session_uc(repo)
+    with pytest.raises(EventSessionNotFoundError):
+        await uc.update_event_session(_session_input())
+
+
+@pytest.mark.asyncio
+async def test_session_acquires_event_lock_via_session_event_id():
+    """Locks the parent event row using the session's event_id."""
+    uc, repo, _ = _make_session_uc()
+    await uc.update_event_session(_session_input())
+    repo.get_event_by_id.assert_called_once_with(EVENT_ID, for_update=True)
+
+
+@pytest.mark.asyncio
+async def test_session_calls_update_session_with_correct_args():
+    """Calls update_session with all supplied field values."""
+    uc, repo, _ = _make_session_uc()
+    await uc.update_event_session(_session_input())
+    repo.update_session.assert_called_once_with(
+        session_id=SESSION_ID,
+        venue_id=VENUE_ID,
+        title="Updated Session",
+        description=None,
+        start_datetime=SESSION_START,
+        end_datetime=SESSION_END,
     )
-    defaults.update(overrides)
-    return UpdateEventInput(**defaults)
 
 
-# ─── UpdateEventUseCase ───────────────────────────────────────────────────────
+@pytest.mark.asyncio
+async def test_session_commits_transaction_on_success():
+    """Commits the database transaction after a successful session update."""
+    uc, _, db = _make_session_uc()
+    await uc.update_event_session(_session_input())
+    db.commit.assert_called_once()
 
 
-class TestUpdateEvent:
-    @pytest.mark.asyncio
-    async def test_success_commits_and_returns_updated_event_with_sessions(self):
-        """Commits the transaction and returns the updated event with sessions on success"""
-        event = _make_event()
-        session = _make_session()
-        repo = _make_update_repo(updated_event=event, updated_session=session)
-        db = AsyncMock()
-        result = await UpdateEventUseCase(repo=repo, db=db).execute(_update_input())
-        assert result.event is event
-        assert result.sessions == [session]
-        db.commit.assert_awaited_once()
+@pytest.mark.asyncio
+async def test_session_rolls_back_on_repo_failure():
+    """Rolls back the transaction when the repository update raises."""
+    repo = _make_session_repo()
+    repo.update_session = AsyncMock(side_effect=RuntimeError("db error"))
+    uc, _, db = _make_session_uc(repo)
+    with pytest.raises(RuntimeError):
+        await uc.update_event_session(_session_input())
+    db.rollback.assert_called_once()
 
-    @pytest.mark.asyncio
-    async def test_output_carries_old_event_and_sessions_for_audit(self):
-        """Includes the pre-update event and session snapshots in the output for audit logging"""
-        old_event = _make_event()
-        old_session = _make_session()
-        repo = _make_update_repo(event=old_event, existing_sessions=[old_session])
-        result = await _make_update_uc(repo).execute(_update_input())
-        assert result.old_event is old_event
-        assert result.old_sessions == [old_session]
 
-    @pytest.mark.asyncio
-    async def test_raises_not_found_when_event_missing(self):
-        """Raises EventNotFoundError when the target event does not exist"""
-        repo = _make_update_repo()
-        repo.get_event_by_id = AsyncMock(return_value=None)
-        with pytest.raises(EventNotFoundError):
-            await _make_update_uc(repo).execute(_update_input())
-
-    @pytest.mark.asyncio
-    async def test_raises_unauthorized_when_caller_is_not_creator(self):
-        """Raises UnauthorizedEventOperationError when the caller did not create the event"""
-        repo = _make_update_repo(event=_make_event(created_by=OTHER_USER_ID))
-        with pytest.raises(UnauthorizedEventOperationError):
-            await _make_update_uc(repo).execute(_update_input())
-
-    @pytest.mark.asyncio
-    async def test_raises_date_error_when_event_end_equals_start(self):
-        """Raises EventDateValidationError when updated end_date equals start_date"""
-        with pytest.raises(EventDateValidationError):
-            await _make_update_uc().execute(_update_input(start_date=_T, end_date=_T))
-
-    @pytest.mark.asyncio
-    async def test_raises_date_error_when_event_end_before_start(self):
-        """Raises EventDateValidationError when updated end_date precedes start_date"""
-        with pytest.raises(EventDateValidationError):
-            await _make_update_uc().execute(_update_input(start_date=_T3, end_date=_T))
-
-    @pytest.mark.asyncio
-    async def test_raises_validation_error_when_sessions_list_is_empty(self):
-        """Raises EventValidationError when the updated sessions list is empty"""
-        with pytest.raises(EventValidationError):
-            await _make_update_uc().execute(_update_input(sessions=[]))
-
-    @pytest.mark.asyncio
-    async def test_raises_invalid_session_date_when_session_end_before_start(self):
-        """Raises InvalidEventSessionDateError when a session's end_datetime precedes start_datetime"""
-        bad = _update_session_input(start_datetime=_T2, end_datetime=_T)
-        with pytest.raises(InvalidEventSessionDateError):
-            await _make_update_uc().execute(_update_input(sessions=[bad]))
-
-    @pytest.mark.asyncio
-    async def test_raises_exceeds_bounds_when_session_starts_before_event(self):
-        """Raises EventSessionExceedsEventBoundsError when a session starts before the updated event"""
-        before = datetime(2025, 5, 31, 9, 0, tzinfo=timezone.utc)
-        bad = _update_session_input(start_datetime=before, end_datetime=_T2)
-        with pytest.raises(EventSessionExceedsEventBoundsError):
-            await _make_update_uc().execute(_update_input(sessions=[bad]))
-
-    @pytest.mark.asyncio
-    async def test_raises_exceeds_bounds_when_session_ends_after_event(self):
-        """Raises EventSessionExceedsEventBoundsError when a session ends after the updated event"""
-        after = datetime(2025, 6, 4, 18, 0, tzinfo=timezone.utc)
-        bad = _update_session_input(start_datetime=_T, end_datetime=after)
-        with pytest.raises(EventSessionExceedsEventBoundsError):
-            await _make_update_uc().execute(_update_input(sessions=[bad]))
-
-    @pytest.mark.asyncio
-    async def test_raises_session_not_found_when_session_id_not_on_this_event(self):
-        """Raises EventSessionNotFoundError when a session id in the request does not belong to this event"""
-        foreign_id = uuid.uuid4()
-        bad = _update_session_input(with_id=foreign_id)
-        repo = _make_update_repo(existing_sessions=[_make_session()])
-        with pytest.raises(EventSessionNotFoundError):
-            await _make_update_uc(repo).execute(_update_input(sessions=[bad]))
-
-    @pytest.mark.asyncio
-    async def test_raises_venue_not_found_when_venue_missing(self):
-        """Raises VenueNotFoundError when a session references a non-existent venue"""
-        repo = _make_update_repo(venue_exists=False)
-        with pytest.raises(VenueNotFoundError):
-            await _make_update_uc(repo).execute(_update_input())
-
-    @pytest.mark.asyncio
-    async def test_deletes_sessions_absent_from_incoming_list(self):
-        """Calls delete_session for every session that exists on the event but is not in the update request"""
-        extra_session_id = uuid.uuid4()
-        extra = _make_session(id=extra_session_id)
-        existing = _make_session()
-        repo = _make_update_repo(existing_sessions=[existing, extra])
-        db = AsyncMock()
-        await UpdateEventUseCase(repo=repo, db=db).execute(_update_input(sessions=[_update_session_input(with_id=SESSION_ID)]))
-        repo.delete_session.assert_awaited_once_with(extra_session_id)
-
-    @pytest.mark.asyncio
-    async def test_updates_sessions_with_id(self):
-        """Calls update_session and not create_session when a session id is provided"""
-        repo = _make_update_repo()
-        await _make_update_uc(repo).execute(_update_input(sessions=[_update_session_input(with_id=SESSION_ID)]))
-        repo.update_session.assert_awaited_once()
-        repo.create_session.assert_not_awaited()
-
-    @pytest.mark.asyncio
-    async def test_creates_sessions_without_id(self):
-        """Calls create_session and not update_session when no session id is provided"""
-        repo = _make_update_repo(existing_sessions=[])
-        await _make_update_uc(repo).execute(_update_input(sessions=[_update_session_input(with_id=None)]))
-        repo.create_session.assert_awaited_once()
-        repo.update_session.assert_not_awaited()
-
-    @pytest.mark.asyncio
-    async def test_rolls_back_on_update_event_failure(self):
-        """Rolls back the transaction and re-raises when the event update fails"""
-        repo = _make_update_repo()
-        repo.update_event = AsyncMock(side_effect=RuntimeError("db"))
-        db = AsyncMock()
-        with pytest.raises(RuntimeError):
-            await UpdateEventUseCase(repo=repo, db=db).execute(_update_input())
-        db.rollback.assert_awaited_once()
-
-    @pytest.mark.asyncio
-    async def test_rolls_back_on_update_session_failure(self):
-        """Rolls back the transaction and re-raises when a session update fails"""
-        repo = _make_update_repo()
-        repo.update_session = AsyncMock(side_effect=RuntimeError("db"))
-        db = AsyncMock()
-        with pytest.raises(RuntimeError):
-            await UpdateEventUseCase(repo=repo, db=db).execute(_update_input())
-        db.rollback.assert_awaited_once()
-
-    @pytest.mark.asyncio
-    async def test_does_not_commit_when_mutation_fails(self):
-        """Never commits when any mutation raises an exception"""
-        repo = _make_update_repo()
-        repo.update_event = AsyncMock(side_effect=RuntimeError("db"))
-        db = AsyncMock()
-        with pytest.raises(RuntimeError):
-            await UpdateEventUseCase(repo=repo, db=db).execute(_update_input())
-        db.commit.assert_not_awaited()
-
-    @pytest.mark.asyncio
-    async def test_acquires_lock_on_event_row(self):
-        """Calls get_event_by_id with for_update=True to acquire a pessimistic row lock"""
-        repo = _make_update_repo()
-        await _make_update_uc(repo).execute(_update_input())
-        repo.get_event_by_id.assert_awaited_once_with(EVENT_ID, for_update=True)
+@pytest.mark.asyncio
+async def test_session_returns_updated_session_and_pre_update_snapshot():
+    """Returns both the updated session and the old session for audit logging."""
+    uc, _, _ = _make_session_uc()
+    result = await uc.update_event_session(_session_input())
+    assert result.session.title == "Updated Session"
+    assert result.old_session.id == SESSION_ID

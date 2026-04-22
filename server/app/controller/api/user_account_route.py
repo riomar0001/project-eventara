@@ -11,11 +11,11 @@ from app.application.dto.users_dto import (
     ListUserAccountsInput,
     SendUserPasswordResetInput,
 )
-from app.application.use_cases.account_settings_usecase import DeleteAccountUseCase
-from app.application.use_cases.audit_log_usecase import CreateAuditLogUseCase
+from app.application.use_cases.account_settings_usecase import AccountSettingsUseCase
+from app.application.use_cases.audit_log_usecase import AuditLogUseCase
 from app.application.use_cases.users_usecase import AdminUserAccountUseCase
 from app.controller.api.audit_helpers import safe_audit_log, serialize_admin_user_account
-from app.controller.dependencies import get_create_audit_log_use_case, require_permission
+from app.controller.dependencies import get_audit_log_use_case, require_permission
 from app.controller.dependencies.use_cases_depends import get_admin_user_account_use_case, get_delete_account_use_case
 from app.controller.docs.user_account_docs import (
     EMAIL_CHANGE_VALIDATION_ERROR,
@@ -256,7 +256,7 @@ async def change_user_role(
     body: ChangeUserRoleRequest,
     caller_id: uuid.UUID = Depends(require_permission("user-accounts", RoleAction.UPDATE)),
     use_case: AdminUserAccountUseCase = Depends(get_admin_user_account_use_case),
-    audit_use_case: CreateAuditLogUseCase = Depends(get_create_audit_log_use_case),
+    audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> ChangeUserRoleResponse:
     """Replace a user's current role assignment set with one effective role.
 
@@ -328,7 +328,7 @@ async def change_user_email(
     body: ChangeUserEmailRequest,
     caller_id: uuid.UUID = Depends(require_permission("user-accounts", RoleAction.UPDATE)),
     use_case: AdminUserAccountUseCase = Depends(get_admin_user_account_use_case),
-    audit_use_case: CreateAuditLogUseCase = Depends(get_create_audit_log_use_case),
+    audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> ChangeUserEmailResponse:
     """Update a user's email address and force re-verification.
 
@@ -384,7 +384,7 @@ async def send_user_password_reset(
     user_id: uuid.UUID,
     caller_id: uuid.UUID = Depends(require_permission("user-accounts", RoleAction.UPDATE)),
     use_case: AdminUserAccountUseCase = Depends(get_admin_user_account_use_case),
-    audit_use_case: CreateAuditLogUseCase = Depends(get_create_audit_log_use_case),
+    audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> SendUserPasswordResetResponse:
     """Send the target user a password reset link through the admin workflow.
 
@@ -446,7 +446,7 @@ async def schedule_admin_account_deletion(
     user_id: uuid.UUID,
     body: AdminDeleteAccountRequest,
     caller_id: uuid.UUID = Depends(require_permission("user-accounts", RoleAction.DELETE)),
-    use_case: DeleteAccountUseCase = Depends(get_delete_account_use_case),
+    use_case: AccountSettingsUseCase = Depends(get_delete_account_use_case),
 ) -> DeleteAccountResponse:
     """Schedule deletion of another user's account through the administrator workflow.
 

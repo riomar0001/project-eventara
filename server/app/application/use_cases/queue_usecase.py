@@ -12,7 +12,7 @@ A job is considered *dead* when its result exists (``arq:result:{id}``) and
 dropped from the active queue, forming a natural dead-letter store.
 
 Concurrency strategy — distributed Redis lock for retry:
-  ``RetryDeadJobUseCase`` issues a ``SET NX EX`` lock on
+  ``retry_dead_job`` issues a ``SET NX EX`` lock on
   ``arq:dlq:retry-lock:{job_id}`` before touching the result key.
   This prevents two concurrent HTTP requests from double-enqueuing the same
   failed job.  The lock TTL (30 s) acts as a deadlock safeguard should the
@@ -97,7 +97,6 @@ async def _get_key_type(redis: ArqRedis, key: str) -> str:
 
 async def _get_collection_size(redis: ArqRedis, key: str) -> int:
     key_type = await _get_key_type(redis, key)
-
     if key_type == "none":
         return 0
     if key_type == "zset":
@@ -112,76 +111,63 @@ async def _get_collection_size(redis: ArqRedis, key: str) -> int:
         return await cast(Awaitable[int], redis.hlen(key))
     if key_type == "string":
         return 1 if await redis.get(key) is not None else 0
-
     return 0
 
 
 async def _get_key_entries(redis: ArqRedis, key: str) -> list[str]:
     key_type = await _get_key_type(redis, key)
-
     if key_type == "none":
         return []
     if key_type == "zset":
-        return [_decode(entry) for entry in await cast(Awaitable[list], redis.zrange(key, 0, -1))]
+        return [_decode(e) for e in await cast(Awaitable[list], redis.zrange(key, 0, -1))]
     if key_type == "list":
-        return [_decode(entry) for entry in await cast(Awaitable[list], redis.lrange(key, 0, -1))]
+        return [_decode(e) for e in await cast(Awaitable[list], redis.lrange(key, 0, -1))]
     if key_type == "set":
-        return sorted(_decode(entry) for entry in await cast(Awaitable[set], redis.smembers(key)))
+        return sorted(_decode(e) for e in await cast(Awaitable[set], redis.smembers(key)))
     if key_type == "hash":
-        return [_decode(entry) for entry in await cast(Awaitable[list], redis.hvals(key))]
+        return [_decode(e) for e in await cast(Awaitable[list], redis.hvals(key))]
     if key_type == "string":
         value = _decode_optional(await redis.get(key))
         return [value] if value else []
-
     return []
 
 
 async def _get_health_entries(redis: ArqRedis) -> list[str]:
     entries: list[str] = []
     matched_keys: list[str] = []
-
     async for key in redis.scan_iter(match=f"{_HEALTH_CHECK_KEY}*"):
         matched_keys.append(_decode(key))
-
     if not matched_keys:
         matched_keys = [_HEALTH_CHECK_KEY]
-
     for key in matched_keys:
         entries.extend(await _get_key_entries(redis, key))
-
     return entries
 
 
-class GetQueueStatsUseCase:
-    """Returns a snapshot of queue activity by inspecting Redis directly.
+class QueueUseCase:
+    """Application service for ARQ queue inspection and dead-letter management.
 
-    Counts are derived from three sources:
-    - Pending jobs  → ``ZCARD arq:queue``
-    - In-progress   → number of ``arq:in-progress:*`` keys alive in Redis
-    - Results       → scan of ``arq:result:*`` keys, partitioned by
-                       ``JobResult.success``
-
-    Worker health entries are read from the ``arq:queue:health-check``
-    sorted set and parsed into structured objects.
-
-    Note: scanning ``arq:result:*`` is O(n) in the number of stored results.
-    ARQ's default result TTL caps this set, so the operation remains fast
-    under normal workloads.
+    All operations query or mutate Redis directly via the ARQ connection pool.
+    ``retry_dead_job`` uses a distributed ``SET NX EX`` lock to prevent
+    concurrent double-enqueue of the same failed job.
 
     Args:
         redis: ARQ connection pool bound to the application lifecycle.
-
-    Returns:
-        ``QueueStatsOutput`` with live counters and health entries.
-
-    Raises:
-        ``QueueInspectionError`` on Redis communication failures.
     """
 
     def __init__(self, redis: ArqRedis) -> None:
         self.redis = redis
 
-    async def execute(self) -> QueueStatsOutput:
+    async def get_stats(self) -> QueueStatsOutput:
+        """Return a live snapshot of queue activity.
+
+        Counts pending, in-progress, completed, and failed jobs by scanning
+        Redis directly.  Worker health entries are parsed from the
+        ``arq:queue:health-check`` sorted set.
+
+        Raises:
+            QueueInspectionError: Redis communication failure.
+        """
         try:
             pending = await _get_collection_size(self.redis, _DEFAULT_QUEUE_NAME)
 
@@ -201,7 +187,7 @@ class GetQueueStatsUseCase:
                         total_failed += 1
 
             raw_entries = await _get_health_entries(self.redis)
-            worker_health = [_parse_health_entry(entry) for entry in raw_entries]
+            worker_health = [_parse_health_entry(e) for e in raw_entries]
 
             return QueueStatsOutput(
                 queue_name=_DEFAULT_QUEUE_NAME,
@@ -217,46 +203,31 @@ class GetQueueStatsUseCase:
                 msg = f"Failed to inspect queue state: {exc}"
             raise QueueInspectionError(msg) from exc
 
+    async def list_dead_jobs(self, page: int = 1, limit: int = 10) -> ListDeadJobsOutput:
+        """Return paginated failed jobs from the dead-letter store.
 
-class ListDeadJobsUseCase:
-    """Retrieves all jobs whose final execution ended in failure.
+        Scans ``arq:result:*`` and filters entries where
+        ``JobResult.success is False``.
 
-    Scans ``arq:result:*`` and filters entries where ``JobResult.success``
-    is ``False``.  Each entry is deserialised via ARQ's ``Job.result_info()``
-    helper, which handles pickle decoding transparently.
-
-    Args:
-        redis: ARQ connection pool.
-
-    Returns:
-        ``ListDeadJobsOutput`` containing the list and total count.
-
-    Raises:
-        ``QueueInspectionError`` on Redis or deserialisation failures.
-    """
-
-    def __init__(self, redis: ArqRedis) -> None:
-        self.redis = redis
-
-    async def execute(self, page: int = 1, limit: int = 10) -> ListDeadJobsOutput:
+        Raises:
+            QueueInspectionError: Redis or deserialisation failure.
+        """
         dead: list[DeadJobInfo] = []
         try:
             async for key in self.redis.scan_iter(match=f"{_RESULT_KEY_PREFIX}*"):
                 job_id = _decode(key).replace(_RESULT_KEY_PREFIX, "")
                 info = await Job(job_id, self.redis).result_info()
                 if info is not None and not info.success:
-                    dead.append(
-                        DeadJobInfo(
-                            job_id=job_id,
-                            function=info.function,
-                            args=_safe_list(info.args),
-                            kwargs=info.kwargs or {},
-                            job_try=info.job_try,
-                            enqueue_time=info.enqueue_time,
-                            finish_time=info.finish_time,
-                            error=str(info.result) if info.result is not None else "Unknown error",
-                        )
-                    )
+                    dead.append(DeadJobInfo(
+                        job_id=job_id,
+                        function=info.function,
+                        args=_safe_list(info.args),
+                        kwargs=info.kwargs or {},
+                        job_try=info.job_try,
+                        enqueue_time=info.enqueue_time,
+                        finish_time=info.finish_time,
+                        error=str(info.result) if info.result is not None else "Unknown error",
+                    ))
         except Exception as exc:
             msg = "Failed to list dead jobs"
             if settings.DEBUG:
@@ -264,42 +235,23 @@ class ListDeadJobsUseCase:
             raise QueueInspectionError(msg) from exc
 
         total = len(dead)
-        total_pages = max(1, -(-total // limit))  # ceiling division
+        total_pages = max(1, -(-total // limit))
         offset = (page - 1) * limit
-        return ListDeadJobsOutput(jobs=dead[offset : offset + limit], total=total, page=page, limit=limit, total_pages=total_pages)
+        return ListDeadJobsOutput(jobs=dead[offset:offset + limit], total=total, page=page, limit=limit, total_pages=total_pages)
 
+    async def retry_dead_job(self, job_id: str) -> RetryJobOutput:
+        """Re-enqueue a failed job and remove it from the dead-letter store.
 
-class RetryDeadJobUseCase:
-    """Re-enqueues a failed job and removes it from the dead-letter store.
+        Acquires ``SET NX EX 30`` on ``arq:dlq:retry-lock:{job_id}`` before
+        the read-modify-write sequence.  The lock is released unconditionally
+        in a ``finally`` block.
 
-    Concurrency control: acquires ``SET NX EX 30`` on
-    ``arq:dlq:retry-lock:{job_id}`` before any read-modify-write operation.
-    This serialises concurrent retry requests for the same job ID across all
-    running API instances.  The lock is unconditionally released in a
-    ``finally`` block.
-
-    After a successful re-enqueue the original ``arq:result:{job_id}`` key is
-    deleted so the job no longer appears in the DLQ.  The new job receives a
-    fresh ``job_id`` and a reset retry counter, giving it the full
-    ``max_tries`` quota.
-
-    Args:
-        redis: ARQ connection pool.
-
-    Returns:
-        ``RetryJobOutput`` with the original and new job IDs.
-
-    Raises:
-        ``JobNotFoundError``      — result key absent or expired.
-        ``JobNotDeadError``       — job succeeded and is not in the DLQ.
-        ``JobRetryConflictError`` — concurrent retry already in progress.
-        ``QueueInspectionError``  — unexpected Redis or ARQ error.
-    """
-
-    def __init__(self, redis: ArqRedis) -> None:
-        self.redis = redis
-
-    async def execute(self, job_id: str) -> RetryJobOutput:
+        Raises:
+            JobNotFoundError: Result key absent or expired.
+            JobNotDeadError: Job succeeded and is not in the DLQ.
+            JobRetryConflictError: Concurrent retry already in progress.
+            QueueInspectionError: Unexpected Redis or ARQ error.
+        """
         lock_key = f"{_DLQ_RETRY_LOCK_PREFIX}{job_id}"
         acquired = await self.redis.set(lock_key, "1", nx=True, ex=_RETRY_LOCK_TTL)
         if not acquired:
@@ -307,7 +259,6 @@ class RetryDeadJobUseCase:
 
         try:
             info = await Job(job_id, self.redis).result_info()
-
             if info is None:
                 raise JobNotFoundError(job_id)
             if info.success:
@@ -321,7 +272,7 @@ class RetryDeadJobUseCase:
                 new_job_id=new_job.job_id if new_job else job_id,
                 function=info.function,
             )
-        except JobNotFoundError, JobNotDeadError, JobRetryConflictError:
+        except (JobNotFoundError, JobNotDeadError, JobRetryConflictError):
             raise
         except Exception as exc:
             msg = "Failed to retry job"
@@ -331,33 +282,19 @@ class RetryDeadJobUseCase:
         finally:
             await self.redis.delete(lock_key)
 
+    async def delete_dead_job(self, job_id: str) -> DeleteJobOutput:
+        """Permanently remove a single failed job from the dead-letter store.
 
-class DeleteDeadJobUseCase:
-    """Permanently removes a single failed job from the dead-letter store.
+        Confirms the job exists and has ``success=False`` before issuing the
+        atomic ``DEL`` command.
 
-    Deletes the ``arq:result:{job_id}`` key after confirming the job exists
-    and has ``success=False``.  The ``DEL`` command is atomic in Redis, so
-    no additional locking is required for a simple delete.
-
-    Args:
-        redis: ARQ connection pool.
-
-    Returns:
-        ``DeleteJobOutput`` confirming the deletion.
-
-    Raises:
-        ``JobNotFoundError`` — result key absent or expired.
-        ``JobNotDeadError``  — job succeeded and should not be deleted via DLQ.
-        ``QueueInspectionError`` — unexpected Redis error.
-    """
-
-    def __init__(self, redis: ArqRedis) -> None:
-        self.redis = redis
-
-    async def execute(self, job_id: str) -> DeleteJobOutput:
+        Raises:
+            JobNotFoundError: Result key absent or expired.
+            JobNotDeadError: Job succeeded and is not a DLQ candidate.
+            QueueInspectionError: Unexpected Redis error.
+        """
         try:
             info = await Job(job_id, self.redis).result_info()
-
             if info is None:
                 raise JobNotFoundError(job_id)
             if info.success:
@@ -365,7 +302,7 @@ class DeleteDeadJobUseCase:
 
             deleted = await self.redis.delete(f"{_RESULT_KEY_PREFIX}{job_id}")
             return DeleteJobOutput(job_id=job_id, deleted=bool(deleted))
-        except JobNotFoundError, JobNotDeadError:
+        except (JobNotFoundError, JobNotDeadError):
             raise
         except Exception as exc:
             msg = "Failed to delete job"
@@ -373,31 +310,17 @@ class DeleteDeadJobUseCase:
                 msg = f"Failed to delete job: {exc}"
             raise QueueInspectionError(msg) from exc
 
+    async def purge_dead_jobs(self) -> PurgeDeadJobsOutput:
+        """Bulk-delete all failed jobs from the dead-letter store.
 
-class PurgeDeadJobsUseCase:
-    """Bulk-deletes all failed jobs from the dead-letter store in one operation.
+        Collects all ``arq:result:*`` keys where ``success=False``, then
+        issues a single ``DEL`` call for efficiency.  Jobs that transition
+        from in-progress to failed between the scan and the delete will not
+        be caught by this purge.
 
-    Collects all ``arq:result:*`` keys where ``success=False``, then issues a
-    single ``DEL`` call with all matching keys for efficiency.  Because the
-    scan and delete are not wrapped in a transaction, a job that transitions
-    from in-progress to failed between the scan and the delete will not be
-    caught by this purge — it will be eligible on the next purge call.  This
-    is an acceptable trade-off for a bulk maintenance operation.
-
-    Args:
-        redis: ARQ connection pool.
-
-    Returns:
-        ``PurgeDeadJobsOutput`` with the total number of keys deleted.
-
-    Raises:
-        ``QueueInspectionError`` on Redis failures.
-    """
-
-    def __init__(self, redis: ArqRedis) -> None:
-        self.redis = redis
-
-    async def execute(self) -> PurgeDeadJobsOutput:
+        Raises:
+            QueueInspectionError: Redis scan or delete failure.
+        """
         keys_to_delete: list = []
         try:
             async for key in self.redis.scan_iter(match=f"{_RESULT_KEY_PREFIX}*"):

@@ -1,21 +1,15 @@
 from fastapi import Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.application.use_cases.account_settings_usecase import ChangePasswordUseCase, DeleteAccountUseCase
-from app.application.use_cases.audit_log_usecase import CreateAuditLogUseCase, GetAuditLogsUseCase
+from app.application.use_cases.account_settings_usecase import AccountSettingsUseCase
+from app.application.use_cases.audit_log_usecase import AuditLogUseCase
 from app.application.use_cases.auth_usecase import AuthUseCase
 from app.application.use_cases.feature_usecase import FeatureManagementUseCase
 from app.application.use_cases.profile_usecase import CheckAliasUseCase, GetLoginHistoryUseCase, OnboardingUseCase, UpdateProfileUseCase
-from app.application.use_cases.queue_usecase import (
-    DeleteDeadJobUseCase,
-    GetQueueStatsUseCase,
-    ListDeadJobsUseCase,
-    PurgeDeadJobsUseCase,
-    RetryDeadJobUseCase,
-)
+from app.application.use_cases.queue_usecase import QueueUseCase
 from app.application.use_cases.role_usecase import RoleManagementUseCase, UserRoleUseCase
 from app.application.use_cases.users_usecase import AdminUserAccountUseCase
-from app.application.use_cases.event_usecase import CreateEventUseCase, UpdateEventUseCase
+from app.application.use_cases.event_usecase import EventUseCase
 from app.application.use_cases.venue_rating_usecase import VenueRatingUseCase
 from app.application.use_cases.venue_usecase import VenueManagementUseCase
 from app.infrastructure.cache.repositories.otp_repository import OTPRepository
@@ -63,24 +57,14 @@ def get_update_profile_use_case(db: AsyncSession = Depends(get_db)) -> UpdatePro
     return UpdateProfileUseCase(UserRepository(db), db)
 
 
-def get_change_password_use_case(db: AsyncSession = Depends(get_db)) -> ChangePasswordUseCase:
-    """Construct a fully-wired ``ChangePasswordUseCase`` for the current request.
-
-    Injects the user repository and the database session so the use case can
-    both verify credentials and revoke all active refresh tokens for the account
-    within the same request lifecycle.
-    """
-    return ChangePasswordUseCase(UserRepository(db), db)
+def get_change_password_use_case(db: AsyncSession = Depends(get_db)) -> AccountSettingsUseCase:
+    """Construct an ``AccountSettingsUseCase`` wired for password changes."""
+    return AccountSettingsUseCase(UserRepository(db), db=db)
 
 
-def get_delete_account_use_case(request: Request, db: AsyncSession = Depends(get_db)) -> DeleteAccountUseCase:
-    """Construct a ``DeleteAccountUseCase`` backed by the request ARQ pool.
-
-    The use case persists the pending deletion synchronously, then enqueues the
-    deferred finalization job through ARQ so the 30-day grace period is
-    enforced by the message queue rather than by in-request timers.
-    """
-    return DeleteAccountUseCase(UserRepository(db), request.app.state.arq)
+def get_delete_account_use_case(request: Request, db: AsyncSession = Depends(get_db)) -> AccountSettingsUseCase:
+    """Construct an ``AccountSettingsUseCase`` wired for account deletion scheduling."""
+    return AccountSettingsUseCase(UserRepository(db), arq=request.app.state.arq)
 
 
 def get_login_history_use_case(db: AsyncSession = Depends(get_db)) -> GetLoginHistoryUseCase:
@@ -104,14 +88,9 @@ def get_otp_repository(request: Request) -> OTPRepository:
     return OTPRepository(request.app.state.redis)
 
 
-def get_create_audit_log_use_case(request: Request, db: AsyncSession = Depends(get_db)) -> CreateAuditLogUseCase:
-    """Construct a ``CreateAuditLogUseCase`` with async queue support."""
-    return CreateAuditLogUseCase(AuditLogRepository(db), request.app.state.arq)
-
-
-def get_audit_logs_use_case(db: AsyncSession = Depends(get_db)) -> GetAuditLogsUseCase:
-    """Construct a ``GetAuditLogsUseCase`` for querying audit trail."""
-    return GetAuditLogsUseCase(AuditLogRepository(db))
+def get_audit_log_use_case(request: Request, db: AsyncSession = Depends(get_db)) -> AuditLogUseCase:
+    """Construct an ``AuditLogUseCase`` with async queue support."""
+    return AuditLogUseCase(AuditLogRepository(db), request.app.state.arq)
 
 
 def get_role_use_case(db: AsyncSession = Depends(get_db)) -> UserRoleUseCase:
@@ -129,29 +108,9 @@ def get_role_management_use_case(db: AsyncSession = Depends(get_db)) -> RoleMana
     return RoleManagementUseCase(RoleRepository(db), db)
 
 
-def get_queue_stats_use_case(request: Request) -> GetQueueStatsUseCase:
-    """Construct a ``GetQueueStatsUseCase`` backed by the application ARQ pool."""
-    return GetQueueStatsUseCase(request.app.state.arq)
-
-
-def get_list_dead_jobs_use_case(request: Request) -> ListDeadJobsUseCase:
-    """Construct a ``ListDeadJobsUseCase`` backed by the application ARQ pool."""
-    return ListDeadJobsUseCase(request.app.state.arq)
-
-
-def get_retry_dead_job_use_case(request: Request) -> RetryDeadJobUseCase:
-    """Construct a ``RetryDeadJobUseCase`` backed by the application ARQ pool."""
-    return RetryDeadJobUseCase(request.app.state.arq)
-
-
-def get_delete_dead_job_use_case(request: Request) -> DeleteDeadJobUseCase:
-    """Construct a ``DeleteDeadJobUseCase`` backed by the application ARQ pool."""
-    return DeleteDeadJobUseCase(request.app.state.arq)
-
-
-def get_purge_dead_jobs_use_case(request: Request) -> PurgeDeadJobsUseCase:
-    """Construct a ``PurgeDeadJobsUseCase`` backed by the application ARQ pool."""
-    return PurgeDeadJobsUseCase(request.app.state.arq)
+def get_queue_use_case(request: Request) -> QueueUseCase:
+    """Construct a ``QueueUseCase`` backed by the application ARQ pool."""
+    return QueueUseCase(request.app.state.arq)
 
 
 def get_venue_management_use_case(db: AsyncSession = Depends(get_db)) -> VenueManagementUseCase:
@@ -164,11 +123,6 @@ def get_venue_rating_use_case(db: AsyncSession = Depends(get_db)) -> VenueRating
     return VenueRatingUseCase(VenueRatingRepository(db), db)
 
 
-def get_create_event_use_case(db: AsyncSession = Depends(get_db)) -> CreateEventUseCase:
-    """Construct a ``CreateEventUseCase`` for the current request."""
-    return CreateEventUseCase(EventRepository(db), db)
-
-
-def get_update_event_use_case(db: AsyncSession = Depends(get_db)) -> UpdateEventUseCase:
-    """Construct an ``UpdateEventUseCase`` for the current request."""
-    return UpdateEventUseCase(EventRepository(db), db)
+def get_event_use_case(db: AsyncSession = Depends(get_db)) -> EventUseCase:
+    """Construct an ``EventUseCase`` for the current request."""
+    return EventUseCase(EventRepository(db), db)
