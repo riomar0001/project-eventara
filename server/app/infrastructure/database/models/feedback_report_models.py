@@ -39,7 +39,6 @@ class FeedbackReport(Base):
         nullable=False,
         default="medium",
     )
-    extra_metadata: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
     __table_args__ = (
         Index("idx_feedback_reports_created_by", "created_by"),
