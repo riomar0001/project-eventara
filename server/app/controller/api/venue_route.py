@@ -40,6 +40,8 @@ from app.controller.docs.venue_rating_docs import (
     RATING_CONFLICT,
     RATING_NOT_FOUND,
     RATING_VALIDATION_ERROR,
+)
+from app.controller.docs.venue_rating_docs import (
     UNAUTHORIZED as RATING_UNAUTHORIZED,
 )
 from app.controller.schemas.venue_management_schema import (
@@ -610,9 +612,7 @@ async def list_venue_ratings(
     - **422 Unprocessable Entity** — pagination query params are invalid.
     """
     try:
-        result = await use_case.list_ratings(
-            ListVenueRatingsInput(venue_id=venue_id, page=page, page_size=page_size)
-        )
+        result = await use_case.list_ratings(ListVenueRatingsInput(venue_id=venue_id, page=page, page_size=page_size))
     except VenueNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
 
@@ -748,8 +748,7 @@ async def update_my_venue_rating(
     responses={**RATING_UNAUTHORIZED, **RATING_NOT_FOUND},
     summary="Delete the authenticated user's rating for a venue",
     description=(
-        "Remove the authenticated user's rating from the specified venue. "
-        "The venue's popularity count is decremented automatically on success."
+        "Remove the authenticated user's rating from the specified venue. The venue's popularity count is decremented automatically on success."
     ),
 )
 async def delete_my_venue_rating(

@@ -6,7 +6,8 @@ from app.controller.api.features_route import feature_router
 from app.controller.api.queue_route import router as queue_router
 from app.controller.api.role_route import grant_router, role_management_router, role_router
 from app.controller.api.user_account_route import router as user_account_router
-from app.controller.api.user_route import account_settings_router, router as user_router
+from app.controller.api.user_route import account_settings_router
+from app.controller.api.user_route import router as user_router
 from app.controller.api.venue_route import venue_router
 
 router = APIRouter()

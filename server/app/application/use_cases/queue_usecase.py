@@ -23,7 +23,8 @@ Concurrency strategy — distributed Redis lock for retry:
 """
 
 import re
-from typing import Awaitable, cast
+from collections.abc import Awaitable
+from typing import cast
 
 from arq.connections import ArqRedis
 from arq.jobs import Job

@@ -559,9 +559,7 @@ class UserRepository:
             image_file_id=row.image_file_id,
             age_group=row.age_group if isinstance(row.age_group, AgeGroup) else AgeGroup(row.age_group),
             gender=row.gender if isinstance(row.gender, Gender) else Gender(row.gender),
-            education_level=row.education_level
-            if isinstance(row.education_level, EducationLevel)
-            else EducationLevel(row.education_level),
+            education_level=row.education_level if isinstance(row.education_level, EducationLevel) else EducationLevel(row.education_level),
             occupation=row.occupation,
             bio=row.bio,
             preferences=row.preferences,

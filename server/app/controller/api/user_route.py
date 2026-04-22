@@ -429,4 +429,3 @@ async def schedule_own_account_deletion(
         deletion_scheduled_for=result.deletion_scheduled_for,
         requested_by=result.requested_by,
     )
-

@@ -34,7 +34,6 @@ from app.controller.docs.user_docs import (
     ACCOUNT_DELETION_FORBIDDEN,
     ACCOUNT_DELETION_VALIDATION_ERROR,
 )
-from app.controller.schemas.user_schema import AdminDeleteAccountRequest, DeleteAccountResponse
 from app.controller.schemas.user_account_schema import (
     AdminUserAccountDetailResponse,
     AdminUserAccountListResponse,
@@ -49,6 +48,7 @@ from app.controller.schemas.user_account_schema import (
     RolePermissionResponse,
     SendUserPasswordResetResponse,
 )
+from app.controller.schemas.user_schema import AdminDeleteAccountRequest, DeleteAccountResponse
 from app.domain.entities.audit_log import ActionType, AuditLogStatus
 from app.domain.entities.authorization_entities import RoleAction
 from app.domain.entities.user_entity import UserStatus

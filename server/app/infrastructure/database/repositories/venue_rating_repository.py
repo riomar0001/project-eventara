@@ -81,9 +81,7 @@ class VenueRatingRepository:
         page_size: int,
     ) -> tuple[list[VenueRatingEntity], int]:
         """Return a paginated slice of ratings for a venue, newest first."""
-        count_result = await self.db.execute(
-            select(func.count(VenueRating.id)).where(VenueRating.venue_id == venue_id)
-        )
+        count_result = await self.db.execute(select(func.count(VenueRating.id)).where(VenueRating.venue_id == venue_id))
         total = count_result.scalar_one()
 
         data_result = await self.db.execute(
@@ -163,11 +161,7 @@ class VenueRatingRepository:
 
     async def get_average_rating(self, venue_id: uuid.UUID) -> tuple[float | None, int]:
         """Return the mean rating and total count for a venue in one round-trip."""
-        result = await self.db.execute(
-            select(func.avg(VenueRating.rating), func.count(VenueRating.id)).where(
-                VenueRating.venue_id == venue_id
-            )
-        )
+        result = await self.db.execute(select(func.avg(VenueRating.rating), func.count(VenueRating.id)).where(VenueRating.venue_id == venue_id))
         row = result.one()
         avg = float(row[0]) if row[0] is not None else None
         count = int(row[1])
@@ -175,16 +169,10 @@ class VenueRatingRepository:
 
     async def increment_venue_popularity(self, venue_id: uuid.UUID) -> None:
         """Atomically increment the venue's popularity counter by one."""
-        await self.db.execute(
-            update(Venue)
-            .where(Venue.id == venue_id)
-            .values(popularity_count=Venue.popularity_count + 1)
-        )
+        await self.db.execute(update(Venue).where(Venue.id == venue_id).values(popularity_count=Venue.popularity_count + 1))
 
     async def decrement_venue_popularity(self, venue_id: uuid.UUID) -> None:
         """Atomically decrement the venue's popularity counter, guarded at zero."""
         await self.db.execute(
-            update(Venue)
-            .where(Venue.id == venue_id, Venue.popularity_count > 0)
-            .values(popularity_count=Venue.popularity_count - 1)
+            update(Venue).where(Venue.id == venue_id, Venue.popularity_count > 0).values(popularity_count=Venue.popularity_count - 1)
         )

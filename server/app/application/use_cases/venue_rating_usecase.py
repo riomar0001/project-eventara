@@ -224,9 +224,7 @@ class VenueRatingUseCase:
         if not await self.repo.venue_exists(data.venue_id):
             raise VenueNotFoundError()
 
-        ratings, total = await self.repo.list_by_venue(
-            data.venue_id, page=data.page, page_size=data.page_size
-        )
+        ratings, total = await self.repo.list_by_venue(data.venue_id, page=data.page, page_size=data.page_size)
         return ListVenueRatingsOutput(
             ratings=ratings,
             total_count=total,
