@@ -4,20 +4,21 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.application.use_cases.account_settings_usecase import AccountSettingsUseCase
 from app.application.use_cases.audit_log_usecase import AuditLogUseCase
 from app.application.use_cases.auth_usecase import AuthUseCase
+from app.application.use_cases.event_status_usecase import EventStatusUseCase
+from app.application.use_cases.event_usecase import EventUseCase
 from app.application.use_cases.feature_usecase import FeatureManagementUseCase
 from app.application.use_cases.profile_usecase import CheckAliasUseCase, GetLoginHistoryUseCase, OnboardingUseCase, UpdateProfileUseCase
 from app.application.use_cases.queue_usecase import QueueUseCase
 from app.application.use_cases.role_usecase import RoleManagementUseCase, UserRoleUseCase
 from app.application.use_cases.users_usecase import AdminUserAccountUseCase
-from app.application.use_cases.event_usecase import EventUseCase
 from app.application.use_cases.venue_rating_usecase import VenueRatingUseCase
 from app.application.use_cases.venue_usecase import VenueManagementUseCase
 from app.infrastructure.cache.repositories.otp_repository import OTPRepository
-from app.infrastructure.database.repositories.event_repository import EventRepository
 from app.infrastructure.cache.repositories.password_reset_repository import PasswordResetRepository
 from app.infrastructure.database.repositories.audit_log_repository import (
     AuditLogRepository,
 )
+from app.infrastructure.database.repositories.event_repository import EventRepository
 from app.infrastructure.database.repositories.role_repository import RoleRepository
 from app.infrastructure.database.repositories.user_repository import UserRepository
 from app.infrastructure.database.repositories.venue_rating_repository import VenueRatingRepository
@@ -126,3 +127,8 @@ def get_venue_rating_use_case(db: AsyncSession = Depends(get_db)) -> VenueRating
 def get_event_use_case(db: AsyncSession = Depends(get_db)) -> EventUseCase:
     """Construct an ``EventUseCase`` for the current request."""
     return EventUseCase(EventRepository(db), db)
+
+
+def get_event_status_use_case(db: AsyncSession = Depends(get_db)) -> EventStatusUseCase:
+    """Construct an ``EventStatusUseCase`` for the current request."""
+    return EventStatusUseCase(EventRepository(db), db)

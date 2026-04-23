@@ -116,9 +116,8 @@ class TestChangePasswordUseCase:
     async def test_same_password(self):
         """Raises SamePasswordError when the new password is identical to the current one"""
         repo = _make_repo(user=_make_user(), security=_make_security())
-        with patch("app.application.use_cases.account_settings_usecase.verify_hash", return_value=True):
-            with pytest.raises(SamePasswordError):
-                await self._make_uc(repo).change_password(self._data())
+        with patch("app.application.use_cases.account_settings_usecase.verify_hash", return_value=True), pytest.raises(SamePasswordError):
+            await self._make_uc(repo).change_password(self._data())
 
     @pytest.mark.asyncio
     async def test_update_returns_false_raises_not_found(self):
@@ -126,10 +125,9 @@ class TestChangePasswordUseCase:
         repo = _make_repo(user=_make_user(), security=_make_security(), updated=False)
         with (
             patch("app.application.use_cases.account_settings_usecase.verify_hash", side_effect=[True, False]),
-            patch("app.application.use_cases.account_settings_usecase.hash_string", return_value="h"),
+            patch("app.application.use_cases.account_settings_usecase.hash_string", return_value="h"),pytest.raises(UserNotFoundError)
         ):
-            with pytest.raises(UserNotFoundError):
-                await self._make_uc(repo).change_password(self._data())
+            await self._make_uc(repo).change_password(self._data())
 
 
 # ─── request_*_deletion ───────────────────────────────────────────────────────

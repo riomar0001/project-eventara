@@ -4,6 +4,7 @@ from datetime import datetime
 from pydantic import BaseModel, Field, field_validator
 
 from app.core.sanitize import sanitize_html, strip_html
+from app.domain.entities.event_entity import EventSessionStatus, EventStatus
 
 
 class EventSessionCreateRequest(BaseModel):
@@ -106,4 +107,24 @@ class EventSessionUpdateRequest(BaseModel):
 class EventSessionUpdatedResponse(BaseModel):
     success: bool = True
     message: str = "Event session updated successfully."
+    data: EventSessionRecordResponse
+
+
+class EventStatusUpdateRequest(BaseModel):
+    new_status: EventStatus
+
+
+class EventSessionStatusUpdateRequest(BaseModel):
+    new_status: EventSessionStatus
+
+
+class EventStatusUpdatedResponse(BaseModel):
+    success: bool = True
+    message: str = "Event status updated successfully."
+    data: EventRecordResponse
+
+
+class EventSessionStatusUpdatedResponse(BaseModel):
+    success: bool = True
+    message: str = "Event session status updated successfully."
     data: EventSessionRecordResponse

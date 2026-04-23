@@ -135,20 +135,19 @@ async def _assign_admin_grants(session, user_id: UUID, role_id: UUID) -> int:
 async def run(user_id: UUID) -> None:
     print("\nRunning seed: Set Admin Role\n" + "-" * 40)
 
-    async with AsyncSessionLocal() as session:
-        async with session.begin():
-            await _ensure_rbac_seeded(session)
-            user = await _get_user(session, user_id)
-            role = await _get_admin_role(session)
-            created = await _assign_admin_role(session, user.id, role.id)
-            grant_count = await _assign_admin_grants(session, user.id, role.id)
+    async with AsyncSessionLocal() as session, session.begin():
+        await _ensure_rbac_seeded(session)
+        user = await _get_user(session, user_id)
+        role = await _get_admin_role(session)
+        created = await _assign_admin_role(session, user.id, role.id)
+        grant_count = await _assign_admin_grants(session, user.id, role.id)
 
-            _log(f"User found: {user.email} ({user.id})")
-            if created:
-                _log("Assigned role: system_administrator")
-            else:
-                _log("system_administrator role already assigned")
-            _log(f"Ensured {grant_count} user grant(s)")
+        _log(f"User found: {user.email} ({user.id})")
+        if created:
+            _log("Assigned role: system_administrator")
+        else:
+            _log("system_administrator role already assigned")
+        _log(f"Ensured {grant_count} user grant(s)")
 
     print("-" * 40)
     print("Done.\n")

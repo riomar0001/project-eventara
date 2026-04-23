@@ -227,21 +227,20 @@ async def _upsert_role_permissions(
 async def run() -> None:
     print("\nRunning seed: RBAC\n" + "-" * 40)
 
-    async with AsyncSessionLocal() as session:
-        async with session.begin():
-            _log("Seeding features...")
-            feature_ids = await _upsert_features(session)
-            for slug in feature_ids:
-                _log(f"  feature: {slug}")
+    async with AsyncSessionLocal() as session, session.begin():
+        _log("Seeding features...")
+        feature_ids = await _upsert_features(session)
+        for slug in feature_ids:
+            _log(f"  feature: {slug}")
 
-            _log("Seeding roles...")
-            role_ids = await _upsert_roles(session)
-            for name in role_ids:
-                _log(f"  role: {name}")
+        _log("Seeding roles...")
+        role_ids = await _upsert_roles(session)
+        for name in role_ids:
+            _log(f"  role: {name}")
 
-            _log("Seeding role permissions...")
-            count = await _upsert_role_permissions(session, feature_ids, role_ids)
-            _log(f"  {count} new permission row(s) inserted")
+        _log("Seeding role permissions...")
+        count = await _upsert_role_permissions(session, feature_ids, role_ids)
+        _log(f"  {count} new permission row(s) inserted")
 
     print("-" * 40)
     print("Done.\n")

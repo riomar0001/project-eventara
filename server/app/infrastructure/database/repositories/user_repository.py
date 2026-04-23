@@ -630,7 +630,7 @@ class UserRepository:
             .values(onboarding_completed=True, onboarding_completed_at=now)
         )
         await self.db.commit()
-        return cast(CursorResult, result).rowcount > 0
+        return cast("CursorResult", result).rowcount > 0
 
     async def update_verification_status(self, user_id: uuid.UUID, verified: bool) -> bool:
         """Atomically update verification status.
@@ -648,7 +648,7 @@ class UserRepository:
             .values(email_verified=verified, email_verified_at=now if verified else None)
         )
         await self.db.commit()
-        return cast(CursorResult, result).rowcount > 0
+        return cast("CursorResult", result).rowcount > 0
 
     async def record_failed_login(
         self,
@@ -801,7 +801,7 @@ class UserRepository:
         """
         now = self._utcnow_naive()
         result = await self.db.execute(update(User).where(User.id == user_id).values(password=password_hash))
-        if cast(CursorResult, result).rowcount == 0:
+        if cast("CursorResult", result).rowcount == 0:
             await self.db.rollback()
             return False
 
@@ -937,7 +937,7 @@ class UserRepository:
             )
         )
         await self.db.commit()
-        return cast(CursorResult, result).rowcount > 0
+        return cast("CursorResult", result).rowcount > 0
 
     async def finalize_account_deletion(
         self,
@@ -977,4 +977,4 @@ class UserRepository:
             )
         )
         await self.db.commit()
-        return cast(CursorResult, result).rowcount > 0
+        return cast("CursorResult", result).rowcount > 0

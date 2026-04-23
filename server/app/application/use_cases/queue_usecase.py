@@ -100,15 +100,15 @@ async def _get_collection_size(redis: ArqRedis, key: str) -> int:
     if key_type == "none":
         return 0
     if key_type == "zset":
-        return await cast(Awaitable[int], redis.zcard(key))
+        return await cast("Awaitable[int]", redis.zcard(key))
     if key_type == "list":
-        return await cast(Awaitable[int], redis.llen(key))
+        return await cast("Awaitable[int]", redis.llen(key))
     if key_type == "set":
-        return await cast(Awaitable[int], redis.scard(key))
+        return await cast("Awaitable[int]", redis.scard(key))
     if key_type == "stream":
-        return await cast(Awaitable[int], redis.xlen(key))
+        return await cast("Awaitable[int]", redis.xlen(key))
     if key_type == "hash":
-        return await cast(Awaitable[int], redis.hlen(key))
+        return await cast("Awaitable[int]", redis.hlen(key))
     if key_type == "string":
         return 1 if await redis.get(key) is not None else 0
     return 0
@@ -119,13 +119,13 @@ async def _get_key_entries(redis: ArqRedis, key: str) -> list[str]:
     if key_type == "none":
         return []
     if key_type == "zset":
-        return [_decode(e) for e in await cast(Awaitable[list], redis.zrange(key, 0, -1))]
+        return [_decode(e) for e in await cast("Awaitable[list]", redis.zrange(key, 0, -1))]
     if key_type == "list":
-        return [_decode(e) for e in await cast(Awaitable[list], redis.lrange(key, 0, -1))]
+        return [_decode(e) for e in await cast("Awaitable[list]", redis.lrange(key, 0, -1))]
     if key_type == "set":
-        return sorted(_decode(e) for e in await cast(Awaitable[set], redis.smembers(key)))
+        return sorted(_decode(e) for e in await cast("Awaitable[set]", redis.smembers(key)))
     if key_type == "hash":
-        return [_decode(e) for e in await cast(Awaitable[list], redis.hvals(key))]
+        return [_decode(e) for e in await cast("Awaitable[list]", redis.hvals(key))]
     if key_type == "string":
         value = _decode_optional(await redis.get(key))
         return [value] if value else []

@@ -21,12 +21,16 @@ Concurrency strategy — pessimistic locking (SELECT … FOR UPDATE) on mutating
 import uuid
 from datetime import datetime
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.entities.event_entity import (
     Event as EventEntity,
+)
+from app.domain.entities.event_entity import (
     EventSession as EventSessionEntity,
+)
+from app.domain.entities.event_entity import (
     EventSessionStatus,
     EventStatus,
 )
@@ -163,7 +167,7 @@ class EventRepository:
             description=description,
             start_datetime=start_datetime,
             end_datetime=end_datetime,
-            status=EventSessionStatus.SCHEDULED,
+            status=EventSessionStatus.POSTED,
         )
         self.db.add(orm)
         await self.db.flush()
@@ -262,3 +266,122 @@ class EventRepository:
         await self.db.delete(orm)
         await self.db.flush()
         return True
+
+    async def update_event_status(self, *, event_id: uuid.UUID, new_status: EventStatus) -> EventEntity | None:
+        """Update the status field of an existing event row.
+
+        The row must already be locked by the calling transaction via
+        ``get_event_by_id(for_update=True)`` before this method is invoked.
+
+        Args:
+            event_id:   Primary key of the event to update.
+            new_status: The target ``EventStatus`` value.
+
+        Returns:
+            The updated ``EventEntity``, or ``None`` if no matching row exists.
+        """
+        result = await self.db.execute(select(Event).where(Event.id == event_id).with_for_update())
+        orm = result.scalar_one_or_none()
+        if orm is None:
+            return None
+        orm.status = new_status
+        await self.db.flush()
+        await self.db.refresh(orm)
+        return self._to_event_entity(orm)
+
+    async def update_session_status(self, *, session_id: uuid.UUID, new_status: EventSessionStatus) -> EventSessionEntity | None:
+        """Update the status field of an existing event session row.
+
+        Args:
+            session_id: Primary key of the session to update.
+            new_status: The target ``EventSessionStatus`` value.
+
+        Returns:
+            The updated ``EventSessionEntity``, or ``None`` if no matching row exists.
+        """
+        result = await self.db.execute(select(EventSession).where(EventSession.id == session_id).with_for_update())
+        orm = result.scalar_one_or_none()
+        if orm is None:
+            return None
+        orm.status = new_status
+        await self.db.flush()
+        await self.db.refresh(orm)
+        return self._to_session_entity(orm)
+
+    async def bulk_update_session_statuses(self, now: datetime) -> tuple[int, int]:
+        """Atomically advance session statuses based on wall-clock time.
+
+        Transitions eligible sessions in two passes within the same database
+        transaction:
+          1. ``POSTED`` → ``STARTED``: sessions whose start window has arrived
+             but end window has not yet passed.
+          2. ``STARTED`` → ``ENDED``: sessions whose end window has passed.
+
+        Using ``synchronize_session=False`` bypasses SQLAlchemy's in-memory
+        object sync for bulk operations, which is safe here because the session
+        is discarded after the commit.
+
+        Args:
+            now: Current UTC timestamp used as the transition boundary.
+
+        Returns:
+            A ``(started_count, ended_count)`` tuple with the number of rows
+            updated in each pass.
+        """
+        started_result = await self.db.execute(
+            update(EventSession)
+            .where(
+                EventSession.status == EventSessionStatus.POSTED,
+                EventSession.start_datetime <= now,
+                EventSession.end_datetime > now,
+            )
+            .values(status=EventSessionStatus.STARTED)
+            .execution_options(synchronize_session=False)
+        )
+        ended_result = await self.db.execute(
+            update(EventSession)
+            .where(
+                EventSession.status == EventSessionStatus.STARTED,
+                EventSession.end_datetime <= now,
+            )
+            .values(status=EventSessionStatus.ENDED)
+            .execution_options(synchronize_session=False)
+        )
+        return started_result.rowcount, ended_result.rowcount
+
+    async def bulk_update_event_statuses(self, now: datetime) -> tuple[int, int]:
+        """Atomically advance event statuses based on wall-clock time.
+
+        Transitions eligible events in two passes within the same database
+        transaction:
+          1. ``POSTED`` → ``STARTED``: events whose start date has arrived but
+             end date has not yet passed.
+          2. ``STARTED`` → ``ENDED``: events whose end date has passed.
+
+        Args:
+            now: Current UTC timestamp used as the transition boundary.
+
+        Returns:
+            A ``(started_count, ended_count)`` tuple with the number of rows
+            updated in each pass.
+        """
+        started_result = await self.db.execute(
+            update(Event)
+            .where(
+                Event.status == EventStatus.POSTED,
+                Event.start_date <= now,
+                Event.end_date > now,
+            )
+            .values(status=EventStatus.STARTED)
+            .execution_options(synchronize_session=False)
+        )
+        ended_result = await self.db.execute(
+            update(Event)
+            .where(
+                Event.status == EventStatus.STARTED,
+                Event.end_date <= now,
+            )
+            .values(status=EventStatus.ENDED)
+            .execution_options(synchronize_session=False)
+        )
+        return started_result.rowcount, ended_result.rowcount

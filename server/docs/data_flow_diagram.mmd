@@ -1,0 +1,533 @@
+%%{init: {"flowchart": {"curve": "basis"}} }%%
+flowchart TD
+
+    %% ════════════════════════════════════════
+    %%  EXTERNAL ENTITIES
+    %% ════════════════════════════════════════
+    USER([User / Client])
+    ADMIN([Admin / Client])
+    EMAIL([Email Service])
+    WORKER([Arq Worker])
+
+    %% ════════════════════════════════════════
+    %%  POSTGRESQL DATA STORES
+    %% ════════════════════════════════════════
+    subgraph PG_AUTH[PostgreSQL — Auth & Identity]
+        DB_USERS[(users)]
+        DB_US[(user_security)]
+        DB_UA[(user_activity)]
+        DB_RT[(refresh_tokens)]
+    end
+
+    subgraph PG_PROFILE[PostgreSQL — Profile]
+        DB_UP[(user_profiles)]
+    end
+
+    subgraph PG_EVENTS[PostgreSQL — Events]
+        DB_EVENTS[(events)]
+        DB_ES[(event_sessions)]
+    end
+
+    subgraph PG_VENUES[PostgreSQL — Venues]
+        DB_VENUES[(venues)]
+        DB_VR[(venue_ratings)]
+    end
+
+    subgraph PG_RBAC[PostgreSQL — RBAC]
+        DB_ROLES[(roles)]
+        DB_RP[(role_permissions)]
+        DB_UR[(user_roles)]
+        DB_FEATS[(features)]
+        DB_UG[(user_grants)]
+    end
+
+    subgraph PG_AUDIT[PostgreSQL — Audit]
+        DB_AL[(audit_logs)]
+    end
+
+    %% ════════════════════════════════════════
+    %%  REDIS DATA STORES
+    %% ════════════════════════════════════════
+    subgraph REDIS[Redis Cache & Queue]
+        R_OTP[(otp - user_id)]
+        R_PWR[(password_reset - user_id)]
+        R_ARQ[(arq:queue)]
+    end
+
+    %% ════════════════════════════════════════
+    %%  1. AUTHENTICATION USE CASES
+    %% ════════════════════════════════════════
+    subgraph AUTH[Authentication]
+        direction TB
+        UC_REG[register_user]
+        UC_VE[verify_email]
+        UC_LG[login]
+        UC_LV[login_verify]
+        UC_ROTP[resend_otp]
+        UC_LO[logout]
+        UC_RF[refresh_token]
+        UC_RV[resend_verification]
+        UC_FP[forgot_password]
+        UC_RP[reset_password]
+    end
+
+    USER -->|email, password, terms| UC_REG
+    UC_REG -->|INSERT| DB_USERS
+    UC_REG -->|INSERT email_verified=false| DB_US
+    UC_REG -->|INSERT activity record| DB_UA
+    UC_REG -->|verification email| EMAIL
+
+    USER -->|JWT verification token| UC_VE
+    UC_VE -->|READ| DB_USERS
+    UC_VE -->|READ| DB_US
+    UC_VE -->|READ claims| DB_UP
+    UC_VE -->|UPDATE email_verified=true| DB_US
+    UC_VE -->|INSERT| DB_RT
+    UC_VE -->|confirmation email| EMAIL
+    UC_VE -->|access_token, refresh_token| USER
+
+    USER -->|email, password| UC_LG
+    UC_LG -->|READ| DB_USERS
+    UC_LG -->|READ failed_attempts, locked_until| DB_US
+    UC_LG -->|SET otp| R_OTP
+    UC_LG -->|otp email| EMAIL
+
+    USER -->|verification_token, otp, ip, user_agent| UC_LV
+    UC_LV -->|GETDEL otp| R_OTP
+    UC_LV -->|READ| DB_USERS
+    UC_LV -->|READ| DB_US
+    UC_LV -->|INSERT| DB_RT
+    UC_LV -->|UPDATE login history| DB_UA
+    UC_LV -->|UPDATE reset failed_attempts| DB_US
+    UC_LV -->|access_token, refresh_token, user_id| USER
+
+    USER -->|verification token| UC_ROTP
+    UC_ROTP -->|SET new otp| R_OTP
+    UC_ROTP -->|otp email| EMAIL
+
+    USER -->|refresh_token| UC_LO
+    UC_LO -->|READ| DB_RT
+    UC_LO -->|UPDATE is_active=false| DB_RT
+
+    USER -->|refresh_token| UC_RF
+    UC_RF -->|READ| DB_RT
+    UC_RF -->|READ| DB_USERS
+    UC_RF -->|READ claims| DB_UP
+    UC_RF -->|UPDATE revoke old token| DB_RT
+    UC_RF -->|INSERT new token| DB_RT
+    UC_RF -->|access_token, refresh_token| USER
+
+    USER -->|email| UC_RV
+    UC_RV -->|READ| DB_USERS
+    UC_RV -->|READ email_verified| DB_US
+    UC_RV -->|verification email| EMAIL
+
+    USER -->|email| UC_FP
+    UC_FP -->|READ| DB_USERS
+    UC_FP -->|SET reset token| R_PWR
+    UC_FP -->|reset email| EMAIL
+
+    USER -->|reset token, new_password| UC_RP
+    UC_RP -->|GETDEL reset token| R_PWR
+    UC_RP -->|UPDATE password hash| DB_USERS
+
+    %% ════════════════════════════════════════
+    %%  2. USER MANAGEMENT — ADMIN
+    %% ════════════════════════════════════════
+    subgraph UMGMT[User Account Management — Admin]
+        direction TB
+        UC_LUA[list_user_accounts]
+        UC_GUA[get_user_account_detail]
+        UC_LROLES[list_roles_admin]
+        UC_CHGR[change_role]
+        UC_CHGE[change_email]
+        UC_SPR[send_password_reset]
+    end
+
+    ADMIN -->|page, search, status, role filter| UC_LUA
+    UC_LUA -->|READ paginated| DB_USERS
+    UC_LUA -->|READ| DB_UR
+
+    ADMIN -->|user_id| UC_GUA
+    UC_GUA -->|READ| DB_USERS
+    UC_GUA -->|READ| DB_UP
+    UC_GUA -->|READ| DB_US
+    UC_GUA -->|READ| DB_UR
+    UC_GUA -->|READ| DB_RP
+
+    ADMIN -->|user_id, role_id, changed_by| UC_CHGR
+    UC_CHGR -->|READ FOR UPDATE| DB_USERS
+    UC_CHGR -->|READ| DB_ROLES
+    UC_CHGR -->|DELETE old assignment| DB_UR
+    UC_CHGR -->|INSERT new assignment| DB_UR
+    UC_CHGR -->|UPDATE stage revoke| DB_RT
+
+    ADMIN -->|user_id, new_email| UC_CHGE
+    UC_CHGE -->|READ FOR UPDATE| DB_USERS
+    UC_CHGE -->|UPDATE email| DB_USERS
+    UC_CHGE -->|UPDATE email_verified=false| DB_US
+    UC_CHGE -->|UPDATE stage revoke| DB_RT
+    UC_CHGE -->|verification email| EMAIL
+
+    ADMIN -->|user_id| UC_SPR
+    UC_SPR -->|READ| DB_USERS
+    UC_SPR -->|READ email_verified| DB_US
+    UC_SPR -->|SET reset token| R_PWR
+    UC_SPR -->|reset email| EMAIL
+
+    %% ════════════════════════════════════════
+    %%  3. USER PROFILE USE CASES
+    %% ════════════════════════════════════════
+    subgraph PROFILE[User Profile]
+        direction TB
+        UC_OB[complete_onboarding]
+        UC_UPR[update_profile]
+        UC_CA[check_alias_availability]
+        UC_LH[get_login_history]
+    end
+
+    USER -->|user_id, alias, first_name, last_name, bio, etc.| UC_OB
+    UC_OB -->|READ onboarding_completed| DB_USERS
+    UC_OB -->|READ email_verified| DB_US
+    UC_OB -->|READ alias uniqueness| DB_UP
+    UC_OB -->|INSERT profile| DB_UP
+    UC_OB -->|UPDATE onboarding_completed=true| DB_USERS
+
+    USER -->|user_id, profile fields| UC_UPR
+    UC_UPR -->|READ FOR UPDATE| DB_UP
+    UC_UPR -->|UPDATE profile| DB_UP
+
+    USER -->|alias string| UC_CA
+    UC_CA -->|READ alias exists| DB_UP
+    UC_CA -->|available: true/false| USER
+
+    USER -->|user_id, limit| UC_LH
+    UC_LH -->|READ login entries| DB_UA
+    UC_LH -->|login history list| USER
+
+    %% ════════════════════════════════════════
+    %%  4. ACCOUNT SETTINGS USE CASES
+    %% ════════════════════════════════════════
+    subgraph ACCSETTINGS[Account Settings]
+        direction TB
+        UC_CP[change_password]
+        UC_RSD[request_self_deletion]
+        UC_RAD[request_admin_deletion]
+        UC_FAD[finalize_account_deletion]
+    end
+
+    USER -->|user_id, current_password, new_password| UC_CP
+    UC_CP -->|READ| DB_USERS
+    UC_CP -->|READ email_verified| DB_US
+    UC_CP -->|UPDATE password hash| DB_USERS
+    UC_CP -->|UPDATE revoke all tokens| DB_RT
+
+    USER -->|user_id, password, reason| UC_RSD
+    UC_RSD -->|READ| DB_USERS
+    UC_RSD -->|UPDATE deletion_scheduled_for| DB_USERS
+    UC_RSD -->|ENQUEUE finalize_deletion| R_ARQ
+
+    ADMIN -->|target_user_id, reason| UC_RAD
+    UC_RAD -->|READ| DB_USERS
+    UC_RAD -->|UPDATE deletion_scheduled_for| DB_USERS
+    UC_RAD -->|ENQUEUE finalize_deletion| R_ARQ
+
+    WORKER -->|user_id, scheduled_for| UC_FAD
+    UC_FAD -->|UPDATE status=deleted, deleted_at| DB_USERS
+
+    %% ════════════════════════════════════════
+    %%  5. EVENT USE CASES
+    %% ════════════════════════════════════════
+    subgraph EVENTS_UC[Event Management]
+        direction TB
+        UC_CREV[create_event]
+        UC_UEM[update_event_metadata]
+        UC_UES[update_event_session]
+    end
+
+    USER -->|title, description, start_date, end_date, sessions list| UC_CREV
+    UC_CREV -->|READ venue existence per session| DB_VENUES
+    UC_CREV -->|INSERT| DB_EVENTS
+    UC_CREV -->|INSERT multiple sessions| DB_ES
+
+    USER -->|event_id, title, description, dates, updated_by| UC_UEM
+    UC_UEM -->|READ FOR UPDATE| DB_EVENTS
+    UC_UEM -->|UPDATE metadata| DB_EVENTS
+
+    USER -->|session_id, venue_id, title, dates, updated_by| UC_UES
+    UC_UES -->|READ| DB_ES
+    UC_UES -->|READ FOR UPDATE parent event| DB_EVENTS
+    UC_UES -->|READ venue existence| DB_VENUES
+    UC_UES -->|UPDATE session| DB_ES
+
+    %% ════════════════════════════════════════
+    %%  6. VENUE MANAGEMENT USE CASES
+    %% ════════════════════════════════════════
+    subgraph VENUES_UC[Venue Management]
+        direction TB
+        UC_LVN[list_venues]
+        UC_GVN[get_venue]
+        UC_CVN[create_venue]
+        UC_UVN[update_venue]
+        UC_DVN[delete_venue]
+    end
+
+    ADMIN -->|page, search, type, is_partner| UC_LVN
+    UC_LVN -->|READ paginated| DB_VENUES
+
+    ADMIN -->|venue_id| UC_GVN
+    UC_GVN -->|READ| DB_VENUES
+
+    ADMIN -->|name, city, address, capacity, type, amenities, etc.| UC_CVN
+    UC_CVN -->|READ FOR UPDATE SKIP LOCKED name+city| DB_VENUES
+    UC_CVN -->|INSERT| DB_VENUES
+
+    ADMIN -->|venue_id, update fields| UC_UVN
+    UC_UVN -->|READ FOR UPDATE| DB_VENUES
+    UC_UVN -->|UPDATE| DB_VENUES
+
+    ADMIN -->|venue_id| UC_DVN
+    UC_DVN -->|READ FOR UPDATE| DB_VENUES
+    UC_DVN -->|READ session dependency count| DB_ES
+    UC_DVN -->|DELETE| DB_VENUES
+
+    %% ════════════════════════════════════════
+    %%  7. VENUE RATING USE CASES
+    %% ════════════════════════════════════════
+    subgraph VR_UC[Venue Ratings]
+        direction TB
+        UC_CVR[create_venue_rating]
+        UC_GMR[get_my_rating]
+        UC_UVR[update_venue_rating]
+        UC_DVR[delete_venue_rating]
+        UC_GAR[get_average_rating]
+        UC_LVRS[list_ratings]
+    end
+
+    USER -->|user_id, venue_id, rating 1-5, comment| UC_CVR
+    UC_CVR -->|READ venue existence| DB_VENUES
+    UC_CVR -->|READ FOR UPDATE dup check| DB_VR
+    UC_CVR -->|INSERT| DB_VR
+    UC_CVR -->|UPDATE popularity_count++| DB_VENUES
+
+    USER -->|user_id, venue_id| UC_GMR
+    UC_GMR -->|READ| DB_VR
+    UC_GMR -->|READ| DB_VENUES
+
+    USER -->|user_id, venue_id, rating, comment| UC_UVR
+    UC_UVR -->|READ venue existence| DB_VENUES
+    UC_UVR -->|READ FOR UPDATE| DB_VR
+    UC_UVR -->|UPDATE| DB_VR
+
+    USER -->|user_id, venue_id| UC_DVR
+    UC_DVR -->|READ FOR UPDATE| DB_VR
+    UC_DVR -->|DELETE| DB_VR
+    UC_DVR -->|UPDATE popularity_count--| DB_VENUES
+
+    USER -->|venue_id| UC_GAR
+    UC_GAR -->|READ aggregate avg, count| DB_VR
+
+    USER -->|venue_id, page, page_size| UC_LVRS
+    UC_LVRS -->|READ paginated| DB_VR
+
+    %% ════════════════════════════════════════
+    %%  8. AUDIT LOG USE CASES
+    %% ════════════════════════════════════════
+    subgraph AUDITLOG_UC[Audit Log]
+        direction TB
+        UC_CAL[create_audit_log]
+        UC_GAL[get_audit_logs]
+    end
+
+    AUTH -->|action_type, resource, status, old/new values| UC_CAL
+    UMGMT -->|action_type, resource, status, old/new values| UC_CAL
+    PROFILE -->|action_type, resource, status, old/new values| UC_CAL
+    ACCSETTINGS -->|action_type, resource, status, old/new values| UC_CAL
+    EVENTS_UC -->|action_type, resource, status, old/new values| UC_CAL
+    VENUES_UC -->|action_type, resource, status, old/new values| UC_CAL
+    VR_UC -->|action_type, resource, status, old/new values| UC_CAL
+
+    UC_CAL -->|ENQUEUE persist_audit_log job| R_ARQ
+    WORKER -->|dequeued log payload| DB_AL
+    UC_CAL -.->|sync fallback INSERT| DB_AL
+
+    ADMIN -->|limit, cursor, filters| UC_GAL
+    UC_GAL -->|READ cursor-paginated| DB_AL
+
+    %% ════════════════════════════════════════
+    %%  9. RBAC — USER ROLE & GRANT USE CASES
+    %% ════════════════════════════════════════
+    subgraph RBAC_ROLES[RBAC — Role Management]
+        direction TB
+        UC_LRL[list_roles]
+        UC_GR[get_role]
+        UC_CRL[create_role]
+        UC_URL[update_role]
+        UC_DRL[delete_role]
+    end
+
+    ADMIN -->|no input| UC_LRL
+    UC_LRL -->|READ| DB_ROLES
+    UC_LRL -->|READ| DB_RP
+    UC_LRL -->|READ| DB_FEATS
+
+    ADMIN -->|role_id| UC_GR
+    UC_GR -->|READ| DB_ROLES
+    UC_GR -->|READ| DB_RP
+
+    ADMIN -->|name, description, is_default, permissions list| UC_CRL
+    UC_CRL -->|READ feature existence| DB_FEATS
+    UC_CRL -->|INSERT| DB_ROLES
+    UC_CRL -->|INSERT batch permissions| DB_RP
+
+    ADMIN -->|role_id, name, description, permissions list| UC_URL
+    UC_URL -->|READ FOR UPDATE| DB_ROLES
+    UC_URL -->|READ feature existence| DB_FEATS
+    UC_URL -->|READ assignment dep count| DB_UR
+    UC_URL -->|READ grant dep count| DB_UG
+    UC_URL -->|UPDATE| DB_ROLES
+    UC_URL -->|DELETE old permissions| DB_RP
+    UC_URL -->|INSERT new permissions| DB_RP
+
+    ADMIN -->|role_id| UC_DRL
+    UC_DRL -->|READ FOR UPDATE| DB_ROLES
+    UC_DRL -->|READ assignment dep count| DB_UR
+    UC_DRL -->|READ grant dep count| DB_UG
+    UC_DRL -->|DELETE cascade| DB_ROLES
+    UC_DRL -->|DELETE cascade| DB_RP
+
+    subgraph RBAC_ASSIGN[RBAC — User Role Assignments]
+        direction TB
+        UC_AR[assign_role]
+        UC_GUR[get_user_roles]
+        UC_UAS[update_assignment]
+        UC_REVA[revoke_assignment]
+    end
+
+    ADMIN -->|user_id, role_id, expires_at| UC_AR
+    UC_AR -->|READ| DB_USERS
+    UC_AR -->|READ| DB_ROLES
+    UC_AR -->|READ FOR UPDATE dup check| DB_UR
+    UC_AR -->|INSERT| DB_UR
+
+    ADMIN -->|user_id| UC_GUR
+    UC_GUR -->|READ| DB_UR
+
+    ADMIN -->|assignment_id, expires_at| UC_UAS
+    UC_UAS -->|UPDATE| DB_UR
+
+    ADMIN -->|assignment_id| UC_REVA
+    UC_REVA -->|DELETE| DB_UR
+
+    subgraph RBAC_GRANTS[RBAC — User Grants]
+        direction TB
+        UC_CG[create_grants]
+        UC_LGF[list_grant_features]
+        UC_GUG[get_user_grants]
+        UC_RG[revoke_grant]
+    end
+
+    ADMIN -->|user_id, role_id, feature_id, actions, effect, dates| UC_CG
+    UC_CG -->|READ| DB_USERS
+    UC_CG -->|READ| DB_ROLES
+    UC_CG -->|READ| DB_FEATS
+    UC_CG -->|READ FOR UPDATE dup check| DB_UG
+    UC_CG -->|INSERT batch grants| DB_UG
+
+    ADMIN -->|no input| UC_LGF
+    UC_LGF -->|READ| DB_FEATS
+
+    ADMIN -->|user_id| UC_GUG
+    UC_GUG -->|READ| DB_UG
+
+    ADMIN -->|grant_id| UC_RG
+    UC_RG -->|DELETE| DB_UG
+
+    %% ════════════════════════════════════════
+    %%  10. FEATURE MANAGEMENT USE CASES
+    %% ════════════════════════════════════════
+    subgraph FEAT_UC[Feature Management]
+        direction TB
+        UC_LF[list_features]
+        UC_GF[get_feature]
+        UC_CF[create_feature]
+        UC_UF[update_feature]
+        UC_DF[delete_feature]
+    end
+
+    ADMIN -->|no input| UC_LF
+    UC_LF -->|READ| DB_FEATS
+
+    ADMIN -->|feature_id| UC_GF
+    UC_GF -->|READ| DB_FEATS
+
+    ADMIN -->|slug, name, description, is_enabled| UC_CF
+    UC_CF -->|INSERT| DB_FEATS
+
+    ADMIN -->|feature_id, slug, name, description, is_enabled| UC_UF
+    UC_UF -->|READ FOR UPDATE| DB_FEATS
+    UC_UF -->|READ role_permission dep count| DB_RP
+    UC_UF -->|READ user_grant dep count| DB_UG
+    UC_UF -->|UPDATE| DB_FEATS
+
+    ADMIN -->|feature_id| UC_DF
+    UC_DF -->|READ FOR UPDATE| DB_FEATS
+    UC_DF -->|READ role_permission dep count| DB_RP
+    UC_DF -->|READ user_grant dep count| DB_UG
+    UC_DF -->|DELETE| DB_FEATS
+
+    %% ════════════════════════════════════════
+    %%  11. QUEUE MANAGEMENT USE CASES
+    %% ════════════════════════════════════════
+    subgraph QUEUE_UC[Queue Management]
+        direction TB
+        UC_QS[get_queue_stats]
+        UC_LDJ[list_dead_jobs]
+        UC_RDJ[retry_dead_job]
+        UC_DDJ[delete_dead_job]
+        UC_PDJ[purge_dead_jobs]
+    end
+
+    ADMIN -->|no input| UC_QS
+    UC_QS -->|SCAN arq:queue, arq:in-progress, arq:result| R_ARQ
+
+    ADMIN -->|page, limit| UC_LDJ
+    UC_LDJ -->|SCAN arq:result failed| R_ARQ
+
+    ADMIN -->|job_id| UC_RDJ
+    UC_RDJ -->|SET NX EX distributed lock| R_ARQ
+    UC_RDJ -->|GETDEL arq:result job| R_ARQ
+    UC_RDJ -->|ENQUEUE retried job| R_ARQ
+
+    ADMIN -->|job_id| UC_DDJ
+    UC_DDJ -->|DEL arq:result job| R_ARQ
+
+    ADMIN -->|no input| UC_PDJ
+    UC_PDJ -->|bulk DEL all arq:result failed| R_ARQ
+
+    %% ════════════════════════════════════════
+    %%  STYLING
+    %% ════════════════════════════════════════
+    classDef external fill:#f0f4ff,stroke:#4a6cf7,color:#1a1a2e
+    classDef process fill:#fff8e1,stroke:#f4a91f,color:#1a1a2e
+    classDef datastore fill:#e8f5e9,stroke:#2e7d32,color:#1a1a2e
+    classDef cache fill:#fce4ec,stroke:#c62828,color:#1a1a2e
+
+    class USER,ADMIN,EMAIL,WORKER external
+    class UC_REG,UC_VE,UC_LG,UC_LV,UC_ROTP,UC_LO,UC_RF,UC_RV,UC_FP,UC_RP process
+    class UC_LUA,UC_GUA,UC_LROLES,UC_CHGR,UC_CHGE,UC_SPR process
+    class UC_OB,UC_UPR,UC_CA,UC_LH process
+    class UC_CP,UC_RSD,UC_RAD,UC_FAD process
+    class UC_CREV,UC_UEM,UC_UES process
+    class UC_LVN,UC_GVN,UC_CVN,UC_UVN,UC_DVN process
+    class UC_CVR,UC_GMR,UC_UVR,UC_DVR,UC_GAR,UC_LVRS process
+    class UC_CAL,UC_GAL process
+    class UC_LRL,UC_GR,UC_CRL,UC_URL,UC_DRL process
+    class UC_AR,UC_GUR,UC_UAS,UC_REVA process
+    class UC_CG,UC_LGF,UC_GUG,UC_RG process
+    class UC_LF,UC_GF,UC_CF,UC_UF,UC_DF process
+    class UC_QS,UC_LDJ,UC_RDJ,UC_DDJ,UC_PDJ process
+    class DB_USERS,DB_US,DB_UA,DB_RT,DB_UP datastore
+    class DB_EVENTS,DB_ES,DB_VENUES,DB_VR datastore
+    class DB_ROLES,DB_RP,DB_UR,DB_FEATS,DB_UG,DB_AL datastore
+    class R_OTP,R_PWR,R_ARQ cache

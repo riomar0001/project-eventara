@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from uuid import UUID
 
-from sqlalchemy import JSON, Enum, ForeignKey, Index, Text
+from sqlalchemy import Enum, ForeignKey, Index, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.domain.entities.feedback_report_entity import (

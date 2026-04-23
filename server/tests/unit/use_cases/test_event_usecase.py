@@ -1,7 +1,7 @@
 """Unit tests for CreateEventUseCase, UpdateEventMetadataUseCase, and UpdateEventSessionUseCase."""
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -35,10 +35,10 @@ OTHER_ID = uuid.UUID("cccccccc-cccc-cccc-cccc-cccccccccccc")
 VENUE_ID = uuid.uuid4()
 SESSION_ID = uuid.UUID("dddddddd-dddd-dddd-dddd-dddddddddddd")
 
-EVENT_START = datetime(2025, 6, 1, tzinfo=timezone.utc)
-EVENT_END = datetime(2025, 6, 10, tzinfo=timezone.utc)
-SESSION_START = datetime(2025, 6, 2, tzinfo=timezone.utc)
-SESSION_END = datetime(2025, 6, 3, tzinfo=timezone.utc)
+EVENT_START = datetime(2025, 6, 1, tzinfo=UTC)
+EVENT_END = datetime(2025, 6, 10, tzinfo=UTC)
+SESSION_START = datetime(2025, 6, 2, tzinfo=UTC)
+SESSION_END = datetime(2025, 6, 3, tzinfo=UTC)
 
 
 def _sample_event(**overrides) -> Event:
@@ -66,7 +66,7 @@ def _sample_session(**overrides) -> EventSession:
         description=None,
         start_datetime=SESSION_START,
         end_datetime=SESSION_END,
-        status=EventSessionStatus.SCHEDULED,
+        status=EventSessionStatus.POSTED,
         created_at=None,
         updated_at=None,
     )
@@ -156,7 +156,7 @@ async def test_create_raises_invalid_session_date_when_end_equals_start():
 @pytest.mark.asyncio
 async def test_create_raises_bounds_error_when_session_start_before_event():
     uc, _, _ = _make_create_uc()
-    early = datetime(2025, 5, 31, tzinfo=timezone.utc)
+    early = datetime(2025, 5, 31, tzinfo=UTC)
     with pytest.raises(EventSessionExceedsEventBoundsError):
         await uc.create_event(_create_input(sessions=[_create_session_input(start_datetime=early, end_datetime=SESSION_END)]))
 
@@ -164,7 +164,7 @@ async def test_create_raises_bounds_error_when_session_start_before_event():
 @pytest.mark.asyncio
 async def test_create_raises_bounds_error_when_session_end_after_event():
     uc, _, _ = _make_create_uc()
-    late = datetime(2025, 6, 11, tzinfo=timezone.utc)
+    late = datetime(2025, 6, 11, tzinfo=UTC)
     with pytest.raises(EventSessionExceedsEventBoundsError):
         await uc.create_event(_create_input(sessions=[_create_session_input(start_datetime=SESSION_START, end_datetime=late)]))
 
@@ -414,7 +414,7 @@ async def test_session_raises_invalid_date_when_end_equals_start():
 @pytest.mark.asyncio
 async def test_session_raises_bounds_error_when_start_before_event():
     uc, _, _ = _make_session_uc()
-    early = datetime(2025, 5, 31, tzinfo=timezone.utc)
+    early = datetime(2025, 5, 31, tzinfo=UTC)
     with pytest.raises(EventSessionExceedsEventBoundsError):
         await uc.update_event_session(_session_input(start_datetime=early, end_datetime=SESSION_END))
 
@@ -422,7 +422,7 @@ async def test_session_raises_bounds_error_when_start_before_event():
 @pytest.mark.asyncio
 async def test_session_raises_bounds_error_when_end_after_event():
     uc, _, _ = _make_session_uc()
-    late = datetime(2025, 6, 11, tzinfo=timezone.utc)
+    late = datetime(2025, 6, 11, tzinfo=UTC)
     with pytest.raises(EventSessionExceedsEventBoundsError):
         await uc.update_event_session(_session_input(start_datetime=SESSION_START, end_datetime=late))
 

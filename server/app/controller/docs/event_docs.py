@@ -1,6 +1,5 @@
 from app.controller.schemas.auth_schema import ErrorResponse, ValidationErrorResponse
 
-
 UNAUTHORIZED = {
     401: {
         "description": "Missing or invalid Bearer token",
@@ -144,6 +143,36 @@ EVENT_SESSION_NOT_FOUND = {
                         "summary": "Venue not found",
                         "value": {"success": False, "message": "Venue not found"},
                     },
+                }
+            }
+        },
+    }
+}
+
+EVENT_STATUS_INVALID_TRANSITION = {
+    400: {
+        "description": "Requested status transition is not allowed from the current state",
+        "model": ErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "message": "Cannot transition event from ended to posted",
+                }
+            }
+        },
+    }
+}
+
+EVENT_SESSION_STATUS_INVALID_TRANSITION = {
+    400: {
+        "description": "Requested session status transition is not allowed from the current state",
+        "model": ErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "message": "Cannot transition event session from ended to posted",
                 }
             }
         },

@@ -7,16 +7,20 @@ from pydantic import BaseModel, Field
 
 class EventStatus(StrEnum):
     DRAFT = "draft"
-    PUBLISHED = "published"
+    POSTED = "POSTED"
+    STARTED = "started"
     CANCELLED = "cancelled"
-    COMPLETED = "completed"
+    ENDED = "ended"
     POSTPONED = "postponed"
 
 
 class EventSessionStatus(StrEnum):
-    SCHEDULED = "scheduled"
+    DRAFT = "draft"
+    POSTED = "posted"
+    STARTED = "started"
     CANCELLED = "cancelled"
-    COMPLETED = "completed"
+    ENDED = "ENDED"
+    POSTPONED = "postponed"
 
 
 class EventParticipantStatus(StrEnum):
@@ -55,7 +59,7 @@ class EventSession(BaseModel):
     description: str | None = Field(default=None, max_length=2000)
     start_datetime: datetime
     end_datetime: datetime
-    status: EventSessionStatus = EventSessionStatus.SCHEDULED
+    status: EventSessionStatus = EventSessionStatus.POSTED
     session_metadata: dict | None = None
     created_at: datetime | None = None
     updated_at: datetime | None = None

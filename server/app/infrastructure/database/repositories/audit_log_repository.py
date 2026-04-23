@@ -173,9 +173,7 @@ class AuditLogRepository:
 
     def _decode_cursor(self, cursor: str) -> dict:
         decoded = json.loads(base64.b64decode(cursor.encode()).decode())
-        if decoded.get("direction") not in {"next", "prev", None}:
-            decoded["direction"] = "next"
-        elif decoded.get("direction") is None:
+        if decoded.get("direction") not in {"next", "prev", None} or decoded.get("direction") is None:
             decoded["direction"] = "next"
         return decoded
 

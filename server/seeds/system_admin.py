@@ -143,12 +143,11 @@ async def _assign_admin_role(session, user_id: UUID) -> None:
 async def run() -> None:
     print("\nRunning seed: System Administrator\n" + "-" * 40)
 
-    async with AsyncSessionLocal() as session:
-        async with session.begin():
-            user_id = await _get_or_create_admin(session)
-            await _ensure_security(session, user_id)
-            await _ensure_activity(session, user_id)
-            await _assign_admin_role(session, user_id)
+    async with AsyncSessionLocal() as session, session.begin():
+        user_id = await _get_or_create_admin(session)
+        await _ensure_security(session, user_id)
+        await _ensure_activity(session, user_id)
+        await _assign_admin_role(session, user_id)
 
     print("-" * 40)
     print("Done.\n")

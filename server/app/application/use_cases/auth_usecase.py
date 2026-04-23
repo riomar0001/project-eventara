@@ -557,7 +557,7 @@ class AuthUseCase:
             _, token_record = await verify_refresh_token(data.refresh_token, self.db)
         except ValueError as exc:
             message = str(exc).lower()
-            if "invalid token" in message or "invalid refresh token" == message:
+            if "invalid token" in message or message == "invalid refresh token":
                 raise InvalidTokenError(str(exc)) from exc
             return
 

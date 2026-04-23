@@ -6,6 +6,7 @@ from arq.connections import RedisSettings
 from app.infrastructure.messaging.jobs.account_deletion_jobs import finalize_account_deletion_job
 from app.infrastructure.messaging.jobs.audit_log_jobs import persist_audit_log
 from app.infrastructure.messaging.jobs.email_jobs import send_email_job
+from app.infrastructure.messaging.jobs.event_status_jobs import sync_event_session_statuses_job, sync_event_statuses_job
 from app.infrastructure.messaging.jobs.token_jobs import revoke_expired_tokens_job
 from app.infrastructure.messaging.redis import get_redis_settings
 
@@ -39,6 +40,12 @@ class WorkerSettings:
         ARQ's ``unique=True`` default ensures only one instance of the job
         is enqueued at a time, so a slow run cannot stack with the next
         scheduled invocation.
+
+        ``sync_event_session_statuses_job`` and ``sync_event_statuses_job``
+        fire every minute at second 0.  They advance session and event
+        statuses (POSTED → STARTED, STARTED → ENDED) using atomic bulk
+        UPDATE statements, so concurrent worker instances produce no
+        duplicate transitions.
     """
 
     redis_settings: RedisSettings = get_redis_settings()
@@ -52,4 +59,6 @@ class WorkerSettings:
     ]
     cron_jobs: list = [
         cron(revoke_expired_tokens_job, hour={0}, minute={0}),
+        cron(sync_event_session_statuses_job, second={0}),
+        cron(sync_event_statuses_job, second={0}),
     ]

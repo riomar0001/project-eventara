@@ -109,9 +109,8 @@ class TestChangePasswordUseCase:
     async def test_same_password(self):
         repo = _make_repo(user=_make_user(), security=_make_security())
         uc = self._make_uc(repo)
-        with patch("app.application.use_cases.account_settings_usecase.verify_hash", return_value=True):
-            with pytest.raises(SamePasswordError):
-                await uc.change_password(self._data())
+        with patch("app.application.use_cases.account_settings_usecase.verify_hash", return_value=True), pytest.raises(SamePasswordError):
+            await uc.change_password(self._data())
 
     @pytest.mark.asyncio
     async def test_update_returns_false_raises_not_found(self):
@@ -119,10 +118,9 @@ class TestChangePasswordUseCase:
         uc = self._make_uc(repo)
         with (
             patch("app.application.use_cases.account_settings_usecase.verify_hash", side_effect=[True, False]),
-            patch("app.application.use_cases.account_settings_usecase.hash_string", return_value="new_hash"),
+            patch("app.application.use_cases.account_settings_usecase.hash_string", return_value="new_hash"),pytest.raises(UserNotFoundError)
         ):
-            with pytest.raises(UserNotFoundError):
-                await uc.change_password(self._data())
+            await uc.change_password(self._data())
 
 
 # ─── request_*_deletion ───────────────────────────────────────────────────────

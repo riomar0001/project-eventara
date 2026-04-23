@@ -227,10 +227,9 @@ class TestRegisterUser:
 
         with (
             patch("app.application.use_cases.auth_usecase.hash_string", return_value=HASHED_PASSWORD),
-            patch("app.application.use_cases.auth_usecase.verification_token", return_value="tok"),
+            patch("app.application.use_cases.auth_usecase.verification_token", return_value="tok"),pytest.raises(EmailAlreadyTakenError)
         ):
-            with pytest.raises(EmailAlreadyTakenError):
-                await uc.register_user(data)
+            await uc.register_user(data)
 
 
 # ─── verify_email ─────────────────────────────────────────────────────────────
@@ -360,17 +359,15 @@ class TestLogin:
     async def test_wrong_password(self):
         repo = _make_repo(user=_make_user(), security=_make_security())
         uc = _make_usecase(repo=repo, otp_repo=self._make_otp_repo())
-        with patch("app.application.use_cases.auth_usecase.verify_hash", return_value=False):
-            with pytest.raises(InvalidCredentialsError):
-                await uc.login(LoginInput(email=USER_EMAIL, password="wrong"))
+        with patch("app.application.use_cases.auth_usecase.verify_hash", return_value=False), pytest.raises(InvalidCredentialsError):
+            await uc.login(LoginInput(email=USER_EMAIL, password="wrong"))
 
     @pytest.mark.asyncio
     async def test_email_not_verified(self):
         repo = _make_repo(user=_make_user(), security=_make_security(email_verified=False))
         uc = _make_usecase(repo=repo, otp_repo=self._make_otp_repo())
-        with patch("app.application.use_cases.auth_usecase.verify_hash", return_value=True):
-            with pytest.raises(EmailNotVerifiedError):
-                await uc.login(LoginInput(email=USER_EMAIL, password=RAW_PASSWORD))
+        with patch("app.application.use_cases.auth_usecase.verify_hash", return_value=True), pytest.raises(EmailNotVerifiedError):
+            await uc.login(LoginInput(email=USER_EMAIL, password=RAW_PASSWORD))
 
     @pytest.mark.asyncio
     async def test_no_otp_repo_raises_runtime_error(self):
@@ -842,7 +839,6 @@ class TestResetPassword:
 
         with (
             patch("app.application.use_cases.auth_usecase.verify_password_reset_token", return_value=self._mock_payload()),
-            patch("app.application.use_cases.auth_usecase.hash_string", return_value="new_hash"),
+            patch("app.application.use_cases.auth_usecase.hash_string", return_value="new_hash"),pytest.raises(UserNotFoundError)
         ):
-            with pytest.raises(UserNotFoundError):
-                await uc.reset_password(ResetPasswordInput(token="tok", new_password="pass"))
+            await uc.reset_password(ResetPasswordInput(token="tok", new_password="pass"))

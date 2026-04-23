@@ -183,10 +183,9 @@ class TestRegisterUser:
         uc = _make_usecase(repo=repo)
         with (
             patch("app.application.use_cases.auth_usecase.hash_string", return_value=HASHED_PASSWORD),
-            patch("app.application.use_cases.auth_usecase.verification_token", return_value="vtok"),
+            patch("app.application.use_cases.auth_usecase.verification_token", return_value="vtok"),pytest.raises(EmailAlreadyTakenError)
         ):
-            with pytest.raises(EmailAlreadyTakenError):
-                await uc.register_user(self._data)
+            await uc.register_user(self._data)
 
 
 # ─── Verify Email ─────────────────────────────────────────────────────────────
@@ -311,18 +310,16 @@ class TestLogin:
         """Raises InvalidCredentialsError and records the failed attempt"""
         repo = _make_repo(user=_make_user(), security=_make_security())
         uc = _make_usecase(repo=repo, otp_repo=self._otp_repo())
-        with patch("app.application.use_cases.auth_usecase.verify_hash", return_value=False):
-            with pytest.raises(InvalidCredentialsError):
-                await uc.login(LoginInput(email=USER_EMAIL, password="wrong"))
+        with patch("app.application.use_cases.auth_usecase.verify_hash", return_value=False), pytest.raises(InvalidCredentialsError):
+            await uc.login(LoginInput(email=USER_EMAIL, password="wrong"))
 
     @pytest.mark.asyncio
     async def test_email_not_verified(self):
         """Raises EmailNotVerifiedError when account email is unconfirmed"""
         repo = _make_repo(user=_make_user(), security=_make_security(email_verified=False))
         uc = _make_usecase(repo=repo, otp_repo=self._otp_repo())
-        with patch("app.application.use_cases.auth_usecase.verify_hash", return_value=True):
-            with pytest.raises(EmailNotVerifiedError):
-                await uc.login(LoginInput(email=USER_EMAIL, password=RAW_PASSWORD))
+        with patch("app.application.use_cases.auth_usecase.verify_hash", return_value=True), pytest.raises(EmailNotVerifiedError):
+            await uc.login(LoginInput(email=USER_EMAIL, password=RAW_PASSWORD))
 
     @pytest.mark.asyncio
     async def test_no_otp_repo(self):
@@ -385,25 +382,22 @@ class TestLoginVerify:
     async def test_wrong_otp_code(self):
         """Raises InvalidOTPError when submitted code is wrong or already consumed"""
         uc = _make_usecase(otp_repo=self._otp_repo(valid=False))
-        with patch("app.application.use_cases.auth_usecase.verify_otp_token", return_value=self._payload()):
-            with pytest.raises(InvalidOTPError):
-                await uc.login_verify(self._data())
+        with patch("app.application.use_cases.auth_usecase.verify_otp_token", return_value=self._payload()), pytest.raises(InvalidOTPError):
+            await uc.login_verify(self._data())
 
     @pytest.mark.asyncio
     async def test_user_not_found(self):
         """Raises UserNotFoundError when token subject has no matching account"""
         uc = _make_usecase(repo=_make_repo(user=None), otp_repo=self._otp_repo())
-        with patch("app.application.use_cases.auth_usecase.verify_otp_token", return_value=self._payload()):
-            with pytest.raises(UserNotFoundError):
-                await uc.login_verify(self._data())
+        with patch("app.application.use_cases.auth_usecase.verify_otp_token", return_value=self._payload()), pytest.raises(UserNotFoundError):
+            await uc.login_verify(self._data())
 
     @pytest.mark.asyncio
     async def test_inactive_user(self):
         """Raises UserInactiveError when account is deactivated after OTP issued"""
         uc = _make_usecase(repo=_make_repo(user=_make_user(status=UserStatus.INACTIVE)), otp_repo=self._otp_repo())
-        with patch("app.application.use_cases.auth_usecase.verify_otp_token", return_value=self._payload()):
-            with pytest.raises(UserInactiveError):
-                await uc.login_verify(self._data())
+        with patch("app.application.use_cases.auth_usecase.verify_otp_token", return_value=self._payload()), pytest.raises(UserInactiveError):
+            await uc.login_verify(self._data())
 
     @pytest.mark.asyncio
     async def test_deletion_grace_expired(self):
@@ -459,9 +453,8 @@ class TestResendOtp:
     async def test_user_not_found(self):
         """Raises UserNotFoundError when token subject has no matching account"""
         uc = _make_usecase(repo=_make_repo(user=None))
-        with patch("app.application.use_cases.auth_usecase.verify_otp_token", return_value=self._payload()):
-            with pytest.raises(UserNotFoundError):
-                await uc.resend_otp(ResendOtpInput(token="tok"))
+        with patch("app.application.use_cases.auth_usecase.verify_otp_token", return_value=self._payload()), pytest.raises(UserNotFoundError):
+            await uc.resend_otp(ResendOtpInput(token="tok"))
 
 
 # ─── Logout ───────────────────────────────────────────────────────────────────
@@ -558,10 +551,9 @@ class TestRefresh:
         uc = _make_usecase(repo=_make_repo(user=None))
         with (
             patch("app.application.use_cases.auth_usecase.verify_refresh_token", new_callable=AsyncMock, return_value=(self._payload(), MagicMock())),
-            patch("app.application.use_cases.auth_usecase.RefreshTokenRepository", return_value=self._patched()),
+            patch("app.application.use_cases.auth_usecase.RefreshTokenRepository", return_value=self._patched()),pytest.raises(UserNotFoundError)
         ):
-            with pytest.raises(UserNotFoundError):
-                await uc.refresh(RefreshTokenInput(refresh_token="tok"))
+            await uc.refresh(RefreshTokenInput(refresh_token="tok"))
 
     @pytest.mark.asyncio
     async def test_inactive_user(self):
@@ -569,10 +561,9 @@ class TestRefresh:
         uc = _make_usecase(repo=_make_repo(user=_make_user(status=UserStatus.INACTIVE)))
         with (
             patch("app.application.use_cases.auth_usecase.verify_refresh_token", new_callable=AsyncMock, return_value=(self._payload(), MagicMock())),
-            patch("app.application.use_cases.auth_usecase.RefreshTokenRepository", return_value=self._patched()),
+            patch("app.application.use_cases.auth_usecase.RefreshTokenRepository", return_value=self._patched()),pytest.raises(UserInactiveError)
         ):
-            with pytest.raises(UserInactiveError):
-                await uc.refresh(RefreshTokenInput(refresh_token="tok"))
+            await uc.refresh(RefreshTokenInput(refresh_token="tok"))
 
     @pytest.mark.asyncio
     async def test_deletion_grace_expired(self):
@@ -747,7 +738,6 @@ class TestResetPassword:
         uc = _make_usecase(repo=repo, password_reset_repo=self._pr_repo())
         with (
             patch("app.application.use_cases.auth_usecase.verify_password_reset_token", return_value=self._payload()),
-            patch("app.application.use_cases.auth_usecase.hash_string", return_value="new_hash"),
+            patch("app.application.use_cases.auth_usecase.hash_string", return_value="new_hash"),pytest.raises(UserNotFoundError)
         ):
-            with pytest.raises(UserNotFoundError):
-                await uc.reset_password(ResetPasswordInput(token="tok", new_password="pass"))
+            await uc.reset_password(ResetPasswordInput(token="tok", new_password="pass"))

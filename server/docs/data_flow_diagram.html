@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Eventara — Data Flow Diagrams</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: #f1f5f9;
+      color: #1e293b;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ── Header ─────────────────────────────────────────────── */
+    .hdr {
+      flex-shrink: 0;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #fff;
+      padding: 18px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 3px solid #3b82f6;
+    }
+    .hdr-left { display: flex; flex-direction: column; gap: 3px; }
+    .hdr-badge {
+      font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: #60a5fa;
+    }
+    .hdr-title { font-size: 1.15rem; font-weight: 700; }
+    .hdr-sub { font-size: 0.75rem; color: #94a3b8; }
+    .hdr-actions { display: flex; gap: 10px; align-items: center; }
+    .btn {
+      padding: 7px 16px; border-radius: 6px; font-size: 0.78rem;
+      font-weight: 600; cursor: pointer; border: none; transition: all .15s;
+    }
+    .btn-print {
+      background: #3b82f6; color: #fff;
+    }
+    .btn-print:hover { background: #2563eb; }
+
+    /* ── Layout ─────────────────────────────────────────────── */
+    .layout { display: flex; flex: 1; overflow: hidden; }
+
+    /* ── Sidebar ─────────────────────────────────────────────── */
+    .sidebar {
+      width: 230px; flex-shrink: 0;
+      background: #0f172a; color: #fff;
+      display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+    .legend {
+      padding: 14px 16px; border-bottom: 1px solid #1e293b;
+      flex-shrink: 0;
+    }
+    .legend-title {
+      font-size: 0.65rem; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; color: #475569; margin-bottom: 8px;
+    }
+    .legend-items { display: flex; flex-direction: column; gap: 5px; }
+    .legend-row { display: flex; align-items: center; gap: 7px; font-size: 0.73rem; color: #94a3b8; }
+    .dot {
+      width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0;
+    }
+    .dot-ext  { background: #93c5fd; border: 1px solid #3b82f6; }
+    .dot-proc { background: #fde68a; border: 1px solid #f59e0b; }
+    .dot-pg   { background: #86efac; border: 1px solid #16a34a; }
+    .dot-redis { background: #fca5a5; border: 1px solid #dc2626; }
+
+    .nav { flex: 1; overflow-y: auto; padding: 8px 0; }
+    .nav-section-lbl {
+      font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: #334155;
+      padding: 10px 16px 4px;
+    }
+    .nav-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 16px; cursor: pointer; font-size: 0.8rem;
+      color: #94a3b8; border-left: 3px solid transparent;
+      transition: all .12s; user-select: none;
+    }
+    .nav-item:hover { color: #e2e8f0; background: rgba(255,255,255,0.04); }
+    .nav-item.active {
+      color: #fff; background: rgba(59,130,246,0.12);
+      border-left-color: #3b82f6;
+    }
+    .nav-count {
+      font-size: 0.65rem; background: #1e293b; color: #64748b;
+      padding: 1px 6px; border-radius: 10px;
+    }
+    .nav-item.active .nav-count { background: #1d4ed8; color: #bfdbfe; }
+
+    /* ── Main ─────────────────────────────────────────────────── */
+    .main { flex: 1; overflow-y: auto; padding: 24px; }
+
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    .panel-hdr { margin-bottom: 18px; }
+    .panel-hdr h2 { font-size: 1.1rem; font-weight: 700; margin-bottom: 4px; }
+    .panel-desc { font-size: 0.78rem; color: #64748b; margin-bottom: 10px; }
+    .panel-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .tag {
+      font-size: 0.68rem; padding: 2px 8px; border-radius: 4px; font-weight: 600;
+    }
+    .tag-pg   { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+    .tag-redis { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+
+    .diagram-card {
+      background: #fff; border-radius: 10px; border: 1px solid #e2e8f0;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      padding: 24px; overflow: auto;
+    }
+    .mermaid svg { max-width: 100%; height: auto; }
+
+    /* ── Print ─────────────────────────────────────────────────── */
+    @media print {
+      body { height: auto; overflow: visible; background: #fff; }
+      .hdr { background: #0f172a !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .hdr-actions { display: none; }
+      .sidebar { display: none; }
+      .layout { display: block; }
+      .main { padding: 0; overflow: visible; }
+      .panel { display: block !important; page-break-before: always; margin-bottom: 0; }
+      .panel:first-child { page-break-before: avoid; }
+      .diagram-card { box-shadow: none; border: 1px solid #e2e8f0; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════ HEADER ═══════════════════ -->
+<header class="hdr">
+  <div class="hdr-left">
+    <span class="hdr-badge">Eventara — System Architecture</span>
+    <span class="hdr-title">Data Flow Diagrams</span>
+    <span class="hdr-sub">HTTP Input → Use Case → Data Store · 11 domains · 62 use cases</span>
+  </div>
+  <div class="hdr-actions">
+    <button class="btn btn-print" onclick="window.print()">Print / Export PDF</button>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- ═══════════════════ SIDEBAR ═══════════════════ -->
+  <nav class="sidebar">
+    <div class="legend">
+      <div class="legend-title">Legend</div>
+      <div class="legend-items">
+        <div class="legend-row"><span class="dot dot-ext"></span>External Entity</div>
+        <div class="legend-row"><span class="dot dot-proc"></span>Use Case / Process</div>
+        <div class="legend-row"><span class="dot dot-pg"></span>PostgreSQL Table</div>
+        <div class="legend-row"><span class="dot dot-redis"></span>Redis / Cache</div>
+      </div>
+    </div>
+    <div class="nav">
+      <div class="nav-section-lbl">Domains</div>
+      <div class="nav-item active" data-panel="auth">Authentication <span class="nav-count">10</span></div>
+      <div class="nav-item" data-panel="umgmt">User Management <span class="nav-count">5</span></div>
+      <div class="nav-item" data-panel="profile">User Profile <span class="nav-count">4</span></div>
+      <div class="nav-item" data-panel="accsettings">Account Settings <span class="nav-count">4</span></div>
+      <div class="nav-item" data-panel="events">Events <span class="nav-count">3</span></div>
+      <div class="nav-item" data-panel="venues">Venues <span class="nav-count">5</span></div>
+      <div class="nav-item" data-panel="vratings">Venue Ratings <span class="nav-count">6</span></div>
+      <div class="nav-item" data-panel="rbac">RBAC <span class="nav-count">13</span></div>
+      <div class="nav-item" data-panel="features">Features <span class="nav-count">5</span></div>
+      <div class="nav-item" data-panel="audit">Audit Log <span class="nav-count">2</span></div>
+      <div class="nav-item" data-panel="queue">Queue Management <span class="nav-count">5</span></div>
+    </div>
+  </nav>
+
+  <!-- ═══════════════════ MAIN ═══════════════════ -->
+  <main class="main">
+
+    <!-- ── 1. AUTHENTICATION ─────────────────────────── -->
+    <div class="panel active" id="auth">
+      <div class="panel-hdr">
+        <h2>Authentication</h2>
+        <p class="panel-desc">Registration, email verification, OTP-based login, token refresh, logout, forgot/reset password, and resend flows.</p>
+        <div class="panel-tags">
+          <span class="tag tag-pg">users</span>
+          <span class="tag tag-pg">user_security</span>
+          <span class="tag tag-pg">user_activity</span>
+          <span class="tag tag-pg">refresh_tokens</span>
+          <span class="tag tag-pg">user_profiles</span>
+          <span class="tag tag-redis">Redis: otp</span>
+          <span class="tag tag-redis">Redis: password_reset</span>
+        </div>
+      </div>
+      <div class="diagram-card">
+        <div class="mermaid">
+flowchart LR
+  classDef ext  fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
+  classDef proc fill:#fef9c3,stroke:#ca8a04,color:#713f12
+  classDef pg   fill:#dcfce7,stroke:#16a34a,color:#14532d
+  classDef redis fill:#fee2e2,stroke:#dc2626,color:#7f1d1d
+
+  USER([User])
+  EMAIL([Email Service])
+
+  subgraph UCASES[Use Cases]
+    direction TB
+    REG[register_user]
+    VE[verify_email]
+    LG[login]
+    LV[login_verify]
+    ROTP[resend_otp]
+    LO[logout]
+    RF[refresh_token]
+    RV[resend_verification]
+    FP[forgot_password]
+    RP[reset_password]
+  end
+
+  subgraph PGDB[PostgreSQL]
+    direction TB
+    USERS[(users)]
+    US[(user_security)]
+    UA[(user_activity)]
+    RT[(refresh_tokens)]
+    UP[(user_profiles)]
+  end
+
+  subgraph CACHE[Redis]
+    direction TB
+    OTP[(otp)]
+    PWR[(password_reset)]
+  end
+
+  USER -->|email, password, terms| REG
+  REG -->|INSERT| USERS
+  REG -->|INSERT email_verified=false| US
+  REG -->|INSERT activity| UA
+  REG -->|verification email| EMAIL
+
+  USER -->|JWT token| VE
+  VE -->|READ| USERS
+  VE -->|READ| US
+  VE -->|READ claims| UP
+  VE -->|UPDATE email_verified=true| US
+  VE -->|INSERT| RT
+  VE -->|confirmation email| EMAIL
+  VE -->|access_token, refresh_token| USER
+
+  USER -->|email, password| LG
+  LG -->|READ| USERS
+  LG -->|READ failed_attempts| US
+  LG -->|SET otp| OTP
+  LG -->|otp email| EMAIL
+
+  USER -->|token, otp, ip, user_agent| LV
+  LV -->|GETDEL otp| OTP
+  LV -->|READ| USERS
+  LV -->|READ| US
+  LV -->|INSERT| RT
+  LV -->|UPDATE login history| UA
+  LV -->|UPDATE reset failed_attempts| US
+  LV -->|tokens| USER
+
+  USER -->|token| ROTP
+  ROTP -->|SET new otp| OTP
+  ROTP -->|otp email| EMAIL
+
+  USER -->|refresh_token| LO
+  LO -->|READ| RT
+  LO -->|UPDATE is_active=false| RT
+
+  USER -->|refresh_token| RF
+  RF -->|READ| RT
+  RF -->|READ| USERS
+  RF -->|READ claims| UP
+  RF -->|UPDATE revoke old| RT
+  RF -->|INSERT new| RT
+  RF -->|tokens| USER
+
+  USER -->|email| RV
+  RV -->|READ| USERS
+  RV -->|READ email_verified| US
+  RV -->|verification email| EMAIL
+
+  USER -->|email| FP
+  FP -->|READ| USERS
+  FP -->|SET reset token| PWR
+  FP -->|reset email| EMAIL
+
+  USER -->|reset token, new_password| RP
+  RP -->|GETDEL reset token| PWR
+  RP -->|UPDATE password hash| USERS
+
+  class USER,EMAIL ext
+  class REG,VE,LG,LV,ROTP,LO,RF,RV,FP,RP proc
+  class USERS,US,UA,RT,UP pg
+  class OTP,PWR redis
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 2. USER MANAGEMENT ─────────────────────────── -->
+    <div class="panel" id="umgmt">
+      <div class="panel-hdr">
+        <h2>User Account Management — Admin</h2>
+        <p class="panel-desc">Admin-facing use cases for listing users, viewing details, changing roles/email, and triggering password resets.</p>
+        <div class="panel-tags">
+          <span class="tag tag-pg">users</span>
+          <span class="tag tag-pg">user_security</span>
+          <span class="tag tag-pg">user_profiles</span>
+          <span class="tag tag-pg">refresh_tokens</span>
+          <span class="tag tag-pg">user_roles</span>
+          <span class="tag tag-pg">role_permissions</span>
+          <span class="tag tag-pg">roles</span>
+          <span class="tag tag-redis">Redis: password_reset</span>
+        </div>
+      </div>
+      <div class="diagram-card">
+        <div class="mermaid">
+flowchart LR
+  classDef ext  fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
+  classDef proc fill:#fef9c3,stroke:#ca8a04,color:#713f12
+  classDef pg   fill:#dcfce7,stroke:#16a34a,color:#14532d
+  classDef redis fill:#fee2e2,stroke:#dc2626,color:#7f1d1d
+
+  ADMIN([Admin])
+  EMAIL([Email Service])
+
+  subgraph UCASES[Use Cases]
+    direction TB
+    LUA[list_user_accounts]
+    GUA[get_user_account_detail]
+    CHGR[change_role]
+    CHGE[change_email]
+    SPR[send_password_reset]
+  end
+
+  subgraph PGDB[PostgreSQL]
+    direction TB
+    USERS[(users)]
+    US[(user_security)]
+    UP[(user_profiles)]
+    RT[(refresh_tokens)]
+    UR[(user_roles)]
+    RP[(role_permissions)]
+    ROLES[(roles)]
+  end
+
+  PWR[(Redis: password_reset)]
+
+  ADMIN -->|page, search, status, role filter| LUA
+  LUA -->|READ paginated| USERS
+  LUA -->|READ| UR
+
+  ADMIN -->|user_id| GUA
+  GUA -->|READ| USERS
+  GUA -->|READ| UP
+  GUA -->|READ| US
+  GUA -->|READ| UR
+  GUA -->|READ| RP
+
+  ADMIN -->|user_id, role_id| CHGR
+  CHGR -->|READ FOR UPDATE| USERS
+  CHGR -->|READ| ROLES
+  CHGR -->|DELETE old assignment| UR
+  CHGR -->|INSERT new assignment| UR
+  CHGR -->|UPDATE stage revoke sessions| RT
+
+  ADMIN -->|user_id, new_email| CHGE
+  CHGE -->|READ FOR UPDATE| USERS
+  CHGE -->|UPDATE email| USERS
+  CHGE -->|UPDATE email_verified=false| US
+  CHGE -->|UPDATE stage revoke sessions| RT
+  CHGE -->|verification email| EMAIL
+
+  ADMIN -->|user_id| SPR
+  SPR -->|READ| USERS
+  SPR -->|READ email_verified| US
+  SPR -->|SET reset token| PWR
+  SPR -->|reset email| EMAIL
+
+  class ADMIN,EMAIL ext
+  class LUA,GUA,CHGR,CHGE,SPR proc
+  class USERS,US,UP,RT,UR,RP,ROLES pg
+  class PWR redis
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 3. USER PROFILE ─────────────────────────── -->
+    <div class="panel" id="profile">
+      <div class="panel-hdr">
+        <h2>User Profile</h2>
+        <p class="panel-desc">Onboarding, profile updates, alias availability checks, and login history retrieval.</p>
+        <div class="panel-tags">
+          <span class="tag tag-pg">users</span>
+          <span class="tag tag-pg">user_profiles</span>
+          <span class="tag tag-pg">user_security</span>
+          <span class="tag tag-pg">user_activity</span>
+        </div>
+      </div>
+      <div class="diagram-card">
+        <div class="mermaid">
+flowchart LR
+  classDef ext  fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
+  classDef proc fill:#fef9c3,stroke:#ca8a04,color:#713f12
+  classDef pg   fill:#dcfce7,stroke:#16a34a,color:#14532d
+
+  USER([User])
+
+  subgraph UCASES[Use Cases]
+    direction TB
+    OB[complete_onboarding]
+    UPR[update_profile]
+    CA[check_alias_availability]
+    LH[get_login_history]
+  end
+
+  subgraph PGDB[PostgreSQL]
+    direction TB
+    USERS[(users)]
+    UP[(user_profiles)]
+    US[(user_security)]
+    UA[(user_activity)]
+  end
+
+  USER -->|user_id, alias, name, bio, demographics| OB
+  OB -->|READ onboarding_completed| USERS
+  OB -->|READ email_verified| US
+  OB -->|READ alias uniqueness| UP
+  OB -->|INSERT profile| UP
+  OB -->|UPDATE onboarding_completed=true| USERS
+
+  USER -->|user_id, profile fields| UPR
+  UPR -->|READ FOR UPDATE| UP
+  UPR -->|UPDATE| UP
+
+  USER -->|alias| CA
+  CA -->|READ exists| UP
+  CA -->|available: bool| USER
+
+  USER -->|user_id, limit| LH
+  LH -->|READ login entries| UA
+  LH -->|history list| USER
+
+  class USER ext
+  class OB,UPR,CA,LH proc
+  class USERS,UP,US,UA pg
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 4. ACCOUNT SETTINGS ─────────────────────────── -->
+    <div class="panel" id="accsettings">
+      <div class="panel-hdr">
+        <h2>Account Settings</h2>
+        <p class="panel-desc">Password changes, self-service account deletion with 30-day grace period, admin-initiated deletion, and the async finalization job.</p>
+        <div class="panel-tags">
+          <span class="tag tag-pg">users</span>
+          <span class="tag tag-pg">user_security</span>
+          <span class="tag tag-pg">refresh_tokens</span>
+          <span class="tag tag-redis">Redis: arq:queue</span>
+        </div>
+      </div>
+      <div class="diagram-card">
+        <div class="mermaid">
+flowchart LR
+  classDef ext  fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
+  classDef proc fill:#fef9c3,stroke:#ca8a04,color:#713f12
+  classDef pg   fill:#dcfce7,stroke:#16a34a,color:#14532d
+  classDef redis fill:#fee2e2,stroke:#dc2626,color:#7f1d1d
+
+  USER([User])
+  ADMIN([Admin])
+  WORKER([Arq Worker])
+
+  subgraph UCASES[Use Cases]
+    direction TB
+    CP[change_password]
+    RSD[request_self_deletion]
+    RAD[request_admin_deletion]
+    FAD[finalize_account_deletion]
+  end
+
+  subgraph PGDB[PostgreSQL]
+    direction TB
+    USERS[(users)]
+    US[(user_security)]
+    RT[(refresh_tokens)]
+  end
+
+  ARQ[(Redis: arq:queue)]
+
+  USER -->|current_password, new_password| CP
+  CP -->|READ| USERS
+  CP -->|READ| US
+  CP -->|UPDATE password hash| USERS
+  CP -->|UPDATE revoke all tokens| RT
+
+  USER -->|password, reason| RSD
+  RSD -->|READ| USERS
+  RSD -->|UPDATE deletion_scheduled_for| USERS
+  RSD -->|ENQUEUE finalize_deletion| ARQ
+
+  ADMIN -->|target_user_id, reason| RAD
+  RAD -->|READ| USERS
+  RAD -->|UPDATE deletion_scheduled_for| USERS
+  RAD -->|ENQUEUE finalize_deletion| ARQ
+
+  ARQ -->|dequeue job| WORKER
+  WORKER -->|user_id, scheduled_for| FAD
+  FAD -->|UPDATE status=deleted| USERS
+
+  class USER,ADMIN,WORKER ext
+  class CP,RSD,RAD,FAD proc
+  class USERS,US,RT pg
+  class ARQ redis
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 5. EVENTS ─────────────────────────── -->
+    <div class="panel" id="events">
+      <div class="panel-hdr">
+        <h2>Event Management</h2>
+        <p class="panel-desc">Create events with one or more sessions, update event metadata, and update individual session details. Venue existence is validated per session.</p>
+        <div class="panel-tags">
+          <span class="tag tag-pg">events</span>
+          <span class="tag tag-pg">event_sessions</span>
+          <span class="tag tag-pg">venues</span>
+        </div>
+      </div>
+      <div class="diagram-card">
+        <div class="mermaid">
+flowchart LR
+  classDef ext  fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
+  classDef proc fill:#fef9c3,stroke:#ca8a04,color:#713f12
+  classDef pg   fill:#dcfce7,stroke:#16a34a,color:#14532d
+
+  USER([User])
+
+  subgraph UCASES[Use Cases]
+    direction TB
+    CREV[create_event]
+    UEM[update_event_metadata]
+    UES[update_event_session]
+  end
+
+  subgraph PGDB[PostgreSQL]
+    direction TB
+    EVT[(events)]
+    ES[(event_sessions)]
+    VEN[(venues)]
+  end
+
+  USER -->|title, description, dates, sessions list| CREV
+  CREV -->|READ venue existence per session| VEN
+  CREV -->|INSERT| EVT
+  CREV -->|INSERT multiple sessions| ES
+
+  USER -->|event_id, title, description, dates| UEM
+  UEM -->|READ FOR UPDATE| EVT
+  UEM -->|UPDATE metadata| EVT
+
+  USER -->|session_id, venue_id, title, dates| UES
+  UES -->|READ| ES
+  UES -->|READ FOR UPDATE parent event| EVT
+  UES -->|READ venue existence| VEN
+  UES -->|UPDATE| ES
+
+  class USER ext
+  class CREV,UEM,UES proc
+  class EVT,ES,VEN pg
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 6. VENUES ─────────────────────────── -->
+    <div class="panel" id="venues">
+      <div class="panel-hdr">
+        <h2>Venue Management</h2>
+        <p class="panel-desc">Admin CRUD for venues. Create uses pessimistic locking with SKIP LOCKED for name+city uniqueness. Delete guards against event_session dependencies.</p>
+        <div class="panel-tags">
+          <span class="tag tag-pg">venues</span>
+          <span class="tag tag-pg">event_sessions</span>
+        </div>
+      </div>
+      <div class="diagram-card">
+        <div class="mermaid">
+flowchart LR
+  classDef ext  fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
+  classDef proc fill:#fef9c3,stroke:#ca8a04,color:#713f12
+  classDef pg   fill:#dcfce7,stroke:#16a34a,color:#14532d
+
+  ADMIN([Admin])
+
+  subgraph UCASES[Use Cases]
+    direction TB
+    LVN[list_venues]
+    GVN[get_venue]
+    CVN[create_venue]
+    UVN[update_venue]
+    DVN[delete_venue]
+  end
+
+  subgraph PGDB[PostgreSQL]
+    direction TB
+    VEN[(venues)]
+    ES[(event_sessions)]
+  end
+
+  ADMIN -->|page, search, type, is_partner| LVN
+  LVN -->|READ paginated| VEN
+
+  ADMIN -->|venue_id| GVN
+  GVN -->|READ| VEN
+
+  ADMIN -->|name, city, address, capacity, type, amenities| CVN
+  CVN -->|READ FOR UPDATE SKIP LOCKED name+city| VEN
+  CVN -->|INSERT| VEN
+
+  ADMIN -->|venue_id, update fields| UVN
+  UVN -->|READ FOR UPDATE| VEN
+  UVN -->|UPDATE| VEN
+
+  ADMIN -->|venue_id| DVN
+  DVN -->|READ FOR UPDATE| VEN
+  DVN -->|READ session dependency count| ES
+  DVN -->|DELETE| VEN
+
+  class ADMIN ext
+  class LVN,GVN,CVN,UVN,DVN proc
+  class VEN,ES pg
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 7. VENUE RATINGS ─────────────────────────── -->
+    <div class="panel" id="vratings">
+      <div class="panel-hdr">
+        <h2>Venue Ratings</h2>
+        <p class="panel-desc">Per-user ratings (1–5) for venues. Create/delete keep venue.popularity_count in sync. Duplicate prevention via pessimistic lock.</p>
+        <div class="panel-tags">
+          <span class="tag tag-pg">venues</span>
+          <span class="tag tag-pg">venue_ratings</span>
+        </div>
+      </div>
+      <div class="diagram-card">
+        <div class="mermaid">
+flowchart LR
+  classDef ext  fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
+  classDef proc fill:#fef9c3,stroke:#ca8a04,color:#713f12
+  classDef pg   fill:#dcfce7,stroke:#16a34a,color:#14532d
+
+  USER([User])
+
+  subgraph UCASES[Use Cases]
+    direction TB
+    CVR[create_venue_rating]
+    GMR[get_my_rating]
+    UVR[update_venue_rating]
+    DVR[delete_venue_rating]
+    GAR[get_average_rating]
+    LVRS[list_ratings]
+  end
+
+  subgraph PGDB[PostgreSQL]
+    direction TB
+    VEN[(venues)]
+    VR[(venue_ratings)]
+  end
+
+  USER -->|user_id, venue_id, rating 1-5, comment| CVR
+  CVR -->|READ existence| VEN
+  CVR -->|READ FOR UPDATE dup check| VR
+  CVR -->|INSERT| VR
+  CVR -->|UPDATE popularity_count++| VEN
+
+  USER -->|user_id, venue_id| GMR
+  GMR -->|READ| VR
+  GMR -->|READ| VEN
+
+  USER -->|user_id, venue_id, rating, comment| UVR
+  UVR -->|READ existence| VEN
+  UVR -->|READ FOR UPDATE| VR
+  UVR -->|UPDATE| VR
+
+  USER -->|user_id, venue_id| DVR
+  DVR -->|READ FOR UPDATE| VR
+  DVR -->|DELETE| VR
+  DVR -->|UPDATE popularity_count--| VEN
+
+  USER -->|venue_id| GAR
+  GAR -->|READ aggregate avg + count| VR
+
+  USER -->|venue_id, page, page_size| LVRS
+  LVRS -->|READ paginated| VR
+
+  class USER ext
+  class CVR,GMR,UVR,DVR,GAR,LVRS proc
+  class VEN,VR pg
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 8. RBAC ─────────────────────────── -->
+    <div class="panel" id="rbac">
+      <div class="panel-hdr">
+        <h2>RBAC — Roles, Assignments &amp; Grants</h2>
+        <p class="panel-desc">Three sub-domains: role management (create/update/delete roles with permissions), user role assignments, and per-user action grants for fine-grained overrides.</p>
+        <div class="panel-tags">
+          <span class="tag tag-pg">roles</span>
+          <span class="tag tag-pg">role_permissions</span>
+          <span class="tag tag-pg">user_roles</span>
+          <span class="tag tag-pg">features</span>
+          <span class="tag tag-pg">user_grants</span>
+          <span class="tag tag-pg">users</span>
+        </div>
+      </div>
+      <div class="diagram-card">
+        <div class="mermaid">
+flowchart LR
+  classDef ext  fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
+  classDef proc fill:#fef9c3,stroke:#ca8a04,color:#713f12
+  classDef pg   fill:#dcfce7,stroke:#16a34a,color:#14532d
+
+  ADMIN([Admin])
+
+  subgraph RM[Role Management]
+    direction TB
+    LRL[list_roles]
+    GR[get_role]
+    CRL[create_role]
+    URL[update_role]
+    DRL[delete_role]
+  end
+
+  subgraph RA[Role Assignments]
+    direction TB
+    AR[assign_role]
+    GUR[get_user_roles]
+    UAS[update_assignment]
+    REVA[revoke_assignment]
+  end
+
+  subgraph GRA[User Grants]
+    direction TB
+    CG[create_grants]
+    LGF[list_grant_features]
+    GUG[get_user_grants]
+    RG[revoke_grant]
+  end
+
+  subgraph PGDB[PostgreSQL]
+    direction TB
+    ROLES[(roles)]
+    RP[(role_permissions)]
+    UR[(user_roles)]
+    FEATS[(features)]
+    UG[(user_grants)]
+    USERS[(users)]
+  end
+
+  ADMIN --> LRL
+  LRL -->|READ| ROLES
+  LRL -->|READ| RP
+  LRL -->|READ| FEATS
+
+  ADMIN -->|role_id| GR
+  GR -->|READ| ROLES
+  GR -->|READ| RP
+
+  ADMIN -->|name, description, permissions list| CRL
+  CRL -->|READ feature existence| FEATS
+  CRL -->|INSERT| ROLES
+  CRL -->|INSERT batch permissions| RP
+
+  ADMIN -->|role_id, name, permissions list| URL
+  URL -->|READ FOR UPDATE| ROLES
+  URL -->|READ dep counts| UR
+  URL -->|READ dep counts| UG
+  URL -->|UPDATE| ROLES
+  URL -->|DELETE old permissions| RP
+  URL -->|INSERT new permissions| RP
+
+  ADMIN -->|role_id| DRL
+  DRL -->|READ FOR UPDATE| ROLES
+  DRL -->|READ dep counts| UR
+  DRL -->|READ dep counts| UG
+  DRL -->|DELETE cascade| ROLES
+  DRL -->|DELETE cascade| RP
+
+  ADMIN -->|user_id, role_id, expires_at| AR
+  AR -->|READ| USERS
+  AR -->|READ| ROLES
+  AR -->|READ FOR UPDATE dup check| UR
+  AR -->|INSERT| UR
+
+  ADMIN -->|user_id| GUR
+  GUR -->|READ| UR
+
+  ADMIN -->|assignment_id, expires_at| UAS
+  UAS -->|UPDATE| UR
+
+  ADMIN -->|assignment_id| REVA
+  REVA -->|DELETE| UR
+
+  ADMIN -->|user_id, feature_id, actions, effect| CG
+  CG -->|READ| USERS
+  CG -->|READ| ROLES
+  CG -->|READ| FEATS
+  CG -->|READ FOR UPDATE dup check| UG
+  CG -->|INSERT batch grants| UG
+
+  ADMIN --> LGF
+  LGF -->|READ| FEATS
+
+  ADMIN -->|user_id| GUG
+  GUG -->|READ| UG
+
+  ADMIN -->|grant_id| RG
+  RG -->|DELETE| UG
+
+  class ADMIN ext
+  class LRL,GR,CRL,URL,DRL proc
+  class AR,GUR,UAS,REVA proc
+  class CG,LGF,GUG,RG proc
+  class ROLES,RP,UR,FEATS,UG,USERS pg
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 9. FEATURES ─────────────────────────── -->
+    <div class="panel" id="features">
+      <div class="panel-hdr">
+        <h2>Feature Management</h2>
+        <p class="panel-desc">Slug-based capability flags used by RBAC. Update/delete are blocked when active role_permissions or user_grants reference the feature.</p>
+        <div class="panel-tags">
+          <span class="tag tag-pg">features</span>
+          <span class="tag tag-pg">role_permissions</span>
+          <span class="tag tag-pg">user_grants</span>
+        </div>
+      </div>
+      <div class="diagram-card">
+        <div class="mermaid">
+flowchart LR
+  classDef ext  fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
+  classDef proc fill:#fef9c3,stroke:#ca8a04,color:#713f12
+  classDef pg   fill:#dcfce7,stroke:#16a34a,color:#14532d
+
+  ADMIN([Admin])
+
+  subgraph UCASES[Use Cases]
+    direction TB
+    LF[list_features]
+    GF[get_feature]
+    CF[create_feature]
+    UF[update_feature]
+    DF[delete_feature]
+  end
+
+  subgraph PGDB[PostgreSQL]
+    direction TB
+    FEATS[(features)]
+    RP[(role_permissions)]
+    UG[(user_grants)]
+  end
+
+  ADMIN --> LF
+  LF -->|READ| FEATS
+
+  ADMIN -->|feature_id| GF
+  GF -->|READ| FEATS
+
+  ADMIN -->|slug, name, description, is_enabled| CF
+  CF -->|INSERT| FEATS
+
+  ADMIN -->|feature_id, update fields| UF
+  UF -->|READ FOR UPDATE| FEATS
+  UF -->|READ role_permission dep count| RP
+  UF -->|READ user_grant dep count| UG
+  UF -->|UPDATE| FEATS
+
+  ADMIN -->|feature_id| DF
+  DF -->|READ FOR UPDATE| FEATS
+  DF -->|READ role_permission dep count| RP
+  DF -->|READ user_grant dep count| UG
+  DF -->|DELETE| FEATS
+
+  class ADMIN ext
+  class LF,GF,CF,UF,DF proc
+  class FEATS,RP,UG pg
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 10. AUDIT LOG ─────────────────────────── -->
+    <div class="panel" id="audit">
+      <div class="panel-hdr">
+        <h2>Audit Log</h2>
+        <p class="panel-desc">All domain use cases emit audit events. Writes are async-first via Arq (non-blocking), with a synchronous fallback. Reads use cursor-based pagination for stability under concurrent writes.</p>
+        <div class="panel-tags">
+          <span class="tag tag-pg">audit_logs</span>
+          <span class="tag tag-redis">Redis: arq:queue</span>
+        </div>
+      </div>
+      <div class="diagram-card">
+        <div class="mermaid">
+flowchart LR
+  classDef ext  fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
+  classDef proc fill:#fef9c3,stroke:#ca8a04,color:#713f12
+  classDef pg   fill:#dcfce7,stroke:#16a34a,color:#14532d
+  classDef redis fill:#fee2e2,stroke:#dc2626,color:#7f1d1d
+
+  DOMAINS([All Domain Use Cases])
+  ADMIN([Admin])
+  WORKER([Arq Worker])
+
+  subgraph UCASES[Use Cases]
+    direction TB
+    CAL[create_audit_log]
+    GAL[get_audit_logs]
+  end
+
+  AL[(audit_logs)]
+  ARQ[(Redis: arq:queue)]
+
+  DOMAINS -->|action_type, resource_type, resource_id, ip, user_agent, old+new values| CAL
+  CAL -->|ENQUEUE persist_audit_log| ARQ
+  ARQ -->|dequeue job| WORKER
+  WORKER -->|INSERT| AL
+  CAL -.->|sync fallback INSERT| AL
+
+  ADMIN -->|limit, cursor, user_id, action_type, date range| GAL
+  GAL -->|READ cursor-paginated| AL
+
+  class DOMAINS,ADMIN,WORKER ext
+  class CAL,GAL proc
+  class AL pg
+  class ARQ redis
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 11. QUEUE ─────────────────────────── -->
+    <div class="panel" id="queue">
+      <div class="panel-hdr">
+        <h2>Queue Management</h2>
+        <p class="panel-desc">Inspect and manage the Arq Redis queue. Retry uses a distributed SET NX EX lock to prevent concurrent double-enqueue.</p>
+        <div class="panel-tags">
+          <span class="tag tag-redis">Redis: arq:queue</span>
+          <span class="tag tag-redis">Redis: arq:in-progress</span>
+          <span class="tag tag-redis">Redis: arq:result</span>
+          <span class="tag tag-redis">Redis: arq:dlq:retry-lock</span>
+        </div>
+      </div>
+      <div class="diagram-card">
+        <div class="mermaid">
+flowchart LR
+  classDef ext  fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
+  classDef proc fill:#fef9c3,stroke:#ca8a04,color:#713f12
+  classDef redis fill:#fee2e2,stroke:#dc2626,color:#7f1d1d
+
+  ADMIN([Admin])
+
+  subgraph UCASES[Use Cases]
+    direction TB
+    QS[get_queue_stats]
+    LDJ[list_dead_jobs]
+    RDJ[retry_dead_job]
+    DDJ[delete_dead_job]
+    PDJ[purge_dead_jobs]
+  end
+
+  subgraph REDIS[Redis]
+    direction TB
+    QUEUE[(arq:queue)]
+    INPROG[(arq:in-progress)]
+    RESULTS[(arq:result)]
+    LOCK[(arq:dlq:retry-lock)]
+  end
+
+  ADMIN --> QS
+  QS -->|SCAN| QUEUE
+  QS -->|SCAN| INPROG
+  QS -->|SCAN| RESULTS
+
+  ADMIN -->|page, limit| LDJ
+  LDJ -->|SCAN failed jobs| RESULTS
+
+  ADMIN -->|job_id| RDJ
+  RDJ -->|SET NX EX 30 dist lock| LOCK
+  RDJ -->|GETDEL job result| RESULTS
+  RDJ -->|ENQUEUE retried job| QUEUE
+
+  ADMIN -->|job_id| DDJ
+  DDJ -->|DEL job result| RESULTS
+
+  ADMIN --> PDJ
+  PDJ -->|bulk DEL all failed| RESULTS
+
+  class ADMIN ext
+  class QS,LDJ,RDJ,DDJ,PDJ proc
+  class QUEUE,INPROG,RESULTS,LOCK redis
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+
+  mermaid.initialize({
+    startOnLoad: false,
+    theme: 'base',
+    themeVariables: {
+      background: '#ffffff',
+      primaryColor: '#fef9c3',
+      primaryBorderColor: '#ca8a04',
+      secondaryColor: '#dcfce7',
+      tertiaryColor: '#dbeafe',
+      edgeLabelBackground: '#f8fafc',
+      fontSize: '13px',
+    },
+    flowchart: { curve: 'basis', padding: 20 }
+  });
+
+  async function showPanel(id) {
+    document.querySelectorAll('.nav-item').forEach(el =>
+      el.classList.toggle('active', el.dataset.panel === id)
+    );
+    document.querySelectorAll('.panel').forEach(el =>
+      el.classList.toggle('active', el.id === id)
+    );
+
+    const panel = document.getElementById(id);
+    if (panel && !panel.dataset.rendered) {
+      panel.dataset.rendered = 'true';
+      const nodes = panel.querySelectorAll('.mermaid');
+      if (nodes.length) {
+        try {
+          await mermaid.run({ nodes: Array.from(nodes) });
+        } catch (e) {
+          nodes.forEach(n => {
+            n.innerHTML = `<pre style="color:red;font-size:12px">Render error: ${e.message}</pre>`;
+          });
+        }
+      }
+    }
+  }
+
+  document.querySelectorAll('.nav-item').forEach(el =>
+    el.addEventListener('click', () => showPanel(el.dataset.panel))
+  );
+
+  showPanel('auth');
+</script>
+</body>
+</html>

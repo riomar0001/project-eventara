@@ -52,7 +52,7 @@ def _make_repo(**kwargs) -> MagicMock:
     repo.user_exists = AsyncMock(return_value=kwargs.get("user_exists", True))
     repo.role_exists = AsyncMock(return_value=kwargs.get("role_exists", True))
     repo.feature_exists = AsyncMock(return_value=kwargs.get("feature_exists", True))
-    repo.get_active_assignment = AsyncMock(return_value=kwargs.get("active_assignment", None))
+    repo.get_active_assignment = AsyncMock(return_value=kwargs.get("active_assignment"))
     repo.create_assignment = AsyncMock(return_value=MagicMock())
     repo.get_assignments_by_user = AsyncMock(return_value=kwargs.get("assignments", []))
     repo.get_assignment_by_id = AsyncMock(return_value=kwargs.get("assignment", MagicMock()))
