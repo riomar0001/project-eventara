@@ -15,7 +15,7 @@ Concurrency strategy — pessimistic locking (SELECT … FOR UPDATE) on mutating
 
 import uuid
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.entities.event_entity import EventParticipant as EventParticipantEntity
@@ -89,6 +89,27 @@ class EventParticipantRepository:
         result = await self.db.execute(query)
         orm = result.scalar_one_or_none()
         return self._to_entity(orm) if orm else None
+
+    async def count_active_participants(self, session_id: uuid.UUID) -> int:
+        """Return the number of non-cancelled participants for a session.
+
+        Counts rows with status REGISTERED, ATTENDED, or NO_SHOW — all statuses
+        that represent a taken slot. CANCELLED registrations are excluded because
+        they free their slot for new registrations.
+
+        Args:
+            session_id: UUID of the target session.
+
+        Returns:
+            Integer count of active (slot-occupying) participants.
+        """
+        result = await self.db.execute(
+            select(func.count()).select_from(EventParticipant).where(
+                EventParticipant.event_session_id == session_id,
+                EventParticipant.status != EventParticipantStatus.CANCELLED,
+            )
+        )
+        return result.scalar_one()
 
     async def create(
         self,

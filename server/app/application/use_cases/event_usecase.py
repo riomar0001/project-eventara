@@ -103,6 +103,7 @@ class EventUseCase:
                     description=s.description,
                     start_datetime=s.start_datetime,
                     end_datetime=s.end_datetime,
+                    max_slots=s.max_slots,
                 ))
         except Exception:
             await self.db.rollback()
@@ -199,6 +200,7 @@ class EventUseCase:
                 description=data.description,
                 start_datetime=data.start_datetime,
                 end_datetime=data.end_datetime,
+                max_slots=data.max_slots,
             )
             if updated_session is None:
                 raise EventSessionNotFoundError(str(data.session_id))

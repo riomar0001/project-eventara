@@ -31,6 +31,18 @@ PARTICIPANT_REGISTRATION_NOT_OPEN = {
     }
 }
 
+PARTICIPANT_SLOTS_FULL = {
+    409: {
+        "description": "All available slots for the session are taken",
+        "model": ErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {"success": False, "message": "Session is full — no slots remaining"}
+            }
+        },
+    }
+}
+
 PARTICIPANT_ALREADY_REGISTERED = {
     409: {
         "description": "User is already registered for this session",

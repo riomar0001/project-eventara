@@ -23,6 +23,7 @@ from app.domain.exceptions.event_participant_exceptions import (
     EventParticipantNotFoundError,
     InvalidEventParticipantStatusTransitionError,
     RegistrationNotOpenError,
+    SessionSlotsFullError,
     UnauthorizedEventParticipantOperationError,
 )
 from app.domain.exceptions.event_session_exceptions import EventSessionNotFoundError
@@ -69,6 +70,7 @@ def _sample_session(**overrides) -> EventSession:
         start_datetime=SESSION_START,
         end_datetime=SESSION_END,
         status=EventSessionStatus.POSTED,
+        max_slots=None,
         created_at=None,
         updated_at=None,
     )
@@ -96,9 +98,11 @@ def _sample_participant(**overrides) -> EventParticipant:
 def _make_register_repos():
     event_repo = MagicMock(spec=EventRepository)
     event_repo.get_session_by_id = AsyncMock(return_value=_sample_session())
+    event_repo.get_venue_capacity = AsyncMock(return_value=100)
 
     participant_repo = MagicMock(spec=EventParticipantRepository)
     participant_repo.get_by_user_and_session = AsyncMock(return_value=None)
+    participant_repo.count_active_participants = AsyncMock(return_value=0)
     participant_repo.create = AsyncMock(return_value=_sample_participant())
 
     return event_repo, participant_repo
@@ -210,6 +214,66 @@ async def test_register_returns_registered_participant():
     result = await uc.register_for_session(_register_input())
     assert result.participant.id == PARTICIPANT_ID
     assert result.participant.status == EventParticipantStatus.REGISTERED
+
+
+@pytest.mark.asyncio
+async def test_register_raises_slots_full_when_session_max_slots_exhausted():
+    event_repo, participant_repo = _make_register_repos()
+    event_repo.get_session_by_id = AsyncMock(return_value=_sample_session(max_slots=50))
+    participant_repo.count_active_participants = AsyncMock(return_value=50)
+    uc, _, _, _ = _make_register_uc(event_repo, participant_repo)
+    with pytest.raises(SessionSlotsFullError):
+        await uc.register_for_session(_register_input())
+
+
+@pytest.mark.asyncio
+async def test_register_raises_slots_full_when_venue_capacity_exhausted():
+    event_repo, participant_repo = _make_register_repos()
+    event_repo.get_session_by_id = AsyncMock(return_value=_sample_session(max_slots=None))
+    event_repo.get_venue_capacity = AsyncMock(return_value=100)
+    participant_repo.count_active_participants = AsyncMock(return_value=100)
+    uc, _, _, _ = _make_register_uc(event_repo, participant_repo)
+    with pytest.raises(SessionSlotsFullError):
+        await uc.register_for_session(_register_input())
+
+
+@pytest.mark.asyncio
+async def test_register_uses_session_max_slots_over_venue_capacity():
+    event_repo, participant_repo = _make_register_repos()
+    event_repo.get_session_by_id = AsyncMock(return_value=_sample_session(max_slots=10))
+    event_repo.get_venue_capacity = AsyncMock(return_value=100)
+    participant_repo.count_active_participants = AsyncMock(return_value=10)
+    uc, _, _, _ = _make_register_uc(event_repo, participant_repo)
+    with pytest.raises(SessionSlotsFullError):
+        await uc.register_for_session(_register_input())
+
+
+@pytest.mark.asyncio
+async def test_register_succeeds_when_slot_below_session_max_slots():
+    event_repo, participant_repo = _make_register_repos()
+    event_repo.get_session_by_id = AsyncMock(return_value=_sample_session(max_slots=50))
+    participant_repo.count_active_participants = AsyncMock(return_value=49)
+    uc, _, _, _ = _make_register_uc(event_repo, participant_repo)
+    result = await uc.register_for_session(_register_input())
+    assert result.participant.id == PARTICIPANT_ID
+
+
+@pytest.mark.asyncio
+async def test_register_fetches_venue_capacity_when_session_max_slots_is_none():
+    event_repo, participant_repo = _make_register_repos()
+    event_repo.get_session_by_id = AsyncMock(return_value=_sample_session(max_slots=None))
+    uc, event_repo_used, _, _ = _make_register_uc(event_repo, participant_repo)
+    await uc.register_for_session(_register_input())
+    event_repo_used.get_venue_capacity.assert_called_once_with(VENUE_ID)
+
+
+@pytest.mark.asyncio
+async def test_register_skips_venue_capacity_lookup_when_session_max_slots_set():
+    event_repo, participant_repo = _make_register_repos()
+    event_repo.get_session_by_id = AsyncMock(return_value=_sample_session(max_slots=50))
+    uc, event_repo_used, _, _ = _make_register_uc(event_repo, participant_repo)
+    await uc.register_for_session(_register_input())
+    event_repo_used.get_venue_capacity.assert_not_called()
 
 
 # ---------------------------------------------------------------------------

@@ -12,6 +12,7 @@ class CreateEventSessionInput:
     description: str | None
     start_datetime: datetime
     end_datetime: datetime
+    max_slots: int | None = None
 
 
 @dataclass
@@ -55,6 +56,7 @@ class UpdateEventSessionInput:
     description: str | None
     start_datetime: datetime
     end_datetime: datetime
+    max_slots: int | None = None
 
 
 @dataclass

@@ -48,6 +48,7 @@ class EventSession(Base):
     start_datetime: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     end_datetime: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     status: Mapped[str] = mapped_column(Enum(EventSessionStatus, native_enum=False), nullable=False, default="scheduled")
+    max_slots: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
     event = relationship("Event", back_populates="sessions")
     venue = relationship("Venue", back_populates="event_sessions")

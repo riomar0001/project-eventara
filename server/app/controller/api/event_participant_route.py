@@ -29,6 +29,7 @@ from app.controller.docs.event_participant_docs import (
     PARTICIPANT_NOT_FOUND,
     PARTICIPANT_REGISTRATION_NOT_OPEN,
     PARTICIPANT_SESSION_NOT_FOUND,
+    PARTICIPANT_SLOTS_FULL,
     PARTICIPANT_UNAUTHORIZED,
     PARTICIPANT_UNAUTHORIZED_OPERATION,
     PARTICIPANT_VALIDATION_ERROR,
@@ -47,6 +48,7 @@ from app.domain.exceptions.event_participant_exceptions import (
     EventParticipantNotFoundError,
     InvalidEventParticipantStatusTransitionError,
     RegistrationNotOpenError,
+    SessionSlotsFullError,
     UnauthorizedEventParticipantOperationError,
 )
 from app.domain.exceptions.event_session_exceptions import EventSessionNotFoundError
@@ -74,12 +76,15 @@ def _to_participant_response(participant: EventParticipantEntity) -> EventPartic
         **PARTICIPANT_SESSION_NOT_FOUND,
         **PARTICIPANT_REGISTRATION_NOT_OPEN,
         **PARTICIPANT_ALREADY_REGISTERED,
+        **PARTICIPANT_SLOTS_FULL,
     },
     summary="Register for an event session",
     description=(
         "Registers the authenticated user for the specified event session. "
         "Registration is only permitted when the session status is POSTED. "
-        "Each user may register for a given session at most once."
+        "Each user may register for a given session at most once. "
+        "Registration is rejected when all slots are taken. "
+        "Slot limit is the session's max_slots if set, otherwise the venue capacity."
     ),
 )
 async def register_for_session(
@@ -100,6 +105,8 @@ async def register_for_session(
     except RegistrationNotOpenError as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
     except DuplicateEventParticipantError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+    except SessionSlotsFullError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
 
     await safe_audit_log(

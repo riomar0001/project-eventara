@@ -71,6 +71,7 @@ class EventRepository:
             start_datetime=orm.start_datetime,
             end_datetime=orm.end_datetime,
             status=EventSessionStatus(orm.status),
+            max_slots=orm.max_slots,
             created_at=orm.created_at,
             updated_at=orm.updated_at,
         )
@@ -79,6 +80,18 @@ class EventRepository:
         """Return True when a venue row with the given ID exists."""
         result = await self.db.execute(select(Venue.id).where(Venue.id == venue_id))
         return result.scalar_one_or_none() is not None
+
+    async def get_venue_capacity(self, venue_id: uuid.UUID) -> int | None:
+        """Return the maximum capacity of the venue, or ``None`` if the venue does not exist.
+
+        Args:
+            venue_id: UUID of the target venue.
+
+        Returns:
+            The venue's integer capacity, or ``None`` if no matching row exists.
+        """
+        result = await self.db.execute(select(Venue.capacity).where(Venue.id == venue_id))
+        return result.scalar_one_or_none()
 
     async def get_event_by_id(self, event_id: uuid.UUID, *, for_update: bool = False) -> EventEntity | None:
         """Return the event entity for the given ID, optionally locking the row.
@@ -162,6 +175,7 @@ class EventRepository:
         description: str | None,
         start_datetime: datetime,
         end_datetime: datetime,
+        max_slots: int | None = None,
     ) -> EventSessionEntity:
         """Insert a new event session row and return the persisted entity."""
         orm = EventSession(
@@ -172,6 +186,7 @@ class EventRepository:
             start_datetime=start_datetime,
             end_datetime=end_datetime,
             status=EventSessionStatus.POSTED,
+            max_slots=max_slots,
         )
         self.db.add(orm)
         await self.db.flush()
@@ -225,6 +240,7 @@ class EventRepository:
         description: str | None,
         start_datetime: datetime,
         end_datetime: datetime,
+        max_slots: int | None = None,
     ) -> EventSessionEntity | None:
         """Apply field updates to an existing event session row.
 
@@ -235,6 +251,7 @@ class EventRepository:
             description:    Replacement plain-text description, or ``None``.
             start_datetime: Replacement session start.
             end_datetime:   Replacement session end.
+            max_slots:      Replacement slot cap, or ``None`` to fall back to venue capacity.
 
         Returns:
             The updated ``EventSessionEntity``, or ``None`` if no matching row exists.
@@ -249,6 +266,7 @@ class EventRepository:
         orm.description = description
         orm.start_datetime = start_datetime
         orm.end_datetime = end_datetime
+        orm.max_slots = max_slots
 
         await self.db.flush()
         await self.db.refresh(orm)

@@ -102,6 +102,7 @@ def _to_session_response(session: EventSessionEntity) -> EventSessionRecordRespo
         start_datetime=session.start_datetime,
         end_datetime=session.end_datetime,
         status=session.status.value if hasattr(session.status, "value") else session.status,
+        max_slots=session.max_slots,
         created_at=session.created_at,
         updated_at=session.updated_at,
     )
@@ -135,6 +136,7 @@ async def create_event(
             description=s.description,
             start_datetime=s.start_datetime,
             end_datetime=s.end_datetime,
+            max_slots=s.max_slots,
         )
         for s in body.sessions
     ]
@@ -274,6 +276,7 @@ async def update_event_session(
                 description=body.description,
                 start_datetime=body.start_datetime,
                 end_datetime=body.end_datetime,
+                max_slots=body.max_slots,
             )
         )
     except UnauthorizedEventOperationError as exc:

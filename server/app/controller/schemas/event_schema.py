@@ -13,6 +13,7 @@ class EventSessionCreateRequest(BaseModel):
     description: str | None = Field(default=None, max_length=5000)
     start_datetime: datetime
     end_datetime: datetime
+    max_slots: int | None = Field(default=None, gt=0)
 
     @field_validator("description", mode="before")
     @classmethod
@@ -44,6 +45,7 @@ class EventSessionRecordResponse(BaseModel):
     start_datetime: datetime
     end_datetime: datetime
     status: str
+    max_slots: int | None
     created_at: datetime | None
     updated_at: datetime | None
 
@@ -95,6 +97,7 @@ class EventSessionUpdateRequest(BaseModel):
     description: str | None = Field(default=None, max_length=5000)
     start_datetime: datetime
     end_datetime: datetime
+    max_slots: int | None = Field(default=None, gt=0)
 
     @field_validator("description", mode="before")
     @classmethod

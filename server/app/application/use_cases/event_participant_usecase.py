@@ -15,6 +15,7 @@ from app.domain.exceptions.event_participant_exceptions import (
     EventParticipantNotFoundError,
     InvalidEventParticipantStatusTransitionError,
     RegistrationNotOpenError,
+    SessionSlotsFullError,
     UnauthorizedEventParticipantOperationError,
 )
 from app.domain.exceptions.event_session_exceptions import EventSessionNotFoundError
@@ -74,19 +75,29 @@ class EventParticipantUseCase:
     async def register_for_session(self, data: RegisterForSessionInput) -> RegisterForSessionOutput:
         """Register the authenticated user for an event session.
 
-        Acquires a session-level row lock to serialise concurrent registrations
-        and guard against concurrent session status changes before validating
-        eligibility.
+        Acquires a session-level row lock to serialise concurrent registrations,
+        guard against concurrent session status changes, and make the slot-count
+        check atomic. Because all concurrent registrations for the same session
+        must acquire the same row lock, the slot count seen within a locked
+        transaction reflects all previously committed registrations, ensuring
+        the capacity limit is never exceeded.
+
+        Slot resolution:
+            If ``session.max_slots`` is set, that value overrides the venue
+            capacity. Otherwise the venue's own capacity is used as the limit.
+            A registration with CANCELLED status does not occupy a slot.
 
         Validation order:
         1. Session exists (with row lock).
         2. Session status allows registration (must be POSTED).
         3. User is not already registered for this session.
+        4. Session still has available slots.
 
         Raises:
-            EventSessionNotFoundError:     No session exists for ``data.session_id``.
-            RegistrationNotOpenError:      Session status does not permit new registrations.
+            EventSessionNotFoundError:      No session exists for ``data.session_id``.
+            RegistrationNotOpenError:       Session status does not permit new registrations.
             DuplicateEventParticipantError: User is already registered for this session.
+            SessionSlotsFullError:          All available slots are occupied.
         """
         session = await self.event_repo.get_session_by_id(data.session_id, for_update=True)
         if session is None:
@@ -98,6 +109,15 @@ class EventParticipantUseCase:
         existing = await self.participant_repo.get_by_user_and_session(data.user_id, data.session_id)
         if existing is not None:
             raise DuplicateEventParticipantError(str(data.user_id), str(data.session_id))
+
+        effective_slots = session.max_slots
+        if effective_slots is None:
+            effective_slots = await self.event_repo.get_venue_capacity(session.venue_id)
+
+        if effective_slots is not None:
+            active_count = await self.participant_repo.count_active_participants(data.session_id)
+            if active_count >= effective_slots:
+                raise SessionSlotsFullError(str(data.session_id), active_count, effective_slots)
 
         try:
             participant = await self.participant_repo.create(

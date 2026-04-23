@@ -59,3 +59,12 @@ class RegistrationNotOpenError(Exception):
         else:
             msg = "Registration is not open for this session"
         super().__init__(msg)
+
+
+class SessionSlotsFullError(Exception):
+    def __init__(self, session_id: str = "", registered: int = 0, capacity: int = 0) -> None:
+        if session_id and capacity:
+            msg = f"Session {session_id} is full: {registered}/{capacity} slots taken"
+        else:
+            msg = "Session is full — no slots remaining"
+        super().__init__(msg)
