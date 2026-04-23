@@ -1,0 +1,170 @@
+"""Use cases for event session registration and participant status management."""
+
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.application.dto.event_participant_dto import (
+    RegisterForSessionInput,
+    RegisterForSessionOutput,
+    UpdateParticipantStatusInput,
+    UpdateParticipantStatusOutput,
+)
+from app.domain.entities.event_entity import EventParticipantStatus, EventSessionStatus
+from app.domain.exceptions.event_exceptions import EventNotFoundError
+from app.domain.exceptions.event_participant_exceptions import (
+    DuplicateEventParticipantError,
+    EventParticipantNotFoundError,
+    InvalidEventParticipantStatusTransitionError,
+    RegistrationNotOpenError,
+    UnauthorizedEventParticipantOperationError,
+)
+from app.domain.exceptions.event_session_exceptions import EventSessionNotFoundError
+from app.infrastructure.database.repositories.event_participant_repository import EventParticipantRepository
+from app.infrastructure.database.repositories.event_repository import EventRepository
+
+_REGISTRATION_OPEN_STATUSES = frozenset({EventSessionStatus.POSTED})
+
+_ALLOWED_PARTICIPANT_TRANSITIONS: dict[EventParticipantStatus, frozenset[EventParticipantStatus]] = {
+    EventParticipantStatus.REGISTERED: frozenset({
+        EventParticipantStatus.ATTENDED,
+        EventParticipantStatus.NO_SHOW,
+        EventParticipantStatus.CANCELLED,
+    }),
+}
+
+
+class EventParticipantUseCase:
+    """Application service for event session registration and participant status management.
+
+    Owns the transaction lifecycle for every mutating operation: commits on
+    success, rolls back on any validation or infrastructure failure, then
+    re-raises the exception.
+
+    Concurrency strategy:
+        ``register_for_session`` — acquires a ``SELECT … FOR UPDATE`` lock on
+        the target event session row before validating registration eligibility.
+        This serialises concurrent registration attempts for the same session,
+        preventing a TOCTOU race where two concurrent requests for the same user
+        both read "not registered" and both attempt to insert. Within the locked
+        transaction, the duplicate check is authoritative; the unique index on
+        ``(user_id, event_session_id)`` serves as the final database-level guard.
+        Locking the session row also prevents a status-change race where a session
+        transitions to CANCELLED or ENDED between the status check and the insert.
+
+        ``update_participant_status`` — acquires a ``SELECT … FOR UPDATE`` lock on
+        the participant row before any read-then-write sequence, serialising
+        concurrent status updates on the same participant and eliminating TOCTOU
+        races between the transition validity check and the subsequent update.
+
+    Args:
+        participant_repo: Concrete ``EventParticipantRepository`` providing participant access.
+        event_repo:       Concrete ``EventRepository`` providing session and event access.
+        db:               The active async database session used for commit and rollback.
+    """
+
+    def __init__(
+        self,
+        participant_repo: EventParticipantRepository,
+        event_repo: EventRepository,
+        db: AsyncSession,
+    ) -> None:
+        self.participant_repo = participant_repo
+        self.event_repo = event_repo
+        self.db = db
+
+    async def register_for_session(self, data: RegisterForSessionInput) -> RegisterForSessionOutput:
+        """Register the authenticated user for an event session.
+
+        Acquires a session-level row lock to serialise concurrent registrations
+        and guard against concurrent session status changes before validating
+        eligibility.
+
+        Validation order:
+        1. Session exists (with row lock).
+        2. Session status allows registration (must be POSTED).
+        3. User is not already registered for this session.
+
+        Raises:
+            EventSessionNotFoundError:     No session exists for ``data.session_id``.
+            RegistrationNotOpenError:      Session status does not permit new registrations.
+            DuplicateEventParticipantError: User is already registered for this session.
+        """
+        session = await self.event_repo.get_session_by_id(data.session_id, for_update=True)
+        if session is None:
+            raise EventSessionNotFoundError(str(data.session_id))
+
+        if session.status not in _REGISTRATION_OPEN_STATUSES:
+            raise RegistrationNotOpenError(str(data.session_id), session.status.value)
+
+        existing = await self.participant_repo.get_by_user_and_session(data.user_id, data.session_id)
+        if existing is not None:
+            raise DuplicateEventParticipantError(str(data.user_id), str(data.session_id))
+
+        try:
+            participant = await self.participant_repo.create(
+                user_id=data.user_id,
+                session_id=data.session_id,
+            )
+        except Exception:
+            await self.db.rollback()
+            raise
+
+        await self.db.commit()
+        return RegisterForSessionOutput(participant=participant)
+
+    async def update_participant_status(self, data: UpdateParticipantStatusInput) -> UpdateParticipantStatusOutput:
+        """Update the attendance status of a registered event session participant.
+
+        Only the event creator may perform this operation. Valid transitions
+        from REGISTERED are ATTENDED, NO_SHOW, and CANCELLED. All other
+        participant statuses are terminal — no further transitions are permitted.
+
+        Validation order:
+        1. Participant exists (with row lock).
+        2. Participant's session exists.
+        3. Parent event exists.
+        4. Caller is the event creator.
+        5. Status transition is valid from the participant's current status.
+
+        Raises:
+            EventParticipantNotFoundError:           No participant record for ``data.participant_id``.
+            EventSessionNotFoundError:               The participant's session no longer exists.
+            EventNotFoundError:                      The parent event no longer exists.
+            UnauthorizedEventParticipantOperationError: Caller is not the event creator.
+            InvalidEventParticipantStatusTransitionError: Transition from current status is not allowed.
+        """
+        old_participant = await self.participant_repo.get_by_id(data.participant_id, for_update=True)
+        if old_participant is None:
+            raise EventParticipantNotFoundError(str(data.participant_id))
+
+        session = await self.event_repo.get_session_by_id(old_participant.event_session_id)
+        if session is None:
+            raise EventSessionNotFoundError(str(old_participant.event_session_id))
+
+        event = await self.event_repo.get_event_by_id(session.event_id)
+        if event is None:
+            raise EventNotFoundError(str(session.event_id))
+
+        if event.created_by != data.updated_by:
+            raise UnauthorizedEventParticipantOperationError(str(event.id))
+
+        allowed_targets = _ALLOWED_PARTICIPANT_TRANSITIONS.get(old_participant.status, frozenset())
+        if data.new_status not in allowed_targets:
+            raise InvalidEventParticipantStatusTransitionError(
+                str(old_participant.id),
+                old_participant.status.value,
+                data.new_status.value,
+            )
+
+        try:
+            updated = await self.participant_repo.update_status(
+                participant_id=data.participant_id,
+                new_status=data.new_status,
+            )
+            if updated is None:
+                raise EventParticipantNotFoundError(str(data.participant_id))
+        except Exception:
+            await self.db.rollback()
+            raise
+
+        await self.db.commit()
+        return UpdateParticipantStatusOutput(participant=updated, old_participant=old_participant)

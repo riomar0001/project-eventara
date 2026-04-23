@@ -126,6 +126,15 @@ def serialize_venue(venue: Venue) -> dict:
     }
 
 
+def serialize_event_participant(participant) -> dict:
+    return {
+        "id": str(participant.id),
+        "user_id": str(participant.user_id),
+        "event_session_id": str(participant.event_session_id),
+        "status": participant.status.value if hasattr(participant.status, "value") else participant.status,
+    }
+
+
 def serialize_event(event: Event) -> dict:
     return {
         "id": str(event.id),

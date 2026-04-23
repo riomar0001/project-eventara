@@ -50,3 +50,12 @@ class InvalidEventParticipantStatusTransitionError(Exception):
         else:
             msg = "Invalid event participant status transition"
         super().__init__(msg)
+
+
+class RegistrationNotOpenError(Exception):
+    def __init__(self, session_id: str = "", current_status: str = "") -> None:
+        if session_id and current_status:
+            msg = f"Registration is not open for session {session_id}: session status is {current_status}"
+        else:
+            msg = "Registration is not open for this session"
+        super().__init__(msg)

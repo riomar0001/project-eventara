@@ -97,16 +97,20 @@ class EventRepository:
         orm = result.scalar_one_or_none()
         return self._to_event_entity(orm) if orm else None
 
-    async def get_session_by_id(self, session_id: uuid.UUID) -> EventSessionEntity | None:
-        """Return the session entity for the given ID, or ``None`` if not found.
+    async def get_session_by_id(self, session_id: uuid.UUID, *, for_update: bool = False) -> EventSessionEntity | None:
+        """Return the session entity for the given ID, optionally locking the row.
 
         Args:
             session_id: UUID of the target session.
+            for_update: When ``True``, acquires a ``SELECT … FOR UPDATE`` lock.
 
         Returns:
             The matching entity, or ``None`` if no row exists.
         """
-        result = await self.db.execute(select(EventSession).where(EventSession.id == session_id))
+        query = select(EventSession).where(EventSession.id == session_id)
+        if for_update:
+            query = query.with_for_update()
+        result = await self.db.execute(query)
         orm = result.scalar_one_or_none()
         return self._to_session_entity(orm) if orm else None
 
