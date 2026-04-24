@@ -21,7 +21,7 @@ Concurrency strategy — pessimistic locking (SELECT … FOR UPDATE) on mutating
 import uuid
 from datetime import datetime
 
-from sqlalchemy import select, update
+from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.entities.event_entity import (
@@ -271,6 +271,37 @@ class EventRepository:
         await self.db.flush()
         await self.db.refresh(orm)
         return self._to_session_entity(orm)
+
+    async def count_sessions_by_event_id(self, event_id: uuid.UUID) -> int:
+        """Return the total number of sessions belonging to an event.
+
+        Args:
+            event_id: UUID of the parent event.
+
+        Returns:
+            Integer count of session rows for that event.
+        """
+        result = await self.db.execute(
+            select(func.count()).select_from(EventSession).where(EventSession.event_id == event_id)
+        )
+        return result.scalar_one()
+
+    async def delete_event(self, event_id: uuid.UUID) -> bool:
+        """Delete an event row by primary key (cascades to sessions via DB FK).
+
+        Args:
+            event_id: UUID of the event to remove.
+
+        Returns:
+            ``True`` if a row was deleted, ``False`` if no matching row existed.
+        """
+        result = await self.db.execute(select(Event).where(Event.id == event_id))
+        orm = result.scalar_one_or_none()
+        if orm is None:
+            return False
+        await self.db.delete(orm)
+        await self.db.flush()
+        return True
 
     async def delete_session(self, session_id: uuid.UUID) -> bool:
         """Delete a single event session row by primary key.

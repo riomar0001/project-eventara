@@ -63,3 +63,26 @@ class UpdateEventSessionInput:
 class UpdateEventSessionOutput:
     session: EventSession
     old_session: EventSession
+
+
+@dataclass
+class DeleteEventInput:
+    event_id: uuid.UUID
+    deleted_by: uuid.UUID
+
+
+@dataclass
+class DeleteEventOutput:
+    event: Event
+
+
+@dataclass
+class DeleteEventSessionInput:
+    session_id: uuid.UUID
+    event_id: uuid.UUID
+    deleted_by: uuid.UUID
+
+
+@dataclass
+class DeleteEventSessionOutput:
+    session: EventSession

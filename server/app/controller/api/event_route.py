@@ -1,14 +1,15 @@
 """Event management API routes.
 
 Exposes endpoints for creating events, updating event metadata, updating
-individual event sessions, and manually transitioning event or session statuses.
+individual event sessions, manually transitioning event or session statuses,
+and physically deleting events or sessions that are still in a deletable state.
 Authentication is required; no RBAC feature gate is applied so any verified
-user may create or update their own events.
+user may create, update, or delete their own events.
 
 Error mapping summary:
-  - 400  date, business-rule, or invalid status transition constraint violated
+  - 400  date, business-rule, invalid status transition, or deletion-not-allowed
   - 401  missing, expired, or invalid Bearer token
-  - 403  caller is not the event creator (update only)
+  - 403  caller is not the event creator (update/delete only)
   - 404  event, session, or venue not found
   - 422  request body failed schema validation
 """
@@ -20,22 +21,27 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from app.application.dto.event_dto import (
     CreateEventInput,
     CreateEventSessionInput,
+    DeleteEventInput,
+    DeleteEventSessionInput,
     UpdateEventMetadataInput,
     UpdateEventSessionInput,
 )
 from app.application.dto.event_status_dto import UpdateEventSessionStatusInput, UpdateEventStatusInput
 from app.application.use_cases.audit_log_usecase import AuditLogUseCase
+from app.application.use_cases.event_deletion_usecase import EventDeletionUseCase
 from app.application.use_cases.event_status_usecase import EventStatusUseCase
 from app.application.use_cases.event_usecase import EventUseCase
 from app.controller.api.audit_helpers import safe_audit_log, serialize_event, serialize_event_sessions
 from app.controller.dependencies import get_audit_log_use_case, get_current_user_id
-from app.controller.dependencies.use_cases_depends import get_event_status_use_case, get_event_use_case
+from app.controller.dependencies.use_cases_depends import get_event_deletion_use_case, get_event_status_use_case, get_event_use_case
 from app.controller.docs.event_docs import (
     EVENT_DATE_INVALID,
+    EVENT_DELETION_NOT_ALLOWED,
     EVENT_METADATA_DATE_INVALID,
     EVENT_METADATA_NOT_FOUND,
     EVENT_NOT_FOUND,
     EVENT_SESSION_DATE_INVALID,
+    EVENT_SESSION_DELETION_NOT_ALLOWED,
     EVENT_SESSION_NOT_FOUND,
     EVENT_SESSION_STATUS_INVALID_TRANSITION,
     EVENT_STATUS_INVALID_TRANSITION,
@@ -45,8 +51,10 @@ from app.controller.docs.event_docs import (
 )
 from app.controller.schemas.event_schema import (
     EventCreateRequest,
+    EventDeletedResponse,
     EventMetadataUpdatedResponse,
     EventRecordResponse,
+    EventSessionDeletedResponse,
     EventSessionRecordResponse,
     EventSessionStatusUpdatedResponse,
     EventSessionStatusUpdateRequest,
@@ -62,12 +70,15 @@ from app.domain.entities.event_entity import Event as EventEntity
 from app.domain.entities.event_entity import EventSession as EventSessionEntity
 from app.domain.exceptions.event_exceptions import (
     EventDateValidationError,
+    EventDeletionNotAllowedError,
     EventNotFoundError,
     EventStatusTransitionError,
     EventValidationError,
     UnauthorizedEventOperationError,
 )
 from app.domain.exceptions.event_session_exceptions import (
+    EventLastSessionError,
+    EventSessionDeletionNotAllowedError,
     EventSessionExceedsEventBoundsError,
     EventSessionNotFoundError,
     EventSessionStatusTransitionError,
@@ -424,3 +435,113 @@ async def update_event_session_status(
     )
 
     return EventSessionStatusUpdatedResponse(data=_to_session_response(result.session))
+
+
+@event_router.delete(
+    "/{event_id}",
+    response_model=EventDeletedResponse,
+    status_code=status.HTTP_200_OK,
+    responses={
+        **UNAUTHORIZED,
+        **EVENT_UNAUTHORIZED_OPERATION,
+        **EVENT_METADATA_NOT_FOUND,
+        **EVENT_DELETION_NOT_ALLOWED,
+    },
+    summary="Delete an event",
+    description=(
+        "Permanently deletes an event and all its sessions. "
+        "Only the event creator may perform this operation. "
+        "Deletion is only permitted when the event status is DRAFT or CANCELLED. "
+        "All child sessions and participant records are removed via database cascade."
+    ),
+)
+async def delete_event(
+    request: Request,
+    event_id: uuid.UUID,
+    user_id: uuid.UUID = Depends(get_current_user_id),
+    use_case: EventDeletionUseCase = Depends(get_event_deletion_use_case),
+    audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
+) -> EventDeletedResponse:
+    """Delete an event in one atomic transaction; cascades to all child sessions."""
+    try:
+        result = await use_case.delete_event(DeleteEventInput(event_id=event_id, deleted_by=user_id))
+    except UnauthorizedEventOperationError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
+    except EventNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except EventDeletionNotAllowedError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
+
+    await safe_audit_log(
+        audit_use_case,
+        request,
+        user_id=user_id,
+        action_type=ActionType.DELETE,
+        resource_type="events",
+        resource_id=str(result.event.id),
+        status=AuditLogStatus.SUCCESS,
+        old_values=serialize_event(result.event),
+        additional_context={"deleted_status": result.event.status.value if hasattr(result.event.status, "value") else result.event.status},
+    )
+
+    return EventDeletedResponse(data=_to_event_response(result.event))
+
+
+@event_router.delete(
+    "/{event_id}/session/{session_id}",
+    response_model=EventSessionDeletedResponse,
+    status_code=status.HTTP_200_OK,
+    responses={
+        **UNAUTHORIZED,
+        **EVENT_UNAUTHORIZED_OPERATION,
+        **EVENT_METADATA_NOT_FOUND,
+        **EVENT_SESSION_NOT_FOUND,
+        **EVENT_SESSION_DELETION_NOT_ALLOWED,
+    },
+    summary="Delete an event session",
+    description=(
+        "Permanently deletes a single event session. "
+        "Only the event creator may perform this operation. "
+        "Deletion is only permitted when the session status is DRAFT or CANCELLED. "
+        "The event must have at least one other session remaining after deletion. "
+        "All participant records for the session are removed via database cascade."
+    ),
+)
+async def delete_event_session(
+    request: Request,
+    event_id: uuid.UUID,
+    session_id: uuid.UUID,
+    user_id: uuid.UUID = Depends(get_current_user_id),
+    use_case: EventDeletionUseCase = Depends(get_event_deletion_use_case),
+    audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
+) -> EventSessionDeletedResponse:
+    """Delete a single event session in one atomic transaction."""
+    try:
+        result = await use_case.delete_event_session(
+            DeleteEventSessionInput(session_id=session_id, event_id=event_id, deleted_by=user_id)
+        )
+    except UnauthorizedEventOperationError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
+    except EventNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except EventSessionNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except (EventSessionDeletionNotAllowedError, EventLastSessionError) as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
+
+    await safe_audit_log(
+        audit_use_case,
+        request,
+        user_id=user_id,
+        action_type=ActionType.DELETE,
+        resource_type="event_sessions",
+        resource_id=str(result.session.id),
+        status=AuditLogStatus.SUCCESS,
+        old_values=serialize_event_sessions([result.session])[0],
+        additional_context={
+            "event_id": str(event_id),
+            "deleted_status": result.session.status.value if hasattr(result.session.status, "value") else result.session.status,
+        },
+    )
+
+    return EventSessionDeletedResponse(data=_to_session_response(result.session))

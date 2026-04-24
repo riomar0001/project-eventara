@@ -53,3 +53,22 @@ class UnauthorizedEventSessionOperationError(Exception):
             else "You do not have permission to perform this operation on this event session"
         )
         super().__init__(msg)
+
+
+class EventSessionDeletionNotAllowedError(Exception):
+    def __init__(self, session_id: str = "", current_status: str = "") -> None:
+        if session_id and current_status:
+            msg = f"Event session {session_id} cannot be deleted while in status: {current_status}"
+        else:
+            msg = "Event session cannot be deleted in its current status"
+        super().__init__(msg)
+
+
+class EventLastSessionError(Exception):
+    def __init__(self, event_id: str = "") -> None:
+        msg = (
+            f"Cannot delete the only remaining session for event: {event_id}"
+            if event_id
+            else "Cannot delete the only remaining session for this event"
+        )
+        super().__init__(msg)

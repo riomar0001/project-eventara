@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.application.use_cases.account_settings_usecase import AccountSettingsUseCase
 from app.application.use_cases.audit_log_usecase import AuditLogUseCase
 from app.application.use_cases.auth_usecase import AuthUseCase
+from app.application.use_cases.event_deletion_usecase import EventDeletionUseCase
 from app.application.use_cases.event_participant_usecase import EventParticipantUseCase
 from app.application.use_cases.event_status_usecase import EventStatusUseCase
 from app.application.use_cases.event_usecase import EventUseCase
@@ -139,3 +140,8 @@ def get_event_status_use_case(db: AsyncSession = Depends(get_db)) -> EventStatus
 def get_event_participant_use_case(db: AsyncSession = Depends(get_db)) -> EventParticipantUseCase:
     """Construct an ``EventParticipantUseCase`` for the current request."""
     return EventParticipantUseCase(EventParticipantRepository(db), EventRepository(db), db)
+
+
+def get_event_deletion_use_case(db: AsyncSession = Depends(get_db)) -> EventDeletionUseCase:
+    """Construct an ``EventDeletionUseCase`` for the current request."""
+    return EventDeletionUseCase(EventRepository(db), db)

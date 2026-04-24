@@ -31,3 +31,12 @@ class EventDateValidationError(Exception):
     def __init__(self, message: str = "") -> None:
         default_msg = "Event start date must be before end date"
         super().__init__(message if message else default_msg)
+
+
+class EventDeletionNotAllowedError(Exception):
+    def __init__(self, event_id: str = "", current_status: str = "") -> None:
+        if event_id and current_status:
+            msg = f"Event {event_id} cannot be deleted while in status: {current_status}"
+        else:
+            msg = "Event cannot be deleted in its current status"
+        super().__init__(msg)

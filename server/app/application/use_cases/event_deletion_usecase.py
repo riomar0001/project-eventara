@@ -1,0 +1,59 @@
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.application.dto.event_dto import (
+    DeleteEventInput,
+    DeleteEventOutput,
+    DeleteEventSessionInput,
+    DeleteEventSessionOutput,
+)
+from app.domain.entities.event_entity import EventSessionStatus, EventStatus
+from app.domain.exceptions.event_exceptions import (
+    EventDeletionNotAllowedError,
+    EventNotFoundError,
+    UnauthorizedEventOperationError,
+)
+from app.domain.exceptions.event_session_exceptions import (
+    EventLastSessionError,
+    EventSessionDeletionNotAllowedError,
+    EventSessionNotFoundError,
+)
+from app.infrastructure.database.repositories.event_repository import EventRepository
+
+_DELETABLE_EVENT_STATUSES = {EventStatus.DRAFT, EventStatus.CANCELLED}
+_DELETABLE_SESSION_STATUSES = {EventSessionStatus.DRAFT, EventSessionStatus.CANCELLED}
+
+
+class EventDeletionUseCase:
+    def __init__(self, event_repo: EventRepository, db: AsyncSession) -> None:
+        self.event_repo = event_repo
+        self.db = db
+
+    async def delete_event(self, data: DeleteEventInput) -> DeleteEventOutput:
+        async with self.db.begin():
+            event = await self.event_repo.get_event_by_id(data.event_id, for_update=True)
+            if event is None:
+                raise EventNotFoundError(str(data.event_id))
+            if event.created_by != data.deleted_by:
+                raise UnauthorizedEventOperationError(str(data.event_id))
+            if event.status not in _DELETABLE_EVENT_STATUSES:
+                raise EventDeletionNotAllowedError(str(data.event_id), event.status.value)
+            await self.event_repo.delete_event(data.event_id)
+            return DeleteEventOutput(event=event)
+
+    async def delete_event_session(self, data: DeleteEventSessionInput) -> DeleteEventSessionOutput:
+        async with self.db.begin():
+            event = await self.event_repo.get_event_by_id(data.event_id, for_update=True)
+            if event is None:
+                raise EventNotFoundError(str(data.event_id))
+            if event.created_by != data.deleted_by:
+                raise UnauthorizedEventOperationError(str(data.event_id))
+            session = await self.event_repo.get_session_by_id(data.session_id)
+            if session is None or session.event_id != data.event_id:
+                raise EventSessionNotFoundError(str(data.session_id))
+            if session.status not in _DELETABLE_SESSION_STATUSES:
+                raise EventSessionDeletionNotAllowedError(str(data.session_id), session.status.value)
+            session_count = await self.event_repo.count_sessions_by_event_id(data.event_id)
+            if session_count <= 1:
+                raise EventLastSessionError(str(data.event_id))
+            await self.event_repo.delete_session(data.session_id)
+            return DeleteEventSessionOutput(session=session)

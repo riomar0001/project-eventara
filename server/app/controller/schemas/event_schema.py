@@ -131,3 +131,15 @@ class EventSessionStatusUpdatedResponse(BaseModel):
     success: bool = True
     message: str = "Event session status updated successfully."
     data: EventSessionRecordResponse
+
+
+class EventDeletedResponse(BaseModel):
+    success: bool = True
+    message: str = "Event deleted successfully."
+    data: EventRecordResponse
+
+
+class EventSessionDeletedResponse(BaseModel):
+    success: bool = True
+    message: str = "Event session deleted successfully."
+    data: EventSessionRecordResponse

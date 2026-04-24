@@ -178,3 +178,45 @@ EVENT_SESSION_STATUS_INVALID_TRANSITION = {
         },
     }
 }
+
+EVENT_DELETION_NOT_ALLOWED = {
+    400: {
+        "description": "Event cannot be deleted in its current status",
+        "model": ErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "message": "Event cannot be deleted while in status: started",
+                }
+            }
+        },
+    }
+}
+
+EVENT_SESSION_DELETION_NOT_ALLOWED = {
+    400: {
+        "description": "Session cannot be deleted in its current status or is the last remaining session",
+        "model": ErrorResponse,
+        "content": {
+            "application/json": {
+                "examples": {
+                    "status_not_allowed": {
+                        "summary": "Session in non-deletable status",
+                        "value": {
+                            "success": False,
+                            "message": "Event session cannot be deleted while in status: started",
+                        },
+                    },
+                    "last_session": {
+                        "summary": "Only session remaining",
+                        "value": {
+                            "success": False,
+                            "message": "Cannot delete the only remaining session for this event",
+                        },
+                    },
+                }
+            }
+        },
+    }
+}
