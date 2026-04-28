@@ -1,16 +1,16 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, ArrowRight, Search, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Building2, MapPin, Search, Users, X } from 'lucide-react';
 import Link from 'next/link';
 import { MobileFloatingAction, PrimaryPageAction } from '@/components/admin/shared/primary-page-action';
-import { CatalogCard, OperationsPageIntro } from './venues-shared';
-import { ADMIN_OPERATIONS_PATHS, getEventsByVenueId, venueRecords } from '@/constants/admin/operations';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { CatalogCard, OperationsPageIntro } from './venues-shared';
+import { ADMIN_OPERATIONS_PATHS, getEventsByVenueId, venueRecords } from '@/constants/admin/operations';
 
 const CAPACITY_FILTERS = [
   { key: 'any', label: 'Any size', min: 0 },
@@ -43,15 +43,7 @@ export function VenuesCatalog() {
       .filter((venue) => (capacityMin ? venue.capacity >= capacityMin : true))
       .filter((venue) => {
         if (!lowerQuery) return true;
-        const haystack = [
-          venue.name,
-          venue.neighborhood,
-          venue.city,
-          venue.venueType,
-          venue.status,
-          venue.setting,
-          venue.tags.join(' ')
-        ]
+        const haystack = [venue.name, venue.neighborhood, venue.city, venue.venueType, venue.status, venue.setting, venue.tags.join(' ')]
           .join(' ')
           .toLowerCase();
         return haystack.includes(lowerQuery);
@@ -122,13 +114,8 @@ export function VenuesCatalog() {
 
       <div className="grid items-end gap-3 rounded-[24px] border border-neutral-200 bg-white/80 p-4 shadow-[0_20px_55px_-34px_rgba(15,23,42,0.25)] md:grid-cols-[minmax(0,1fr)_minmax(0,190px)] lg:grid-cols-[minmax(0,1fr)_minmax(0,210px)_minmax(0,210px)_auto]">
         <div className="relative">
-          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-neutral-400" />
-          <Input
-            placeholder="Search venues, tags, or neighborhoods"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            className="h-10 pl-9"
-          />
+          <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-neutral-400" />
+          <Input placeholder="Search venues, tags, or neighborhoods" value={query} onChange={(event) => setQuery(event.target.value)} className="h-10 pl-9" />
         </div>
 
         <div className="space-y-1.5">
@@ -171,19 +158,15 @@ export function VenuesCatalog() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h3 className="text-lg font-semibold tracking-tight text-neutral-950">Venue results</h3>
-          <p className="text-sm text-neutral-500">Showing {filtered.length} of {venueRecords.length} venues - {sortLabel}</p>
+          <p className="text-sm text-neutral-500">
+            Showing {filtered.length} of {venueRecords.length} venues - {sortLabel}
+          </p>
         </div>
         <div className="flex flex-wrap gap-2">
           {capacityKey !== 'any' && (
             <Badge variant="outline" className="h-7 gap-2 border-amber-200 bg-amber-50 text-amber-700">
               {capacityLabel}
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-xs"
-                className="-mr-1 text-amber-700"
-                onClick={() => setCapacityKey('any')}
-              >
+              <Button type="button" variant="ghost" size="icon-xs" className="-mr-1 text-amber-700" onClick={() => setCapacityKey('any')}>
                 <X className="size-3" />
               </Button>
             </Badge>
@@ -191,19 +174,21 @@ export function VenuesCatalog() {
           {query.trim() && (
             <Badge variant="outline" className="h-7 gap-2 border-neutral-200 bg-white text-neutral-700">
               {`"${query.trim()}"`}
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-xs"
-                className="-mr-1 text-neutral-600"
-                onClick={() => setQuery('')}
-              >
+              <Button type="button" variant="ghost" size="icon-xs" className="-mr-1 text-neutral-600" onClick={() => setQuery('')}>
                 <X className="size-3" />
               </Button>
             </Badge>
           )}
           {(capacityKey !== 'any' || query.trim()) && (
-            <Button variant="ghost" size="xs" className="text-neutral-500" onClick={() => { setCapacityKey('any'); setQuery(''); }}>
+            <Button
+              variant="ghost"
+              size="xs"
+              className="text-neutral-500"
+              onClick={() => {
+                setCapacityKey('any');
+                setQuery('');
+              }}
+            >
               Clear filters
             </Button>
           )}
@@ -214,7 +199,7 @@ export function VenuesCatalog() {
         {paged.map((venue, index) => (
           <div key={venue.id} className="contents">
             {index === 3 && paged.length > 3 ? (
-              <Card className="xl:col-span-4 border-0 bg-white py-0 shadow-none ring-1 ring-neutral-200">
+              <Card className="border-0 bg-white py-0 shadow-none ring-1 ring-neutral-200 xl:col-span-4">
                 <CardContent className="grid gap-6 p-6 md:grid-cols-[1.2fr_auto] md:items-center">
                   <div className="space-y-2">
                     <p className="text-[11px] font-semibold tracking-[0.22em] text-amber-700 uppercase">Community growth</p>
@@ -237,25 +222,13 @@ export function VenuesCatalog() {
               description={venue.summary}
               href={ADMIN_OPERATIONS_PATHS.venueDetail(venue.id)}
               editHref={ADMIN_OPERATIONS_PATHS.venueEdit(venue.id)}
-              badges={[venue.status, venue.setting, venue.venueType]}
-              meta={[
-                {
-                  label: 'Capacity',
-                  value: `${venue.capacity} guests`
-                },
-                {
-                  label: 'Event use',
-                  value: `${getEventsByVenueId(venue.id).length} sample events`
-                },
-                {
-                  label: 'Location',
-                  value: venue.city
-                },
-                {
-                  label: 'Booking window',
-                  value: venue.bookingWindow
-                }
+              badges={[venue.status, venue.setting]}
+              specs={[
+                { label: 'Location', value: venue.city, icon: <MapPin className="size-3.5" /> },
+                { label: 'Venue type', value: venue.venueType, icon: <Building2 className="size-3.5" /> },
+                { label: 'Capacity', value: `${venue.capacity} guests`, icon: <Users className="size-3.5" /> }
               ]}
+              tags={venue.tags}
             />
           </div>
         ))}
@@ -263,31 +236,16 @@ export function VenuesCatalog() {
 
       {totalPages > 1 ? (
         <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={currentPage === 1}
-            onClick={() => setPage((prev) => Math.max(1, prev - 1))}
-          >
+          <Button variant="outline" size="sm" disabled={currentPage === 1} onClick={() => setPage((prev) => Math.max(1, prev - 1))}>
             <ArrowLeft className="size-4" />
             Prev
           </Button>
           {pageNumbers.map((pageNumber) => (
-            <Button
-              key={pageNumber}
-              variant={pageNumber === currentPage ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setPage(pageNumber)}
-            >
+            <Button key={pageNumber} variant={pageNumber === currentPage ? 'default' : 'outline'} size="sm" onClick={() => setPage(pageNumber)}>
               {pageNumber}
             </Button>
           ))}
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={currentPage === totalPages}
-            onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
-          >
+          <Button variant="outline" size="sm" disabled={currentPage === totalPages} onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}>
             Next
             <ArrowRight className="size-4" />
           </Button>
