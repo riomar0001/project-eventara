@@ -78,8 +78,10 @@ class EventUseCase:
                 raise InvalidEventSessionDateError(str(s.start_datetime), str(s.end_datetime))
             if s.start_datetime < data.start_date or s.end_datetime > data.end_date:
                 raise EventSessionExceedsEventBoundsError(
-                    str(s.start_datetime), str(s.end_datetime),
-                    str(data.start_date), str(data.end_date),
+                    str(s.start_datetime),
+                    str(s.end_datetime),
+                    str(data.start_date),
+                    str(data.end_date),
                 )
 
         for s in data.sessions:
@@ -96,15 +98,17 @@ class EventUseCase:
             )
             sessions = []
             for s in data.sessions:
-                sessions.append(await self.repo.create_session(
-                    event_id=event.id,
-                    venue_id=s.venue_id,
-                    title=s.title,
-                    description=s.description,
-                    start_datetime=s.start_datetime,
-                    end_datetime=s.end_datetime,
-                    max_slots=s.max_slots,
-                ))
+                sessions.append(
+                    await self.repo.create_session(
+                        event_id=event.id,
+                        venue_id=s.venue_id,
+                        title=s.title,
+                        description=s.description,
+                        start_datetime=s.start_datetime,
+                        end_datetime=s.end_datetime,
+                        max_slots=s.max_slots,
+                    )
+                )
         except Exception:
             await self.db.rollback()
             raise
@@ -185,8 +189,10 @@ class EventUseCase:
 
         if data.start_datetime < event.start_date or data.end_datetime > event.end_date:
             raise EventSessionExceedsEventBoundsError(
-                str(data.start_datetime), str(data.end_datetime),
-                str(event.start_date), str(event.end_date),
+                str(data.start_datetime),
+                str(data.end_datetime),
+                str(event.start_date),
+                str(event.end_date),
             )
 
         if not await self.repo.venue_exists(data.venue_id):

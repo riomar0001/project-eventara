@@ -164,9 +164,7 @@ async def test_delete_event_session_draft_succeeds():
     repo.count_sessions_by_event_id = AsyncMock(return_value=3)
     repo.delete_session = AsyncMock(return_value=True)
 
-    result = await use_case.delete_event_session(
-        DeleteEventSessionInput(session_id=session.id, event_id=event.id, deleted_by=caller)
-    )
+    result = await use_case.delete_event_session(DeleteEventSessionInput(session_id=session.id, event_id=event.id, deleted_by=caller))
 
     repo.delete_session.assert_awaited_once_with(session.id)
     assert result.session is session
@@ -183,9 +181,7 @@ async def test_delete_event_session_cancelled_succeeds():
     repo.count_sessions_by_event_id = AsyncMock(return_value=2)
     repo.delete_session = AsyncMock(return_value=True)
 
-    result = await use_case.delete_event_session(
-        DeleteEventSessionInput(session_id=session.id, event_id=event.id, deleted_by=caller)
-    )
+    result = await use_case.delete_event_session(DeleteEventSessionInput(session_id=session.id, event_id=event.id, deleted_by=caller))
 
     assert result.session is session
 
@@ -201,9 +197,7 @@ async def test_delete_event_session_event_not_found_raises():
     repo.get_event_by_id = AsyncMock(return_value=None)
 
     with pytest.raises(EventNotFoundError):
-        await use_case.delete_event_session(
-            DeleteEventSessionInput(session_id=uuid.uuid4(), event_id=uuid.uuid4(), deleted_by=uuid.uuid4())
-        )
+        await use_case.delete_event_session(DeleteEventSessionInput(session_id=uuid.uuid4(), event_id=uuid.uuid4(), deleted_by=uuid.uuid4()))
 
 
 @pytest.mark.asyncio
@@ -213,9 +207,7 @@ async def test_delete_event_session_unauthorized_raises():
     repo.get_event_by_id = AsyncMock(return_value=event)
 
     with pytest.raises(UnauthorizedEventOperationError):
-        await use_case.delete_event_session(
-            DeleteEventSessionInput(session_id=uuid.uuid4(), event_id=event.id, deleted_by=uuid.uuid4())
-        )
+        await use_case.delete_event_session(DeleteEventSessionInput(session_id=uuid.uuid4(), event_id=event.id, deleted_by=uuid.uuid4()))
 
 
 @pytest.mark.asyncio
@@ -227,9 +219,7 @@ async def test_delete_event_session_not_found_raises():
     repo.get_session_by_id = AsyncMock(return_value=None)
 
     with pytest.raises(EventSessionNotFoundError):
-        await use_case.delete_event_session(
-            DeleteEventSessionInput(session_id=uuid.uuid4(), event_id=event.id, deleted_by=caller)
-        )
+        await use_case.delete_event_session(DeleteEventSessionInput(session_id=uuid.uuid4(), event_id=event.id, deleted_by=caller))
 
 
 @pytest.mark.asyncio
@@ -243,9 +233,7 @@ async def test_delete_event_session_wrong_event_raises():
     repo.get_session_by_id = AsyncMock(return_value=session)
 
     with pytest.raises(EventSessionNotFoundError):
-        await use_case.delete_event_session(
-            DeleteEventSessionInput(session_id=session.id, event_id=event.id, deleted_by=caller)
-        )
+        await use_case.delete_event_session(DeleteEventSessionInput(session_id=session.id, event_id=event.id, deleted_by=caller))
 
 
 @pytest.mark.asyncio
@@ -258,9 +246,7 @@ async def test_delete_event_session_posted_status_raises():
     repo.get_session_by_id = AsyncMock(return_value=session)
 
     with pytest.raises(EventSessionDeletionNotAllowedError):
-        await use_case.delete_event_session(
-            DeleteEventSessionInput(session_id=session.id, event_id=event.id, deleted_by=caller)
-        )
+        await use_case.delete_event_session(DeleteEventSessionInput(session_id=session.id, event_id=event.id, deleted_by=caller))
 
 
 @pytest.mark.asyncio
@@ -273,9 +259,7 @@ async def test_delete_event_session_started_status_raises():
     repo.get_session_by_id = AsyncMock(return_value=session)
 
     with pytest.raises(EventSessionDeletionNotAllowedError):
-        await use_case.delete_event_session(
-            DeleteEventSessionInput(session_id=session.id, event_id=event.id, deleted_by=caller)
-        )
+        await use_case.delete_event_session(DeleteEventSessionInput(session_id=session.id, event_id=event.id, deleted_by=caller))
 
 
 @pytest.mark.asyncio
@@ -288,9 +272,7 @@ async def test_delete_event_session_ended_status_raises():
     repo.get_session_by_id = AsyncMock(return_value=session)
 
     with pytest.raises(EventSessionDeletionNotAllowedError):
-        await use_case.delete_event_session(
-            DeleteEventSessionInput(session_id=session.id, event_id=event.id, deleted_by=caller)
-        )
+        await use_case.delete_event_session(DeleteEventSessionInput(session_id=session.id, event_id=event.id, deleted_by=caller))
 
 
 @pytest.mark.asyncio
@@ -304,9 +286,7 @@ async def test_delete_event_session_last_session_raises():
     repo.count_sessions_by_event_id = AsyncMock(return_value=1)
 
     with pytest.raises(EventLastSessionError):
-        await use_case.delete_event_session(
-            DeleteEventSessionInput(session_id=session.id, event_id=event.id, deleted_by=caller)
-        )
+        await use_case.delete_event_session(DeleteEventSessionInput(session_id=session.id, event_id=event.id, deleted_by=caller))
 
 
 @pytest.mark.asyncio
@@ -320,9 +300,7 @@ async def test_delete_event_session_with_exactly_two_sessions_succeeds():
     repo.count_sessions_by_event_id = AsyncMock(return_value=2)
     repo.delete_session = AsyncMock(return_value=True)
 
-    result = await use_case.delete_event_session(
-        DeleteEventSessionInput(session_id=session.id, event_id=event.id, deleted_by=caller)
-    )
+    result = await use_case.delete_event_session(DeleteEventSessionInput(session_id=session.id, event_id=event.id, deleted_by=caller))
 
     assert result.session is session
     repo.delete_session.assert_awaited_once()

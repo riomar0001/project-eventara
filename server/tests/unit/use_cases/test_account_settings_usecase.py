@@ -118,7 +118,8 @@ class TestChangePasswordUseCase:
         uc = self._make_uc(repo)
         with (
             patch("app.application.use_cases.account_settings_usecase.verify_hash", side_effect=[True, False]),
-            patch("app.application.use_cases.account_settings_usecase.hash_string", return_value="new_hash"),pytest.raises(UserNotFoundError)
+            patch("app.application.use_cases.account_settings_usecase.hash_string", return_value="new_hash"),
+            pytest.raises(UserNotFoundError),
         ):
             await uc.change_password(self._data())
 

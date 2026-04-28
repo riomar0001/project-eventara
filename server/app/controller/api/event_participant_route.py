@@ -97,9 +97,7 @@ async def register_for_session(
 ) -> RegisterForSessionResponse:
     """Register the calling user for an event session in one atomic transaction."""
     try:
-        result = await use_case.register_for_session(
-            RegisterForSessionInput(user_id=user_id, session_id=session_id)
-        )
+        result = await use_case.register_for_session(RegisterForSessionInput(user_id=user_id, session_id=session_id))
     except EventSessionNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
     except RegistrationNotOpenError as exc:

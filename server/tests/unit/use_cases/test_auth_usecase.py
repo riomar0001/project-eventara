@@ -227,7 +227,8 @@ class TestRegisterUser:
 
         with (
             patch("app.application.use_cases.auth_usecase.hash_string", return_value=HASHED_PASSWORD),
-            patch("app.application.use_cases.auth_usecase.verification_token", return_value="tok"),pytest.raises(EmailAlreadyTakenError)
+            patch("app.application.use_cases.auth_usecase.verification_token", return_value="tok"),
+            pytest.raises(EmailAlreadyTakenError),
         ):
             await uc.register_user(data)
 
@@ -839,6 +840,7 @@ class TestResetPassword:
 
         with (
             patch("app.application.use_cases.auth_usecase.verify_password_reset_token", return_value=self._mock_payload()),
-            patch("app.application.use_cases.auth_usecase.hash_string", return_value="new_hash"),pytest.raises(UserNotFoundError)
+            patch("app.application.use_cases.auth_usecase.hash_string", return_value="new_hash"),
+            pytest.raises(UserNotFoundError),
         ):
             await uc.reset_password(ResetPasswordInput(token="tok", new_password="pass"))

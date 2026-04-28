@@ -95,6 +95,7 @@ def _sample_participant(**overrides) -> EventParticipant:
 # RegisterForSession
 # ---------------------------------------------------------------------------
 
+
 def _make_register_repos():
     event_repo = MagicMock(spec=EventRepository)
     event_repo.get_session_by_id = AsyncMock(return_value=_sample_session())
@@ -279,6 +280,7 @@ async def test_register_skips_venue_capacity_lookup_when_session_max_slots_set()
 # ---------------------------------------------------------------------------
 # UpdateParticipantStatus
 # ---------------------------------------------------------------------------
+
 
 def _make_update_repos():
     event_repo = MagicMock(spec=EventRepository)

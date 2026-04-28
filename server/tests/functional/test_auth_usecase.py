@@ -183,7 +183,8 @@ class TestRegisterUser:
         uc = _make_usecase(repo=repo)
         with (
             patch("app.application.use_cases.auth_usecase.hash_string", return_value=HASHED_PASSWORD),
-            patch("app.application.use_cases.auth_usecase.verification_token", return_value="vtok"),pytest.raises(EmailAlreadyTakenError)
+            patch("app.application.use_cases.auth_usecase.verification_token", return_value="vtok"),
+            pytest.raises(EmailAlreadyTakenError),
         ):
             await uc.register_user(self._data)
 
@@ -551,7 +552,8 @@ class TestRefresh:
         uc = _make_usecase(repo=_make_repo(user=None))
         with (
             patch("app.application.use_cases.auth_usecase.verify_refresh_token", new_callable=AsyncMock, return_value=(self._payload(), MagicMock())),
-            patch("app.application.use_cases.auth_usecase.RefreshTokenRepository", return_value=self._patched()),pytest.raises(UserNotFoundError)
+            patch("app.application.use_cases.auth_usecase.RefreshTokenRepository", return_value=self._patched()),
+            pytest.raises(UserNotFoundError),
         ):
             await uc.refresh(RefreshTokenInput(refresh_token="tok"))
 
@@ -561,7 +563,8 @@ class TestRefresh:
         uc = _make_usecase(repo=_make_repo(user=_make_user(status=UserStatus.INACTIVE)))
         with (
             patch("app.application.use_cases.auth_usecase.verify_refresh_token", new_callable=AsyncMock, return_value=(self._payload(), MagicMock())),
-            patch("app.application.use_cases.auth_usecase.RefreshTokenRepository", return_value=self._patched()),pytest.raises(UserInactiveError)
+            patch("app.application.use_cases.auth_usecase.RefreshTokenRepository", return_value=self._patched()),
+            pytest.raises(UserInactiveError),
         ):
             await uc.refresh(RefreshTokenInput(refresh_token="tok"))
 
@@ -738,6 +741,7 @@ class TestResetPassword:
         uc = _make_usecase(repo=repo, password_reset_repo=self._pr_repo())
         with (
             patch("app.application.use_cases.auth_usecase.verify_password_reset_token", return_value=self._payload()),
-            patch("app.application.use_cases.auth_usecase.hash_string", return_value="new_hash"),pytest.raises(UserNotFoundError)
+            patch("app.application.use_cases.auth_usecase.hash_string", return_value="new_hash"),
+            pytest.raises(UserNotFoundError),
         ):
             await uc.reset_password(ResetPasswordInput(token="tok", new_password="pass"))

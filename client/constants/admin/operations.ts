@@ -15,24 +15,36 @@ export const ADMIN_OPERATIONS_PATHS = {
 } as const;
 
 export type VenueRecord = {
-  address: string;
-  amenities: string[];
-  bookingWindow: string;
-  capacity: number;
-  city: string;
-  description: string;
+  // identity
   id: string;
-  leadContact: string;
-  leadEmail: string;
-  leadPhone: string;
+  image_file_id?: string | null;
+  photo: string; // unsplash placeholder; maps to image_file_id in prod
+  // core info
   name: string;
-  neighborhood: string;
-  photo: string;
-  setting: 'Indoor' | 'Outdoor' | 'Hybrid';
-  status: 'Active' | 'Seasonal' | 'Private Hold';
-  summary: string;
-  tags: string[];
-  venueType: string;
+  description: string | null;
+  summary: string; // catalog card blurb (not persisted; derived for UI)
+  // address
+  address_line: string;
+  city: string;
+  province: string;
+  postal_code: string;
+  region: string;
+  country: string;
+  // venue meta
+  capacity: number;
+  venue_type: 'indoor' | 'outdoor' | 'hybrid';
+  is_partner: boolean;
+  amenities: string[] | null;
+  // counts (read-only; set by backend)
+  popularity_count: number;
+  usage_count: number;
+  // contact
+  contact_name: string;
+  contact_phone: string;
+  contact_email: string;
+  // timestamps (null in seed data)
+  created_at: string | null;
+  updated_at: string | null;
 };
 
 export type EventRecord = {
@@ -74,171 +86,203 @@ export type VolunteerRecord = {
 export const venueRecords: VenueRecord[] = [
   {
     id: 'riverfront-pavilion',
+    photo: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=1400&q=80',
     name: 'Riverfront Pavilion',
-    neighborhood: 'Quayside District',
-    city: 'Singapore',
-    address: '18 Basin Walk, Quayside District',
-    capacity: 420,
-    venueType: 'Waterfront Hall',
-    setting: 'Hybrid',
-    status: 'Active',
-    bookingWindow: 'Open through November 2026',
-    leadContact: 'Talia Morgan',
-    leadEmail: 'talia@eventara.local',
-    leadPhone: '+65 8812 4471',
-    summary: 'A bright riverside venue used for community showcases, evening talks, and sponsor receptions.',
     description:
-      'Riverfront Pavilion pairs a glass-wrapped hall with an open terrace, making it the most adaptable venue in the current admin preview. It is designed for sunset programming, sponsor moments, and high-traffic guest arrival flows.',
-    amenities: ['Dockside terrace', 'LED wall package', 'Backstage prep lounge', 'Vendor power drops'],
-    tags: ['Sunset-friendly', 'Sponsor-ready', 'Hybrid setup'],
-    photo: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=1400&q=80'
+      'Riverfront Pavilion pairs a glass-wrapped hall with an open terrace, making it the most adaptable venue in the current admin preview. Designed for sunset programming, sponsor moments, and high-traffic guest arrival flows.',
+    summary: 'A bright riverside venue used for community showcases, evening talks, and sponsor receptions.',
+    address_line: '18 Basin Walk',
+    city: 'Davao City',
+    province: 'Davao del Sur',
+    postal_code: '8000',
+    region: 'Region XI (Davao Region)',
+    country: 'Philippines',
+    capacity: 420,
+    venue_type: 'hybrid',
+    is_partner: true,
+    amenities: ['Dockside Terrace', 'Led Wall Package', 'Backstage Prep Lounge', 'Vendor Power Drops'],
+    popularity_count: 184,
+    usage_count: 12,
+    contact_name: 'Talia Morgan',
+    contact_email: 'talia@eventara.local',
+    contact_phone: '+63 912 881 2447',
+    created_at: '2025-03-10T08:00:00Z',
+    updated_at: '2026-01-15T10:30:00Z'
   },
   {
     id: 'lantern-square',
+    photo: 'https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?auto=format&fit=crop&w=1400&q=80',
     name: 'Lantern Square',
-    neighborhood: 'Arts Quarter',
-    city: 'Singapore',
-    address: '105 Lantern Street, Arts Quarter',
-    capacity: 260,
-    venueType: 'Courtyard Campus',
-    setting: 'Outdoor',
-    status: 'Seasonal',
-    bookingWindow: 'Peak bookings from June to September',
-    leadContact: 'Nur Afiqah',
-    leadEmail: 'afiqah@eventara.local',
-    leadPhone: '+65 8133 5106',
-    summary: 'An open courtyard built for night markets, ticketed food programs, and immersive installations.',
     description:
-      'Lantern Square is strongest after dark. The venue’s circulation pattern supports stall layouts, queue management, and ambient lighting moments that reward community-focused event formats.',
-    amenities: ['Pop-up stall bays', 'String lighting rig', 'Load-in lane', 'Portable stage points'],
-    tags: ['Night market', 'Outdoor flow', 'High foot traffic'],
-    photo: 'https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?auto=format&fit=crop&w=1400&q=80'
+      "Lantern Square is strongest after dark. The venue's circulation pattern supports stall layouts, queue management, and ambient lighting moments that reward community-focused event formats.",
+    summary: 'An open courtyard built for night markets, ticketed food programs, and immersive installations.',
+    address_line: '105 Lantern Street, Poblacion District',
+    city: 'Davao City',
+    province: 'Davao del Sur',
+    postal_code: '8000',
+    region: 'Region XI (Davao Region)',
+    country: 'Philippines',
+    capacity: 260,
+    venue_type: 'outdoor',
+    is_partner: false,
+    amenities: ['Pop-Up Stall Bays', 'String Lighting Rig', 'Load-In Lane', 'Portable Stage Points'],
+    popularity_count: 97,
+    usage_count: 7,
+    contact_name: 'Nur Afiqah',
+    contact_email: 'afiqah@eventara.local',
+    contact_phone: '+63 917 813 3510',
+    created_at: '2025-05-22T09:00:00Z',
+    updated_at: '2025-12-01T14:00:00Z'
   },
   {
     id: 'harbor-warehouse',
+    photo: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=1400&q=80',
     name: 'Harbor Warehouse 9',
-    neighborhood: 'Pier Exchange',
-    city: 'Singapore',
-    address: '9 Dock Crane Road, Pier Exchange',
-    capacity: 680,
-    venueType: 'Industrial Hall',
-    setting: 'Indoor',
-    status: 'Active',
-    bookingWindow: 'Available with 6-week lead time',
-    leadContact: 'Marcelo Reyes',
-    leadEmail: 'marcelo@eventara.local',
-    leadPhone: '+65 8779 6302',
-    summary: 'A dramatic industrial shell used for high-volume launches, maker fairs, and staged live programs.',
     description:
       'Harbor Warehouse 9 is the heavy-lift option in the venue set. It supports larger scenic builds, dense audience layouts, and operational zones for volunteer teams, vendors, and production staff.',
-    amenities: ['Rigging grid', 'Freight access', 'Control booth', 'Green room suites'],
-    tags: ['Large format', 'Production-ready', 'Industrial mood'],
-    photo: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=1400&q=80'
+    summary: 'A dramatic industrial shell used for high-volume launches, maker fairs, and staged live programs.',
+    address_line: '9 Dock Crane Road, Sasa Port Area',
+    city: 'Davao City',
+    province: 'Davao del Sur',
+    postal_code: '8000',
+    region: 'Region XI (Davao Region)',
+    country: 'Philippines',
+    capacity: 680,
+    venue_type: 'indoor',
+    is_partner: true,
+    amenities: ['Rigging Grid', 'Freight Access', 'Control Booth', 'Green Room Suites'],
+    popularity_count: 261,
+    usage_count: 18,
+    contact_name: 'Marcelo Reyes',
+    contact_email: 'marcelo@eventara.local',
+    contact_phone: '+63 918 877 9630',
+    created_at: '2025-01-08T07:30:00Z',
+    updated_at: '2026-02-20T11:00:00Z'
   },
   {
     id: 'hillside-greenhouse',
+    photo: 'https://images.unsplash.com/photo-1460317442991-0ec209397118?auto=format&fit=crop&w=1400&q=80',
     name: 'Hillside Greenhouse',
-    neighborhood: 'Botanic Ridge',
-    city: 'Singapore',
-    address: '44 Canopy Rise, Botanic Ridge',
-    capacity: 180,
-    venueType: 'Garden Conservatory',
-    setting: 'Indoor',
-    status: 'Private Hold',
-    bookingWindow: 'Reserved for curated partnerships',
-    leadContact: 'Eunice Lim',
-    leadEmail: 'eunice@eventara.local',
-    leadPhone: '+65 8901 2254',
-    summary: 'A plant-filled conservatory suited for donor dinners, press previews, and premium workshops.',
     description:
       'Hillside Greenhouse is a quieter premium venue used for intimate formats. Its natural light and compact circulation make it ideal for carefully staged hospitality programs rather than high-volume public events.',
-    amenities: ['Dining kitchen', 'Skylight canopy', 'Private arrival gate', 'Workshop benches'],
-    tags: ['Premium', 'Natural light', 'Smaller capacity'],
-    photo: 'https://images.unsplash.com/photo-1460317442991-0ec209397118?auto=format&fit=crop&w=1400&q=80'
+    summary: 'A plant-filled conservatory suited for donor dinners, press previews, and premium workshops.',
+    address_line: '44 Canopy Rise, Matina District',
+    city: 'Davao City',
+    province: 'Davao del Sur',
+    postal_code: '8000',
+    region: 'Region XI (Davao Region)',
+    country: 'Philippines',
+    capacity: 180,
+    venue_type: 'indoor',
+    is_partner: false,
+    amenities: ['Dining Kitchen', 'Skylight Canopy', 'Private Arrival Gate', 'Workshop Benches'],
+    popularity_count: 43,
+    usage_count: 4,
+    contact_name: 'Eunice Lim',
+    contact_email: 'eunice@eventara.local',
+    contact_phone: '+63 919 890 1225',
+    created_at: '2025-07-14T10:00:00Z',
+    updated_at: '2025-10-30T16:45:00Z'
   },
   {
     id: 'neon-loft',
+    photo: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1400&q=80',
     name: 'Neon Loft',
-    neighborhood: 'Innovation District',
-    city: 'Singapore',
-    address: '88 Cyber Way, Innovation District',
-    capacity: 150,
-    venueType: 'Creative Studio',
-    setting: 'Indoor',
-    status: 'Active',
-    bookingWindow: 'Open year-round',
-    leadContact: 'Julian Brooks',
-    leadEmail: 'julian@eventara.local',
-    leadPhone: '+65 8221 9934',
-    summary: 'A sleek, modern studio space perfect for hackathons, design sprints, and product demos.',
     description:
       'Neon Loft offers a highly modular layout with writable walls, breakout pods, and integrated presentation tech. It is optimized for focused, collaborative work and intimate tech gatherings.',
-    amenities: ['Whiteboard walls', 'Breakout pods', 'Fiber internet', 'AV presentation suite'],
-    tags: ['Tech-friendly', 'Modular', 'Workshops'],
-    photo: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1400&q=80'
+    summary: 'A sleek, modern studio space perfect for hackathons, design sprints, and product demos.',
+    address_line: '88 Cyber Way, Damosa IT Park',
+    city: 'Davao City',
+    province: 'Davao del Sur',
+    postal_code: '8000',
+    region: 'Region XI (Davao Region)',
+    country: 'Philippines',
+    capacity: 150,
+    venue_type: 'indoor',
+    is_partner: true,
+    amenities: ['Whiteboard Walls', 'Breakout Pods', 'Fiber Internet', 'Av Presentation Suite'],
+    popularity_count: 119,
+    usage_count: 9,
+    contact_name: 'Julian Brooks',
+    contact_email: 'julian@eventara.local',
+    contact_phone: '+63 916 822 1993',
+    created_at: '2025-09-01T08:00:00Z',
+    updated_at: '2026-03-05T09:15:00Z'
   },
   {
     id: 'skyline-terrace',
+    photo: 'https://images.unsplash.com/photo-1572111504281-9df91fb4fb5d?auto=format&fit=crop&w=1400&q=80',
     name: 'Skyline Terrace',
-    neighborhood: 'Central Business District',
-    city: 'Singapore',
-    address: 'Level 42, 1 Financial Tower, CBD',
-    capacity: 300,
-    venueType: 'Rooftop Lounge',
-    setting: 'Hybrid',
-    status: 'Active',
-    bookingWindow: 'Requires 4-week notice',
-    leadContact: 'Sarah Chen',
-    leadEmail: 'sarah@eventara.local',
-    leadPhone: '+65 8990 1122',
-    summary: 'A premium rooftop destination offering panoramic city views for VIP mixers and cocktail receptions.',
     description:
       'Skyline Terrace combines a plush indoor lounge with a sprawling outdoor deck. It is the premier choice for evening networking events, investor dinners, and upscale social gatherings that demand a sophisticated backdrop.',
-    amenities: ['Full service bar', 'Outdoor heaters/fans', 'Lounge seating', 'DJ booth'],
-    tags: ['VIP', 'Scenic views', 'Evening reception'],
-    photo: 'https://images.unsplash.com/photo-1572111504281-9df91fb4fb5d?auto=format&fit=crop&w=1400&q=80'
+    summary: 'A premium rooftop destination offering panoramic city views for VIP mixers and cocktail receptions.',
+    address_line: 'Level 42, 1 Financial Tower, Bajada',
+    city: 'Davao City',
+    province: 'Davao del Sur',
+    postal_code: '8000',
+    region: 'Region XI (Davao Region)',
+    country: 'Philippines',
+    capacity: 300,
+    venue_type: 'hybrid',
+    is_partner: true,
+    amenities: ['Full Service Bar', 'Outdoor Heaters', 'Lounge Seating', 'Dj Booth'],
+    popularity_count: 202,
+    usage_count: 14,
+    contact_name: 'Sarah Chen',
+    contact_email: 'sarah@eventara.local',
+    contact_phone: '+63 915 899 0112',
+    created_at: '2025-04-18T11:00:00Z',
+    updated_at: '2026-01-28T13:30:00Z'
   },
   {
     id: 'heritage-hall',
+    photo: 'https://images.unsplash.com/photo-1507676184212-d0330a15233c?auto=format&fit=crop&w=1400&q=80',
     name: 'Heritage Hall',
-    neighborhood: 'Civic District',
-    city: 'Singapore',
-    address: '12 Old Parliament Lane, Civic District',
-    capacity: 500,
-    venueType: 'Historic Auditorium',
-    setting: 'Indoor',
-    status: 'Active',
-    bookingWindow: 'Reopening January 2027',
-    leadContact: 'David Tan',
-    leadEmail: 'david@eventara.local',
-    leadPhone: '+65 8445 7710',
-    summary: 'A beautifully restored colonial-era hall designed for keynote speeches, award ceremonies, and formal banquets.',
     description:
       'Heritage Hall features classical architecture, high arched ceilings, and modern acoustic treatments. It provides a grand, formal atmosphere while maintaining the technical infrastructure needed for complex stage productions.',
-    amenities: ['Tiered seating options', 'Acoustic paneling', 'VIP holding rooms', 'Grand foyer'],
-    tags: ['Formal', 'Historic', 'Keynote'],
-    photo: 'https://images.unsplash.com/photo-1507676184212-d0330a15233c?auto=format&fit=crop&w=1400&q=80'
+    summary: 'A beautifully restored colonial-era hall designed for keynote speeches, award ceremonies, and formal banquets.',
+    address_line: '12 Old Parliament Lane, Civic District',
+    city: 'Davao City',
+    province: 'Davao del Sur',
+    postal_code: '8000',
+    region: 'Region XI (Davao Region)',
+    country: 'Philippines',
+    capacity: 500,
+    venue_type: 'indoor',
+    is_partner: false,
+    amenities: ['Tiered Seating Options', 'Acoustic Paneling', 'Vip Holding Rooms', 'Grand Foyer'],
+    popularity_count: 156,
+    usage_count: 11,
+    contact_name: 'David Tan',
+    contact_email: 'david@eventara.local',
+    contact_phone: '+63 917 844 5771',
+    created_at: '2024-11-03T07:00:00Z',
+    updated_at: '2025-08-12T10:00:00Z'
   },
   {
     id: 'the-vault',
+    photo: 'https://images.unsplash.com/photo-1566737236500-c8ac43014a67?auto=format&fit=crop&w=1400&q=80',
     name: 'The Vault',
-    neighborhood: 'Marina South',
-    city: 'Singapore',
-    address: 'Sub-level 2, Marina South Bunkers',
-    capacity: 350,
-    venueType: 'Underground Club',
-    setting: 'Indoor',
-    status: 'Active',
-    bookingWindow: 'Open for weekend bookings',
-    leadContact: 'Maya Patel',
-    leadEmail: 'maya@eventara.local',
-    leadPhone: '+65 8332 9005',
-    summary: 'An edgy, subterranean space favored for secret shows, after-parties, and immersive brand activations.',
     description:
       'The Vault is a windowless, soundproofed bunker that gives event producers total control over lighting and atmosphere. It thrives during late-night programming and exclusive, high-energy entertainment formats.',
-    amenities: ['Club sound system', 'Dynamic light grid', 'Coat check', 'Private booths'],
-    tags: ['Late night', 'Immersive', 'High energy'],
-    photo: 'https://images.unsplash.com/photo-1566737236500-c8ac43014a67?auto=format&fit=crop&w=1400&q=80'
+    summary: 'An edgy, subterranean space favored for secret shows, after-parties, and immersive brand activations.',
+    address_line: 'Sub-level 2, Marina South Bunkers, Lanang',
+    city: 'Davao City',
+    province: 'Davao del Sur',
+    postal_code: '8000',
+    region: 'Region XI (Davao Region)',
+    country: 'Philippines',
+    capacity: 350,
+    venue_type: 'indoor',
+    is_partner: false,
+    amenities: ['Club Sound System', 'Dynamic Light Grid', 'Coat Check', 'Private Booths'],
+    popularity_count: 88,
+    usage_count: 6,
+    contact_name: 'Maya Patel',
+    contact_email: 'maya@eventara.local',
+    contact_phone: '+63 918 833 2900',
+    created_at: '2025-06-30T12:00:00Z',
+    updated_at: '2025-11-18T15:00:00Z'
   }
 ];
 
