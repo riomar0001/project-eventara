@@ -23,11 +23,12 @@ const SORT_OPTIONS = [
   { key: 'name', label: 'Name (A-Z)' },
   { key: 'capacity', label: 'Largest capacity' },
   { key: 'city', label: 'City (A–Z)' },
-  { key: 'status', label: 'Status (A–Z)' }
+  { key: 'venue_type', label: 'Venue type (A–Z)' },
+  { key: 'partner', label: 'Partners first' }
 ];
 
 export function VenuesCatalog() {
-  const activeVenueCount = venueRecords.filter((venue) => venue.status === 'Active').length;
+  const partnerVenueCount = venueRecords.filter((venue) => venue.is_partner).length;
   const totalCapacity = venueRecords.reduce((sum, venue) => sum + venue.capacity, 0);
   const [query, setQuery] = useState('');
   const [capacityKey, setCapacityKey] = useState('any');
@@ -43,7 +44,7 @@ export function VenuesCatalog() {
       .filter((venue) => (capacityMin ? venue.capacity >= capacityMin : true))
       .filter((venue) => {
         if (!lowerQuery) return true;
-        const haystack = [venue.name, venue.neighborhood, venue.city, venue.venueType, venue.status, venue.setting, venue.tags.join(' ')]
+        const haystack = [venue.name, venue.city, venue.province, venue.region, venue.venue_type, venue.contact_name, (venue.amenities ?? []).join(' ')]
           .join(' ')
           .toLowerCase();
         return haystack.includes(lowerQuery);
@@ -51,7 +52,8 @@ export function VenuesCatalog() {
       .sort((a, b) => {
         if (sortKey === 'capacity') return b.capacity - a.capacity;
         if (sortKey === 'city') return a.city.localeCompare(b.city);
-        if (sortKey === 'status') return a.status.localeCompare(b.status);
+        if (sortKey === 'venue_type') return a.venue_type.localeCompare(b.venue_type);
+        if (sortKey === 'partner') return Number(b.is_partner) - Number(a.is_partner);
         return a.name.localeCompare(b.name);
       });
   }, [capacityKey, query, sortKey]);
@@ -78,9 +80,9 @@ export function VenuesCatalog() {
         description="Shape the event footprint from a single cinematic surface, with venue health, capacity, and booking readiness visible before you ever open a detail page."
         metrics={[
           {
-            label: 'Live venues',
-            value: activeVenueCount,
-            hint: 'Spaces currently presented as active in the mock admin catalog.'
+            label: 'Partner venues',
+            value: partnerVenueCount,
+            hint: 'Spaces marked as Eventara partner venues in the catalog.'
           },
           {
             label: 'Portfolio capacity',
@@ -108,7 +110,7 @@ export function VenuesCatalog() {
         <div className="relative">
           <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-neutral-400" />
           <Input
-            placeholder="Search venues, tags, or neighborhoods"
+            placeholder="Search venues, city, region, or amenities"
             value={query}
             onChange={(event) => {
               setQuery(event.target.value);
@@ -248,18 +250,18 @@ export function VenuesCatalog() {
 
             <CatalogCard
               title={venue.name}
-              subtitle={venue.neighborhood}
+              subtitle={[venue.city, venue.province].filter(Boolean).join(', ')}
               photo={venue.photo}
               description={venue.summary}
               href={ADMIN_OPERATIONS_PATHS.venueDetail(venue.id)}
               editHref={ADMIN_OPERATIONS_PATHS.venueEdit(venue.id)}
-              badges={[venue.status, venue.setting]}
+              badges={[venue.venue_type, ...(venue.is_partner ? ['Partner'] : [])]}
               specs={[
-                { label: 'Location', value: venue.city, icon: <MapPin className="size-3.5" /> },
-                { label: 'Venue type', value: venue.venueType, icon: <Building2 className="size-3.5" /> },
-                { label: 'Capacity', value: `${venue.capacity} guests`, icon: <Users className="size-3.5" /> }
+                { label: 'Location', value: [venue.city, venue.province].filter(Boolean).join(', '), icon: <MapPin className="size-3.5" /> },
+                { label: 'Venue type', value: venue.venue_type.charAt(0).toUpperCase() + venue.venue_type.slice(1), icon: <Building2 className="size-3.5" /> },
+                { label: 'Capacity', value: `${venue.capacity.toLocaleString()} guests`, icon: <Users className="size-3.5" /> }
               ]}
-              tags={venue.tags}
+              tags={venue.amenities ?? []}
             />
           </div>
         ))}
