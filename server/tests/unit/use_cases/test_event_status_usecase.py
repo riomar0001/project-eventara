@@ -73,6 +73,7 @@ def _sample_session(**overrides) -> EventSession:
 # update_event_status
 # ---------------------------------------------------------------------------
 
+
 def _make_event_status_repo(event=None, updated_event=None):
     repo = MagicMock(spec=EventRepository)
     repo.get_event_by_id = AsyncMock(return_value=event or _sample_event())
@@ -220,6 +221,7 @@ async def test_update_event_status_does_not_commit_on_not_found():
 # ---------------------------------------------------------------------------
 # update_event_session_status
 # ---------------------------------------------------------------------------
+
 
 def _make_session_status_repo(session=None, event=None, updated_session=None):
     repo = MagicMock(spec=EventRepository)

@@ -35,11 +35,7 @@ PARTICIPANT_SLOTS_FULL = {
     409: {
         "description": "All available slots for the session are taken",
         "model": ErrorResponse,
-        "content": {
-            "application/json": {
-                "example": {"success": False, "message": "Session is full — no slots remaining"}
-            }
-        },
+        "content": {"application/json": {"example": {"success": False, "message": "Session is full — no slots remaining"}}},
     }
 }
 
@@ -47,11 +43,7 @@ PARTICIPANT_ALREADY_REGISTERED = {
     409: {
         "description": "User is already registered for this session",
         "model": ErrorResponse,
-        "content": {
-            "application/json": {
-                "example": {"success": False, "message": "User is already registered for this event session"}
-            }
-        },
+        "content": {"application/json": {"example": {"success": False, "message": "User is already registered for this event session"}}},
     }
 }
 
@@ -59,11 +51,7 @@ PARTICIPANT_NOT_FOUND = {
     404: {
         "description": "Participant record not found",
         "model": ErrorResponse,
-        "content": {
-            "application/json": {
-                "example": {"success": False, "message": "Event participant not found"}
-            }
-        },
+        "content": {"application/json": {"example": {"success": False, "message": "Event participant not found"}}},
     }
 }
 

@@ -93,20 +93,20 @@ export function CatalogCard({
           </div>
           <div className="space-y-1.5">
             <p className="text-[10px] tracking-[0.2em] text-white/65 uppercase">{subtitle}</p>
-            <h3 className="text-xl font-semibold tracking-tight text-white leading-snug">{title}</h3>
+            <h3 className="text-xl leading-snug font-semibold tracking-tight text-white">{title}</h3>
           </div>
         </div>
       </PhotoPanel>
 
       <CardContent className="space-y-4 py-5">
-        <p className="text-sm leading-6 text-neutral-500 line-clamp-2">{description}</p>
+        <p className="line-clamp-2 text-sm leading-6 text-neutral-500">{description}</p>
 
         {/* Spec row — inline with icons, no boxes */}
-        <div className="grid grid-cols-2 gap-y-2.5 gap-x-3">
+        <div className="grid grid-cols-2 gap-x-3 gap-y-2.5">
           {specs.map((spec) => (
             <div key={spec.label} className="flex items-center gap-2 text-[13px] text-neutral-500">
               <span className="shrink-0 text-neutral-400">{spec.icon}</span>
-              <span className="font-medium text-neutral-800 truncate">{spec.value}</span>
+              <span className="truncate font-medium text-neutral-800">{spec.value}</span>
             </div>
           ))}
         </div>

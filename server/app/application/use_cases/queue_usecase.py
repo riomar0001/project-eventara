@@ -218,16 +218,18 @@ class QueueUseCase:
                 job_id = _decode(key).replace(_RESULT_KEY_PREFIX, "")
                 info = await Job(job_id, self.redis).result_info()
                 if info is not None and not info.success:
-                    dead.append(DeadJobInfo(
-                        job_id=job_id,
-                        function=info.function,
-                        args=_safe_list(info.args),
-                        kwargs=info.kwargs or {},
-                        job_try=info.job_try,
-                        enqueue_time=info.enqueue_time,
-                        finish_time=info.finish_time,
-                        error=str(info.result) if info.result is not None else "Unknown error",
-                    ))
+                    dead.append(
+                        DeadJobInfo(
+                            job_id=job_id,
+                            function=info.function,
+                            args=_safe_list(info.args),
+                            kwargs=info.kwargs or {},
+                            job_try=info.job_try,
+                            enqueue_time=info.enqueue_time,
+                            finish_time=info.finish_time,
+                            error=str(info.result) if info.result is not None else "Unknown error",
+                        )
+                    )
         except Exception as exc:
             msg = "Failed to list dead jobs"
             if settings.DEBUG:
@@ -237,7 +239,7 @@ class QueueUseCase:
         total = len(dead)
         total_pages = max(1, -(-total // limit))
         offset = (page - 1) * limit
-        return ListDeadJobsOutput(jobs=dead[offset:offset + limit], total=total, page=page, limit=limit, total_pages=total_pages)
+        return ListDeadJobsOutput(jobs=dead[offset : offset + limit], total=total, page=page, limit=limit, total_pages=total_pages)
 
     async def retry_dead_job(self, job_id: str) -> RetryJobOutput:
         """Re-enqueue a failed job and remove it from the dead-letter store.
@@ -272,7 +274,7 @@ class QueueUseCase:
                 new_job_id=new_job.job_id if new_job else job_id,
                 function=info.function,
             )
-        except (JobNotFoundError, JobNotDeadError, JobRetryConflictError):
+        except JobNotFoundError, JobNotDeadError, JobRetryConflictError:
             raise
         except Exception as exc:
             msg = "Failed to retry job"
@@ -302,7 +304,7 @@ class QueueUseCase:
 
             deleted = await self.redis.delete(f"{_RESULT_KEY_PREFIX}{job_id}")
             return DeleteJobOutput(job_id=job_id, deleted=bool(deleted))
-        except (JobNotFoundError, JobNotDeadError):
+        except JobNotFoundError, JobNotDeadError:
             raise
         except Exception as exc:
             msg = "Failed to delete job"

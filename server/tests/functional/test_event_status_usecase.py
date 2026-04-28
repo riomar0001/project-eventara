@@ -105,6 +105,7 @@ def _session_status_input(**overrides):
 # update_event_status
 # ---------------------------------------------------------------------------
 
+
 class TestUpdateEventStatus:
     @pytest.mark.asyncio
     async def test_raises_not_found_when_event_does_not_exist(self):
@@ -236,6 +237,7 @@ class TestUpdateEventStatus:
 # ---------------------------------------------------------------------------
 # update_event_session_status
 # ---------------------------------------------------------------------------
+
 
 class TestUpdateEventSessionStatus:
     @pytest.mark.asyncio

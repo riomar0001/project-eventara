@@ -25,11 +25,13 @@ from app.infrastructure.database.repositories.event_repository import EventRepos
 _REGISTRATION_OPEN_STATUSES = frozenset({EventSessionStatus.POSTED})
 
 _ALLOWED_PARTICIPANT_TRANSITIONS: dict[EventParticipantStatus, frozenset[EventParticipantStatus]] = {
-    EventParticipantStatus.REGISTERED: frozenset({
-        EventParticipantStatus.ATTENDED,
-        EventParticipantStatus.NO_SHOW,
-        EventParticipantStatus.CANCELLED,
-    }),
+    EventParticipantStatus.REGISTERED: frozenset(
+        {
+            EventParticipantStatus.ATTENDED,
+            EventParticipantStatus.NO_SHOW,
+            EventParticipantStatus.CANCELLED,
+        }
+    ),
 }
 
 

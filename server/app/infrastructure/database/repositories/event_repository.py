@@ -136,11 +136,7 @@ class EventRepository:
         Returns:
             List of ``EventSessionEntity`` objects, earliest first.
         """
-        result = await self.db.execute(
-            select(EventSession)
-            .where(EventSession.event_id == event_id)
-            .order_by(EventSession.start_datetime)
-        )
+        result = await self.db.execute(select(EventSession).where(EventSession.event_id == event_id).order_by(EventSession.start_datetime))
         return [self._to_session_entity(orm) for orm in result.scalars().all()]
 
     async def create_event(
@@ -281,9 +277,7 @@ class EventRepository:
         Returns:
             Integer count of session rows for that event.
         """
-        result = await self.db.execute(
-            select(func.count()).select_from(EventSession).where(EventSession.event_id == event_id)
-        )
+        result = await self.db.execute(select(func.count()).select_from(EventSession).where(EventSession.event_id == event_id))
         return result.scalar_one()
 
     async def delete_event(self, event_id: uuid.UUID) -> bool:

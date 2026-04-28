@@ -78,6 +78,7 @@ def _sample_session(**overrides) -> EventSession:
 # CreateEventUseCase
 # ---------------------------------------------------------------------------
 
+
 def _make_create_repo():
     repo = MagicMock(spec=EventRepository)
     repo.venue_exists = AsyncMock(return_value=True)
@@ -246,6 +247,7 @@ async def test_create_does_not_commit_when_venue_not_found():
 # UpdateEventMetadataUseCase
 # ---------------------------------------------------------------------------
 
+
 def _make_meta_repo():
     repo = MagicMock(spec=EventRepository)
     repo.get_event_by_id = AsyncMock(return_value=_sample_event())
@@ -359,6 +361,7 @@ async def test_meta_returns_updated_event_and_pre_update_snapshot():
 # ---------------------------------------------------------------------------
 # UpdateEventSessionUseCase
 # ---------------------------------------------------------------------------
+
 
 def _make_session_repo():
     repo = MagicMock(spec=EventRepository)

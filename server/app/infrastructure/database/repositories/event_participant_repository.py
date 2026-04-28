@@ -104,7 +104,9 @@ class EventParticipantRepository:
             Integer count of active (slot-occupying) participants.
         """
         result = await self.db.execute(
-            select(func.count()).select_from(EventParticipant).where(
+            select(func.count())
+            .select_from(EventParticipant)
+            .where(
                 EventParticipant.event_session_id == session_id,
                 EventParticipant.status != EventParticipantStatus.CANCELLED,
             )
@@ -146,9 +148,7 @@ class EventParticipantRepository:
         Returns:
             The updated ``EventParticipantEntity``, or ``None`` if no matching row exists.
         """
-        result = await self.db.execute(
-            select(EventParticipant).where(EventParticipant.id == participant_id).with_for_update()
-        )
+        result = await self.db.execute(select(EventParticipant).where(EventParticipant.id == participant_id).with_for_update())
         orm = result.scalar_one_or_none()
         if orm is None:
             return None

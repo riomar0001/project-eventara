@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ArrowLeft, ArrowRight, Building2, MapPin, Search, Users, X } from 'lucide-react';
 import Link from 'next/link';
 import { MobileFloatingAction, PrimaryPageAction } from '@/components/admin/shared/primary-page-action';
@@ -62,14 +62,6 @@ export function VenuesCatalog() {
   const capacityLabel = CAPACITY_FILTERS.find((option) => option.key === capacityKey)?.label ?? 'Any size';
   const sortLabel = SORT_OPTIONS.find((option) => option.key === sortKey)?.label ?? 'Name (A-Z)';
 
-  useEffect(() => {
-    setPage(1);
-  }, [capacityKey, query, sortKey]);
-
-  useEffect(() => {
-    if (currentPage !== page) setPage(currentPage);
-  }, [currentPage, page]);
-
   const pageNumbers = useMemo(() => {
     if (totalPages <= 5) return Array.from({ length: totalPages }, (_, index) => index + 1);
     const start = Math.max(1, Math.min(currentPage - 2, totalPages - 4));
@@ -115,12 +107,26 @@ export function VenuesCatalog() {
       <div className="grid items-end gap-3 rounded-[24px] border border-neutral-200 bg-white/80 p-4 shadow-[0_20px_55px_-34px_rgba(15,23,42,0.25)] md:grid-cols-[minmax(0,1fr)_minmax(0,190px)] lg:grid-cols-[minmax(0,1fr)_minmax(0,210px)_minmax(0,210px)_auto]">
         <div className="relative">
           <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-neutral-400" />
-          <Input placeholder="Search venues, tags, or neighborhoods" value={query} onChange={(event) => setQuery(event.target.value)} className="h-10 pl-9" />
+          <Input
+            placeholder="Search venues, tags, or neighborhoods"
+            value={query}
+            onChange={(event) => {
+              setQuery(event.target.value);
+              setPage(1);
+            }}
+            className="h-10 pl-9"
+          />
         </div>
 
         <div className="space-y-1.5">
           <p className="text-[11px] font-semibold tracking-[0.18em] text-neutral-500 uppercase">Capacity</p>
-          <Select value={capacityKey} onValueChange={setCapacityKey}>
+          <Select
+            value={capacityKey}
+            onValueChange={(v) => {
+              setCapacityKey(v);
+              setPage(1);
+            }}
+          >
             <SelectTrigger className="w-full" size="default">
               <SelectValue placeholder="Select capacity" />
             </SelectTrigger>
@@ -136,7 +142,13 @@ export function VenuesCatalog() {
 
         <div className="space-y-1.5">
           <p className="text-[11px] font-semibold tracking-[0.18em] text-neutral-500 uppercase">Sort by</p>
-          <Select value={sortKey} onValueChange={setSortKey}>
+          <Select
+            value={sortKey}
+            onValueChange={(v) => {
+              setSortKey(v);
+              setPage(1);
+            }}
+          >
             <SelectTrigger className="w-full" size="default">
               <SelectValue placeholder="Sort" />
             </SelectTrigger>
@@ -166,7 +178,16 @@ export function VenuesCatalog() {
           {capacityKey !== 'any' && (
             <Badge variant="outline" className="h-7 gap-2 border-amber-200 bg-amber-50 text-amber-700">
               {capacityLabel}
-              <Button type="button" variant="ghost" size="icon-xs" className="-mr-1 text-amber-700" onClick={() => setCapacityKey('any')}>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-xs"
+                className="-mr-1 text-amber-700"
+                onClick={() => {
+                  setCapacityKey('any');
+                  setPage(1);
+                }}
+              >
                 <X className="size-3" />
               </Button>
             </Badge>
@@ -174,7 +195,16 @@ export function VenuesCatalog() {
           {query.trim() && (
             <Badge variant="outline" className="h-7 gap-2 border-neutral-200 bg-white text-neutral-700">
               {`"${query.trim()}"`}
-              <Button type="button" variant="ghost" size="icon-xs" className="-mr-1 text-neutral-600" onClick={() => setQuery('')}>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-xs"
+                className="-mr-1 text-neutral-600"
+                onClick={() => {
+                  setQuery('');
+                  setPage(1);
+                }}
+              >
                 <X className="size-3" />
               </Button>
             </Badge>
@@ -187,6 +217,7 @@ export function VenuesCatalog() {
               onClick={() => {
                 setCapacityKey('any');
                 setQuery('');
+                setPage(1);
               }}
             >
               Clear filters

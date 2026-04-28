@@ -517,9 +517,7 @@ async def delete_event_session(
 ) -> EventSessionDeletedResponse:
     """Delete a single event session in one atomic transaction."""
     try:
-        result = await use_case.delete_event_session(
-            DeleteEventSessionInput(session_id=session_id, event_id=event_id, deleted_by=user_id)
-        )
+        result = await use_case.delete_event_session(DeleteEventSessionInput(session_id=session_id, event_id=event_id, deleted_by=user_id))
     except UnauthorizedEventOperationError as exc:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
     except EventNotFoundError as exc:

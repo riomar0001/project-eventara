@@ -27,10 +27,7 @@ class EventSessionExceedsEventBoundsError(Exception):
         event_end: str = "",
     ) -> None:
         if all([session_start, session_end, event_start, event_end]):
-            msg = (
-                f"Session window [{session_start} – {session_end}] falls outside "
-                f"the event window [{event_start} – {event_end}]"
-            )
+            msg = f"Session window [{session_start} – {session_end}] falls outside the event window [{event_start} – {event_end}]"
         else:
             msg = "Session dates must fall within the event date range"
         super().__init__(msg)
