@@ -600,3 +600,6 @@ export function getVolunteerInitials(name: string) {
     .slice(0, 2)
     .toUpperCase();
 }
+
+export { eventDetailRecords, getEventDetailById, getSessionsByEventId, getEventVolunteersByEventId, getRatingsByEventId } from './event-detail-data';
+export type { EventDbStatus, EventDetailRecord, EventSessionRecord, EventVolunteerRecord, EventRatingRecord } from './event-detail-data';
