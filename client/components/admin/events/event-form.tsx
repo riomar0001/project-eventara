@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { CalendarPlus2, Clock, MapPin, Plus, Save, Trash2 } from 'lucide-react';
+import { CalendarPlus2, Clock, MapPin, Plus, Send, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -10,18 +10,9 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { BackLink, FieldLabel, PhotoPanel } from './events-shared';
-import {
-  ADMIN_OPERATIONS_PATHS,
-  eventDetailRecords,
-  getSessionsByEventId,
-  venueRecords,
-  type EventDbStatus,
-  type EventDetailRecord
-} from '@/constants/admin/operations';
+import { ADMIN_OPERATIONS_PATHS, eventDetailRecords, getSessionsByEventId, venueRecords, type EventDetailRecord } from '@/constants/admin/operations';
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
-
-const STATUS_OPTIONS: EventDbStatus[] = ['draft', 'posted', 'started', 'cancelled', 'ended', 'postponed'];
 
 function toLocalInput(iso: string) {
   return iso.slice(0, 16); // "2026-07-18T16:30:00+08:00" → "2026-07-18T16:30"
@@ -94,7 +85,6 @@ export function EventForm({ mode, event }: EventFormProps) {
   const [description, setDescription] = useState(event?.description ?? '');
   const [startDate, setStartDate] = useState(event?.startDate ? toLocalInput(event.startDate) : '');
   const [endDate, setEndDate] = useState(event?.endDate ? toLocalInput(event.endDate) : '');
-  const [status, setStatus] = useState<EventDbStatus>(event?.status ?? 'draft');
   const [sessions, setSessions] = useState<SessionFormData[]>(() =>
     mode === 'edit' && existingSessions.length > 0
       ? existingSessions.map((s) => ({
@@ -131,6 +121,16 @@ export function EventForm({ mode, event }: EventFormProps) {
 
   function updateSession(index: number, patch: Partial<SessionFormData>) {
     setSessions((prev) => prev.map((s, i) => (i === index ? { ...s, ...patch } : s)));
+  }
+
+  function handlePost(e: React.FormEvent) {
+    e.preventDefault();
+    // status = 'posted'
+  }
+
+  function handleSaveDraft(e: React.FormEvent) {
+    e.preventDefault();
+    // status = 'draft'
   }
 
   return (
@@ -178,22 +178,6 @@ export function EventForm({ mode, event }: EventFormProps) {
                     <FieldLabel htmlFor="event-end-date">End date *</FieldLabel>
                     <Input id="event-end-date" type="datetime-local" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
                   </div>
-                </div>
-
-                <div className="space-y-2">
-                  <FieldLabel htmlFor="event-status">Status</FieldLabel>
-                  <Select value={status} onValueChange={(v) => setStatus(v as EventDbStatus)}>
-                    <SelectTrigger id="event-status">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {STATUS_OPTIONS.map((s) => (
-                        <SelectItem key={s} value={s}>
-                          {s.charAt(0).toUpperCase() + s.slice(1)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
                 </div>
               </div>
 
@@ -300,11 +284,14 @@ export function EventForm({ mode, event }: EventFormProps) {
 
               {/* ── Submit ─────────────────────────────────────────────────────── */}
               <div className="flex flex-wrap gap-2 border-t border-neutral-200/80 pt-6">
-                <Button type="submit">
-                  <Save className="size-4" />
-                  {mode === 'create' ? 'Save event draft' : 'Save event changes'}
+                <Button type="submit" onClick={handlePost}>
+                  <Send className="size-4" />
+                  Post
                 </Button>
-                <Button type="button" variant="outline" asChild>
+                <Button type="submit" variant="outline" onClick={handleSaveDraft}>
+                  Save as Draft
+                </Button>
+                <Button type="button" variant="ghost" asChild>
                   <Link href={ADMIN_OPERATIONS_PATHS.events}>Cancel</Link>
                 </Button>
               </div>
@@ -317,7 +304,7 @@ export function EventForm({ mode, event }: EventFormProps) {
           <PhotoPanel photo={previewPhoto} className="min-h-70">
             <div className="flex min-h-70 flex-col justify-between p-6">
               <Badge variant="secondary" className="w-fit bg-white/85 text-neutral-900 capitalize">
-                {status}
+                {mode === 'edit' ? event.status : 'New'}
               </Badge>
               <div className="space-y-2">
                 <p className="text-xs tracking-[0.18em] text-white/75 uppercase">
