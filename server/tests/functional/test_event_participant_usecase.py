@@ -29,6 +29,7 @@ from app.domain.exceptions.event_participant_exceptions import (
 from app.domain.exceptions.event_session_exceptions import EventSessionNotFoundError
 from app.infrastructure.database.repositories.event_participant_repository import EventParticipantRepository
 from app.infrastructure.database.repositories.event_repository import EventRepository
+from app.infrastructure.database.repositories.role_repository import RoleRepository
 
 EVENT_ID = uuid.UUID("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
 CREATOR_ID = uuid.UUID("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
@@ -109,12 +110,21 @@ def _make_register_repos():
     return event_repo, participant_repo
 
 
-def _make_register_uc(event_repo=None, participant_repo=None):
+def _make_role_repo():
+    repo = MagicMock(spec=RoleRepository)
+    repo.get_role_by_name = AsyncMock(return_value=None)
+    repo.get_active_assignment = AsyncMock(return_value=None)
+    repo.create_assignment = AsyncMock(return_value=MagicMock())
+    return repo
+
+
+def _make_register_uc(event_repo=None, participant_repo=None, role_repo=None):
     default_event_repo, default_participant_repo = _make_register_repos()
     event_repo = event_repo or default_event_repo
     participant_repo = participant_repo or default_participant_repo
+    role_repo = role_repo or _make_role_repo()
     db = AsyncMock(spec=AsyncSession)
-    return EventParticipantUseCase(participant_repo, event_repo, db), event_repo, participant_repo, db
+    return EventParticipantUseCase(participant_repo, event_repo, role_repo, db), event_repo, participant_repo, db
 
 
 def _register_input(**overrides):
@@ -316,7 +326,7 @@ def _make_update_uc(event_repo=None, participant_repo=None):
     event_repo = event_repo or default_event_repo
     participant_repo = participant_repo or default_participant_repo
     db = AsyncMock(spec=AsyncSession)
-    return EventParticipantUseCase(participant_repo, event_repo, db), event_repo, participant_repo, db
+    return EventParticipantUseCase(participant_repo, event_repo, _make_role_repo(), db), event_repo, participant_repo, db
 
 
 def _update_input(**overrides):

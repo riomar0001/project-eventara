@@ -2,13 +2,7 @@ import uuid
 from datetime import datetime
 from enum import StrEnum
 
-from pydantic import BaseModel, EmailStr, Field
-
-
-class VolunteerRole(StrEnum):
-    ORGANIZER = "organizer"
-    COORDINATOR = "coordinator"
-    VOLUNTEER = "volunteer"
+from pydantic import BaseModel, Field
 
 
 class VolunteerStatus(StrEnum):
@@ -24,12 +18,23 @@ class ApplicationStatus(StrEnum):
     WITHDRAWN = "withdrawn"
 
 
+class VolunteerRole(BaseModel):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4)
+    name: str
+    description: str | None = None
+    created_by: uuid.UUID | None = None
+    is_active: bool = True
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+
+    model_config = {"from_attributes": True}
+
+
 class Volunteer(BaseModel):
     id: uuid.UUID = Field(default_factory=uuid.uuid4)
     user_id: uuid.UUID
-    email: EmailStr
     contact_phone: str = Field(min_length=7, max_length=20)
-    role: VolunteerRole
+    volunteer_role_id: uuid.UUID
     status: VolunteerStatus = VolunteerStatus.ACTIVE
     created_at: datetime | None = None
     updated_at: datetime | None = None

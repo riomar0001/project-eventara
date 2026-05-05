@@ -2,6 +2,7 @@ from fastapi import Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application.use_cases.account_settings_usecase import AccountSettingsUseCase
+from app.application.use_cases.volunteer_usecase import VolunteerUseCase
 from app.application.use_cases.audit_log_usecase import AuditLogUseCase
 from app.application.use_cases.auth_usecase import AuthUseCase
 from app.application.use_cases.event_deletion_usecase import EventDeletionUseCase
@@ -20,6 +21,7 @@ from app.infrastructure.cache.repositories.password_reset_repository import Pass
 from app.infrastructure.database.repositories.audit_log_repository import (
     AuditLogRepository,
 )
+from app.infrastructure.database.repositories.volunteer_repository import VolunteerRepository
 from app.infrastructure.database.repositories.event_participant_repository import EventParticipantRepository
 from app.infrastructure.database.repositories.event_repository import EventRepository
 from app.infrastructure.database.repositories.role_repository import RoleRepository
@@ -139,9 +141,14 @@ def get_event_status_use_case(db: AsyncSession = Depends(get_db)) -> EventStatus
 
 def get_event_participant_use_case(db: AsyncSession = Depends(get_db)) -> EventParticipantUseCase:
     """Construct an ``EventParticipantUseCase`` for the current request."""
-    return EventParticipantUseCase(EventParticipantRepository(db), EventRepository(db), db)
+    return EventParticipantUseCase(EventParticipantRepository(db), EventRepository(db), RoleRepository(db), db)
 
 
 def get_event_deletion_use_case(db: AsyncSession = Depends(get_db)) -> EventDeletionUseCase:
     """Construct an ``EventDeletionUseCase`` for the current request."""
     return EventDeletionUseCase(EventRepository(db), db)
+
+
+def get_volunteer_use_case(db: AsyncSession = Depends(get_db)) -> VolunteerUseCase:
+    """Construct a ``VolunteerUseCase`` for volunteer registration and role management."""
+    return VolunteerUseCase(VolunteerRepository(db), RoleRepository(db), db)

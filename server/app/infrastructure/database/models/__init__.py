@@ -21,7 +21,7 @@ from app.infrastructure.database.models.user_models import (
     UserSecurity,
 )
 from app.infrastructure.database.models.venue_models import Venue, VenueRating
-from app.infrastructure.database.models.volunteer_models import Volunteer, VolunteerApplication
+from app.infrastructure.database.models.volunteer_models import Volunteer, VolunteerApplication, VolunteerRole
 
 __all__ = [
     "AuditLog",
@@ -46,4 +46,5 @@ __all__ = [
     "VenueRating",
     "Volunteer",
     "VolunteerApplication",
+    "VolunteerRole",
 ]

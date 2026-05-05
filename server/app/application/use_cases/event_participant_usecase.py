@@ -19,10 +19,13 @@ from app.domain.exceptions.event_participant_exceptions import (
     UnauthorizedEventParticipantOperationError,
 )
 from app.domain.exceptions.event_session_exceptions import EventSessionNotFoundError
+from app.domain.exceptions.role_exceptions import RoleAlreadyAssignedError
 from app.infrastructure.database.repositories.event_participant_repository import EventParticipantRepository
 from app.infrastructure.database.repositories.event_repository import EventRepository
+from app.infrastructure.database.repositories.role_repository import RoleRepository
 
 _REGISTRATION_OPEN_STATUSES = frozenset({EventSessionStatus.POSTED})
+_PARTICIPANT_RBAC_ROLE_NAME = "participant"
 
 _ALLOWED_PARTICIPANT_TRANSITIONS: dict[EventParticipantStatus, frozenset[EventParticipantStatus]] = {
     EventParticipantStatus.REGISTERED: frozenset(
@@ -61,6 +64,8 @@ class EventParticipantUseCase:
     Args:
         participant_repo: Concrete ``EventParticipantRepository`` providing participant access.
         event_repo:       Concrete ``EventRepository`` providing session and event access.
+        role_repo:        ``RoleRepository`` used to assign the RBAC 'participant' role on
+                          successful registration without opening a separate transaction.
         db:               The active async database session used for commit and rollback.
     """
 
@@ -68,10 +73,12 @@ class EventParticipantUseCase:
         self,
         participant_repo: EventParticipantRepository,
         event_repo: EventRepository,
+        role_repo: RoleRepository,
         db: AsyncSession,
     ) -> None:
         self.participant_repo = participant_repo
         self.event_repo = event_repo
+        self.role_repo = role_repo
         self.db = db
 
     async def register_for_session(self, data: RegisterForSessionInput) -> RegisterForSessionOutput:
@@ -126,12 +133,38 @@ class EventParticipantUseCase:
                 user_id=data.user_id,
                 session_id=data.session_id,
             )
+            await self._assign_rbac_participant_role(data.user_id)
         except Exception:
             await self.db.rollback()
             raise
 
         await self.db.commit()
         return RegisterForSessionOutput(participant=participant)
+
+    async def _assign_rbac_participant_role(self, user_id) -> None:
+        """Assign the platform 'participant' RBAC role to the user if available.
+
+        Silently skips if no RBAC role named 'participant' exists or if the user
+        already holds the assignment, so that missing platform configuration never
+        blocks event registration.
+        """
+        rbac_role = await self.role_repo.get_role_by_name(_PARTICIPANT_RBAC_ROLE_NAME)
+        if not rbac_role:
+            return
+
+        existing = await self.role_repo.get_active_assignment(user_id, rbac_role.id)
+        if existing:
+            return
+
+        try:
+            await self.role_repo.create_assignment(
+                user_id=user_id,
+                role_id=rbac_role.id,
+                expires_at=None,
+                assigned_by=user_id,
+            )
+        except RoleAlreadyAssignedError:
+            return
 
     async def update_participant_status(self, data: UpdateParticipantStatusInput) -> UpdateParticipantStatusOutput:
         """Update the attendance status of a registered event session participant.
