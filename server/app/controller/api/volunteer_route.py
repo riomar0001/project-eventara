@@ -1,39 +1,69 @@
 """Volunteer management API routes.
 
-Exposes endpoints for adding new volunteers and creating dynamic volunteer roles.
-Both endpoints require a valid access token and the appropriate RBAC permission.
+Exposes endpoints for adding new volunteers, creating dynamic volunteer roles, and
+managing the volunteer application lifecycle (submit, review, withdraw).
 
 Error mapping summary:
   - 401  missing, expired, or invalid Bearer token
-  - 403  RBAC denial
-  - 404  user or volunteer custom role not found
-  - 409  user is already a volunteer / volunteer role name already exists
-  - 422  request body failed schema validation
+  - 403  RBAC denial or not the application owner
+  - 404  user, volunteer custom role, or application not found
+  - 409  user is already a volunteer / volunteer role name already exists / active
+         application already exists
+  - 422  invalid status transition / inactive role / request body failed validation
 """
 
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 
-from app.application.dto.volunteer_dto import AddVolunteerInput, CreateVolunteerRoleInput
+from app.application.dto.volunteer_dto import (
+    AddVolunteerInput,
+    CreateVolunteerRoleInput,
+    ReviewApplicationInput,
+    SubmitApplicationInput,
+    WithdrawApplicationInput,
+)
 from app.application.use_cases.audit_log_usecase import AuditLogUseCase
-from app.application.use_cases.volunteer_usecase import VolunteerUseCase
+from app.application.use_cases.volunteer_usecase import VolunteerApplicationUseCase, VolunteerUseCase
 from app.controller.api.audit_helpers import safe_audit_log
-from app.controller.dependencies import get_audit_log_use_case, require_permission
-from app.controller.dependencies.use_cases_depends import get_volunteer_use_case
+from app.controller.dependencies import (
+    get_audit_log_use_case,
+    require_completed_onboarding,
+    require_permission,
+)
+from app.controller.dependencies.use_cases_depends import (
+    get_volunteer_application_use_case,
+    get_volunteer_use_case,
+)
 from app.controller.docs.volunteer_docs import (
+    APPLICATION_ALREADY_EXISTS,
+    APPLICATION_NOT_FOUND,
     FORBIDDEN,
+    INVALID_APPLICATION_TRANSITION,
     UNAUTHORIZED,
+    UNAUTHORIZED_APPLICATION_OPERATION,
     USER_NOT_FOUND,
     VALIDATION_ERROR,
     VOLUNTEER_ALREADY_EXISTS,
     VOLUNTEER_ROLE_ALREADY_EXISTS,
     VOLUNTEER_ROLE_NOT_FOUND,
 )
-from app.controller.schemas.volunteer_schema import AddVolunteerRequest, CreateVolunteerRoleRequest
+from app.controller.schemas.volunteer_schema import (
+    AddVolunteerRequest,
+    CreateVolunteerRoleRequest,
+    ReviewApplicationRequest,
+    SubmitApplicationRequest,
+)
 from app.domain.entities.audit_log import ActionType, AuditLogStatus
 from app.domain.entities.authorization_entities import RoleAction
+from app.domain.entities.volunteer_entity import ApplicationStatus
 from app.domain.exceptions.user_exceptions import UserNotFoundError
+from app.domain.exceptions.volunteer_application_exceptions import (
+    InvalidApplicationStatusTransitionError,
+    UnauthorizedApplicationOperationError,
+    VolunteerApplicationAlreadyExistsError,
+    VolunteerApplicationNotFoundError,
+)
 from app.domain.exceptions.volunteer_exceptions import VolunteerAlreadyExistsError
 from app.domain.exceptions.volunteer_role_exceptions import (
     VolunteerRoleAlreadyExistsError,
@@ -43,6 +73,18 @@ from app.domain.exceptions.volunteer_role_exceptions import (
 
 volunteer_router = APIRouter(prefix="/volunteers", tags=["Volunteers"])
 volunteer_role_router = APIRouter(prefix="/volunteer-roles", tags=["Volunteers"])
+volunteer_application_router = APIRouter(prefix="/volunteer-applications", tags=["Volunteers"])
+
+
+def _serialize_application(application) -> dict:
+    return {
+        "id": str(application.id),
+        "user_id": str(application.user_id),
+        "status": application.status.value if hasattr(application.status, "value") else application.status,
+        "application_data": application.application_data,
+        "created_at": application.created_at.isoformat() if application.created_at else None,
+        "updated_at": application.updated_at.isoformat() if application.updated_at else None,
+    }
 
 
 def _serialize_volunteer(volunteer) -> dict:
@@ -186,4 +228,219 @@ async def create_volunteer_role(
         "success": True,
         "message": "Volunteer role created successfully.",
         "data": _serialize_volunteer_role(result.role),
+    }
+
+
+@volunteer_application_router.post(
+    "",
+    status_code=status.HTTP_201_CREATED,
+    responses={
+        **UNAUTHORIZED,
+        **VOLUNTEER_ALREADY_EXISTS,
+        **APPLICATION_ALREADY_EXISTS,
+        **VALIDATION_ERROR,
+    },
+    summary="Submit a volunteer application",
+    description=(
+        "Submit a volunteer application for the authenticated user. "
+        "A user who is already an active volunteer or already has a pending or approved "
+        "application cannot submit a new one. "
+        "Optional application_data may include free-form fields such as skills and availability."
+    ),
+)
+async def submit_application(
+    request: Request,
+    body: SubmitApplicationRequest,
+    caller_id: uuid.UUID = Depends(require_completed_onboarding),
+    use_case: VolunteerApplicationUseCase = Depends(get_volunteer_application_use_case),
+    audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
+) -> dict:
+    """Submit a volunteer application for the currently authenticated user.
+
+    # Error mapping
+    - **401 Unauthorized** — missing, expired, or invalid Bearer token.
+    - **409 Conflict** — the user is already an active volunteer, or already has a
+      PENDING or APPROVED application.
+    - **422 Unprocessable Entity** — request body failed schema validation.
+    """
+    try:
+        result = await use_case.submit_application(
+            SubmitApplicationInput(
+                user_id=caller_id,
+                application_data=body.application_data,
+            )
+        )
+    except UserNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except VolunteerAlreadyExistsError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+    except VolunteerApplicationAlreadyExistsError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+
+    await safe_audit_log(
+        audit_use_case,
+        request,
+        user_id=caller_id,
+        action_type=ActionType.CREATE,
+        resource_type="volunteer_applications",
+        resource_id=str(result.application.id),
+        status=AuditLogStatus.SUCCESS,
+        new_values=_serialize_application(result.application),
+    )
+
+    return {
+        "success": True,
+        "message": "Volunteer application submitted successfully.",
+        "data": _serialize_application(result.application),
+    }
+
+
+@volunteer_application_router.patch(
+    "/{application_id}/review",
+    status_code=status.HTTP_200_OK,
+    responses={
+        **UNAUTHORIZED,
+        **FORBIDDEN,
+        **APPLICATION_NOT_FOUND,
+        **VOLUNTEER_ROLE_NOT_FOUND,
+        **VOLUNTEER_ALREADY_EXISTS,
+        **APPLICATION_ALREADY_EXISTS,
+        **INVALID_APPLICATION_TRANSITION,
+        **VALIDATION_ERROR,
+    },
+    summary="Review a volunteer application",
+    description=(
+        "Approve or reject a pending volunteer application. "
+        "When approving, provide contact_phone and volunteer_role_id to automatically "
+        "create a Volunteer record within the same transaction. "
+        "Only PENDING applications can be reviewed."
+    ),
+)
+async def review_application(
+    request: Request,
+    application_id: uuid.UUID,
+    body: ReviewApplicationRequest,
+    caller_id: uuid.UUID = Depends(require_permission("volunteer_applications", RoleAction.UPDATE)),
+    use_case: VolunteerApplicationUseCase = Depends(get_volunteer_application_use_case),
+    audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
+) -> dict:
+    """Approve or reject a pending volunteer application.
+
+    # Error mapping
+    - **401 Unauthorized** — missing, expired, or invalid Bearer token.
+    - **403 Forbidden** — caller lacks ``update`` permission on ``volunteer_applications``.
+    - **404 Not Found** — application or volunteer custom role not found.
+    - **409 Conflict** — the applicant is already an active volunteer (on approval).
+    - **422 Unprocessable Entity** — invalid status transition, inactive volunteer role,
+      or request body failed validation.
+    """
+    try:
+        result = await use_case.review_application(
+            ReviewApplicationInput(
+                application_id=application_id,
+                reviewer_id=caller_id,
+                new_status=body.status,
+                contact_phone=body.contact_phone,
+                volunteer_role_id=body.volunteer_role_id,
+            )
+        )
+    except VolunteerApplicationNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except InvalidApplicationStatusTransitionError as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))
+    except VolunteerRoleNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except VolunteerRoleInactiveError as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))
+    except VolunteerAlreadyExistsError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+
+    action_verb = "approved" if body.status == ApplicationStatus.APPROVED else "rejected"
+    new_values: dict = {"application": _serialize_application(result.application)}
+    if result.volunteer:
+        new_values["volunteer"] = _serialize_volunteer(result.volunteer)
+
+    await safe_audit_log(
+        audit_use_case,
+        request,
+        user_id=caller_id,
+        action_type=ActionType.UPDATE,
+        resource_type="volunteer_applications",
+        resource_id=str(application_id),
+        status=AuditLogStatus.SUCCESS,
+        new_values=new_values,
+        additional_context={"action": action_verb},
+    )
+
+    return {
+        "success": True,
+        "message": f"Volunteer application {action_verb} successfully.",
+        "data": {
+            "application": _serialize_application(result.application),
+            "volunteer": _serialize_volunteer(result.volunteer) if result.volunteer else None,
+        },
+    }
+
+
+@volunteer_application_router.delete(
+    "/{application_id}",
+    status_code=status.HTTP_200_OK,
+    responses={
+        **UNAUTHORIZED,
+        **UNAUTHORIZED_APPLICATION_OPERATION,
+        **APPLICATION_NOT_FOUND,
+        **INVALID_APPLICATION_TRANSITION,
+        **VALIDATION_ERROR,
+    },
+    summary="Withdraw a volunteer application",
+    description=(
+        "Withdraw the caller's own pending volunteer application. "
+        "Only the applicant may withdraw their application, and only while it is in PENDING status."
+    ),
+)
+async def withdraw_application(
+    request: Request,
+    application_id: uuid.UUID,
+    caller_id: uuid.UUID = Depends(require_completed_onboarding),
+    use_case: VolunteerApplicationUseCase = Depends(get_volunteer_application_use_case),
+    audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
+) -> dict:
+    """Withdraw the caller's own pending volunteer application.
+
+    # Error mapping
+    - **401 Unauthorized** — missing, expired, or invalid Bearer token.
+    - **403 Forbidden** — the caller is not the owner of the application.
+    - **404 Not Found** — application does not exist.
+    - **422 Unprocessable Entity** — application is not in PENDING status.
+    """
+    try:
+        result = await use_case.withdraw_application(
+            WithdrawApplicationInput(
+                application_id=application_id,
+                user_id=caller_id,
+            )
+        )
+    except VolunteerApplicationNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except UnauthorizedApplicationOperationError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
+    except InvalidApplicationStatusTransitionError as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))
+
+    await safe_audit_log(
+        audit_use_case,
+        request,
+        user_id=caller_id,
+        action_type=ActionType.UPDATE,
+        resource_type="volunteer_applications",
+        resource_id=str(application_id),
+        status=AuditLogStatus.SUCCESS,
+        new_values=_serialize_application(result.application),
+        additional_context={"action": "withdrawn"},
+    )
+
+    return {
+        "success": True,
+        "message": "Volunteer application withdrawn successfully.",
+        "data": _serialize_application(result.application),
     }

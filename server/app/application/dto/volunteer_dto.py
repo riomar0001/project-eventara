@@ -1,7 +1,7 @@
 import uuid
 from dataclasses import dataclass
 
-from app.domain.entities.volunteer_entity import Volunteer, VolunteerRole
+from app.domain.entities.volunteer_entity import ApplicationStatus, Volunteer, VolunteerApplication, VolunteerRole
 
 
 @dataclass
@@ -27,3 +27,40 @@ class CreateVolunteerRoleInput:
 @dataclass
 class CreateVolunteerRoleOutput:
     role: VolunteerRole
+
+
+@dataclass
+class SubmitApplicationInput:
+    user_id: uuid.UUID
+    application_data: dict | None
+
+
+@dataclass
+class SubmitApplicationOutput:
+    application: VolunteerApplication
+
+
+@dataclass
+class ReviewApplicationInput:
+    application_id: uuid.UUID
+    reviewer_id: uuid.UUID
+    new_status: ApplicationStatus
+    contact_phone: str | None
+    volunteer_role_id: uuid.UUID | None
+
+
+@dataclass
+class ReviewApplicationOutput:
+    application: VolunteerApplication
+    volunteer: Volunteer | None
+
+
+@dataclass
+class WithdrawApplicationInput:
+    application_id: uuid.UUID
+    user_id: uuid.UUID
+
+
+@dataclass
+class WithdrawApplicationOutput:
+    application: VolunteerApplication

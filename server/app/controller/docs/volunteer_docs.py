@@ -62,3 +62,53 @@ VALIDATION_ERROR = {
         "content": {"application/json": {"example": {"success": False, "message": "Validation failed."}}},
     }
 }
+
+APPLICATION_NOT_FOUND = {
+    404: {
+        "description": "Volunteer application not found",
+        "model": ErrorResponse,
+        "content": {"application/json": {"example": {"success": False, "message": "Volunteer application not found"}}},
+    }
+}
+
+APPLICATION_ALREADY_EXISTS = {
+    409: {
+        "description": "User already has an active volunteer application",
+        "model": ErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {"success": False, "message": "An active volunteer application already exists"}
+            }
+        },
+    }
+}
+
+INVALID_APPLICATION_TRANSITION = {
+    422: {
+        "description": "Application status transition is not permitted",
+        "model": ErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "message": "Cannot transition application <id> from 'approved' to 'withdrawn'",
+                }
+            }
+        },
+    }
+}
+
+UNAUTHORIZED_APPLICATION_OPERATION = {
+    403: {
+        "description": "Caller is not the owner of the application",
+        "model": ErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "message": "You do not have permission to perform this operation on this application",
+                }
+            }
+        },
+    }
+}

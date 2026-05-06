@@ -5,11 +5,11 @@ from typing import Protocol
 
 from app.domain.entities.authorization_entities import Role as RoleEntity
 from app.domain.entities.user_entity import User as UserEntity
-from app.domain.entities.volunteer_entity import Volunteer, VolunteerRole
+from app.domain.entities.volunteer_entity import ApplicationStatus, Volunteer, VolunteerApplication, VolunteerRole
 
 
 class IVolunteerRepository(Protocol):
-    """Contract for volunteer and volunteer-role persistence operations."""
+    """Contract for volunteer, volunteer-role, and volunteer-application persistence operations."""
 
     async def get_volunteer_by_user_id(self, user_id: uuid.UUID, *, for_update: bool = False) -> Volunteer | None: ...
 
@@ -39,3 +39,29 @@ class IVolunteerRepository(Protocol):
     async def get_user_by_id(self, user_id: uuid.UUID) -> UserEntity | None: ...
 
     async def get_rbac_role_by_name(self, name: str) -> RoleEntity | None: ...
+
+    async def get_application_by_id(
+        self,
+        application_id: uuid.UUID,
+        *,
+        for_update: bool = False,
+    ) -> VolunteerApplication | None: ...
+
+    async def get_active_application_by_user_id(
+        self,
+        user_id: uuid.UUID,
+        *,
+        for_update: bool = False,
+    ) -> VolunteerApplication | None: ...
+
+    async def create_application(
+        self,
+        user_id: uuid.UUID,
+        application_data: dict | None,
+    ) -> VolunteerApplication: ...
+
+    async def update_application_status(
+        self,
+        application_id: uuid.UUID,
+        new_status: ApplicationStatus,
+    ) -> VolunteerApplication | None: ...

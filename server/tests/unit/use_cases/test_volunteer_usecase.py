@@ -1,4 +1,4 @@
-"""Unit tests for VolunteerUseCase (add_volunteer and create_volunteer_role)."""
+"""Unit tests for VolunteerUseCase (add_volunteer, create_volunteer_role) and VolunteerApplicationUseCase."""
 
 import uuid
 from unittest.mock import AsyncMock, MagicMock
@@ -6,12 +6,24 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.application.dto.volunteer_dto import AddVolunteerInput, CreateVolunteerRoleInput
-from app.application.use_cases.volunteer_usecase import VolunteerUseCase
+from app.application.dto.volunteer_dto import (
+    AddVolunteerInput,
+    CreateVolunteerRoleInput,
+    ReviewApplicationInput,
+    SubmitApplicationInput,
+    WithdrawApplicationInput,
+)
+from app.application.use_cases.volunteer_usecase import VolunteerApplicationUseCase, VolunteerUseCase
 from app.domain.entities.authorization_entities import Role as RoleEntity
 from app.domain.entities.user_entity import User as UserEntity
-from app.domain.entities.volunteer_entity import Volunteer, VolunteerRole, VolunteerStatus
+from app.domain.entities.volunteer_entity import ApplicationStatus, Volunteer, VolunteerApplication, VolunteerRole, VolunteerStatus
 from app.domain.exceptions.user_exceptions import UserNotFoundError
+from app.domain.exceptions.volunteer_application_exceptions import (
+    InvalidApplicationStatusTransitionError,
+    UnauthorizedApplicationOperationError,
+    VolunteerApplicationAlreadyExistsError,
+    VolunteerApplicationNotFoundError,
+)
 from app.domain.exceptions.volunteer_exceptions import VolunteerAlreadyExistsError
 from app.domain.exceptions.volunteer_role_exceptions import (
     VolunteerRoleAlreadyExistsError,
@@ -26,6 +38,7 @@ USER_ID = uuid.UUID("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
 VOLUNTEER_ID = uuid.UUID("cccccccc-cccc-cccc-cccc-cccccccccccc")
 ROLE_ID = uuid.UUID("dddddddd-dddd-dddd-dddd-dddddddddddd")
 RBAC_ROLE_ID = uuid.UUID("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee")
+APPLICATION_ID = uuid.UUID("ffffffff-ffff-ffff-ffff-ffffffffffff")
 
 
 def _sample_user() -> UserEntity:
@@ -64,6 +77,15 @@ def _sample_rbac_role() -> RoleEntity:
     )
 
 
+def _sample_application(*, status: ApplicationStatus = ApplicationStatus.PENDING) -> VolunteerApplication:
+    return VolunteerApplication(
+        id=APPLICATION_ID,
+        user_id=USER_ID,
+        status=status,
+        application_data={"skills": "logistics"},
+    )
+
+
 def _make_vol_repo(**overrides) -> MagicMock:
     repo = MagicMock(spec=VolunteerRepository)
     repo.get_user_by_id = AsyncMock(return_value=_sample_user())
@@ -73,6 +95,12 @@ def _make_vol_repo(**overrides) -> MagicMock:
     repo.get_volunteer_role_by_name = AsyncMock(return_value=None)
     repo.create_volunteer_role = AsyncMock(return_value=_sample_volunteer_role())
     repo.get_rbac_role_by_name = AsyncMock(return_value=_sample_rbac_role())
+    repo.get_application_by_id = AsyncMock(return_value=_sample_application())
+    repo.get_active_application_by_user_id = AsyncMock(return_value=None)
+    repo.create_application = AsyncMock(return_value=_sample_application())
+    repo.update_application_status = AsyncMock(
+        side_effect=lambda app_id, new_status: _sample_application(status=new_status)
+    )
     for key, value in overrides.items():
         setattr(repo, key, value)
     return repo
@@ -92,6 +120,37 @@ def _make_uc(vol_repo=None, role_repo=None):
     role_repo = role_repo or _make_role_repo()
     db = AsyncMock(spec=AsyncSession)
     return VolunteerUseCase(vol_repo, role_repo, db), vol_repo, role_repo, db
+
+
+def _make_app_uc(vol_repo=None, role_repo=None):
+    vol_repo = vol_repo or _make_vol_repo()
+    role_repo = role_repo or _make_role_repo()
+    db = AsyncMock(spec=AsyncSession)
+    return VolunteerApplicationUseCase(vol_repo, role_repo, db), vol_repo, role_repo, db
+
+
+def _submit_input(**overrides):
+    defaults = dict(user_id=USER_ID, application_data={"skills": "logistics"})
+    defaults.update(overrides)
+    return SubmitApplicationInput(**defaults)
+
+
+def _review_input(**overrides):
+    defaults = dict(
+        application_id=APPLICATION_ID,
+        reviewer_id=ACTOR_ID,
+        new_status=ApplicationStatus.APPROVED,
+        contact_phone="+1234567890",
+        volunteer_role_id=ROLE_ID,
+    )
+    defaults.update(overrides)
+    return ReviewApplicationInput(**defaults)
+
+
+def _withdraw_input(**overrides):
+    defaults = dict(application_id=APPLICATION_ID, user_id=USER_ID)
+    defaults.update(overrides)
+    return WithdrawApplicationInput(**defaults)
 
 
 def _add_input(**overrides):
@@ -254,3 +313,224 @@ class TestCreateVolunteerRole:
         result = await uc.create_volunteer_role(_create_role_input())
         assert result.role.is_active is True
         assert result.role.created_by == ACTOR_ID
+
+
+# ---------------------------------------------------------------------------
+# TestVolunteerApplicationUseCase
+# ---------------------------------------------------------------------------
+
+
+class TestSubmitApplication:
+    @pytest.mark.asyncio
+    async def test_submit_application_raises_when_user_not_found(self):
+        vol_repo = _make_vol_repo(get_user_by_id=AsyncMock(return_value=None))
+        uc, _, _, db = _make_app_uc(vol_repo=vol_repo)
+        with pytest.raises(UserNotFoundError):
+            await uc.submit_application(_submit_input())
+        db.commit.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_submit_application_raises_when_user_is_already_a_volunteer(self):
+        vol_repo = _make_vol_repo(get_volunteer_by_user_id=AsyncMock(return_value=_sample_volunteer()))
+        uc, _, _, db = _make_app_uc(vol_repo=vol_repo)
+        with pytest.raises(VolunteerAlreadyExistsError):
+            await uc.submit_application(_submit_input())
+        db.commit.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_submit_application_raises_when_active_application_exists(self):
+        vol_repo = _make_vol_repo(
+            get_active_application_by_user_id=AsyncMock(return_value=_sample_application())
+        )
+        uc, _, _, db = _make_app_uc(vol_repo=vol_repo)
+        with pytest.raises(VolunteerApplicationAlreadyExistsError):
+            await uc.submit_application(_submit_input())
+        db.rollback.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_submit_application_creates_application_and_commits(self):
+        uc, vol_repo, _, db = _make_app_uc()
+        result = await uc.submit_application(_submit_input())
+        vol_repo.create_application.assert_called_once_with(
+            user_id=USER_ID,
+            application_data={"skills": "logistics"},
+        )
+        db.commit.assert_called_once()
+        assert result.application.user_id == USER_ID
+
+    @pytest.mark.asyncio
+    async def test_submit_application_locks_active_application_row_before_check(self):
+        uc, vol_repo, _, _ = _make_app_uc()
+        await uc.submit_application(_submit_input())
+        vol_repo.get_active_application_by_user_id.assert_called_once_with(USER_ID, for_update=True)
+
+    @pytest.mark.asyncio
+    async def test_submit_application_rollback_on_unexpected_exception(self):
+        vol_repo = _make_vol_repo(create_application=AsyncMock(side_effect=RuntimeError("db error")))
+        uc, _, _, db = _make_app_uc(vol_repo=vol_repo)
+        with pytest.raises(RuntimeError):
+            await uc.submit_application(_submit_input())
+        db.rollback.assert_called_once()
+        db.commit.assert_not_called()
+
+
+class TestReviewApplication:
+    @pytest.mark.asyncio
+    async def test_review_application_raises_when_application_not_found(self):
+        vol_repo = _make_vol_repo(get_application_by_id=AsyncMock(return_value=None))
+        uc, _, _, db = _make_app_uc(vol_repo=vol_repo)
+        with pytest.raises(VolunteerApplicationNotFoundError):
+            await uc.review_application(_review_input())
+        db.commit.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_review_application_raises_on_invalid_status_transition(self):
+        approved_app = _sample_application(status=ApplicationStatus.APPROVED)
+        vol_repo = _make_vol_repo(get_application_by_id=AsyncMock(return_value=approved_app))
+        uc, _, _, db = _make_app_uc(vol_repo=vol_repo)
+        with pytest.raises(InvalidApplicationStatusTransitionError):
+            await uc.review_application(_review_input(new_status=ApplicationStatus.APPROVED))
+        db.commit.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_review_application_approves_and_creates_volunteer(self):
+        uc, vol_repo, _, db = _make_app_uc()
+        result = await uc.review_application(_review_input())
+        vol_repo.create_volunteer.assert_called_once_with(
+            user_id=USER_ID,
+            contact_phone="+1234567890",
+            volunteer_role_id=ROLE_ID,
+        )
+        db.commit.assert_called_once()
+        assert result.volunteer is not None
+        assert result.application.status == ApplicationStatus.APPROVED
+
+    @pytest.mark.asyncio
+    async def test_review_application_rejects_and_does_not_create_volunteer(self):
+        uc, vol_repo, _, db = _make_app_uc()
+        result = await uc.review_application(
+            _review_input(new_status=ApplicationStatus.REJECTED, contact_phone=None, volunteer_role_id=None)
+        )
+        vol_repo.create_volunteer.assert_not_called()
+        db.commit.assert_called_once()
+        assert result.volunteer is None
+
+    @pytest.mark.asyncio
+    async def test_review_application_approves_without_volunteer_when_no_contact_info(self):
+        uc, vol_repo, _, db = _make_app_uc()
+        result = await uc.review_application(
+            _review_input(contact_phone=None, volunteer_role_id=None)
+        )
+        vol_repo.create_volunteer.assert_not_called()
+        db.commit.assert_called_once()
+        assert result.volunteer is None
+
+    @pytest.mark.asyncio
+    async def test_review_application_raises_when_volunteer_role_not_found_on_approval(self):
+        vol_repo = _make_vol_repo(get_volunteer_role_by_id=AsyncMock(return_value=None))
+        uc, _, _, db = _make_app_uc(vol_repo=vol_repo)
+        with pytest.raises(VolunteerRoleNotFoundError):
+            await uc.review_application(_review_input())
+        db.rollback.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_review_application_raises_when_volunteer_role_inactive_on_approval(self):
+        vol_repo = _make_vol_repo(
+            get_volunteer_role_by_id=AsyncMock(return_value=_sample_volunteer_role(is_active=False))
+        )
+        uc, _, _, db = _make_app_uc(vol_repo=vol_repo)
+        with pytest.raises(VolunteerRoleInactiveError):
+            await uc.review_application(_review_input())
+        db.rollback.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_review_application_raises_when_applicant_is_already_a_volunteer(self):
+        vol_repo = _make_vol_repo(
+            get_volunteer_by_user_id=AsyncMock(return_value=_sample_volunteer())
+        )
+        uc, _, _, db = _make_app_uc(vol_repo=vol_repo)
+        with pytest.raises(VolunteerAlreadyExistsError):
+            await uc.review_application(_review_input())
+        db.rollback.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_review_application_locks_application_row(self):
+        uc, vol_repo, _, _ = _make_app_uc()
+        await uc.review_application(_review_input())
+        vol_repo.get_application_by_id.assert_called_once_with(APPLICATION_ID, for_update=True)
+
+    @pytest.mark.asyncio
+    async def test_review_application_assigns_rbac_volunteer_role_on_approval(self):
+        uc, _, role_repo, _ = _make_app_uc()
+        await uc.review_application(_review_input())
+        role_repo.create_assignment.assert_called_once_with(
+            user_id=USER_ID,
+            role_id=RBAC_ROLE_ID,
+            expires_at=None,
+            assigned_by=ACTOR_ID,
+        )
+
+    @pytest.mark.asyncio
+    async def test_review_application_rollback_on_unexpected_exception(self):
+        vol_repo = _make_vol_repo(
+            update_application_status=AsyncMock(side_effect=RuntimeError("db error"))
+        )
+        uc, _, _, db = _make_app_uc(vol_repo=vol_repo)
+        with pytest.raises(RuntimeError):
+            await uc.review_application(_review_input())
+        db.rollback.assert_called_once()
+        db.commit.assert_not_called()
+
+
+class TestWithdrawApplication:
+    @pytest.mark.asyncio
+    async def test_withdraw_application_raises_when_application_not_found(self):
+        vol_repo = _make_vol_repo(get_application_by_id=AsyncMock(return_value=None))
+        uc, _, _, db = _make_app_uc(vol_repo=vol_repo)
+        with pytest.raises(VolunteerApplicationNotFoundError):
+            await uc.withdraw_application(_withdraw_input())
+        db.commit.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_withdraw_application_raises_when_caller_is_not_owner(self):
+        other_user_id = uuid.UUID("11111111-1111-1111-1111-111111111111")
+        uc, _, _, db = _make_app_uc()
+        with pytest.raises(UnauthorizedApplicationOperationError):
+            await uc.withdraw_application(_withdraw_input(user_id=other_user_id))
+        db.commit.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_withdraw_application_raises_on_invalid_status_transition(self):
+        approved_app = _sample_application(status=ApplicationStatus.APPROVED)
+        vol_repo = _make_vol_repo(get_application_by_id=AsyncMock(return_value=approved_app))
+        uc, _, _, db = _make_app_uc(vol_repo=vol_repo)
+        with pytest.raises(InvalidApplicationStatusTransitionError):
+            await uc.withdraw_application(_withdraw_input())
+        db.commit.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_withdraw_application_updates_status_and_commits(self):
+        uc, vol_repo, _, db = _make_app_uc()
+        result = await uc.withdraw_application(_withdraw_input())
+        vol_repo.update_application_status.assert_called_once_with(
+            APPLICATION_ID, ApplicationStatus.WITHDRAWN
+        )
+        db.commit.assert_called_once()
+        assert result.application.status == ApplicationStatus.WITHDRAWN
+
+    @pytest.mark.asyncio
+    async def test_withdraw_application_locks_application_row(self):
+        uc, vol_repo, _, _ = _make_app_uc()
+        await uc.withdraw_application(_withdraw_input())
+        vol_repo.get_application_by_id.assert_called_once_with(APPLICATION_ID, for_update=True)
+
+    @pytest.mark.asyncio
+    async def test_withdraw_application_rollback_on_unexpected_exception(self):
+        vol_repo = _make_vol_repo(
+            update_application_status=AsyncMock(side_effect=RuntimeError("db error"))
+        )
+        uc, _, _, db = _make_app_uc(vol_repo=vol_repo)
+        with pytest.raises(RuntimeError):
+            await uc.withdraw_application(_withdraw_input())
+        db.rollback.assert_called_once()
+        db.commit.assert_not_called()

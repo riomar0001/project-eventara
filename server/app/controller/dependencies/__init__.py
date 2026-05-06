@@ -20,6 +20,7 @@ from app.controller.dependencies.use_cases_depends import (
     get_update_profile_use_case,
     get_venue_management_use_case,
     get_venue_rating_use_case,
+    get_volunteer_application_use_case,
     get_volunteer_use_case,
 )
 
@@ -40,6 +41,7 @@ __all__ = [
     "get_update_profile_use_case",
     "get_venue_management_use_case",
     "get_venue_rating_use_case",
+    "get_volunteer_application_use_case",
     "get_volunteer_use_case",
     "login_rate_limit",
     "require_completed_onboarding",

@@ -89,6 +89,7 @@ from app.domain.exceptions.venue_rating_exceptions import (
 )
 from app.domain.exceptions.volunteer_application_exceptions import (
     ApplicationStatusError,
+    InvalidApplicationStatusTransitionError,
     UnauthorizedApplicationOperationError,
     VolunteerApplicationAlreadyExistsError,
     VolunteerApplicationNotFoundError,
@@ -133,6 +134,7 @@ __all__ = [
     "FeatureNotFoundError",
     "FeedbackReportNotFoundError",
     "FeedbackReportValidationError",
+    "InvalidApplicationStatusTransitionError",
     "InvalidCredentialsError",
     "InvalidEventParticipantStatusTransitionError",
     "InvalidEventRatingStatusTransitionError",
