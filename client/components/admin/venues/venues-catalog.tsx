@@ -1,11 +1,10 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { ArrowLeft, ArrowRight, Building2, MapPin, Plus, Search, Users, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BadgeCheck, Building2, MapPin, Plus, Search, Users, UsersRound, X } from 'lucide-react';
 import Link from 'next/link';
 import { MobileFloatingAction, PrimaryPageAction } from '@/components/admin/shared/primary-page-action';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CatalogCard, OperationsPageIntro } from './venues-shared';
@@ -35,26 +34,141 @@ const SORT_OPTIONS = [
   { key: 'name', label: 'Name (A-Z)' },
   { key: 'capacity', label: 'Largest capacity' },
   { key: 'city', label: 'City (A–Z)' },
-  { key: 'venue_type', label: 'Venue type (A–Z)' },
-  { key: 'partner', label: 'Partners first' }
+  { key: 'venue_type', label: 'Venue type (A–Z)' }
 ];
+
+const PAGE_SIZE = 8;
+
+// ── Section pagination controls ───────────────────────────────────────────────
+
+function SectionPagination({
+  currentPage,
+  totalPages,
+  onPrev,
+  onNext,
+  onGoto
+}: {
+  currentPage: number;
+  totalPages: number;
+  onPrev: () => void;
+  onNext: () => void;
+  onGoto: (n: number) => void;
+}) {
+  const pageNumbers = useMemo(() => {
+    if (totalPages <= 5) return Array.from({ length: totalPages }, (_, i) => i + 1);
+    const start = Math.max(1, Math.min(currentPage - 2, totalPages - 4));
+    return Array.from({ length: 5 }, (_, i) => start + i);
+  }, [currentPage, totalPages]);
+
+  if (totalPages <= 1) return null;
+  return (
+    <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
+      <Button variant="outline" size="sm" disabled={currentPage === 1} onClick={onPrev}>
+        <ArrowLeft className="size-4" />
+        Prev
+      </Button>
+      {pageNumbers.map((n) => (
+        <Button key={n} variant={n === currentPage ? 'default' : 'outline'} size="sm" onClick={() => onGoto(n)}>
+          {n}
+        </Button>
+      ))}
+      <Button variant="outline" size="sm" disabled={currentPage === totalPages} onClick={onNext}>
+        Next
+        <ArrowRight className="size-4" />
+      </Button>
+    </div>
+  );
+}
+
+// ── Section header ─────────────────────────────────────────────────────────────
+
+function SectionHeader({
+  icon,
+  label,
+  count,
+  accent
+}: {
+  icon: React.ReactNode;
+  label: string;
+  count: number;
+  accent: 'amber' | 'sky';
+}) {
+  const iconRing = accent === 'amber' ? 'bg-amber-50 ring-amber-100 text-amber-600' : 'bg-sky-50 ring-sky-100 text-sky-600';
+  const labelColor = accent === 'amber' ? 'text-amber-700' : 'text-sky-700';
+
+  return (
+    <div className="flex items-center gap-3">
+      <span className={`flex size-8 shrink-0 items-center justify-center rounded-xl ring-1 ${iconRing}`}>
+        {icon}
+      </span>
+      <div className="min-w-0">
+        <p className={`text-sm font-semibold ${labelColor}`}>{label}</p>
+        <p className="text-xs text-neutral-500">{count} {count === 1 ? 'venue' : 'venues'}</p>
+      </div>
+      <div className="flex-1 border-t border-neutral-200" />
+    </div>
+  );
+}
+
+// ── Section empty state ────────────────────────────────────────────────────────
+
+function SectionEmpty({ hasFilters, label }: { hasFilters: boolean; label: string }) {
+  return (
+    <div className="rounded-2xl border border-dashed border-neutral-200 px-6 py-8 text-center">
+      <p className="text-sm font-medium text-neutral-500">
+        {hasFilters ? `No ${label} match the current filters.` : `No ${label} have been added yet.`}
+      </p>
+    </div>
+  );
+}
+
+// ── Venue card grid ────────────────────────────────────────────────────────────
+
+function VenueGrid({ venues }: { venues: VenueRecordResponse[] }) {
+  return (
+    <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
+      {venues.map((venue) => (
+        <CatalogCard
+          key={venue.id}
+          title={venue.name}
+          subtitle={[venue.city, venue.province].filter(Boolean).join(', ')}
+          photo={venuePhoto(venue)}
+          description={venue.description ?? 'No description provided.'}
+          href={ADMIN_OPERATIONS_PATHS.venueDetail(venue.id)}
+          editHref={ADMIN_OPERATIONS_PATHS.venueEdit(venue.id)}
+          badges={[venue.venue_type]}
+          specs={[
+            { label: 'Location', value: [venue.city, venue.province].filter(Boolean).join(', '), icon: <MapPin className="size-3.5" /> },
+            { label: 'Venue type', value: venue.venue_type.charAt(0).toUpperCase() + venue.venue_type.slice(1), icon: <Building2 className="size-3.5" /> },
+            { label: 'Capacity', value: `${venue.capacity.toLocaleString()} guests`, icon: <Users className="size-3.5" /> }
+          ]}
+          tags={venue.amenities ?? []}
+        />
+      ))}
+    </div>
+  );
+}
+
+// ── Main catalog ───────────────────────────────────────────────────────────────
 
 export function VenuesCatalog() {
   const { venues, isLoading, error } = useVenues();
   const [query, setQuery] = useState('');
   const [capacityKey, setCapacityKey] = useState('any');
   const [sortKey, setSortKey] = useState('name');
-  const [page, setPage] = useState(1);
-  const pageSize = 8;
+  const [partnerPage, setPartnerPage] = useState(1);
+  const [communityPage, setCommunityPage] = useState(1);
 
-  const partnerVenueCount = useMemo(() => venues.filter((v) => v.is_partner).length, [venues]);
+  const partnerCount = useMemo(() => venues.filter((v) => v.is_partner).length, [venues]);
+  const communityCount = useMemo(() => venues.filter((v) => !v.is_partner).length, [venues]);
   const totalCapacity = useMemo(() => venues.reduce((sum, v) => sum + v.capacity, 0), [venues]);
 
-  const filtered = useMemo(() => {
-    const lowerQuery = query.trim().toLowerCase();
-    const capacityMin = CAPACITY_FILTERS.find((o) => o.key === capacityKey)?.min ?? 0;
+  const capacityMin = CAPACITY_FILTERS.find((o) => o.key === capacityKey)?.min ?? 0;
+  const hasActiveFilters = capacityKey !== 'any' || Boolean(query.trim());
 
-    return venues
+  function applyFiltersAndSort(list: VenueRecordResponse[]) {
+    const lowerQuery = query.trim().toLowerCase();
+    return list
       .filter((v) => (capacityMin ? v.capacity >= capacityMin : true))
       .filter((v) => {
         if (!lowerQuery) return true;
@@ -67,28 +181,45 @@ export function VenuesCatalog() {
         if (sortKey === 'capacity') return b.capacity - a.capacity;
         if (sortKey === 'city') return a.city.localeCompare(b.city);
         if (sortKey === 'venue_type') return a.venue_type.localeCompare(b.venue_type);
-        if (sortKey === 'partner') return Number(b.is_partner) - Number(a.is_partner);
         return a.name.localeCompare(b.name);
       });
-  }, [capacityKey, query, sortKey, venues]);
+  }
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
-  const currentPage = Math.min(page, totalPages);
-  const paged = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const filteredPartners = useMemo(
+    () => applyFiltersAndSort(venues.filter((v) => v.is_partner)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [venues, query, capacityKey, sortKey]
+  );
+
+  const filteredCommunity = useMemo(
+    () => applyFiltersAndSort(venues.filter((v) => !v.is_partner)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [venues, query, capacityKey, sortKey]
+  );
+
+  const partnerTotalPages = Math.max(1, Math.ceil(filteredPartners.length / PAGE_SIZE));
+  const communityTotalPages = Math.max(1, Math.ceil(filteredCommunity.length / PAGE_SIZE));
+
+  const partnerCurrentPage = Math.min(partnerPage, partnerTotalPages);
+  const communityCurrentPage = Math.min(communityPage, communityTotalPages);
+
+  const pagedPartners = filteredPartners.slice((partnerCurrentPage - 1) * PAGE_SIZE, partnerCurrentPage * PAGE_SIZE);
+  const pagedCommunity = filteredCommunity.slice((communityCurrentPage - 1) * PAGE_SIZE, communityCurrentPage * PAGE_SIZE);
+
   const capacityLabel = CAPACITY_FILTERS.find((o) => o.key === capacityKey)?.label ?? 'Any size';
   const sortLabel = SORT_OPTIONS.find((o) => o.key === sortKey)?.label ?? 'Name (A-Z)';
-  const hasActiveFilters = capacityKey !== 'any' || Boolean(query.trim());
 
-  const pageNumbers = useMemo(() => {
-    if (totalPages <= 5) return Array.from({ length: totalPages }, (_, i) => i + 1);
-    const start = Math.max(1, Math.min(currentPage - 2, totalPages - 4));
-    return Array.from({ length: 5 }, (_, i) => start + i);
-  }, [currentPage, totalPages]);
+  function updateFilters(fn: () => void) {
+    fn();
+    setPartnerPage(1);
+    setCommunityPage(1);
+  }
 
   function clearFilters() {
     setCapacityKey('any');
     setQuery('');
-    setPage(1);
+    setPartnerPage(1);
+    setCommunityPage(1);
   }
 
   return (
@@ -100,9 +231,9 @@ export function VenuesCatalog() {
         title="Venue Management"
         description="Shape the event footprint from a single cinematic surface, with venue health, capacity, and booking readiness visible before you ever open a detail page."
         metrics={[
-          { label: 'Partner venues', value: partnerVenueCount, hint: 'Spaces marked as Eventara partner venues in the catalog.' },
-          { label: 'Portfolio capacity', value: totalCapacity.toLocaleString(), hint: 'Combined guest capacity across all venues.' },
-          { label: 'Total venues', value: venues.length, hint: 'All community and official venues in the system.' }
+          { label: 'Official partners', value: isLoading ? '—' : partnerCount, hint: 'Officially managed partner spaces in the catalog.' },
+          { label: 'Community venues', value: isLoading ? '—' : communityCount, hint: 'Community-suggested spaces under review or active.' },
+          { label: 'Portfolio capacity', value: isLoading ? '—' : totalCapacity.toLocaleString(), hint: 'Combined guest capacity across all venues.' }
         ]}
         actions={
           <PrimaryPageAction
@@ -115,20 +246,21 @@ export function VenuesCatalog() {
         }
       />
 
+      {/* ── Filters ─────────────────────────────────────────────────────────── */}
       <div className="grid items-end gap-3 rounded-[24px] border border-neutral-200 bg-white/80 p-4 shadow-[0_20px_55px_-34px_rgba(15,23,42,0.25)] md:grid-cols-[minmax(0,1fr)_minmax(0,190px)] lg:grid-cols-[minmax(0,1fr)_minmax(0,210px)_minmax(0,210px)_auto]">
         <div className="relative">
           <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-neutral-400" />
           <Input
             placeholder="Search venues, city, region, or amenities"
             value={query}
-            onChange={(e) => { setQuery(e.target.value); setPage(1); }}
+            onChange={(e) => updateFilters(() => setQuery(e.target.value))}
             className="h-10 pl-9"
           />
         </div>
 
         <div className="space-y-1.5">
           <p className="text-[11px] font-semibold tracking-[0.18em] text-neutral-500 uppercase">Capacity</p>
-          <Select value={capacityKey} onValueChange={(v) => { setCapacityKey(v); setPage(1); }}>
+          <Select value={capacityKey} onValueChange={(v) => updateFilters(() => setCapacityKey(v))}>
             <SelectTrigger className="w-full" size="default"><SelectValue /></SelectTrigger>
             <SelectContent align="start">
               {CAPACITY_FILTERS.map((o) => <SelectItem key={o.key} value={o.key}>{o.label}</SelectItem>)}
@@ -138,7 +270,7 @@ export function VenuesCatalog() {
 
         <div className="space-y-1.5">
           <p className="text-[11px] font-semibold tracking-[0.18em] text-neutral-500 uppercase">Sort by</p>
-          <Select value={sortKey} onValueChange={(v) => { setSortKey(v); setPage(1); }}>
+          <Select value={sortKey} onValueChange={(v) => updateFilters(() => setSortKey(v))}>
             <SelectTrigger className="w-full" size="default"><SelectValue /></SelectTrigger>
             <SelectContent align="start">
               {SORT_OPTIONS.map((o) => <SelectItem key={o.key} value={o.key}>{o.label}</SelectItem>)}
@@ -151,18 +283,14 @@ export function VenuesCatalog() {
         </Button>
       </div>
 
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h3 className="text-lg font-semibold tracking-tight text-neutral-950">Venue results</h3>
-          <p className="text-sm text-neutral-500">
-            {isLoading ? 'Loading venues…' : error ? error : `Showing ${filtered.length} of ${venues.length} venues — ${sortLabel}`}
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
+      {/* ── Active filter chips ──────────────────────────────────────────────── */}
+      {hasActiveFilters && (
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="text-xs text-neutral-500">{sortLabel} ·</p>
           {capacityKey !== 'any' && (
             <span className="inline-flex h-7 items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 text-xs font-medium text-amber-700">
               {capacityLabel}
-              <Button type="button" variant="ghost" size="icon-xs" className="-mr-1 text-amber-700" onClick={() => { setCapacityKey('any'); setPage(1); }}>
+              <Button type="button" variant="ghost" size="icon-xs" className="-mr-1 text-amber-700" onClick={() => updateFilters(() => setCapacityKey('any'))}>
                 <X className="size-3" />
               </Button>
             </span>
@@ -170,158 +298,116 @@ export function VenuesCatalog() {
           {query.trim() && (
             <span className="inline-flex h-7 items-center gap-2 rounded-full border border-neutral-200 bg-white px-3 text-xs font-medium text-neutral-700">
               {`"${query.trim()}"`}
-              <Button type="button" variant="ghost" size="icon-xs" className="-mr-1 text-neutral-600" onClick={() => { setQuery(''); setPage(1); }}>
+              <Button type="button" variant="ghost" size="icon-xs" className="-mr-1 text-neutral-600" onClick={() => updateFilters(() => setQuery(''))}>
                 <X className="size-3" />
               </Button>
             </span>
           )}
-          {hasActiveFilters && (
-            <Button variant="ghost" size="xs" className="text-neutral-500" onClick={clearFilters}>
-              Clear filters
-            </Button>
-          )}
-        </div>
-      </div>
-
-      {isLoading ? (
-        <div className="grid gap-6 xl:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-80 animate-pulse rounded-[24px] bg-neutral-100" />
-          ))}
-        </div>
-      ) : error ? (
-        <div className="rounded-[24px] border border-red-100 bg-red-50 px-6 py-10 text-center">
-          <p className="text-sm font-medium text-red-700">{error}</p>
-        </div>
-      ) : paged.length === 0 ? (
-        <div className="overflow-hidden rounded-[24px] border border-neutral-200 bg-white shadow-[0_24px_70px_-46px_rgba(15,23,42,0.45)]">
-          <div className="grid lg:grid-cols-[minmax(0,1fr)_340px]">
-            <div className="p-6 sm:p-8">
-              <div className="flex items-center gap-2">
-                <span className="flex size-9 items-center justify-center rounded-xl bg-amber-50 text-amber-700 ring-1 ring-amber-100">
-                  {hasActiveFilters ? <Search className="size-4" /> : <Building2 className="size-4" />}
-                </span>
-                <p className="text-[11px] font-semibold tracking-[0.2em] text-amber-700 uppercase">
-                  {hasActiveFilters ? 'No matching venues' : 'Empty portfolio'}
-                </p>
-              </div>
-
-              <h3 className="mt-5 max-w-2xl text-2xl font-semibold tracking-tight text-neutral-950">
-                {hasActiveFilters ? 'No venue fits this filter set.' : 'Start the venue portfolio with the first space.'}
-              </h3>
-              <p className="mt-3 max-w-2xl text-sm leading-6 text-neutral-500">
-                {hasActiveFilters
-                  ? 'Adjust the search or capacity filter to widen the result set, then keep scanning from the same catalog view.'
-                  : 'Add a community suggestion or official partner venue so event planning can move from blank slate to bookable inventory.'}
-              </p>
-
-              <div className="mt-6 flex flex-wrap gap-2">
-                <Button asChild variant="amber" className="rounded-xl">
-                  <Link href={ADMIN_OPERATIONS_PATHS.venueCreate}>
-                    <Plus className="size-4" />
-                    Add venue
-                  </Link>
-                </Button>
-                {hasActiveFilters && (
-                  <Button type="button" variant="outline" className="rounded-xl" onClick={clearFilters}>
-                    <X className="size-4" />
-                    Clear filters
-                  </Button>
-                )}
-              </div>
-
-              <div className="mt-8 grid gap-3 sm:grid-cols-3">
-                {[
-                  ['Required', 'Name, address, capacity'],
-                  ['Media', 'Venue image upload'],
-                  ['Contact', 'Lead contact details']
-                ].map(([label, value]) => (
-                  <div key={label} className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3">
-                    <p className="text-[11px] font-semibold tracking-[0.16em] text-neutral-400 uppercase">{label}</p>
-                    <p className="mt-1 text-sm font-medium text-neutral-800">{value}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="border-t border-neutral-200 bg-neutral-950 p-6 text-white lg:border-t-0 lg:border-l">
-              <div className="flex h-full flex-col justify-between gap-8">
-                <div className="space-y-3">
-                  <p className="text-[11px] font-semibold tracking-[0.2em] text-amber-300 uppercase">Next best action</p>
-                  <p className="text-sm leading-6 text-white/70">
-                    Create one complete venue record first. The catalog will immediately unlock filtering, detail review, edit, image, and delete workflows.
-                  </p>
-                </div>
-                <div className="space-y-3">
-                  {['Capture the space', 'Attach operational details', 'Use it in event planning'].map((step, index) => (
-                    <div key={step} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-                      <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-amber-300 text-xs font-semibold text-neutral-950">
-                        {index + 1}
-                      </span>
-                      <span className="text-sm font-medium text-white/90">{step}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div className="grid gap-6 xl:grid-cols-4">
-          {paged.map((venue, index) => (
-            <div key={venue.id} className="contents">
-              {index === 3 && paged.length > 3 ? (
-                <Card className="border-0 bg-white py-0 shadow-none ring-1 ring-neutral-200 xl:col-span-4">
-                  <CardContent className="grid gap-6 p-6 md:grid-cols-[1.2fr_auto] md:items-center">
-                    <div className="space-y-2">
-                      <p className="text-[11px] font-semibold tracking-[0.22em] text-amber-700 uppercase">Community growth</p>
-                      <h3 className="text-xl font-semibold text-neutral-950">Know a venue we should highlight?</h3>
-                      <p className="text-sm leading-6 text-neutral-600">
-                        Add a new space to the Eventara portfolio so the team can review it and bring it into upcoming programming.
-                      </p>
-                    </div>
-                    <Button asChild size="lg" variant="amber" className="h-11 rounded-xl">
-                      <Link href={ADMIN_OPERATIONS_PATHS.venueCreate}>Contribute venue</Link>
-                    </Button>
-                  </CardContent>
-                </Card>
-              ) : null}
-
-              <CatalogCard
-                title={venue.name}
-                subtitle={[venue.city, venue.province].filter(Boolean).join(', ')}
-                photo={venuePhoto(venue)}
-                description={venue.description ?? 'No description provided.'}
-                href={ADMIN_OPERATIONS_PATHS.venueDetail(venue.id)}
-                editHref={ADMIN_OPERATIONS_PATHS.venueEdit(venue.id)}
-                badges={[venue.venue_type, ...(venue.is_partner ? ['Partner'] : [])]}
-                specs={[
-                  { label: 'Location', value: [venue.city, venue.province].filter(Boolean).join(', '), icon: <MapPin className="size-3.5" /> },
-                  { label: 'Venue type', value: venue.venue_type.charAt(0).toUpperCase() + venue.venue_type.slice(1), icon: <Building2 className="size-3.5" /> },
-                  { label: 'Capacity', value: `${venue.capacity.toLocaleString()} guests`, icon: <Users className="size-3.5" /> }
-                ]}
-                tags={venue.amenities ?? []}
-              />
-            </div>
-          ))}
+          <Button variant="ghost" size="xs" className="text-neutral-500" onClick={clearFilters}>
+            Clear all
+          </Button>
         </div>
       )}
 
-      {!isLoading && !error && totalPages > 1 && (
-        <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
-          <Button variant="outline" size="sm" disabled={currentPage === 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>
-            <ArrowLeft className="size-4" />
-            Prev
-          </Button>
-          {pageNumbers.map((n) => (
-            <Button key={n} variant={n === currentPage ? 'default' : 'outline'} size="sm" onClick={() => setPage(n)}>
-              {n}
-            </Button>
-          ))}
-          <Button variant="outline" size="sm" disabled={currentPage === totalPages} onClick={() => setPage((p) => Math.min(totalPages, p + 1))}>
-            Next
-            <ArrowRight className="size-4" />
-          </Button>
+      {/* ── Error ───────────────────────────────────────────────────────────── */}
+      {error && (
+        <div className="rounded-[24px] border border-red-100 bg-red-50 px-6 py-10 text-center">
+          <p className="text-sm font-medium text-red-700">{error}</p>
+        </div>
+      )}
+
+      {/* ── Loading skeleton ─────────────────────────────────────────────────── */}
+      {isLoading && (
+        <div className="space-y-8">
+          <div className="space-y-4">
+            <div className="h-6 w-48 animate-pulse rounded-lg bg-neutral-200" />
+            <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="h-80 animate-pulse rounded-[24px] bg-neutral-100" />
+              ))}
+            </div>
+          </div>
+          <div className="space-y-4">
+            <div className="h-6 w-44 animate-pulse rounded-lg bg-neutral-200" />
+            <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="h-80 animate-pulse rounded-[24px] bg-neutral-100" />
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Sections ─────────────────────────────────────────────────────────── */}
+      {!isLoading && !error && (
+        <div className="space-y-10">
+
+          {/* Official Partners */}
+          <section className="space-y-4">
+            <SectionHeader
+              icon={<BadgeCheck className="size-4" />}
+              label="Official Partners"
+              count={filteredPartners.length}
+              accent="amber"
+            />
+
+            {pagedPartners.length === 0 ? (
+              <SectionEmpty hasFilters={hasActiveFilters} label="official partner venues" />
+            ) : (
+              <VenueGrid venues={pagedPartners} />
+            )}
+
+            <SectionPagination
+              currentPage={partnerCurrentPage}
+              totalPages={partnerTotalPages}
+              onPrev={() => setPartnerPage((p) => Math.max(1, p - 1))}
+              onNext={() => setPartnerPage((p) => Math.min(partnerTotalPages, p + 1))}
+              onGoto={setPartnerPage}
+            />
+          </section>
+
+          {/* Community Venues */}
+          <section className="space-y-4">
+            <SectionHeader
+              icon={<UsersRound className="size-4" />}
+              label="Community Venues"
+              count={filteredCommunity.length}
+              accent="sky"
+            />
+
+            {pagedCommunity.length === 0 ? (
+              <SectionEmpty hasFilters={hasActiveFilters} label="community venues" />
+            ) : (
+              <>
+                <VenueGrid venues={pagedCommunity} />
+                {!hasActiveFilters && communityCurrentPage === 1 && filteredCommunity.length > 0 && (
+                  <div className="overflow-hidden rounded-2xl border border-sky-100 bg-sky-50 px-5 py-4">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <p className="text-[11px] font-semibold tracking-[0.18em] text-sky-700 uppercase">Community growth</p>
+                        <p className="mt-0.5 text-sm text-neutral-600">Know a venue that should be in the portfolio?</p>
+                      </div>
+                      <Button asChild size="sm" variant="outline" className="rounded-xl border-sky-200 text-sky-700 hover:bg-sky-100">
+                        <Link href={ADMIN_OPERATIONS_PATHS.venueCreate}>
+                          <Plus className="size-4" />
+                          Suggest venue
+                        </Link>
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+
+            <SectionPagination
+              currentPage={communityCurrentPage}
+              totalPages={communityTotalPages}
+              onPrev={() => setCommunityPage((p) => Math.max(1, p - 1))}
+              onNext={() => setCommunityPage((p) => Math.min(communityTotalPages, p + 1))}
+              onGoto={setCommunityPage}
+            />
+          </section>
+
         </div>
       )}
     </div>
