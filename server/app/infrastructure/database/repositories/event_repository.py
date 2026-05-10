@@ -94,6 +94,45 @@ class EventRepository:
         result = await self.db.execute(select(Venue.capacity).where(Venue.id == venue_id))
         return result.scalar_one_or_none()
 
+    async def get_all_events(
+        self,
+        *,
+        status: EventStatus | None = None,
+        limit: int = 20,
+        offset: int = 0,
+    ) -> list[EventEntity]:
+        """Return a paginated list of events ordered by creation date descending.
+
+        Args:
+            status: When provided, restricts results to events with the given status.
+            limit:  Maximum number of rows to return.
+            offset: Number of rows to skip before collecting results.
+
+        Returns:
+            List of ``EventEntity`` objects, newest first.
+        """
+        query = select(Event).order_by(Event.created_at.desc())
+        if status is not None:
+            query = query.where(Event.status == status)
+        query = query.limit(limit).offset(offset)
+        result = await self.db.execute(query)
+        return [self._to_event_entity(orm) for orm in result.scalars().all()]
+
+    async def count_all_events(self, *, status: EventStatus | None = None) -> int:
+        """Return the total count of events, optionally filtered by status.
+
+        Args:
+            status: When provided, counts only events with the given status.
+
+        Returns:
+            Integer row count.
+        """
+        query = select(func.count()).select_from(Event)
+        if status is not None:
+            query = query.where(Event.status == status)
+        result = await self.db.execute(query)
+        return result.scalar_one()
+
     async def get_event_by_id(self, event_id: uuid.UUID, *, for_update: bool = False) -> EventEntity | None:
         """Return the event entity for the given ID, optionally locking the row.
 

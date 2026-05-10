@@ -2,7 +2,7 @@ import uuid
 from dataclasses import dataclass, field
 from datetime import datetime
 
-from app.domain.entities.event_entity import Event, EventSession
+from app.domain.entities.event_entity import Event, EventSession, EventStatus
 
 
 @dataclass
@@ -101,3 +101,24 @@ class UpdateEventBannerInput:
 class UpdateEventBannerOutput:
     event: Event
     old_banner_url: str | None
+
+
+@dataclass
+class GetAllEventsInput:
+    page: int = 1
+    page_size: int = 20
+    status: EventStatus | None = None
+
+
+@dataclass
+class GetAllEventsOutput:
+    events: list[Event]
+    total: int
+    page: int
+    page_size: int
+    total_pages: int
+
+
+@dataclass
+class GetEventWithSessionsInput:
+    event_id: uuid.UUID

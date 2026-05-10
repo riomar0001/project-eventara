@@ -1,0 +1,186 @@
+import uuid
+from datetime import UTC, datetime
+from unittest.mock import AsyncMock, MagicMock
+
+import pytest
+
+from app.application.dto.event_dto import GetAllEventsInput, GetEventWithSessionsInput
+from app.application.use_cases.event_query_usecase import GetEventUseCase
+from app.domain.entities.event_entity import Event, EventSession, EventSessionStatus, EventStatus
+from app.domain.exceptions.event_exceptions import EventNotFoundError
+from app.infrastructure.database.repositories.event_repository import EventRepository
+
+EVENT_ID = uuid.UUID("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
+SESSION_ID = uuid.UUID("dddddddd-dddd-dddd-dddd-dddddddddddd")
+CREATOR_ID = uuid.UUID("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
+VENUE_ID = uuid.uuid4()
+
+EVENT_START = datetime(2025, 6, 1, tzinfo=UTC)
+EVENT_END = datetime(2025, 6, 10, tzinfo=UTC)
+SESSION_START = datetime(2025, 6, 2, tzinfo=UTC)
+SESSION_END = datetime(2025, 6, 3, tzinfo=UTC)
+
+
+def _sample_event(**overrides) -> Event:
+    defaults = dict(
+        id=EVENT_ID,
+        title="Test Event",
+        description="<p>desc</p>",
+        start_date=EVENT_START,
+        end_date=EVENT_END,
+        status=EventStatus.POSTED,
+        created_by=CREATOR_ID,
+        created_at=None,
+        updated_at=None,
+    )
+    defaults.update(overrides)
+    return Event(**defaults)
+
+
+def _sample_session(**overrides) -> EventSession:
+    defaults = dict(
+        id=SESSION_ID,
+        event_id=EVENT_ID,
+        venue_id=VENUE_ID,
+        title="Session Title",
+        description=None,
+        start_datetime=SESSION_START,
+        end_datetime=SESSION_END,
+        status=EventSessionStatus.POSTED,
+        created_at=None,
+        updated_at=None,
+    )
+    defaults.update(overrides)
+    return EventSession(**defaults)
+
+
+def _make_repo():
+    repo = MagicMock(spec=EventRepository)
+    repo.get_all_events = AsyncMock(return_value=[_sample_event()])
+    repo.count_all_events = AsyncMock(return_value=1)
+    repo.get_event_by_id = AsyncMock(return_value=_sample_event())
+    repo.get_sessions_by_event_id = AsyncMock(return_value=[_sample_session()])
+    return repo
+
+
+def _make_uc(repo=None):
+    repo = repo or _make_repo()
+    return GetEventUseCase(repo), repo
+
+
+class TestGetAllEventsUseCase:
+    @pytest.mark.asyncio
+    async def test_returns_events_and_pagination_metadata(self):
+        uc, _ = _make_uc()
+        result = await uc.get_all_events(GetAllEventsInput(page=1, page_size=20))
+        assert len(result.events) == 1
+        assert result.total == 1
+        assert result.page == 1
+        assert result.total_pages == 1
+
+    @pytest.mark.asyncio
+    async def test_calls_repository_with_correct_offset_for_page_three(self):
+        uc, repo = _make_uc()
+        await uc.get_all_events(GetAllEventsInput(page=3, page_size=10))
+        repo.get_all_events.assert_called_once_with(status=None, limit=10, offset=20)
+
+    @pytest.mark.asyncio
+    async def test_caps_page_size_at_max_page_size(self):
+        uc, repo = _make_uc()
+        await uc.get_all_events(GetAllEventsInput(page=1, page_size=9999))
+        assert repo.get_all_events.call_args.kwargs["limit"] == GetEventUseCase.MAX_PAGE_SIZE
+
+    @pytest.mark.asyncio
+    async def test_passes_none_status_to_repository_when_no_filter(self):
+        uc, repo = _make_uc()
+        await uc.get_all_events(GetAllEventsInput(page=1, page_size=20))
+        repo.get_all_events.assert_called_once_with(status=None, limit=20, offset=0)
+        repo.count_all_events.assert_called_once_with(status=None)
+
+    @pytest.mark.asyncio
+    async def test_passes_status_filter_to_both_repository_calls(self):
+        uc, repo = _make_uc()
+        await uc.get_all_events(GetAllEventsInput(page=1, page_size=20, status=EventStatus.POSTED))
+        repo.get_all_events.assert_called_once_with(status=EventStatus.POSTED, limit=20, offset=0)
+        repo.count_all_events.assert_called_once_with(status=EventStatus.POSTED)
+
+    @pytest.mark.asyncio
+    async def test_returns_empty_list_and_zero_totals_when_no_events_exist(self):
+        repo = _make_repo()
+        repo.get_all_events = AsyncMock(return_value=[])
+        repo.count_all_events = AsyncMock(return_value=0)
+        uc = GetEventUseCase(repo)
+        result = await uc.get_all_events(GetAllEventsInput(page=1, page_size=20))
+        assert result.events == []
+        assert result.total == 0
+        assert result.total_pages == 0
+
+    @pytest.mark.asyncio
+    async def test_calculates_total_pages_as_ceiling_of_total_divided_by_page_size(self):
+        repo = _make_repo()
+        repo.count_all_events = AsyncMock(return_value=25)
+        repo.get_all_events = AsyncMock(return_value=[_sample_event()] * 10)
+        uc = GetEventUseCase(repo)
+        result = await uc.get_all_events(GetAllEventsInput(page=1, page_size=10))
+        assert result.total_pages == 3
+
+    @pytest.mark.asyncio
+    async def test_total_pages_is_one_when_total_equals_page_size(self):
+        repo = _make_repo()
+        repo.count_all_events = AsyncMock(return_value=20)
+        repo.get_all_events = AsyncMock(return_value=[_sample_event()] * 20)
+        uc = GetEventUseCase(repo)
+        result = await uc.get_all_events(GetAllEventsInput(page=1, page_size=20))
+        assert result.total_pages == 1
+
+    @pytest.mark.asyncio
+    async def test_effective_page_size_is_reflected_in_output(self):
+        uc, _ = _make_uc()
+        result = await uc.get_all_events(GetAllEventsInput(page=1, page_size=15))
+        assert result.page_size == 15
+
+
+class TestGetEventWithSessionsUseCase:
+    @pytest.mark.asyncio
+    async def test_returns_event_and_sessions_for_valid_event_id(self):
+        uc, _ = _make_uc()
+        result = await uc.get_event_with_sessions(GetEventWithSessionsInput(event_id=EVENT_ID))
+        assert result.event.id == EVENT_ID
+        assert len(result.sessions) == 1
+
+    @pytest.mark.asyncio
+    async def test_raises_event_not_found_when_event_row_does_not_exist(self):
+        repo = _make_repo()
+        repo.get_event_by_id = AsyncMock(return_value=None)
+        uc = GetEventUseCase(repo)
+        with pytest.raises(EventNotFoundError):
+            await uc.get_event_with_sessions(GetEventWithSessionsInput(event_id=EVENT_ID))
+
+    @pytest.mark.asyncio
+    async def test_does_not_query_sessions_when_event_is_not_found(self):
+        repo = _make_repo()
+        repo.get_event_by_id = AsyncMock(return_value=None)
+        uc = GetEventUseCase(repo)
+        with pytest.raises(EventNotFoundError):
+            await uc.get_event_with_sessions(GetEventWithSessionsInput(event_id=EVENT_ID))
+        repo.get_sessions_by_event_id.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_returns_event_with_empty_sessions_list_when_event_has_no_sessions(self):
+        repo = _make_repo()
+        repo.get_sessions_by_event_id = AsyncMock(return_value=[])
+        uc = GetEventUseCase(repo)
+        result = await uc.get_event_with_sessions(GetEventWithSessionsInput(event_id=EVENT_ID))
+        assert result.sessions == []
+
+    @pytest.mark.asyncio
+    async def test_fetches_sessions_with_correct_event_id(self):
+        uc, repo = _make_uc()
+        await uc.get_event_with_sessions(GetEventWithSessionsInput(event_id=EVENT_ID))
+        repo.get_sessions_by_event_id.assert_called_once_with(EVENT_ID)
+
+    @pytest.mark.asyncio
+    async def test_fetches_event_without_row_lock(self):
+        uc, repo = _make_uc()
+        await uc.get_event_with_sessions(GetEventWithSessionsInput(event_id=EVENT_ID))
+        repo.get_event_by_id.assert_called_once_with(EVENT_ID)

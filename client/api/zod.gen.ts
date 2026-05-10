@@ -300,6 +300,19 @@ export const zEventDeletedResponse = z.object({
 });
 
 /**
+ * EventListResponse
+ */
+export const zEventListResponse = z.object({
+    success: z.boolean().optional().default(true),
+    message: z.string().optional().default('Events retrieved successfully.'),
+    data: z.array(zEventRecordResponse),
+    total: z.int(),
+    page: z.int(),
+    page_size: z.int(),
+    total_pages: z.int()
+});
+
+/**
  * EventMetadataUpdatedResponse
  */
 export const zEventMetadataUpdatedResponse = z.object({
@@ -347,6 +360,16 @@ export const zEventSessionRecordResponse = z.object({
     max_slots: z.int().nullable(),
     created_at: z.iso.datetime().nullable(),
     updated_at: z.iso.datetime().nullable()
+});
+
+/**
+ * EventDetailResponse
+ */
+export const zEventDetailResponse = z.object({
+    success: z.boolean().optional().default(true),
+    message: z.string().optional().default('Event retrieved successfully.'),
+    data: zEventRecordResponse,
+    sessions: z.array(zEventSessionRecordResponse)
 });
 
 /**
@@ -2123,6 +2146,17 @@ export const zUpdateMyVenueRatingVenuesVenueIdRatingsMePatchPath = z.object({
  */
 export const zUpdateMyVenueRatingVenuesVenueIdRatingsMePatchResponse = zVenueRatingResponse;
 
+export const zGetAllEventsEventsGetQuery = z.object({
+    status: zEventStatus.nullish(),
+    page: z.int().gte(1).optional().default(1),
+    page_size: z.int().gte(1).lte(100).optional().default(20)
+});
+
+/**
+ * Paginated list of events
+ */
+export const zGetAllEventsEventsGetResponse = zEventListResponse;
+
 export const zCreateEventEventsPostBody = zEventCreateRequest;
 
 /**
@@ -2138,6 +2172,15 @@ export const zDeleteEventEventsEventIdDeletePath = z.object({
  * Successful Response
  */
 export const zDeleteEventEventsEventIdDeleteResponse = zEventDeletedResponse;
+
+export const zGetEventWithSessionsEventsEventIdGetPath = z.object({
+    event_id: z.uuid()
+});
+
+/**
+ * Event with all its sessions
+ */
+export const zGetEventWithSessionsEventsEventIdGetResponse = zEventDetailResponse;
 
 export const zUpdateEventMetadataEventsEventIdPatchBody = zEventUpdateRequest;
 

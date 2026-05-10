@@ -16,13 +16,15 @@ Error mapping summary:
 
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 
 from app.application.dto.event_dto import (
     CreateEventInput,
     CreateEventSessionInput,
     DeleteEventInput,
     DeleteEventSessionInput,
+    GetAllEventsInput,
+    GetEventWithSessionsInput,
     UpdateEventBannerInput,
     UpdateEventMetadataInput,
     UpdateEventSessionInput,
@@ -30,18 +32,22 @@ from app.application.dto.event_dto import (
 from app.application.dto.event_status_dto import UpdateEventSessionStatusInput, UpdateEventStatusInput
 from app.application.use_cases.audit_log_usecase import AuditLogUseCase
 from app.application.use_cases.event_deletion_usecase import EventDeletionUseCase
+from app.application.use_cases.event_query_usecase import GetEventUseCase
 from app.application.use_cases.event_status_usecase import EventStatusUseCase
 from app.application.use_cases.event_usecase import EventUseCase
 from app.controller.api.audit_helpers import safe_audit_log, serialize_event, serialize_event_sessions
 from app.controller.dependencies import get_audit_log_use_case, get_current_user_id
 from app.controller.dependencies.storage_depends import get_storage_service
-from app.controller.dependencies.use_cases_depends import get_event_deletion_use_case, get_event_status_use_case, get_event_use_case
+from app.controller.dependencies.use_cases_depends import get_event_deletion_use_case, get_event_query_use_case, get_event_status_use_case, get_event_use_case
 from app.controller.docs.event_docs import (
-    EVENT_BANNER_UPLOAD_OPENAPI_EXTRA,
     EVENT_BANNER_STORAGE_UNAVAILABLE,
+    EVENT_BANNER_UPLOAD_OPENAPI_EXTRA,
     EVENT_CREATE_OPENAPI_EXTRA,
     EVENT_DATE_INVALID,
     EVENT_DELETION_NOT_ALLOWED,
+    EVENT_DETAIL_QUERY_EXAMPLE,
+    EVENT_GET_NOT_FOUND,
+    EVENT_LIST_QUERY_EXAMPLE,
     EVENT_METADATA_DATE_INVALID,
     EVENT_METADATA_NOT_FOUND,
     EVENT_NOT_FOUND,
@@ -61,6 +67,8 @@ from app.controller.schemas.event_schema import (
     EventBannerUploadResponse,
     EventCreateRequest,
     EventDeletedResponse,
+    EventDetailResponse,
+    EventListResponse,
     EventMetadataUpdatedResponse,
     EventRecordResponse,
     EventSessionDeletedResponse,
@@ -77,6 +85,7 @@ from app.controller.schemas.event_schema import (
 from app.domain.entities.audit_log import ActionType, AuditLogStatus
 from app.domain.entities.event_entity import Event as EventEntity
 from app.domain.entities.event_entity import EventSession as EventSessionEntity
+from app.domain.entities.event_entity import EventStatus
 from app.domain.exceptions.event_exceptions import (
     EventDateValidationError,
     EventDeletionNotAllowedError,
@@ -127,6 +136,98 @@ def _to_session_response(session: EventSessionEntity) -> EventSessionRecordRespo
         max_slots=session.max_slots,
         created_at=session.created_at,
         updated_at=session.updated_at,
+    )
+
+
+@event_router.get(
+    "",
+    response_model=EventListResponse,
+    status_code=status.HTTP_200_OK,
+    responses={**UNAUTHORIZED, **EVENT_LIST_QUERY_EXAMPLE},
+    summary="List all events",
+    description=(
+        "Returns a paginated list of events ordered by creation date descending. "
+        "Optionally filter by event status. "
+        "Page size is capped at 100 regardless of the supplied value."
+    ),
+)
+async def get_all_events(
+    request: Request,
+    event_status: EventStatus | None = Query(default=None, alias="status", description="Filter by event status"),
+    page: int = Query(default=1, ge=1, description="Page number (1-based)"),
+    page_size: int = Query(default=20, ge=1, le=100, description="Items per page (max 100)"),
+    user_id: uuid.UUID = Depends(get_current_user_id),
+    use_case: GetEventUseCase = Depends(get_event_query_use_case),
+    audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
+) -> EventListResponse:
+    """Return a paginated list of all events with optional status filtering."""
+    result = await use_case.get_all_events(
+        GetAllEventsInput(page=page, page_size=page_size, status=event_status)
+    )
+
+    await safe_audit_log(
+        audit_use_case,
+        request,
+        user_id=user_id,
+        action_type=ActionType.READ,
+        resource_type="events",
+        resource_id=None,
+        status=AuditLogStatus.SUCCESS,
+        additional_context={
+            "filter_status": event_status.value if event_status else None,
+            "page": page,
+            "page_size": result.page_size,
+            "total": result.total,
+        },
+    )
+
+    return EventListResponse(
+        data=[_to_event_response(e) for e in result.events],
+        total=result.total,
+        page=result.page,
+        page_size=result.page_size,
+        total_pages=result.total_pages,
+    )
+
+
+@event_router.get(
+    "/{event_id}",
+    response_model=EventDetailResponse,
+    status_code=status.HTTP_200_OK,
+    responses={**UNAUTHORIZED, **EVENT_GET_NOT_FOUND, **EVENT_DETAIL_QUERY_EXAMPLE},
+    summary="Get an event with all its sessions",
+    description=(
+        "Returns a single event together with all its sessions ordered by start time. "
+        "Authentication is required."
+    ),
+)
+async def get_event_with_sessions(
+    request: Request,
+    event_id: uuid.UUID,
+    user_id: uuid.UUID = Depends(get_current_user_id),
+    use_case: GetEventUseCase = Depends(get_event_query_use_case),
+    audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
+) -> EventDetailResponse:
+    """Return a single event and its ordered sessions list."""
+    try:
+        result = await use_case.get_event_with_sessions(GetEventWithSessionsInput(event_id=event_id))
+    except EventNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+
+    await safe_audit_log(
+        audit_use_case,
+        request,
+        user_id=user_id,
+        action_type=ActionType.READ,
+        resource_type="events",
+        resource_id=str(result.event.id),
+        status=AuditLogStatus.SUCCESS,
+        additional_context={"session_count": len(result.sessions)},
+    )
+
+    return EventDetailResponse(
+        data=_to_event_response(result.event),
+        sessions=[_to_session_response(s) for s in result.sessions],
     )
 
 

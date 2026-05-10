@@ -1,4 +1,5 @@
 from app.controller.schemas.auth_schema import ErrorResponse, ValidationErrorResponse
+from app.controller.schemas.event_schema import EventDetailResponse, EventListResponse
 
 EVENT_CREATE_OPENAPI_EXTRA = {
     "requestBody": {
@@ -293,5 +294,40 @@ EVENT_SESSION_DELETION_NOT_ALLOWED = {
                 }
             }
         },
+    }
+}
+
+EVENT_LIST_QUERY_EXAMPLE = {
+    200: {
+        "description": "Paginated list of events",
+        "model": EventListResponse,
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": True,
+                    "message": "Events retrieved successfully.",
+                    "data": [],
+                    "total": 0,
+                    "page": 1,
+                    "page_size": 20,
+                    "total_pages": 0,
+                }
+            }
+        },
+    }
+}
+
+EVENT_DETAIL_QUERY_EXAMPLE = {
+    200: {
+        "description": "Event with all its sessions",
+        "model": EventDetailResponse,
+    }
+}
+
+EVENT_GET_NOT_FOUND = {
+    404: {
+        "description": "Event not found",
+        "model": ErrorResponse,
+        "content": {"application/json": {"example": {"success": False, "message": "Event not found"}}},
     }
 }

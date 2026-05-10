@@ -7,6 +7,7 @@ from app.application.use_cases.audit_log_usecase import AuditLogUseCase
 from app.application.use_cases.auth_usecase import AuthUseCase
 from app.application.use_cases.event_deletion_usecase import EventDeletionUseCase
 from app.application.use_cases.event_participant_usecase import EventParticipantUseCase
+from app.application.use_cases.event_query_usecase import GetEventUseCase
 from app.application.use_cases.event_status_usecase import EventStatusUseCase
 from app.application.use_cases.event_usecase import EventUseCase
 from app.application.use_cases.feature_usecase import FeatureManagementUseCase
@@ -147,6 +148,11 @@ def get_event_status_use_case(db: AsyncSession = Depends(get_db)) -> EventStatus
 def get_event_participant_use_case(db: AsyncSession = Depends(get_db)) -> EventParticipantUseCase:
     """Construct an ``EventParticipantUseCase`` for the current request."""
     return EventParticipantUseCase(EventParticipantRepository(db), EventRepository(db), RoleRepository(db), db)
+
+
+def get_event_query_use_case(db: AsyncSession = Depends(get_db)) -> GetEventUseCase:
+    """Construct a ``GetEventUseCase`` for read-only event queries."""
+    return GetEventUseCase(EventRepository(db))
 
 
 def get_event_deletion_use_case(db: AsyncSession = Depends(get_db)) -> EventDeletionUseCase:

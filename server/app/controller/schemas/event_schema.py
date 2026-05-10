@@ -164,3 +164,20 @@ class EventBannerUploadResponse(BaseModel):
     message: str = "Banner upload URL generated. Use upload_url to PUT your image directly to storage."
     data: EventRecordResponse
     upload: EventBannerUploadData
+
+
+class EventListResponse(BaseModel):
+    success: bool = True
+    message: str = "Events retrieved successfully."
+    data: list[EventRecordResponse]
+    total: int
+    page: int
+    page_size: int
+    total_pages: int
+
+
+class EventDetailResponse(BaseModel):
+    success: bool = True
+    message: str = "Event retrieved successfully."
+    data: EventRecordResponse
+    sessions: list[EventSessionRecordResponse]

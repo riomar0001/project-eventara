@@ -845,6 +845,59 @@ export type EventDeletedResponse = {
 };
 
 /**
+ * EventDetailResponse
+ */
+export type EventDetailResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Message
+     */
+    message?: string;
+    data: EventRecordResponse;
+    /**
+     * Sessions
+     */
+    sessions: Array<EventSessionRecordResponse>;
+};
+
+/**
+ * EventListResponse
+ */
+export type EventListResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Message
+     */
+    message?: string;
+    /**
+     * Data
+     */
+    data: Array<EventRecordResponse>;
+    /**
+     * Total
+     */
+    total: number;
+    /**
+     * Page
+     */
+    page: number;
+    /**
+     * Page Size
+     */
+    page_size: number;
+    /**
+     * Total Pages
+     */
+    total_pages: number;
+};
+
+/**
  * EventMetadataUpdatedResponse
  */
 export type EventMetadataUpdatedResponse = {
@@ -5852,6 +5905,54 @@ export type UpdateMyVenueRatingVenuesVenueIdRatingsMePatchResponses = {
 
 export type UpdateMyVenueRatingVenuesVenueIdRatingsMePatchResponse = UpdateMyVenueRatingVenuesVenueIdRatingsMePatchResponses[keyof UpdateMyVenueRatingVenuesVenueIdRatingsMePatchResponses];
 
+export type GetAllEventsEventsGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Status
+         *
+         * Filter by event status
+         */
+        status?: EventStatus | null;
+        /**
+         * Page
+         *
+         * Page number (1-based)
+         */
+        page?: number;
+        /**
+         * Page Size
+         *
+         * Items per page (max 100)
+         */
+        page_size?: number;
+    };
+    url: '/events';
+};
+
+export type GetAllEventsEventsGetErrors = {
+    /**
+     * Missing or invalid Bearer token
+     */
+    401: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetAllEventsEventsGetError = GetAllEventsEventsGetErrors[keyof GetAllEventsEventsGetErrors];
+
+export type GetAllEventsEventsGetResponses = {
+    /**
+     * Paginated list of events
+     */
+    200: EventListResponse;
+};
+
+export type GetAllEventsEventsGetResponse = GetAllEventsEventsGetResponses[keyof GetAllEventsEventsGetResponses];
+
 export type CreateEventEventsPostData = {
     body: EventCreateRequest;
     path?: never;
@@ -5934,6 +6035,44 @@ export type DeleteEventEventsEventIdDeleteResponses = {
 };
 
 export type DeleteEventEventsEventIdDeleteResponse = DeleteEventEventsEventIdDeleteResponses[keyof DeleteEventEventsEventIdDeleteResponses];
+
+export type GetEventWithSessionsEventsEventIdGetData = {
+    body?: never;
+    path: {
+        /**
+         * Event Id
+         */
+        event_id: string;
+    };
+    query?: never;
+    url: '/events/{event_id}';
+};
+
+export type GetEventWithSessionsEventsEventIdGetErrors = {
+    /**
+     * Missing or invalid Bearer token
+     */
+    401: ErrorResponse;
+    /**
+     * Event not found
+     */
+    404: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetEventWithSessionsEventsEventIdGetError = GetEventWithSessionsEventsEventIdGetErrors[keyof GetEventWithSessionsEventsEventIdGetErrors];
+
+export type GetEventWithSessionsEventsEventIdGetResponses = {
+    /**
+     * Event with all its sessions
+     */
+    200: EventDetailResponse;
+};
+
+export type GetEventWithSessionsEventsEventIdGetResponse = GetEventWithSessionsEventsEventIdGetResponses[keyof GetEventWithSessionsEventsEventIdGetResponses];
 
 export type UpdateEventMetadataEventsEventIdPatchData = {
     body: EventUpdateRequest;
