@@ -10,7 +10,7 @@ from app.application.use_cases.event_participant_usecase import EventParticipant
 from app.application.use_cases.event_status_usecase import EventStatusUseCase
 from app.application.use_cases.event_usecase import EventUseCase
 from app.application.use_cases.feature_usecase import FeatureManagementUseCase
-from app.application.use_cases.profile_usecase import CheckAliasUseCase, GetLoginHistoryUseCase, OnboardingUseCase, UpdateProfileUseCase
+from app.application.use_cases.profile_usecase import CheckAliasUseCase, GetLoginHistoryUseCase, OnboardingUseCase, UpdateProfileAvatarUseCase, UpdateProfileUseCase
 from app.application.use_cases.queue_usecase import QueueUseCase
 from app.application.use_cases.role_usecase import RoleManagementUseCase, UserRoleUseCase
 from app.application.use_cases.users_usecase import AdminUserAccountUseCase
@@ -61,6 +61,11 @@ def get_onboarding_use_case(db: AsyncSession = Depends(get_db)) -> OnboardingUse
 def get_update_profile_use_case(db: AsyncSession = Depends(get_db)) -> UpdateProfileUseCase:
     """Construct an ``UpdateProfileUseCase`` for the current request."""
     return UpdateProfileUseCase(UserRepository(db), db)
+
+
+def get_update_profile_avatar_use_case(db: AsyncSession = Depends(get_db)) -> UpdateProfileAvatarUseCase:
+    """Construct an ``UpdateProfileAvatarUseCase`` for the current request."""
+    return UpdateProfileAvatarUseCase(UserRepository(db), db)
 
 
 def get_change_password_use_case(db: AsyncSession = Depends(get_db)) -> AccountSettingsUseCase:

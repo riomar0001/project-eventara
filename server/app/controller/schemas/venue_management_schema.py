@@ -10,6 +10,7 @@ from app.domain.entities.venue_entities import VenueType
 class _VenueBaseRequest(BaseModel):
     name: str = Field(min_length=1, max_length=255)
     description: str | None = Field(default=None)
+    image_url: str | None = Field(default=None, max_length=512)
     address_line: str = Field(min_length=1, max_length=255)
     city: str = Field(min_length=1, max_length=100)
     province: str = Field(min_length=1, max_length=100)
@@ -55,6 +56,7 @@ class VenueCreateRequest(_VenueBaseRequest):
 class VenueUpdateRequest(BaseModel):
     name: str = Field(min_length=1, max_length=255)
     description: str | None = Field(default=None)
+    image_url: str | None = Field(default=None, max_length=512)
     address_line: str = Field(min_length=1, max_length=255)
     city: str = Field(min_length=1, max_length=100)
     province: str = Field(min_length=1, max_length=100)
@@ -80,6 +82,7 @@ class VenueUpdateRequest(BaseModel):
 class VenueRecordResponse(BaseModel):
     id: uuid.UUID
     creator_id: uuid.UUID
+    image_url: str | None = None
     name: str
     description: str | None
     address_line: str
@@ -126,6 +129,7 @@ class VenueListResponse(BaseModel):
 
 class PublicVenueRecordResponse(BaseModel):
     id: uuid.UUID
+    image_url: str | None = None
     name: str
     description: str | None
     address_line: str
@@ -155,3 +159,21 @@ class PublicVenueListResponse(BaseModel):
     success: bool = True
     data: list[PublicVenueRecordResponse]
     pagination: VenuePaginationResponse
+
+
+class VenueImageUploadRequest(BaseModel):
+    content_type: str = Field(min_length=1, max_length=100)
+
+
+class VenueImageUploadData(BaseModel):
+    upload_url: str
+    object_key: str
+    public_url: str
+    expires_in: int
+
+
+class VenueImageUploadResponse(BaseModel):
+    success: bool = True
+    message: str = "Venue image upload URL generated. Use upload_url to PUT your image directly to storage."
+    data: VenueRecordResponse
+    upload: VenueImageUploadData

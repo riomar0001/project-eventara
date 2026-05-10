@@ -128,6 +128,11 @@ export function useProfileSettingsForm() {
     toast.success('Profile form reset.');
   }
 
+  function handleProfilePictureChange(publicUrl: string) {
+    updateUser({ imageFileId: publicUrl });
+    toast.success('Profile picture updated.');
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -215,6 +220,7 @@ export function useProfileSettingsForm() {
     form,
     handleReset,
     handleSubmit,
+    handleProfilePictureChange,
     isOnboarded: Boolean(user?.doneOnboarding),
     isSubmitting,
     setField,

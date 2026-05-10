@@ -1,12 +1,14 @@
 'use client';
 
-import { Building2, CalendarRange, CalendarSync, Globe, Mail, MapPin, PencilLine, Phone, Trash2, User, Users } from 'lucide-react';
+import { Building2, CalendarRange, CalendarSync, Globe, Mail, MapPin, PencilLine, Phone, User, Users } from 'lucide-react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { BackLink, DetailPanel, PhotoPanel } from './venues-shared';
+import { BackLink, PhotoPanel } from './venues-shared';
+import { DeleteVenueButton } from './venue-delete-button';
 import { useVenue } from '@/hooks/admin/venues/use-venue';
 import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
+import { resolveStorageImageUrl } from '@/lib/storage/image-url';
 
 const VENUE_PHOTO: Record<string, string> = {
   indoor: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=1400&q=80',
@@ -14,13 +16,24 @@ const VENUE_PHOTO: Record<string, string> = {
   hybrid: 'https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?auto=format&fit=crop&w=1400&q=80'
 };
 
-function InfoRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+function CompactPanel({ children, className, title }: { children: React.ReactNode; className?: string; title: string }) {
   return (
-    <div className="flex items-start gap-3 border-b border-neutral-100 py-3 last:border-0">
+    <section className={`rounded-2xl border border-neutral-200 bg-white shadow-[0_18px_55px_-42px_rgba(15,23,42,0.35)] ${className ?? ''}`}>
+      <div className="flex min-h-12 items-center border-b border-neutral-100 px-4">
+        <h2 className="text-sm font-semibold tracking-tight text-neutral-950">{title}</h2>
+      </div>
+      <div className="p-4">{children}</div>
+    </section>
+  );
+}
+
+function CompactField({ className, icon, label, value }: { className?: string; icon: React.ReactNode; label: string; value: string }) {
+  return (
+    <div className={`flex min-h-14 items-start gap-2.5 rounded-xl bg-neutral-50/70 px-3 py-2.5 ${className ?? ''}`}>
       <span className="mt-0.5 shrink-0 text-neutral-400">{icon}</span>
       <div className="min-w-0">
-        <p className="text-[11px] font-semibold tracking-[0.14em] text-neutral-400 uppercase">{label}</p>
-        <p className="mt-0.5 text-sm font-medium break-words text-neutral-900">{value}</p>
+        <p className="text-[10px] font-semibold tracking-[0.14em] text-neutral-400 uppercase">{label}</p>
+        <p className="mt-0.5 text-sm leading-5 font-medium break-words text-neutral-900">{value}</p>
       </div>
     </div>
   );
@@ -61,7 +74,7 @@ export function VenueDetail({ venueId }: { venueId: string }) {
     );
   }
 
-  const photo = VENUE_PHOTO[venue.venue_type] ?? VENUE_PHOTO.indoor;
+  const photo = resolveStorageImageUrl(venue.image_url) || VENUE_PHOTO[venue.venue_type] || VENUE_PHOTO.indoor;
   const fullAddress = [venue.address_line, venue.city, venue.province, venue.postal_code, venue.region, venue.country].filter(Boolean).join(', ');
   const hasContact = venue.contact_name || venue.contact_email || venue.contact_phone;
 
@@ -76,10 +89,7 @@ export function VenueDetail({ venueId }: { venueId: string }) {
             Edit venue
           </Link>
         </Button>
-        <Button variant="destructive" size="sm">
-          <Trash2 className="size-4" />
-          Delete venue
-        </Button>
+        <DeleteVenueButton venueId={venue.id} venueName={venue.name} />
       </div>
 
       {/* ── Hero photo panel ─────────────────────────────────────────────────── */}
@@ -111,33 +121,32 @@ export function VenueDetail({ venueId }: { venueId: string }) {
         <StatCell label="Usage count" value={venue.usage_count.toLocaleString()} />
       </div>
 
-      {/* ── Row 1: Location + Contact ────────────────────────────────────────── */}
-      <div className={`grid gap-6 ${hasContact ? 'xl:grid-cols-[1.1fr_0.9fr]' : ''}`}>
-        <DetailPanel title="Location" description="Full registered address for this venue.">
-          <div className="divide-y divide-neutral-100">
-            <InfoRow icon={<MapPin className="size-4" />} label="Address line" value={venue.address_line} />
-            <InfoRow icon={<Building2 className="size-4" />} label="City" value={venue.city} />
-            <InfoRow icon={<MapPin className="size-4" />} label="Province" value={venue.province} />
-            <InfoRow icon={<MapPin className="size-4" />} label="Region" value={venue.region} />
-            <InfoRow icon={<MapPin className="size-4" />} label="Postal code" value={venue.postal_code} />
-            <InfoRow icon={<Globe className="size-4" />} label="Country" value={venue.country} />
+      <div className="grid gap-4 xl:grid-cols-12">
+        <CompactPanel title="Location" className={hasContact ? 'xl:col-span-7' : 'xl:col-span-12'}>
+          <div className="rounded-xl bg-amber-50/80 px-3 py-2.5">
+            <p className="text-[10px] font-semibold tracking-[0.16em] text-amber-700 uppercase">Full address</p>
+            <p className="mt-1 text-sm leading-5 font-medium text-neutral-900">{fullAddress}</p>
           </div>
-          <div className="mt-4 rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3">
-            <p className="mb-1 text-[11px] font-semibold tracking-[0.14em] text-neutral-400 uppercase">Full address</p>
-            <p className="text-sm leading-6 text-neutral-700">{fullAddress}</p>
+          <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            <CompactField className="sm:col-span-2 lg:col-span-3" icon={<MapPin className="size-4" />} label="Address line" value={venue.address_line} />
+            <CompactField icon={<Building2 className="size-4" />} label="City" value={venue.city} />
+            <CompactField icon={<MapPin className="size-4" />} label="Province" value={venue.province} />
+            <CompactField icon={<MapPin className="size-4" />} label="Region" value={venue.region} />
+            <CompactField icon={<MapPin className="size-4" />} label="Postal code" value={venue.postal_code} />
+            <CompactField icon={<Globe className="size-4" />} label="Country" value={venue.country} />
           </div>
-        </DetailPanel>
+        </CompactPanel>
 
         {hasContact && (
-          <DetailPanel title="Lead contact" description="Primary point of contact for this venue.">
-            <div className="divide-y divide-neutral-100">
-              {venue.contact_name && <InfoRow icon={<User className="size-4" />} label="Name" value={venue.contact_name} />}
-              {venue.contact_email && <InfoRow icon={<Mail className="size-4" />} label="Email" value={venue.contact_email} />}
-              {venue.contact_phone && <InfoRow icon={<Phone className="size-4" />} label="Phone" value={venue.contact_phone} />}
+          <CompactPanel title="Lead contact" className="xl:col-span-5">
+            <div className="grid gap-2">
+              {venue.contact_name && <CompactField icon={<User className="size-4" />} label="Name" value={venue.contact_name} />}
+              {venue.contact_email && <CompactField icon={<Mail className="size-4" />} label="Email" value={venue.contact_email} />}
+              {venue.contact_phone && <CompactField icon={<Phone className="size-4" />} label="Phone" value={venue.contact_phone} />}
             </div>
-            <div className="mt-4 flex flex-wrap gap-2">
+            <div className="mt-3 flex flex-wrap gap-2">
               {venue.contact_email && (
-                <Button asChild variant="outline" size="sm">
+                <Button asChild variant="outline" size="xs">
                   <a href={`mailto:${venue.contact_email}`}>
                     <Mail className="size-4" />
                     Send email
@@ -145,7 +154,7 @@ export function VenueDetail({ venueId }: { venueId: string }) {
                 </Button>
               )}
               {venue.contact_phone && (
-                <Button asChild variant="outline" size="sm">
+                <Button asChild variant="outline" size="xs">
                   <a href={`tel:${venue.contact_phone}`}>
                     <Phone className="size-4" />
                     Call
@@ -153,17 +162,14 @@ export function VenueDetail({ venueId }: { venueId: string }) {
                 </Button>
               )}
             </div>
-          </DetailPanel>
+          </CompactPanel>
         )}
-      </div>
 
-      {/* ── Row 2: Amenities + Metadata ──────────────────────────────────────── */}
-      <div className="grid gap-6 xl:grid-cols-2">
-        <DetailPanel title="Amenities" description="Features and facilities available at this venue.">
+        <CompactPanel title="Amenities" className="xl:col-span-4">
           {venue.amenities && venue.amenities.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5">
               {venue.amenities.map((amenity) => (
-                <Badge key={amenity} variant="outline" className="rounded-full px-3 py-1 text-xs font-medium">
+                <Badge key={amenity} variant="secondary" className="h-6 rounded-full bg-neutral-100 px-2.5 text-[11px] font-medium text-neutral-700">
                   {amenity}
                 </Badge>
               ))}
@@ -171,31 +177,36 @@ export function VenueDetail({ venueId }: { venueId: string }) {
           ) : (
             <p className="text-sm text-neutral-400">No amenities listed for this venue.</p>
           )}
-        </DetailPanel>
+        </CompactPanel>
 
-        <DetailPanel title="Venue metadata" description="System-tracked counts and flags.">
-          <div className="divide-y divide-neutral-100">
-            <InfoRow icon={<Users className="size-4" />} label="Capacity" value={`${venue.capacity.toLocaleString()} guests`} />
-            <InfoRow icon={<Building2 className="size-4" />} label="Venue type" value={venue.venue_type.charAt(0).toUpperCase() + venue.venue_type.slice(1)} />
-            <InfoRow icon={<CalendarSync className="size-4" />} label="Usage count" value={`${venue.usage_count} times booked`} />
-            <InfoRow icon={<Users className="size-4" />} label="Popularity" value={`${venue.popularity_count} interactions`} />
-            <InfoRow icon={<Building2 className="size-4" />} label="Partner status" value={venue.is_partner ? 'Eventara partner venue' : 'Community suggestion'} />
+        <CompactPanel title="Venue metadata" className="xl:col-span-8">
+          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+            <CompactField icon={<Users className="size-4" />} label="Capacity" value={`${venue.capacity.toLocaleString()} guests`} />
+            <CompactField icon={<Building2 className="size-4" />} label="Venue type" value={venue.venue_type.charAt(0).toUpperCase() + venue.venue_type.slice(1)} />
+            <CompactField icon={<CalendarSync className="size-4" />} label="Usage" value={`${venue.usage_count} bookings`} />
+            <CompactField icon={<Users className="size-4" />} label="Popularity" value={`${venue.popularity_count} interactions`} />
+            <CompactField
+              className="lg:col-span-2"
+              icon={<Building2 className="size-4" />}
+              label="Partner status"
+              value={venue.is_partner ? 'Eventara partner venue' : 'Community suggestion'}
+            />
             {venue.created_at && (
-              <InfoRow
+              <CompactField
                 icon={<CalendarRange className="size-4" />}
                 label="Created"
                 value={new Date(venue.created_at).toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' })}
               />
             )}
             {venue.updated_at && (
-              <InfoRow
+              <CompactField
                 icon={<CalendarRange className="size-4" />}
                 label="Last updated"
                 value={new Date(venue.updated_at).toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' })}
               />
             )}
           </div>
-        </DetailPanel>
+        </CompactPanel>
       </div>
     </div>
   );

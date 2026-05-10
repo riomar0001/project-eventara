@@ -4,17 +4,30 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application.dto.account_settings_dto import ChangePasswordInput, RequestAccountDeletionInput
-from app.application.dto.profile_dto import GetLoginHistoryInput, UpdateProfileInput, UserOnboardingInput
+from app.application.dto.profile_dto import (
+    GetLoginHistoryInput,
+    UpdateProfileAvatarInput,
+    UpdateProfileInput,
+    UserOnboardingInput,
+)
 from app.application.use_cases.account_settings_usecase import AccountSettingsUseCase
 from app.application.use_cases.audit_log_usecase import AuditLogUseCase
-from app.application.use_cases.profile_usecase import CheckAliasUseCase, GetLoginHistoryUseCase, OnboardingUseCase, UpdateProfileUseCase
+from app.application.use_cases.profile_usecase import (
+    CheckAliasUseCase,
+    GetLoginHistoryUseCase,
+    OnboardingUseCase,
+    UpdateProfileAvatarUseCase,
+    UpdateProfileUseCase,
+)
 from app.controller.api.audit_helpers import safe_audit_log, serialize_profile
 from app.controller.dependencies import get_audit_log_use_case, get_current_user_id, get_onboarding_use_case, get_update_profile_use_case
+from app.controller.dependencies.storage_depends import get_storage_service
 from app.controller.dependencies.use_cases_depends import (
     get_change_password_use_case,
     get_check_alias_use_case,
     get_delete_account_use_case,
     get_login_history_use_case,
+    get_update_profile_avatar_use_case,
 )
 from app.controller.docs.user_docs import (
     ACCOUNT_DELETION_CONFLICT,
@@ -27,6 +40,8 @@ from app.controller.docs.user_docs import (
     INVALID_CURRENT_PASSWORD,
     ONBOARDING_CONFLICT,
     ONBOARDING_VALIDATION_ERROR,
+    PROFILE_AVATAR_UPLOAD_OPENAPI_EXTRA,
+    PROFILE_AVATAR_STORAGE_UNAVAILABLE,
     PROFILE_NOT_FOUND,
     SAME_PASSWORD_ERROR,
     UNAUTHORIZED,
@@ -44,6 +59,10 @@ from app.controller.schemas.user_schema import (
     DeleteAccountResponse,
     LoginHistoryEntryResponse,
     LoginHistoryListResponse,
+    ProfileAvatarData,
+    ProfileAvatarUploadData,
+    ProfileAvatarUploadRequest,
+    ProfileAvatarUploadResponse,
     UpdateProfileRequest,
     UpdateProfileResponse,
     UserOnboardingRequest,
@@ -67,6 +86,7 @@ from app.domain.exceptions.user_exceptions import (
 from app.infrastructure.database.repositories.rbac_repository import RBACRepository
 from app.infrastructure.database.repositories.user_repository import UserRepository
 from app.infrastructure.database.session import get_db
+from app.infrastructure.storage.storage_service import StorageService
 
 router = APIRouter(prefix="/user", tags=["Profile"])
 account_settings_router = APIRouter(prefix="/user", tags=["Account Settings"])
@@ -162,6 +182,81 @@ async def update_profile(
         occupation=p.occupation,
         bio=p.bio,
         access_token=new_token,
+    )
+
+
+@account_settings_router.patch(
+    "/profile/avatar",
+    response_model=ProfileAvatarUploadResponse,
+    status_code=status.HTTP_200_OK,
+    responses={
+        **UNAUTHORIZED,
+        **PROFILE_NOT_FOUND,
+        **UPDATE_PROFILE_FORBIDDEN,
+        **PROFILE_AVATAR_STORAGE_UNAVAILABLE,
+    },
+    summary="Upload profile avatar",
+    description=(
+        "Generate a presigned upload URL for the authenticated user's profile avatar. "
+        "PUT the image binary directly to ``upload_url`` within the expiry window (3600 s). "
+        "Allowed content types: ``image/jpeg``, ``image/png``, ``image/webp``, ``image/gif``."
+    ),
+    openapi_extra=PROFILE_AVATAR_UPLOAD_OPENAPI_EXTRA,
+)
+async def upload_profile_avatar(
+    request: Request,
+    body: ProfileAvatarUploadRequest,
+    user_id: uuid.UUID = Depends(get_current_user_id),
+    use_case: UpdateProfileAvatarUseCase = Depends(get_update_profile_avatar_use_case),
+    audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
+    storage: StorageService = Depends(get_storage_service),
+) -> ProfileAvatarUploadResponse:
+    """Generate a presigned avatar upload URL and persist the resulting object key on the user profile."""
+    try:
+        upload_url, object_key, public_url, expires_in = storage.generate_presigned_upload(
+            resource_type="user-profile",
+            content_type=body.content_type,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))
+    except RuntimeError as exc:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc))
+
+    try:
+        result = await use_case.update_avatar(
+            UpdateProfileAvatarInput(
+                user_id=user_id,
+                image_url=object_key,
+            )
+        )
+    except UserNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except UserInactiveError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
+    except ProfileNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+
+    await safe_audit_log(
+        audit_use_case,
+        request,
+        user_id=user_id,
+        action_type=ActionType.UPDATE,
+        resource_type="profile",
+        resource_id=str(user_id),
+        status=AuditLogStatus.SUCCESS,
+        old_values={"image_file_id": result.old_image_url},
+        new_values={"image_file_id": object_key},
+        additional_context={"public_url": public_url},
+    )
+
+    return ProfileAvatarUploadResponse(
+        data=ProfileAvatarData(user_id=user_id, image_file_id=object_key),
+        upload=ProfileAvatarUploadData(
+            upload_url=upload_url,
+            object_key=object_key,
+            public_url=public_url,
+            expires_in=expires_in,
+        ),
     )
 
 

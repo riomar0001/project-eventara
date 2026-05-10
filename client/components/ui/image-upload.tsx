@@ -1,31 +1,41 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ImageIcon, Loader2, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { type UploadResourceType, useUpload } from '@/hooks/use-upload';
-
-const STORAGE_PUBLIC_URL = (process.env.NEXT_PUBLIC_STORAGE_PUBLIC_URL ?? '').replace(/\/$/, '');
-
-function buildPublicUrl(objectKey: string): string {
-  return `${STORAGE_PUBLIC_URL}/${objectKey}`;
-}
+import { resolveStorageImageUrl } from '@/lib/storage/image-url';
 
 interface ImageUploadProps {
   value?: string | null;
-  onChange: (objectKey: string) => void;
+  onChange: (publicUrl: string) => void;
   resourceType: UploadResourceType;
+  resourceId?: string;
+  deferUpload?: boolean;
+  onFileSelected?: (file: File | null) => void;
   className?: string;
   disabled?: boolean;
 }
 
-export function ImageUpload({ value, onChange, resourceType, className, disabled }: ImageUploadProps) {
+export function ImageUpload({ value, onChange, resourceType, resourceId, deferUpload, onFileSelected, className, disabled }: ImageUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const { upload, isUploading } = useUpload();
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const displayUrl = previewUrl ?? (value ? buildPublicUrl(value) : null);
+  const displayUrl = previewUrl ?? resolveStorageImageUrl(value) ?? null;
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl?.startsWith('blob:')) URL.revokeObjectURL(previewUrl);
+    };
+  }, [previewUrl]);
+
+  function getUploadContext() {
+    if (resourceType === 'event-cover-banner') return { eventId: resourceId };
+    if (resourceType === 'venue-image') return { venueId: resourceId };
+    return undefined;
+  }
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -34,9 +44,18 @@ export function ImageUpload({ value, onChange, resourceType, className, disabled
 
     setError(null);
     try {
-      const result = await upload(file, resourceType);
+      if (deferUpload) {
+        const nextPreviewUrl = URL.createObjectURL(file);
+        setPreviewUrl(nextPreviewUrl);
+        onChange(nextPreviewUrl);
+        onFileSelected?.(file);
+        return;
+      }
+
+      const result = await upload(file, resourceType, getUploadContext());
       setPreviewUrl(result.publicUrl);
-      onChange(result.objectKey);
+      onFileSelected?.(null);
+      onChange(result.publicUrl);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Upload failed.');
     }
@@ -44,12 +63,19 @@ export function ImageUpload({ value, onChange, resourceType, className, disabled
 
   return (
     <div className={className}>
-      <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" className="hidden" onChange={handleFileChange} disabled={disabled || isUploading} />
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp,image/gif"
+        className="hidden"
+        onChange={handleFileChange}
+        disabled={disabled || isUploading}
+      />
 
       {displayUrl ? (
-        <div className="relative overflow-hidden rounded-lg">
+        <div className="relative aspect-square size-40 overflow-hidden rounded-lg">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={displayUrl} alt="Preview" className="h-40 w-full object-cover" />
+          <img src={displayUrl} alt="Preview" className="size-full object-cover" />
           {!disabled && (
             <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/40 opacity-0 transition-opacity hover:opacity-100">
               <Button size="sm" variant="secondary" type="button" onClick={() => inputRef.current?.click()} disabled={isUploading}>
@@ -64,7 +90,7 @@ export function ImageUpload({ value, onChange, resourceType, className, disabled
           type="button"
           onClick={() => inputRef.current?.click()}
           disabled={disabled || isUploading}
-          className="flex h-40 w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-neutral-200 bg-neutral-50 transition-colors hover:border-neutral-400 hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex aspect-square size-40 flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-neutral-200 bg-neutral-50 transition-colors hover:border-neutral-400 hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isUploading ? (
             <>

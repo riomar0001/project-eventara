@@ -6,14 +6,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { VolunteersTableToolbar } from './table/table-toolbar';
 import { VolunteersTableContent } from './table/volunteers-table';
 import { OperationsPageIntro } from './volunteers-shared';
-import { ADMIN_OPERATIONS_PATHS, volunteerRecords } from '@/constants/admin/operations';
+import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
+import type { VolunteerTableRecord } from './table/table-columns';
 
 export function VolunteersPage() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'Active' | 'Training' | 'Inactive'>('all');
   const [availabilityFilter, setAvailabilityFilter] = useState<'all' | 'Flexible' | 'Weekends' | 'Weeknights'>('all');
+  const volunteers: VolunteerTableRecord[] = [];
 
-  const filteredVolunteers = volunteerRecords.filter((volunteer) => {
+  const filteredVolunteers = volunteers.filter((volunteer) => {
     const matchesSearch =
       search.length === 0 ||
       volunteer.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -36,18 +38,18 @@ export function VolunteersPage() {
         metrics={[
           {
             label: 'Roster size',
-            value: volunteerRecords.length,
-            hint: 'Volunteers currently represented in the mock roster.'
+            value: volunteers.length,
+            hint: 'Volunteers will appear here once the volunteers read endpoint is available.'
           },
           {
             label: 'Active crew',
-            value: volunteerRecords.filter((volunteer) => volunteer.status === 'Active').length,
-            hint: 'Volunteers currently shown as ready for assignment.'
+            value: volunteers.filter((volunteer) => volunteer.status === 'Active').length,
+            hint: 'Volunteers currently ready for assignment.'
           },
           {
             label: 'Tracked hours',
-            value: volunteerRecords.reduce((sum, volunteer) => sum + volunteer.hoursContributed, 0),
-            hint: 'Combined contribution hours across the current volunteer preview.'
+            value: volunteers.reduce((sum, volunteer) => sum + volunteer.hoursContributed, 0),
+            hint: 'Combined contribution hours across the current volunteer roster.'
           }
         ]}
         actions={

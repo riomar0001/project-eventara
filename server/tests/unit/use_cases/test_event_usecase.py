@@ -1,5 +1,3 @@
-"""Unit tests for CreateEventUseCase, UpdateEventMetadataUseCase, and UpdateEventSessionUseCase."""
-
 import uuid
 from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
@@ -74,11 +72,6 @@ def _sample_session(**overrides) -> EventSession:
     return EventSession(**defaults)
 
 
-# ---------------------------------------------------------------------------
-# CreateEventUseCase
-# ---------------------------------------------------------------------------
-
-
 def _make_create_repo():
     repo = MagicMock(spec=EventRepository)
     repo.venue_exists = AsyncMock(return_value=True)
@@ -101,6 +94,7 @@ def _create_input(**overrides):
         start_date=EVENT_START,
         end_date=EVENT_END,
         created_by=CREATOR_ID,
+        banner_url="https://cdn.example.com/banner.jpg",
         sessions=sessions,
     )
     defaults.update(overrides)
@@ -189,6 +183,7 @@ async def test_create_calls_create_event_with_correct_args():
         start_date=EVENT_START,
         end_date=EVENT_END,
         created_by=CREATOR_ID,
+        banner_url="https://cdn.example.com/banner.jpg",
     )
 
 
@@ -235,11 +230,6 @@ async def test_create_does_not_commit_on_venue_not_found():
     db.commit.assert_not_called()
 
 
-# ---------------------------------------------------------------------------
-# UpdateEventMetadataUseCase
-# ---------------------------------------------------------------------------
-
-
 def _make_meta_repo():
     repo = MagicMock(spec=EventRepository)
     repo.get_event_by_id = AsyncMock(return_value=_sample_event())
@@ -261,6 +251,7 @@ def _meta_input(**overrides):
         description="<p>updated</p>",
         start_date=EVENT_START,
         end_date=EVENT_END,
+        banner_url="https://cdn.example.com/updated-banner.jpg",
     )
     defaults.update(overrides)
     return UpdateEventMetadataInput(**defaults)
@@ -313,6 +304,7 @@ async def test_meta_calls_update_event_with_correct_args():
         description="<p>updated</p>",
         start_date=EVENT_START,
         end_date=EVENT_END,
+        banner_url="https://cdn.example.com/updated-banner.jpg",
     )
 
 
@@ -339,11 +331,6 @@ async def test_meta_returns_updated_event_and_old_event():
     result = await uc.update_event_metadata(_meta_input())
     assert result.event.title == "Updated"
     assert result.old_event.id == EVENT_ID
-
-
-# ---------------------------------------------------------------------------
-# UpdateEventSessionUseCase
-# ---------------------------------------------------------------------------
 
 
 def _make_session_repo():

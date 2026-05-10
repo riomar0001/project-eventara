@@ -55,6 +55,7 @@ class EventRepository:
             end_date=orm.end_date,
             status=EventStatus(orm.status),
             created_by=orm.created_by,
+            banner_url=orm.banner_url,
             created_at=orm.created_at,
             updated_at=orm.updated_at,
         )
@@ -147,6 +148,7 @@ class EventRepository:
         start_date: datetime,
         end_date: datetime,
         created_by: uuid.UUID,
+        banner_url: str | None = None,
     ) -> EventEntity:
         """Insert a new event row and return the persisted entity."""
         orm = Event(
@@ -156,6 +158,7 @@ class EventRepository:
             end_date=end_date,
             status=EventStatus.DRAFT,
             created_by=created_by,
+            banner_url=banner_url,
         )
         self.db.add(orm)
         await self.db.flush()
@@ -197,6 +200,7 @@ class EventRepository:
         description: str,
         start_date: datetime,
         end_date: datetime,
+        banner_url: str | None = None,
     ) -> EventEntity | None:
         """Apply field updates to an existing event row.
 
@@ -222,6 +226,7 @@ class EventRepository:
         orm.description = description
         orm.start_date = start_date
         orm.end_date = end_date
+        orm.banner_url = banner_url
 
         await self.db.flush()
         await self.db.refresh(orm)
@@ -313,6 +318,28 @@ class EventRepository:
         await self.db.delete(orm)
         await self.db.flush()
         return True
+
+    async def update_event_banner(self, *, event_id: uuid.UUID, banner_url: str) -> EventEntity | None:
+        """Set the banner_url field on an existing event row.
+
+        The row must already be locked by the calling transaction via
+        ``get_event_by_id(for_update=True)`` before this method is invoked.
+
+        Args:
+            event_id:   Primary key of the event to update.
+            banner_url: Storage object key of the uploaded banner image.
+
+        Returns:
+            The updated ``EventEntity``, or ``None`` if no matching row exists.
+        """
+        result = await self.db.execute(select(Event).where(Event.id == event_id).with_for_update())
+        orm = result.scalar_one_or_none()
+        if orm is None:
+            return None
+        orm.banner_url = banner_url
+        await self.db.flush()
+        await self.db.refresh(orm)
+        return self._to_event_entity(orm)
 
     async def update_event_status(self, *, event_id: uuid.UUID, new_status: EventStatus) -> EventEntity | None:
         """Update the status field of an existing event row.

@@ -13,8 +13,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { ImageUpload } from '@/components/ui/image-upload';
+import { useUpload } from '@/hooks/use-upload';
 import { BackLink, FieldLabel, PhotoPanel } from './events-shared';
-import { ADMIN_OPERATIONS_PATHS, eventDetailRecords, getSessionsByEventId, type EventDetailRecord } from '@/constants/admin/operations';
+import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
+import { resolveStorageImageUrl } from '@/lib/storage/image-url';
 
 // ── API helpers ────────────────────────────────────────────────────────────────
 
@@ -111,14 +114,38 @@ function createBlankSession(venueId?: string): SessionFormData {
 
 // ── Component ──────────────────────────────────────────────────────────────────
 
+type EventDetailRecord = {
+  id: string;
+  title: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+  photo?: string | null;
+  status: 'draft' | 'posted' | 'started' | 'cancelled' | 'ended' | 'postponed';
+};
+
+type ExistingEventSession = {
+  id: string;
+  venueId: string;
+  title: string;
+  description?: string | null;
+  startDatetime: string;
+  endDatetime: string;
+  maxSlots?: number | null;
+};
+
 type EventFormProps = { mode: 'create'; event?: never } | { mode: 'edit'; event: EventDetailRecord };
+type EventWithBanner = EventDetailRecord & { banner_url?: string | null };
 
 export function EventForm({ mode, event }: EventFormProps) {
   const router = useRouter();
-  const existingSessions = mode === 'edit' ? getSessionsByEventId(event.id) : [];
+  const { upload, isUploading: isUploadingBanner } = useUpload();
+  const existingSessions: ExistingEventSession[] = [];
 
   const [title, setTitle] = useState(event?.title ?? '');
   const [description, setDescription] = useState(event?.description ?? '');
+  const [bannerUrl, setBannerUrl] = useState(mode === 'edit' ? ((event as EventWithBanner).banner_url ?? event.photo ?? '') : '');
+  const [pendingBannerFile, setPendingBannerFile] = useState<File | null>(null);
   const [startDate, setStartDate] = useState(event?.startDate ? toLocalInput(event.startDate) : '');
   const [endDate, setEndDate] = useState(event?.endDate ? toLocalInput(event.endDate) : '');
   const [sessions, setSessions] = useState<SessionFormData[]>(() =>
@@ -162,7 +189,7 @@ export function EventForm({ mode, event }: EventFormProps) {
     };
   }, []);
 
-  const previewPhoto = event?.photo ?? eventDetailRecords[0]?.photo ?? '';
+  const previewPhoto = resolveStorageImageUrl(bannerUrl) || event?.photo || '';
 
   function addSession() {
     setSessions((prev) => [...prev, createBlankSession()]);
@@ -226,6 +253,7 @@ export function EventForm({ mode, event }: EventFormProps) {
             description: description.trim(),
             start_date: startDate,
             end_date: endDate,
+            banner_url: pendingBannerFile ? null : bannerUrl || null,
             sessions: sessionPayload.map((s) => ({
               venue_id: s.venueId,
               title: s.title,
@@ -242,6 +270,12 @@ export function EventForm({ mode, event }: EventFormProps) {
         if (!result.data) throw result.error ?? new Error('Unable to create event right now.');
 
         const eventId = result.data.data.id;
+
+        if (pendingBannerFile) {
+          const uploadedBanner = await upload(pendingBannerFile, 'event-cover-banner', { eventId });
+          setBannerUrl(uploadedBanner.publicUrl);
+          setPendingBannerFile(null);
+        }
 
         if (targetStatus === 'posted') {
           const statusResult = await Events.updateEventStatusEventsEventIdStatusPatch({
@@ -261,7 +295,7 @@ export function EventForm({ mode, event }: EventFormProps) {
 
         const metaResult = await Events.updateEventMetadataEventsEventIdPatch({
           path: { event_id: eventId },
-          body: { title: title.trim(), description: description.trim(), start_date: startDate, end_date: endDate },
+          body: { title: title.trim(), description: description.trim(), start_date: startDate, end_date: endDate, banner_url: bannerUrl || null },
           headers: { Authorization: `Bearer ${getAccessToken()}` },
           throwOnError: false
         });
@@ -364,6 +398,19 @@ export function EventForm({ mode, event }: EventFormProps) {
                     onChange={(e) => setDescription(e.target.value)}
                     className="min-h-32"
                     placeholder="Describe the event, its format, and what makes it unique."
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <FieldLabel>Event banner</FieldLabel>
+                  <ImageUpload
+                    value={bannerUrl}
+                    onChange={setBannerUrl}
+                    resourceType="event-cover-banner"
+                    resourceId={mode === 'edit' ? event.id : undefined}
+                    deferUpload={mode === 'create'}
+                    onFileSelected={setPendingBannerFile}
+                    disabled={isSubmitting || isUploadingBanner}
                   />
                 </div>
 
@@ -482,12 +529,12 @@ export function EventForm({ mode, event }: EventFormProps) {
 
               {/* ── Submit ─────────────────────────────────────────────────────── */}
               <div className="flex flex-wrap gap-2 border-t border-neutral-200/80 pt-6">
-                <Button type="submit" onClick={handlePost} disabled={isSubmitting}>
+                <Button type="submit" onClick={handlePost} disabled={isSubmitting || isUploadingBanner}>
                   <Send className="size-4" />
-                  {isSubmitting ? 'Saving…' : 'Post'}
+                  {isSubmitting || isUploadingBanner ? 'Saving…' : 'Post'}
                 </Button>
-                <Button type="submit" variant="outline" onClick={handleSaveDraft} disabled={isSubmitting}>
-                  {isSubmitting ? 'Saving…' : 'Save as Draft'}
+                <Button type="submit" variant="outline" onClick={handleSaveDraft} disabled={isSubmitting || isUploadingBanner}>
+                  {isSubmitting || isUploadingBanner ? 'Saving…' : 'Save as Draft'}
                 </Button>
                 <Button type="button" variant="ghost" asChild disabled={isSubmitting}>
                   <Link href={ADMIN_OPERATIONS_PATHS.events}>Cancel</Link>

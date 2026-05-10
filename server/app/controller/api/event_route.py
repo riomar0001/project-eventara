@@ -23,6 +23,7 @@ from app.application.dto.event_dto import (
     CreateEventSessionInput,
     DeleteEventInput,
     DeleteEventSessionInput,
+    UpdateEventBannerInput,
     UpdateEventMetadataInput,
     UpdateEventSessionInput,
 )
@@ -33,8 +34,12 @@ from app.application.use_cases.event_status_usecase import EventStatusUseCase
 from app.application.use_cases.event_usecase import EventUseCase
 from app.controller.api.audit_helpers import safe_audit_log, serialize_event, serialize_event_sessions
 from app.controller.dependencies import get_audit_log_use_case, get_current_user_id
+from app.controller.dependencies.storage_depends import get_storage_service
 from app.controller.dependencies.use_cases_depends import get_event_deletion_use_case, get_event_status_use_case, get_event_use_case
 from app.controller.docs.event_docs import (
+    EVENT_BANNER_UPLOAD_OPENAPI_EXTRA,
+    EVENT_BANNER_STORAGE_UNAVAILABLE,
+    EVENT_CREATE_OPENAPI_EXTRA,
     EVENT_DATE_INVALID,
     EVENT_DELETION_NOT_ALLOWED,
     EVENT_METADATA_DATE_INVALID,
@@ -46,10 +51,14 @@ from app.controller.docs.event_docs import (
     EVENT_SESSION_STATUS_INVALID_TRANSITION,
     EVENT_STATUS_INVALID_TRANSITION,
     EVENT_UNAUTHORIZED_OPERATION,
+    EVENT_UPDATE_OPENAPI_EXTRA,
     EVENT_VALIDATION_ERROR,
     UNAUTHORIZED,
 )
 from app.controller.schemas.event_schema import (
+    EventBannerUploadData,
+    EventBannerUploadRequest,
+    EventBannerUploadResponse,
     EventCreateRequest,
     EventDeletedResponse,
     EventMetadataUpdatedResponse,
@@ -85,6 +94,7 @@ from app.domain.exceptions.event_session_exceptions import (
     InvalidEventSessionDateError,
 )
 from app.domain.exceptions.venue_exceptions import VenueNotFoundError
+from app.infrastructure.storage.storage_service import StorageService
 
 event_router = APIRouter(prefix="/events", tags=["Events"])
 
@@ -98,6 +108,7 @@ def _to_event_response(event: EventEntity) -> EventRecordResponse:
         end_date=event.end_date,
         status=event.status.value if hasattr(event.status, "value") else event.status,
         created_by=event.created_by,
+        banner_url=StorageService.public_url_for_object_key(event.banner_url),
         created_at=event.created_at,
         updated_at=event.updated_at,
     )
@@ -129,8 +140,10 @@ def _to_session_response(session: EventSessionEntity) -> EventSessionRecordRespo
         "Creates an event and its associated sessions atomically. "
         "At least one session is required. "
         "Session date windows must fall within the event date range. "
+        "An optional ``banner_url`` may be supplied when the banner has already been uploaded through the feature-specific banner endpoint. "
         "The event description accepts raw HTML produced by a WYSIWYG editor."
     ),
+    openapi_extra=EVENT_CREATE_OPENAPI_EXTRA,
 )
 async def create_event(
     request: Request,
@@ -160,6 +173,7 @@ async def create_event(
                 start_date=body.start_date,
                 end_date=body.end_date,
                 created_by=user_id,
+                banner_url=StorageService.object_key_from_public_url(body.banner_url),
                 sessions=session_inputs,
             )
         )
@@ -202,10 +216,11 @@ async def create_event(
     },
     summary="Update event metadata",
     description=(
-        "Updates an event's title, description, and date range. "
+        "Updates an event's title, description, date range, and optional banner object key. "
         "Only the event creator may perform this operation. "
         "The event description accepts raw HTML produced by a WYSIWYG editor."
     ),
+    openapi_extra=EVENT_UPDATE_OPENAPI_EXTRA,
 )
 async def update_event_metadata(
     request: Request,
@@ -225,6 +240,7 @@ async def update_event_metadata(
                 description=body.description,
                 start_date=body.start_date,
                 end_date=body.end_date,
+                banner_url=StorageService.object_key_from_public_url(body.banner_url),
             )
         )
     except UnauthorizedEventOperationError as exc:
@@ -543,3 +559,82 @@ async def delete_event_session(
     )
 
     return EventSessionDeletedResponse(data=_to_session_response(result.session))
+
+
+@event_router.post(
+    "/{event_id}/banner",
+    response_model=EventBannerUploadResponse,
+    status_code=status.HTTP_200_OK,
+    responses={
+        **UNAUTHORIZED,
+        **EVENT_UNAUTHORIZED_OPERATION,
+        **EVENT_METADATA_NOT_FOUND,
+        **EVENT_BANNER_STORAGE_UNAVAILABLE,
+        **EVENT_VALIDATION_ERROR,
+    },
+    summary="Generate a presigned URL to upload the event banner",
+    description=(
+        "Generates a short-lived presigned PUT URL for uploading an event banner image directly to object storage, "
+        "bypassing the API server for the binary transfer. "
+        "The banner's object key is stored on the event immediately; the caller must PUT the image to ``upload_url`` "
+        "within the expiry window (3600 s). "
+        "Only the event creator may perform this operation. "
+        "Allowed content types: ``image/jpeg``, ``image/png``, ``image/webp``, ``image/gif``."
+    ),
+    openapi_extra=EVENT_BANNER_UPLOAD_OPENAPI_EXTRA,
+)
+async def upload_event_banner(
+    request: Request,
+    event_id: uuid.UUID,
+    body: EventBannerUploadRequest,
+    user_id: uuid.UUID = Depends(get_current_user_id),
+    use_case: EventUseCase = Depends(get_event_use_case),
+    audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
+    storage: StorageService = Depends(get_storage_service),
+) -> EventBannerUploadResponse:
+    """Generate a presigned banner upload URL and persist the resulting object key on the event."""
+    try:
+        upload_url, object_key, public_url, expires_in = storage.generate_presigned_upload(
+            resource_type="event-cover-banner",
+            content_type=body.content_type,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))
+    except RuntimeError as exc:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc))
+
+    try:
+        result = await use_case.update_event_banner(
+            UpdateEventBannerInput(
+                event_id=event_id,
+                updated_by=user_id,
+                banner_url=object_key,
+            )
+        )
+    except UnauthorizedEventOperationError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
+    except EventNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+
+    await safe_audit_log(
+        audit_use_case,
+        request,
+        user_id=user_id,
+        action_type=ActionType.UPDATE,
+        resource_type="events",
+        resource_id=str(event_id),
+        status=AuditLogStatus.SUCCESS,
+        old_values={"banner_file": result.old_banner_url},
+        new_values={"banner_file": object_key},
+        additional_context={"public_url": public_url},
+    )
+
+    return EventBannerUploadResponse(
+        data=_to_event_response(result.event),
+        upload=EventBannerUploadData(
+            upload_url=upload_url,
+            object_key=object_key,
+            public_url=public_url,
+            expires_in=expires_in,
+        ),
+    )

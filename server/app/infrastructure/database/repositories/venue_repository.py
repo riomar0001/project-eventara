@@ -41,6 +41,7 @@ class VenueRepository:
         return VenueEntity(
             id=orm.id,
             creator_id=orm.creator_id,
+            image_url=orm.image_file_id,
             name=orm.name,
             description=orm.description,
             address_line=orm.address_line,
@@ -171,6 +172,7 @@ class VenueRepository:
         country: str,
         capacity: int,
         venue_type: VenueType,
+        image_url: str | None,
         is_partner: bool,
         amenities: list[str] | None,
         contact_name: str,
@@ -198,6 +200,7 @@ class VenueRepository:
             country=country,
             capacity=capacity,
             venue_type=venue_type,
+            image_file_id=image_url,
             is_partner=is_partner,
             amenities=amenities,
             contact_name=contact_name,
@@ -222,6 +225,7 @@ class VenueRepository:
         country: str,
         capacity: int,
         venue_type: VenueType,
+        image_url: str | None,
         is_partner: bool,
         amenities: list[str] | None,
         contact_name: str,
@@ -252,12 +256,35 @@ class VenueRepository:
         orm.country = country
         orm.capacity = capacity
         orm.venue_type = venue_type
+        orm.image_file_id = image_url
         orm.is_partner = is_partner
         orm.amenities = amenities
         orm.contact_name = contact_name
         orm.contact_phone = contact_phone
         orm.contact_email = contact_email
 
+        await self.db.flush()
+        await self.db.refresh(orm)
+        return self._to_entity(orm)
+
+    async def update_venue_image(self, venue_id: uuid.UUID, image_url: str) -> VenueEntity | None:
+        """Set the image_file_id field (storage object key) on an existing venue row.
+
+        The row must already be locked by the calling transaction via
+        ``get_venue_by_id(for_update=True)`` before this method is invoked.
+
+        Args:
+            venue_id:  Primary key of the venue to update.
+            image_url: Storage object key of the uploaded venue image.
+
+        Returns:
+            The updated ``VenueEntity``, or ``None`` if no matching row exists.
+        """
+        result = await self.db.execute(select(Venue).where(Venue.id == venue_id).with_for_update())
+        orm = result.scalar_one_or_none()
+        if orm is None:
+            return None
+        orm.image_file_id = image_url
         await self.db.flush()
         await self.db.refresh(orm)
         return self._to_entity(orm)

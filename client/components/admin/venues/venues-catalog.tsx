@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { ArrowLeft, ArrowRight, Building2, MapPin, Search, Users, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Building2, MapPin, Plus, Search, Users, X } from 'lucide-react';
 import Link from 'next/link';
 import { MobileFloatingAction, PrimaryPageAction } from '@/components/admin/shared/primary-page-action';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { CatalogCard, OperationsPageIntro } from './venues-shared';
 import { useVenues } from '@/hooks/admin/venues/use-venues';
 import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
+import { resolveStorageImageUrl } from '@/lib/storage/image-url';
 import type { VenueRecordResponse } from '@/api/types.gen';
 
 const VENUE_PHOTO: Record<string, string> = {
@@ -20,7 +21,7 @@ const VENUE_PHOTO: Record<string, string> = {
 };
 
 function venuePhoto(venue: VenueRecordResponse): string {
-  return VENUE_PHOTO[venue.venue_type] ?? VENUE_PHOTO.indoor;
+  return resolveStorageImageUrl(venue.image_url) || VENUE_PHOTO[venue.venue_type] || VENUE_PHOTO.indoor;
 }
 
 const CAPACITY_FILTERS = [
@@ -76,12 +77,19 @@ export function VenuesCatalog() {
   const paged = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
   const capacityLabel = CAPACITY_FILTERS.find((o) => o.key === capacityKey)?.label ?? 'Any size';
   const sortLabel = SORT_OPTIONS.find((o) => o.key === sortKey)?.label ?? 'Name (A-Z)';
+  const hasActiveFilters = capacityKey !== 'any' || Boolean(query.trim());
 
   const pageNumbers = useMemo(() => {
     if (totalPages <= 5) return Array.from({ length: totalPages }, (_, i) => i + 1);
     const start = Math.max(1, Math.min(currentPage - 2, totalPages - 4));
     return Array.from({ length: 5 }, (_, i) => start + i);
   }, [currentPage, totalPages]);
+
+  function clearFilters() {
+    setCapacityKey('any');
+    setQuery('');
+    setPage(1);
+  }
 
   return (
     <div className="space-y-6">
@@ -167,8 +175,8 @@ export function VenuesCatalog() {
               </Button>
             </span>
           )}
-          {(capacityKey !== 'any' || query.trim()) && (
-            <Button variant="ghost" size="xs" className="text-neutral-500" onClick={() => { setCapacityKey('any'); setQuery(''); setPage(1); }}>
+          {hasActiveFilters && (
+            <Button variant="ghost" size="xs" className="text-neutral-500" onClick={clearFilters}>
               Clear filters
             </Button>
           )}
@@ -186,8 +194,77 @@ export function VenuesCatalog() {
           <p className="text-sm font-medium text-red-700">{error}</p>
         </div>
       ) : paged.length === 0 ? (
-        <div className="rounded-[24px] border border-neutral-200 bg-neutral-50 px-6 py-10 text-center">
-          <p className="text-sm text-neutral-500">No venues match your current filters.</p>
+        <div className="overflow-hidden rounded-[24px] border border-neutral-200 bg-white shadow-[0_24px_70px_-46px_rgba(15,23,42,0.45)]">
+          <div className="grid lg:grid-cols-[minmax(0,1fr)_340px]">
+            <div className="p-6 sm:p-8">
+              <div className="flex items-center gap-2">
+                <span className="flex size-9 items-center justify-center rounded-xl bg-amber-50 text-amber-700 ring-1 ring-amber-100">
+                  {hasActiveFilters ? <Search className="size-4" /> : <Building2 className="size-4" />}
+                </span>
+                <p className="text-[11px] font-semibold tracking-[0.2em] text-amber-700 uppercase">
+                  {hasActiveFilters ? 'No matching venues' : 'Empty portfolio'}
+                </p>
+              </div>
+
+              <h3 className="mt-5 max-w-2xl text-2xl font-semibold tracking-tight text-neutral-950">
+                {hasActiveFilters ? 'No venue fits this filter set.' : 'Start the venue portfolio with the first space.'}
+              </h3>
+              <p className="mt-3 max-w-2xl text-sm leading-6 text-neutral-500">
+                {hasActiveFilters
+                  ? 'Adjust the search or capacity filter to widen the result set, then keep scanning from the same catalog view.'
+                  : 'Add a community suggestion or official partner venue so event planning can move from blank slate to bookable inventory.'}
+              </p>
+
+              <div className="mt-6 flex flex-wrap gap-2">
+                <Button asChild variant="amber" className="rounded-xl">
+                  <Link href={ADMIN_OPERATIONS_PATHS.venueCreate}>
+                    <Plus className="size-4" />
+                    Add venue
+                  </Link>
+                </Button>
+                {hasActiveFilters && (
+                  <Button type="button" variant="outline" className="rounded-xl" onClick={clearFilters}>
+                    <X className="size-4" />
+                    Clear filters
+                  </Button>
+                )}
+              </div>
+
+              <div className="mt-8 grid gap-3 sm:grid-cols-3">
+                {[
+                  ['Required', 'Name, address, capacity'],
+                  ['Media', 'Venue image upload'],
+                  ['Contact', 'Lead contact details']
+                ].map(([label, value]) => (
+                  <div key={label} className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3">
+                    <p className="text-[11px] font-semibold tracking-[0.16em] text-neutral-400 uppercase">{label}</p>
+                    <p className="mt-1 text-sm font-medium text-neutral-800">{value}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="border-t border-neutral-200 bg-neutral-950 p-6 text-white lg:border-t-0 lg:border-l">
+              <div className="flex h-full flex-col justify-between gap-8">
+                <div className="space-y-3">
+                  <p className="text-[11px] font-semibold tracking-[0.2em] text-amber-300 uppercase">Next best action</p>
+                  <p className="text-sm leading-6 text-white/70">
+                    Create one complete venue record first. The catalog will immediately unlock filtering, detail review, edit, image, and delete workflows.
+                  </p>
+                </div>
+                <div className="space-y-3">
+                  {['Capture the space', 'Attach operational details', 'Use it in event planning'].map((step, index) => (
+                    <div key={step} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                      <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-amber-300 text-xs font-semibold text-neutral-950">
+                        {index + 1}
+                      </span>
+                      <span className="text-sm font-medium text-white/90">{step}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       ) : (
         <div className="grid gap-6 xl:grid-cols-4">

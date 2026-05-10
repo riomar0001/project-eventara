@@ -6,16 +6,22 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { ImageUpload } from '@/components/ui/image-upload';
 import { useProfileSettingsForm } from '@/hooks/admin/user-settings/profile/use-profile-settings-form';
 import { PROFILE_AGE_GROUP_OPTIONS, PROFILE_EDUCATION_LEVEL_OPTIONS, PROFILE_GENDER_OPTIONS } from '@/constants/user/profile';
 
 export default function ProfileSettingsPage() {
-  const { aliasHint, aliasStatus, errors, form, handleReset, handleSubmit, isOnboarded, isSubmitting, setField, user } = useProfileSettingsForm();
+  const { aliasHint, aliasStatus, errors, form, handleProfilePictureChange, handleReset, handleSubmit, isOnboarded, isSubmitting, setField, user } = useProfileSettingsForm();
 
   return (
     <div className="max-w-3xl space-y-6">
       <form className="space-y-6" onSubmit={handleSubmit}>
         <div className="grid gap-4 md:grid-cols-2">
+          <div className="space-y-2 md:col-span-2">
+            <label className="text-sm font-medium">Profile picture</label>
+            <ImageUpload value={user?.imageFileId ?? null} onChange={handleProfilePictureChange} resourceType="user-profile" disabled={isSubmitting} />
+          </div>
+
           <div className="space-y-2 md:col-span-2">
             <label className="text-sm font-medium" htmlFor="email">
               Email

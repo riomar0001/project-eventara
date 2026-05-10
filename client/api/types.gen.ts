@@ -507,6 +507,10 @@ export type CommunityVenueCreateRequest = {
      */
     description?: string | null;
     /**
+     * Image Url
+     */
+    image_url?: string | null;
+    /**
      * Address Line
      */
     address_line: string;
@@ -748,6 +752,54 @@ export type ErrorResponse = {
 };
 
 /**
+ * EventBannerUploadData
+ */
+export type EventBannerUploadData = {
+    /**
+     * Upload Url
+     */
+    upload_url: string;
+    /**
+     * Object Key
+     */
+    object_key: string;
+    /**
+     * Public Url
+     */
+    public_url: string;
+    /**
+     * Expires In
+     */
+    expires_in: number;
+};
+
+/**
+ * EventBannerUploadRequest
+ */
+export type EventBannerUploadRequest = {
+    /**
+     * Content Type
+     */
+    content_type: string;
+};
+
+/**
+ * EventBannerUploadResponse
+ */
+export type EventBannerUploadResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Message
+     */
+    message?: string;
+    data: EventRecordResponse;
+    upload: EventBannerUploadData;
+};
+
+/**
  * EventCreateRequest
  */
 export type EventCreateRequest = {
@@ -767,6 +819,10 @@ export type EventCreateRequest = {
      * End Date
      */
     end_date: string;
+    /**
+     * Banner Url
+     */
+    banner_url?: string | null;
     /**
      * Sessions
      */
@@ -870,6 +926,10 @@ export type EventRecordResponse = {
      * Created By
      */
     created_by: string;
+    /**
+     * Banner Url
+     */
+    banner_url?: string | null;
     /**
      * Created At
      */
@@ -1094,6 +1154,10 @@ export type EventUpdateRequest = {
      * End Date
      */
     end_date: string;
+    /**
+     * Banner Url
+     */
+    banner_url?: string | null;
 };
 
 /**
@@ -1524,6 +1588,10 @@ export type OfficialVenueCreateRequest = {
      */
     description?: string | null;
     /**
+     * Image Url
+     */
+    image_url?: string | null;
+    /**
      * Address Line
      */
     address_line: string;
@@ -1597,9 +1665,23 @@ export type PaginationMeta = {
 };
 
 /**
- * PresignUploadData
+ * ProfileAvatarData
  */
-export type PresignUploadData = {
+export type ProfileAvatarData = {
+    /**
+     * User Id
+     */
+    user_id: string;
+    /**
+     * Image File Id
+     */
+    image_file_id: string;
+};
+
+/**
+ * ProfileAvatarUploadData
+ */
+export type ProfileAvatarUploadData = {
     /**
      * Upload Url
      */
@@ -1619,13 +1701,9 @@ export type PresignUploadData = {
 };
 
 /**
- * PresignUploadRequest
+ * ProfileAvatarUploadRequest
  */
-export type PresignUploadRequest = {
-    /**
-     * Resource Type
-     */
-    resource_type: 'event-cover-banner' | 'registration-uploads' | 'user-profile';
+export type ProfileAvatarUploadRequest = {
     /**
      * Content Type
      */
@@ -1633,9 +1711,9 @@ export type PresignUploadRequest = {
 };
 
 /**
- * PresignUploadResponse
+ * ProfileAvatarUploadResponse
  */
-export type PresignUploadResponse = {
+export type ProfileAvatarUploadResponse = {
     /**
      * Success
      */
@@ -1644,7 +1722,8 @@ export type PresignUploadResponse = {
      * Message
      */
     message?: string;
-    data: PresignUploadData;
+    data: ProfileAvatarData;
+    upload: ProfileAvatarUploadData;
 };
 
 /**
@@ -1670,6 +1749,10 @@ export type PublicVenueRecordResponse = {
      * Id
      */
     id: string;
+    /**
+     * Image Url
+     */
+    image_url?: string | null;
     /**
      * Name
      */
@@ -2559,6 +2642,54 @@ export type ValidationErrorResponse = {
 };
 
 /**
+ * VenueImageUploadData
+ */
+export type VenueImageUploadData = {
+    /**
+     * Upload Url
+     */
+    upload_url: string;
+    /**
+     * Object Key
+     */
+    object_key: string;
+    /**
+     * Public Url
+     */
+    public_url: string;
+    /**
+     * Expires In
+     */
+    expires_in: number;
+};
+
+/**
+ * VenueImageUploadRequest
+ */
+export type VenueImageUploadRequest = {
+    /**
+     * Content Type
+     */
+    content_type: string;
+};
+
+/**
+ * VenueImageUploadResponse
+ */
+export type VenueImageUploadResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Message
+     */
+    message?: string;
+    data: VenueRecordResponse;
+    upload: VenueImageUploadData;
+};
+
+/**
  * VenueListResponse
  */
 export type VenueListResponse = {
@@ -2781,6 +2912,10 @@ export type VenueRecordResponse = {
      */
     creator_id: string;
     /**
+     * Image Url
+     */
+    image_url?: string | null;
+    /**
      * Name
      */
     name: string;
@@ -2887,6 +3022,10 @@ export type VenueUpdateRequest = {
      * Description
      */
     description?: string | null;
+    /**
+     * Image Url
+     */
+    image_url?: string | null;
     /**
      * Address Line
      */
@@ -3490,6 +3629,47 @@ export type UpdateProfileUserProfilePatchResponses = {
 };
 
 export type UpdateProfileUserProfilePatchResponse = UpdateProfileUserProfilePatchResponses[keyof UpdateProfileUserProfilePatchResponses];
+
+export type UploadProfileAvatarUserProfileAvatarPatchData = {
+    body: ProfileAvatarUploadRequest;
+    path?: never;
+    query?: never;
+    url: '/user/profile/avatar';
+};
+
+export type UploadProfileAvatarUserProfileAvatarPatchErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden — account is inactive or deleted
+     */
+    403: ErrorResponse;
+    /**
+     * Not found — no user or profile exists for the authenticated account
+     */
+    404: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+    /**
+     * Object storage is unavailable or not configured
+     */
+    503: ErrorResponse;
+};
+
+export type UploadProfileAvatarUserProfileAvatarPatchError = UploadProfileAvatarUserProfileAvatarPatchErrors[keyof UploadProfileAvatarUserProfileAvatarPatchErrors];
+
+export type UploadProfileAvatarUserProfileAvatarPatchResponses = {
+    /**
+     * Successful Response
+     */
+    200: ProfileAvatarUploadResponse;
+};
+
+export type UploadProfileAvatarUserProfileAvatarPatchResponse = UploadProfileAvatarUserProfileAvatarPatchResponses[keyof UploadProfileAvatarUserProfileAvatarPatchResponses];
 
 export type GetLoginHistoryUserLoginHistoryGetData = {
     body?: never;
@@ -5393,6 +5573,52 @@ export type CreateOfficialVenueVenuesOfficialPostResponses = {
 
 export type CreateOfficialVenueVenuesOfficialPostResponse = CreateOfficialVenueVenuesOfficialPostResponses[keyof CreateOfficialVenueVenuesOfficialPostResponses];
 
+export type UploadVenueImageVenuesVenueIdImagePostData = {
+    body: VenueImageUploadRequest;
+    path: {
+        /**
+         * Venue Id
+         */
+        venue_id: string;
+    };
+    query?: never;
+    url: '/venues/{venue_id}/image';
+};
+
+export type UploadVenueImageVenuesVenueIdImagePostErrors = {
+    /**
+     * Missing or invalid Bearer token
+     */
+    401: ErrorResponse;
+    /**
+     * Insufficient permissions
+     */
+    403: ErrorResponse;
+    /**
+     * Venue not found
+     */
+    404: ErrorResponse;
+    /**
+     * Request body failed schema validation
+     */
+    422: ValidationErrorResponse;
+    /**
+     * Object storage is unavailable or not configured
+     */
+    503: ErrorResponse;
+};
+
+export type UploadVenueImageVenuesVenueIdImagePostError = UploadVenueImageVenuesVenueIdImagePostErrors[keyof UploadVenueImageVenuesVenueIdImagePostErrors];
+
+export type UploadVenueImageVenuesVenueIdImagePostResponses = {
+    /**
+     * Successful Response
+     */
+    200: VenueImageUploadResponse;
+};
+
+export type UploadVenueImageVenuesVenueIdImagePostResponse = UploadVenueImageVenuesVenueIdImagePostResponses[keyof UploadVenueImageVenuesVenueIdImagePostResponses];
+
 export type ListVenueRatingsVenuesVenueIdRatingsGetData = {
     body?: never;
     path: {
@@ -5951,6 +6177,52 @@ export type UpdateEventSessionStatusEventsEventIdSessionSessionIdStatusPatchResp
 
 export type UpdateEventSessionStatusEventsEventIdSessionSessionIdStatusPatchResponse = UpdateEventSessionStatusEventsEventIdSessionSessionIdStatusPatchResponses[keyof UpdateEventSessionStatusEventsEventIdSessionSessionIdStatusPatchResponses];
 
+export type UploadEventBannerEventsEventIdBannerPostData = {
+    body: EventBannerUploadRequest;
+    path: {
+        /**
+         * Event Id
+         */
+        event_id: string;
+    };
+    query?: never;
+    url: '/events/{event_id}/banner';
+};
+
+export type UploadEventBannerEventsEventIdBannerPostErrors = {
+    /**
+     * Missing or invalid Bearer token
+     */
+    401: ErrorResponse;
+    /**
+     * Caller is not the event creator
+     */
+    403: ErrorResponse;
+    /**
+     * Event not found
+     */
+    404: ErrorResponse;
+    /**
+     * Request body failed schema validation
+     */
+    422: ValidationErrorResponse;
+    /**
+     * Object storage is not configured on this server
+     */
+    503: ErrorResponse;
+};
+
+export type UploadEventBannerEventsEventIdBannerPostError = UploadEventBannerEventsEventIdBannerPostErrors[keyof UploadEventBannerEventsEventIdBannerPostErrors];
+
+export type UploadEventBannerEventsEventIdBannerPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: EventBannerUploadResponse;
+};
+
+export type UploadEventBannerEventsEventIdBannerPostResponse = UploadEventBannerEventsEventIdBannerPostResponses[keyof UploadEventBannerEventsEventIdBannerPostResponses];
+
 export type RegisterForSessionEventsEventIdSessionSessionIdRegisterPostData = {
     body?: never;
     path: {
@@ -6273,31 +6545,6 @@ export type WithdrawApplicationVolunteerApplicationsApplicationIdDeleteResponses
 };
 
 export type WithdrawApplicationVolunteerApplicationsApplicationIdDeleteResponse = WithdrawApplicationVolunteerApplicationsApplicationIdDeleteResponses[keyof WithdrawApplicationVolunteerApplicationsApplicationIdDeleteResponses];
-
-export type GeneratePresignedUrlUploadsPresignPostData = {
-    body: PresignUploadRequest;
-    path?: never;
-    query?: never;
-    url: '/uploads/presign';
-};
-
-export type GeneratePresignedUrlUploadsPresignPostErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type GeneratePresignedUrlUploadsPresignPostError = GeneratePresignedUrlUploadsPresignPostErrors[keyof GeneratePresignedUrlUploadsPresignPostErrors];
-
-export type GeneratePresignedUrlUploadsPresignPostResponses = {
-    /**
-     * Successful Response
-     */
-    200: PresignUploadResponse;
-};
-
-export type GeneratePresignedUrlUploadsPresignPostResponse = GeneratePresignedUrlUploadsPresignPostResponses[keyof GeneratePresignedUrlUploadsPresignPostResponses];
 
 export type RootGetData = {
     body?: never;

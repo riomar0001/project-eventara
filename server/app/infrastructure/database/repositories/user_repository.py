@@ -618,6 +618,48 @@ class UserRepository:
             preferences=orm_profile.preferences,
         )
 
+    async def update_profile_image(self, user_id: uuid.UUID, image_url: str) -> DomainUserProfile | None:
+        """Set the profile avatar storage object key for the given user.
+
+        Returns the updated ``DomainUserProfile``, or ``None`` if no profile row exists.
+        """
+        result = await self.db.execute(
+            update(UserProfile)
+            .where(UserProfile.user_id == user_id)
+            .values(image_file_id=image_url)
+            .returning(
+                UserProfile.user_id,
+                UserProfile.alias,
+                UserProfile.first_name,
+                UserProfile.last_name,
+                UserProfile.image_file_id,
+                UserProfile.age_group,
+                UserProfile.gender,
+                UserProfile.education_level,
+                UserProfile.occupation,
+                UserProfile.bio,
+                UserProfile.preferences,
+            )
+        )
+        row = result.one_or_none()
+        if row is None:
+            return None
+
+        return DomainUserProfile(
+            user_id=row.user_id,
+            email="",
+            alias=row.alias,
+            first_name=row.first_name,
+            last_name=row.last_name,
+            image_file_id=row.image_file_id,
+            age_group=row.age_group if isinstance(row.age_group, AgeGroup) else AgeGroup(row.age_group),
+            gender=row.gender if isinstance(row.gender, Gender) else Gender(row.gender),
+            education_level=row.education_level if isinstance(row.education_level, EducationLevel) else EducationLevel(row.education_level),
+            occupation=row.occupation,
+            bio=row.bio,
+            preferences=row.preferences,
+        )
+
     async def complete_onboarding(self, user_id: uuid.UUID) -> bool:
         """Atomically mark onboarding as completed.
 

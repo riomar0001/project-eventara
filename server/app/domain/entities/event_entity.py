@@ -45,6 +45,7 @@ class Event(BaseModel):
     end_date: datetime
     status: EventStatus = EventStatus.DRAFT
     created_by: uuid.UUID
+    banner_url: str | None = None
     created_at: datetime | None = None
     updated_at: datetime | None = None
 

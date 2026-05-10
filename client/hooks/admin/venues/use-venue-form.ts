@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { Venues } from '@/api/sdk.gen';
 import { getAccessToken } from '@/store/auth-store';
 import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
+import { useUpload } from '@/hooks/use-upload';
 import type { VenueFormValues } from '@/components/admin/venues/venue-form';
 
 function extractErrorMessage(payload: unknown): string | undefined {
@@ -38,15 +39,14 @@ function getVenueErrorMessage(error: unknown, fallback: string): string {
 
 export function useVenueForm() {
   const router = useRouter();
+  const { upload, isUploading } = useUpload();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  async function submitCreate(form: VenueFormValues) {
-    if (isSubmitting) return;
-    setIsSubmitting(true);
-
-    const baseBody = {
+  function buildVenueBody(form: VenueFormValues, imageFile?: File | null) {
+    return {
       name: form.name,
       description: form.description || null,
+      image_url: imageFile ? null : form.image_url || null,
       address_line: form.address_line,
       city: form.city,
       province: form.province,
@@ -57,6 +57,13 @@ export function useVenueForm() {
       venue_type: form.venue_type,
       amenities: form.amenities.length > 0 ? form.amenities : null
     };
+  }
+
+  async function submitCreate(form: VenueFormValues, imageFile?: File | null) {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
+    const baseBody = buildVenueBody(form, imageFile);
 
     try {
       let venueId: string;
@@ -65,15 +72,14 @@ export function useVenueForm() {
         const result = await Venues.createCommunityVenueVenuesCommunityPost({
           body: {
             ...baseBody,
-            contact_name: form.contact_name || null,
-            contact_phone: form.contact_phone || null,
-            contact_email: form.contact_email || null
+            contact_name: form.contact_name,
+            contact_phone: form.contact_phone,
+            contact_email: form.contact_email
           },
           headers: { Authorization: `Bearer ${getAccessToken()}` },
           throwOnError: false
         });
         if (!result.data) throw result.error ?? new Error('Unable to add venue.');
-        toast.success(result.data.message ?? 'Community venue added successfully.');
         venueId = result.data.data.id;
       } else {
         const result = await Venues.createOfficialVenueVenuesOfficialPost({
@@ -87,10 +93,14 @@ export function useVenueForm() {
           throwOnError: false
         });
         if (!result.data) throw result.error ?? new Error('Unable to add venue.');
-        toast.success(result.data.message ?? 'Official venue created successfully.');
         venueId = result.data.data.id;
       }
 
+      if (imageFile) {
+        await upload(imageFile, 'venue-image', { venueId });
+      }
+
+      toast.success(form.venue_category === 'community' ? 'Community venue added successfully.' : 'Official venue created successfully.');
       router.push(ADMIN_OPERATIONS_PATHS.venueDetail(venueId));
     } catch (error) {
       toast.error(getVenueErrorMessage(error, 'Unable to save venue. Please try again.'));
@@ -99,5 +109,34 @@ export function useVenueForm() {
     }
   }
 
-  return { submitCreate, isSubmitting };
+  async function submitEdit(venueId: string, form: VenueFormValues) {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
+    try {
+      const result = await Venues.updateVenueVenuesVenueIdPatch({
+        path: { venue_id: venueId },
+        body: {
+          ...buildVenueBody(form),
+          is_partner: form.venue_category === 'official',
+          contact_name: form.contact_name || '',
+          contact_phone: form.contact_phone || '',
+          contact_email: form.contact_email || ''
+        },
+        headers: { Authorization: `Bearer ${getAccessToken()}` },
+        throwOnError: false
+      });
+
+      if (!result.data) throw result.error ?? new Error('Unable to update venue.');
+
+      toast.success(result.data.message ?? 'Venue updated successfully.');
+      router.push(ADMIN_OPERATIONS_PATHS.venueDetail(venueId));
+    } catch (error) {
+      toast.error(getVenueErrorMessage(error, 'Unable to update venue. Please try again.'));
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  return { submitCreate, submitEdit, isSubmitting: isSubmitting || isUploading };
 }

@@ -5,7 +5,7 @@ from botocore.config import Config
 
 from app.core.config import settings
 
-_ALLOWED_RESOURCE_TYPES = frozenset(["event-cover-banner", "registration-uploads", "user-profile"])
+_ALLOWED_RESOURCE_TYPES = frozenset(["event-cover-banner", "registration-uploads", "user-profile", "venue-image"])
 
 _ALLOWED_CONTENT_TYPES: dict[str, str] = {
     "image/jpeg": "jpg",
@@ -34,6 +34,41 @@ def _require_storage_settings() -> None:
 
 
 class StorageService:
+    @staticmethod
+    def public_url_for_object_key(object_key: str | None) -> str | None:
+        """Return a display URL for a stored object key or existing absolute URL.
+
+        Args:
+            object_key: Stored file key such as ``venue-image/<uuid>.webp``.
+
+        Returns:
+            Absolute public URL when possible, the original absolute URL for
+            legacy rows, or ``None`` when no file is stored.
+        """
+        if not object_key:
+            return None
+        if object_key.startswith(("http://", "https://")):
+            return object_key
+        _require_storage_settings()
+        return f"{settings.STORAGE_PUBLIC_URL.rstrip('/')}/{object_key}"  # type: ignore[union-attr]
+
+    @staticmethod
+    def object_key_from_public_url(value: str | None) -> str | None:
+        """Return the file key that should be persisted for a submitted image reference.
+
+        Args:
+            value: Storage object key or public URL.
+
+        Returns:
+            Object key with the configured public URL prefix removed when present.
+        """
+        if not value:
+            return None
+        public_base = (settings.STORAGE_PUBLIC_URL or "").rstrip("/")
+        if public_base and value.startswith(f"{public_base}/"):
+            return value[len(public_base) + 1 :]
+        return value
+
     def generate_presigned_upload(self, resource_type: str, content_type: str) -> tuple[str, str, str, int]:
         """Return (upload_url, object_key, public_url, expires_in).
 
@@ -65,6 +100,6 @@ class StorageService:
             ExpiresIn=PRESIGN_EXPIRES_IN,
         )
 
-        public_url = f"{settings.STORAGE_PUBLIC_URL.rstrip('/')}/{object_key}"  # type: ignore[union-attr]
+        public_url = self.public_url_for_object_key(object_key)
 
-        return upload_url, object_key, public_url, PRESIGN_EXPIRES_IN
+        return upload_url, object_key, public_url or object_key, PRESIGN_EXPIRES_IN

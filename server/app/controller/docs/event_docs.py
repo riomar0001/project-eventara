@@ -1,5 +1,80 @@
 from app.controller.schemas.auth_schema import ErrorResponse, ValidationErrorResponse
 
+EVENT_CREATE_OPENAPI_EXTRA = {
+    "requestBody": {
+        "content": {
+            "application/json": {
+                "examples": {
+                    "with_banner": {
+                        "summary": "Create event with a previously uploaded banner",
+                        "value": {
+                            "title": "Community Tech Summit",
+                            "description": "<p>A city-wide technology and volunteer summit.</p>",
+                            "start_date": "2026-06-01T09:00:00Z",
+                            "end_date": "2026-06-03T17:00:00Z",
+                            "banner_url": "https://cdn.example.com/event-cover-banner/banner.webp",
+                            "sessions": [
+                                {
+                                    "venue_id": "11111111-1111-1111-1111-111111111111",
+                                    "title": "Opening Forum",
+                                    "description": "Main program opening session",
+                                    "start_datetime": "2026-06-01T10:00:00Z",
+                                    "end_datetime": "2026-06-01T12:00:00Z",
+                                    "max_slots": 200,
+                                }
+                            ],
+                        },
+                    }
+                }
+            }
+        }
+    }
+}
+
+EVENT_UPDATE_OPENAPI_EXTRA = {
+    "requestBody": {
+        "content": {
+            "application/json": {
+                "examples": {
+                    "with_banner": {
+                        "summary": "Update metadata and banner",
+                        "value": {
+                            "title": "Community Tech Summit 2026",
+                            "description": "<p>Updated event details.</p>",
+                            "start_date": "2026-06-01T09:00:00Z",
+                            "end_date": "2026-06-03T17:00:00Z",
+                            "banner_url": "https://cdn.example.com/event-cover-banner/updated-banner.webp",
+                        },
+                    }
+                }
+            }
+        }
+    }
+}
+
+EVENT_BANNER_UPLOAD_OPENAPI_EXTRA = {
+    "requestBody": {
+        "content": {
+            "application/json": {
+                "examples": {
+                    "webp_banner": {
+                        "summary": "Generate a WebP banner upload URL",
+                        "value": {"content_type": "image/webp"},
+                    }
+                }
+            }
+        }
+    }
+}
+
+EVENT_BANNER_STORAGE_UNAVAILABLE = {
+    503: {
+        "description": "Object storage is not configured on this server",
+        "model": ErrorResponse,
+        "content": {"application/json": {"example": {"success": False, "message": "Object storage is not fully configured."}}},
+    }
+}
+
 UNAUTHORIZED = {
     401: {
         "description": "Missing or invalid Bearer token",

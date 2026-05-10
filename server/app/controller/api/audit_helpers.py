@@ -91,6 +91,7 @@ def serialize_profile(profile: UserProfile) -> dict:
         "education_level": profile.education_level.value if profile.education_level else None,
         "occupation": profile.occupation,
         "bio": profile.bio,
+        "image_file_id": profile.image_file_id,
     }
 
 
@@ -108,6 +109,7 @@ def serialize_venue(venue: Venue) -> dict:
     return {
         "id": str(venue.id),
         "creator_id": str(venue.creator_id),
+        "image_url": venue.image_url,
         "name": venue.name,
         "description": venue.description,
         "address_line": venue.address_line,
@@ -144,6 +146,7 @@ def serialize_event(event: Event) -> dict:
         "end_date": event.end_date.isoformat() if event.end_date else None,
         "status": event.status.value if hasattr(event.status, "value") else event.status,
         "created_by": str(event.created_by),
+        "banner_url": event.banner_url,
     }
 
 

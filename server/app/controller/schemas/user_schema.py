@@ -138,3 +138,26 @@ class UpdateProfileResponse(BaseModel):
 class UserPermissionsResponse(BaseModel):
     success: bool = True
     permissions: dict[str, bool]
+
+
+class ProfileAvatarUploadRequest(BaseModel):
+    content_type: str = Field(min_length=1, max_length=100)
+
+
+class ProfileAvatarData(BaseModel):
+    user_id: uuid.UUID
+    image_file_id: str
+
+
+class ProfileAvatarUploadData(BaseModel):
+    upload_url: str
+    object_key: str
+    public_url: str
+    expires_in: int
+
+
+class ProfileAvatarUploadResponse(BaseModel):
+    success: bool = True
+    message: str = "Profile avatar upload URL generated. Use upload_url to PUT your image directly to storage."
+    data: ProfileAvatarData
+    upload: ProfileAvatarUploadData

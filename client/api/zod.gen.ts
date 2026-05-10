@@ -226,6 +226,23 @@ export const zErrorResponse = z.object({
 });
 
 /**
+ * EventBannerUploadData
+ */
+export const zEventBannerUploadData = z.object({
+    upload_url: z.string(),
+    object_key: z.string(),
+    public_url: z.string(),
+    expires_in: z.int()
+});
+
+/**
+ * EventBannerUploadRequest
+ */
+export const zEventBannerUploadRequest = z.object({
+    content_type: z.string().min(1).max(100)
+});
+
+/**
  * EventParticipantRecordResponse
  */
 export const zEventParticipantRecordResponse = z.object({
@@ -258,8 +275,19 @@ export const zEventRecordResponse = z.object({
     end_date: z.iso.datetime(),
     status: z.string(),
     created_by: z.uuid(),
+    banner_url: z.string().nullish(),
     created_at: z.iso.datetime().nullable(),
     updated_at: z.iso.datetime().nullable()
+});
+
+/**
+ * EventBannerUploadResponse
+ */
+export const zEventBannerUploadResponse = z.object({
+    success: z.boolean().optional().default(true),
+    message: z.string().optional().default('Banner upload URL generated. Use upload_url to PUT your image directly to storage.'),
+    data: zEventRecordResponse,
+    upload: zEventBannerUploadData
 });
 
 /**
@@ -300,6 +328,7 @@ export const zEventCreateRequest = z.object({
     description: z.string().min(1),
     start_date: z.iso.datetime(),
     end_date: z.iso.datetime(),
+    banner_url: z.string().max(512).nullish(),
     sessions: z.array(zEventSessionCreateRequest).min(1)
 });
 
@@ -413,7 +442,8 @@ export const zEventUpdateRequest = z.object({
     title: z.string().min(1).max(255),
     description: z.string().min(1),
     start_date: z.iso.datetime(),
-    end_date: z.iso.datetime()
+    end_date: z.iso.datetime(),
+    banner_url: z.string().max(512).nullish()
 });
 
 /**
@@ -628,9 +658,17 @@ export const zGetAuditLogsResponse = z.object({
 });
 
 /**
- * PresignUploadData
+ * ProfileAvatarData
  */
-export const zPresignUploadData = z.object({
+export const zProfileAvatarData = z.object({
+    user_id: z.uuid(),
+    image_file_id: z.string()
+});
+
+/**
+ * ProfileAvatarUploadData
+ */
+export const zProfileAvatarUploadData = z.object({
     upload_url: z.string(),
     object_key: z.string(),
     public_url: z.string(),
@@ -638,24 +676,20 @@ export const zPresignUploadData = z.object({
 });
 
 /**
- * PresignUploadRequest
+ * ProfileAvatarUploadRequest
  */
-export const zPresignUploadRequest = z.object({
-    resource_type: z.enum([
-        'event-cover-banner',
-        'registration-uploads',
-        'user-profile'
-    ]),
+export const zProfileAvatarUploadRequest = z.object({
     content_type: z.string().min(1).max(100)
 });
 
 /**
- * PresignUploadResponse
+ * ProfileAvatarUploadResponse
  */
-export const zPresignUploadResponse = z.object({
+export const zProfileAvatarUploadResponse = z.object({
     success: z.boolean().optional().default(true),
-    message: z.string().optional().default('Presigned URL generated.'),
-    data: zPresignUploadData
+    message: z.string().optional().default('Profile avatar upload URL generated. Use upload_url to PUT your image directly to storage.'),
+    data: zProfileAvatarData,
+    upload: zProfileAvatarUploadData
 });
 
 /**
@@ -1181,6 +1215,23 @@ export const zValidationErrorResponse = z.object({
 });
 
 /**
+ * VenueImageUploadData
+ */
+export const zVenueImageUploadData = z.object({
+    upload_url: z.string(),
+    object_key: z.string(),
+    public_url: z.string(),
+    expires_in: z.int()
+});
+
+/**
+ * VenueImageUploadRequest
+ */
+export const zVenueImageUploadRequest = z.object({
+    content_type: z.string().min(1).max(100)
+});
+
+/**
  * VenuePaginationResponse
  */
 export const zVenuePaginationResponse = z.object({
@@ -1293,6 +1344,7 @@ export const zVenueType = z.enum([
 export const zCommunityVenueCreateRequest = z.object({
     name: z.string().min(1).max(255),
     description: z.string().nullish(),
+    image_url: z.string().max(512).nullish(),
     address_line: z.string().min(1).max(255),
     city: z.string().min(1).max(100),
     province: z.string().min(1).max(100),
@@ -1315,6 +1367,7 @@ export const zCommunityVenueCreateRequest = z.object({
 export const zOfficialVenueCreateRequest = z.object({
     name: z.string().min(1).max(255),
     description: z.string().nullish(),
+    image_url: z.string().max(512).nullish(),
     address_line: z.string().min(1).max(255),
     city: z.string().min(1).max(100),
     province: z.string().min(1).max(100),
@@ -1334,6 +1387,7 @@ export const zOfficialVenueCreateRequest = z.object({
  */
 export const zPublicVenueRecordResponse = z.object({
     id: z.uuid(),
+    image_url: z.string().nullish(),
     name: z.string(),
     description: z.string().nullable(),
     address_line: z.string(),
@@ -1375,6 +1429,7 @@ export const zPublicVenueResponse = z.object({
 export const zVenueRecordResponse = z.object({
     id: z.uuid(),
     creator_id: z.uuid(),
+    image_url: z.string().nullish(),
     name: z.string(),
     description: z.string().nullable(),
     address_line: z.string(),
@@ -1394,6 +1449,16 @@ export const zVenueRecordResponse = z.object({
     contact_email: z.string().nullable(),
     created_at: z.iso.datetime().nullable(),
     updated_at: z.iso.datetime().nullable()
+});
+
+/**
+ * VenueImageUploadResponse
+ */
+export const zVenueImageUploadResponse = z.object({
+    success: z.boolean().optional().default(true),
+    message: z.string().optional().default('Venue image upload URL generated. Use upload_url to PUT your image directly to storage.'),
+    data: zVenueRecordResponse,
+    upload: zVenueImageUploadData
 });
 
 /**
@@ -1420,6 +1485,7 @@ export const zVenueResponse = z.object({
 export const zVenueUpdateRequest = z.object({
     name: z.string().min(1).max(255),
     description: z.string().nullish(),
+    image_url: z.string().max(512).nullish(),
     address_line: z.string().min(1).max(255),
     city: z.string().min(1).max(100),
     province: z.string().min(1).max(100),
@@ -1575,6 +1641,13 @@ export const zUpdateProfileUserProfilePatchBody = zUpdateProfileRequest;
  * Successful Response
  */
 export const zUpdateProfileUserProfilePatchResponse = zUpdateProfileResponse;
+
+export const zUploadProfileAvatarUserProfileAvatarPatchBody = zProfileAvatarUploadRequest;
+
+/**
+ * Successful Response
+ */
+export const zUploadProfileAvatarUserProfileAvatarPatchResponse = zProfileAvatarUploadResponse;
 
 export const zGetLoginHistoryUserLoginHistoryGetQuery = z.object({
     limit: z.int().gte(1).lte(50).optional().default(10)
@@ -1976,6 +2049,17 @@ export const zCreateOfficialVenueVenuesOfficialPostBody = zOfficialVenueCreateRe
  */
 export const zCreateOfficialVenueVenuesOfficialPostResponse = zVenueResponse;
 
+export const zUploadVenueImageVenuesVenueIdImagePostBody = zVenueImageUploadRequest;
+
+export const zUploadVenueImageVenuesVenueIdImagePostPath = z.object({
+    venue_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zUploadVenueImageVenuesVenueIdImagePostResponse = zVenueImageUploadResponse;
+
 export const zListVenueRatingsVenuesVenueIdRatingsGetPath = z.object({
     venue_id: z.uuid()
 });
@@ -2111,6 +2195,17 @@ export const zUpdateEventSessionStatusEventsEventIdSessionSessionIdStatusPatchPa
  */
 export const zUpdateEventSessionStatusEventsEventIdSessionSessionIdStatusPatchResponse = zEventSessionStatusUpdatedResponse;
 
+export const zUploadEventBannerEventsEventIdBannerPostBody = zEventBannerUploadRequest;
+
+export const zUploadEventBannerEventsEventIdBannerPostPath = z.object({
+    event_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zUploadEventBannerEventsEventIdBannerPostResponse = zEventBannerUploadResponse;
+
 export const zRegisterForSessionEventsEventIdSessionSessionIdRegisterPostPath = z.object({
     event_id: z.uuid(),
     session_id: z.uuid()
@@ -2184,10 +2279,3 @@ export const zWithdrawApplicationVolunteerApplicationsApplicationIdDeletePath = 
  * Successful Response
  */
 export const zWithdrawApplicationVolunteerApplicationsApplicationIdDeleteResponse = z.record(z.string(), z.unknown());
-
-export const zGeneratePresignedUrlUploadsPresignPostBody = zPresignUploadRequest;
-
-/**
- * Successful Response
- */
-export const zGeneratePresignedUrlUploadsPresignPostResponse = zPresignUploadResponse;

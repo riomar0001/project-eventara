@@ -1,5 +1,20 @@
 from app.controller.schemas.auth_schema import ErrorResponse, ValidationErrorResponse
 
+PROFILE_AVATAR_UPLOAD_OPENAPI_EXTRA = {
+    "requestBody": {
+        "content": {
+            "application/json": {
+                "examples": {
+                    "png_avatar": {
+                        "summary": "Generate a PNG profile picture upload URL",
+                        "value": {"content_type": "image/png"},
+                    }
+                }
+            }
+        }
+    }
+}
+
 # POST /user/onboard
 ONBOARDING_VALIDATION_ERROR = {
     422: {
@@ -382,5 +397,13 @@ FORBIDDEN = {
                 }
             }
         },
+    }
+}
+
+PROFILE_AVATAR_STORAGE_UNAVAILABLE = {
+    503: {
+        "description": "Object storage is unavailable or not configured",
+        "model": ErrorResponse,
+        "content": {"application/json": {"example": {"success": False, "message": "Storage service is currently unavailable."}}},
     }
 }

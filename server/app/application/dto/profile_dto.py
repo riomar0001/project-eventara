@@ -42,6 +42,18 @@ class UpdateProfileOutput:
 
 
 @dataclass
+class UpdateProfileAvatarInput:
+    user_id: uuid.UUID
+    image_url: str
+
+
+@dataclass
+class UpdateProfileAvatarOutput:
+    profile: UserProfile
+    old_image_url: str | None
+
+
+@dataclass
 class GetLoginHistoryInput:
     user_id: uuid.UUID
     limit: int = 10

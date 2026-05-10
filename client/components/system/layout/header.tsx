@@ -19,6 +19,7 @@ import { Input } from '@/components/ui/input';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Auth } from '@/api/sdk.gen';
 import { notifications } from '@/constants/system/notifications';
+import { resolveStorageImageUrl } from '@/lib/storage/image-url';
 import { getDisplayName, getInitials } from '@/lib/user/profile';
 import { useAuthStore } from '@/store/auth-store';
 
@@ -123,7 +124,7 @@ export function Header() {
             <Button className="hover:bg-primary/30 flex h-11 w-11 items-center justify-center rounded-xl bg-white p-1 transition-colors outline-none sm:w-60 sm:justify-between sm:px-2.5 sm:pr-5">
               <div className="flex items-center gap-2.5">
                 <Avatar className="size-8 shrink-0">
-                  <AvatarImage alt={displayName} />
+                  <AvatarImage src={resolveStorageImageUrl(user?.imageFileId)} alt={displayName} />
                   <AvatarFallback className="text-xs">{initials}</AvatarFallback>
                 </Avatar>
                 <div className="hidden flex-col text-left sm:flex">

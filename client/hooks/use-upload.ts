@@ -1,27 +1,94 @@
 'use client';
 
 import { useState } from 'react';
+import { AccountSettings, Events, Venues } from '@/api/sdk.gen';
 import { getAccessToken } from '@/store/auth-store';
 
-export type UploadResourceType = 'event-cover-banner' | 'registration-uploads' | 'user-profile';
+export type UploadResourceType = 'event-cover-banner' | 'venue-image' | 'user-profile';
 
 const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
 const MAX_SIZE_BYTES = 5 * 1024 * 1024;
+
+interface UploadContext {
+  eventId?: string;
+  venueId?: string;
+}
 
 export interface UploadResult {
   objectKey: string;
   publicUrl: string;
 }
 
+interface PresignedUpload {
+  upload_url: string;
+  object_key: string;
+  public_url: string;
+}
+
+function extractUploadError(payload: unknown): string | undefined {
+  if (!payload || typeof payload !== 'object') return undefined;
+  const p = payload as { detail?: unknown; message?: unknown };
+  if (typeof p.detail === 'string') return p.detail;
+  if (Array.isArray(p.detail) && p.detail.length > 0) {
+    const first = p.detail[0];
+    if (typeof first === 'string') return first;
+    if (first && typeof first === 'object') {
+      const ve = first as { msg?: unknown; message?: unknown };
+      if (typeof ve.msg === 'string') return ve.msg;
+      if (typeof ve.message === 'string') return ve.message;
+    }
+  }
+  if (typeof p.message === 'string') return p.message;
+  return undefined;
+}
+
 function parseUploadError(error: unknown): string {
+  const extracted = extractUploadError(error);
+  if (extracted) return extracted;
   if (error instanceof Error) return error.message;
   return 'Upload failed.';
+}
+
+async function requestFeatureUpload(file: File, resourceType: UploadResourceType, context?: UploadContext): Promise<PresignedUpload> {
+  const headers = { Authorization: `Bearer ${getAccessToken()}` };
+
+  if (resourceType === 'event-cover-banner') {
+    if (!context?.eventId) throw new Error('Save the event before uploading a banner.');
+    const result = await Events.uploadEventBannerEventsEventIdBannerPost({
+      path: { event_id: context.eventId },
+      body: { content_type: file.type },
+      headers,
+      throwOnError: false
+    });
+    if (!result.data) throw result.error ?? new Error('Failed to get event banner upload URL.');
+    return result.data.upload;
+  }
+
+  if (resourceType === 'venue-image') {
+    if (!context?.venueId) throw new Error('Save the venue before uploading an image.');
+    const result = await Venues.uploadVenueImageVenuesVenueIdImagePost({
+      path: { venue_id: context.venueId },
+      body: { content_type: file.type },
+      headers,
+      throwOnError: false
+    });
+    if (!result.data) throw result.error ?? new Error('Failed to get venue image upload URL.');
+    return result.data.upload;
+  }
+
+  const result = await AccountSettings.uploadProfileAvatarUserProfileAvatarPatch({
+    body: { content_type: file.type },
+    headers,
+    throwOnError: false
+  });
+  if (!result.data) throw result.error ?? new Error('Failed to get profile picture upload URL.');
+  return result.data.upload;
 }
 
 export function useUpload() {
   const [isUploading, setIsUploading] = useState(false);
 
-  async function upload(file: File, resourceType: UploadResourceType): Promise<UploadResult> {
+  async function upload(file: File, resourceType: UploadResourceType, context?: UploadContext): Promise<UploadResult> {
     if (!ALLOWED_TYPES.has(file.type)) {
       throw new Error('Only JPEG, PNG, WebP, and GIF images are allowed.');
     }
@@ -31,25 +98,7 @@ export function useUpload() {
 
     setIsUploading(true);
     try {
-      const presignResp = await fetch('/api/uploads/presign', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${getAccessToken()}`
-        },
-        body: JSON.stringify({ resource_type: resourceType, content_type: file.type })
-      });
-
-      const body = await presignResp.json().catch(() => null);
-      if (!presignResp.ok) {
-        throw new Error(body?.message ?? body?.detail ?? 'Failed to get upload URL.');
-      }
-
-      const { upload_url, object_key, public_url } = body.data as {
-        upload_url: string;
-        object_key: string;
-        public_url: string;
-      };
+      const { upload_url, object_key, public_url } = await requestFeatureUpload(file, resourceType, context);
 
       const putResp = await fetch(upload_url, {
         method: 'PUT',

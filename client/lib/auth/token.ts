@@ -13,6 +13,7 @@ export interface AuthUser {
   educationLevel?: string;
   occupation?: string;
   bio?: string;
+  imageFileId?: string;
 }
 
 // Extending standard JwtPayload gives you 'sub' and 'exp' automatically
@@ -28,6 +29,7 @@ interface RawTokenPayload extends JwtPayload {
   education_level?: string;
   occupation?: string;
   bio?: string;
+  image_file_id?: string;
 }
 
 /**
@@ -58,7 +60,8 @@ export function decodeTokenUser(token: string): AuthUser | null {
       gender: p.gender ?? undefined,
       educationLevel: p.education_level ?? undefined,
       occupation: p.occupation ?? undefined,
-      bio: p.bio ?? undefined
+      bio: p.bio ?? undefined,
+      imageFileId: p.image_file_id ?? undefined
     };
   } catch {
     // jwtDecode throws an InvalidTokenError if the token is invalid/malformed

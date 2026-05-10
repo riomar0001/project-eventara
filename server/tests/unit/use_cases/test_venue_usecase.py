@@ -1,5 +1,3 @@
-"""Unit tests for VenueManagementUseCase."""
-
 import uuid
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock
@@ -14,8 +12,6 @@ from app.domain.exceptions.venue_exceptions import (
     VenueInUseError,
     VenueNotFoundError,
 )
-
-# ─── Helpers ──────────────────────────────────────────────────────────────────
 
 VENUE_ID = uuid.uuid4()
 CREATOR_ID = uuid.uuid4()
@@ -85,6 +81,7 @@ def _create_input(**overrides: Any) -> CreateVenueInput:
         country="Philippines",
         capacity=500,
         venue_type=VenueType.INDOOR,
+        image_url="https://cdn.example.com/venue.jpg",
         amenities=["wifi", "air conditioning"],
     )
     defaults.update(overrides)
@@ -103,15 +100,13 @@ def _update_input(**overrides: Any) -> UpdateVenueInput:
         country="Philippines",
         capacity=600,
         venue_type=VenueType.INDOOR,
+        image_url="https://cdn.example.com/updated-venue.jpg",
         contact_name="Juan Dela Cruz",
         contact_phone="09171234567",
         contact_email="venue@example.com",
     )
     defaults.update(overrides)
     return UpdateVenueInput(**defaults)
-
-
-# ─── _normalise_amenities ─────────────────────────────────────────────────────
 
 
 class TestNormaliseAmenities:
@@ -135,9 +130,6 @@ class TestNormaliseAmenities:
         assert _normalise_amenities(["", "   "]) is None
 
 
-# ─── list_venues ──────────────────────────────────────────────────────────────
-
-
 class TestListVenues:
     @pytest.mark.asyncio
     async def test_returns_venues_and_total(self):
@@ -158,9 +150,6 @@ class TestListVenues:
         assert result.total_pages == 3
 
 
-# ─── get_venue ────────────────────────────────────────────────────────────────
-
-
 class TestGetVenue:
     @pytest.mark.asyncio
     async def test_success(self):
@@ -172,9 +161,6 @@ class TestGetVenue:
     async def test_raises_not_found_when_missing(self):
         with pytest.raises(VenueNotFoundError):
             await _make_uc(_make_repo(venue=None)).get_venue(VENUE_ID)
-
-
-# ─── create_venue ─────────────────────────────────────────────────────────────
 
 
 class TestCreateVenue:
@@ -194,6 +180,7 @@ class TestCreateVenue:
         await VenueManagementUseCase(repo=repo, db=db).create_venue(_create_input(amenities=["wifi", "air conditioning"]))
         call_kwargs = repo.create_venue.call_args.kwargs
         assert call_kwargs["amenities"] == ["Wifi", "Air Conditioning"]
+        assert call_kwargs["image_url"] == "https://cdn.example.com/venue.jpg"
 
     @pytest.mark.asyncio
     async def test_duplicate_name_in_city_raises_already_exists(self):
@@ -211,9 +198,6 @@ class TestCreateVenue:
         with pytest.raises(RuntimeError):
             await VenueManagementUseCase(repo=repo, db=db).create_venue(_create_input())
         db.rollback.assert_awaited_once()
-
-
-# ─── update_venue ─────────────────────────────────────────────────────────────
 
 
 class TestUpdateVenue:
@@ -250,6 +234,7 @@ class TestUpdateVenue:
         await VenueManagementUseCase(repo=repo, db=db).update_venue(_update_input(amenities=["parking", "restroom"]))
         call_kwargs = repo.update_venue.call_args.kwargs
         assert call_kwargs["amenities"] == ["Parking", "Restroom"]
+        assert call_kwargs["image_url"] == "https://cdn.example.com/updated-venue.jpg"
 
     @pytest.mark.asyncio
     async def test_venue_not_found_raises(self):
@@ -287,9 +272,6 @@ class TestUpdateVenue:
         with pytest.raises(RuntimeError):
             await VenueManagementUseCase(repo=repo, db=db).update_venue(_update_input())
         db.rollback.assert_awaited_once()
-
-
-# ─── delete_venue ─────────────────────────────────────────────────────────────
 
 
 class TestDeleteVenue:
@@ -333,9 +315,6 @@ class TestDeleteVenue:
         with pytest.raises(RuntimeError):
             await VenueManagementUseCase(repo=repo, db=db).delete_venue(VENUE_ID)
         db.rollback.assert_awaited_once()
-
-
-# ─── create_venue (community) ─────────────────────────────────────────────────
 
 
 class TestCreateCommunityVenue:
@@ -385,9 +364,6 @@ class TestCreateCommunityVenue:
         with pytest.raises(VenueAlreadyExistsError):
             await VenueManagementUseCase(repo=repo, db=db).create_venue(_create_input(is_partner=False))
         db.rollback.assert_awaited_once()
-
-
-# ─── create_venue (official) ──────────────────────────────────────────────────
 
 
 class TestCreateOfficialVenue:

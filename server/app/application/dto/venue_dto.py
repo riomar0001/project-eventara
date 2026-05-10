@@ -27,6 +27,7 @@ class CreateVenueInput:
     country: str
     capacity: int
     venue_type: VenueType
+    image_url: str | None = None
     description: str | None = None
     is_partner: bool = False
     amenities: list[str] | None = None
@@ -50,6 +51,7 @@ class UpdateVenueInput:
     contact_name: str
     contact_phone: str
     contact_email: str
+    image_url: str | None = None
     description: str | None = None
     is_partner: bool = False
     amenities: list[str] | None = None
@@ -58,6 +60,19 @@ class UpdateVenueInput:
 @dataclass
 class VenueOutput:
     venue: VenueEntity
+
+
+@dataclass
+class UpdateVenueImageInput:
+    venue_id: uuid.UUID
+    updated_by: uuid.UUID
+    image_url: str
+
+
+@dataclass
+class UpdateVenueImageOutput:
+    venue: VenueEntity
+    old_image_url: str | None
 
 
 @dataclass

@@ -1,32 +1,87 @@
 'use client';
 
-import { CalendarPlus } from 'lucide-react';
+import { CalendarCheck, CalendarPlus, ImageIcon, MapPin, Plus, Send } from 'lucide-react';
 import Link from 'next/link';
 import { MobileFloatingAction, PrimaryPageAction } from '@/components/admin/shared/primary-page-action';
 import { Button } from '@/components/ui/button';
-import { CatalogCard, OperationsPageIntro } from './events-shared';
-import { ADMIN_OPERATIONS_PATHS, eventRecords, getVenueById, getVolunteersByEventId } from '@/constants/admin/operations';
+import { OperationsPageIntro } from './events-shared';
+import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
+
+const EVENT_EMPTY_CHECKLIST = [
+  { label: 'Details', value: 'Title and date window', icon: CalendarCheck },
+  { label: 'Venue', value: 'At least one session', icon: MapPin },
+  { label: 'Media', value: 'Event banner image', icon: ImageIcon }
+] as const;
 
 function EventsEmptyState() {
   return (
-    <div className="flex flex-col items-center justify-center rounded-[28px] border border-dashed border-neutral-200 bg-neutral-50/60 px-8 py-20 text-center">
-      <div className="mb-5 flex size-14 items-center justify-center rounded-2xl bg-sky-50 ring-1 ring-sky-100">
-        <CalendarPlus className="size-6 text-sky-500" />
+    <div className="overflow-hidden rounded-[24px] border border-neutral-200 bg-white shadow-[0_24px_70px_-46px_rgba(15,23,42,0.45)]">
+      <div className="grid lg:grid-cols-[minmax(0,1fr)_340px]">
+        <div className="p-6 sm:p-8">
+          <div className="flex items-center gap-2">
+            <span className="flex size-9 items-center justify-center rounded-xl bg-sky-50 text-sky-700 ring-1 ring-sky-100">
+              <CalendarPlus className="size-4" />
+            </span>
+            <p className="text-[11px] font-semibold tracking-[0.2em] text-sky-700 uppercase">Empty pipeline</p>
+          </div>
+
+          <h3 className="mt-5 max-w-2xl text-2xl font-semibold tracking-tight text-neutral-950">Create the first event draft and start shaping the calendar.</h3>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-neutral-500">
+            Add the event details, attach a banner, and schedule at least one venue session so the pipeline can move from planning to published.
+          </p>
+
+          <div className="mt-6 flex flex-wrap gap-2">
+            <Button asChild className="rounded-xl bg-sky-600 text-white hover:bg-sky-500">
+              <Link href={ADMIN_OPERATIONS_PATHS.eventCreate}>
+                <Plus className="size-4" />
+                Add event
+              </Link>
+            </Button>
+          </div>
+
+          <div className="mt-8 grid gap-3 sm:grid-cols-3">
+            {EVENT_EMPTY_CHECKLIST.map(({ label, value, icon: Icon }) => (
+              <div key={label} className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3">
+                <Icon className="mb-3 size-4 text-sky-600" />
+                <p className="text-[11px] font-semibold tracking-[0.16em] text-neutral-400 uppercase">{label}</p>
+                <p className="mt-1 text-sm font-medium text-neutral-800">{value}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="border-t border-neutral-200 bg-neutral-950 p-6 text-white lg:border-t-0 lg:border-l">
+          <div className="flex h-full flex-col justify-between gap-8">
+            <div className="space-y-3">
+              <p className="text-[11px] font-semibold tracking-[0.2em] text-sky-300 uppercase">Launch path</p>
+              <p className="text-sm leading-6 text-white/70">
+                Save as draft while the structure is incomplete, then post once the schedule and banner are ready for review.
+              </p>
+            </div>
+            <div className="space-y-3">
+              {['Draft the event', 'Attach sessions', 'Post when ready'].map((step, index) => (
+                <div key={step} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                  <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-sky-300 text-xs font-semibold text-neutral-950">
+                    {index + 1}
+                  </span>
+                  <span className="text-sm font-medium text-white/90">{step}</span>
+                </div>
+              ))}
+            </div>
+            <div className="rounded-2xl border border-sky-300/20 bg-sky-300/10 px-4 py-3">
+              <div className="flex items-center gap-2 text-sm font-medium text-sky-100">
+                <Send className="size-4" />
+                Ready for the first listing
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-      <h3 className="text-lg font-semibold tracking-tight text-neutral-950">No events yet</h3>
-      <p className="mt-2 max-w-sm text-sm leading-6 text-neutral-500">
-        Your event pipeline is empty. Create your first event to start building the public calendar and scheduling volunteer staffing.
-      </p>
-      <Button asChild size="default" className="mt-6 rounded-xl bg-sky-600 text-white hover:bg-sky-500">
-        <Link href={ADMIN_OPERATIONS_PATHS.eventCreate}>Create your first event</Link>
-      </Button>
     </div>
   );
 }
 
 export function EventsCatalog() {
-  const events = eventRecords;
-
   return (
     <div className="space-y-6">
       <MobileFloatingAction cta="Add event" href={ADMIN_OPERATIONS_PATHS.eventCreate} theme="sky" />
@@ -38,18 +93,18 @@ export function EventsCatalog() {
         metrics={[
           {
             label: 'Total events',
-            value: events.length,
-            hint: 'Scheduled campaigns currently represented in this preview catalog.'
+            value: 0,
+            hint: 'Events will appear here once the events read endpoint is available.'
           },
           {
             label: 'Upcoming events',
-            value: events.filter((event) => event.status === 'On Sale').length,
-            hint: 'Events already positioned for promotion and attendee acquisition.'
+            value: 0,
+            hint: 'Published upcoming events from the API.'
           },
           {
             label: 'Volunteer seats',
-            value: events.reduce((count, event) => count + getVolunteersByEventId(event.id).length, 0),
-            hint: 'Rostered volunteer placements currently tied to active event plans.'
+            value: 0,
+            hint: 'Rostered volunteer placements tied to events.'
           }
         ]}
         actions={
@@ -63,42 +118,7 @@ export function EventsCatalog() {
         }
       />
 
-      {events.length === 0 ? (
-        <EventsEmptyState />
-      ) : (
-        <div className="grid gap-6 xl:grid-cols-4">
-          {events.map((event) => {
-            const venue = getVenueById(event.venueId);
-
-            return (
-              <CatalogCard
-                key={event.id}
-                title={event.title}
-                subtitle={event.dateLabel}
-                photo={event.photo}
-                description={event.summary}
-                href={ADMIN_OPERATIONS_PATHS.eventDetail(event.id)}
-                editHref={ADMIN_OPERATIONS_PATHS.eventEdit(event.id)}
-                badges={[event.status, event.audience]}
-                meta={[
-                  {
-                    label: 'Venue',
-                    value: venue?.name ?? 'Venue not set'
-                  },
-                  {
-                    label: 'Registration',
-                    value: event.registrationLabel
-                  },
-                  {
-                    label: 'Volunteer need',
-                    value: event.volunteerNeed
-                  }
-                ]}
-              />
-            );
-          })}
-        </div>
-      )}
+      <EventsEmptyState />
     </div>
   );
 }

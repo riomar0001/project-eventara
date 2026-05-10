@@ -16,7 +16,7 @@ import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 
-from app.application.dto.venue_dto import CreateVenueInput, ListVenuesInput, UpdateVenueInput
+from app.application.dto.venue_dto import CreateVenueInput, ListVenuesInput, UpdateVenueImageInput, UpdateVenueInput
 from app.application.dto.venue_rating_dto import (
     CreateVenueRatingInput,
     ListVenueRatingsInput,
@@ -27,14 +27,20 @@ from app.application.use_cases.venue_rating_usecase import VenueRatingUseCase
 from app.application.use_cases.venue_usecase import VenueManagementUseCase
 from app.controller.api.audit_helpers import safe_audit_log, serialize_venue, serialize_venue_rating
 from app.controller.dependencies import get_audit_log_use_case, get_current_user_id, require_permission
+from app.controller.dependencies.storage_depends import get_storage_service
 from app.controller.dependencies.use_cases_depends import get_venue_management_use_case, get_venue_rating_use_case
 from app.controller.docs.venue_management_docs import (
+    COMMUNITY_VENUE_CREATE_OPENAPI_EXTRA,
     FORBIDDEN,
+    OFFICIAL_VENUE_CREATE_OPENAPI_EXTRA,
     UNAUTHORIZED,
     VALIDATION_ERROR,
     VENUE_CONFLICT,
+    VENUE_IMAGE_UPLOAD_OPENAPI_EXTRA,
+    VENUE_IMAGE_STORAGE_UNAVAILABLE,
     VENUE_IN_USE,
     VENUE_NOT_FOUND,
+    VENUE_UPDATE_OPENAPI_EXTRA,
 )
 from app.controller.docs.venue_rating_docs import (
     RATING_CONFLICT,
@@ -50,6 +56,9 @@ from app.controller.schemas.venue_management_schema import (
     PublicVenueListResponse,
     PublicVenueRecordResponse,
     PublicVenueResponse,
+    VenueImageUploadData,
+    VenueImageUploadRequest,
+    VenueImageUploadResponse,
     VenueListResponse,
     VenuePaginationResponse,
     VenueRecordResponse,
@@ -71,6 +80,7 @@ from app.domain.entities.audit_log import ActionType, AuditLogStatus
 from app.domain.entities.authorization_entities import RoleAction
 from app.domain.entities.venue_entities import VenueType
 from app.domain.exceptions.venue_exceptions import (
+    UnauthorizedVenueOperationError,
     VenueAlreadyExistsError,
     VenueInUseError,
     VenueNotFoundError,
@@ -79,6 +89,7 @@ from app.domain.exceptions.venue_rating_exceptions import (
     VenueRatingAlreadyExistsError,
     VenueRatingNotFoundError,
 )
+from app.infrastructure.storage.storage_service import StorageService
 
 venue_router = APIRouter(prefix="/venues", tags=["Venues"])
 
@@ -87,6 +98,7 @@ def _to_venue_response(venue) -> VenueRecordResponse:
     return VenueRecordResponse(
         id=venue.id,
         creator_id=venue.creator_id,
+        image_url=StorageService.public_url_for_object_key(venue.image_url),
         name=venue.name,
         description=venue.description,
         address_line=venue.address_line,
@@ -112,6 +124,7 @@ def _to_venue_response(venue) -> VenueRecordResponse:
 def _to_public_venue_response(venue) -> PublicVenueRecordResponse:
     return PublicVenueRecordResponse(
         id=venue.id,
+        image_url=StorageService.public_url_for_object_key(venue.image_url),
         name=venue.name,
         description=venue.description,
         address_line=venue.address_line,
@@ -339,51 +352,10 @@ async def get_venue(
     description=(
         "Add a venue suggested by the community. Contact information is optional. "
         "The venue is automatically marked as non-partner (``is_partner=false``). "
+        "An optional ``image_url`` may be supplied when the venue image has already been uploaded through the feature-specific image endpoint. "
         "Amenity names are normalised to Title Case. Venue names must be unique within the same city."
     ),
-    openapi_extra={
-        "requestBody": {
-            "content": {
-                "application/json": {
-                    "examples": {
-                        "minimal": {
-                            "summary": "Required fields only (no contact)",
-                            "value": {
-                                "name": "Rizal Park",
-                                "address_line": "Roxas Blvd",
-                                "city": "Manila",
-                                "province": "Metro Manila",
-                                "postal_code": "1000",
-                                "region": "NCR",
-                                "country": "Philippines",
-                                "capacity": 5000,
-                                "venue_type": "outdoor",
-                            },
-                        },
-                        "with_contact": {
-                            "summary": "With optional contact information",
-                            "value": {
-                                "name": "Rizal Park",
-                                "description": "Historic open-air park in Manila.",
-                                "address_line": "Roxas Blvd",
-                                "city": "Manila",
-                                "province": "Metro Manila",
-                                "postal_code": "1000",
-                                "region": "NCR",
-                                "country": "Philippines",
-                                "capacity": 5000,
-                                "venue_type": "outdoor",
-                                "amenities": ["Open Space", "Restroom"],
-                                "contact_name": "Juan Dela Cruz",
-                                "contact_phone": "09171234567",
-                                "contact_email": "juan@example.com",
-                            },
-                        },
-                    }
-                }
-            }
-        }
-    },
+    openapi_extra=COMMUNITY_VENUE_CREATE_OPENAPI_EXTRA,
 )
 async def create_community_venue(
     request: Request,
@@ -414,6 +386,7 @@ async def create_community_venue(
                 country=body.country,
                 capacity=body.capacity,
                 venue_type=body.venue_type,
+                image_url=StorageService.object_key_from_public_url(body.image_url),
                 is_partner=False,
                 amenities=body.amenities,
                 contact_name=body.contact_name,
@@ -446,54 +419,10 @@ async def create_community_venue(
     description=(
         "Add an officially managed venue. Contact information is required. "
         "The venue is automatically marked as a partner (``is_partner=true``). "
+        "An optional ``image_url`` may be supplied when the venue image has already been uploaded through the feature-specific image endpoint. "
         "Amenity names are normalised to Title Case. Venue names must be unique within the same city."
     ),
-    openapi_extra={
-        "requestBody": {
-            "content": {
-                "application/json": {
-                    "examples": {
-                        "minimal": {
-                            "summary": "Required fields only",
-                            "value": {
-                                "name": "Davao Convention Center",
-                                "address_line": "123 Quimpo Blvd",
-                                "city": "Davao City",
-                                "province": "Davao del Sur",
-                                "postal_code": "8000",
-                                "region": "Region XI",
-                                "country": "Philippines",
-                                "capacity": 2000,
-                                "venue_type": "indoor",
-                                "contact_name": "Maria Santos",
-                                "contact_phone": "09171234567",
-                                "contact_email": "contact@davaocvb.ph",
-                            },
-                        },
-                        "full": {
-                            "summary": "All fields including optional",
-                            "value": {
-                                "name": "Davao Convention Center",
-                                "description": "Premier convention facility in Mindanao.",
-                                "address_line": "123 Quimpo Blvd",
-                                "city": "Davao City",
-                                "province": "Davao del Sur",
-                                "postal_code": "8000",
-                                "region": "Region XI",
-                                "country": "Philippines",
-                                "capacity": 2000,
-                                "venue_type": "indoor",
-                                "amenities": ["Wifi", "Air Conditioning", "Parking"],
-                                "contact_name": "Maria Santos",
-                                "contact_phone": "09171234567",
-                                "contact_email": "contact@davaocvb.ph",
-                            },
-                        },
-                    }
-                }
-            }
-        }
-    },
+    openapi_extra=OFFICIAL_VENUE_CREATE_OPENAPI_EXTRA,
 )
 async def create_official_venue(
     request: Request,
@@ -524,6 +453,7 @@ async def create_official_venue(
                 country=body.country,
                 capacity=body.capacity,
                 venue_type=body.venue_type,
+                image_url=StorageService.object_key_from_public_url(body.image_url),
                 is_partner=True,
                 amenities=body.amenities,
                 contact_name=body.contact_name,
@@ -554,10 +484,11 @@ async def create_official_venue(
     responses={**UNAUTHORIZED, **FORBIDDEN, **VENUE_NOT_FOUND, **VENUE_CONFLICT, **VALIDATION_ERROR},
     summary="Update a venue",
     description=(
-        "Update an existing venue record. All fields are replaced. Amenity names "
+        "Update an existing venue record, including its optional image object key. All fields are replaced. Amenity names "
         "are normalised to Title Case. Name uniqueness is re-checked against the "
         "city value supplied in this request."
     ),
+    openapi_extra=VENUE_UPDATE_OPENAPI_EXTRA,
 )
 async def update_venue(
     request: Request,
@@ -591,6 +522,7 @@ async def update_venue(
                 country=body.country,
                 capacity=body.capacity,
                 venue_type=body.venue_type,
+                image_url=StorageService.object_key_from_public_url(body.image_url),
                 is_partner=body.is_partner,
                 amenities=body.amenities,
                 contact_name=body.contact_name,
@@ -659,7 +591,81 @@ async def delete_venue(
     )
 
 
-# ─── Venue Rating Endpoints ───────────────────────────────────────────────────
+@venue_router.post(
+    "/{venue_id}/image",
+    response_model=VenueImageUploadResponse,
+    status_code=status.HTTP_200_OK,
+    responses={
+        **UNAUTHORIZED,
+        **FORBIDDEN,
+        **VENUE_NOT_FOUND,
+        **VALIDATION_ERROR,
+        **VENUE_IMAGE_STORAGE_UNAVAILABLE,
+    },
+    summary="Upload a venue image",
+    description=(
+        "Generate a presigned upload URL for the venue's cover image. "
+        "The caller must be the venue creator. "
+        "PUT the image binary directly to ``upload_url`` within the expiry window (3600 s). "
+        "Allowed content types: ``image/jpeg``, ``image/png``, ``image/webp``, ``image/gif``."
+    ),
+    openapi_extra=VENUE_IMAGE_UPLOAD_OPENAPI_EXTRA,
+)
+async def upload_venue_image(
+    request: Request,
+    venue_id: uuid.UUID,
+    body: VenueImageUploadRequest,
+    caller_id: uuid.UUID = Depends(require_permission("venues", RoleAction.UPDATE)),
+    use_case: VenueManagementUseCase = Depends(get_venue_management_use_case),
+    audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
+    storage: StorageService = Depends(get_storage_service),
+) -> VenueImageUploadResponse:
+    """Generate a presigned venue image upload URL and persist the resulting object key on the venue."""
+    try:
+        upload_url, object_key, public_url, expires_in = storage.generate_presigned_upload(
+            resource_type="venue-image",
+            content_type=body.content_type,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))
+    except RuntimeError as exc:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc))
+
+    try:
+        result = await use_case.update_venue_image(
+            UpdateVenueImageInput(
+                venue_id=venue_id,
+                updated_by=caller_id,
+                image_url=object_key,
+            )
+        )
+    except UnauthorizedVenueOperationError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
+    except VenueNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+
+    await safe_audit_log(
+        audit_use_case,
+        request,
+        user_id=caller_id,
+        action_type=ActionType.UPDATE,
+        resource_type="venues",
+        resource_id=str(venue_id),
+        status=AuditLogStatus.SUCCESS,
+        old_values={"image_file_id": result.old_image_url},
+        new_values={"image_file_id": object_key},
+        additional_context={"public_url": public_url},
+    )
+
+    return VenueImageUploadResponse(
+        data=_to_venue_response(result.venue),
+        upload=VenueImageUploadData(
+            upload_url=upload_url,
+            object_key=object_key,
+            public_url=public_url,
+            expires_in=expires_in,
+        ),
+    )
 
 
 def _to_rating_response(rating) -> VenueRatingRecordResponse:

@@ -5,21 +5,43 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { ADMIN_OPERATIONS_PATHS, getVolunteerInitials, type VolunteerRecord } from '@/constants/admin/operations';
+import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
+
+export type VolunteerTableRecord = {
+  id: string;
+  name: string;
+  email: string;
+  photo?: string | null;
+  primaryRole: string;
+  skills: string[];
+  availability: 'Flexible' | 'Weekends' | 'Weeknights';
+  hoursContributed: number;
+  status: 'Active' | 'Training' | 'Inactive';
+};
 
 export type VolunteerColumnMeta = {
   cellClassName?: string;
   headerClassName?: string;
 };
 
-export const volunteerColumns: ColumnDef<VolunteerRecord>[] = [
+function getVolunteerInitials(name: string) {
+  return name
+    .split(' ')
+    .filter(Boolean)
+    .map((part) => part[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
+}
+
+export const volunteerColumns: ColumnDef<VolunteerTableRecord>[] = [
   {
     id: 'profile',
     header: 'Volunteer',
     cell: ({ row }) => (
       <div className="flex items-center gap-3">
         <Avatar size="lg">
-          <AvatarImage src={row.original.photo} alt={row.original.name} />
+          <AvatarImage src={row.original.photo ?? undefined} alt={row.original.name} />
           <AvatarFallback>{getVolunteerInitials(row.original.name)}</AvatarFallback>
         </Avatar>
         <div className="space-y-1">

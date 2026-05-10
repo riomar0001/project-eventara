@@ -8,9 +8,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { ImageUpload } from '@/components/ui/image-upload';
 import { BackLink, FieldLabel, PhotoPanel } from './venues-shared';
 import { useVenueForm } from '@/hooks/admin/venues/use-venue-form';
 import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
+import { resolveStorageImageUrl } from '@/lib/storage/image-url';
 import type { VenueRecordResponse } from '@/api/types.gen';
 
 // ── Form shape ─────────────────────────────────────────────────────────────────
@@ -18,6 +20,7 @@ export interface VenueFormValues {
   venue_category: 'community' | 'official';
   name: string;
   description: string;
+  image_url: string;
   address_line: string;
   city: string;
   province: string;
@@ -37,6 +40,7 @@ function defaultValues(venue?: VenueRecordResponse): VenueFormValues {
     venue_category: venue?.is_partner ? 'official' : 'community',
     name: venue?.name ?? '',
     description: venue?.description ?? '',
+    image_url: venue?.image_url ?? '',
     address_line: venue?.address_line ?? '',
     city: venue?.city ?? '',
     province: venue?.province ?? '',
@@ -89,11 +93,12 @@ function CategoryTile({
 // ── Component ──────────────────────────────────────────────────────────────────
 export function VenueForm({ mode, venue }: { mode: 'create' | 'edit'; venue?: VenueRecordResponse }) {
   const [form, setForm] = useState<VenueFormValues>(() => defaultValues(venue));
-  const { submitCreate, isSubmitting } = useVenueForm();
+  const { submitCreate, submitEdit, isSubmitting } = useVenueForm();
   const amenityInputRef = useRef<HTMLInputElement>(null);
   const [amenityDraft, setAmenityDraft] = useState('');
+  const [pendingImageFile, setPendingImageFile] = useState<File | null>(null);
 
-  const previewPhoto = 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=1400&q=80';
+  const previewPhoto = resolveStorageImageUrl(form.image_url) || 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=1400&q=80';
 
   function set<K extends keyof VenueFormValues>(key: K, value: VenueFormValues[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -127,7 +132,9 @@ export function VenueForm({ mode, venue }: { mode: 'create' | 'edit'; venue?: Ve
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     if (mode === 'create') {
-      await submitCreate(form);
+      await submitCreate(form, pendingImageFile);
+    } else if (venue?.id) {
+      await submitEdit(venue.id, form);
     }
   }
 
@@ -156,7 +163,7 @@ export function VenueForm({ mode, venue }: { mode: 'create' | 'edit'; venue?: Ve
                     current={form.venue_category}
                     icon={Users}
                     label="Community suggestion"
-                    description="A venue suggested by the community. Contact info is optional."
+                    description="A venue suggested by the community. Lead contact is required."
                     onSelect={(v) => set('venue_category', v)}
                   />
                   <CategoryTile
@@ -197,6 +204,19 @@ export function VenueForm({ mode, venue }: { mode: 'create' | 'edit'; venue?: Ve
                       maxLength={1000}
                     />
                     <p className="text-right text-[11px] text-neutral-400">{form.description.length} / 1000</p>
+                  </div>
+
+                  <div className="space-y-2 md:col-span-2">
+                    <FieldLabel>Venue image</FieldLabel>
+                    <ImageUpload
+                      value={form.image_url}
+                      onChange={(value) => set('image_url', value)}
+                      resourceType="venue-image"
+                      resourceId={venue?.id}
+                      deferUpload={mode === 'create'}
+                      onFileSelected={setPendingImageFile}
+                      disabled={isSubmitting}
+                    />
                   </div>
 
                   <div className="space-y-2">
@@ -301,25 +321,22 @@ export function VenueForm({ mode, venue }: { mode: 'create' | 'edit'; venue?: Ve
 
               {/* ── Section: Contact ─────────────────────────────────────── */}
               <fieldset className="space-y-4">
-                <div className="flex items-baseline gap-2">
-                  <legend className="text-xs font-semibold tracking-[0.18em] text-neutral-400 uppercase">Lead contact</legend>
-                  {!isOfficial && <span className="text-[11px] text-neutral-400">(optional)</span>}
-                </div>
+                <legend className="text-xs font-semibold tracking-[0.18em] text-neutral-400 uppercase">Lead contact *</legend>
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2 md:col-span-2">
-                    <FieldLabel htmlFor="contact-name">Contact name{isOfficial ? ' *' : ''}</FieldLabel>
+                    <FieldLabel htmlFor="contact-name">Contact name *</FieldLabel>
                     <Input
                       id="contact-name"
                       value={form.contact_name}
                       onChange={(e) => set('contact_name', e.target.value)}
                       placeholder="Maria Santos"
                       maxLength={255}
-                      required={isOfficial}
+                      required
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <FieldLabel htmlFor="contact-phone">Phone{isOfficial ? ' *' : ''}</FieldLabel>
+                    <FieldLabel htmlFor="contact-phone">Phone *</FieldLabel>
                     <Input
                       id="contact-phone"
                       type="tel"
@@ -327,12 +344,12 @@ export function VenueForm({ mode, venue }: { mode: 'create' | 'edit'; venue?: Ve
                       onChange={(e) => set('contact_phone', e.target.value)}
                       placeholder="+63 912 345 6789"
                       maxLength={20}
-                      required={isOfficial}
+                      required
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <FieldLabel htmlFor="contact-email">Email{isOfficial ? ' *' : ''}</FieldLabel>
+                    <FieldLabel htmlFor="contact-email">Email *</FieldLabel>
                     <Input
                       id="contact-email"
                       type="email"
@@ -340,7 +357,7 @@ export function VenueForm({ mode, venue }: { mode: 'create' | 'edit'; venue?: Ve
                       onChange={(e) => set('contact_email', e.target.value)}
                       placeholder="venue@example.com"
                       maxLength={255}
-                      required={isOfficial}
+                      required
                     />
                   </div>
                 </div>

@@ -4,6 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.application.dto.profile_dto import (
     GetLoginHistoryInput,
     GetLoginHistoryOutput,
+    UpdateProfileAvatarInput,
+    UpdateProfileAvatarOutput,
     UpdateProfileInput,
     UpdateProfileOutput,
     UserOnboardingInput,
@@ -175,6 +177,58 @@ class UpdateProfileUseCase:
 
         await self.db.commit()
         return UpdateProfileOutput(profile=updated_profile, previous_profile=current_profile)
+
+
+class UpdateProfileAvatarUseCase:
+    """Handles updating the authenticated user's profile avatar URL.
+
+    Acquires a pessimistic ``SELECT FOR UPDATE`` lock on the profile row before
+    reading the current avatar URL and writing the new one, serialising concurrent
+    avatar-update requests for the same account.
+    """
+
+    def __init__(self, repo: IUserRepository, db: AsyncSession) -> None:
+        self.repo = repo
+        self.db = db
+
+    async def update_avatar(self, data: UpdateProfileAvatarInput) -> UpdateProfileAvatarOutput:
+        """Replace the profile avatar URL for the authenticated user.
+
+        Args:
+            data: ``UpdateProfileAvatarInput`` with the user ID and new image object key.
+
+        Returns:
+            ``UpdateProfileAvatarOutput`` with the updated profile and the previous avatar URL.
+
+        Raises:
+            UserNotFoundError: No user exists for the given ID.
+            UserInactiveError: The account is inactive or deleted.
+            ProfileNotFoundError: The user has not completed onboarding.
+        """
+        user = await self.repo.get_by_id(data.user_id)
+        if not user:
+            raise UserNotFoundError()
+        if user.status in (UserStatus.INACTIVE, UserStatus.DELETED):
+            raise UserInactiveError()
+
+        current_profile = await self.repo.get_profile_by_user_id_for_update(data.user_id)
+        if not current_profile:
+            raise ProfileNotFoundError()
+
+        old_image_url = current_profile.image_file_id
+
+        try:
+            updated_profile = await self.repo.update_profile_image(data.user_id, data.image_url)
+        except Exception:
+            await self.db.rollback()
+            raise
+
+        if updated_profile is None:
+            await self.db.rollback()
+            raise ProfileNotFoundError()
+
+        await self.db.commit()
+        return UpdateProfileAvatarOutput(profile=updated_profile, old_image_url=old_image_url)
 
 
 class CheckAliasUseCase:

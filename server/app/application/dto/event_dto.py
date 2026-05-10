@@ -22,6 +22,7 @@ class CreateEventInput:
     start_date: datetime
     end_date: datetime
     created_by: uuid.UUID
+    banner_url: str | None = None
     sessions: list[CreateEventSessionInput] = field(default_factory=list)
 
 
@@ -39,6 +40,7 @@ class UpdateEventMetadataInput:
     description: str
     start_date: datetime
     end_date: datetime
+    banner_url: str | None = None
 
 
 @dataclass
@@ -86,3 +88,16 @@ class DeleteEventSessionInput:
 @dataclass
 class DeleteEventSessionOutput:
     session: EventSession
+
+
+@dataclass
+class UpdateEventBannerInput:
+    event_id: uuid.UUID
+    updated_by: uuid.UUID
+    banner_url: str
+
+
+@dataclass
+class UpdateEventBannerOutput:
+    event: Event
+    old_banner_url: str | None

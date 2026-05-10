@@ -101,6 +101,7 @@ def _create_input(**overrides):
         start_date=EVENT_START,
         end_date=EVENT_END,
         created_by=CREATOR_ID,
+        banner_url="https://cdn.example.com/banner.jpg",
         sessions=sessions,
     )
     defaults.update(overrides)
@@ -269,6 +270,7 @@ def _meta_input(**overrides):
         description="<p>updated</p>",
         start_date=EVENT_START,
         end_date=EVENT_END,
+        banner_url="https://cdn.example.com/updated-banner.jpg",
     )
     defaults.update(overrides)
     return UpdateEventMetadataInput(**defaults)
@@ -327,6 +329,7 @@ async def test_meta_calls_update_event_with_new_values():
         description="<p>updated</p>",
         start_date=EVENT_START,
         end_date=EVENT_END,
+        banner_url="https://cdn.example.com/updated-banner.jpg",
     )
 
 

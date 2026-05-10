@@ -24,6 +24,7 @@ class Event(Base):
     end_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     status: Mapped[str] = mapped_column(Enum(EventStatus, native_enum=False), nullable=False, default="draft")
     created_by: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    banner_url: Mapped[str | None] = mapped_column(String(512), nullable=True)
 
     creator = relationship("User", back_populates="events")
     volunteers = relationship("EventVolunteer", back_populates="event")

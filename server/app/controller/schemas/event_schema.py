@@ -28,6 +28,7 @@ class EventCreateRequest(BaseModel):
     description: str = Field(min_length=1)
     start_date: datetime
     end_date: datetime
+    banner_url: str | None = Field(default=None, max_length=512)
     sessions: list[EventSessionCreateRequest] = Field(min_length=1)
 
     @field_validator("description", mode="before")
@@ -60,6 +61,7 @@ class EventRecordResponse(BaseModel):
     end_date: datetime
     status: str
     created_by: uuid.UUID
+    banner_url: str | None = None
     created_at: datetime | None
     updated_at: datetime | None
 
@@ -78,6 +80,7 @@ class EventUpdateRequest(BaseModel):
     description: str = Field(min_length=1)
     start_date: datetime
     end_date: datetime
+    banner_url: str | None = Field(default=None, max_length=512)
 
     @field_validator("description", mode="before")
     @classmethod
@@ -143,3 +146,21 @@ class EventSessionDeletedResponse(BaseModel):
     success: bool = True
     message: str = "Event session deleted successfully."
     data: EventSessionRecordResponse
+
+
+class EventBannerUploadRequest(BaseModel):
+    content_type: str = Field(min_length=1, max_length=100)
+
+
+class EventBannerUploadData(BaseModel):
+    upload_url: str
+    object_key: str
+    public_url: str
+    expires_in: int
+
+
+class EventBannerUploadResponse(BaseModel):
+    success: bool = True
+    message: str = "Banner upload URL generated. Use upload_url to PUT your image directly to storage."
+    data: EventRecordResponse
+    upload: EventBannerUploadData
