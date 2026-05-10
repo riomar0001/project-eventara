@@ -2695,6 +2695,39 @@ export type ValidationErrorResponse = {
 };
 
 /**
+ * VenueCapacityData
+ */
+export type VenueCapacityData = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Capacity
+     */
+    capacity: number;
+};
+
+/**
+ * VenueCapacityResponse
+ */
+export type VenueCapacityResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Message
+     */
+    message?: string;
+    data: VenueCapacityData;
+};
+
+/**
  * VenueImageUploadData
  */
 export type VenueImageUploadData = {
@@ -5551,6 +5584,44 @@ export type UpdateVenueVenuesVenueIdPatchResponses = {
 };
 
 export type UpdateVenueVenuesVenueIdPatchResponse = UpdateVenueVenuesVenueIdPatchResponses[keyof UpdateVenueVenuesVenueIdPatchResponses];
+
+export type GetVenueCapacityVenuesVenueIdCapacityGetData = {
+    body?: never;
+    path: {
+        /**
+         * Venue Id
+         */
+        venue_id: string;
+    };
+    query?: never;
+    url: '/venues/{venue_id}/capacity';
+};
+
+export type GetVenueCapacityVenuesVenueIdCapacityGetErrors = {
+    /**
+     * Missing or invalid Bearer token
+     */
+    401: ErrorResponse;
+    /**
+     * Venue not found
+     */
+    404: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetVenueCapacityVenuesVenueIdCapacityGetError = GetVenueCapacityVenuesVenueIdCapacityGetErrors[keyof GetVenueCapacityVenuesVenueIdCapacityGetErrors];
+
+export type GetVenueCapacityVenuesVenueIdCapacityGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: VenueCapacityResponse;
+};
+
+export type GetVenueCapacityVenuesVenueIdCapacityGetResponse = GetVenueCapacityVenuesVenueIdCapacityGetResponses[keyof GetVenueCapacityVenuesVenueIdCapacityGetResponses];
 
 export type CreateCommunityVenueVenuesCommunityPostData = {
     body: CommunityVenueCreateRequest;

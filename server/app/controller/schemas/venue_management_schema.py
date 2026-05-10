@@ -161,6 +161,18 @@ class PublicVenueListResponse(BaseModel):
     pagination: VenuePaginationResponse
 
 
+class VenueCapacityData(BaseModel):
+    id: uuid.UUID
+    name: str
+    capacity: int
+
+
+class VenueCapacityResponse(BaseModel):
+    success: bool = True
+    message: str = "Venue capacity retrieved successfully."
+    data: VenueCapacityData
+
+
 class VenueImageUploadRequest(BaseModel):
     content_type: str = Field(min_length=1, max_length=100)
 

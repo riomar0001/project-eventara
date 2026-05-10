@@ -1238,6 +1238,24 @@ export const zValidationErrorResponse = z.object({
 });
 
 /**
+ * VenueCapacityData
+ */
+export const zVenueCapacityData = z.object({
+    id: z.uuid(),
+    name: z.string(),
+    capacity: z.int()
+});
+
+/**
+ * VenueCapacityResponse
+ */
+export const zVenueCapacityResponse = z.object({
+    success: z.boolean().optional().default(true),
+    message: z.string().optional().default('Venue capacity retrieved successfully.'),
+    data: zVenueCapacityData
+});
+
+/**
  * VenueImageUploadData
  */
 export const zVenueImageUploadData = z.object({
@@ -2057,6 +2075,15 @@ export const zUpdateVenueVenuesVenueIdPatchPath = z.object({
  * Successful Response
  */
 export const zUpdateVenueVenuesVenueIdPatchResponse = zVenueResponse;
+
+export const zGetVenueCapacityVenuesVenueIdCapacityGetPath = z.object({
+    venue_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zGetVenueCapacityVenuesVenueIdCapacityGetResponse = zVenueCapacityResponse;
 
 export const zCreateCommunityVenueVenuesCommunityPostBody = zCommunityVenueCreateRequest;
 

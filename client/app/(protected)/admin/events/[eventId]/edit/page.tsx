@@ -1,6 +1,6 @@
-import { notFound } from 'next/navigation';
+import { EventEditLoader } from '@/components/admin/events/event-form';
 
 export default async function AdminEventEditPage({ params }: { params: Promise<{ eventId: string }> }) {
-  await params;
-  notFound();
+  const { eventId } = await params;
+  return <EventEditLoader eventId={eventId} />;
 }

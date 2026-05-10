@@ -15,6 +15,7 @@ from app.application.use_cases.profile_usecase import CheckAliasUseCase, GetLogi
 from app.application.use_cases.queue_usecase import QueueUseCase
 from app.application.use_cases.role_usecase import RoleManagementUseCase, UserRoleUseCase
 from app.application.use_cases.users_usecase import AdminUserAccountUseCase
+from app.application.use_cases.venue_query_usecase import GetVenueCapacityUseCase
 from app.application.use_cases.venue_rating_usecase import VenueRatingUseCase
 from app.application.use_cases.venue_usecase import VenueManagementUseCase
 from app.infrastructure.cache.repositories.otp_repository import OTPRepository
@@ -128,6 +129,11 @@ def get_queue_use_case(request: Request) -> QueueUseCase:
 def get_venue_management_use_case(db: AsyncSession = Depends(get_db)) -> VenueManagementUseCase:
     """Construct a ``VenueManagementUseCase`` for admin venue CRUD."""
     return VenueManagementUseCase(VenueRepo(db), db)
+
+
+def get_venue_capacity_use_case(db: AsyncSession = Depends(get_db)) -> GetVenueCapacityUseCase:
+    """Construct a ``GetVenueCapacityUseCase`` for slot-overflow advisory checks."""
+    return GetVenueCapacityUseCase(VenueRepo(db))
 
 
 def get_venue_rating_use_case(db: AsyncSession = Depends(get_db)) -> VenueRatingUseCase:

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Clock, MapPin, Plus, Send, Trash2 } from 'lucide-react';
+import { AlertCircle, AlertTriangle, Clock, MapPin, Plus, Send, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { Events, Venues } from '@/api/sdk.gen';
@@ -15,6 +15,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { ImageUpload } from '@/components/ui/image-upload';
 import { useUpload } from '@/hooks/use-upload';
+import { useEvent } from '@/hooks/admin/events/use-event';
+import { DateTimePicker } from '@/components/ui/date-time-picker';
 import { BackLink, FieldLabel, PhotoPanel } from './events-shared';
 import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
 import { resolveStorageImageUrl } from '@/lib/storage/image-url';
@@ -53,6 +55,10 @@ function getApiError(error: unknown, fallback: string): string {
 
 function toLocalInput(iso: string) {
   return iso.slice(0, 16); // "2026-07-18T16:30:00+08:00" → "2026-07-18T16:30"
+}
+
+function toUtcIso(local: string): string {
+  return new Date(local).toISOString(); // "2026-07-18T16:30" → "2026-07-18T08:30:00.000Z"
 }
 
 function formatLocalDate(local: string) {
@@ -134,13 +140,14 @@ type ExistingEventSession = {
   maxSlots?: number | null;
 };
 
-type EventFormProps = { mode: 'create'; event?: never } | { mode: 'edit'; event: EventDetailRecord };
+type EventFormProps =
+  | { mode: 'create'; event?: never; initialSessions?: never }
+  | { mode: 'edit'; event: EventDetailRecord; initialSessions?: ExistingEventSession[] };
 type EventWithBanner = EventDetailRecord & { banner_url?: string | null };
 
-export function EventForm({ mode, event }: EventFormProps) {
+export function EventForm({ mode, event, initialSessions = [] }: EventFormProps) {
   const router = useRouter();
   const { upload, isUploading: isUploadingBanner } = useUpload();
-  const existingSessions: ExistingEventSession[] = [];
 
   const [title, setTitle] = useState(event?.title ?? '');
   const [description, setDescription] = useState(event?.description ?? '');
@@ -149,8 +156,8 @@ export function EventForm({ mode, event }: EventFormProps) {
   const [startDate, setStartDate] = useState(event?.startDate ? toLocalInput(event.startDate) : '');
   const [endDate, setEndDate] = useState(event?.endDate ? toLocalInput(event.endDate) : '');
   const [sessions, setSessions] = useState<SessionFormData[]>(() =>
-    mode === 'edit' && existingSessions.length > 0
-      ? existingSessions.map((s) => ({
+    mode === 'edit' && initialSessions.length > 0
+      ? initialSessions.map((s) => ({
           key: s.id,
           existingId: s.id,
           venueId: s.venueId,
@@ -166,6 +173,7 @@ export function EventForm({ mode, event }: EventFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [venues, setVenues] = useState<{ id: string; name: string }[]>([]);
   const [venuesLoading, setVenuesLoading] = useState(true);
+  const [venueCapacities, setVenueCapacities] = useState<Record<string, number>>({});
 
   useEffect(() => {
     let cancelled = false;
@@ -188,6 +196,36 @@ export function EventForm({ mode, event }: EventFormProps) {
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    const unresolved = sessions.map((s) => s.venueId).filter((id) => id && !(id in venueCapacities));
+    const unique = [...new Set(unresolved)];
+    if (unique.length === 0) return;
+
+    let cancelled = false;
+    async function fetchCapacities() {
+      const results = await Promise.allSettled(
+        unique.map((venueId) =>
+          Venues.getVenueCapacityVenuesVenueIdCapacityGet({
+            path: { venue_id: venueId },
+            headers: { Authorization: `Bearer ${getAccessToken()}` },
+            throwOnError: false
+          })
+        )
+      );
+      if (cancelled) return;
+      const updates: Record<string, number> = {};
+      results.forEach((r, i) => {
+        if (r.status === 'fulfilled' && r.value.data) updates[unique[i]] = r.value.data.data.capacity;
+      });
+      if (Object.keys(updates).length > 0) setVenueCapacities((prev) => ({ ...prev, ...updates }));
+    }
+    void fetchCapacities();
+    return () => {
+      cancelled = true;
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sessions.map((s) => s.venueId).join(',')]);
 
   const previewPhoto = resolveStorageImageUrl(bannerUrl) || event?.photo || '';
 
@@ -251,15 +289,15 @@ export function EventForm({ mode, event }: EventFormProps) {
           body: {
             title: title.trim(),
             description: description.trim(),
-            start_date: startDate,
-            end_date: endDate,
+            start_date: toUtcIso(startDate),
+            end_date: toUtcIso(endDate),
             banner_url: pendingBannerFile ? null : bannerUrl || null,
             sessions: sessionPayload.map((s) => ({
               venue_id: s.venueId,
               title: s.title,
               description: s.description || null,
-              start_datetime: s.startDatetime,
-              end_datetime: s.endDatetime,
+              start_datetime: toUtcIso(s.startDatetime),
+              end_datetime: toUtcIso(s.endDatetime),
               max_slots: s.maxSlots ? parseInt(s.maxSlots, 10) : null
             }))
           },
@@ -295,7 +333,7 @@ export function EventForm({ mode, event }: EventFormProps) {
 
         const metaResult = await Events.updateEventMetadataEventsEventIdPatch({
           path: { event_id: eventId },
-          body: { title: title.trim(), description: description.trim(), start_date: startDate, end_date: endDate, banner_url: bannerUrl || null },
+          body: { title: title.trim(), description: description.trim(), start_date: toUtcIso(startDate), end_date: toUtcIso(endDate), banner_url: bannerUrl || null },
           headers: { Authorization: `Bearer ${getAccessToken()}` },
           throwOnError: false
         });
@@ -322,8 +360,8 @@ export function EventForm({ mode, event }: EventFormProps) {
                   venue_id: s.venueId,
                   title: s.title,
                   description: s.description || null,
-                  start_datetime: s.startDatetime,
-                  end_datetime: s.endDatetime,
+                  start_datetime: toUtcIso(s.startDatetime),
+                  end_datetime: toUtcIso(s.endDatetime),
                   max_slots: s.maxSlots ? parseInt(s.maxSlots, 10) : null
                 },
                 headers: { Authorization: `Bearer ${getAccessToken()}` },
@@ -418,11 +456,24 @@ export function EventForm({ mode, event }: EventFormProps) {
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
                     <FieldLabel htmlFor="event-start-date">Start date *</FieldLabel>
-                    <Input id="event-start-date" type="datetime-local" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+                    <DateTimePicker
+                      id="event-start-date"
+                      value={startDate}
+                      onChange={setStartDate}
+                      disabled={isSubmitting}
+                      placeholder="Pick start date & time"
+                    />
                   </div>
                   <div className="space-y-2">
                     <FieldLabel htmlFor="event-end-date">End date *</FieldLabel>
-                    <Input id="event-end-date" type="datetime-local" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+                    <DateTimePicker
+                      id="event-end-date"
+                      value={endDate}
+                      onChange={setEndDate}
+                      minDatetime={startDate ? new Date(startDate) : undefined}
+                      disabled={isSubmitting}
+                      placeholder="Pick end date & time"
+                    />
                   </div>
                 </div>
               </div>
@@ -502,25 +553,44 @@ export function EventForm({ mode, event }: EventFormProps) {
                           onChange={(e) => updateSession(index, { maxSlots: e.target.value })}
                           placeholder="e.g. 250"
                         />
+                        {(() => {
+                          const capacity = session.venueId ? venueCapacities[session.venueId] : undefined;
+                          const slots = session.maxSlots ? parseInt(session.maxSlots, 10) : NaN;
+                          if (capacity !== undefined && !isNaN(slots) && slots > capacity) {
+                            return (
+                              <p className="flex items-center gap-1.5 text-xs text-amber-600">
+                                <AlertTriangle className="size-3 shrink-0" />
+                                Exceeds venue capacity of {capacity.toLocaleString()} seats
+                              </p>
+                            );
+                          }
+                          return null;
+                        })()}
                       </div>
 
                       <div className="space-y-2">
                         <FieldLabel htmlFor={`session-${session.key}-start`}>Start datetime *</FieldLabel>
-                        <Input
+                        <DateTimePicker
                           id={`session-${session.key}-start`}
-                          type="datetime-local"
                           value={session.startDatetime}
-                          onChange={(e) => updateSession(index, { startDatetime: e.target.value })}
+                          onChange={(v) => updateSession(index, { startDatetime: v })}
+                          minDatetime={startDate ? new Date(startDate) : undefined}
+                          maxDatetime={endDate ? new Date(endDate) : undefined}
+                          disabled={isSubmitting}
+                          placeholder="Pick session start"
                         />
                       </div>
 
                       <div className="space-y-2">
                         <FieldLabel htmlFor={`session-${session.key}-end`}>End datetime *</FieldLabel>
-                        <Input
+                        <DateTimePicker
                           id={`session-${session.key}-end`}
-                          type="datetime-local"
                           value={session.endDatetime}
-                          onChange={(e) => updateSession(index, { endDatetime: e.target.value })}
+                          onChange={(v) => updateSession(index, { endDatetime: v })}
+                          minDatetime={session.startDatetime ? new Date(session.startDatetime) : startDate ? new Date(startDate) : undefined}
+                          maxDatetime={endDate ? new Date(endDate) : undefined}
+                          disabled={isSubmitting}
+                          placeholder="Pick session end"
                         />
                       </div>
                     </div>
@@ -608,4 +678,60 @@ export function EventForm({ mode, event }: EventFormProps) {
       </div>
     </div>
   );
+}
+
+// ── Edit loader ────────────────────────────────────────────────────────────────
+
+export function EventEditLoader({ eventId }: { eventId: string }) {
+  const { event, sessions, isLoading, error } = useEvent(eventId);
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex flex-wrap items-center gap-2">
+          <BackLink href={ADMIN_OPERATIONS_PATHS.events} label="Back to events" />
+        </div>
+        <div className="animate-pulse space-y-4">
+          <div className="h-10 w-1/3 rounded-xl bg-neutral-200" />
+          <div className="h-96 rounded-2xl bg-neutral-100" />
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !event) {
+    return (
+      <div className="space-y-6">
+        <div className="flex flex-wrap items-center gap-2">
+          <BackLink href={ADMIN_OPERATIONS_PATHS.events} label="Back to events" />
+        </div>
+        <div className="flex items-center gap-3 rounded-2xl border border-red-100 bg-red-50 px-5 py-4 text-sm text-red-700">
+          <AlertCircle className="size-4 shrink-0" />
+          {error ?? 'Event not found.'}
+        </div>
+      </div>
+    );
+  }
+
+  const eventRecord: EventDetailRecord & { banner_url?: string | null } = {
+    id: event.id,
+    title: event.title,
+    description: event.description,
+    startDate: event.start_date,
+    endDate: event.end_date,
+    status: event.status as EventDetailRecord['status'],
+    banner_url: event.banner_url,
+  };
+
+  const sessionRecords: ExistingEventSession[] = sessions.map((s) => ({
+    id: s.id,
+    venueId: s.venue_id,
+    title: s.title,
+    description: s.description,
+    startDatetime: s.start_datetime,
+    endDatetime: s.end_datetime,
+    maxSlots: s.max_slots,
+  }));
+
+  return <EventForm mode="edit" event={eventRecord} initialSessions={sessionRecords} />;
 }

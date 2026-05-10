@@ -16,19 +16,20 @@ import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 
-from app.application.dto.venue_dto import CreateVenueInput, ListVenuesInput, UpdateVenueImageInput, UpdateVenueInput
+from app.application.dto.venue_dto import CreateVenueInput, GetVenueCapacityInput, ListVenuesInput, UpdateVenueImageInput, UpdateVenueInput
 from app.application.dto.venue_rating_dto import (
     CreateVenueRatingInput,
     ListVenueRatingsInput,
     UpdateVenueRatingInput,
 )
 from app.application.use_cases.audit_log_usecase import AuditLogUseCase
+from app.application.use_cases.venue_query_usecase import GetVenueCapacityUseCase
 from app.application.use_cases.venue_rating_usecase import VenueRatingUseCase
 from app.application.use_cases.venue_usecase import VenueManagementUseCase
 from app.controller.api.audit_helpers import safe_audit_log, serialize_venue, serialize_venue_rating
 from app.controller.dependencies import get_audit_log_use_case, get_current_user_id, require_permission
 from app.controller.dependencies.storage_depends import get_storage_service
-from app.controller.dependencies.use_cases_depends import get_venue_management_use_case, get_venue_rating_use_case
+from app.controller.dependencies.use_cases_depends import get_venue_capacity_use_case, get_venue_management_use_case, get_venue_rating_use_case
 from app.controller.docs.venue_management_docs import (
     COMMUNITY_VENUE_CREATE_OPENAPI_EXTRA,
     FORBIDDEN,
@@ -56,6 +57,8 @@ from app.controller.schemas.venue_management_schema import (
     PublicVenueListResponse,
     PublicVenueRecordResponse,
     PublicVenueResponse,
+    VenueCapacityData,
+    VenueCapacityResponse,
     VenueImageUploadData,
     VenueImageUploadRequest,
     VenueImageUploadResponse,
@@ -341,6 +344,51 @@ async def get_venue(
     except VenueNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
     return VenueResponse(data=_to_venue_response(result.venue), message="Venue loaded successfully.")
+
+
+@venue_router.get(
+    "/{venue_id}/capacity",
+    response_model=VenueCapacityResponse,
+    status_code=status.HTTP_200_OK,
+    responses={**UNAUTHORIZED, **VENUE_NOT_FOUND},
+    summary="Get venue capacity",
+    description=(
+        "Return the physical attendee capacity for a single venue. "
+        "Intended for event-session forms to surface an advisory warning when "
+        "the proposed slot count would exceed the venue's registered capacity. "
+        "Requires only a valid access token — no feature RBAC permission is needed."
+    ),
+)
+async def get_venue_capacity(
+    request: Request,
+    venue_id: uuid.UUID,
+    user_id: uuid.UUID = Depends(get_current_user_id),
+    use_case: GetVenueCapacityUseCase = Depends(get_venue_capacity_use_case),
+    audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
+) -> VenueCapacityResponse:
+    """Return the capacity of a venue for slot-overflow advisory checks.
+
+    # Error mapping
+    - **401 Unauthorized** — missing, expired, or invalid Bearer token.
+    - **404 Not Found** — no venue exists for the supplied UUID.
+    """
+    try:
+        result = await use_case.get_venue_capacity(GetVenueCapacityInput(venue_id=venue_id))
+    except VenueNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+
+    await safe_audit_log(
+        audit_use_case,
+        request,
+        user_id=user_id,
+        action_type=ActionType.READ,
+        resource_type="venues",
+        resource_id=str(venue_id),
+        status=AuditLogStatus.SUCCESS,
+    )
+    return VenueCapacityResponse(
+        data=VenueCapacityData(id=result.venue_id, name=result.name, capacity=result.capacity)
+    )
 
 
 @venue_router.post(

@@ -1,17 +1,38 @@
 'use client';
 
-import { CalendarCheck, CalendarPlus, ImageIcon, MapPin, Plus, Send } from 'lucide-react';
+import { AlertCircle, CalendarCheck, CalendarPlus, ChevronLeft, ChevronRight, ImageIcon, MapPin, Plus, Send } from 'lucide-react';
 import Link from 'next/link';
+import type { EventStatus } from '@/api/types.gen';
 import { MobileFloatingAction, PrimaryPageAction } from '@/components/admin/shared/primary-page-action';
 import { Button } from '@/components/ui/button';
-import { OperationsPageIntro } from './events-shared';
 import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
+import { useEvents } from '@/hooks/admin/events/use-events';
+import { CatalogCard, OperationsPageIntro } from './events-shared';
+
+const STATUS_FILTERS: { label: string; value: EventStatus | null }[] = [
+  { label: 'All', value: null },
+  { label: 'Draft', value: 'draft' },
+  { label: 'Posted', value: 'posted' },
+  { label: 'Started', value: 'started' },
+  { label: 'Postponed', value: 'postponed' },
+  { label: 'Ended', value: 'ended' },
+  { label: 'Cancelled', value: 'cancelled' },
+];
 
 const EVENT_EMPTY_CHECKLIST = [
   { label: 'Details', value: 'Title and date window', icon: CalendarCheck },
   { label: 'Venue', value: 'At least one session', icon: MapPin },
-  { label: 'Media', value: 'Event banner image', icon: ImageIcon }
+  { label: 'Media', value: 'Event banner image', icon: ImageIcon },
 ] as const;
+
+function fmtDate(iso: string) {
+  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function stripAndTruncate(html: string, max = 150) {
+  const plain = html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+  return plain.length > max ? plain.slice(0, max).trimEnd() + '…' : plain;
+}
 
 function EventsEmptyState() {
   return (
@@ -25,7 +46,9 @@ function EventsEmptyState() {
             <p className="text-[11px] font-semibold tracking-[0.2em] text-sky-700 uppercase">Empty pipeline</p>
           </div>
 
-          <h3 className="mt-5 max-w-2xl text-2xl font-semibold tracking-tight text-neutral-950">Create the first event draft and start shaping the calendar.</h3>
+          <h3 className="mt-5 max-w-2xl text-2xl font-semibold tracking-tight text-neutral-950">
+            Create the first event draft and start shaping the calendar.
+          </h3>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-neutral-500">
             Add the event details, attach a banner, and schedule at least one venue session so the pipeline can move from planning to published.
           </p>
@@ -81,7 +104,28 @@ function EventsEmptyState() {
   );
 }
 
+function EventCardSkeleton() {
+  return (
+    <div className="animate-pulse overflow-hidden rounded-[20px] bg-white ring-1 ring-neutral-200">
+      <div className="h-64 rounded-t-xl rounded-b-[28px] bg-neutral-200" />
+      <div className="space-y-3 p-5">
+        <div className="h-3 w-2/3 rounded bg-neutral-200" />
+        <div className="h-3 w-full rounded bg-neutral-100" />
+        <div className="h-3 w-4/5 rounded bg-neutral-100" />
+        <div className="mt-4 flex gap-2">
+          <div className="h-8 w-16 rounded-lg bg-neutral-200" />
+          <div className="h-8 w-16 rounded-lg bg-neutral-100" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function EventsCatalog() {
+  const { events, total, page, totalPages, statusFilter, isLoading, error, setPage, setStatusFilter } = useEvents(12);
+
+  const upcomingCount = events.filter((e) => e.status === 'posted' || e.status === 'started').length;
+
   return (
     <div className="space-y-6">
       <MobileFloatingAction cta="Add event" href={ADMIN_OPERATIONS_PATHS.eventCreate} theme="sky" />
@@ -93,19 +137,19 @@ export function EventsCatalog() {
         metrics={[
           {
             label: 'Total events',
-            value: 0,
-            hint: 'Events will appear here once the events read endpoint is available.'
+            value: isLoading ? '—' : total,
+            hint: statusFilter ? `Events with status: ${statusFilter}` : 'All events across all statuses.',
           },
           {
-            label: 'Upcoming events',
-            value: 0,
-            hint: 'Published upcoming events from the API.'
+            label: 'Active this page',
+            value: isLoading ? '—' : upcomingCount,
+            hint: 'Posted and started events visible on this page.',
           },
           {
             label: 'Volunteer seats',
             value: 0,
-            hint: 'Rostered volunteer placements tied to events.'
-          }
+            hint: 'Rostered volunteer placements tied to events.',
+          },
         ]}
         actions={
           <PrimaryPageAction
@@ -118,7 +162,80 @@ export function EventsCatalog() {
         }
       />
 
-      <EventsEmptyState />
+      <div className="flex flex-wrap gap-2">
+        {STATUS_FILTERS.map((f) => (
+          <button
+            key={String(f.value)}
+            onClick={() => setStatusFilter(f.value)}
+            className={[
+              'rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors',
+              statusFilter === f.value
+                ? 'bg-sky-600 text-white'
+                : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200',
+            ].join(' ')}
+          >
+            {f.label}
+          </button>
+        ))}
+      </div>
+
+      {error && (
+        <div className="flex items-center gap-3 rounded-2xl border border-red-100 bg-red-50 px-5 py-4 text-sm text-red-700">
+          <AlertCircle className="size-4 shrink-0" />
+          {error}
+        </div>
+      )}
+
+      {isLoading && (
+        <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <EventCardSkeleton key={i} />
+          ))}
+        </div>
+      )}
+
+      {!isLoading && !error && events.length === 0 && <EventsEmptyState />}
+
+      {!isLoading && !error && events.length > 0 && (
+        <>
+          <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+            {events.map((event) => (
+              <CatalogCard
+                key={event.id}
+                badges={[event.status.charAt(0).toUpperCase() + event.status.slice(1)]}
+                description={stripAndTruncate(event.description)}
+                editHref={ADMIN_OPERATIONS_PATHS.eventEdit(event.id)}
+                href={ADMIN_OPERATIONS_PATHS.eventDetail(event.id)}
+                meta={[
+                  { label: 'Start', value: fmtDate(event.start_date) },
+                  { label: 'End', value: fmtDate(event.end_date) },
+                ]}
+                photo={event.banner_url ?? ''}
+                subtitle={fmtDate(event.start_date)}
+                title={event.title}
+              />
+            ))}
+          </div>
+
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between border-t border-neutral-100 pt-4">
+              <p className="text-sm text-neutral-500">
+                Page {page} of {totalPages} &mdash; {total} total
+              </p>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={() => setPage(page - 1)} disabled={page <= 1}>
+                  <ChevronLeft className="size-4" />
+                  Previous
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => setPage(page + 1)} disabled={page >= totalPages}>
+                  Next
+                  <ChevronRight className="size-4" />
+                </Button>
+              </div>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }

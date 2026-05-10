@@ -85,3 +85,15 @@ class ListVenuesOutput:
     @property
     def total_pages(self) -> int:
         return math.ceil(self.total_count / self.page_size) if self.page_size else 0
+
+
+@dataclass
+class GetVenueCapacityInput:
+    venue_id: uuid.UUID
+
+
+@dataclass
+class GetVenueCapacityOutput:
+    venue_id: uuid.UUID
+    name: str
+    capacity: int
