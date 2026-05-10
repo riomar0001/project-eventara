@@ -1,47 +1,40 @@
 'use client';
 
-import { useState } from 'react';
-import { ImagePlus, Save } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { Building2, MapPin, Save, Users, X } from 'lucide-react';
 import Link from 'next/link';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { BackLink, FieldLabel, PhotoPanel } from './venues-shared';
-import { ADMIN_OPERATIONS_PATHS, type VenueRecord } from '@/constants/admin/operations';
+import { useVenueForm } from '@/hooks/admin/venues/use-venue-form';
+import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
+import type { VenueRecordResponse } from '@/api/types.gen';
 
-// ── Amenity options ────────────────────────────────────────────────────────────
-const AMENITY_OPTIONS = ['Air Conditioning', 'Parking', 'Wi-Fi', 'Catering', 'AV Equipment', 'Stage', 'Dressing Room', 'Wheelchair Access'];
-
-// ── VenueRecord shape expected by this form ────────────────────────────────────
-// Mirrors the domain `Venue` entity (venue_entities.py) field-for-field.
+// ── Form shape ─────────────────────────────────────────────────────────────────
 export interface VenueFormValues {
-  // identity
+  venue_category: 'community' | 'official';
   name: string;
   description: string;
-  // address
   address_line: string;
   city: string;
   province: string;
   postal_code: string;
   region: string;
   country: string;
-  // venue meta
-  capacity: string; // kept as string for controlled input; cast on submit
+  capacity: string;
   venue_type: 'indoor' | 'outdoor' | 'hybrid';
-  is_partner: boolean;
   amenities: string[];
-  // contact
   contact_name: string;
   contact_phone: string;
   contact_email: string;
 }
 
-function defaultValues(venue?: VenueRecord): VenueFormValues {
+function defaultValues(venue?: VenueRecordResponse): VenueFormValues {
   return {
+    venue_category: venue?.is_partner ? 'official' : 'community',
     name: venue?.name ?? '',
     description: venue?.description ?? '',
     address_line: venue?.address_line ?? '',
@@ -52,7 +45,6 @@ function defaultValues(venue?: VenueRecord): VenueFormValues {
     country: venue?.country ?? 'Philippines',
     capacity: venue?.capacity ? String(venue.capacity) : '',
     venue_type: venue?.venue_type ?? 'indoor',
-    is_partner: venue?.is_partner ?? false,
     amenities: venue?.amenities ?? [],
     contact_name: venue?.contact_name ?? '',
     contact_phone: venue?.contact_phone ?? '',
@@ -60,51 +52,124 @@ function defaultValues(venue?: VenueRecord): VenueFormValues {
   };
 }
 
+// ── Category selector ──────────────────────────────────────────────────────────
+function CategoryTile({
+  value,
+  current,
+  icon: Icon,
+  label,
+  description,
+  onSelect
+}: {
+  value: 'community' | 'official';
+  current: 'community' | 'official';
+  icon: React.ElementType;
+  label: string;
+  description: string;
+  onSelect: (v: 'community' | 'official') => void;
+}) {
+  const active = current === value;
+  return (
+    <button
+      type="button"
+      onClick={() => onSelect(value)}
+      className={`flex flex-1 items-start gap-3 rounded-xl border px-4 py-3 text-left transition-colors ${
+        active ? 'border-neutral-900 bg-neutral-900 text-white' : 'border-neutral-200 bg-neutral-50 text-neutral-700 hover:border-neutral-400'
+      }`}
+    >
+      <Icon className={`mt-0.5 size-4 shrink-0 ${active ? 'text-white' : 'text-neutral-500'}`} />
+      <div>
+        <p className={`text-sm font-medium ${active ? 'text-white' : 'text-neutral-900'}`}>{label}</p>
+        <p className={`mt-0.5 text-xs leading-5 ${active ? 'text-white/70' : 'text-neutral-500'}`}>{description}</p>
+      </div>
+    </button>
+  );
+}
+
 // ── Component ──────────────────────────────────────────────────────────────────
-export function VenueForm({ mode, venue }: { mode: 'create' | 'edit'; venue?: VenueRecord }) {
+export function VenueForm({ mode, venue }: { mode: 'create' | 'edit'; venue?: VenueRecordResponse }) {
   const [form, setForm] = useState<VenueFormValues>(() => defaultValues(venue));
+  const { submitCreate, isSubmitting } = useVenueForm();
+  const amenityInputRef = useRef<HTMLInputElement>(null);
+  const [amenityDraft, setAmenityDraft] = useState('');
 
   const previewPhoto = 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=1400&q=80';
 
-  // Generic field updater
   function set<K extends keyof VenueFormValues>(key: K, value: VenueFormValues[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
-  function toggleAmenity(amenity: string) {
+  function addAmenity(raw: string) {
+    const amenity = raw.trim();
+    if (!amenity) return;
     setForm((prev) => ({
       ...prev,
-      amenities: prev.amenities.includes(amenity) ? prev.amenities.filter((a) => a !== amenity) : [...prev.amenities, amenity]
+      amenities: prev.amenities.map((a) => a.toLowerCase()).includes(amenity.toLowerCase())
+        ? prev.amenities
+        : [...prev.amenities, amenity]
     }));
+    setAmenityDraft('');
   }
 
-  function handleSubmit(event: React.FormEvent) {
-    event.preventDefault();
-    // TODO: wire to create_venue / update_venue use-case via API route
-    console.log('submit', { ...form, capacity: Number(form.capacity) });
+  function removeAmenity(amenity: string) {
+    setForm((prev) => ({ ...prev, amenities: prev.amenities.filter((a) => a !== amenity) }));
   }
+
+  function handleAmenityKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addAmenity(amenityDraft);
+    } else if (e.key === 'Backspace' && amenityDraft === '' && form.amenities.length > 0) {
+      removeAmenity(form.amenities[form.amenities.length - 1]);
+    }
+  }
+
+  async function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    if (mode === 'create') {
+      await submitCreate(form);
+    }
+  }
+
+  const isOfficial = form.venue_category === 'official';
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center gap-2">
-        <BackLink href={ADMIN_OPERATIONS_PATHS.venues} label="Back to venues" />
-        <Badge variant="outline" className="rounded-full px-3 py-1 text-xs tracking-[0.18em] uppercase">
-          UI preview only
-        </Badge>
-      </div>
+      <BackLink href={ADMIN_OPERATIONS_PATHS.venues} label="Back to venues" />
 
       <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
         {/* ── Left column: form ──────────────────────────────────────────── */}
         <Card className="border-0 bg-white shadow-none ring-1 ring-neutral-200">
           <CardHeader className="border-b border-neutral-200/80 pb-5">
             <CardTitle>{mode === 'create' ? 'Add venue' : `Edit ${venue?.name ?? 'venue'}`}</CardTitle>
-            <CardDescription>
-              All fields map directly to the <code>Venue</code> domain entity. Inputs are interactive for design review; submit wires to the use-case layer.
-            </CardDescription>
+            <CardDescription>Fill in the details below. Fields marked * are required.</CardDescription>
           </CardHeader>
 
           <CardContent className="pt-6">
             <form className="space-y-8" onSubmit={handleSubmit}>
+              {/* ── Section: Venue category ──────────────────────────────── */}
+              <fieldset className="space-y-3">
+                <legend className="text-xs font-semibold tracking-[0.18em] text-neutral-400 uppercase">Venue category *</legend>
+                <div className="flex gap-3">
+                  <CategoryTile
+                    value="community"
+                    current={form.venue_category}
+                    icon={Users}
+                    label="Community suggestion"
+                    description="A venue suggested by the community. Contact info is optional."
+                    onSelect={(v) => set('venue_category', v)}
+                  />
+                  <CategoryTile
+                    value="official"
+                    current={form.venue_category}
+                    icon={Building2}
+                    label="Official partner venue"
+                    description="An officially managed partner space. Contact info is required."
+                    onSelect={(v) => set('venue_category', v)}
+                  />
+                </div>
+              </fieldset>
+
               {/* ── Section: Basic info ──────────────────────────────────── */}
               <fieldset className="space-y-4">
                 <legend className="text-xs font-semibold tracking-[0.18em] text-neutral-400 uppercase">Basic information</legend>
@@ -161,15 +226,6 @@ export function VenueForm({ mode, venue }: { mode: 'create' | 'edit'; venue?: Ve
                     />
                   </div>
                 </div>
-
-                {/* is_partner toggle */}
-                <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-700">
-                  <Checkbox checked={form.is_partner} onCheckedChange={(checked) => set('is_partner', !!checked)} />
-                  <span>
-                    <span className="font-medium text-neutral-900">Partner venue</span>
-                    <span className="ml-2 text-neutral-500">Mark as an Eventara partner space with elevated visibility.</span>
-                  </span>
-                </label>
               </fieldset>
 
               {/* ── Section: Address ─────────────────────────────────────── */}
@@ -245,22 +301,25 @@ export function VenueForm({ mode, venue }: { mode: 'create' | 'edit'; venue?: Ve
 
               {/* ── Section: Contact ─────────────────────────────────────── */}
               <fieldset className="space-y-4">
-                <legend className="text-xs font-semibold tracking-[0.18em] text-neutral-400 uppercase">Lead contact</legend>
+                <div className="flex items-baseline gap-2">
+                  <legend className="text-xs font-semibold tracking-[0.18em] text-neutral-400 uppercase">Lead contact</legend>
+                  {!isOfficial && <span className="text-[11px] text-neutral-400">(optional)</span>}
+                </div>
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2 md:col-span-2">
-                    <FieldLabel htmlFor="contact-name">Contact name *</FieldLabel>
+                    <FieldLabel htmlFor="contact-name">Contact name{isOfficial ? ' *' : ''}</FieldLabel>
                     <Input
                       id="contact-name"
                       value={form.contact_name}
                       onChange={(e) => set('contact_name', e.target.value)}
                       placeholder="Maria Santos"
                       maxLength={255}
-                      required
+                      required={isOfficial}
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <FieldLabel htmlFor="contact-phone">Phone *</FieldLabel>
+                    <FieldLabel htmlFor="contact-phone">Phone{isOfficial ? ' *' : ''}</FieldLabel>
                     <Input
                       id="contact-phone"
                       type="tel"
@@ -268,12 +327,12 @@ export function VenueForm({ mode, venue }: { mode: 'create' | 'edit'; venue?: Ve
                       onChange={(e) => set('contact_phone', e.target.value)}
                       placeholder="+63 912 345 6789"
                       maxLength={20}
-                      required
+                      required={isOfficial}
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <FieldLabel htmlFor="contact-email">Email *</FieldLabel>
+                    <FieldLabel htmlFor="contact-email">Email{isOfficial ? ' *' : ''}</FieldLabel>
                     <Input
                       id="contact-email"
                       type="email"
@@ -281,7 +340,7 @@ export function VenueForm({ mode, venue }: { mode: 'create' | 'edit'; venue?: Ve
                       onChange={(e) => set('contact_email', e.target.value)}
                       placeholder="venue@example.com"
                       maxLength={255}
-                      required
+                      required={isOfficial}
                     />
                   </div>
                 </div>
@@ -290,24 +349,44 @@ export function VenueForm({ mode, venue }: { mode: 'create' | 'edit'; venue?: Ve
               {/* ── Section: Amenities ───────────────────────────────────── */}
               <fieldset className="space-y-3">
                 <legend className="text-xs font-semibold tracking-[0.18em] text-neutral-400 uppercase">Amenities</legend>
-                <div className="grid gap-3 md:grid-cols-2">
-                  {AMENITY_OPTIONS.map((amenity) => (
-                    <label
+                <div
+                  className="flex min-h-12 cursor-text flex-wrap gap-2 rounded-xl border border-neutral-200 bg-neutral-50 px-3 py-2.5"
+                  onClick={() => amenityInputRef.current?.focus()}
+                >
+                  {form.amenities.map((amenity) => (
+                    <span
                       key={amenity}
-                      className="flex cursor-pointer items-center gap-3 rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-700"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3 py-1 text-xs font-medium text-neutral-700"
                     >
-                      <Checkbox checked={form.amenities.includes(amenity)} onCheckedChange={() => toggleAmenity(amenity)} />
-                      <span>{amenity}</span>
-                    </label>
+                      {amenity}
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); removeAmenity(amenity); }}
+                        className="text-neutral-400 hover:text-neutral-700"
+                      >
+                        <X className="size-3" />
+                      </button>
+                    </span>
                   ))}
+                  <input
+                    ref={amenityInputRef}
+                    type="text"
+                    value={amenityDraft}
+                    onChange={(e) => setAmenityDraft(e.target.value)}
+                    onKeyDown={handleAmenityKeyDown}
+                    onBlur={() => addAmenity(amenityDraft)}
+                    placeholder={form.amenities.length === 0 ? 'Type an amenity and press Enter…' : ''}
+                    className="min-w-40 flex-1 bg-transparent text-sm text-neutral-700 outline-none placeholder:text-neutral-400"
+                  />
                 </div>
+                <p className="text-[11px] text-neutral-400">Press Enter to add. Backspace on empty input removes the last tag.</p>
               </fieldset>
 
               {/* ── Actions ─────────────────────────────────────────────── */}
               <div className="flex flex-wrap gap-2 pt-2">
-                <Button type="submit">
+                <Button type="submit" disabled={isSubmitting}>
                   <Save className="size-4" />
-                  {mode === 'create' ? 'Save venue' : 'Save changes'}
+                  {isSubmitting ? 'Saving…' : mode === 'create' ? 'Save venue' : 'Save changes'}
                 </Button>
                 <Button type="button" variant="outline" asChild>
                   <Link href={ADMIN_OPERATIONS_PATHS.venues}>Cancel</Link>
@@ -322,17 +401,14 @@ export function VenueForm({ mode, venue }: { mode: 'create' | 'edit'; venue?: Ve
           <PhotoPanel photo={previewPhoto} className="min-h-70">
             <div className="flex min-h-70 flex-col justify-between p-6">
               <div className="flex flex-wrap gap-2">
-                <Badge variant="secondary" className="w-fit bg-white/85 text-neutral-900">
-                  Preview card
-                </Badge>
-                {form.is_partner && (
-                  <Badge variant="secondary" className="bg-amber-400/90 text-amber-950">
-                    Partner
-                  </Badge>
+                {isOfficial && (
+                  <span className="rounded-full bg-amber-400/90 px-3 py-1 text-xs font-medium text-amber-950">Partner</span>
                 )}
               </div>
               <div className="space-y-2">
-                <p className="text-xs tracking-[0.18em] text-white/75 uppercase">{[form.city, form.province].filter(Boolean).join(', ') || 'City, Province'}</p>
+                <p className="text-xs tracking-[0.18em] text-white/75 uppercase">
+                  {[form.city, form.province].filter(Boolean).join(', ') || 'City, Province'}
+                </p>
                 <h2 className="text-3xl font-semibold tracking-tight text-white">{form.name || 'Untitled venue'}</h2>
                 <p className="max-w-xl text-sm leading-6 text-white/85">{form.description || 'Your venue description will appear here as you type.'}</p>
               </div>
@@ -365,12 +441,20 @@ export function VenueForm({ mode, venue }: { mode: 'create' | 'edit'; venue?: Ve
                 </div>
               </div>
 
-              {/* Contact */}
-              <div className="space-y-0.5 rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3">
-                <p className="text-[11px] font-semibold tracking-[0.14em] text-neutral-400 uppercase">Contact</p>
-                <p className="font-medium text-neutral-900">{form.contact_name || '—'}</p>
-                <p className="text-neutral-500">{form.contact_email || ''}</p>
-                <p className="text-neutral-500">{form.contact_phone || ''}</p>
+              {/* Contact (official only) */}
+              {isOfficial && (
+                <div className="space-y-0.5 rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3">
+                  <p className="text-[11px] font-semibold tracking-[0.14em] text-neutral-400 uppercase">Contact</p>
+                  <p className="font-medium text-neutral-900">{form.contact_name || '—'}</p>
+                  <p className="text-neutral-500">{form.contact_email || ''}</p>
+                  <p className="text-neutral-500">{form.contact_phone || ''}</p>
+                </div>
+              )}
+
+              {/* Category */}
+              <div className="flex items-center gap-2 rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3">
+                <MapPin className="size-3.5 shrink-0 text-neutral-400" />
+                <p className="text-sm text-neutral-700">{isOfficial ? 'Official partner venue' : 'Community suggestion'}</p>
               </div>
 
               {/* Amenities */}
@@ -387,14 +471,6 @@ export function VenueForm({ mode, venue }: { mode: 'create' | 'edit'; venue?: Ve
                 ) : (
                   <p className="text-neutral-400">No amenities selected.</p>
                 )}
-              </div>
-
-              {/* Photo upload placeholder */}
-              <div className="rounded-xl border border-dashed border-neutral-200 px-4 py-4 text-neutral-500">
-                <div className="flex items-center gap-2">
-                  <ImagePlus className="size-4" />
-                  Photo upload is intentionally mocked for this design pass.
-                </div>
               </div>
             </CardContent>
           </Card>

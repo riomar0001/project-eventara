@@ -4,13 +4,24 @@ import { useMemo, useState } from 'react';
 import { ArrowLeft, ArrowRight, Building2, MapPin, Search, Users, X } from 'lucide-react';
 import Link from 'next/link';
 import { MobileFloatingAction, PrimaryPageAction } from '@/components/admin/shared/primary-page-action';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CatalogCard, OperationsPageIntro } from './venues-shared';
-import { ADMIN_OPERATIONS_PATHS, getEventsByVenueId, venueRecords } from '@/constants/admin/operations';
+import { useVenues } from '@/hooks/admin/venues/use-venues';
+import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
+import type { VenueRecordResponse } from '@/api/types.gen';
+
+const VENUE_PHOTO: Record<string, string> = {
+  indoor: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=1400&q=80',
+  outdoor: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=1400&q=80',
+  hybrid: 'https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?auto=format&fit=crop&w=1400&q=80'
+};
+
+function venuePhoto(venue: VenueRecordResponse): string {
+  return VENUE_PHOTO[venue.venue_type] ?? VENUE_PHOTO.indoor;
+}
 
 const CAPACITY_FILTERS = [
   { key: 'any', label: 'Any size', min: 0 },
@@ -28,23 +39,25 @@ const SORT_OPTIONS = [
 ];
 
 export function VenuesCatalog() {
-  const partnerVenueCount = venueRecords.filter((venue) => venue.is_partner).length;
-  const totalCapacity = venueRecords.reduce((sum, venue) => sum + venue.capacity, 0);
+  const { venues, isLoading, error } = useVenues();
   const [query, setQuery] = useState('');
   const [capacityKey, setCapacityKey] = useState('any');
   const [sortKey, setSortKey] = useState('name');
   const [page, setPage] = useState(1);
   const pageSize = 8;
 
+  const partnerVenueCount = useMemo(() => venues.filter((v) => v.is_partner).length, [venues]);
+  const totalCapacity = useMemo(() => venues.reduce((sum, v) => sum + v.capacity, 0), [venues]);
+
   const filtered = useMemo(() => {
     const lowerQuery = query.trim().toLowerCase();
-    const capacityMin = CAPACITY_FILTERS.find((option) => option.key === capacityKey)?.min ?? 0;
+    const capacityMin = CAPACITY_FILTERS.find((o) => o.key === capacityKey)?.min ?? 0;
 
-    return venueRecords
-      .filter((venue) => (capacityMin ? venue.capacity >= capacityMin : true))
-      .filter((venue) => {
+    return venues
+      .filter((v) => (capacityMin ? v.capacity >= capacityMin : true))
+      .filter((v) => {
         if (!lowerQuery) return true;
-        const haystack = [venue.name, venue.city, venue.province, venue.region, venue.venue_type, venue.contact_name, (venue.amenities ?? []).join(' ')]
+        const haystack = [v.name, v.city, v.province, v.region, v.venue_type, v.contact_name ?? '', (v.amenities ?? []).join(' ')]
           .join(' ')
           .toLowerCase();
         return haystack.includes(lowerQuery);
@@ -56,18 +69,18 @@ export function VenuesCatalog() {
         if (sortKey === 'partner') return Number(b.is_partner) - Number(a.is_partner);
         return a.name.localeCompare(b.name);
       });
-  }, [capacityKey, query, sortKey]);
+  }, [capacityKey, query, sortKey, venues]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const currentPage = Math.min(page, totalPages);
   const paged = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
-  const capacityLabel = CAPACITY_FILTERS.find((option) => option.key === capacityKey)?.label ?? 'Any size';
-  const sortLabel = SORT_OPTIONS.find((option) => option.key === sortKey)?.label ?? 'Name (A-Z)';
+  const capacityLabel = CAPACITY_FILTERS.find((o) => o.key === capacityKey)?.label ?? 'Any size';
+  const sortLabel = SORT_OPTIONS.find((o) => o.key === sortKey)?.label ?? 'Name (A-Z)';
 
   const pageNumbers = useMemo(() => {
-    if (totalPages <= 5) return Array.from({ length: totalPages }, (_, index) => index + 1);
+    if (totalPages <= 5) return Array.from({ length: totalPages }, (_, i) => i + 1);
     const start = Math.max(1, Math.min(currentPage - 2, totalPages - 4));
-    return Array.from({ length: 5 }, (_, index) => start + index);
+    return Array.from({ length: 5 }, (_, i) => start + i);
   }, [currentPage, totalPages]);
 
   return (
@@ -79,21 +92,9 @@ export function VenuesCatalog() {
         title="Venue Management"
         description="Shape the event footprint from a single cinematic surface, with venue health, capacity, and booking readiness visible before you ever open a detail page."
         metrics={[
-          {
-            label: 'Partner venues',
-            value: partnerVenueCount,
-            hint: 'Spaces marked as Eventara partner venues in the catalog.'
-          },
-          {
-            label: 'Portfolio capacity',
-            value: totalCapacity.toLocaleString(),
-            hint: 'Combined guest capacity across the current venue preview set.'
-          },
-          {
-            label: 'Event-ready spaces',
-            value: venueRecords.filter((venue) => getEventsByVenueId(venue.id).length > 0).length,
-            hint: 'Venues already connected to sample events in this UI-only flow.'
-          }
+          { label: 'Partner venues', value: partnerVenueCount, hint: 'Spaces marked as Eventara partner venues in the catalog.' },
+          { label: 'Portfolio capacity', value: totalCapacity.toLocaleString(), hint: 'Combined guest capacity across all venues.' },
+          { label: 'Total venues', value: venues.length, hint: 'All community and official venues in the system.' }
         ]}
         actions={
           <PrimaryPageAction
@@ -112,54 +113,27 @@ export function VenuesCatalog() {
           <Input
             placeholder="Search venues, city, region, or amenities"
             value={query}
-            onChange={(event) => {
-              setQuery(event.target.value);
-              setPage(1);
-            }}
+            onChange={(e) => { setQuery(e.target.value); setPage(1); }}
             className="h-10 pl-9"
           />
         </div>
 
         <div className="space-y-1.5">
           <p className="text-[11px] font-semibold tracking-[0.18em] text-neutral-500 uppercase">Capacity</p>
-          <Select
-            value={capacityKey}
-            onValueChange={(v) => {
-              setCapacityKey(v);
-              setPage(1);
-            }}
-          >
-            <SelectTrigger className="w-full" size="default">
-              <SelectValue placeholder="Select capacity" />
-            </SelectTrigger>
+          <Select value={capacityKey} onValueChange={(v) => { setCapacityKey(v); setPage(1); }}>
+            <SelectTrigger className="w-full" size="default"><SelectValue /></SelectTrigger>
             <SelectContent align="start">
-              {CAPACITY_FILTERS.map((option) => (
-                <SelectItem key={option.key} value={option.key}>
-                  {option.label}
-                </SelectItem>
-              ))}
+              {CAPACITY_FILTERS.map((o) => <SelectItem key={o.key} value={o.key}>{o.label}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
 
         <div className="space-y-1.5">
           <p className="text-[11px] font-semibold tracking-[0.18em] text-neutral-500 uppercase">Sort by</p>
-          <Select
-            value={sortKey}
-            onValueChange={(v) => {
-              setSortKey(v);
-              setPage(1);
-            }}
-          >
-            <SelectTrigger className="w-full" size="default">
-              <SelectValue placeholder="Sort" />
-            </SelectTrigger>
+          <Select value={sortKey} onValueChange={(v) => { setSortKey(v); setPage(1); }}>
+            <SelectTrigger className="w-full" size="default"><SelectValue /></SelectTrigger>
             <SelectContent align="start">
-              {SORT_OPTIONS.map((option) => (
-                <SelectItem key={option.key} value={option.key}>
-                  {option.label}
-                </SelectItem>
-              ))}
+              {SORT_OPTIONS.map((o) => <SelectItem key={o.key} value={o.key}>{o.label}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
@@ -173,117 +147,106 @@ export function VenuesCatalog() {
         <div>
           <h3 className="text-lg font-semibold tracking-tight text-neutral-950">Venue results</h3>
           <p className="text-sm text-neutral-500">
-            Showing {filtered.length} of {venueRecords.length} venues - {sortLabel}
+            {isLoading ? 'Loading venues…' : error ? error : `Showing ${filtered.length} of ${venues.length} venues — ${sortLabel}`}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
           {capacityKey !== 'any' && (
-            <Badge variant="outline" className="h-7 gap-2 border-amber-200 bg-amber-50 text-amber-700">
+            <span className="inline-flex h-7 items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 text-xs font-medium text-amber-700">
               {capacityLabel}
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-xs"
-                className="-mr-1 text-amber-700"
-                onClick={() => {
-                  setCapacityKey('any');
-                  setPage(1);
-                }}
-              >
+              <Button type="button" variant="ghost" size="icon-xs" className="-mr-1 text-amber-700" onClick={() => { setCapacityKey('any'); setPage(1); }}>
                 <X className="size-3" />
               </Button>
-            </Badge>
+            </span>
           )}
           {query.trim() && (
-            <Badge variant="outline" className="h-7 gap-2 border-neutral-200 bg-white text-neutral-700">
+            <span className="inline-flex h-7 items-center gap-2 rounded-full border border-neutral-200 bg-white px-3 text-xs font-medium text-neutral-700">
               {`"${query.trim()}"`}
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-xs"
-                className="-mr-1 text-neutral-600"
-                onClick={() => {
-                  setQuery('');
-                  setPage(1);
-                }}
-              >
+              <Button type="button" variant="ghost" size="icon-xs" className="-mr-1 text-neutral-600" onClick={() => { setQuery(''); setPage(1); }}>
                 <X className="size-3" />
               </Button>
-            </Badge>
+            </span>
           )}
           {(capacityKey !== 'any' || query.trim()) && (
-            <Button
-              variant="ghost"
-              size="xs"
-              className="text-neutral-500"
-              onClick={() => {
-                setCapacityKey('any');
-                setQuery('');
-                setPage(1);
-              }}
-            >
+            <Button variant="ghost" size="xs" className="text-neutral-500" onClick={() => { setCapacityKey('any'); setQuery(''); setPage(1); }}>
               Clear filters
             </Button>
           )}
         </div>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-4">
-        {paged.map((venue, index) => (
-          <div key={venue.id} className="contents">
-            {index === 3 && paged.length > 3 ? (
-              <Card className="border-0 bg-white py-0 shadow-none ring-1 ring-neutral-200 xl:col-span-4">
-                <CardContent className="grid gap-6 p-6 md:grid-cols-[1.2fr_auto] md:items-center">
-                  <div className="space-y-2">
-                    <p className="text-[11px] font-semibold tracking-[0.22em] text-amber-700 uppercase">Community growth</p>
-                    <h3 className="text-xl font-semibold text-neutral-950">Know a venue we should highlight?</h3>
-                    <p className="text-sm leading-6 text-neutral-600">
-                      Add a new space to the Eventara portfolio so the team can review it and bring it into upcoming programming.
-                    </p>
-                  </div>
-                  <Button asChild size="lg" variant="amber" className="h-11 rounded-xl">
-                    <Link href={ADMIN_OPERATIONS_PATHS.venueCreate}>Contribute venue</Link>
-                  </Button>
-                </CardContent>
-              </Card>
-            ) : null}
+      {isLoading ? (
+        <div className="grid gap-6 xl:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="h-80 animate-pulse rounded-[24px] bg-neutral-100" />
+          ))}
+        </div>
+      ) : error ? (
+        <div className="rounded-[24px] border border-red-100 bg-red-50 px-6 py-10 text-center">
+          <p className="text-sm font-medium text-red-700">{error}</p>
+        </div>
+      ) : paged.length === 0 ? (
+        <div className="rounded-[24px] border border-neutral-200 bg-neutral-50 px-6 py-10 text-center">
+          <p className="text-sm text-neutral-500">No venues match your current filters.</p>
+        </div>
+      ) : (
+        <div className="grid gap-6 xl:grid-cols-4">
+          {paged.map((venue, index) => (
+            <div key={venue.id} className="contents">
+              {index === 3 && paged.length > 3 ? (
+                <Card className="border-0 bg-white py-0 shadow-none ring-1 ring-neutral-200 xl:col-span-4">
+                  <CardContent className="grid gap-6 p-6 md:grid-cols-[1.2fr_auto] md:items-center">
+                    <div className="space-y-2">
+                      <p className="text-[11px] font-semibold tracking-[0.22em] text-amber-700 uppercase">Community growth</p>
+                      <h3 className="text-xl font-semibold text-neutral-950">Know a venue we should highlight?</h3>
+                      <p className="text-sm leading-6 text-neutral-600">
+                        Add a new space to the Eventara portfolio so the team can review it and bring it into upcoming programming.
+                      </p>
+                    </div>
+                    <Button asChild size="lg" variant="amber" className="h-11 rounded-xl">
+                      <Link href={ADMIN_OPERATIONS_PATHS.venueCreate}>Contribute venue</Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              ) : null}
 
-            <CatalogCard
-              title={venue.name}
-              subtitle={[venue.city, venue.province].filter(Boolean).join(', ')}
-              photo={venue.photo}
-              description={venue.summary}
-              href={ADMIN_OPERATIONS_PATHS.venueDetail(venue.id)}
-              editHref={ADMIN_OPERATIONS_PATHS.venueEdit(venue.id)}
-              badges={[venue.venue_type, ...(venue.is_partner ? ['Partner'] : [])]}
-              specs={[
-                { label: 'Location', value: [venue.city, venue.province].filter(Boolean).join(', '), icon: <MapPin className="size-3.5" /> },
-                { label: 'Venue type', value: venue.venue_type.charAt(0).toUpperCase() + venue.venue_type.slice(1), icon: <Building2 className="size-3.5" /> },
-                { label: 'Capacity', value: `${venue.capacity.toLocaleString()} guests`, icon: <Users className="size-3.5" /> }
-              ]}
-              tags={venue.amenities ?? []}
-            />
-          </div>
-        ))}
-      </div>
+              <CatalogCard
+                title={venue.name}
+                subtitle={[venue.city, venue.province].filter(Boolean).join(', ')}
+                photo={venuePhoto(venue)}
+                description={venue.description ?? 'No description provided.'}
+                href={ADMIN_OPERATIONS_PATHS.venueDetail(venue.id)}
+                editHref={ADMIN_OPERATIONS_PATHS.venueEdit(venue.id)}
+                badges={[venue.venue_type, ...(venue.is_partner ? ['Partner'] : [])]}
+                specs={[
+                  { label: 'Location', value: [venue.city, venue.province].filter(Boolean).join(', '), icon: <MapPin className="size-3.5" /> },
+                  { label: 'Venue type', value: venue.venue_type.charAt(0).toUpperCase() + venue.venue_type.slice(1), icon: <Building2 className="size-3.5" /> },
+                  { label: 'Capacity', value: `${venue.capacity.toLocaleString()} guests`, icon: <Users className="size-3.5" /> }
+                ]}
+                tags={venue.amenities ?? []}
+              />
+            </div>
+          ))}
+        </div>
+      )}
 
-      {totalPages > 1 ? (
+      {!isLoading && !error && totalPages > 1 && (
         <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
-          <Button variant="outline" size="sm" disabled={currentPage === 1} onClick={() => setPage((prev) => Math.max(1, prev - 1))}>
+          <Button variant="outline" size="sm" disabled={currentPage === 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>
             <ArrowLeft className="size-4" />
             Prev
           </Button>
-          {pageNumbers.map((pageNumber) => (
-            <Button key={pageNumber} variant={pageNumber === currentPage ? 'default' : 'outline'} size="sm" onClick={() => setPage(pageNumber)}>
-              {pageNumber}
+          {pageNumbers.map((n) => (
+            <Button key={n} variant={n === currentPage ? 'default' : 'outline'} size="sm" onClick={() => setPage(n)}>
+              {n}
             </Button>
           ))}
-          <Button variant="outline" size="sm" disabled={currentPage === totalPages} onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}>
+          <Button variant="outline" size="sm" disabled={currentPage === totalPages} onClick={() => setPage((p) => Math.min(totalPages, p + 1))}>
             Next
             <ArrowRight className="size-4" />
           </Button>
         </div>
-      ) : null}
+      )}
     </div>
   );
 }

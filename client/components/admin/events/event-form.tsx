@@ -1,8 +1,12 @@
 'use client';
 
-import { useState } from 'react';
-import { CalendarPlus2, Clock, MapPin, Plus, Send, Trash2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Clock, MapPin, Plus, Send, Trash2 } from 'lucide-react';
 import Link from 'next/link';
+import { toast } from 'sonner';
+import { Events, Venues } from '@/api/sdk.gen';
+import { getAccessToken } from '@/store/auth-store';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,7 +14,37 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { BackLink, FieldLabel, PhotoPanel } from './events-shared';
-import { ADMIN_OPERATIONS_PATHS, eventDetailRecords, getSessionsByEventId, venueRecords, type EventDetailRecord } from '@/constants/admin/operations';
+import { ADMIN_OPERATIONS_PATHS, eventDetailRecords, getSessionsByEventId, type EventDetailRecord } from '@/constants/admin/operations';
+
+// ── API helpers ────────────────────────────────────────────────────────────────
+
+function extractApiError(payload: unknown): string | undefined {
+  if (!payload || typeof payload !== 'object') return undefined;
+  const p = payload as { detail?: unknown; message?: unknown };
+  if (typeof p.detail === 'string') return p.detail;
+  if (Array.isArray(p.detail) && p.detail.length > 0) {
+    const first = p.detail[0];
+    if (typeof first === 'string') return first;
+    if (first && typeof first === 'object') {
+      const ve = first as { msg?: unknown; message?: unknown };
+      if (typeof ve.msg === 'string') return ve.msg;
+      if (typeof ve.message === 'string') return ve.message;
+    }
+  }
+  if (typeof p.message === 'string') return p.message;
+  return undefined;
+}
+
+function getApiError(error: unknown, fallback: string): string {
+  if (typeof error === 'string') return error;
+  if (error && typeof error === 'object') {
+    const d = (error as { response?: { data?: unknown } }).response?.data;
+    const msg = extractApiError(d) ?? extractApiError(error);
+    if (msg) return msg;
+  }
+  if (error instanceof Error) return error.message;
+  return fallback;
+}
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -48,6 +82,7 @@ function formatLocalTime(local: string) {
 
 type SessionFormData = {
   key: string;
+  existingId?: string;
   venueId: string;
   title: string;
   description: string;
@@ -65,7 +100,7 @@ function nextSessionKey(): string {
 function createBlankSession(venueId?: string): SessionFormData {
   return {
     key: nextSessionKey(),
-    venueId: venueId ?? venueRecords[0]?.id ?? '',
+    venueId: venueId ?? '',
     title: '',
     description: '',
     startDatetime: '',
@@ -79,6 +114,7 @@ function createBlankSession(venueId?: string): SessionFormData {
 type EventFormProps = { mode: 'create'; event?: never } | { mode: 'edit'; event: EventDetailRecord };
 
 export function EventForm({ mode, event }: EventFormProps) {
+  const router = useRouter();
   const existingSessions = mode === 'edit' ? getSessionsByEventId(event.id) : [];
 
   const [title, setTitle] = useState(event?.title ?? '');
@@ -89,6 +125,7 @@ export function EventForm({ mode, event }: EventFormProps) {
     mode === 'edit' && existingSessions.length > 0
       ? existingSessions.map((s) => ({
           key: s.id,
+          existingId: s.id,
           venueId: s.venueId,
           title: s.title,
           description: s.description ?? '',
@@ -96,18 +133,34 @@ export function EventForm({ mode, event }: EventFormProps) {
           endDatetime: toLocalInput(s.endDatetime),
           maxSlots: s.maxSlots != null ? String(s.maxSlots) : ''
         }))
-      : [
-          {
-            key: 'session-1',
-            venueId: venueRecords[0]?.id ?? '',
-            title: '',
-            description: '',
-            startDatetime: '',
-            endDatetime: '',
-            maxSlots: ''
-          }
-        ]
+      : [{ key: 'session-1', venueId: '', title: '', description: '', startDatetime: '', endDatetime: '', maxSlots: '' }]
   );
+  const [removedSessionIds, setRemovedSessionIds] = useState<string[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [venues, setVenues] = useState<{ id: string; name: string }[]>([]);
+  const [venuesLoading, setVenuesLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadVenues() {
+      try {
+        const result = await Venues.listVenuesVenuesGet({
+          query: { page_size: 100 },
+          headers: { Authorization: `Bearer ${getAccessToken()}` },
+          throwOnError: false
+        });
+        if (result.data && !cancelled) setVenues(result.data.data.map((v) => ({ id: v.id, name: v.name })));
+      } catch {
+        // leave empty — venue IDs can still be typed manually if needed
+      } finally {
+        if (!cancelled) setVenuesLoading(false);
+      }
+    }
+    void loadVenues();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const previewPhoto = event?.photo ?? eventDetailRecords[0]?.photo ?? '';
 
@@ -116,6 +169,10 @@ export function EventForm({ mode, event }: EventFormProps) {
   }
 
   function removeSession(index: number) {
+    const session = sessions[index];
+    if (session?.existingId) {
+      setRemovedSessionIds((prev) => [...prev, session.existingId!]);
+    }
     setSessions((prev) => prev.filter((_, i) => i !== index));
   }
 
@@ -123,23 +180,162 @@ export function EventForm({ mode, event }: EventFormProps) {
     setSessions((prev) => prev.map((s, i) => (i === index ? { ...s, ...patch } : s)));
   }
 
-  function handlePost(e: React.FormEvent) {
+  function validate(): string | null {
+    if (!title.trim()) return 'Event title is required.';
+    if (!description.trim()) return 'Event description is required.';
+    if (!startDate) return 'Start date is required.';
+    if (!endDate) return 'End date is required.';
+    if (new Date(startDate) >= new Date(endDate)) return 'Start date must be before end date.';
+    if (sessions.length === 0) return 'At least one session is required.';
+    for (let i = 0; i < sessions.length; i++) {
+      const s = sessions[i];
+      if (!s.title.trim()) return `Session ${i + 1}: title is required.`;
+      if (!s.venueId) return `Session ${i + 1}: venue is required.`;
+      if (!s.startDatetime) return `Session ${i + 1}: start datetime is required.`;
+      if (!s.endDatetime) return `Session ${i + 1}: end datetime is required.`;
+      if (new Date(s.startDatetime) >= new Date(s.endDatetime)) return `Session ${i + 1}: start must be before end.`;
+    }
+    return null;
+  }
+
+  async function handleSubmit(e: React.FormEvent, targetStatus: 'draft' | 'posted') {
     e.preventDefault();
-    // status = 'posted'
+    const validationError = validate();
+    if (validationError) {
+      toast.error(validationError);
+      return;
+    }
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
+    const sessionPayload = sessions.map((s) => ({
+      existingId: s.existingId,
+      venueId: s.venueId,
+      title: s.title.trim(),
+      description: s.description.trim(),
+      startDatetime: s.startDatetime,
+      endDatetime: s.endDatetime,
+      maxSlots: s.maxSlots
+    }));
+
+    try {
+      if (mode === 'create') {
+        const result = await Events.createEventEventsPost({
+          body: {
+            title: title.trim(),
+            description: description.trim(),
+            start_date: startDate,
+            end_date: endDate,
+            sessions: sessionPayload.map((s) => ({
+              venue_id: s.venueId,
+              title: s.title,
+              description: s.description || null,
+              start_datetime: s.startDatetime,
+              end_datetime: s.endDatetime,
+              max_slots: s.maxSlots ? parseInt(s.maxSlots, 10) : null
+            }))
+          },
+          headers: { Authorization: `Bearer ${getAccessToken()}` },
+          throwOnError: false
+        });
+
+        if (!result.data) throw result.error ?? new Error('Unable to create event right now.');
+
+        const eventId = result.data.data.id;
+
+        if (targetStatus === 'posted') {
+          const statusResult = await Events.updateEventStatusEventsEventIdStatusPatch({
+            path: { event_id: eventId },
+            body: { new_status: 'posted' },
+            headers: { Authorization: `Bearer ${getAccessToken()}` },
+            throwOnError: false
+          });
+          toast.success(statusResult.data ? (statusResult.data.message ?? 'Event published.') : 'Event saved as draft.');
+        } else {
+          toast.success(result.data.message ?? 'Event saved as draft.');
+        }
+
+        router.push(ADMIN_OPERATIONS_PATHS.eventDetail(eventId));
+      } else {
+        const eventId = event.id;
+
+        const metaResult = await Events.updateEventMetadataEventsEventIdPatch({
+          path: { event_id: eventId },
+          body: { title: title.trim(), description: description.trim(), start_date: startDate, end_date: endDate },
+          headers: { Authorization: `Bearer ${getAccessToken()}` },
+          throwOnError: false
+        });
+
+        if (!metaResult.data) throw metaResult.error ?? new Error('Unable to update event right now.');
+
+        await Promise.allSettled(
+          removedSessionIds.map((sid) =>
+            Events.deleteEventSessionEventsEventIdSessionSessionIdDelete({
+              path: { event_id: eventId, session_id: sid },
+              headers: { Authorization: `Bearer ${getAccessToken()}` },
+              throwOnError: false
+            })
+          )
+        );
+
+        await Promise.allSettled(
+          sessionPayload
+            .filter((s) => s.existingId)
+            .map((s) =>
+              Events.updateEventSessionEventsEventIdSessionSessionIdPatch({
+                path: { event_id: eventId, session_id: s.existingId! },
+                body: {
+                  venue_id: s.venueId,
+                  title: s.title,
+                  description: s.description || null,
+                  start_datetime: s.startDatetime,
+                  end_datetime: s.endDatetime,
+                  max_slots: s.maxSlots ? parseInt(s.maxSlots, 10) : null
+                },
+                headers: { Authorization: `Bearer ${getAccessToken()}` },
+                throwOnError: false
+              })
+            )
+        );
+
+        const newCount = sessionPayload.filter((s) => !s.existingId).length;
+        if (newCount > 0) {
+          toast.warning(`${newCount} new session(s) were not saved — adding sessions to an existing event is not yet supported.`);
+        }
+
+        if (targetStatus === 'posted' && event.status === 'draft') {
+          await Events.updateEventStatusEventsEventIdStatusPatch({
+            path: { event_id: eventId },
+            body: { new_status: 'posted' },
+            headers: { Authorization: `Bearer ${getAccessToken()}` },
+            throwOnError: false
+          });
+          toast.success('Event updated and published.');
+        } else {
+          toast.success(metaResult.data.message ?? 'Event updated successfully.');
+        }
+
+        router.push(ADMIN_OPERATIONS_PATHS.eventDetail(eventId));
+      }
+    } catch (err) {
+      toast.error(getApiError(err, mode === 'create' ? 'Unable to create event right now.' : 'Unable to update event right now.'));
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  function handlePost(e: React.FormEvent) {
+    void handleSubmit(e, 'posted');
   }
 
   function handleSaveDraft(e: React.FormEvent) {
-    e.preventDefault();
-    // status = 'draft'
+    void handleSubmit(e, 'draft');
   }
 
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center gap-2">
         <BackLink href={ADMIN_OPERATIONS_PATHS.events} label="Back to events" />
-        <Badge variant="outline" className="rounded-full px-3 py-1 text-xs tracking-[0.18em] uppercase">
-          UI preview only
-        </Badge>
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
@@ -147,7 +343,9 @@ export function EventForm({ mode, event }: EventFormProps) {
         <Card className="border-0 bg-white shadow-none ring-1 ring-neutral-200">
           <CardHeader className="border-b border-neutral-200/80 pb-5">
             <CardTitle>{mode === 'create' ? 'Add event' : `Edit ${event.title}`}</CardTitle>
-            <CardDescription>Fields map directly to the API schema — drop-in ready when the backend is connected.</CardDescription>
+            <CardDescription>
+              {mode === 'create' ? 'Fill in the event details and sessions below.' : 'Update the event details and sessions below.'}
+            </CardDescription>
           </CardHeader>
           <CardContent className="pt-6">
             <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
@@ -233,12 +431,12 @@ export function EventForm({ mode, event }: EventFormProps) {
 
                       <div className="space-y-2">
                         <FieldLabel htmlFor={`session-${session.key}-venue`}>Venue *</FieldLabel>
-                        <Select value={session.venueId} onValueChange={(v) => updateSession(index, { venueId: v })}>
+                        <Select value={session.venueId} onValueChange={(v) => updateSession(index, { venueId: v })} disabled={venuesLoading}>
                           <SelectTrigger id={`session-${session.key}-venue`}>
-                            <SelectValue />
+                            <SelectValue placeholder={venuesLoading ? 'Loading venues…' : 'Select a venue'} />
                           </SelectTrigger>
                           <SelectContent>
-                            {venueRecords.map((v) => (
+                            {venues.map((v) => (
                               <SelectItem key={v.id} value={v.id}>
                                 {v.name}
                               </SelectItem>
@@ -284,14 +482,14 @@ export function EventForm({ mode, event }: EventFormProps) {
 
               {/* ── Submit ─────────────────────────────────────────────────────── */}
               <div className="flex flex-wrap gap-2 border-t border-neutral-200/80 pt-6">
-                <Button type="submit" onClick={handlePost}>
+                <Button type="submit" onClick={handlePost} disabled={isSubmitting}>
                   <Send className="size-4" />
-                  Post
+                  {isSubmitting ? 'Saving…' : 'Post'}
                 </Button>
-                <Button type="submit" variant="outline" onClick={handleSaveDraft}>
-                  Save as Draft
+                <Button type="submit" variant="outline" onClick={handleSaveDraft} disabled={isSubmitting}>
+                  {isSubmitting ? 'Saving…' : 'Save as Draft'}
                 </Button>
-                <Button type="button" variant="ghost" asChild>
+                <Button type="button" variant="ghost" asChild disabled={isSubmitting}>
                   <Link href={ADMIN_OPERATIONS_PATHS.events}>Cancel</Link>
                 </Button>
               </div>
@@ -329,7 +527,7 @@ export function EventForm({ mode, event }: EventFormProps) {
               {sessions.length > 0 ? (
                 <div className="space-y-3">
                   {sessions.map((s) => {
-                    const v = venueRecords.find((r) => r.id === s.venueId);
+                    const v = venues.find((r) => r.id === s.venueId);
                     return (
                       <div key={s.key} className="rounded-xl border border-neutral-200 bg-neutral-50 p-3">
                         <p className="text-sm font-medium text-neutral-950">{s.title || 'Untitled session'}</p>
@@ -358,26 +556,6 @@ export function EventForm({ mode, event }: EventFormProps) {
             </CardContent>
           </Card>
 
-          <Card className="border-0 bg-white shadow-none ring-1 ring-neutral-200">
-            <CardHeader className="border-b border-neutral-200/80 pb-4">
-              <CardTitle>Design notes</CardTitle>
-              <CardDescription>Schema mapping reference for the event payload.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3 pt-6 text-sm leading-6 text-neutral-600">
-              <div className="rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3">
-                <p className="font-medium text-neutral-950">API request shape</p>
-                <p className="mt-1 font-mono text-xs text-neutral-500">
-                  {`{ title, description, start_date, end_date, status, sessions: [{ venue_id, title, description?, start_datetime, end_datetime, max_slots? }] }`}
-                </p>
-              </div>
-              <div className="rounded-xl border border-dashed border-neutral-200 px-4 py-4 text-neutral-500">
-                <div className="flex items-center gap-2">
-                  <CalendarPlus2 className="size-4" />
-                  Scheduling and publishing actions are intentionally left disconnected in this UI pass.
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </div>
       </div>
     </div>

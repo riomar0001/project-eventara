@@ -37,9 +37,9 @@ class Venue(BaseModel):
     usage_count: int = Field(default=0, ge=0)
     is_partner: bool = False
     amenities: list[str] | None = None
-    contact_name: str = Field(min_length=1, max_length=255)
-    contact_phone: str = Field(min_length=1, max_length=20)
-    contact_email: str = Field(min_length=1, max_length=255)
+    contact_name: str | None = Field(default=None, max_length=255)
+    contact_phone: str | None = Field(default=None, max_length=20)
+    contact_email: str | None = Field(default=None, max_length=255)
     created_at: datetime | None = None
     updated_at: datetime | None = None
 

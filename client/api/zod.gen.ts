@@ -18,6 +18,15 @@ export const zActionType = z.enum([
 ]);
 
 /**
+ * AddVolunteerRequest
+ */
+export const zAddVolunteerRequest = z.object({
+    target_user_id: z.uuid(),
+    contact_phone: z.string().min(7).max(20),
+    volunteer_role_id: z.uuid()
+});
+
+/**
  * AdminDeleteAccountRequest
  */
 export const zAdminDeleteAccountRequest = z.object({
@@ -44,6 +53,16 @@ export const zAgeGroup = z.enum([
     'teen',
     'adult',
     'senior'
+]);
+
+/**
+ * ApplicationStatus
+ */
+export const zApplicationStatus = z.enum([
+    'pending',
+    'approved',
+    'rejected',
+    'withdrawn'
 ]);
 
 /**
@@ -128,6 +147,14 @@ export const zCheckAliasResponse = z.object({
 });
 
 /**
+ * CreateVolunteerRoleRequest
+ */
+export const zCreateVolunteerRoleRequest = z.object({
+    name: z.string().min(2).max(100),
+    description: z.string().max(500).nullish()
+});
+
+/**
  * DeadJobResponse
  */
 export const zDeadJobResponse = z.object({
@@ -196,6 +223,207 @@ export const zEducationLevel = z.enum([
 export const zErrorResponse = z.object({
     success: z.boolean().optional().default(false),
     message: z.string()
+});
+
+/**
+ * EventParticipantRecordResponse
+ */
+export const zEventParticipantRecordResponse = z.object({
+    id: z.uuid(),
+    user_id: z.uuid(),
+    event_session_id: z.uuid(),
+    status: z.string(),
+    created_at: z.iso.datetime().nullable(),
+    updated_at: z.iso.datetime().nullable()
+});
+
+/**
+ * EventParticipantStatus
+ */
+export const zEventParticipantStatus = z.enum([
+    'registered',
+    'attended',
+    'cancelled',
+    'no_show'
+]);
+
+/**
+ * EventRecordResponse
+ */
+export const zEventRecordResponse = z.object({
+    id: z.uuid(),
+    title: z.string(),
+    description: z.string(),
+    start_date: z.iso.datetime(),
+    end_date: z.iso.datetime(),
+    status: z.string(),
+    created_by: z.uuid(),
+    created_at: z.iso.datetime().nullable(),
+    updated_at: z.iso.datetime().nullable()
+});
+
+/**
+ * EventDeletedResponse
+ */
+export const zEventDeletedResponse = z.object({
+    success: z.boolean().optional().default(true),
+    message: z.string().optional().default('Event deleted successfully.'),
+    data: zEventRecordResponse
+});
+
+/**
+ * EventMetadataUpdatedResponse
+ */
+export const zEventMetadataUpdatedResponse = z.object({
+    success: z.boolean().optional().default(true),
+    message: z.string().optional().default('Event updated successfully.'),
+    data: zEventRecordResponse
+});
+
+/**
+ * EventSessionCreateRequest
+ */
+export const zEventSessionCreateRequest = z.object({
+    venue_id: z.uuid(),
+    title: z.string().min(5).max(255),
+    description: z.string().max(5000).nullish(),
+    start_datetime: z.iso.datetime(),
+    end_datetime: z.iso.datetime(),
+    max_slots: z.int().gt(0).nullish()
+});
+
+/**
+ * EventCreateRequest
+ */
+export const zEventCreateRequest = z.object({
+    title: z.string().min(1).max(255),
+    description: z.string().min(1),
+    start_date: z.iso.datetime(),
+    end_date: z.iso.datetime(),
+    sessions: z.array(zEventSessionCreateRequest).min(1)
+});
+
+/**
+ * EventSessionRecordResponse
+ */
+export const zEventSessionRecordResponse = z.object({
+    id: z.uuid(),
+    event_id: z.uuid(),
+    venue_id: z.uuid(),
+    title: z.string(),
+    description: z.string().nullable(),
+    start_datetime: z.iso.datetime(),
+    end_datetime: z.iso.datetime(),
+    status: z.string(),
+    max_slots: z.int().nullable(),
+    created_at: z.iso.datetime().nullable(),
+    updated_at: z.iso.datetime().nullable()
+});
+
+/**
+ * EventSessionDeletedResponse
+ */
+export const zEventSessionDeletedResponse = z.object({
+    success: z.boolean().optional().default(true),
+    message: z.string().optional().default('Event session deleted successfully.'),
+    data: zEventSessionRecordResponse
+});
+
+/**
+ * EventSessionStatus
+ */
+export const zEventSessionStatus = z.enum([
+    'draft',
+    'posted',
+    'started',
+    'cancelled',
+    'ended',
+    'postponed'
+]);
+
+/**
+ * EventSessionStatusUpdateRequest
+ */
+export const zEventSessionStatusUpdateRequest = z.object({
+    new_status: zEventSessionStatus
+});
+
+/**
+ * EventSessionStatusUpdatedResponse
+ */
+export const zEventSessionStatusUpdatedResponse = z.object({
+    success: z.boolean().optional().default(true),
+    message: z.string().optional().default('Event session status updated successfully.'),
+    data: zEventSessionRecordResponse
+});
+
+/**
+ * EventSessionUpdateRequest
+ */
+export const zEventSessionUpdateRequest = z.object({
+    venue_id: z.uuid(),
+    title: z.string().min(5).max(255),
+    description: z.string().max(5000).nullish(),
+    start_datetime: z.iso.datetime(),
+    end_datetime: z.iso.datetime(),
+    max_slots: z.int().gt(0).nullish()
+});
+
+/**
+ * EventSessionUpdatedResponse
+ */
+export const zEventSessionUpdatedResponse = z.object({
+    success: z.boolean().optional().default(true),
+    message: z.string().optional().default('Event session updated successfully.'),
+    data: zEventSessionRecordResponse
+});
+
+/**
+ * EventStatus
+ */
+export const zEventStatus = z.enum([
+    'draft',
+    'posted',
+    'started',
+    'cancelled',
+    'ended',
+    'postponed'
+]);
+
+/**
+ * EventStatusUpdateRequest
+ */
+export const zEventStatusUpdateRequest = z.object({
+    new_status: zEventStatus
+});
+
+/**
+ * EventStatusUpdatedResponse
+ */
+export const zEventStatusUpdatedResponse = z.object({
+    success: z.boolean().optional().default(true),
+    message: z.string().optional().default('Event status updated successfully.'),
+    data: zEventRecordResponse
+});
+
+/**
+ * EventUpdateRequest
+ */
+export const zEventUpdateRequest = z.object({
+    title: z.string().min(1).max(255),
+    description: z.string().min(1),
+    start_date: z.iso.datetime(),
+    end_date: z.iso.datetime()
+});
+
+/**
+ * EventWithSessionsResponse
+ */
+export const zEventWithSessionsResponse = z.object({
+    success: z.boolean().optional().default(true),
+    message: z.string().optional().default('Event created successfully.'),
+    data: zEventRecordResponse,
+    sessions: z.array(zEventSessionRecordResponse)
 });
 
 /**
@@ -400,6 +628,37 @@ export const zGetAuditLogsResponse = z.object({
 });
 
 /**
+ * PresignUploadData
+ */
+export const zPresignUploadData = z.object({
+    upload_url: z.string(),
+    object_key: z.string(),
+    public_url: z.string(),
+    expires_in: z.int()
+});
+
+/**
+ * PresignUploadRequest
+ */
+export const zPresignUploadRequest = z.object({
+    resource_type: z.enum([
+        'event-cover-banner',
+        'registration-uploads',
+        'user-profile'
+    ]),
+    content_type: z.string().min(1).max(100)
+});
+
+/**
+ * PresignUploadResponse
+ */
+export const zPresignUploadResponse = z.object({
+    success: z.boolean().optional().default(true),
+    message: z.string().optional().default('Presigned URL generated.'),
+    data: zPresignUploadData
+});
+
+/**
  * PurgeDeadJobsResponse
  */
 export const zPurgeDeadJobsResponse = z.object({
@@ -423,6 +682,15 @@ export const zRefreshTokenResponse = z.object({
     refresh_token: z.string(),
     token_type: z.string().optional().default('bearer'),
     message: z.string().optional().default('Token refreshed successfully.')
+});
+
+/**
+ * RegisterForSessionResponse
+ */
+export const zRegisterForSessionResponse = z.object({
+    success: z.boolean().optional().default(true),
+    message: z.string().optional().default('Successfully registered for event session.'),
+    data: zEventParticipantRecordResponse
 });
 
 /**
@@ -500,6 +768,15 @@ export const zRetryJobResponse = z.object({
     original_job_id: z.string(),
     new_job_id: z.string(),
     function: z.string()
+});
+
+/**
+ * ReviewApplicationRequest
+ */
+export const zReviewApplicationRequest = z.object({
+    status: zApplicationStatus,
+    contact_phone: z.string().min(7).max(20).nullish(),
+    volunteer_role_id: z.uuid().nullish()
 });
 
 /**
@@ -648,10 +925,33 @@ export const zSendUserPasswordResetResponse = z.object({
 });
 
 /**
+ * SubmitApplicationRequest
+ */
+export const zSubmitApplicationRequest = z.object({
+    application_data: z.record(z.string(), z.unknown()).nullish()
+});
+
+/**
  * UpdateAssignmentRequest
  */
 export const zUpdateAssignmentRequest = z.object({
     expires_at: z.iso.datetime().nullable()
+});
+
+/**
+ * UpdateParticipantStatusRequest
+ */
+export const zUpdateParticipantStatusRequest = z.object({
+    new_status: zEventParticipantStatus
+});
+
+/**
+ * UpdateParticipantStatusResponse
+ */
+export const zUpdateParticipantStatusResponse = z.object({
+    success: z.boolean().optional().default(true),
+    message: z.string().optional().default('Participant status updated successfully.'),
+    data: zEventParticipantRecordResponse
 });
 
 /**
@@ -986,6 +1286,50 @@ export const zVenueType = z.enum([
 ]);
 
 /**
+ * CommunityVenueCreateRequest
+ *
+ * Venue suggested by the community — contact information is optional.
+ */
+export const zCommunityVenueCreateRequest = z.object({
+    name: z.string().min(1).max(255),
+    description: z.string().nullish(),
+    address_line: z.string().min(1).max(255),
+    city: z.string().min(1).max(100),
+    province: z.string().min(1).max(100),
+    postal_code: z.string().min(1).max(20),
+    region: z.string().min(1).max(100),
+    country: z.string().min(1).max(100),
+    capacity: z.int().gt(0),
+    venue_type: zVenueType,
+    amenities: z.array(z.string()).nullish(),
+    contact_name: z.string().max(255).nullish(),
+    contact_phone: z.string().max(20).nullish(),
+    contact_email: z.email().nullish()
+});
+
+/**
+ * OfficialVenueCreateRequest
+ *
+ * Officially managed venue — contact information is required.
+ */
+export const zOfficialVenueCreateRequest = z.object({
+    name: z.string().min(1).max(255),
+    description: z.string().nullish(),
+    address_line: z.string().min(1).max(255),
+    city: z.string().min(1).max(100),
+    province: z.string().min(1).max(100),
+    postal_code: z.string().min(1).max(20),
+    region: z.string().min(1).max(100),
+    country: z.string().min(1).max(100),
+    capacity: z.int().gt(0),
+    venue_type: zVenueType,
+    amenities: z.array(z.string()).nullish(),
+    contact_name: z.string().min(1).max(255),
+    contact_phone: z.string().min(1).max(20),
+    contact_email: z.email()
+});
+
+/**
  * PublicVenueRecordResponse
  */
 export const zPublicVenueRecordResponse = z.object({
@@ -1026,27 +1370,6 @@ export const zPublicVenueResponse = z.object({
 });
 
 /**
- * VenueCreateRequest
- */
-export const zVenueCreateRequest = z.object({
-    name: z.string().min(1).max(255),
-    description: z.string().max(1000).nullish(),
-    address_line: z.string().min(1).max(255),
-    city: z.string().min(1).max(100),
-    province: z.string().min(1).max(100),
-    postal_code: z.string().min(1).max(20),
-    region: z.string().min(1).max(100),
-    country: z.string().min(1).max(100),
-    capacity: z.int().gt(0),
-    venue_type: zVenueType,
-    is_partner: z.boolean().optional().default(false),
-    amenities: z.array(z.string()).nullish(),
-    contact_name: z.string().min(1).max(255),
-    contact_phone: z.string().min(1).max(20),
-    contact_email: z.email()
-});
-
-/**
  * VenueRecordResponse
  */
 export const zVenueRecordResponse = z.object({
@@ -1066,9 +1389,9 @@ export const zVenueRecordResponse = z.object({
     usage_count: z.int(),
     is_partner: z.boolean(),
     amenities: z.array(z.string()).nullable(),
-    contact_name: z.string(),
-    contact_phone: z.string(),
-    contact_email: z.string(),
+    contact_name: z.string().nullable(),
+    contact_phone: z.string().nullable(),
+    contact_email: z.string().nullable(),
     created_at: z.iso.datetime().nullable(),
     updated_at: z.iso.datetime().nullable()
 });
@@ -1096,7 +1419,7 @@ export const zVenueResponse = z.object({
  */
 export const zVenueUpdateRequest = z.object({
     name: z.string().min(1).max(255),
-    description: z.string().max(1000).nullish(),
+    description: z.string().nullish(),
     address_line: z.string().min(1).max(255),
     city: z.string().min(1).max(100),
     province: z.string().min(1).max(100),
@@ -1610,13 +1933,6 @@ export const zListVenuesVenuesGetQuery = z.object({
  */
 export const zListVenuesVenuesGetResponse = zVenueListResponse;
 
-export const zCreateVenueVenuesPostBody = zVenueCreateRequest;
-
-/**
- * Successful Response
- */
-export const zCreateVenueVenuesPostResponse = zVenueResponse;
-
 export const zDeleteVenueVenuesVenueIdDeletePath = z.object({
     venue_id: z.uuid()
 });
@@ -1645,6 +1961,20 @@ export const zUpdateVenueVenuesVenueIdPatchPath = z.object({
  * Successful Response
  */
 export const zUpdateVenueVenuesVenueIdPatchResponse = zVenueResponse;
+
+export const zCreateCommunityVenueVenuesCommunityPostBody = zCommunityVenueCreateRequest;
+
+/**
+ * Successful Response
+ */
+export const zCreateCommunityVenueVenuesCommunityPostResponse = zVenueResponse;
+
+export const zCreateOfficialVenueVenuesOfficialPostBody = zOfficialVenueCreateRequest;
+
+/**
+ * Successful Response
+ */
+export const zCreateOfficialVenueVenuesOfficialPostResponse = zVenueResponse;
 
 export const zListVenueRatingsVenuesVenueIdRatingsGetPath = z.object({
     venue_id: z.uuid()
@@ -1708,3 +2038,156 @@ export const zUpdateMyVenueRatingVenuesVenueIdRatingsMePatchPath = z.object({
  * Successful Response
  */
 export const zUpdateMyVenueRatingVenuesVenueIdRatingsMePatchResponse = zVenueRatingResponse;
+
+export const zCreateEventEventsPostBody = zEventCreateRequest;
+
+/**
+ * Successful Response
+ */
+export const zCreateEventEventsPostResponse = zEventWithSessionsResponse;
+
+export const zDeleteEventEventsEventIdDeletePath = z.object({
+    event_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zDeleteEventEventsEventIdDeleteResponse = zEventDeletedResponse;
+
+export const zUpdateEventMetadataEventsEventIdPatchBody = zEventUpdateRequest;
+
+export const zUpdateEventMetadataEventsEventIdPatchPath = z.object({
+    event_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zUpdateEventMetadataEventsEventIdPatchResponse = zEventMetadataUpdatedResponse;
+
+export const zDeleteEventSessionEventsEventIdSessionSessionIdDeletePath = z.object({
+    event_id: z.uuid(),
+    session_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zDeleteEventSessionEventsEventIdSessionSessionIdDeleteResponse = zEventSessionDeletedResponse;
+
+export const zUpdateEventSessionEventsEventIdSessionSessionIdPatchBody = zEventSessionUpdateRequest;
+
+export const zUpdateEventSessionEventsEventIdSessionSessionIdPatchPath = z.object({
+    event_id: z.uuid(),
+    session_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zUpdateEventSessionEventsEventIdSessionSessionIdPatchResponse = zEventSessionUpdatedResponse;
+
+export const zUpdateEventStatusEventsEventIdStatusPatchBody = zEventStatusUpdateRequest;
+
+export const zUpdateEventStatusEventsEventIdStatusPatchPath = z.object({
+    event_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zUpdateEventStatusEventsEventIdStatusPatchResponse = zEventStatusUpdatedResponse;
+
+export const zUpdateEventSessionStatusEventsEventIdSessionSessionIdStatusPatchBody = zEventSessionStatusUpdateRequest;
+
+export const zUpdateEventSessionStatusEventsEventIdSessionSessionIdStatusPatchPath = z.object({
+    event_id: z.uuid(),
+    session_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zUpdateEventSessionStatusEventsEventIdSessionSessionIdStatusPatchResponse = zEventSessionStatusUpdatedResponse;
+
+export const zRegisterForSessionEventsEventIdSessionSessionIdRegisterPostPath = z.object({
+    event_id: z.uuid(),
+    session_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zRegisterForSessionEventsEventIdSessionSessionIdRegisterPostResponse = zRegisterForSessionResponse;
+
+export const zUpdateParticipantStatusEventsEventIdSessionSessionIdParticipantsParticipantIdPatchBody = zUpdateParticipantStatusRequest;
+
+export const zUpdateParticipantStatusEventsEventIdSessionSessionIdParticipantsParticipantIdPatchPath = z.object({
+    event_id: z.uuid(),
+    session_id: z.uuid(),
+    participant_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zUpdateParticipantStatusEventsEventIdSessionSessionIdParticipantsParticipantIdPatchResponse = zUpdateParticipantStatusResponse;
+
+export const zAddVolunteerVolunteersPostBody = zAddVolunteerRequest;
+
+/**
+ * Response Add Volunteer Volunteers Post
+ *
+ * Successful Response
+ */
+export const zAddVolunteerVolunteersPostResponse = z.record(z.string(), z.unknown());
+
+export const zCreateVolunteerRoleVolunteerRolesPostBody = zCreateVolunteerRoleRequest;
+
+/**
+ * Response Create Volunteer Role Volunteer Roles Post
+ *
+ * Successful Response
+ */
+export const zCreateVolunteerRoleVolunteerRolesPostResponse = z.record(z.string(), z.unknown());
+
+export const zSubmitApplicationVolunteerApplicationsPostBody = zSubmitApplicationRequest;
+
+/**
+ * Response Submit Application Volunteer Applications Post
+ *
+ * Successful Response
+ */
+export const zSubmitApplicationVolunteerApplicationsPostResponse = z.record(z.string(), z.unknown());
+
+export const zReviewApplicationVolunteerApplicationsApplicationIdReviewPatchBody = zReviewApplicationRequest;
+
+export const zReviewApplicationVolunteerApplicationsApplicationIdReviewPatchPath = z.object({
+    application_id: z.uuid()
+});
+
+/**
+ * Response Review Application Volunteer Applications  Application Id  Review Patch
+ *
+ * Successful Response
+ */
+export const zReviewApplicationVolunteerApplicationsApplicationIdReviewPatchResponse = z.record(z.string(), z.unknown());
+
+export const zWithdrawApplicationVolunteerApplicationsApplicationIdDeletePath = z.object({
+    application_id: z.uuid()
+});
+
+/**
+ * Response Withdraw Application Volunteer Applications  Application Id  Delete
+ *
+ * Successful Response
+ */
+export const zWithdrawApplicationVolunteerApplicationsApplicationIdDeleteResponse = z.record(z.string(), z.unknown());
+
+export const zGeneratePresignedUrlUploadsPresignPostBody = zPresignUploadRequest;
+
+/**
+ * Successful Response
+ */
+export const zGeneratePresignedUrlUploadsPresignPostResponse = zPresignUploadResponse;

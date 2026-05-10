@@ -27,12 +27,12 @@ class CreateVenueInput:
     country: str
     capacity: int
     venue_type: VenueType
-    contact_name: str
-    contact_phone: str
-    contact_email: str
     description: str | None = None
     is_partner: bool = False
     amenities: list[str] | None = None
+    contact_name: str | None = None
+    contact_phone: str | None = None
+    contact_email: str | None = None
 
 
 @dataclass

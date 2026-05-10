@@ -47,6 +47,12 @@ class Settings(BaseSettings):
     ADMIN_EMAIL: str
     ADMIN_PASSWORD: str
 
+    STORAGE_ENDPOINT: str | None = None
+    STORAGE_ACCESS_KEY_ID: str | None = None
+    STORAGE_SECRET_ACCESS_KEY: str | None = None
+    STORAGE_BUCKET_NAME: str | None = None
+    STORAGE_PUBLIC_URL: str | None = None
+
     @field_validator(
         "ACCESS_TOKEN_EXPIRATION",
         "REFRESH_TOKEN_EXPIRATION",

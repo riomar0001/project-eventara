@@ -28,9 +28,9 @@ class Venue(Base):
     usage_count: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
     is_partner: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     amenities: Mapped[list | None] = mapped_column(JSON, nullable=True)
-    contact_name: Mapped[str] = mapped_column(String(255), nullable=False)
-    contact_phone: Mapped[str] = mapped_column(String(20), nullable=False)
-    contact_email: Mapped[str] = mapped_column(String(255), nullable=False)
+    contact_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    contact_phone: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    contact_email: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
     creator = relationship("User", back_populates="venues")
     venue_ratings = relationship("VenueRating", back_populates="venue")

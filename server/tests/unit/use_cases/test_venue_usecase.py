@@ -39,9 +39,9 @@ def _make_venue(**overrides: Any) -> Venue:
         usage_count=0,
         is_partner=False,
         amenities=["Wifi", "Air Conditioning"],
-        contact_name="Juan Dela Cruz",
-        contact_phone="09171234567",
-        contact_email="venue@example.com",
+        contact_name=None,
+        contact_phone=None,
+        contact_email=None,
     )
     defaults.update(overrides)
     return Venue(**defaults)
@@ -85,9 +85,6 @@ def _create_input(**overrides: Any) -> CreateVenueInput:
         country="Philippines",
         capacity=500,
         venue_type=VenueType.INDOOR,
-        contact_name="Juan Dela Cruz",
-        contact_phone="09171234567",
-        contact_email="venue@example.com",
         amenities=["wifi", "air conditioning"],
     )
     defaults.update(overrides)
@@ -335,4 +332,104 @@ class TestDeleteVenue:
         db = AsyncMock()
         with pytest.raises(RuntimeError):
             await VenueManagementUseCase(repo=repo, db=db).delete_venue(VENUE_ID)
+        db.rollback.assert_awaited_once()
+
+
+# ─── create_venue (community) ─────────────────────────────────────────────────
+
+
+class TestCreateCommunityVenue:
+    @pytest.mark.asyncio
+    async def test_is_partner_stored_as_false(self):
+        repo = _make_repo(name_exists=False)
+        db = AsyncMock()
+        await VenueManagementUseCase(repo=repo, db=db).create_venue(_create_input(is_partner=False))
+        call_kwargs = repo.create_venue.call_args.kwargs
+        assert call_kwargs["is_partner"] is False
+
+    @pytest.mark.asyncio
+    async def test_contact_fields_are_none_when_omitted(self):
+        repo = _make_repo(name_exists=False)
+        db = AsyncMock()
+        await VenueManagementUseCase(repo=repo, db=db).create_venue(_create_input(is_partner=False))
+        call_kwargs = repo.create_venue.call_args.kwargs
+        assert call_kwargs["contact_name"] is None
+        assert call_kwargs["contact_phone"] is None
+        assert call_kwargs["contact_email"] is None
+
+    @pytest.mark.asyncio
+    async def test_optional_contact_fields_passed_when_provided(self):
+        repo = _make_repo(name_exists=False)
+        db = AsyncMock()
+        await VenueManagementUseCase(repo=repo, db=db).create_venue(
+            _create_input(is_partner=False, contact_name="Juan Dela Cruz", contact_phone="09171234567", contact_email="juan@example.com")
+        )
+        call_kwargs = repo.create_venue.call_args.kwargs
+        assert call_kwargs["contact_name"] == "Juan Dela Cruz"
+        assert call_kwargs["contact_phone"] == "09171234567"
+        assert call_kwargs["contact_email"] == "juan@example.com"
+
+    @pytest.mark.asyncio
+    async def test_success_commits_and_returns_venue(self):
+        venue = _make_venue(is_partner=False)
+        repo = _make_repo(name_exists=False, created=venue)
+        db = AsyncMock()
+        result = await VenueManagementUseCase(repo=repo, db=db).create_venue(_create_input(is_partner=False))
+        assert result.venue is venue
+        db.commit.assert_awaited_once()
+
+    @pytest.mark.asyncio
+    async def test_duplicate_name_raises_already_exists(self):
+        repo = _make_repo(name_exists=True)
+        db = AsyncMock()
+        with pytest.raises(VenueAlreadyExistsError):
+            await VenueManagementUseCase(repo=repo, db=db).create_venue(_create_input(is_partner=False))
+        db.rollback.assert_awaited_once()
+
+
+# ─── create_venue (official) ──────────────────────────────────────────────────
+
+
+class TestCreateOfficialVenue:
+    @pytest.mark.asyncio
+    async def test_is_partner_stored_as_true(self):
+        repo = _make_repo(name_exists=False)
+        db = AsyncMock()
+        await VenueManagementUseCase(repo=repo, db=db).create_venue(
+            _create_input(is_partner=True, contact_name="Maria Santos", contact_phone="09171234567", contact_email="contact@venue.ph")
+        )
+        call_kwargs = repo.create_venue.call_args.kwargs
+        assert call_kwargs["is_partner"] is True
+
+    @pytest.mark.asyncio
+    async def test_contact_fields_passed_to_repo(self):
+        repo = _make_repo(name_exists=False)
+        db = AsyncMock()
+        await VenueManagementUseCase(repo=repo, db=db).create_venue(
+            _create_input(is_partner=True, contact_name="Maria Santos", contact_phone="09171234567", contact_email="contact@venue.ph")
+        )
+        call_kwargs = repo.create_venue.call_args.kwargs
+        assert call_kwargs["contact_name"] == "Maria Santos"
+        assert call_kwargs["contact_phone"] == "09171234567"
+        assert call_kwargs["contact_email"] == "contact@venue.ph"
+
+    @pytest.mark.asyncio
+    async def test_success_commits_and_returns_venue(self):
+        venue = _make_venue(is_partner=True, contact_name="Maria Santos", contact_phone="09171234567", contact_email="contact@venue.ph")
+        repo = _make_repo(name_exists=False, created=venue)
+        db = AsyncMock()
+        result = await VenueManagementUseCase(repo=repo, db=db).create_venue(
+            _create_input(is_partner=True, contact_name="Maria Santos", contact_phone="09171234567", contact_email="contact@venue.ph")
+        )
+        assert result.venue is venue
+        db.commit.assert_awaited_once()
+
+    @pytest.mark.asyncio
+    async def test_duplicate_name_raises_already_exists(self):
+        repo = _make_repo(name_exists=True)
+        db = AsyncMock()
+        with pytest.raises(VenueAlreadyExistsError):
+            await VenueManagementUseCase(repo=repo, db=db).create_venue(
+                _create_input(is_partner=True, contact_name="Maria Santos", contact_phone="09171234567", contact_email="contact@venue.ph")
+            )
         db.rollback.assert_awaited_once()

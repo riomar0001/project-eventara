@@ -1,10 +1,11 @@
-import { CalendarRange, Clock, MapPin, PencilLine, Star, Trash2, Users } from 'lucide-react';
+import { CalendarRange, Clock, MapPin, PencilLine, Star, Users } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { BackLink, DetailPanel, PhotoPanel } from './events-shared';
+import { DeleteEventButton } from './event-delete-button';
 import {
   ADMIN_OPERATIONS_PATHS,
   getEventDetailById,
@@ -25,7 +26,7 @@ function InfoRow({ icon, label, value }: { icon: React.ReactNode; label: string;
       <span className="mt-0.5 shrink-0 text-neutral-400">{icon}</span>
       <div className="min-w-0">
         <p className="text-[11px] font-semibold tracking-[0.14em] text-neutral-400 uppercase">{label}</p>
-        <p className="mt-0.5 text-sm font-medium break-words text-neutral-900">{value}</p>
+        <p className="mt-0.5 text-sm font-medium wrap-break-word text-neutral-900">{value}</p>
       </div>
     </div>
   );
@@ -122,10 +123,7 @@ export function EventDetail({ eventId }: { eventId: string }) {
             Edit
           </Link>
         </Button>
-        <Button variant="destructive" size="sm">
-          <Trash2 className="size-4" />
-          Delete
-        </Button>
+        <DeleteEventButton eventId={event.id} eventTitle={event.title} />
       </div>
 
       {/* ── Hero photo panel ─────────────────────────────────────────────────── */}

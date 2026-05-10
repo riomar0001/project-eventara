@@ -4,8 +4,8 @@ import * as z from 'zod';
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { AssignRoleUserRolesPostData, AssignRoleUserRolesPostErrors, AssignRoleUserRolesPostResponses, ChangePasswordUserChangePasswordPostData, ChangePasswordUserChangePasswordPostErrors, ChangePasswordUserChangePasswordPostResponses, ChangeUserEmailUserAccountsUserIdEmailPatchData, ChangeUserEmailUserAccountsUserIdEmailPatchErrors, ChangeUserEmailUserAccountsUserIdEmailPatchResponses, ChangeUserRoleUserAccountsUserIdRolePatchData, ChangeUserRoleUserAccountsUserIdRolePatchErrors, ChangeUserRoleUserAccountsUserIdRolePatchResponses, CheckAliasUserCheckAliasGetData, CheckAliasUserCheckAliasGetErrors, CheckAliasUserCheckAliasGetResponses, CreateFeatureFeaturesPostData, CreateFeatureFeaturesPostErrors, CreateFeatureFeaturesPostResponses, CreateGrantsUserGrantsPostData, CreateGrantsUserGrantsPostErrors, CreateGrantsUserGrantsPostResponses, CreateRoleRolesPostData, CreateRoleRolesPostErrors, CreateRoleRolesPostResponses, CreateVenueRatingVenuesVenueIdRatingsPostData, CreateVenueRatingVenuesVenueIdRatingsPostErrors, CreateVenueRatingVenuesVenueIdRatingsPostResponses, CreateVenueVenuesPostData, CreateVenueVenuesPostErrors, CreateVenueVenuesPostResponses, DeleteDeadJobQueuesDlqJobIdDeleteData, DeleteDeadJobQueuesDlqJobIdDeleteErrors, DeleteDeadJobQueuesDlqJobIdDeleteResponses, DeleteFeatureFeaturesFeatureIdDeleteData, DeleteFeatureFeaturesFeatureIdDeleteErrors, DeleteFeatureFeaturesFeatureIdDeleteResponses, DeleteMyVenueRatingVenuesVenueIdRatingsMeDeleteData, DeleteMyVenueRatingVenuesVenueIdRatingsMeDeleteErrors, DeleteMyVenueRatingVenuesVenueIdRatingsMeDeleteResponses, DeleteRoleRolesRoleIdDeleteData, DeleteRoleRolesRoleIdDeleteErrors, DeleteRoleRolesRoleIdDeleteResponses, DeleteVenueVenuesVenueIdDeleteData, DeleteVenueVenuesVenueIdDeleteErrors, DeleteVenueVenuesVenueIdDeleteResponses, ForgotPasswordAuthForgotPasswordPostData, ForgotPasswordAuthForgotPasswordPostErrors, ForgotPasswordAuthForgotPasswordPostResponses, GetAssignmentUserRolesAssignmentIdGetData, GetAssignmentUserRolesAssignmentIdGetErrors, GetAssignmentUserRolesAssignmentIdGetResponses, GetAuditLogsAuditLogsGetData, GetAuditLogsAuditLogsGetErrors, GetAuditLogsAuditLogsGetResponses, GetCommunityVenueVenuesPublicCommunityVenueIdGetData, GetCommunityVenueVenuesPublicCommunityVenueIdGetErrors, GetCommunityVenueVenuesPublicCommunityVenueIdGetResponses, GetFeatureFeaturesFeatureIdGetData, GetFeatureFeaturesFeatureIdGetErrors, GetFeatureFeaturesFeatureIdGetResponses, GetLoginHistoryUserLoginHistoryGetData, GetLoginHistoryUserLoginHistoryGetErrors, GetLoginHistoryUserLoginHistoryGetResponses, GetMyPermissionsUserMePermissionsGetData, GetMyPermissionsUserMePermissionsGetErrors, GetMyPermissionsUserMePermissionsGetResponses, GetMyVenueRatingVenuesVenueIdRatingsMeGetData, GetMyVenueRatingVenuesVenueIdRatingsMeGetErrors, GetMyVenueRatingVenuesVenueIdRatingsMeGetResponses, GetPartnerVenueVenuesPublicPartnersVenueIdGetData, GetPartnerVenueVenuesPublicPartnersVenueIdGetErrors, GetPartnerVenueVenuesPublicPartnersVenueIdGetResponses, GetQueueStatsQueuesGetData, GetQueueStatsQueuesGetErrors, GetQueueStatsQueuesGetResponses, GetRoleRolesRoleIdGetData, GetRoleRolesRoleIdGetErrors, GetRoleRolesRoleIdGetResponses, GetUserAccountDetailUserAccountsUserIdGetData, GetUserAccountDetailUserAccountsUserIdGetErrors, GetUserAccountDetailUserAccountsUserIdGetResponses, GetVenueRatingAverageVenuesVenueIdRatingsAverageGetData, GetVenueRatingAverageVenuesVenueIdRatingsAverageGetErrors, GetVenueRatingAverageVenuesVenueIdRatingsAverageGetResponses, GetVenueVenuesVenueIdGetData, GetVenueVenuesVenueIdGetErrors, GetVenueVenuesVenueIdGetResponses, HealthCheckHealthGetData, HealthCheckHealthGetResponses, ListCommunityVenuesVenuesPublicCommunityGetData, ListCommunityVenuesVenuesPublicCommunityGetErrors, ListCommunityVenuesVenuesPublicCommunityGetResponses, ListDeadJobsQueuesDlqGetData, ListDeadJobsQueuesDlqGetErrors, ListDeadJobsQueuesDlqGetResponses, ListFeaturesFeaturesGetData, ListFeaturesFeaturesGetErrors, ListFeaturesFeaturesGetResponses, ListGrantFeaturesUserGrantsFeaturesGetData, ListGrantFeaturesUserGrantsFeaturesGetErrors, ListGrantFeaturesUserGrantsFeaturesGetResponses, ListPartnerVenuesVenuesPublicPartnersGetData, ListPartnerVenuesVenuesPublicPartnersGetErrors, ListPartnerVenuesVenuesPublicPartnersGetResponses, ListRolesRolesGetData, ListRolesRolesGetErrors, ListRolesRolesGetResponses, ListRolesUserAccountsRolesGetData, ListRolesUserAccountsRolesGetErrors, ListRolesUserAccountsRolesGetResponses, ListUserAccountsUserAccountsGetData, ListUserAccountsUserAccountsGetErrors, ListUserAccountsUserAccountsGetResponses, ListUserGrantsUserGrantsGetData, ListUserGrantsUserGrantsGetErrors, ListUserGrantsUserGrantsGetResponses, ListUserRolesUserRolesGetData, ListUserRolesUserRolesGetErrors, ListUserRolesUserRolesGetResponses, ListVenueRatingsVenuesVenueIdRatingsGetData, ListVenueRatingsVenuesVenueIdRatingsGetErrors, ListVenueRatingsVenuesVenueIdRatingsGetResponses, ListVenuesVenuesGetData, ListVenuesVenuesGetErrors, ListVenuesVenuesGetResponses, LoginAuthLoginPostData, LoginAuthLoginPostErrors, LoginAuthLoginPostResponses, LoginVerifyAuthLoginVerifyPostData, LoginVerifyAuthLoginVerifyPostErrors, LoginVerifyAuthLoginVerifyPostResponses, LogoutAuthLogoutPostData, LogoutAuthLogoutPostErrors, LogoutAuthLogoutPostResponses, PurgeDeadJobsQueuesDlqDeleteData, PurgeDeadJobsQueuesDlqDeleteErrors, PurgeDeadJobsQueuesDlqDeleteResponses, RefreshTokenAuthRefreshPostData, RefreshTokenAuthRefreshPostErrors, RefreshTokenAuthRefreshPostResponses, RegisterUserAuthRegisterPostData, RegisterUserAuthRegisterPostErrors, RegisterUserAuthRegisterPostResponses, ResendOtpAuthLoginResendOtpPostData, ResendOtpAuthLoginResendOtpPostErrors, ResendOtpAuthLoginResendOtpPostResponses, ResendVerificationAuthResendVerificationPostData, ResendVerificationAuthResendVerificationPostErrors, ResendVerificationAuthResendVerificationPostResponses, ResetPasswordAuthResetPasswordTokenPostData, ResetPasswordAuthResetPasswordTokenPostErrors, ResetPasswordAuthResetPasswordTokenPostResponses, RetryDeadJobQueuesDlqJobIdRetryPostData, RetryDeadJobQueuesDlqJobIdRetryPostErrors, RetryDeadJobQueuesDlqJobIdRetryPostResponses, RevokeAssignmentUserRolesAssignmentIdDeleteData, RevokeAssignmentUserRolesAssignmentIdDeleteErrors, RevokeAssignmentUserRolesAssignmentIdDeleteResponses, RevokeGrantUserGrantsGrantIdDeleteData, RevokeGrantUserGrantsGrantIdDeleteErrors, RevokeGrantUserGrantsGrantIdDeleteResponses, RootGetData, RootGetResponses, ScheduleAdminAccountDeletionUserAccountsUserIdAccountDeletionPostData, ScheduleAdminAccountDeletionUserAccountsUserIdAccountDeletionPostErrors, ScheduleAdminAccountDeletionUserAccountsUserIdAccountDeletionPostResponses, ScheduleOwnAccountDeletionUserAccountDeletionPostData, ScheduleOwnAccountDeletionUserAccountDeletionPostErrors, ScheduleOwnAccountDeletionUserAccountDeletionPostResponses, SendUserPasswordResetUserAccountsUserIdPasswordResetPostData, SendUserPasswordResetUserAccountsUserIdPasswordResetPostErrors, SendUserPasswordResetUserAccountsUserIdPasswordResetPostResponses, UpdateAssignmentUserRolesAssignmentIdPatchData, UpdateAssignmentUserRolesAssignmentIdPatchErrors, UpdateAssignmentUserRolesAssignmentIdPatchResponses, UpdateFeatureFeaturesFeatureIdPatchData, UpdateFeatureFeaturesFeatureIdPatchErrors, UpdateFeatureFeaturesFeatureIdPatchResponses, UpdateMyVenueRatingVenuesVenueIdRatingsMePatchData, UpdateMyVenueRatingVenuesVenueIdRatingsMePatchErrors, UpdateMyVenueRatingVenuesVenueIdRatingsMePatchResponses, UpdateProfileUserProfilePatchData, UpdateProfileUserProfilePatchErrors, UpdateProfileUserProfilePatchResponses, UpdateRoleRolesRoleIdPatchData, UpdateRoleRolesRoleIdPatchErrors, UpdateRoleRolesRoleIdPatchResponses, UpdateVenueVenuesVenueIdPatchData, UpdateVenueVenuesVenueIdPatchErrors, UpdateVenueVenuesVenueIdPatchResponses, UserOnboardingUserOnboardPostData, UserOnboardingUserOnboardPostErrors, UserOnboardingUserOnboardPostResponses, VerifyEmailAuthVerifyTokenGetData, VerifyEmailAuthVerifyTokenGetErrors, VerifyEmailAuthVerifyTokenGetResponses } from './types.gen';
-import { zAssignRoleUserRolesPostBody, zAssignRoleUserRolesPostResponse, zChangePasswordUserChangePasswordPostBody, zChangePasswordUserChangePasswordPostResponse, zChangeUserEmailUserAccountsUserIdEmailPatchBody, zChangeUserEmailUserAccountsUserIdEmailPatchPath, zChangeUserEmailUserAccountsUserIdEmailPatchResponse, zChangeUserRoleUserAccountsUserIdRolePatchBody, zChangeUserRoleUserAccountsUserIdRolePatchPath, zChangeUserRoleUserAccountsUserIdRolePatchResponse, zCheckAliasUserCheckAliasGetQuery, zCheckAliasUserCheckAliasGetResponse, zCreateFeatureFeaturesPostBody, zCreateFeatureFeaturesPostResponse, zCreateGrantsUserGrantsPostBody, zCreateGrantsUserGrantsPostResponse, zCreateRoleRolesPostBody, zCreateRoleRolesPostResponse, zCreateVenueRatingVenuesVenueIdRatingsPostBody, zCreateVenueRatingVenuesVenueIdRatingsPostPath, zCreateVenueRatingVenuesVenueIdRatingsPostResponse, zCreateVenueVenuesPostBody, zCreateVenueVenuesPostResponse, zDeleteDeadJobQueuesDlqJobIdDeletePath, zDeleteDeadJobQueuesDlqJobIdDeleteResponse, zDeleteFeatureFeaturesFeatureIdDeletePath, zDeleteFeatureFeaturesFeatureIdDeleteResponse, zDeleteMyVenueRatingVenuesVenueIdRatingsMeDeletePath, zDeleteMyVenueRatingVenuesVenueIdRatingsMeDeleteResponse, zDeleteRoleRolesRoleIdDeletePath, zDeleteRoleRolesRoleIdDeleteResponse, zDeleteVenueVenuesVenueIdDeletePath, zDeleteVenueVenuesVenueIdDeleteResponse, zForgotPasswordAuthForgotPasswordPostBody, zForgotPasswordAuthForgotPasswordPostResponse, zGetAssignmentUserRolesAssignmentIdGetPath, zGetAssignmentUserRolesAssignmentIdGetResponse, zGetAuditLogsAuditLogsGetQuery, zGetAuditLogsAuditLogsGetResponse, zGetCommunityVenueVenuesPublicCommunityVenueIdGetPath, zGetCommunityVenueVenuesPublicCommunityVenueIdGetResponse, zGetFeatureFeaturesFeatureIdGetPath, zGetFeatureFeaturesFeatureIdGetResponse, zGetLoginHistoryUserLoginHistoryGetQuery, zGetLoginHistoryUserLoginHistoryGetResponse, zGetMyPermissionsUserMePermissionsGetResponse, zGetMyVenueRatingVenuesVenueIdRatingsMeGetPath, zGetMyVenueRatingVenuesVenueIdRatingsMeGetResponse, zGetPartnerVenueVenuesPublicPartnersVenueIdGetPath, zGetPartnerVenueVenuesPublicPartnersVenueIdGetResponse, zGetQueueStatsQueuesGetResponse, zGetRoleRolesRoleIdGetPath, zGetRoleRolesRoleIdGetResponse, zGetUserAccountDetailUserAccountsUserIdGetPath, zGetUserAccountDetailUserAccountsUserIdGetResponse, zGetVenueRatingAverageVenuesVenueIdRatingsAverageGetPath, zGetVenueRatingAverageVenuesVenueIdRatingsAverageGetResponse, zGetVenueVenuesVenueIdGetPath, zGetVenueVenuesVenueIdGetResponse, zListCommunityVenuesVenuesPublicCommunityGetQuery, zListCommunityVenuesVenuesPublicCommunityGetResponse, zListDeadJobsQueuesDlqGetQuery, zListDeadJobsQueuesDlqGetResponse, zListFeaturesFeaturesGetResponse, zListGrantFeaturesUserGrantsFeaturesGetResponse, zListPartnerVenuesVenuesPublicPartnersGetQuery, zListPartnerVenuesVenuesPublicPartnersGetResponse, zListRolesRolesGetResponse, zListRolesUserAccountsRolesGetResponse, zListUserAccountsUserAccountsGetQuery, zListUserAccountsUserAccountsGetResponse, zListUserGrantsUserGrantsGetQuery, zListUserGrantsUserGrantsGetResponse, zListUserRolesUserRolesGetQuery, zListUserRolesUserRolesGetResponse, zListVenueRatingsVenuesVenueIdRatingsGetPath, zListVenueRatingsVenuesVenueIdRatingsGetQuery, zListVenueRatingsVenuesVenueIdRatingsGetResponse, zListVenuesVenuesGetQuery, zListVenuesVenuesGetResponse, zLoginAuthLoginPostBody, zLoginAuthLoginPostResponse, zLoginVerifyAuthLoginVerifyPostBody, zLoginVerifyAuthLoginVerifyPostResponse, zLogoutAuthLogoutPostBody, zLogoutAuthLogoutPostResponse, zPurgeDeadJobsQueuesDlqDeleteResponse, zRefreshTokenAuthRefreshPostBody, zRefreshTokenAuthRefreshPostResponse, zRegisterUserAuthRegisterPostBody, zRegisterUserAuthRegisterPostResponse, zResendOtpAuthLoginResendOtpPostBody, zResendOtpAuthLoginResendOtpPostResponse, zResendVerificationAuthResendVerificationPostBody, zResendVerificationAuthResendVerificationPostResponse, zResetPasswordAuthResetPasswordTokenPostBody, zResetPasswordAuthResetPasswordTokenPostPath, zResetPasswordAuthResetPasswordTokenPostResponse, zRetryDeadJobQueuesDlqJobIdRetryPostPath, zRetryDeadJobQueuesDlqJobIdRetryPostResponse, zRevokeAssignmentUserRolesAssignmentIdDeletePath, zRevokeAssignmentUserRolesAssignmentIdDeleteResponse, zRevokeGrantUserGrantsGrantIdDeletePath, zRevokeGrantUserGrantsGrantIdDeleteResponse, zScheduleAdminAccountDeletionUserAccountsUserIdAccountDeletionPostBody, zScheduleAdminAccountDeletionUserAccountsUserIdAccountDeletionPostPath, zScheduleAdminAccountDeletionUserAccountsUserIdAccountDeletionPostResponse, zScheduleOwnAccountDeletionUserAccountDeletionPostBody, zScheduleOwnAccountDeletionUserAccountDeletionPostResponse, zSendUserPasswordResetUserAccountsUserIdPasswordResetPostPath, zSendUserPasswordResetUserAccountsUserIdPasswordResetPostResponse, zUpdateAssignmentUserRolesAssignmentIdPatchBody, zUpdateAssignmentUserRolesAssignmentIdPatchPath, zUpdateAssignmentUserRolesAssignmentIdPatchResponse, zUpdateFeatureFeaturesFeatureIdPatchBody, zUpdateFeatureFeaturesFeatureIdPatchPath, zUpdateFeatureFeaturesFeatureIdPatchResponse, zUpdateMyVenueRatingVenuesVenueIdRatingsMePatchBody, zUpdateMyVenueRatingVenuesVenueIdRatingsMePatchPath, zUpdateMyVenueRatingVenuesVenueIdRatingsMePatchResponse, zUpdateProfileUserProfilePatchBody, zUpdateProfileUserProfilePatchResponse, zUpdateRoleRolesRoleIdPatchBody, zUpdateRoleRolesRoleIdPatchPath, zUpdateRoleRolesRoleIdPatchResponse, zUpdateVenueVenuesVenueIdPatchBody, zUpdateVenueVenuesVenueIdPatchPath, zUpdateVenueVenuesVenueIdPatchResponse, zUserOnboardingUserOnboardPostBody, zUserOnboardingUserOnboardPostResponse, zVerifyEmailAuthVerifyTokenGetPath, zVerifyEmailAuthVerifyTokenGetResponse } from './zod.gen';
+import type { AddVolunteerVolunteersPostData, AddVolunteerVolunteersPostErrors, AddVolunteerVolunteersPostResponses, AssignRoleUserRolesPostData, AssignRoleUserRolesPostErrors, AssignRoleUserRolesPostResponses, ChangePasswordUserChangePasswordPostData, ChangePasswordUserChangePasswordPostErrors, ChangePasswordUserChangePasswordPostResponses, ChangeUserEmailUserAccountsUserIdEmailPatchData, ChangeUserEmailUserAccountsUserIdEmailPatchErrors, ChangeUserEmailUserAccountsUserIdEmailPatchResponses, ChangeUserRoleUserAccountsUserIdRolePatchData, ChangeUserRoleUserAccountsUserIdRolePatchErrors, ChangeUserRoleUserAccountsUserIdRolePatchResponses, CheckAliasUserCheckAliasGetData, CheckAliasUserCheckAliasGetErrors, CheckAliasUserCheckAliasGetResponses, CreateCommunityVenueVenuesCommunityPostData, CreateCommunityVenueVenuesCommunityPostErrors, CreateCommunityVenueVenuesCommunityPostResponses, CreateEventEventsPostData, CreateEventEventsPostErrors, CreateEventEventsPostResponses, CreateFeatureFeaturesPostData, CreateFeatureFeaturesPostErrors, CreateFeatureFeaturesPostResponses, CreateGrantsUserGrantsPostData, CreateGrantsUserGrantsPostErrors, CreateGrantsUserGrantsPostResponses, CreateOfficialVenueVenuesOfficialPostData, CreateOfficialVenueVenuesOfficialPostErrors, CreateOfficialVenueVenuesOfficialPostResponses, CreateRoleRolesPostData, CreateRoleRolesPostErrors, CreateRoleRolesPostResponses, CreateVenueRatingVenuesVenueIdRatingsPostData, CreateVenueRatingVenuesVenueIdRatingsPostErrors, CreateVenueRatingVenuesVenueIdRatingsPostResponses, CreateVolunteerRoleVolunteerRolesPostData, CreateVolunteerRoleVolunteerRolesPostErrors, CreateVolunteerRoleVolunteerRolesPostResponses, DeleteDeadJobQueuesDlqJobIdDeleteData, DeleteDeadJobQueuesDlqJobIdDeleteErrors, DeleteDeadJobQueuesDlqJobIdDeleteResponses, DeleteEventEventsEventIdDeleteData, DeleteEventEventsEventIdDeleteErrors, DeleteEventEventsEventIdDeleteResponses, DeleteEventSessionEventsEventIdSessionSessionIdDeleteData, DeleteEventSessionEventsEventIdSessionSessionIdDeleteErrors, DeleteEventSessionEventsEventIdSessionSessionIdDeleteResponses, DeleteFeatureFeaturesFeatureIdDeleteData, DeleteFeatureFeaturesFeatureIdDeleteErrors, DeleteFeatureFeaturesFeatureIdDeleteResponses, DeleteMyVenueRatingVenuesVenueIdRatingsMeDeleteData, DeleteMyVenueRatingVenuesVenueIdRatingsMeDeleteErrors, DeleteMyVenueRatingVenuesVenueIdRatingsMeDeleteResponses, DeleteRoleRolesRoleIdDeleteData, DeleteRoleRolesRoleIdDeleteErrors, DeleteRoleRolesRoleIdDeleteResponses, DeleteVenueVenuesVenueIdDeleteData, DeleteVenueVenuesVenueIdDeleteErrors, DeleteVenueVenuesVenueIdDeleteResponses, ForgotPasswordAuthForgotPasswordPostData, ForgotPasswordAuthForgotPasswordPostErrors, ForgotPasswordAuthForgotPasswordPostResponses, GeneratePresignedUrlUploadsPresignPostData, GeneratePresignedUrlUploadsPresignPostErrors, GeneratePresignedUrlUploadsPresignPostResponses, GetAssignmentUserRolesAssignmentIdGetData, GetAssignmentUserRolesAssignmentIdGetErrors, GetAssignmentUserRolesAssignmentIdGetResponses, GetAuditLogsAuditLogsGetData, GetAuditLogsAuditLogsGetErrors, GetAuditLogsAuditLogsGetResponses, GetCommunityVenueVenuesPublicCommunityVenueIdGetData, GetCommunityVenueVenuesPublicCommunityVenueIdGetErrors, GetCommunityVenueVenuesPublicCommunityVenueIdGetResponses, GetFeatureFeaturesFeatureIdGetData, GetFeatureFeaturesFeatureIdGetErrors, GetFeatureFeaturesFeatureIdGetResponses, GetLoginHistoryUserLoginHistoryGetData, GetLoginHistoryUserLoginHistoryGetErrors, GetLoginHistoryUserLoginHistoryGetResponses, GetMyPermissionsUserMePermissionsGetData, GetMyPermissionsUserMePermissionsGetErrors, GetMyPermissionsUserMePermissionsGetResponses, GetMyVenueRatingVenuesVenueIdRatingsMeGetData, GetMyVenueRatingVenuesVenueIdRatingsMeGetErrors, GetMyVenueRatingVenuesVenueIdRatingsMeGetResponses, GetPartnerVenueVenuesPublicPartnersVenueIdGetData, GetPartnerVenueVenuesPublicPartnersVenueIdGetErrors, GetPartnerVenueVenuesPublicPartnersVenueIdGetResponses, GetQueueStatsQueuesGetData, GetQueueStatsQueuesGetErrors, GetQueueStatsQueuesGetResponses, GetRoleRolesRoleIdGetData, GetRoleRolesRoleIdGetErrors, GetRoleRolesRoleIdGetResponses, GetUserAccountDetailUserAccountsUserIdGetData, GetUserAccountDetailUserAccountsUserIdGetErrors, GetUserAccountDetailUserAccountsUserIdGetResponses, GetVenueRatingAverageVenuesVenueIdRatingsAverageGetData, GetVenueRatingAverageVenuesVenueIdRatingsAverageGetErrors, GetVenueRatingAverageVenuesVenueIdRatingsAverageGetResponses, GetVenueVenuesVenueIdGetData, GetVenueVenuesVenueIdGetErrors, GetVenueVenuesVenueIdGetResponses, HealthCheckHealthGetData, HealthCheckHealthGetResponses, ListCommunityVenuesVenuesPublicCommunityGetData, ListCommunityVenuesVenuesPublicCommunityGetErrors, ListCommunityVenuesVenuesPublicCommunityGetResponses, ListDeadJobsQueuesDlqGetData, ListDeadJobsQueuesDlqGetErrors, ListDeadJobsQueuesDlqGetResponses, ListFeaturesFeaturesGetData, ListFeaturesFeaturesGetErrors, ListFeaturesFeaturesGetResponses, ListGrantFeaturesUserGrantsFeaturesGetData, ListGrantFeaturesUserGrantsFeaturesGetErrors, ListGrantFeaturesUserGrantsFeaturesGetResponses, ListPartnerVenuesVenuesPublicPartnersGetData, ListPartnerVenuesVenuesPublicPartnersGetErrors, ListPartnerVenuesVenuesPublicPartnersGetResponses, ListRolesRolesGetData, ListRolesRolesGetErrors, ListRolesRolesGetResponses, ListRolesUserAccountsRolesGetData, ListRolesUserAccountsRolesGetErrors, ListRolesUserAccountsRolesGetResponses, ListUserAccountsUserAccountsGetData, ListUserAccountsUserAccountsGetErrors, ListUserAccountsUserAccountsGetResponses, ListUserGrantsUserGrantsGetData, ListUserGrantsUserGrantsGetErrors, ListUserGrantsUserGrantsGetResponses, ListUserRolesUserRolesGetData, ListUserRolesUserRolesGetErrors, ListUserRolesUserRolesGetResponses, ListVenueRatingsVenuesVenueIdRatingsGetData, ListVenueRatingsVenuesVenueIdRatingsGetErrors, ListVenueRatingsVenuesVenueIdRatingsGetResponses, ListVenuesVenuesGetData, ListVenuesVenuesGetErrors, ListVenuesVenuesGetResponses, LoginAuthLoginPostData, LoginAuthLoginPostErrors, LoginAuthLoginPostResponses, LoginVerifyAuthLoginVerifyPostData, LoginVerifyAuthLoginVerifyPostErrors, LoginVerifyAuthLoginVerifyPostResponses, LogoutAuthLogoutPostData, LogoutAuthLogoutPostErrors, LogoutAuthLogoutPostResponses, PurgeDeadJobsQueuesDlqDeleteData, PurgeDeadJobsQueuesDlqDeleteErrors, PurgeDeadJobsQueuesDlqDeleteResponses, RefreshTokenAuthRefreshPostData, RefreshTokenAuthRefreshPostErrors, RefreshTokenAuthRefreshPostResponses, RegisterForSessionEventsEventIdSessionSessionIdRegisterPostData, RegisterForSessionEventsEventIdSessionSessionIdRegisterPostErrors, RegisterForSessionEventsEventIdSessionSessionIdRegisterPostResponses, RegisterUserAuthRegisterPostData, RegisterUserAuthRegisterPostErrors, RegisterUserAuthRegisterPostResponses, ResendOtpAuthLoginResendOtpPostData, ResendOtpAuthLoginResendOtpPostErrors, ResendOtpAuthLoginResendOtpPostResponses, ResendVerificationAuthResendVerificationPostData, ResendVerificationAuthResendVerificationPostErrors, ResendVerificationAuthResendVerificationPostResponses, ResetPasswordAuthResetPasswordTokenPostData, ResetPasswordAuthResetPasswordTokenPostErrors, ResetPasswordAuthResetPasswordTokenPostResponses, RetryDeadJobQueuesDlqJobIdRetryPostData, RetryDeadJobQueuesDlqJobIdRetryPostErrors, RetryDeadJobQueuesDlqJobIdRetryPostResponses, ReviewApplicationVolunteerApplicationsApplicationIdReviewPatchData, ReviewApplicationVolunteerApplicationsApplicationIdReviewPatchErrors, ReviewApplicationVolunteerApplicationsApplicationIdReviewPatchResponses, RevokeAssignmentUserRolesAssignmentIdDeleteData, RevokeAssignmentUserRolesAssignmentIdDeleteErrors, RevokeAssignmentUserRolesAssignmentIdDeleteResponses, RevokeGrantUserGrantsGrantIdDeleteData, RevokeGrantUserGrantsGrantIdDeleteErrors, RevokeGrantUserGrantsGrantIdDeleteResponses, RootGetData, RootGetResponses, ScheduleAdminAccountDeletionUserAccountsUserIdAccountDeletionPostData, ScheduleAdminAccountDeletionUserAccountsUserIdAccountDeletionPostErrors, ScheduleAdminAccountDeletionUserAccountsUserIdAccountDeletionPostResponses, ScheduleOwnAccountDeletionUserAccountDeletionPostData, ScheduleOwnAccountDeletionUserAccountDeletionPostErrors, ScheduleOwnAccountDeletionUserAccountDeletionPostResponses, SendUserPasswordResetUserAccountsUserIdPasswordResetPostData, SendUserPasswordResetUserAccountsUserIdPasswordResetPostErrors, SendUserPasswordResetUserAccountsUserIdPasswordResetPostResponses, SubmitApplicationVolunteerApplicationsPostData, SubmitApplicationVolunteerApplicationsPostErrors, SubmitApplicationVolunteerApplicationsPostResponses, UpdateAssignmentUserRolesAssignmentIdPatchData, UpdateAssignmentUserRolesAssignmentIdPatchErrors, UpdateAssignmentUserRolesAssignmentIdPatchResponses, UpdateEventMetadataEventsEventIdPatchData, UpdateEventMetadataEventsEventIdPatchErrors, UpdateEventMetadataEventsEventIdPatchResponses, UpdateEventSessionEventsEventIdSessionSessionIdPatchData, UpdateEventSessionEventsEventIdSessionSessionIdPatchErrors, UpdateEventSessionEventsEventIdSessionSessionIdPatchResponses, UpdateEventSessionStatusEventsEventIdSessionSessionIdStatusPatchData, UpdateEventSessionStatusEventsEventIdSessionSessionIdStatusPatchErrors, UpdateEventSessionStatusEventsEventIdSessionSessionIdStatusPatchResponses, UpdateEventStatusEventsEventIdStatusPatchData, UpdateEventStatusEventsEventIdStatusPatchErrors, UpdateEventStatusEventsEventIdStatusPatchResponses, UpdateFeatureFeaturesFeatureIdPatchData, UpdateFeatureFeaturesFeatureIdPatchErrors, UpdateFeatureFeaturesFeatureIdPatchResponses, UpdateMyVenueRatingVenuesVenueIdRatingsMePatchData, UpdateMyVenueRatingVenuesVenueIdRatingsMePatchErrors, UpdateMyVenueRatingVenuesVenueIdRatingsMePatchResponses, UpdateParticipantStatusEventsEventIdSessionSessionIdParticipantsParticipantIdPatchData, UpdateParticipantStatusEventsEventIdSessionSessionIdParticipantsParticipantIdPatchErrors, UpdateParticipantStatusEventsEventIdSessionSessionIdParticipantsParticipantIdPatchResponses, UpdateProfileUserProfilePatchData, UpdateProfileUserProfilePatchErrors, UpdateProfileUserProfilePatchResponses, UpdateRoleRolesRoleIdPatchData, UpdateRoleRolesRoleIdPatchErrors, UpdateRoleRolesRoleIdPatchResponses, UpdateVenueVenuesVenueIdPatchData, UpdateVenueVenuesVenueIdPatchErrors, UpdateVenueVenuesVenueIdPatchResponses, UserOnboardingUserOnboardPostData, UserOnboardingUserOnboardPostErrors, UserOnboardingUserOnboardPostResponses, VerifyEmailAuthVerifyTokenGetData, VerifyEmailAuthVerifyTokenGetErrors, VerifyEmailAuthVerifyTokenGetResponses, WithdrawApplicationVolunteerApplicationsApplicationIdDeleteData, WithdrawApplicationVolunteerApplicationsApplicationIdDeleteErrors, WithdrawApplicationVolunteerApplicationsApplicationIdDeleteResponses } from './types.gen';
+import { zAddVolunteerVolunteersPostBody, zAddVolunteerVolunteersPostResponse, zAssignRoleUserRolesPostBody, zAssignRoleUserRolesPostResponse, zChangePasswordUserChangePasswordPostBody, zChangePasswordUserChangePasswordPostResponse, zChangeUserEmailUserAccountsUserIdEmailPatchBody, zChangeUserEmailUserAccountsUserIdEmailPatchPath, zChangeUserEmailUserAccountsUserIdEmailPatchResponse, zChangeUserRoleUserAccountsUserIdRolePatchBody, zChangeUserRoleUserAccountsUserIdRolePatchPath, zChangeUserRoleUserAccountsUserIdRolePatchResponse, zCheckAliasUserCheckAliasGetQuery, zCheckAliasUserCheckAliasGetResponse, zCreateCommunityVenueVenuesCommunityPostBody, zCreateCommunityVenueVenuesCommunityPostResponse, zCreateEventEventsPostBody, zCreateEventEventsPostResponse, zCreateFeatureFeaturesPostBody, zCreateFeatureFeaturesPostResponse, zCreateGrantsUserGrantsPostBody, zCreateGrantsUserGrantsPostResponse, zCreateOfficialVenueVenuesOfficialPostBody, zCreateOfficialVenueVenuesOfficialPostResponse, zCreateRoleRolesPostBody, zCreateRoleRolesPostResponse, zCreateVenueRatingVenuesVenueIdRatingsPostBody, zCreateVenueRatingVenuesVenueIdRatingsPostPath, zCreateVenueRatingVenuesVenueIdRatingsPostResponse, zCreateVolunteerRoleVolunteerRolesPostBody, zCreateVolunteerRoleVolunteerRolesPostResponse, zDeleteDeadJobQueuesDlqJobIdDeletePath, zDeleteDeadJobQueuesDlqJobIdDeleteResponse, zDeleteEventEventsEventIdDeletePath, zDeleteEventEventsEventIdDeleteResponse, zDeleteEventSessionEventsEventIdSessionSessionIdDeletePath, zDeleteEventSessionEventsEventIdSessionSessionIdDeleteResponse, zDeleteFeatureFeaturesFeatureIdDeletePath, zDeleteFeatureFeaturesFeatureIdDeleteResponse, zDeleteMyVenueRatingVenuesVenueIdRatingsMeDeletePath, zDeleteMyVenueRatingVenuesVenueIdRatingsMeDeleteResponse, zDeleteRoleRolesRoleIdDeletePath, zDeleteRoleRolesRoleIdDeleteResponse, zDeleteVenueVenuesVenueIdDeletePath, zDeleteVenueVenuesVenueIdDeleteResponse, zForgotPasswordAuthForgotPasswordPostBody, zForgotPasswordAuthForgotPasswordPostResponse, zGeneratePresignedUrlUploadsPresignPostBody, zGeneratePresignedUrlUploadsPresignPostResponse, zGetAssignmentUserRolesAssignmentIdGetPath, zGetAssignmentUserRolesAssignmentIdGetResponse, zGetAuditLogsAuditLogsGetQuery, zGetAuditLogsAuditLogsGetResponse, zGetCommunityVenueVenuesPublicCommunityVenueIdGetPath, zGetCommunityVenueVenuesPublicCommunityVenueIdGetResponse, zGetFeatureFeaturesFeatureIdGetPath, zGetFeatureFeaturesFeatureIdGetResponse, zGetLoginHistoryUserLoginHistoryGetQuery, zGetLoginHistoryUserLoginHistoryGetResponse, zGetMyPermissionsUserMePermissionsGetResponse, zGetMyVenueRatingVenuesVenueIdRatingsMeGetPath, zGetMyVenueRatingVenuesVenueIdRatingsMeGetResponse, zGetPartnerVenueVenuesPublicPartnersVenueIdGetPath, zGetPartnerVenueVenuesPublicPartnersVenueIdGetResponse, zGetQueueStatsQueuesGetResponse, zGetRoleRolesRoleIdGetPath, zGetRoleRolesRoleIdGetResponse, zGetUserAccountDetailUserAccountsUserIdGetPath, zGetUserAccountDetailUserAccountsUserIdGetResponse, zGetVenueRatingAverageVenuesVenueIdRatingsAverageGetPath, zGetVenueRatingAverageVenuesVenueIdRatingsAverageGetResponse, zGetVenueVenuesVenueIdGetPath, zGetVenueVenuesVenueIdGetResponse, zListCommunityVenuesVenuesPublicCommunityGetQuery, zListCommunityVenuesVenuesPublicCommunityGetResponse, zListDeadJobsQueuesDlqGetQuery, zListDeadJobsQueuesDlqGetResponse, zListFeaturesFeaturesGetResponse, zListGrantFeaturesUserGrantsFeaturesGetResponse, zListPartnerVenuesVenuesPublicPartnersGetQuery, zListPartnerVenuesVenuesPublicPartnersGetResponse, zListRolesRolesGetResponse, zListRolesUserAccountsRolesGetResponse, zListUserAccountsUserAccountsGetQuery, zListUserAccountsUserAccountsGetResponse, zListUserGrantsUserGrantsGetQuery, zListUserGrantsUserGrantsGetResponse, zListUserRolesUserRolesGetQuery, zListUserRolesUserRolesGetResponse, zListVenueRatingsVenuesVenueIdRatingsGetPath, zListVenueRatingsVenuesVenueIdRatingsGetQuery, zListVenueRatingsVenuesVenueIdRatingsGetResponse, zListVenuesVenuesGetQuery, zListVenuesVenuesGetResponse, zLoginAuthLoginPostBody, zLoginAuthLoginPostResponse, zLoginVerifyAuthLoginVerifyPostBody, zLoginVerifyAuthLoginVerifyPostResponse, zLogoutAuthLogoutPostBody, zLogoutAuthLogoutPostResponse, zPurgeDeadJobsQueuesDlqDeleteResponse, zRefreshTokenAuthRefreshPostBody, zRefreshTokenAuthRefreshPostResponse, zRegisterForSessionEventsEventIdSessionSessionIdRegisterPostPath, zRegisterForSessionEventsEventIdSessionSessionIdRegisterPostResponse, zRegisterUserAuthRegisterPostBody, zRegisterUserAuthRegisterPostResponse, zResendOtpAuthLoginResendOtpPostBody, zResendOtpAuthLoginResendOtpPostResponse, zResendVerificationAuthResendVerificationPostBody, zResendVerificationAuthResendVerificationPostResponse, zResetPasswordAuthResetPasswordTokenPostBody, zResetPasswordAuthResetPasswordTokenPostPath, zResetPasswordAuthResetPasswordTokenPostResponse, zRetryDeadJobQueuesDlqJobIdRetryPostPath, zRetryDeadJobQueuesDlqJobIdRetryPostResponse, zReviewApplicationVolunteerApplicationsApplicationIdReviewPatchBody, zReviewApplicationVolunteerApplicationsApplicationIdReviewPatchPath, zReviewApplicationVolunteerApplicationsApplicationIdReviewPatchResponse, zRevokeAssignmentUserRolesAssignmentIdDeletePath, zRevokeAssignmentUserRolesAssignmentIdDeleteResponse, zRevokeGrantUserGrantsGrantIdDeletePath, zRevokeGrantUserGrantsGrantIdDeleteResponse, zScheduleAdminAccountDeletionUserAccountsUserIdAccountDeletionPostBody, zScheduleAdminAccountDeletionUserAccountsUserIdAccountDeletionPostPath, zScheduleAdminAccountDeletionUserAccountsUserIdAccountDeletionPostResponse, zScheduleOwnAccountDeletionUserAccountDeletionPostBody, zScheduleOwnAccountDeletionUserAccountDeletionPostResponse, zSendUserPasswordResetUserAccountsUserIdPasswordResetPostPath, zSendUserPasswordResetUserAccountsUserIdPasswordResetPostResponse, zSubmitApplicationVolunteerApplicationsPostBody, zSubmitApplicationVolunteerApplicationsPostResponse, zUpdateAssignmentUserRolesAssignmentIdPatchBody, zUpdateAssignmentUserRolesAssignmentIdPatchPath, zUpdateAssignmentUserRolesAssignmentIdPatchResponse, zUpdateEventMetadataEventsEventIdPatchBody, zUpdateEventMetadataEventsEventIdPatchPath, zUpdateEventMetadataEventsEventIdPatchResponse, zUpdateEventSessionEventsEventIdSessionSessionIdPatchBody, zUpdateEventSessionEventsEventIdSessionSessionIdPatchPath, zUpdateEventSessionEventsEventIdSessionSessionIdPatchResponse, zUpdateEventSessionStatusEventsEventIdSessionSessionIdStatusPatchBody, zUpdateEventSessionStatusEventsEventIdSessionSessionIdStatusPatchPath, zUpdateEventSessionStatusEventsEventIdSessionSessionIdStatusPatchResponse, zUpdateEventStatusEventsEventIdStatusPatchBody, zUpdateEventStatusEventsEventIdStatusPatchPath, zUpdateEventStatusEventsEventIdStatusPatchResponse, zUpdateFeatureFeaturesFeatureIdPatchBody, zUpdateFeatureFeaturesFeatureIdPatchPath, zUpdateFeatureFeaturesFeatureIdPatchResponse, zUpdateMyVenueRatingVenuesVenueIdRatingsMePatchBody, zUpdateMyVenueRatingVenuesVenueIdRatingsMePatchPath, zUpdateMyVenueRatingVenuesVenueIdRatingsMePatchResponse, zUpdateParticipantStatusEventsEventIdSessionSessionIdParticipantsParticipantIdPatchBody, zUpdateParticipantStatusEventsEventIdSessionSessionIdParticipantsParticipantIdPatchPath, zUpdateParticipantStatusEventsEventIdSessionSessionIdParticipantsParticipantIdPatchResponse, zUpdateProfileUserProfilePatchBody, zUpdateProfileUserProfilePatchResponse, zUpdateRoleRolesRoleIdPatchBody, zUpdateRoleRolesRoleIdPatchPath, zUpdateRoleRolesRoleIdPatchResponse, zUpdateVenueVenuesVenueIdPatchBody, zUpdateVenueVenuesVenueIdPatchPath, zUpdateVenueVenuesVenueIdPatchResponse, zUserOnboardingUserOnboardPostBody, zUserOnboardingUserOnboardPostResponse, zVerifyEmailAuthVerifyTokenGetPath, zVerifyEmailAuthVerifyTokenGetResponse, zWithdrawApplicationVolunteerApplicationsApplicationIdDeletePath, zWithdrawApplicationVolunteerApplicationsApplicationIdDeleteResponse } from './zod.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -1205,30 +1205,6 @@ export class Venues {
     }
     
     /**
-     * Create a venue
-     *
-     * Create a new venue record. Amenity names are automatically normalised to Title Case before storage (e.g. ``air conditioning`` → ``Air Conditioning``). Venue names must be unique within the same city.
-     */
-    public static createVenueVenuesPost<ThrowOnError extends boolean = false>(options: Options<CreateVenueVenuesPostData, ThrowOnError>) {
-        return (options.client ?? client).post<CreateVenueVenuesPostResponses, CreateVenueVenuesPostErrors, ThrowOnError>({
-            requestValidator: async (data) => await z.object({
-                body: zCreateVenueVenuesPostBody,
-                path: z.never().optional(),
-                query: z.never().optional()
-            }).parseAsync(data),
-            responseType: 'json',
-            responseValidator: async (data) => await zCreateVenueVenuesPostResponse.parseAsync(data),
-            security: [{ scheme: 'bearer', type: 'http' }],
-            url: '/venues',
-            ...options,
-            headers: {
-                'Content-Type': 'application/json',
-                ...options.headers
-            }
-        });
-    }
-    
-    /**
      * Delete a venue
      *
      * Permanently delete a venue when no event sessions reference it. This action is irreversible.
@@ -1283,6 +1259,54 @@ export class Venues {
             responseValidator: async (data) => await zUpdateVenueVenuesVenueIdPatchResponse.parseAsync(data),
             security: [{ scheme: 'bearer', type: 'http' }],
             url: '/venues/{venue_id}',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+    
+    /**
+     * Add a community venue suggestion
+     *
+     * Add a venue suggested by the community. Contact information is optional. The venue is automatically marked as non-partner (``is_partner=false``). Amenity names are normalised to Title Case. Venue names must be unique within the same city.
+     */
+    public static createCommunityVenueVenuesCommunityPost<ThrowOnError extends boolean = false>(options: Options<CreateCommunityVenueVenuesCommunityPostData, ThrowOnError>) {
+        return (options.client ?? client).post<CreateCommunityVenueVenuesCommunityPostResponses, CreateCommunityVenueVenuesCommunityPostErrors, ThrowOnError>({
+            requestValidator: async (data) => await z.object({
+                body: zCreateCommunityVenueVenuesCommunityPostBody,
+                path: z.never().optional(),
+                query: z.never().optional()
+            }).parseAsync(data),
+            responseType: 'json',
+            responseValidator: async (data) => await zCreateCommunityVenueVenuesCommunityPostResponse.parseAsync(data),
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/venues/community',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+    
+    /**
+     * Add an official venue
+     *
+     * Add an officially managed venue. Contact information is required. The venue is automatically marked as a partner (``is_partner=true``). Amenity names are normalised to Title Case. Venue names must be unique within the same city.
+     */
+    public static createOfficialVenueVenuesOfficialPost<ThrowOnError extends boolean = false>(options: Options<CreateOfficialVenueVenuesOfficialPostData, ThrowOnError>) {
+        return (options.client ?? client).post<CreateOfficialVenueVenuesOfficialPostResponses, CreateOfficialVenueVenuesOfficialPostErrors, ThrowOnError>({
+            requestValidator: async (data) => await z.object({
+                body: zCreateOfficialVenueVenuesOfficialPostBody,
+                path: z.never().optional(),
+                query: z.never().optional()
+            }).parseAsync(data),
+            responseType: 'json',
+            responseValidator: async (data) => await zCreateOfficialVenueVenuesOfficialPostResponse.parseAsync(data),
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/venues/official',
             ...options,
             headers: {
                 'Content-Type': 'application/json',
@@ -1409,6 +1433,360 @@ export class Venues {
             responseValidator: async (data) => await zUpdateMyVenueRatingVenuesVenueIdRatingsMePatchResponse.parseAsync(data),
             security: [{ scheme: 'bearer', type: 'http' }],
             url: '/venues/{venue_id}/ratings/me',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+}
+
+export class Events {
+    /**
+     * Create a new event with sessions
+     *
+     * Creates an event and its associated sessions atomically. At least one session is required. Session date windows must fall within the event date range. The event description accepts raw HTML produced by a WYSIWYG editor.
+     */
+    public static createEventEventsPost<ThrowOnError extends boolean = false>(options: Options<CreateEventEventsPostData, ThrowOnError>) {
+        return (options.client ?? client).post<CreateEventEventsPostResponses, CreateEventEventsPostErrors, ThrowOnError>({
+            requestValidator: async (data) => await z.object({
+                body: zCreateEventEventsPostBody,
+                path: z.never().optional(),
+                query: z.never().optional()
+            }).parseAsync(data),
+            responseType: 'json',
+            responseValidator: async (data) => await zCreateEventEventsPostResponse.parseAsync(data),
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/events',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+    
+    /**
+     * Delete an event
+     *
+     * Permanently deletes an event and all its sessions. Only the event creator may perform this operation. Deletion is only permitted when the event status is DRAFT or CANCELLED. All child sessions and participant records are removed via database cascade.
+     */
+    public static deleteEventEventsEventIdDelete<ThrowOnError extends boolean = false>(options: Options<DeleteEventEventsEventIdDeleteData, ThrowOnError>) {
+        return (options.client ?? client).delete<DeleteEventEventsEventIdDeleteResponses, DeleteEventEventsEventIdDeleteErrors, ThrowOnError>({
+            requestValidator: async (data) => await z.object({
+                body: z.never().optional(),
+                path: zDeleteEventEventsEventIdDeletePath,
+                query: z.never().optional()
+            }).parseAsync(data),
+            responseType: 'json',
+            responseValidator: async (data) => await zDeleteEventEventsEventIdDeleteResponse.parseAsync(data),
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/events/{event_id}',
+            ...options
+        });
+    }
+    
+    /**
+     * Update event metadata
+     *
+     * Updates an event's title, description, and date range. Only the event creator may perform this operation. The event description accepts raw HTML produced by a WYSIWYG editor.
+     */
+    public static updateEventMetadataEventsEventIdPatch<ThrowOnError extends boolean = false>(options: Options<UpdateEventMetadataEventsEventIdPatchData, ThrowOnError>) {
+        return (options.client ?? client).patch<UpdateEventMetadataEventsEventIdPatchResponses, UpdateEventMetadataEventsEventIdPatchErrors, ThrowOnError>({
+            requestValidator: async (data) => await z.object({
+                body: zUpdateEventMetadataEventsEventIdPatchBody,
+                path: zUpdateEventMetadataEventsEventIdPatchPath,
+                query: z.never().optional()
+            }).parseAsync(data),
+            responseType: 'json',
+            responseValidator: async (data) => await zUpdateEventMetadataEventsEventIdPatchResponse.parseAsync(data),
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/events/{event_id}',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+    
+    /**
+     * Delete an event session
+     *
+     * Permanently deletes a single event session. Only the event creator may perform this operation. Deletion is only permitted when the session status is DRAFT or CANCELLED. The event must have at least one other session remaining after deletion. All participant records for the session are removed via database cascade.
+     */
+    public static deleteEventSessionEventsEventIdSessionSessionIdDelete<ThrowOnError extends boolean = false>(options: Options<DeleteEventSessionEventsEventIdSessionSessionIdDeleteData, ThrowOnError>) {
+        return (options.client ?? client).delete<DeleteEventSessionEventsEventIdSessionSessionIdDeleteResponses, DeleteEventSessionEventsEventIdSessionSessionIdDeleteErrors, ThrowOnError>({
+            requestValidator: async (data) => await z.object({
+                body: z.never().optional(),
+                path: zDeleteEventSessionEventsEventIdSessionSessionIdDeletePath,
+                query: z.never().optional()
+            }).parseAsync(data),
+            responseType: 'json',
+            responseValidator: async (data) => await zDeleteEventSessionEventsEventIdSessionSessionIdDeleteResponse.parseAsync(data),
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/events/{event_id}/session/{session_id}',
+            ...options
+        });
+    }
+    
+    /**
+     * Update an event session
+     *
+     * Updates a single event session by its ID. Only the creator of the parent event may perform this operation. The session date window must fall within the parent event's date range.
+     */
+    public static updateEventSessionEventsEventIdSessionSessionIdPatch<ThrowOnError extends boolean = false>(options: Options<UpdateEventSessionEventsEventIdSessionSessionIdPatchData, ThrowOnError>) {
+        return (options.client ?? client).patch<UpdateEventSessionEventsEventIdSessionSessionIdPatchResponses, UpdateEventSessionEventsEventIdSessionSessionIdPatchErrors, ThrowOnError>({
+            requestValidator: async (data) => await z.object({
+                body: zUpdateEventSessionEventsEventIdSessionSessionIdPatchBody,
+                path: zUpdateEventSessionEventsEventIdSessionSessionIdPatchPath,
+                query: z.never().optional()
+            }).parseAsync(data),
+            responseType: 'json',
+            responseValidator: async (data) => await zUpdateEventSessionEventsEventIdSessionSessionIdPatchResponse.parseAsync(data),
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/events/{event_id}/session/{session_id}',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+    
+    /**
+     * Update event status
+     *
+     * Manually transitions an event to a new status. Only the event creator may perform this operation. Allowed transitions: DRAFT → POSTED | CANCELLED; POSTED → STARTED | CANCELLED | POSTPONED; STARTED → ENDED | CANCELLED; POSTPONED → POSTED | CANCELLED. ENDED and CANCELLED are terminal states with no further transitions.
+     */
+    public static updateEventStatusEventsEventIdStatusPatch<ThrowOnError extends boolean = false>(options: Options<UpdateEventStatusEventsEventIdStatusPatchData, ThrowOnError>) {
+        return (options.client ?? client).patch<UpdateEventStatusEventsEventIdStatusPatchResponses, UpdateEventStatusEventsEventIdStatusPatchErrors, ThrowOnError>({
+            requestValidator: async (data) => await z.object({
+                body: zUpdateEventStatusEventsEventIdStatusPatchBody,
+                path: zUpdateEventStatusEventsEventIdStatusPatchPath,
+                query: z.never().optional()
+            }).parseAsync(data),
+            responseType: 'json',
+            responseValidator: async (data) => await zUpdateEventStatusEventsEventIdStatusPatchResponse.parseAsync(data),
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/events/{event_id}/status',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+    
+    /**
+     * Update event session status
+     *
+     * Manually transitions an event session to a new status. Only the creator of the parent event may perform this operation. Allowed transitions: DRAFT → POSTED | CANCELLED; POSTED → STARTED | CANCELLED | POSTPONED; STARTED → ENDED | CANCELLED; POSTPONED → POSTED | CANCELLED. ENDED and CANCELLED are terminal states with no further transitions.
+     */
+    public static updateEventSessionStatusEventsEventIdSessionSessionIdStatusPatch<ThrowOnError extends boolean = false>(options: Options<UpdateEventSessionStatusEventsEventIdSessionSessionIdStatusPatchData, ThrowOnError>) {
+        return (options.client ?? client).patch<UpdateEventSessionStatusEventsEventIdSessionSessionIdStatusPatchResponses, UpdateEventSessionStatusEventsEventIdSessionSessionIdStatusPatchErrors, ThrowOnError>({
+            requestValidator: async (data) => await z.object({
+                body: zUpdateEventSessionStatusEventsEventIdSessionSessionIdStatusPatchBody,
+                path: zUpdateEventSessionStatusEventsEventIdSessionSessionIdStatusPatchPath,
+                query: z.never().optional()
+            }).parseAsync(data),
+            responseType: 'json',
+            responseValidator: async (data) => await zUpdateEventSessionStatusEventsEventIdSessionSessionIdStatusPatchResponse.parseAsync(data),
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/events/{event_id}/session/{session_id}/status',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+}
+
+export class EventParticipants {
+    /**
+     * Register for an event session
+     *
+     * Registers the authenticated user for the specified event session. Registration is only permitted when the session status is POSTED. Each user may register for a given session at most once. Registration is rejected when all slots are taken. Slot limit is the session's max_slots if set, otherwise the venue capacity.
+     */
+    public static registerForSessionEventsEventIdSessionSessionIdRegisterPost<ThrowOnError extends boolean = false>(options: Options<RegisterForSessionEventsEventIdSessionSessionIdRegisterPostData, ThrowOnError>) {
+        return (options.client ?? client).post<RegisterForSessionEventsEventIdSessionSessionIdRegisterPostResponses, RegisterForSessionEventsEventIdSessionSessionIdRegisterPostErrors, ThrowOnError>({
+            requestValidator: async (data) => await z.object({
+                body: z.never().optional(),
+                path: zRegisterForSessionEventsEventIdSessionSessionIdRegisterPostPath,
+                query: z.never().optional()
+            }).parseAsync(data),
+            responseType: 'json',
+            responseValidator: async (data) => await zRegisterForSessionEventsEventIdSessionSessionIdRegisterPostResponse.parseAsync(data),
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/events/{event_id}/session/{session_id}/register',
+            ...options
+        });
+    }
+    
+    /**
+     * Update event participant status
+     *
+     * Updates the attendance status of a registered session participant. Only the event creator may perform this operation. Valid transitions from REGISTERED: ATTENDED, NO_SHOW, CANCELLED. ATTENDED, NO_SHOW, and CANCELLED are terminal states with no further transitions.
+     */
+    public static updateParticipantStatusEventsEventIdSessionSessionIdParticipantsParticipantIdPatch<ThrowOnError extends boolean = false>(options: Options<UpdateParticipantStatusEventsEventIdSessionSessionIdParticipantsParticipantIdPatchData, ThrowOnError>) {
+        return (options.client ?? client).patch<UpdateParticipantStatusEventsEventIdSessionSessionIdParticipantsParticipantIdPatchResponses, UpdateParticipantStatusEventsEventIdSessionSessionIdParticipantsParticipantIdPatchErrors, ThrowOnError>({
+            requestValidator: async (data) => await z.object({
+                body: zUpdateParticipantStatusEventsEventIdSessionSessionIdParticipantsParticipantIdPatchBody,
+                path: zUpdateParticipantStatusEventsEventIdSessionSessionIdParticipantsParticipantIdPatchPath,
+                query: z.never().optional()
+            }).parseAsync(data),
+            responseType: 'json',
+            responseValidator: async (data) => await zUpdateParticipantStatusEventsEventIdSessionSessionIdParticipantsParticipantIdPatchResponse.parseAsync(data),
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/events/{event_id}/session/{session_id}/participants/{participant_id}',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+}
+
+export class Volunteers {
+    /**
+     * Add a new volunteer
+     *
+     * Register a user as a volunteer by assigning them a dynamic volunteer role. The target user must exist and the volunteer custom role must be active. A user can only be registered as a volunteer once. The user's RBAC role is automatically updated to 'volunteer' if that system role exists.
+     */
+    public static addVolunteerVolunteersPost<ThrowOnError extends boolean = false>(options: Options<AddVolunteerVolunteersPostData, ThrowOnError>) {
+        return (options.client ?? client).post<AddVolunteerVolunteersPostResponses, AddVolunteerVolunteersPostErrors, ThrowOnError>({
+            requestValidator: async (data) => await z.object({
+                body: zAddVolunteerVolunteersPostBody,
+                path: z.never().optional(),
+                query: z.never().optional()
+            }).parseAsync(data),
+            responseType: 'json',
+            responseValidator: async (data) => await zAddVolunteerVolunteersPostResponse.parseAsync(data),
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/volunteers',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+    
+    /**
+     * Create a volunteer role
+     *
+     * Create a new dynamic volunteer role definition. Role names are globally unique (case-insensitive). Community leaders use these roles to classify volunteers within their events.
+     */
+    public static createVolunteerRoleVolunteerRolesPost<ThrowOnError extends boolean = false>(options: Options<CreateVolunteerRoleVolunteerRolesPostData, ThrowOnError>) {
+        return (options.client ?? client).post<CreateVolunteerRoleVolunteerRolesPostResponses, CreateVolunteerRoleVolunteerRolesPostErrors, ThrowOnError>({
+            requestValidator: async (data) => await z.object({
+                body: zCreateVolunteerRoleVolunteerRolesPostBody,
+                path: z.never().optional(),
+                query: z.never().optional()
+            }).parseAsync(data),
+            responseType: 'json',
+            responseValidator: async (data) => await zCreateVolunteerRoleVolunteerRolesPostResponse.parseAsync(data),
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/volunteer-roles',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+    
+    /**
+     * Submit a volunteer application
+     *
+     * Submit a volunteer application for the authenticated user. A user who is already an active volunteer or already has a pending or approved application cannot submit a new one. Optional application_data may include free-form fields such as skills and availability.
+     */
+    public static submitApplicationVolunteerApplicationsPost<ThrowOnError extends boolean = false>(options: Options<SubmitApplicationVolunteerApplicationsPostData, ThrowOnError>) {
+        return (options.client ?? client).post<SubmitApplicationVolunteerApplicationsPostResponses, SubmitApplicationVolunteerApplicationsPostErrors, ThrowOnError>({
+            requestValidator: async (data) => await z.object({
+                body: zSubmitApplicationVolunteerApplicationsPostBody,
+                path: z.never().optional(),
+                query: z.never().optional()
+            }).parseAsync(data),
+            responseType: 'json',
+            responseValidator: async (data) => await zSubmitApplicationVolunteerApplicationsPostResponse.parseAsync(data),
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/volunteer-applications',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+    
+    /**
+     * Review a volunteer application
+     *
+     * Approve or reject a pending volunteer application. When approving, provide contact_phone and volunteer_role_id to automatically create a Volunteer record within the same transaction. Only PENDING applications can be reviewed.
+     */
+    public static reviewApplicationVolunteerApplicationsApplicationIdReviewPatch<ThrowOnError extends boolean = false>(options: Options<ReviewApplicationVolunteerApplicationsApplicationIdReviewPatchData, ThrowOnError>) {
+        return (options.client ?? client).patch<ReviewApplicationVolunteerApplicationsApplicationIdReviewPatchResponses, ReviewApplicationVolunteerApplicationsApplicationIdReviewPatchErrors, ThrowOnError>({
+            requestValidator: async (data) => await z.object({
+                body: zReviewApplicationVolunteerApplicationsApplicationIdReviewPatchBody,
+                path: zReviewApplicationVolunteerApplicationsApplicationIdReviewPatchPath,
+                query: z.never().optional()
+            }).parseAsync(data),
+            responseType: 'json',
+            responseValidator: async (data) => await zReviewApplicationVolunteerApplicationsApplicationIdReviewPatchResponse.parseAsync(data),
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/volunteer-applications/{application_id}/review',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+    
+    /**
+     * Withdraw a volunteer application
+     *
+     * Withdraw the caller's own pending volunteer application. Only the applicant may withdraw their application, and only while it is in PENDING status.
+     */
+    public static withdrawApplicationVolunteerApplicationsApplicationIdDelete<ThrowOnError extends boolean = false>(options: Options<WithdrawApplicationVolunteerApplicationsApplicationIdDeleteData, ThrowOnError>) {
+        return (options.client ?? client).delete<WithdrawApplicationVolunteerApplicationsApplicationIdDeleteResponses, WithdrawApplicationVolunteerApplicationsApplicationIdDeleteErrors, ThrowOnError>({
+            requestValidator: async (data) => await z.object({
+                body: z.never().optional(),
+                path: zWithdrawApplicationVolunteerApplicationsApplicationIdDeletePath,
+                query: z.never().optional()
+            }).parseAsync(data),
+            responseType: 'json',
+            responseValidator: async (data) => await zWithdrawApplicationVolunteerApplicationsApplicationIdDeleteResponse.parseAsync(data),
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/volunteer-applications/{application_id}',
+            ...options
+        });
+    }
+}
+
+export class Uploads {
+    /**
+     * Generate a presigned upload URL
+     *
+     * Returns a short-lived presigned PUT URL targeting Cloudflare R2.  The client uploads the file directly to that URL, then saves the returned `object_key` on the relevant resource.
+     *
+     * **Requires** a valid Bearer token (any authenticated user).
+     */
+    public static generatePresignedUrlUploadsPresignPost<ThrowOnError extends boolean = false>(options: Options<GeneratePresignedUrlUploadsPresignPostData, ThrowOnError>) {
+        return (options.client ?? client).post<GeneratePresignedUrlUploadsPresignPostResponses, GeneratePresignedUrlUploadsPresignPostErrors, ThrowOnError>({
+            requestValidator: async (data) => await z.object({
+                body: zGeneratePresignedUrlUploadsPresignPostBody,
+                path: z.never().optional(),
+                query: z.never().optional()
+            }).parseAsync(data),
+            responseType: 'json',
+            responseValidator: async (data) => await zGeneratePresignedUrlUploadsPresignPostResponse.parseAsync(data),
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/uploads/presign',
             ...options,
             headers: {
                 'Content-Type': 'application/json',

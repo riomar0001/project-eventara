@@ -7,7 +7,7 @@ from app.core.sanitize import sanitize_html
 from app.domain.entities.venue_entities import VenueType
 
 
-class VenueCreateRequest(BaseModel):
+class _VenueBaseRequest(BaseModel):
     name: str = Field(min_length=1, max_length=255)
     description: str | None = Field(default=None)
     address_line: str = Field(min_length=1, max_length=255)
@@ -18,11 +18,7 @@ class VenueCreateRequest(BaseModel):
     country: str = Field(min_length=1, max_length=100)
     capacity: int = Field(gt=0)
     venue_type: VenueType
-    is_partner: bool = False
     amenities: list[str] | None = None
-    contact_name: str = Field(min_length=1, max_length=255)
-    contact_phone: str = Field(min_length=1, max_length=20)
-    contact_email: EmailStr
 
     @field_validator("description", mode="before")
     @classmethod
@@ -30,6 +26,30 @@ class VenueCreateRequest(BaseModel):
         if v is None:
             return None
         return sanitize_html(v) or None
+
+
+class CommunityVenueCreateRequest(_VenueBaseRequest):
+    """Venue suggested by the community — contact information is optional."""
+
+    contact_name: str | None = Field(default=None, max_length=255)
+    contact_phone: str | None = Field(default=None, max_length=20)
+    contact_email: EmailStr | None = None
+
+
+class OfficialVenueCreateRequest(_VenueBaseRequest):
+    """Officially managed venue — contact information is required."""
+
+    contact_name: str = Field(min_length=1, max_length=255)
+    contact_phone: str = Field(min_length=1, max_length=20)
+    contact_email: EmailStr
+
+
+# Kept for backward compatibility with the update endpoint.
+class VenueCreateRequest(_VenueBaseRequest):
+    is_partner: bool = False
+    contact_name: str = Field(min_length=1, max_length=255)
+    contact_phone: str = Field(min_length=1, max_length=20)
+    contact_email: EmailStr
 
 
 class VenueUpdateRequest(BaseModel):
@@ -74,9 +94,9 @@ class VenueRecordResponse(BaseModel):
     usage_count: int
     is_partner: bool
     amenities: list[str] | None
-    contact_name: str
-    contact_phone: str
-    contact_email: str
+    contact_name: str | None
+    contact_phone: str | None
+    contact_email: str | None
     created_at: datetime | None
     updated_at: datetime | None
 

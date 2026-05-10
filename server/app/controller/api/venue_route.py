@@ -45,10 +45,11 @@ from app.controller.docs.venue_rating_docs import (
     UNAUTHORIZED as RATING_UNAUTHORIZED,
 )
 from app.controller.schemas.venue_management_schema import (
+    CommunityVenueCreateRequest,
+    OfficialVenueCreateRequest,
     PublicVenueListResponse,
     PublicVenueRecordResponse,
     PublicVenueResponse,
-    VenueCreateRequest,
     VenueListResponse,
     VenuePaginationResponse,
     VenueRecordResponse,
@@ -330,25 +331,68 @@ async def get_venue(
 
 
 @venue_router.post(
-    "",
+    "/community",
     response_model=VenueResponse,
     status_code=status.HTTP_201_CREATED,
     responses={**UNAUTHORIZED, **FORBIDDEN, **VENUE_CONFLICT, **VALIDATION_ERROR},
-    summary="Create a venue",
+    summary="Add a community venue suggestion",
     description=(
-        "Create a new venue record. Amenity names are automatically normalised to "
-        "Title Case before storage (e.g. ``air conditioning`` → ``Air Conditioning``). "
-        "Venue names must be unique within the same city."
+        "Add a venue suggested by the community. Contact information is optional. "
+        "The venue is automatically marked as non-partner (``is_partner=false``). "
+        "Amenity names are normalised to Title Case. Venue names must be unique within the same city."
     ),
+    openapi_extra={
+        "requestBody": {
+            "content": {
+                "application/json": {
+                    "examples": {
+                        "minimal": {
+                            "summary": "Required fields only (no contact)",
+                            "value": {
+                                "name": "Rizal Park",
+                                "address_line": "Roxas Blvd",
+                                "city": "Manila",
+                                "province": "Metro Manila",
+                                "postal_code": "1000",
+                                "region": "NCR",
+                                "country": "Philippines",
+                                "capacity": 5000,
+                                "venue_type": "outdoor",
+                            },
+                        },
+                        "with_contact": {
+                            "summary": "With optional contact information",
+                            "value": {
+                                "name": "Rizal Park",
+                                "description": "Historic open-air park in Manila.",
+                                "address_line": "Roxas Blvd",
+                                "city": "Manila",
+                                "province": "Metro Manila",
+                                "postal_code": "1000",
+                                "region": "NCR",
+                                "country": "Philippines",
+                                "capacity": 5000,
+                                "venue_type": "outdoor",
+                                "amenities": ["Open Space", "Restroom"],
+                                "contact_name": "Juan Dela Cruz",
+                                "contact_phone": "09171234567",
+                                "contact_email": "juan@example.com",
+                            },
+                        },
+                    }
+                }
+            }
+        }
+    },
 )
-async def create_venue(
+async def create_community_venue(
     request: Request,
-    body: VenueCreateRequest,
+    body: CommunityVenueCreateRequest,
     caller_id: uuid.UUID = Depends(require_permission("venues", RoleAction.CREATE)),
     use_case: VenueManagementUseCase = Depends(get_venue_management_use_case),
     audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> VenueResponse:
-    """Create a new venue.
+    """Add a community-suggested venue.
 
     # Error mapping
     - **401 Unauthorized** — missing, expired, or invalid Bearer token.
@@ -370,7 +414,7 @@ async def create_venue(
                 country=body.country,
                 capacity=body.capacity,
                 venue_type=body.venue_type,
-                is_partner=body.is_partner,
+                is_partner=False,
                 amenities=body.amenities,
                 contact_name=body.contact_name,
                 contact_phone=body.contact_phone,
@@ -390,7 +434,117 @@ async def create_venue(
         status=AuditLogStatus.SUCCESS,
         new_values=serialize_venue(result.venue),
     )
-    return VenueResponse(data=_to_venue_response(result.venue), message="Venue created successfully.")
+    return VenueResponse(data=_to_venue_response(result.venue), message="Community venue suggestion added successfully.")
+
+
+@venue_router.post(
+    "/official",
+    response_model=VenueResponse,
+    status_code=status.HTTP_201_CREATED,
+    responses={**UNAUTHORIZED, **FORBIDDEN, **VENUE_CONFLICT, **VALIDATION_ERROR},
+    summary="Add an official venue",
+    description=(
+        "Add an officially managed venue. Contact information is required. "
+        "The venue is automatically marked as a partner (``is_partner=true``). "
+        "Amenity names are normalised to Title Case. Venue names must be unique within the same city."
+    ),
+    openapi_extra={
+        "requestBody": {
+            "content": {
+                "application/json": {
+                    "examples": {
+                        "minimal": {
+                            "summary": "Required fields only",
+                            "value": {
+                                "name": "Davao Convention Center",
+                                "address_line": "123 Quimpo Blvd",
+                                "city": "Davao City",
+                                "province": "Davao del Sur",
+                                "postal_code": "8000",
+                                "region": "Region XI",
+                                "country": "Philippines",
+                                "capacity": 2000,
+                                "venue_type": "indoor",
+                                "contact_name": "Maria Santos",
+                                "contact_phone": "09171234567",
+                                "contact_email": "contact@davaocvb.ph",
+                            },
+                        },
+                        "full": {
+                            "summary": "All fields including optional",
+                            "value": {
+                                "name": "Davao Convention Center",
+                                "description": "Premier convention facility in Mindanao.",
+                                "address_line": "123 Quimpo Blvd",
+                                "city": "Davao City",
+                                "province": "Davao del Sur",
+                                "postal_code": "8000",
+                                "region": "Region XI",
+                                "country": "Philippines",
+                                "capacity": 2000,
+                                "venue_type": "indoor",
+                                "amenities": ["Wifi", "Air Conditioning", "Parking"],
+                                "contact_name": "Maria Santos",
+                                "contact_phone": "09171234567",
+                                "contact_email": "contact@davaocvb.ph",
+                            },
+                        },
+                    }
+                }
+            }
+        }
+    },
+)
+async def create_official_venue(
+    request: Request,
+    body: OfficialVenueCreateRequest,
+    caller_id: uuid.UUID = Depends(require_permission("venues", RoleAction.CREATE)),
+    use_case: VenueManagementUseCase = Depends(get_venue_management_use_case),
+    audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
+) -> VenueResponse:
+    """Add an official partner venue.
+
+    # Error mapping
+    - **401 Unauthorized** — missing, expired, or invalid Bearer token.
+    - **403 Forbidden** — caller lacks ``create`` permission on ``venues``.
+    - **409 Conflict** — a venue with the same name already exists in the same city.
+    - **422 Unprocessable Entity** — the request body failed schema validation.
+    """
+    try:
+        result = await use_case.create_venue(
+            CreateVenueInput(
+                creator_id=caller_id,
+                name=body.name,
+                description=body.description,
+                address_line=body.address_line,
+                city=body.city,
+                province=body.province,
+                postal_code=body.postal_code,
+                region=body.region,
+                country=body.country,
+                capacity=body.capacity,
+                venue_type=body.venue_type,
+                is_partner=True,
+                amenities=body.amenities,
+                contact_name=body.contact_name,
+                contact_phone=body.contact_phone,
+                contact_email=body.contact_email,
+            )
+        )
+    except VenueAlreadyExistsError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+
+    await safe_audit_log(
+        audit_use_case,
+        request,
+        user_id=caller_id,
+        action_type=ActionType.CREATE,
+        resource_type="venues",
+        resource_id=str(result.venue.id),
+        status=AuditLogStatus.SUCCESS,
+        new_values=serialize_venue(result.venue),
+    )
+    return VenueResponse(data=_to_venue_response(result.venue), message="Official venue created successfully.")
 
 
 @venue_router.patch(
