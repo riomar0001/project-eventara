@@ -19,7 +19,7 @@ export default function ProfileSettingsPage() {
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2 md:col-span-2">
             <label className="text-sm font-medium">Profile picture</label>
-            <ImageUpload value={user?.imageFileId ?? null} onChange={handleProfilePictureChange} resourceType="user-profile" disabled={isSubmitting} />
+            <ImageUpload value={user?.imageFileId ?? null} onChange={handleProfilePictureChange} resourceType="user-profile" disabled={isSubmitting} className="w-24 aspect-square" />
           </div>
 
           <div className="space-y-2 md:col-span-2">

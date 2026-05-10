@@ -5,15 +5,15 @@ import { Building2, MapPin, Save, Users, X } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { ImageUpload } from '@/components/ui/image-upload';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { ImageUpload } from '@/components/ui/image-upload';
-import { BackLink, FieldLabel, PhotoPanel } from './venues-shared';
 import { useVenueForm } from '@/hooks/admin/venues/use-venue-form';
+import { BackLink, FieldLabel, PhotoPanel } from './venues-shared';
+import type { VenueRecordResponse } from '@/api/types.gen';
 import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
 import { resolveStorageImageUrl } from '@/lib/storage/image-url';
-import type { VenueRecordResponse } from '@/api/types.gen';
 
 // ── Form shape ─────────────────────────────────────────────────────────────────
 export interface VenueFormValues {
@@ -98,7 +98,8 @@ export function VenueForm({ mode, venue }: { mode: 'create' | 'edit'; venue?: Ve
   const [amenityDraft, setAmenityDraft] = useState('');
   const [pendingImageFile, setPendingImageFile] = useState<File | null>(null);
 
-  const previewPhoto = resolveStorageImageUrl(form.image_url) || 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=1400&q=80';
+  const previewPhoto =
+    resolveStorageImageUrl(form.image_url) || 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=1400&q=80';
 
   function set<K extends keyof VenueFormValues>(key: K, value: VenueFormValues[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -109,9 +110,7 @@ export function VenueForm({ mode, venue }: { mode: 'create' | 'edit'; venue?: Ve
     if (!amenity) return;
     setForm((prev) => ({
       ...prev,
-      amenities: prev.amenities.map((a) => a.toLowerCase()).includes(amenity.toLowerCase())
-        ? prev.amenities
-        : [...prev.amenities, amenity]
+      amenities: prev.amenities.map((a) => a.toLowerCase()).includes(amenity.toLowerCase()) ? prev.amenities : [...prev.amenities, amenity]
     }));
     setAmenityDraft('');
   }
@@ -216,6 +215,7 @@ export function VenueForm({ mode, venue }: { mode: 'create' | 'edit'; venue?: Ve
                       deferUpload={mode === 'create'}
                       onFileSelected={setPendingImageFile}
                       disabled={isSubmitting}
+                      className="aspect-video w-full"
                     />
                   </div>
 
@@ -378,7 +378,10 @@ export function VenueForm({ mode, venue }: { mode: 'create' | 'edit'; venue?: Ve
                       {amenity}
                       <button
                         type="button"
-                        onClick={(e) => { e.stopPropagation(); removeAmenity(amenity); }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeAmenity(amenity);
+                        }}
                         className="text-neutral-400 hover:text-neutral-700"
                       >
                         <X className="size-3" />
@@ -418,14 +421,10 @@ export function VenueForm({ mode, venue }: { mode: 'create' | 'edit'; venue?: Ve
           <PhotoPanel photo={previewPhoto} className="min-h-70">
             <div className="flex min-h-70 flex-col justify-between p-6">
               <div className="flex flex-wrap gap-2">
-                {isOfficial && (
-                  <span className="rounded-full bg-amber-400/90 px-3 py-1 text-xs font-medium text-amber-950">Partner</span>
-                )}
+                {isOfficial && <span className="rounded-full bg-amber-400/90 px-3 py-1 text-xs font-medium text-amber-950">Partner</span>}
               </div>
               <div className="space-y-2">
-                <p className="text-xs tracking-[0.18em] text-white/75 uppercase">
-                  {[form.city, form.province].filter(Boolean).join(', ') || 'City, Province'}
-                </p>
+                <p className="text-xs tracking-[0.18em] text-white/75 uppercase">{[form.city, form.province].filter(Boolean).join(', ') || 'City, Province'}</p>
                 <h2 className="text-3xl font-semibold tracking-tight text-white">{form.name || 'Untitled venue'}</h2>
                 <p className="max-w-xl text-sm leading-6 text-white/85">{form.description || 'Your venue description will appear here as you type.'}</p>
               </div>

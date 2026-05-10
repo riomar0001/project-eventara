@@ -5,6 +5,7 @@ import { ImageIcon, Loader2, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { type UploadResourceType, useUpload } from '@/hooks/use-upload';
 import { resolveStorageImageUrl } from '@/lib/storage/image-url';
+import { cn } from '@/lib/utils';
 
 interface ImageUploadProps {
   value?: string | null;
@@ -62,7 +63,7 @@ export function ImageUpload({ value, onChange, resourceType, resourceId, deferUp
   }
 
   return (
-    <div className={className}>
+    <div className={cn('w-40 aspect-square', className)}>
       <input
         ref={inputRef}
         type="file"
@@ -73,7 +74,7 @@ export function ImageUpload({ value, onChange, resourceType, resourceId, deferUp
       />
 
       {displayUrl ? (
-        <div className="relative aspect-square size-40 overflow-hidden rounded-lg">
+        <div className="relative w-full h-full overflow-hidden rounded-lg">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={displayUrl} alt="Preview" className="size-full object-cover" />
           {!disabled && (
@@ -90,7 +91,7 @@ export function ImageUpload({ value, onChange, resourceType, resourceId, deferUp
           type="button"
           onClick={() => inputRef.current?.click()}
           disabled={disabled || isUploading}
-          className="flex aspect-square size-40 flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-neutral-200 bg-neutral-50 transition-colors hover:border-neutral-400 hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex w-full h-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-neutral-200 bg-neutral-50 transition-colors hover:border-neutral-400 hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isUploading ? (
             <>

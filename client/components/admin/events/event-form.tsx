@@ -411,6 +411,7 @@ export function EventForm({ mode, event }: EventFormProps) {
                     deferUpload={mode === 'create'}
                     onFileSelected={setPendingBannerFile}
                     disabled={isSubmitting || isUploadingBanner}
+                    className="w-full aspect-video"
                   />
                 </div>
 
