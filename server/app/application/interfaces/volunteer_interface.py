@@ -5,11 +5,27 @@ from typing import Protocol
 
 from app.domain.entities.authorization_entities import Role as RoleEntity
 from app.domain.entities.user_entity import User as UserEntity
-from app.domain.entities.volunteer_entity import ApplicationStatus, Volunteer, VolunteerApplication, VolunteerRole
+from app.domain.entities.volunteer_entity import (
+    ApplicationStatus,
+    PotentialVolunteer,
+    Volunteer,
+    VolunteerApplication,
+    VolunteerRole,
+    VolunteerStatus,
+    VolunteerSummary,
+)
 
 
 class IVolunteerRepository(Protocol):
     """Contract for volunteer, volunteer-role, and volunteer-application persistence operations."""
+
+    async def get_all_volunteers(
+        self,
+        status: VolunteerStatus | None,
+        role_id: uuid.UUID | None,
+        page: int,
+        page_size: int,
+    ) -> tuple[list[VolunteerSummary], int]: ...
 
     async def get_volunteer_by_user_id(self, user_id: uuid.UUID, *, for_update: bool = False) -> Volunteer | None: ...
 
@@ -65,3 +81,43 @@ class IVolunteerRepository(Protocol):
         application_id: uuid.UUID,
         new_status: ApplicationStatus,
     ) -> VolunteerApplication | None: ...
+
+    async def get_all_volunteer_roles(
+        self,
+        search: str | None,
+        is_active: bool | None,
+        page: int,
+        page_size: int,
+    ) -> tuple[list[VolunteerRole], int]: ...
+
+    async def update_volunteer_role(
+        self,
+        role_id: uuid.UUID,
+        name: str | None,
+        description: object,
+        is_active: bool | None,
+        *,
+        for_update: bool = False,
+    ) -> VolunteerRole | None: ...
+
+    async def delete_volunteers_by_role_id(self, role_id: uuid.UUID) -> int: ...
+
+    async def delete_volunteer_role_by_id(self, role_id: uuid.UUID) -> None: ...
+
+    async def get_volunteer_by_id(self, volunteer_id: uuid.UUID, *, for_update: bool = False) -> Volunteer | None: ...
+
+    async def update_volunteer(
+        self,
+        volunteer_id: uuid.UUID,
+        contact_phone: str | None,
+        volunteer_role_id: uuid.UUID | None,
+        status: VolunteerStatus | None,
+    ) -> Volunteer | None: ...
+
+    async def get_potential_volunteers(
+        self,
+        page: int,
+        page_size: int,
+        min_events: int,
+        search: str | None,
+    ) -> tuple[list[PotentialVolunteer], int]: ...

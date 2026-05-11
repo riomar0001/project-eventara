@@ -20,6 +20,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 
 from app.application.dto.event_dto import (
     CreateEventInput,
+    CreateEventSessionForEventInput,
     CreateEventSessionInput,
     DeleteEventInput,
     DeleteEventSessionInput,
@@ -76,6 +77,8 @@ from app.controller.schemas.event_schema import (
     EventListResponse,
     EventMetadataUpdatedResponse,
     EventRecordResponse,
+    EventSessionCreatedResponse,
+    EventSessionCreateRequest,
     EventSessionDeletedResponse,
     EventSessionRecordResponse,
     EventSessionStatusUpdatedResponse,
@@ -133,6 +136,8 @@ def _to_session_response(session: EventSessionEntity) -> EventSessionRecordRespo
         id=session.id,
         event_id=session.event_id,
         venue_id=session.venue_id,
+        venue_name=session.venue_name,
+        venue_location=session.venue_location,
         title=session.title,
         description=session.description,
         start_datetime=session.start_datetime,
@@ -427,6 +432,71 @@ async def update_event_session(
     )
 
     return EventSessionUpdatedResponse(data=_to_session_response(result.session))
+
+
+@event_router.post(
+    "/{event_id}/session",
+    response_model=EventSessionCreatedResponse,
+    status_code=status.HTTP_201_CREATED,
+    responses={
+        **UNAUTHORIZED,
+        **EVENT_UNAUTHORIZED_OPERATION,
+        **EVENT_METADATA_NOT_FOUND,
+        **EVENT_SESSION_NOT_FOUND,
+        **EVENT_SESSION_DATE_INVALID,
+        **EVENT_VALIDATION_ERROR,
+    },
+    summary="Create an event session",
+    description=(
+        "Creates a single session for an existing event. "
+        "Only the event creator may perform this operation. "
+        "The session date window must fall within the parent event date range."
+    ),
+)
+async def create_event_session(
+    request: Request,
+    event_id: uuid.UUID,
+    body: EventSessionCreateRequest,
+    user_id: uuid.UUID = Depends(get_current_user_id),
+    use_case: EventUseCase = Depends(get_event_use_case),
+    audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
+) -> EventSessionCreatedResponse:
+    """Create a new session on an existing event in a single atomic transaction."""
+    try:
+        result = await use_case.create_event_session(
+            CreateEventSessionForEventInput(
+                event_id=event_id,
+                updated_by=user_id,
+                venue_id=body.venue_id,
+                title=body.title,
+                description=body.description,
+                start_datetime=body.start_datetime,
+                end_datetime=body.end_datetime,
+                max_slots=body.max_slots,
+            )
+        )
+    except UnauthorizedEventOperationError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
+    except EventNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except (InvalidEventSessionDateError, EventSessionExceedsEventBoundsError) as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
+    except VenueNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+
+    await safe_audit_log(
+        audit_use_case,
+        request,
+        user_id=user_id,
+        action_type=ActionType.CREATE,
+        resource_type="event_sessions",
+        resource_id=str(result.session.id),
+        status=AuditLogStatus.SUCCESS,
+        new_values=serialize_event_sessions([result.session])[0],
+        additional_context={"event_id": str(event_id)},
+    )
+
+    return EventSessionCreatedResponse(data=_to_session_response(result.session))
 
 
 @event_router.patch(

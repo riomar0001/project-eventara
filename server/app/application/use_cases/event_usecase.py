@@ -4,6 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application.dto.event_dto import (
     CreateEventInput,
+    CreateEventSessionForEventInput,
+    CreateEventSessionOutput,
     EventWithSessionsOutput,
     UpdateEventBannerInput,
     UpdateEventBannerOutput,
@@ -118,6 +120,61 @@ class EventUseCase:
 
         await self.db.commit()
         return EventWithSessionsOutput(event=event, sessions=sessions)
+
+    async def create_event_session(self, data: CreateEventSessionForEventInput) -> CreateEventSessionOutput:
+        """Create a session for an existing event in a single atomic transaction.
+
+        Validation order:
+        1. Event exists (with row lock).
+        2. Caller is the event creator.
+        3. Session end must be after session start.
+        4. Session window must fall within the parent event date range.
+        5. Referenced venue must exist.
+
+        Raises:
+            EventNotFoundError: No event exists for ``data.event_id``.
+            UnauthorizedEventOperationError: Caller is not the event creator.
+            InvalidEventSessionDateError: ``end_datetime`` ≤ ``start_datetime``.
+            EventSessionExceedsEventBoundsError: Session outside event range.
+            VenueNotFoundError: Referenced venue does not exist.
+        """
+        event = await self.repo.get_event_by_id(data.event_id, for_update=True)
+        if event is None:
+            raise EventNotFoundError(str(data.event_id))
+
+        if event.created_by != data.updated_by:
+            raise UnauthorizedEventOperationError(str(data.event_id))
+
+        if data.end_datetime <= data.start_datetime:
+            raise InvalidEventSessionDateError(str(data.start_datetime), str(data.end_datetime))
+
+        if data.start_datetime < event.start_date or data.end_datetime > event.end_date:
+            raise EventSessionExceedsEventBoundsError(
+                str(data.start_datetime),
+                str(data.end_datetime),
+                str(event.start_date),
+                str(event.end_date),
+            )
+
+        if not await self.repo.venue_exists(data.venue_id):
+            raise VenueNotFoundError()
+
+        try:
+            session = await self.repo.create_session(
+                event_id=data.event_id,
+                venue_id=data.venue_id,
+                title=data.title,
+                description=data.description,
+                start_datetime=data.start_datetime,
+                end_datetime=data.end_datetime,
+                max_slots=data.max_slots,
+            )
+        except Exception:
+            await self.db.rollback()
+            raise
+
+        await self.db.commit()
+        return CreateEventSessionOutput(session=session)
 
     async def update_event_metadata(self, data: UpdateEventMetadataInput) -> UpdateEventMetadataOutput:
         """Update title, description, and date range for an existing event.

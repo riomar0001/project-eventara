@@ -9,6 +9,7 @@ from app.application.use_cases.event_participant_usecase import EventParticipant
 from app.application.use_cases.event_query_usecase import GetEventUseCase
 from app.application.use_cases.event_status_usecase import EventStatusUseCase
 from app.application.use_cases.event_usecase import EventUseCase
+from app.application.use_cases.event_volunteer_usecase import EventVolunteerUseCase
 from app.application.use_cases.feature_usecase import FeatureManagementUseCase
 from app.application.use_cases.profile_usecase import (
     CheckAliasUseCase,
@@ -23,7 +24,13 @@ from app.application.use_cases.users_usecase import AdminUserAccountUseCase
 from app.application.use_cases.venue_query_usecase import GetVenueCapacityUseCase
 from app.application.use_cases.venue_rating_usecase import VenueRatingUseCase
 from app.application.use_cases.venue_usecase import VenueManagementUseCase
-from app.application.use_cases.volunteer_usecase import VolunteerApplicationUseCase, VolunteerUseCase
+from app.application.use_cases.volunteer_usecase import (
+    GetVolunteerUseCase,
+    UpdateVolunteerInfoUseCase,
+    VolunteerApplicationUseCase,
+    VolunteerRoleUseCase,
+    VolunteerUseCase,
+)
 from app.infrastructure.cache.repositories.otp_repository import OTPRepository
 from app.infrastructure.cache.repositories.password_reset_repository import PasswordResetRepository
 from app.infrastructure.database.repositories.audit_log_repository import (
@@ -31,6 +38,7 @@ from app.infrastructure.database.repositories.audit_log_repository import (
 )
 from app.infrastructure.database.repositories.event_participant_repository import EventParticipantRepository
 from app.infrastructure.database.repositories.event_repository import EventRepository
+from app.infrastructure.database.repositories.event_volunteer_repository import EventVolunteerRepository
 from app.infrastructure.database.repositories.role_repository import RoleRepository
 from app.infrastructure.database.repositories.user_repository import UserRepository
 from app.infrastructure.database.repositories.venue_rating_repository import VenueRatingRepository
@@ -172,6 +180,11 @@ def get_event_deletion_use_case(db: AsyncSession = Depends(get_db)) -> EventDele
     return EventDeletionUseCase(EventRepository(db), db)
 
 
+def get_event_volunteer_use_case(db: AsyncSession = Depends(get_db)) -> EventVolunteerUseCase:
+    """Construct an ``EventVolunteerUseCase`` for event volunteer management and participant queries."""
+    return EventVolunteerUseCase(EventVolunteerRepository(db), db)
+
+
 def get_volunteer_use_case(db: AsyncSession = Depends(get_db)) -> VolunteerUseCase:
     """Construct a ``VolunteerUseCase`` for volunteer registration and role management."""
     return VolunteerUseCase(VolunteerRepository(db), RoleRepository(db), db)
@@ -180,3 +193,18 @@ def get_volunteer_use_case(db: AsyncSession = Depends(get_db)) -> VolunteerUseCa
 def get_volunteer_application_use_case(db: AsyncSession = Depends(get_db)) -> VolunteerApplicationUseCase:
     """Construct a ``VolunteerApplicationUseCase`` for the volunteer application lifecycle."""
     return VolunteerApplicationUseCase(VolunteerRepository(db), RoleRepository(db), db)
+
+
+def get_volunteer_role_use_case(db: AsyncSession = Depends(get_db)) -> VolunteerRoleUseCase:
+    """Construct a ``VolunteerRoleUseCase`` for volunteer role read, update, and delete operations."""
+    return VolunteerRoleUseCase(VolunteerRepository(db), db)
+
+
+def get_all_volunteers_use_case(db: AsyncSession = Depends(get_db)) -> GetVolunteerUseCase:
+    """Construct a ``GetVolunteerUseCase`` for read-only volunteer listing and potential volunteer queries."""
+    return GetVolunteerUseCase(VolunteerRepository(db))
+
+
+def get_update_volunteer_use_case(db: AsyncSession = Depends(get_db)) -> UpdateVolunteerInfoUseCase:
+    """Construct an ``UpdateVolunteerInfoUseCase`` for updating volunteer contact and role data."""
+    return UpdateVolunteerInfoUseCase(VolunteerRepository(db), db)

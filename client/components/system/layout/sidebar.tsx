@@ -27,21 +27,29 @@ import { usePermissions } from '@/context/permissions-context';
 import { cn } from '@/lib/utils';
 
 export function AppSidebar() {
-  const [transactionsOpen, setTransactionsOpen] = React.useState(true);
-  const { state } = useSidebar();
   const pathname = usePathname();
+  const [volunteerOpen, setVolunteerOpen] = React.useState(() => pathname.startsWith('/admin/volunteers'));
+  const { state } = useSidebar();
   const isCollapsed = state === 'collapsed';
   const { can } = usePermissions();
 
   function isActiveHref(href: string) {
     if (!href.startsWith('/')) return false;
-    if (href === '/admin/dashboard') return pathname === '/admin/dashboard';
-    return pathname === href || pathname.startsWith(`${href}/`);
+    const normalizedHref = href.split('#')[0];
+    if (normalizedHref === '/admin/dashboard') return pathname === '/admin/dashboard';
+    return pathname === normalizedHref || pathname.startsWith(`${normalizedHref}/`);
   }
 
   React.useEffect(() => {
-    if (isCollapsed) setTransactionsOpen(false);
-  }, [isCollapsed]);
+    if (isCollapsed) {
+      setVolunteerOpen(false);
+      return;
+    }
+
+    if (pathname.startsWith('/admin/volunteers')) {
+      setVolunteerOpen(true);
+    }
+  }, [isCollapsed, pathname]);
 
   return (
     <Sidebar collapsible="icon" className="border-0!">
@@ -65,14 +73,14 @@ export function AppSidebar() {
                 <SidebarMenu className="gap-2">
                   {visibleItems.map((item) =>
                     item.children ? (
-                      <Collapsible key={item.label} open={transactionsOpen} onOpenChange={setTransactionsOpen} asChild>
+                      <Collapsible key={item.label} open={volunteerOpen} onOpenChange={setVolunteerOpen} asChild>
                         <SidebarMenuItem>
                           <CollapsibleTrigger asChild>
-                            <SidebarMenuButton tooltip={item.label} className={cn('h-10 [&_svg]:size-4.5', transactionsOpen && 'text-foreground')}>
+                            <SidebarMenuButton tooltip={item.label} isActive={isActiveHref(item.href)} className="h-10 [&_svg]:size-4.5">
                               <item.icon />
                               <span>{item.label}</span>
                               <ChevronDown
-                                className={cn('ml-auto size-4 transition-transform group-data-[collapsible=icon]:hidden', transactionsOpen && 'rotate-180')}
+                                className={cn('ml-auto size-4 transition-transform group-data-[collapsible=icon]:hidden', volunteerOpen && 'rotate-180')}
                               />
                             </SidebarMenuButton>
                           </CollapsibleTrigger>
@@ -80,11 +88,11 @@ export function AppSidebar() {
                             <SidebarMenuSub>
                               {item.children.map((child) => (
                                 <SidebarMenuSubItem key={child.label}>
-                                  <SidebarMenuSubButton asChild className="h-8 text-sm">
-                                    <a href={child.href} className="flex items-center">
+                                  <SidebarMenuSubButton asChild isActive={isActiveHref(child.href)} className="h-8 text-sm">
+                                    <Link href={child.href} className="flex items-center">
                                       {child.label}
                                       {child.badge ? <Badge className="ml-auto h-4.5 min-w-4.5 px-1 text-[10px]">{child.badge}</Badge> : null}
-                                    </a>
+                                    </Link>
                                   </SidebarMenuSubButton>
                                 </SidebarMenuSubItem>
                               ))}
