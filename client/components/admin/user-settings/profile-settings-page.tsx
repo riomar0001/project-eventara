@@ -21,7 +21,7 @@ export default function ProfileSettingsPage() {
           <div className="space-y-2 md:col-span-2">
             <label className="text-sm font-medium">Profile picture</label>
             <ImageUpload
-              value={user?.imageFileId ?? null}
+              value={user?.image ?? null}
               onChange={handleProfilePictureChange}
               resourceType="user-profile"
               disabled={isSubmitting}

@@ -13,7 +13,31 @@ export interface AuthUser {
   educationLevel?: string;
   occupation?: string;
   bio?: string;
-  imageFileId?: string;
+  image?: string;
+}
+
+const PROFILE_AVATAR_CACHE_KEY = 'eventara-profile-avatars';
+
+function readProfileAvatarCache(): Record<string, string> {
+  if (typeof window === 'undefined') return {};
+
+  try {
+    const raw = window.localStorage.getItem(PROFILE_AVATAR_CACHE_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
+    return Object.fromEntries(Object.entries(parsed).filter((entry): entry is [string, string] => typeof entry[1] === 'string'));
+  } catch {
+    return {};
+  }
+}
+
+export function rememberProfileAvatar(userId: string, image: string) {
+  if (typeof window === 'undefined' || !userId || !image) return;
+
+  const cache = readProfileAvatarCache();
+  cache[userId] = image;
+  window.localStorage.setItem(PROFILE_AVATAR_CACHE_KEY, JSON.stringify(cache));
 }
 
 // Extending standard JwtPayload gives you 'sub' and 'exp' automatically
@@ -29,7 +53,7 @@ interface RawTokenPayload extends JwtPayload {
   education_level?: string;
   occupation?: string;
   bio?: string;
-  image_file_id?: string;
+  image?: string;
 }
 
 /**
@@ -61,7 +85,7 @@ export function decodeTokenUser(token: string): AuthUser | null {
       educationLevel: p.education_level ?? undefined,
       occupation: p.occupation ?? undefined,
       bio: p.bio ?? undefined,
-      imageFileId: p.image_file_id ?? undefined
+      image: p.image ?? readProfileAvatarCache()[p.sub] ?? undefined
     };
   } catch {
     // jwtDecode throws an InvalidTokenError if the token is invalid/malformed

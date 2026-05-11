@@ -146,7 +146,7 @@ class ProfileAvatarUploadRequest(BaseModel):
 
 class ProfileAvatarData(BaseModel):
     user_id: uuid.UUID
-    image_file_id: str
+    image: str
 
 
 class ProfileAvatarUploadData(BaseModel):

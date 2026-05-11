@@ -250,7 +250,7 @@ async def upload_profile_avatar(
     )
 
     return ProfileAvatarUploadResponse(
-        data=ProfileAvatarData(user_id=user_id, image_file_id=object_key),
+        data=ProfileAvatarData(user_id=user_id, image=public_url),
         upload=ProfileAvatarUploadData(
             upload_url=upload_url,
             object_key=object_key,

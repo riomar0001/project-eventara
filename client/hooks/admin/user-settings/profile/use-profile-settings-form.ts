@@ -4,7 +4,7 @@ import { type AliasStatus, normalizeAlias, useAliasAvailability } from '@/hooks/
 import { Profile } from '@/api/sdk.gen';
 import type { AgeGroup, EducationLevel, Gender } from '@/api/types.gen';
 import { PROFILE_ALIAS_MIN_LENGTH, PROFILE_ALIAS_PATTERN, PROFILE_COMPLETION_FIELDS } from '@/constants/user/profile';
-import { decodeTokenUser } from '@/lib/auth/token';
+import { decodeTokenUser, rememberProfileAvatar } from '@/lib/auth/token';
 import { getProfileCompletion } from '@/lib/user/profile';
 import { type AuthUser, useAuthStore } from '@/store/auth-store';
 
@@ -129,7 +129,8 @@ export function useProfileSettingsForm() {
   }
 
   function handleProfilePictureChange(publicUrl: string) {
-    updateUser({ imageFileId: publicUrl });
+    if (user?.id) rememberProfileAvatar(user.id, publicUrl);
+    updateUser({ image: publicUrl });
     toast.success('Profile picture updated.');
   }
 

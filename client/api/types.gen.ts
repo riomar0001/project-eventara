@@ -1850,9 +1850,9 @@ export type ProfileAvatarData = {
      */
     user_id: string;
     /**
-     * Image File Id
+     * Image
      */
-    image_file_id: string;
+    image: string;
 };
 
 /**

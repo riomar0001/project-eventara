@@ -76,7 +76,7 @@ export function AppSidebar() {
                       <Collapsible key={item.label} open={volunteerOpen} onOpenChange={setVolunteerOpen} asChild>
                         <SidebarMenuItem>
                           <CollapsibleTrigger asChild>
-                            <SidebarMenuButton tooltip={item.label} isActive={isActiveHref(item.href)} className="h-10 [&_svg]:size-4.5">
+                            <SidebarMenuButton tooltip={item.label} isActive={isActiveHref(item.href)} className="h-12 px-4 py-3.5 [&_svg]:size-4.5">
                               <item.icon />
                               <span>{item.label}</span>
                               <ChevronDown
