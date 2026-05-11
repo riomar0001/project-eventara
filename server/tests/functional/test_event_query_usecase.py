@@ -211,3 +211,22 @@ class TestGetEventWithSessionsUseCase:
         uc, repo = _make_uc()
         await uc.get_event_with_sessions(GetEventWithSessionsInput(event_id=EVENT_ID))
         repo.get_event_by_id.assert_called_once_with(EVENT_ID)
+
+    @pytest.mark.asyncio
+    async def test_sessions_carry_venue_name_and_location_populated_by_repository(self):
+        """Sessions in the output include venue_name and venue_location as provided by the repository."""
+        session_with_venue = _sample_session(venue_name="SMX Convention Center", venue_location="Davao City")
+        repo = _make_repo()
+        repo.get_sessions_by_event_id = AsyncMock(return_value=[session_with_venue])
+        uc = GetEventUseCase(repo)
+        result = await uc.get_event_with_sessions(GetEventWithSessionsInput(event_id=EVENT_ID))
+        assert result.sessions[0].venue_name == "SMX Convention Center"
+        assert result.sessions[0].venue_location == "Davao City"
+
+    @pytest.mark.asyncio
+    async def test_sessions_have_none_for_venue_fields_when_repository_omits_them(self):
+        """Sessions with no joined venue data report None for venue_name and venue_location."""
+        uc, _ = _make_uc()
+        result = await uc.get_event_with_sessions(GetEventWithSessionsInput(event_id=EVENT_ID))
+        assert result.sessions[0].venue_name is None
+        assert result.sessions[0].venue_location is None

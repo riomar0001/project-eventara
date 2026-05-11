@@ -272,6 +272,16 @@ export type AssignRoleRequest = {
 };
 
 /**
+ * AssignVolunteerRequest
+ */
+export type AssignVolunteerRequest = {
+    /**
+     * Alias
+     */
+    alias: string;
+};
+
+/**
  * AssignableRoleListResponse
  */
 export type AssignableRoleListResponse = {
@@ -913,6 +923,36 @@ export type EventMetadataUpdatedResponse = {
 };
 
 /**
+ * EventParticipantRecord
+ */
+export type EventParticipantRecord = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * User Id
+     */
+    user_id: string;
+    /**
+     * Event Session Id
+     */
+    event_session_id: string;
+    /**
+     * Status
+     */
+    status: string;
+    /**
+     * Created At
+     */
+    created_at: string | null;
+    /**
+     * Updated At
+     */
+    updated_at: string | null;
+};
+
+/**
  * EventParticipantRecordResponse
  */
 export type EventParticipantRecordResponse = {
@@ -946,6 +986,25 @@ export type EventParticipantRecordResponse = {
  * EventParticipantStatus
  */
 export type EventParticipantStatus = 'registered' | 'attended' | 'cancelled' | 'no_show';
+
+/**
+ * EventParticipantsResponse
+ */
+export type EventParticipantsResponse = {
+    /**
+     * Success
+     */
+    success: boolean;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Data
+     */
+    data: Array<EventParticipantRecord>;
+    meta: AppControllerSchemasEventVolunteerSchemaPaginationMeta;
+};
 
 /**
  * EventRecordResponse
@@ -1024,6 +1083,21 @@ export type EventSessionCreateRequest = {
 };
 
 /**
+ * EventSessionCreatedResponse
+ */
+export type EventSessionCreatedResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Message
+     */
+    message?: string;
+    data: EventSessionRecordResponse;
+};
+
+/**
  * EventSessionDeletedResponse
  */
 export type EventSessionDeletedResponse = {
@@ -1054,6 +1128,14 @@ export type EventSessionRecordResponse = {
      * Venue Id
      */
     venue_id: string;
+    /**
+     * Venue Name
+     */
+    venue_name?: string | null;
+    /**
+     * Venue Location
+     */
+    venue_location?: string | null;
     /**
      * Title
      */
@@ -1214,6 +1296,74 @@ export type EventUpdateRequest = {
 };
 
 /**
+ * EventVolunteerListResponse
+ */
+export type EventVolunteerListResponse = {
+    /**
+     * Success
+     */
+    success: boolean;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Data
+     */
+    data: Array<EventVolunteerRecordResponse>;
+};
+
+/**
+ * EventVolunteerRecordResponse
+ */
+export type EventVolunteerRecordResponse = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Volunteer Id
+     */
+    volunteer_id: string;
+    /**
+     * Event Id
+     */
+    event_id: string;
+    /**
+     * Status
+     */
+    status: string;
+    /**
+     * Created At
+     */
+    created_at: string | null;
+    /**
+     * Updated At
+     */
+    updated_at: string | null;
+};
+
+/**
+ * EventVolunteerResponse
+ */
+export type EventVolunteerResponse = {
+    /**
+     * Success
+     */
+    success: boolean;
+    /**
+     * Message
+     */
+    message: string;
+    data: EventVolunteerRecordResponse;
+};
+
+/**
+ * EventVolunteerStatus
+ */
+export type EventVolunteerStatus = 'pending' | 'joined' | 'left' | 'rejected';
+
+/**
  * EventWithSessionsResponse
  */
 export type EventWithSessionsResponse = {
@@ -1372,7 +1522,7 @@ export type GetAuditLogsResponse = {
      * Data
      */
     data: Array<AuditLogResponse>;
-    pagination: PaginationMeta;
+    pagination: AppControllerSchemasAuditLogSchemaPaginationMeta;
 };
 
 /**
@@ -1689,32 +1839,6 @@ export type OfficialVenueCreateRequest = {
      * Contact Email
      */
     contact_email: string;
-};
-
-/**
- * PaginationMeta
- */
-export type PaginationMeta = {
-    /**
-     * Limit
-     */
-    limit: number;
-    /**
-     * Total Pages
-     */
-    total_pages: number;
-    /**
-     * Next Cursor
-     */
-    next_cursor: string | null;
-    /**
-     * Prev Cursor
-     */
-    prev_cursor: string | null;
-    /**
-     * Has Next
-     */
-    has_next: boolean;
 };
 
 /**
@@ -2352,6 +2476,13 @@ export type UpdateAssignmentRequest = {
 };
 
 /**
+ * UpdateEventVolunteerStatusRequest
+ */
+export type UpdateEventVolunteerStatusRequest = {
+    status: EventVolunteerStatus;
+};
+
+/**
  * UpdateParticipantStatusRequest
  */
 export type UpdateParticipantStatusRequest = {
@@ -2445,6 +2576,39 @@ export type UpdateProfileResponse = {
      * Access Token
      */
     access_token: string;
+};
+
+/**
+ * UpdateVolunteerRequest
+ */
+export type UpdateVolunteerRequest = {
+    /**
+     * Contact Phone
+     */
+    contact_phone?: string | null;
+    /**
+     * Volunteer Role Id
+     */
+    volunteer_role_id?: string | null;
+    status?: VolunteerStatus | null;
+};
+
+/**
+ * UpdateVolunteerRoleRequest
+ */
+export type UpdateVolunteerRoleRequest = {
+    /**
+     * Name
+     */
+    name?: string | null;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Is Active
+     */
+    is_active?: boolean | null;
 };
 
 /**
@@ -3190,6 +3354,11 @@ export type VerifyEmailResponse = {
 };
 
 /**
+ * VolunteerStatus
+ */
+export type VolunteerStatus = 'active' | 'inactive' | 'suspended';
+
+/**
  * WorkerHealthEntrySchema
  */
 export type WorkerHealthEntrySchema = {
@@ -3221,6 +3390,50 @@ export type WorkerHealthEntrySchema = {
      * Queued
      */
     queued: number;
+};
+
+/**
+ * PaginationMeta
+ */
+export type AppControllerSchemasAuditLogSchemaPaginationMeta = {
+    /**
+     * Limit
+     */
+    limit: number;
+    /**
+     * Total Pages
+     */
+    total_pages: number;
+    /**
+     * Next Cursor
+     */
+    next_cursor: string | null;
+    /**
+     * Prev Cursor
+     */
+    prev_cursor: string | null;
+    /**
+     * Has Next
+     */
+    has_next: boolean;
+};
+
+/**
+ * PaginationMeta
+ */
+export type AppControllerSchemasEventVolunteerSchemaPaginationMeta = {
+    /**
+     * Total
+     */
+    total: number;
+    /**
+     * Limit
+     */
+    limit: number;
+    /**
+     * Offset
+     */
+    offset: number;
 };
 
 export type RegisterUserAuthRegisterPostData = {
@@ -6291,6 +6504,52 @@ export type UpdateEventSessionEventsEventIdSessionSessionIdPatchResponses = {
 
 export type UpdateEventSessionEventsEventIdSessionSessionIdPatchResponse = UpdateEventSessionEventsEventIdSessionSessionIdPatchResponses[keyof UpdateEventSessionEventsEventIdSessionSessionIdPatchResponses];
 
+export type CreateEventSessionEventsEventIdSessionPostData = {
+    body: EventSessionCreateRequest;
+    path: {
+        /**
+         * Event Id
+         */
+        event_id: string;
+    };
+    query?: never;
+    url: '/events/{event_id}/session';
+};
+
+export type CreateEventSessionEventsEventIdSessionPostErrors = {
+    /**
+     * Session date constraints violated
+     */
+    400: ErrorResponse;
+    /**
+     * Missing or invalid Bearer token
+     */
+    401: ErrorResponse;
+    /**
+     * Caller is not the event creator
+     */
+    403: ErrorResponse;
+    /**
+     * Session or venue not found
+     */
+    404: ErrorResponse;
+    /**
+     * Request body failed schema validation
+     */
+    422: ValidationErrorResponse;
+};
+
+export type CreateEventSessionEventsEventIdSessionPostError = CreateEventSessionEventsEventIdSessionPostErrors[keyof CreateEventSessionEventsEventIdSessionPostErrors];
+
+export type CreateEventSessionEventsEventIdSessionPostResponses = {
+    /**
+     * Successful Response
+     */
+    201: EventSessionCreatedResponse;
+};
+
+export type CreateEventSessionEventsEventIdSessionPostResponse = CreateEventSessionEventsEventIdSessionPostResponses[keyof CreateEventSessionEventsEventIdSessionPostResponses];
+
 export type UpdateEventStatusEventsEventIdStatusPatchData = {
     body: EventStatusUpdateRequest;
     path: {
@@ -6537,6 +6796,60 @@ export type UpdateParticipantStatusEventsEventIdSessionSessionIdParticipantsPart
 
 export type UpdateParticipantStatusEventsEventIdSessionSessionIdParticipantsParticipantIdPatchResponse = UpdateParticipantStatusEventsEventIdSessionSessionIdParticipantsParticipantIdPatchResponses[keyof UpdateParticipantStatusEventsEventIdSessionSessionIdParticipantsParticipantIdPatchResponses];
 
+export type GetAllVolunteersVolunteersGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Page
+         */
+        page?: number;
+        /**
+         * Page Size
+         */
+        page_size?: number;
+        /**
+         * Status
+         */
+        status?: VolunteerStatus | null;
+        /**
+         * Role Id
+         */
+        role_id?: string | null;
+    };
+    url: '/volunteers';
+};
+
+export type GetAllVolunteersVolunteersGetErrors = {
+    /**
+     * Missing or invalid Bearer token
+     */
+    401: ErrorResponse;
+    /**
+     * Insufficient permissions
+     */
+    403: ErrorResponse;
+    /**
+     * Request body failed schema validation
+     */
+    422: ValidationErrorResponse;
+};
+
+export type GetAllVolunteersVolunteersGetError = GetAllVolunteersVolunteersGetErrors[keyof GetAllVolunteersVolunteersGetErrors];
+
+export type GetAllVolunteersVolunteersGetResponses = {
+    /**
+     * Response Get All Volunteers Volunteers Get
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type GetAllVolunteersVolunteersGetResponse = GetAllVolunteersVolunteersGetResponses[keyof GetAllVolunteersVolunteersGetResponses];
+
 export type AddVolunteerVolunteersPostData = {
     body: AddVolunteerRequest;
     path?: never;
@@ -6582,6 +6895,160 @@ export type AddVolunteerVolunteersPostResponses = {
 
 export type AddVolunteerVolunteersPostResponse = AddVolunteerVolunteersPostResponses[keyof AddVolunteerVolunteersPostResponses];
 
+export type GetPotentialVolunteersVolunteersPotentialGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Page
+         */
+        page?: number;
+        /**
+         * Page Size
+         */
+        page_size?: number;
+        /**
+         * Min Events
+         */
+        min_events?: number;
+        /**
+         * Search
+         */
+        search?: string | null;
+    };
+    url: '/volunteers/potential';
+};
+
+export type GetPotentialVolunteersVolunteersPotentialGetErrors = {
+    /**
+     * Missing or invalid Bearer token
+     */
+    401: ErrorResponse;
+    /**
+     * Insufficient permissions
+     */
+    403: ErrorResponse;
+    /**
+     * Request body failed schema validation
+     */
+    422: ValidationErrorResponse;
+};
+
+export type GetPotentialVolunteersVolunteersPotentialGetError = GetPotentialVolunteersVolunteersPotentialGetErrors[keyof GetPotentialVolunteersVolunteersPotentialGetErrors];
+
+export type GetPotentialVolunteersVolunteersPotentialGetResponses = {
+    /**
+     * Response Get Potential Volunteers Volunteers Potential Get
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type GetPotentialVolunteersVolunteersPotentialGetResponse = GetPotentialVolunteersVolunteersPotentialGetResponses[keyof GetPotentialVolunteersVolunteersPotentialGetResponses];
+
+export type UpdateVolunteerInfoVolunteersVolunteerIdPatchData = {
+    body: UpdateVolunteerRequest;
+    path: {
+        /**
+         * Volunteer Id
+         */
+        volunteer_id: string;
+    };
+    query?: never;
+    url: '/volunteers/{volunteer_id}';
+};
+
+export type UpdateVolunteerInfoVolunteersVolunteerIdPatchErrors = {
+    /**
+     * Missing or invalid Bearer token
+     */
+    401: ErrorResponse;
+    /**
+     * Insufficient permissions
+     */
+    403: ErrorResponse;
+    /**
+     * Volunteer custom role not found
+     */
+    404: ErrorResponse;
+    /**
+     * Request body failed schema validation
+     */
+    422: ValidationErrorResponse;
+};
+
+export type UpdateVolunteerInfoVolunteersVolunteerIdPatchError = UpdateVolunteerInfoVolunteersVolunteerIdPatchErrors[keyof UpdateVolunteerInfoVolunteersVolunteerIdPatchErrors];
+
+export type UpdateVolunteerInfoVolunteersVolunteerIdPatchResponses = {
+    /**
+     * Response Update Volunteer Info Volunteers  Volunteer Id  Patch
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type UpdateVolunteerInfoVolunteersVolunteerIdPatchResponse = UpdateVolunteerInfoVolunteersVolunteerIdPatchResponses[keyof UpdateVolunteerInfoVolunteersVolunteerIdPatchResponses];
+
+export type GetAllVolunteerRolesVolunteerRolesGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Page
+         */
+        page?: number;
+        /**
+         * Page Size
+         */
+        page_size?: number;
+        /**
+         * Search
+         */
+        search?: string | null;
+        /**
+         * Is Active
+         */
+        is_active?: boolean | null;
+    };
+    url: '/volunteer-roles';
+};
+
+export type GetAllVolunteerRolesVolunteerRolesGetErrors = {
+    /**
+     * Missing or invalid Bearer token
+     */
+    401: ErrorResponse;
+    /**
+     * Insufficient permissions
+     */
+    403: ErrorResponse;
+    /**
+     * Request body failed schema validation
+     */
+    422: ValidationErrorResponse;
+};
+
+export type GetAllVolunteerRolesVolunteerRolesGetError = GetAllVolunteerRolesVolunteerRolesGetErrors[keyof GetAllVolunteerRolesVolunteerRolesGetErrors];
+
+export type GetAllVolunteerRolesVolunteerRolesGetResponses = {
+    /**
+     * Response Get All Volunteer Roles Volunteer Roles Get
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type GetAllVolunteerRolesVolunteerRolesGetResponse = GetAllVolunteerRolesVolunteerRolesGetResponses[keyof GetAllVolunteerRolesVolunteerRolesGetResponses];
+
 export type CreateVolunteerRoleVolunteerRolesPostData = {
     body: CreateVolunteerRoleRequest;
     path?: never;
@@ -6622,6 +7089,102 @@ export type CreateVolunteerRoleVolunteerRolesPostResponses = {
 };
 
 export type CreateVolunteerRoleVolunteerRolesPostResponse = CreateVolunteerRoleVolunteerRolesPostResponses[keyof CreateVolunteerRoleVolunteerRolesPostResponses];
+
+export type DeleteVolunteerRoleVolunteerRolesRoleIdDeleteData = {
+    body?: never;
+    path: {
+        /**
+         * Role Id
+         */
+        role_id: string;
+    };
+    query?: never;
+    url: '/volunteer-roles/{role_id}';
+};
+
+export type DeleteVolunteerRoleVolunteerRolesRoleIdDeleteErrors = {
+    /**
+     * Missing or invalid Bearer token
+     */
+    401: ErrorResponse;
+    /**
+     * Insufficient permissions
+     */
+    403: ErrorResponse;
+    /**
+     * Volunteer custom role not found
+     */
+    404: ErrorResponse;
+    /**
+     * Request body failed schema validation
+     */
+    422: ValidationErrorResponse;
+};
+
+export type DeleteVolunteerRoleVolunteerRolesRoleIdDeleteError = DeleteVolunteerRoleVolunteerRolesRoleIdDeleteErrors[keyof DeleteVolunteerRoleVolunteerRolesRoleIdDeleteErrors];
+
+export type DeleteVolunteerRoleVolunteerRolesRoleIdDeleteResponses = {
+    /**
+     * Response Delete Volunteer Role Volunteer Roles  Role Id  Delete
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type DeleteVolunteerRoleVolunteerRolesRoleIdDeleteResponse = DeleteVolunteerRoleVolunteerRolesRoleIdDeleteResponses[keyof DeleteVolunteerRoleVolunteerRolesRoleIdDeleteResponses];
+
+export type UpdateVolunteerRoleVolunteerRolesRoleIdPatchData = {
+    body: UpdateVolunteerRoleRequest;
+    path: {
+        /**
+         * Role Id
+         */
+        role_id: string;
+    };
+    query?: never;
+    url: '/volunteer-roles/{role_id}';
+};
+
+export type UpdateVolunteerRoleVolunteerRolesRoleIdPatchErrors = {
+    /**
+     * Missing or invalid Bearer token
+     */
+    401: ErrorResponse;
+    /**
+     * Insufficient permissions
+     */
+    403: ErrorResponse;
+    /**
+     * Volunteer custom role not found
+     */
+    404: ErrorResponse;
+    /**
+     * Volunteer role with that name already exists
+     */
+    409: ErrorResponse;
+    /**
+     * Request body failed schema validation
+     */
+    422: ValidationErrorResponse;
+};
+
+export type UpdateVolunteerRoleVolunteerRolesRoleIdPatchError = UpdateVolunteerRoleVolunteerRolesRoleIdPatchErrors[keyof UpdateVolunteerRoleVolunteerRolesRoleIdPatchErrors];
+
+export type UpdateVolunteerRoleVolunteerRolesRoleIdPatchResponses = {
+    /**
+     * Response Update Volunteer Role Volunteer Roles  Role Id  Patch
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type UpdateVolunteerRoleVolunteerRolesRoleIdPatchResponse = UpdateVolunteerRoleVolunteerRolesRoleIdPatchResponses[keyof UpdateVolunteerRoleVolunteerRolesRoleIdPatchResponses];
 
 export type SubmitApplicationVolunteerApplicationsPostData = {
     body: SubmitApplicationRequest;
@@ -6755,6 +7318,246 @@ export type WithdrawApplicationVolunteerApplicationsApplicationIdDeleteResponses
 };
 
 export type WithdrawApplicationVolunteerApplicationsApplicationIdDeleteResponse = WithdrawApplicationVolunteerApplicationsApplicationIdDeleteResponses[keyof WithdrawApplicationVolunteerApplicationsApplicationIdDeleteResponses];
+
+export type ListEventVolunteersEventsEventIdVolunteersGetData = {
+    body?: never;
+    path: {
+        /**
+         * Event Id
+         */
+        event_id: string;
+    };
+    query?: {
+        /**
+         * Status
+         */
+        status?: EventVolunteerStatus | null;
+    };
+    url: '/events/{event_id}/volunteers';
+};
+
+export type ListEventVolunteersEventsEventIdVolunteersGetErrors = {
+    /**
+     * Missing or invalid Bearer token
+     */
+    401: ErrorResponse;
+    /**
+     * Caller is not the event organizer
+     */
+    403: ErrorResponse;
+    /**
+     * Event not found
+     */
+    404: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListEventVolunteersEventsEventIdVolunteersGetError = ListEventVolunteersEventsEventIdVolunteersGetErrors[keyof ListEventVolunteersEventsEventIdVolunteersGetErrors];
+
+export type ListEventVolunteersEventsEventIdVolunteersGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: EventVolunteerListResponse;
+};
+
+export type ListEventVolunteersEventsEventIdVolunteersGetResponse = ListEventVolunteersEventsEventIdVolunteersGetResponses[keyof ListEventVolunteersEventsEventIdVolunteersGetResponses];
+
+export type AssignVolunteerEventsEventIdVolunteersPostData = {
+    body: AssignVolunteerRequest;
+    path: {
+        /**
+         * Event Id
+         */
+        event_id: string;
+    };
+    query?: never;
+    url: '/events/{event_id}/volunteers';
+};
+
+export type AssignVolunteerEventsEventIdVolunteersPostErrors = {
+    /**
+     * Missing or invalid Bearer token
+     */
+    401: ErrorResponse;
+    /**
+     * Caller is not the event organizer
+     */
+    403: ErrorResponse;
+    /**
+     * Volunteer not found
+     */
+    404: ErrorResponse;
+    /**
+     * Volunteer is already assigned to this event
+     */
+    409: ErrorResponse;
+    /**
+     * Request body failed schema validation
+     */
+    422: ValidationErrorResponse;
+};
+
+export type AssignVolunteerEventsEventIdVolunteersPostError = AssignVolunteerEventsEventIdVolunteersPostErrors[keyof AssignVolunteerEventsEventIdVolunteersPostErrors];
+
+export type AssignVolunteerEventsEventIdVolunteersPostResponses = {
+    /**
+     * Successful Response
+     */
+    201: EventVolunteerResponse;
+};
+
+export type AssignVolunteerEventsEventIdVolunteersPostResponse = AssignVolunteerEventsEventIdVolunteersPostResponses[keyof AssignVolunteerEventsEventIdVolunteersPostResponses];
+
+export type RemoveEventVolunteerEventsEventIdVolunteersEventVolunteerIdDeleteData = {
+    body?: never;
+    path: {
+        /**
+         * Event Id
+         */
+        event_id: string;
+        /**
+         * Event Volunteer Id
+         */
+        event_volunteer_id: string;
+    };
+    query?: never;
+    url: '/events/{event_id}/volunteers/{event_volunteer_id}';
+};
+
+export type RemoveEventVolunteerEventsEventIdVolunteersEventVolunteerIdDeleteErrors = {
+    /**
+     * Missing or invalid Bearer token
+     */
+    401: ErrorResponse;
+    /**
+     * Caller is not the event organizer
+     */
+    403: ErrorResponse;
+    /**
+     * Event not found
+     */
+    404: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type RemoveEventVolunteerEventsEventIdVolunteersEventVolunteerIdDeleteError = RemoveEventVolunteerEventsEventIdVolunteersEventVolunteerIdDeleteErrors[keyof RemoveEventVolunteerEventsEventIdVolunteersEventVolunteerIdDeleteErrors];
+
+export type RemoveEventVolunteerEventsEventIdVolunteersEventVolunteerIdDeleteResponses = {
+    /**
+     * Successful Response
+     */
+    200: EventVolunteerResponse;
+};
+
+export type RemoveEventVolunteerEventsEventIdVolunteersEventVolunteerIdDeleteResponse = RemoveEventVolunteerEventsEventIdVolunteersEventVolunteerIdDeleteResponses[keyof RemoveEventVolunteerEventsEventIdVolunteersEventVolunteerIdDeleteResponses];
+
+export type UpdateEventVolunteerStatusEventsEventIdVolunteersEventVolunteerIdPatchData = {
+    body: UpdateEventVolunteerStatusRequest;
+    path: {
+        /**
+         * Event Id
+         */
+        event_id: string;
+        /**
+         * Event Volunteer Id
+         */
+        event_volunteer_id: string;
+    };
+    query?: never;
+    url: '/events/{event_id}/volunteers/{event_volunteer_id}';
+};
+
+export type UpdateEventVolunteerStatusEventsEventIdVolunteersEventVolunteerIdPatchErrors = {
+    /**
+     * Missing or invalid Bearer token
+     */
+    401: ErrorResponse;
+    /**
+     * Caller is not the event organizer
+     */
+    403: ErrorResponse;
+    /**
+     * Event not found
+     */
+    404: ErrorResponse;
+    /**
+     * Request body failed schema validation
+     */
+    422: ValidationErrorResponse;
+};
+
+export type UpdateEventVolunteerStatusEventsEventIdVolunteersEventVolunteerIdPatchError = UpdateEventVolunteerStatusEventsEventIdVolunteersEventVolunteerIdPatchErrors[keyof UpdateEventVolunteerStatusEventsEventIdVolunteersEventVolunteerIdPatchErrors];
+
+export type UpdateEventVolunteerStatusEventsEventIdVolunteersEventVolunteerIdPatchResponses = {
+    /**
+     * Successful Response
+     */
+    200: EventVolunteerResponse;
+};
+
+export type UpdateEventVolunteerStatusEventsEventIdVolunteersEventVolunteerIdPatchResponse = UpdateEventVolunteerStatusEventsEventIdVolunteersEventVolunteerIdPatchResponses[keyof UpdateEventVolunteerStatusEventsEventIdVolunteersEventVolunteerIdPatchResponses];
+
+export type GetEventParticipantsEventsEventIdParticipantsGetData = {
+    body?: never;
+    path: {
+        /**
+         * Event Id
+         */
+        event_id: string;
+    };
+    query?: {
+        /**
+         * Status
+         */
+        status?: string | null;
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Offset
+         */
+        offset?: number;
+    };
+    url: '/events/{event_id}/participants';
+};
+
+export type GetEventParticipantsEventsEventIdParticipantsGetErrors = {
+    /**
+     * Missing or invalid Bearer token
+     */
+    401: ErrorResponse;
+    /**
+     * Caller is neither the event organizer nor a joined volunteer
+     */
+    403: ErrorResponse;
+    /**
+     * Event not found
+     */
+    404: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetEventParticipantsEventsEventIdParticipantsGetError = GetEventParticipantsEventsEventIdParticipantsGetErrors[keyof GetEventParticipantsEventsEventIdParticipantsGetErrors];
+
+export type GetEventParticipantsEventsEventIdParticipantsGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: EventParticipantsResponse;
+};
+
+export type GetEventParticipantsEventsEventIdParticipantsGetResponse = GetEventParticipantsEventsEventIdParticipantsGetResponses[keyof GetEventParticipantsEventsEventIdParticipantsGetResponses];
 
 export type RootGetData = {
     body?: never;

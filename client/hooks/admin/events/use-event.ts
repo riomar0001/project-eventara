@@ -10,6 +10,11 @@ export function useEvent(eventId: string) {
   const [sessions, setSessions] = useState<EventSessionRecordResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
+
+  function refetch() {
+    setReloadKey((value) => value + 1);
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -40,7 +45,7 @@ export function useEvent(eventId: string) {
     return () => {
       cancelled = true;
     };
-  }, [eventId]);
+  }, [eventId, reloadKey]);
 
-  return { event, sessions, isLoading, error };
+  return { event, sessions, isLoading, error, refetch };
 }

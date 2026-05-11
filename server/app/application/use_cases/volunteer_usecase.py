@@ -1,16 +1,31 @@
 """Use cases for volunteer registration, dynamic volunteer role management, and volunteer applications."""
 
+import math
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application.dto.volunteer_dto import (
+    _UNSET,
     AddVolunteerInput,
     AddVolunteerOutput,
     CreateVolunteerRoleInput,
     CreateVolunteerRoleOutput,
+    DeleteVolunteerRoleInput,
+    DeleteVolunteerRoleOutput,
+    GetAllVolunteerRolesInput,
+    GetAllVolunteerRolesOutput,
+    GetAllVolunteersInput,
+    GetAllVolunteersOutput,
+    GetPotentialVolunteersInput,
+    GetPotentialVolunteersOutput,
     ReviewApplicationInput,
     ReviewApplicationOutput,
     SubmitApplicationInput,
     SubmitApplicationOutput,
+    UpdateVolunteerInfoInput,
+    UpdateVolunteerInfoOutput,
+    UpdateVolunteerRoleInput,
+    UpdateVolunteerRoleOutput,
     WithdrawApplicationInput,
     WithdrawApplicationOutput,
 )
@@ -24,7 +39,7 @@ from app.domain.exceptions.volunteer_application_exceptions import (
     VolunteerApplicationAlreadyExistsError,
     VolunteerApplicationNotFoundError,
 )
-from app.domain.exceptions.volunteer_exceptions import VolunteerAlreadyExistsError
+from app.domain.exceptions.volunteer_exceptions import VolunteerAlreadyExistsError, VolunteerNotFoundError
 from app.domain.exceptions.volunteer_role_exceptions import (
     VolunteerRoleAlreadyExistsError,
     VolunteerRoleInactiveError,
@@ -43,6 +58,79 @@ _ALLOWED_APPLICATION_TRANSITIONS: dict[ApplicationStatus, frozenset[ApplicationS
         }
     ),
 }
+
+
+class GetVolunteerUseCase:
+    """Read-only application service for listing volunteers with optional filters.
+
+    Concurrency strategy — no locking:
+        This use case performs a pure read (SELECT with optional WHERE clauses and
+        OFFSET/LIMIT pagination).  There is no check-then-modify sequence, so no
+        TOCTOU race is possible and no pessimistic or optimistic lock is needed.
+        Reads execute at the database's default READ COMMITTED isolation level,
+        which guarantees each row is returned in a fully committed state.
+
+    Args:
+        repo: Concrete implementation of ``IVolunteerRepository``.
+    """
+
+    def __init__(self, repo: IVolunteerRepository) -> None:
+        self.repo = repo
+
+    async def get_all_volunteers(self, data: GetAllVolunteersInput) -> GetAllVolunteersOutput:
+        """Return a paginated, optionally filtered list of volunteers.
+
+        Args:
+            data: ``GetAllVolunteersInput`` with pagination parameters and optional
+                  status and volunteer-role-id filters.
+
+        Returns:
+            ``GetAllVolunteersOutput`` containing the matching volunteer slice,
+            the total record count, and computed pagination metadata.
+        """
+        volunteers, total = await self.repo.get_all_volunteers(
+            status=data.status,
+            role_id=data.role_id,
+            page=data.page,
+            page_size=data.page_size,
+        )
+        total_pages = max(1, math.ceil(total / data.page_size))
+        return GetAllVolunteersOutput(
+            volunteers=volunteers,
+            total=total,
+            page=data.page,
+            page_size=data.page_size,
+            total_pages=total_pages,
+        )
+
+    async def get_potential_volunteers(self, data: GetPotentialVolunteersInput) -> GetPotentialVolunteersOutput:
+        """Return a paginated list of users ranked by event participation who are not yet volunteers.
+
+        Users are ordered by descending event count so the most engaged participants
+        appear first, making them the highest-priority candidates for outreach.
+
+        Args:
+            data: ``GetPotentialVolunteersInput`` with pagination parameters, a
+                  minimum-event-count threshold, and an optional search string.
+
+        Returns:
+            ``GetPotentialVolunteersOutput`` containing the matching user slice,
+            the total record count, and computed pagination metadata.
+        """
+        potential_volunteers, total = await self.repo.get_potential_volunteers(
+            page=data.page,
+            page_size=data.page_size,
+            min_events=data.min_events,
+            search=data.search,
+        )
+        total_pages = max(1, math.ceil(total / data.page_size))
+        return GetPotentialVolunteersOutput(
+            potential_volunteers=potential_volunteers,
+            total=total,
+            page=data.page,
+            page_size=data.page_size,
+            total_pages=total_pages,
+        )
 
 
 class VolunteerUseCase:
@@ -194,6 +282,147 @@ class VolunteerUseCase:
             )
         except RoleAlreadyAssignedError:
             return
+
+
+class VolunteerRoleUseCase:
+    """Application service for listing, updating, and deleting volunteer custom roles.
+
+    Owns the transaction lifecycle for every mutating operation: commits on
+    success, rolls back on any validation or infrastructure failure, then
+    re-raises the exception.
+
+    Concurrency strategy — pessimistic locking (SELECT … FOR UPDATE):
+        ``update_volunteer_role`` acquires a row-level lock on the target role
+        before the name-uniqueness check and the attribute update.  This
+        serialises concurrent updates to the same record and prevents two
+        callers from simultaneously renaming a role to the same name while both
+        pass the application-layer uniqueness check.
+
+        ``delete_volunteer_role`` acquires a row-level lock on the role row,
+        then locks and bulk-deletes all volunteer rows assigned to that role
+        within the same transaction.  This prevents a concurrent volunteer
+        assignment from targeting the role after the existence check and before
+        the delete.
+
+    Args:
+        repo: Concrete implementation of ``IVolunteerRepository``.
+        db:   The active async database session used for commit and rollback.
+    """
+
+    def __init__(self, repo: IVolunteerRepository, db: AsyncSession) -> None:
+        self.repo = repo
+        self.db = db
+
+    async def get_all_volunteer_roles(self, data: GetAllVolunteerRolesInput) -> GetAllVolunteerRolesOutput:
+        """Return a paginated, optionally filtered list of volunteer custom roles.
+
+        Args:
+            data: ``GetAllVolunteerRolesInput`` with pagination parameters and
+                  optional search string and active-status filter.
+
+        Returns:
+            ``GetAllVolunteerRolesOutput`` containing the matching roles slice,
+            the total record count, and computed pagination metadata.
+        """
+        roles, total = await self.repo.get_all_volunteer_roles(
+            search=data.search,
+            is_active=data.is_active,
+            page=data.page,
+            page_size=data.page_size,
+        )
+        total_pages = max(1, math.ceil(total / data.page_size))
+        return GetAllVolunteerRolesOutput(
+            roles=roles,
+            total=total,
+            page=data.page,
+            page_size=data.page_size,
+            total_pages=total_pages,
+        )
+
+    async def update_volunteer_role(self, data: UpdateVolunteerRoleInput) -> UpdateVolunteerRoleOutput:
+        """Update attributes of an existing volunteer custom role.
+
+        Only the fields explicitly provided in ``data`` are changed.  A name
+        change triggers a case-insensitive uniqueness check against all other
+        existing roles before the update is applied.  A row-level lock is held
+        from the initial fetch through the commit to prevent concurrent edits
+        from producing an inconsistent state.
+
+        Args:
+            data: ``UpdateVolunteerRoleInput`` with the role ID and any subset
+                  of ``name``, ``description``, and ``is_active`` to change.
+
+        Returns:
+            ``UpdateVolunteerRoleOutput`` wrapping the updated ``VolunteerRole``
+            entity.
+
+        Raises:
+            VolunteerRoleNotFoundError: No role exists for ``data.role_id``.
+            VolunteerRoleAlreadyExistsError: The requested new name is already
+                taken by another role (case-insensitive).
+        """
+        role = await self.repo.get_volunteer_role_by_id(data.role_id, for_update=True)
+        if not role:
+            raise VolunteerRoleNotFoundError(str(data.role_id))
+
+        if data.name is not None and data.name.lower() != role.name.lower():
+            existing = await self.repo.get_volunteer_role_by_name(data.name)
+            if existing:
+                raise VolunteerRoleAlreadyExistsError(data.name)
+
+        description = data.description if data.description is not _UNSET else _UNSET
+
+        try:
+            updated = await self.repo.update_volunteer_role(
+                role_id=data.role_id,
+                name=data.name,
+                description=description,
+                is_active=data.is_active,
+            )
+            if updated is None:
+                raise VolunteerRoleNotFoundError(str(data.role_id))
+        except VolunteerRoleNotFoundError:
+            await self.db.rollback()
+            raise
+        except Exception:
+            await self.db.rollback()
+            raise
+
+        await self.db.commit()
+        return UpdateVolunteerRoleOutput(role=updated)
+
+    async def delete_volunteer_role(self, data: DeleteVolunteerRoleInput) -> DeleteVolunteerRoleOutput:
+        """Delete a volunteer custom role and remove all volunteers assigned to it.
+
+        The operation is atomic: all associated volunteer records are deleted
+        within the same transaction as the role itself.  A row-level lock on
+        the role prevents a concurrent assignment from succeeding after the
+        existence check.
+
+        Args:
+            data: ``DeleteVolunteerRoleInput`` with the role ID and the actor's
+                  user ID for audit purposes.
+
+        Returns:
+            ``DeleteVolunteerRoleOutput`` with the deleted role's ID and the
+            count of volunteer records that were removed as a side effect.
+
+        Raises:
+            VolunteerRoleNotFoundError: No role exists for ``data.role_id``.
+        """
+        role = await self.repo.get_volunteer_role_by_id(data.role_id, for_update=True)
+        if not role:
+            raise VolunteerRoleNotFoundError(str(data.role_id))
+
+        try:
+            volunteers_removed = await self.repo.delete_volunteers_by_role_id(data.role_id)
+            await self.repo.delete_volunteer_role_by_id(data.role_id)
+        except Exception:
+            await self.db.rollback()
+            raise
+
+        await self.db.commit()
+        return DeleteVolunteerRoleOutput(role_id=data.role_id, volunteers_removed=volunteers_removed)
 
 
 class VolunteerApplicationUseCase:
@@ -442,3 +671,85 @@ class VolunteerApplicationUseCase:
             )
         except RoleAlreadyAssignedError:
             return
+
+
+class UpdateVolunteerInfoUseCase:
+    """Application service for updating an existing volunteer's contact and role information.
+
+    Owns the transaction lifecycle: commits on success, rolls back on any
+    validation or infrastructure failure, then re-raises the exception.
+
+    Concurrency strategy — pessimistic locking (SELECT … FOR UPDATE):
+        ``update_volunteer_info`` acquires a row-level lock on the target
+        volunteer row before applying changes.  This serialises concurrent
+        update requests for the same volunteer and prevents two callers from
+        reading the same state and then both attempting to persist conflicting
+        modifications.
+
+    Args:
+        repo: Concrete implementation of ``IVolunteerRepository``.
+        db:   The active async database session used for commit and rollback.
+    """
+
+    def __init__(self, repo: IVolunteerRepository, db: AsyncSession) -> None:
+        self.repo = repo
+        self.db = db
+
+    async def update_volunteer_info(self, data: UpdateVolunteerInfoInput) -> UpdateVolunteerInfoOutput:
+        """Update contact phone, volunteer role assignment, and/or status of a volunteer.
+
+        Only the fields explicitly provided (non-None) in ``data`` are changed.
+        When a new ``volunteer_role_id`` is specified the referenced role must
+        exist and be active.  A row-level lock is held from the initial fetch
+        through the commit to prevent concurrent updates from producing an
+        inconsistent state.
+
+        Args:
+            data: ``UpdateVolunteerInfoInput`` with the volunteer ID, the actor's
+                  user ID, and any subset of ``contact_phone``, ``volunteer_role_id``,
+                  and ``status`` to change.
+
+        Returns:
+            ``UpdateVolunteerInfoOutput`` containing the updated ``Volunteer``
+            entity and a snapshot of the state before the change.
+
+        Raises:
+            VolunteerNotFoundError: No volunteer record exists for ``data.volunteer_id``.
+            VolunteerRoleNotFoundError: The referenced new volunteer role does not exist.
+            VolunteerRoleInactiveError: The referenced new volunteer role is inactive.
+        """
+        volunteer = await self.repo.get_volunteer_by_id(data.volunteer_id, for_update=True)
+        if not volunteer:
+            raise VolunteerNotFoundError(str(data.volunteer_id))
+
+        old_values = {
+            "contact_phone": volunteer.contact_phone,
+            "volunteer_role_id": str(volunteer.volunteer_role_id),
+            "status": volunteer.status.value if hasattr(volunteer.status, "value") else volunteer.status,
+        }
+
+        if data.volunteer_role_id is not None:
+            role = await self.repo.get_volunteer_role_by_id(data.volunteer_role_id)
+            if not role:
+                raise VolunteerRoleNotFoundError(str(data.volunteer_role_id))
+            if not role.is_active:
+                raise VolunteerRoleInactiveError(str(data.volunteer_role_id))
+
+        try:
+            updated = await self.repo.update_volunteer(
+                volunteer_id=data.volunteer_id,
+                contact_phone=data.contact_phone,
+                volunteer_role_id=data.volunteer_role_id,
+                status=data.status,
+            )
+            if updated is None:
+                raise VolunteerNotFoundError(str(data.volunteer_id))
+        except VolunteerNotFoundError, VolunteerRoleNotFoundError, VolunteerRoleInactiveError:
+            await self.db.rollback()
+            raise
+        except Exception:
+            await self.db.rollback()
+            raise
+
+        await self.db.commit()
+        return UpdateVolunteerInfoOutput(volunteer=updated, old_values=old_values)

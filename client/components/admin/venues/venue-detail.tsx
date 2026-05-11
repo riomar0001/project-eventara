@@ -33,7 +33,7 @@ function CompactField({ className, icon, label, value }: { className?: string; i
       <span className="mt-0.5 shrink-0 text-neutral-400">{icon}</span>
       <div className="min-w-0">
         <p className="text-[10px] font-semibold tracking-[0.14em] text-neutral-400 uppercase">{label}</p>
-        <p className="mt-0.5 text-sm leading-5 font-medium break-words text-neutral-900">{value}</p>
+        <p className="mt-0.5 text-sm leading-5 font-medium wrap-break-word text-neutral-900">{value}</p>
       </div>
     </div>
   );
@@ -79,6 +79,7 @@ export function VenueDetail({ venueId }: { venueId: string }) {
   const photo = resolveStorageImageUrl(venue.image_url) || VENUE_PHOTO[venue.venue_type] || VENUE_PHOTO.indoor;
   const fullAddress = [venue.address_line, venue.city, venue.province, venue.postal_code, venue.region, venue.country].filter(Boolean).join(', ');
   const hasContact = venue.contact_name || venue.contact_email || venue.contact_phone;
+  const amenities = venue.amenities ?? [];
 
   return (
     <div className="space-y-6">
@@ -167,21 +168,7 @@ export function VenueDetail({ venueId }: { venueId: string }) {
           </CompactPanel>
         )}
 
-        <CompactPanel title="Amenities" className="xl:col-span-4">
-          {venue.amenities && venue.amenities.length > 0 ? (
-            <div className="flex flex-wrap gap-1.5">
-              {venue.amenities.map((amenity) => (
-                <Badge key={amenity} variant="secondary" className="h-6 rounded-full bg-neutral-100 px-2.5 text-[11px] font-medium text-neutral-700">
-                  {amenity}
-                </Badge>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-neutral-400">No amenities listed for this venue.</p>
-          )}
-        </CompactPanel>
-
-        <CompactPanel title="Venue metadata" className="xl:col-span-8">
+        <CompactPanel title="Venue details" className="xl:col-span-12">
           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
             <CompactField icon={<Users className="size-4" />} label="Capacity" value={`${venue.capacity.toLocaleString()} guests`} />
             <CompactField
@@ -210,6 +197,24 @@ export function VenueDetail({ venueId }: { venueId: string }) {
                 label="Last updated"
                 value={new Date(venue.updated_at).toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' })}
               />
+            )}
+          </div>
+
+          <div className="mt-4 border-t border-neutral-100 pt-4">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="text-[10px] font-semibold tracking-[0.16em] text-neutral-400 uppercase">Amenities</p>
+              {amenities.length > 0 && <p className="text-xs text-neutral-400">{amenities.length} listed</p>}
+            </div>
+            {amenities.length > 0 ? (
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                {amenities.map((amenity) => (
+                  <Badge key={amenity} variant="secondary" className="h-6 rounded-full bg-neutral-100 px-2.5 text-[11px] font-medium text-neutral-700">
+                    {amenity}
+                  </Badge>
+                ))}
+              </div>
+            ) : (
+              <p className="mt-3 text-sm text-neutral-400">No amenities listed for this venue.</p>
             )}
           </div>
         </CompactPanel>

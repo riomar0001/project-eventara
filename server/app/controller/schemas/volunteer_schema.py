@@ -2,7 +2,7 @@ import uuid
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
-from app.domain.entities.volunteer_entity import ApplicationStatus
+from app.domain.entities.volunteer_entity import ApplicationStatus, VolunteerStatus
 
 
 class AddVolunteerRequest(BaseModel):
@@ -47,6 +47,33 @@ class ReviewApplicationRequest(BaseModel):
         if self.status == ApplicationStatus.APPROVED and (not self.contact_phone or not self.volunteer_role_id):
             raise ValueError("contact_phone and volunteer_role_id are required when approving an application")
         return self
+
+    @field_validator("contact_phone")
+    @classmethod
+    def strip_contact_phone(cls, v: str | None) -> str | None:
+        return v.strip() if v else v
+
+
+class UpdateVolunteerRoleRequest(BaseModel):
+    name: str | None = Field(default=None, min_length=2, max_length=100)
+    description: str | None = Field(default=None, max_length=500)
+    is_active: bool | None = None
+
+    @field_validator("name")
+    @classmethod
+    def strip_name(cls, v: str | None) -> str | None:
+        return v.strip() if v else v
+
+    @field_validator("description")
+    @classmethod
+    def strip_description(cls, v: str | None) -> str | None:
+        return v.strip() if v else v
+
+
+class UpdateVolunteerRequest(BaseModel):
+    contact_phone: str | None = Field(default=None, min_length=7, max_length=20)
+    volunteer_role_id: uuid.UUID | None = None
+    status: VolunteerStatus | None = None
 
     @field_validator("contact_phone")
     @classmethod

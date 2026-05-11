@@ -7,10 +7,12 @@ export const ADMIN_OPERATIONS_PATHS = {
   eventCreate: '/admin/events/new',
   eventDetail: (eventId: string) => `/admin/events/${eventId}`,
   eventEdit: (eventId: string) => `/admin/events/${eventId}/edit`,
-  volunteers: '/admin/volunteers',
+  volunteers: '/admin/volunteers/roster',
   volunteerCreate: '/admin/volunteers/new',
   volunteerDetail: (volunteerId: string) => `/admin/volunteers/${volunteerId}`,
   volunteerEdit: (volunteerId: string) => `/admin/volunteers/${volunteerId}/edit`,
+  volunteerPotentialVolunteers: '/admin/volunteers/potential-volunteers',
+  volunteerRoles: '/admin/volunteers/roles',
   queues: '/admin/queues'
 } as const;
 

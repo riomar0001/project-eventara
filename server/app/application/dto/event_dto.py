@@ -27,6 +27,23 @@ class CreateEventInput:
 
 
 @dataclass
+class CreateEventSessionForEventInput:
+    event_id: uuid.UUID
+    updated_by: uuid.UUID
+    venue_id: uuid.UUID
+    title: str
+    description: str | None
+    start_datetime: datetime
+    end_datetime: datetime
+    max_slots: int | None = None
+
+
+@dataclass
+class CreateEventSessionOutput:
+    session: EventSession
+
+
+@dataclass
 class EventWithSessionsOutput:
     event: Event
     sessions: list[EventSession]
