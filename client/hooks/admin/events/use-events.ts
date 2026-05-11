@@ -25,10 +25,10 @@ export function useEvents(pageSize = 20) {
           query: {
             page,
             page_size: pageSize,
-            ...(statusFilter !== null ? { status: statusFilter } : {}),
+            ...(statusFilter !== null ? { status: statusFilter } : {})
           },
           headers: getAuthHeaders(),
-          throwOnError: false,
+          throwOnError: false
         });
 
         if (!result.data) throw result.error ?? new Error('Unable to load events.');
@@ -66,6 +66,6 @@ export function useEvents(pageSize = 20) {
     isLoading,
     error,
     setPage,
-    setStatusFilter,
+    setStatusFilter
   };
 }

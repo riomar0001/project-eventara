@@ -35,11 +35,13 @@ from app.infrastructure.database.repositories.role_repository import RoleReposit
 _VOLUNTEER_RBAC_ROLE_NAME = "volunteer"
 
 _ALLOWED_APPLICATION_TRANSITIONS: dict[ApplicationStatus, frozenset[ApplicationStatus]] = {
-    ApplicationStatus.PENDING: frozenset({
-        ApplicationStatus.APPROVED,
-        ApplicationStatus.REJECTED,
-        ApplicationStatus.WITHDRAWN,
-    }),
+    ApplicationStatus.PENDING: frozenset(
+        {
+            ApplicationStatus.APPROVED,
+            ApplicationStatus.REJECTED,
+            ApplicationStatus.WITHDRAWN,
+        }
+    ),
 }
 
 
@@ -125,7 +127,7 @@ class VolunteerUseCase:
 
             await self._assign_rbac_volunteer_role(data.target_user_id, data.actor_id)
 
-        except (VolunteerAlreadyExistsError, UserNotFoundError, VolunteerRoleNotFoundError, VolunteerRoleInactiveError):
+        except VolunteerAlreadyExistsError, UserNotFoundError, VolunteerRoleNotFoundError, VolunteerRoleInactiveError:
             await self.db.rollback()
             raise
         except Exception:
@@ -260,9 +262,7 @@ class VolunteerApplicationUseCase:
             raise VolunteerAlreadyExistsError(str(data.user_id))
 
         try:
-            active_application = await self.repo.get_active_application_by_user_id(
-                data.user_id, for_update=True
-            )
+            active_application = await self.repo.get_active_application_by_user_id(data.user_id, for_update=True)
             if active_application:
                 raise VolunteerApplicationAlreadyExistsError(str(data.user_id))
 
@@ -270,7 +270,7 @@ class VolunteerApplicationUseCase:
                 user_id=data.user_id,
                 application_data=data.application_data,
             )
-        except (VolunteerApplicationAlreadyExistsError, UserNotFoundError, VolunteerAlreadyExistsError):
+        except VolunteerApplicationAlreadyExistsError, UserNotFoundError, VolunteerAlreadyExistsError:
             await self.db.rollback()
             raise
         except Exception:
@@ -329,9 +329,7 @@ class VolunteerApplicationUseCase:
 
         volunteer = None
         try:
-            updated_application = await self.repo.update_application_status(
-                data.application_id, data.new_status
-            )
+            updated_application = await self.repo.update_application_status(data.application_id, data.new_status)
             if updated_application is None:
                 raise VolunteerApplicationNotFoundError(str(data.application_id))
 
@@ -342,9 +340,7 @@ class VolunteerApplicationUseCase:
                 if not volunteer_role.is_active:
                     raise VolunteerRoleInactiveError(str(data.volunteer_role_id))
 
-                existing_volunteer = await self.repo.get_volunteer_by_user_id(
-                    application.user_id, for_update=True
-                )
+                existing_volunteer = await self.repo.get_volunteer_by_user_id(application.user_id, for_update=True)
                 if existing_volunteer:
                     raise VolunteerAlreadyExistsError(str(application.user_id))
 
@@ -409,12 +405,10 @@ class VolunteerApplicationUseCase:
             )
 
         try:
-            updated_application = await self.repo.update_application_status(
-                data.application_id, ApplicationStatus.WITHDRAWN
-            )
+            updated_application = await self.repo.update_application_status(data.application_id, ApplicationStatus.WITHDRAWN)
             if updated_application is None:
                 raise VolunteerApplicationNotFoundError(str(data.application_id))
-        except (VolunteerApplicationNotFoundError, UnauthorizedApplicationOperationError, InvalidApplicationStatusTransitionError):
+        except VolunteerApplicationNotFoundError, UnauthorizedApplicationOperationError, InvalidApplicationStatusTransitionError:
             await self.db.rollback()
             raise
         except Exception:

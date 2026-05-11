@@ -2,7 +2,6 @@ from fastapi import Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application.use_cases.account_settings_usecase import AccountSettingsUseCase
-from app.application.use_cases.volunteer_usecase import VolunteerApplicationUseCase, VolunteerUseCase
 from app.application.use_cases.audit_log_usecase import AuditLogUseCase
 from app.application.use_cases.auth_usecase import AuthUseCase
 from app.application.use_cases.event_deletion_usecase import EventDeletionUseCase
@@ -11,25 +10,32 @@ from app.application.use_cases.event_query_usecase import GetEventUseCase
 from app.application.use_cases.event_status_usecase import EventStatusUseCase
 from app.application.use_cases.event_usecase import EventUseCase
 from app.application.use_cases.feature_usecase import FeatureManagementUseCase
-from app.application.use_cases.profile_usecase import CheckAliasUseCase, GetLoginHistoryUseCase, OnboardingUseCase, UpdateProfileAvatarUseCase, UpdateProfileUseCase
+from app.application.use_cases.profile_usecase import (
+    CheckAliasUseCase,
+    GetLoginHistoryUseCase,
+    OnboardingUseCase,
+    UpdateProfileAvatarUseCase,
+    UpdateProfileUseCase,
+)
 from app.application.use_cases.queue_usecase import QueueUseCase
 from app.application.use_cases.role_usecase import RoleManagementUseCase, UserRoleUseCase
 from app.application.use_cases.users_usecase import AdminUserAccountUseCase
 from app.application.use_cases.venue_query_usecase import GetVenueCapacityUseCase
 from app.application.use_cases.venue_rating_usecase import VenueRatingUseCase
 from app.application.use_cases.venue_usecase import VenueManagementUseCase
+from app.application.use_cases.volunteer_usecase import VolunteerApplicationUseCase, VolunteerUseCase
 from app.infrastructure.cache.repositories.otp_repository import OTPRepository
 from app.infrastructure.cache.repositories.password_reset_repository import PasswordResetRepository
 from app.infrastructure.database.repositories.audit_log_repository import (
     AuditLogRepository,
 )
-from app.infrastructure.database.repositories.volunteer_repository import VolunteerRepository
 from app.infrastructure.database.repositories.event_participant_repository import EventParticipantRepository
 from app.infrastructure.database.repositories.event_repository import EventRepository
 from app.infrastructure.database.repositories.role_repository import RoleRepository
 from app.infrastructure.database.repositories.user_repository import UserRepository
 from app.infrastructure.database.repositories.venue_rating_repository import VenueRatingRepository
 from app.infrastructure.database.repositories.venue_repository import VenueRepository as VenueRepo
+from app.infrastructure.database.repositories.volunteer_repository import VolunteerRepository
 from app.infrastructure.database.session import get_db
 
 

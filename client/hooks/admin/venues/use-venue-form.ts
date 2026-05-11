@@ -3,11 +3,11 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { Venues } from '@/api/sdk.gen';
-import { getAccessToken } from '@/store/auth-store';
-import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
-import { useUpload } from '@/hooks/use-upload';
 import type { VenueFormValues } from '@/components/admin/venues/venue-form';
+import { useUpload } from '@/hooks/use-upload';
+import { Venues } from '@/api/sdk.gen';
+import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
+import { getAccessToken } from '@/store/auth-store';
 
 function extractErrorMessage(payload: unknown): string | undefined {
   if (!payload || typeof payload !== 'object') return undefined;

@@ -22,13 +22,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.entities.authorization_entities import Role as RoleEntity
 from app.domain.entities.user_entity import User as UserEntity
-from app.domain.entities.volunteer_entity import ApplicationStatus
+from app.domain.entities.volunteer_entity import ApplicationStatus, VolunteerStatus
 from app.domain.entities.volunteer_entity import Volunteer as VolunteerEntity
 from app.domain.entities.volunteer_entity import VolunteerApplication as VolunteerApplicationEntity
 from app.domain.entities.volunteer_entity import VolunteerRole as VolunteerRoleEntity
-from app.domain.entities.volunteer_entity import VolunteerStatus
 from app.infrastructure.database.models.user_models import Role, User
-from app.infrastructure.database.models.volunteer_models import Volunteer, VolunteerApplication as VolunteerApplicationModel, VolunteerRole
+from app.infrastructure.database.models.volunteer_models import Volunteer, VolunteerRole
+from app.infrastructure.database.models.volunteer_models import VolunteerApplication as VolunteerApplicationModel
 
 
 class VolunteerRepository:
@@ -124,9 +124,7 @@ class VolunteerRepository:
         return self._to_volunteer_role_entity(orm) if orm else None
 
     async def get_volunteer_role_by_name(self, name: str) -> VolunteerRoleEntity | None:
-        result = await self.db.execute(
-            select(VolunteerRole).where(func.lower(VolunteerRole.name) == name.lower())
-        )
+        result = await self.db.execute(select(VolunteerRole).where(func.lower(VolunteerRole.name) == name.lower()))
         orm = result.scalar_one_or_none()
         return self._to_volunteer_role_entity(orm) if orm else None
 
@@ -213,9 +211,7 @@ class VolunteerRepository:
         new_status: ApplicationStatus,
     ) -> VolunteerApplicationEntity | None:
         """Update the status of a volunteer application and flush within the current transaction."""
-        result = await self.db.execute(
-            select(VolunteerApplicationModel).where(VolunteerApplicationModel.id == application_id)
-        )
+        result = await self.db.execute(select(VolunteerApplicationModel).where(VolunteerApplicationModel.id == application_id))
         orm = result.scalar_one_or_none()
         if not orm:
             return None

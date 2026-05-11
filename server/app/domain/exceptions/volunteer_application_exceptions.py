@@ -1,18 +1,12 @@
 class VolunteerApplicationNotFoundError(Exception):
     def __init__(self, application_id: str = "") -> None:
-        super().__init__(
-            f"Volunteer application not found: {application_id}"
-            if application_id
-            else "Volunteer application not found"
-        )
+        super().__init__(f"Volunteer application not found: {application_id}" if application_id else "Volunteer application not found")
 
 
 class VolunteerApplicationAlreadyExistsError(Exception):
     def __init__(self, user_id: str = "") -> None:
         super().__init__(
-            f"An active volunteer application already exists for user: {user_id}"
-            if user_id
-            else "An active volunteer application already exists"
+            f"An active volunteer application already exists for user: {user_id}" if user_id else "An active volunteer application already exists"
         )
 
 

@@ -1,25 +1,25 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { AlertCircle, AlertTriangle, Clock, MapPin, Plus, Send, Trash2 } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { Events, Venues } from '@/api/sdk.gen';
-import { getAccessToken } from '@/store/auth-store';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { DateTimePicker } from '@/components/ui/date-time-picker';
+import { ImageUpload } from '@/components/ui/image-upload';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { ImageUpload } from '@/components/ui/image-upload';
-import { useUpload } from '@/hooks/use-upload';
 import { useEvent } from '@/hooks/admin/events/use-event';
-import { DateTimePicker } from '@/components/ui/date-time-picker';
+import { useUpload } from '@/hooks/use-upload';
 import { BackLink, FieldLabel, PhotoPanel } from './events-shared';
+import { Events, Venues } from '@/api/sdk.gen';
 import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
 import { resolveStorageImageUrl } from '@/lib/storage/image-url';
+import { getAccessToken } from '@/store/auth-store';
 
 // ── API helpers ────────────────────────────────────────────────────────────────
 
@@ -224,7 +224,7 @@ export function EventForm({ mode, event, initialSessions = [] }: EventFormProps)
     return () => {
       cancelled = true;
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessions.map((s) => s.venueId).join(',')]);
 
   const previewPhoto = resolveStorageImageUrl(bannerUrl) || event?.photo || '';
@@ -333,7 +333,13 @@ export function EventForm({ mode, event, initialSessions = [] }: EventFormProps)
 
         const metaResult = await Events.updateEventMetadataEventsEventIdPatch({
           path: { event_id: eventId },
-          body: { title: title.trim(), description: description.trim(), start_date: toUtcIso(startDate), end_date: toUtcIso(endDate), banner_url: bannerUrl || null },
+          body: {
+            title: title.trim(),
+            description: description.trim(),
+            start_date: toUtcIso(startDate),
+            end_date: toUtcIso(endDate),
+            banner_url: bannerUrl || null
+          },
           headers: { Authorization: `Bearer ${getAccessToken()}` },
           throwOnError: false
         });
@@ -449,7 +455,7 @@ export function EventForm({ mode, event, initialSessions = [] }: EventFormProps)
                     deferUpload={mode === 'create'}
                     onFileSelected={setPendingBannerFile}
                     disabled={isSubmitting || isUploadingBanner}
-                    className="w-full aspect-video"
+                    className="aspect-video w-full"
                   />
                 </div>
 
@@ -673,7 +679,6 @@ export function EventForm({ mode, event, initialSessions = [] }: EventFormProps)
               )}
             </CardContent>
           </Card>
-
         </div>
       </div>
     </div>
@@ -720,7 +725,7 @@ export function EventEditLoader({ eventId }: { eventId: string }) {
     startDate: event.start_date,
     endDate: event.end_date,
     status: event.status as EventDetailRecord['status'],
-    banner_url: event.banner_url,
+    banner_url: event.banner_url
   };
 
   const sessionRecords: ExistingEventSession[] = sessions.map((s) => ({
@@ -730,7 +735,7 @@ export function EventEditLoader({ eventId }: { eventId: string }) {
     description: s.description,
     startDatetime: s.start_datetime,
     endDatetime: s.end_datetime,
-    maxSlots: s.max_slots,
+    maxSlots: s.max_slots
   }));
 
   return <EventForm mode="edit" event={eventRecord} initialSessions={sessionRecords} />;

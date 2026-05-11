@@ -4,8 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Events } from '@/api/sdk.gen';
-import { getAccessToken } from '@/store/auth-store';
 import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
+import { getAccessToken } from '@/store/auth-store';
 
 function extractErrorMessage(payload: unknown): string | undefined {
   if (!payload || typeof payload !== 'object') return undefined;
@@ -105,13 +105,7 @@ export function useEventForm() {
     }
   }
 
-  async function submitEdit(
-    eventId: string,
-    data: EventFormSubmitData,
-    removedSessionIds: string[],
-    targetStatus: 'draft' | 'posted',
-    currentStatus: string
-  ) {
+  async function submitEdit(eventId: string, data: EventFormSubmitData, removedSessionIds: string[], targetStatus: 'draft' | 'posted', currentStatus: string) {
     if (isSubmitting) return;
     setIsSubmitting(true);
 

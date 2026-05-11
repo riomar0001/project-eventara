@@ -64,7 +64,7 @@ export function DateTimePicker({
   disabled,
   placeholder = 'Pick a date & time',
   id,
-  className,
+  className
 }: DateTimePickerProps) {
   const [open, setOpen] = useState(false);
 
@@ -150,24 +150,11 @@ export function DateTimePicker({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">
-        <Calendar
-          mode="single"
-          selected={selected}
-          onSelect={handleDaySelect}
-          disabled={calendarDisabled}
-          autoFocus
-        />
-        <div className="border-t border-border px-3 py-2.5">
+        <Calendar mode="single" selected={selected} onSelect={handleDaySelect} disabled={calendarDisabled} autoFocus />
+        <div className="border-border border-t px-3 py-2.5">
           <div className="flex items-center gap-3">
-            <span className="w-8 shrink-0 text-xs font-medium text-muted-foreground">Time</span>
-            <Input
-              type="time"
-              value={timeStr}
-              min={minTimeStr}
-              max={maxTimeStr}
-              onChange={(e) => handleTimeChange(e.target.value)}
-              className="h-8 text-sm"
-            />
+            <span className="text-muted-foreground w-8 shrink-0 text-xs font-medium">Time</span>
+            <Input type="time" value={timeStr} min={minTimeStr} max={maxTimeStr} onChange={(e) => handleTimeChange(e.target.value)} className="h-8 text-sm" />
           </div>
         </div>
       </PopoverContent>

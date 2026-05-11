@@ -3,15 +3,16 @@
 import { AlertCircle, CheckCircle2, Loader2, Mail, RotateCcw, Save, XCircle } from 'lucide-react';
 import { FieldHint } from '@/components/system/forms/field-hint';
 import { Button } from '@/components/ui/button';
+import { ImageUpload } from '@/components/ui/image-upload';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { ImageUpload } from '@/components/ui/image-upload';
 import { useProfileSettingsForm } from '@/hooks/admin/user-settings/profile/use-profile-settings-form';
 import { PROFILE_AGE_GROUP_OPTIONS, PROFILE_EDUCATION_LEVEL_OPTIONS, PROFILE_GENDER_OPTIONS } from '@/constants/user/profile';
 
 export default function ProfileSettingsPage() {
-  const { aliasHint, aliasStatus, errors, form, handleProfilePictureChange, handleReset, handleSubmit, isOnboarded, isSubmitting, setField, user } = useProfileSettingsForm();
+  const { aliasHint, aliasStatus, errors, form, handleProfilePictureChange, handleReset, handleSubmit, isOnboarded, isSubmitting, setField, user } =
+    useProfileSettingsForm();
 
   return (
     <div className="max-w-3xl space-y-6">
@@ -19,7 +20,13 @@ export default function ProfileSettingsPage() {
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2 md:col-span-2">
             <label className="text-sm font-medium">Profile picture</label>
-            <ImageUpload value={user?.imageFileId ?? null} onChange={handleProfilePictureChange} resourceType="user-profile" disabled={isSubmitting} className="w-24 aspect-square" />
+            <ImageUpload
+              value={user?.imageFileId ?? null}
+              onChange={handleProfilePictureChange}
+              resourceType="user-profile"
+              disabled={isSubmitting}
+              className="aspect-square w-24"
+            />
           </div>
 
           <div className="space-y-2 md:col-span-2">

@@ -9,8 +9,6 @@ Concurrency strategy — plain SELECT (no locking):
     briefly outdated warning in the session form.
 """
 
-import uuid
-
 from app.application.dto.venue_dto import GetVenueCapacityInput, GetVenueCapacityOutput
 from app.domain.exceptions.venue_exceptions import VenueNotFoundError
 from app.infrastructure.database.repositories.venue_repository import VenueRepository

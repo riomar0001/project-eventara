@@ -4,9 +4,9 @@ import { Building2, CalendarRange, CalendarSync, Globe, Mail, MapPin, PencilLine
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { BackLink, PhotoPanel } from './venues-shared';
-import { DeleteVenueButton } from './venue-delete-button';
 import { useVenue } from '@/hooks/admin/venues/use-venue';
+import { DeleteVenueButton } from './venue-delete-button';
+import { BackLink, PhotoPanel } from './venues-shared';
 import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
 import { resolveStorageImageUrl } from '@/lib/storage/image-url';
 
@@ -57,7 +57,9 @@ export function VenueDetail({ venueId }: { venueId: string }) {
         <div className="h-8 w-32 animate-pulse rounded-lg bg-neutral-100" />
         <div className="min-h-90 animate-pulse rounded-[32px] bg-neutral-100" />
         <div className="grid grid-cols-4 gap-4">
-          {Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-20 animate-pulse rounded-xl bg-neutral-100" />)}
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="h-20 animate-pulse rounded-xl bg-neutral-100" />
+          ))}
         </div>
       </div>
     );
@@ -182,7 +184,11 @@ export function VenueDetail({ venueId }: { venueId: string }) {
         <CompactPanel title="Venue metadata" className="xl:col-span-8">
           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
             <CompactField icon={<Users className="size-4" />} label="Capacity" value={`${venue.capacity.toLocaleString()} guests`} />
-            <CompactField icon={<Building2 className="size-4" />} label="Venue type" value={venue.venue_type.charAt(0).toUpperCase() + venue.venue_type.slice(1)} />
+            <CompactField
+              icon={<Building2 className="size-4" />}
+              label="Venue type"
+              value={venue.venue_type.charAt(0).toUpperCase() + venue.venue_type.slice(1)}
+            />
             <CompactField icon={<CalendarSync className="size-4" />} label="Usage" value={`${venue.usage_count} bookings`} />
             <CompactField icon={<Users className="size-4" />} label="Popularity" value={`${venue.popularity_count} interactions`} />
             <CompactField
