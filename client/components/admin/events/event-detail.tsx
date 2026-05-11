@@ -76,7 +76,7 @@ function fmtDateTime(iso: string) {
     day: 'numeric',
     year: 'numeric',
     hour: 'numeric',
-    minute: '2-digit',
+    minute: '2-digit'
   });
 }
 
@@ -147,7 +147,7 @@ function StatusBadge({ status }: { status: string }) {
     started: 'bg-green-100 text-green-700',
     ended: 'bg-neutral-200 text-neutral-500',
     cancelled: 'bg-red-100 text-red-700',
-    postponed: 'bg-amber-100 text-amber-700',
+    postponed: 'bg-amber-100 text-amber-700'
   };
   const cls = colorMap[status] ?? 'bg-neutral-100 text-neutral-700';
   return (

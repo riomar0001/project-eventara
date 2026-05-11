@@ -7,11 +7,11 @@ import { MobileFloatingAction, PrimaryPageAction } from '@/components/admin/shar
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CatalogCard, OperationsPageIntro } from './venues-shared';
 import { useVenues } from '@/hooks/admin/venues/use-venues';
+import { CatalogCard, OperationsPageIntro } from './venues-shared';
+import type { VenueRecordResponse } from '@/api/types.gen';
 import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
 import { resolveStorageImageUrl } from '@/lib/storage/image-url';
-import type { VenueRecordResponse } from '@/api/types.gen';
 
 const VENUE_PHOTO: Record<string, string> = {
   indoor: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=1400&q=80',
@@ -200,9 +200,7 @@ export function VenuesCatalog() {
       .filter((v) => (capacityMin ? v.capacity >= capacityMin : true))
       .filter((v) => {
         if (!lowerQuery) return true;
-        const haystack = [v.name, v.city, v.province, v.region, v.venue_type, v.contact_name ?? '', (v.amenities ?? []).join(' ')]
-          .join(' ')
-          .toLowerCase();
+        const haystack = [v.name, v.city, v.province, v.region, v.venue_type, v.contact_name ?? '', (v.amenities ?? []).join(' ')].join(' ').toLowerCase();
         return haystack.includes(lowerQuery);
       })
       .sort((a, b) => {
@@ -291,7 +289,11 @@ export function VenuesCatalog() {
           <Select value={capacityKey} onValueChange={(v) => updateFilters(() => setCapacityKey(v))}>
             <SelectTrigger className="w-full" size="default"><SelectValue /></SelectTrigger>
             <SelectContent align="start">
-              {CAPACITY_FILTERS.map((o) => <SelectItem key={o.key} value={o.key}>{o.label}</SelectItem>)}
+              {CAPACITY_FILTERS.map((o) => (
+                <SelectItem key={o.key} value={o.key}>
+                  {o.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -301,7 +303,11 @@ export function VenuesCatalog() {
           <Select value={sortKey} onValueChange={(v) => updateFilters(() => setSortKey(v))}>
             <SelectTrigger className="w-full" size="default"><SelectValue /></SelectTrigger>
             <SelectContent align="start">
-              {SORT_OPTIONS.map((o) => <SelectItem key={o.key} value={o.key}>{o.label}</SelectItem>)}
+              {SORT_OPTIONS.map((o) => (
+                <SelectItem key={o.key} value={o.key}>
+                  {o.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>

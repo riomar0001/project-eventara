@@ -2,12 +2,12 @@
 
 import { AlertCircle, CalendarCheck, CalendarPlus, ChevronLeft, ChevronRight, ImageIcon, MapPin, Plus, Send } from 'lucide-react';
 import Link from 'next/link';
-import type { EventStatus } from '@/api/types.gen';
 import { MobileFloatingAction, PrimaryPageAction } from '@/components/admin/shared/primary-page-action';
 import { Button } from '@/components/ui/button';
-import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
 import { useEvents } from '@/hooks/admin/events/use-events';
 import { CatalogCard, OperationsPageIntro } from './events-shared';
+import type { EventStatus } from '@/api/types.gen';
+import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
 
 const STATUS_FILTERS: { label: string; value: EventStatus | null }[] = [
   { label: 'All', value: null },
@@ -16,13 +16,13 @@ const STATUS_FILTERS: { label: string; value: EventStatus | null }[] = [
   { label: 'Started', value: 'started' },
   { label: 'Postponed', value: 'postponed' },
   { label: 'Ended', value: 'ended' },
-  { label: 'Cancelled', value: 'cancelled' },
+  { label: 'Cancelled', value: 'cancelled' }
 ];
 
 const EVENT_EMPTY_CHECKLIST = [
   { label: 'Details', value: 'Title and date window', icon: CalendarCheck },
   { label: 'Venue', value: 'At least one session', icon: MapPin },
-  { label: 'Media', value: 'Event banner image', icon: ImageIcon },
+  { label: 'Media', value: 'Event banner image', icon: ImageIcon }
 ] as const;
 
 function fmtDate(iso: string) {
@@ -30,7 +30,10 @@ function fmtDate(iso: string) {
 }
 
 function stripAndTruncate(html: string, max = 150) {
-  const plain = html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+  const plain = html
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
   return plain.length > max ? plain.slice(0, max).trimEnd() + '…' : plain;
 }
 
@@ -138,18 +141,18 @@ export function EventsCatalog() {
           {
             label: 'Total events',
             value: isLoading ? '—' : total,
-            hint: statusFilter ? `Events with status: ${statusFilter}` : 'All events across all statuses.',
+            hint: statusFilter ? `Events with status: ${statusFilter}` : 'All events across all statuses.'
           },
           {
             label: 'Active this page',
             value: isLoading ? '—' : upcomingCount,
-            hint: 'Posted and started events visible on this page.',
+            hint: 'Posted and started events visible on this page.'
           },
           {
             label: 'Volunteer seats',
             value: 0,
-            hint: 'Rostered volunteer placements tied to events.',
-          },
+            hint: 'Rostered volunteer placements tied to events.'
+          }
         ]}
         actions={
           <PrimaryPageAction
@@ -169,9 +172,7 @@ export function EventsCatalog() {
             onClick={() => setStatusFilter(f.value)}
             className={[
               'rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors',
-              statusFilter === f.value
-                ? 'bg-sky-600 text-white'
-                : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200',
+              statusFilter === f.value ? 'bg-sky-600 text-white' : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
             ].join(' ')}
           >
             {f.label}
@@ -208,7 +209,7 @@ export function EventsCatalog() {
                 href={ADMIN_OPERATIONS_PATHS.eventDetail(event.id)}
                 meta={[
                   { label: 'Start', value: fmtDate(event.start_date) },
-                  { label: 'End', value: fmtDate(event.end_date) },
+                  { label: 'End', value: fmtDate(event.end_date) }
                 ]}
                 photo={event.banner_url ?? ''}
                 subtitle={fmtDate(event.start_date)}

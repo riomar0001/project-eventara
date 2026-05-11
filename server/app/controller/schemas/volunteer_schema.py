@@ -41,7 +41,7 @@ class ReviewApplicationRequest(BaseModel):
     volunteer_role_id: uuid.UUID | None = None
 
     @model_validator(mode="after")
-    def validate_review_fields(self) -> "ReviewApplicationRequest":
+    def validate_review_fields(self) -> ReviewApplicationRequest:
         if self.status not in (ApplicationStatus.APPROVED, ApplicationStatus.REJECTED):
             raise ValueError("status must be 'approved' or 'rejected'")
         if self.status == ApplicationStatus.APPROVED and (not self.contact_phone or not self.volunteer_role_id):

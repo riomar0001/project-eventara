@@ -97,7 +97,7 @@ export function DateTimePicker({
   disabled,
   placeholder = 'Pick a date',
   id,
-  className,
+  className
 }: DateTimePickerProps) {
   const [open, setOpen] = useState(false);
 

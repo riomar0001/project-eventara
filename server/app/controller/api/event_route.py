@@ -39,7 +39,12 @@ from app.application.use_cases.event_usecase import EventUseCase
 from app.controller.api.audit_helpers import safe_audit_log, serialize_event, serialize_event_sessions
 from app.controller.dependencies import get_audit_log_use_case, get_current_user_id
 from app.controller.dependencies.storage_depends import get_storage_service
-from app.controller.dependencies.use_cases_depends import get_event_deletion_use_case, get_event_query_use_case, get_event_status_use_case, get_event_use_case
+from app.controller.dependencies.use_cases_depends import (
+    get_event_deletion_use_case,
+    get_event_query_use_case,
+    get_event_status_use_case,
+    get_event_use_case,
+)
 from app.controller.docs.event_docs import (
     EVENT_BANNER_STORAGE_UNAVAILABLE,
     EVENT_BANNER_UPLOAD_OPENAPI_EXTRA,
@@ -166,9 +171,7 @@ async def get_all_events(
     audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> EventListResponse:
     """Return a paginated list of all events with optional status filtering."""
-    result = await use_case.get_all_events(
-        GetAllEventsInput(page=page, page_size=page_size, status=event_status)
-    )
+    result = await use_case.get_all_events(GetAllEventsInput(page=page, page_size=page_size, status=event_status))
 
     await safe_audit_log(
         audit_use_case,
@@ -201,10 +204,7 @@ async def get_all_events(
     status_code=status.HTTP_200_OK,
     responses={**UNAUTHORIZED, **EVENT_GET_NOT_FOUND, **EVENT_DETAIL_QUERY_EXAMPLE},
     summary="Get an event with all its sessions",
-    description=(
-        "Returns a single event together with all its sessions ordered by start time. "
-        "Authentication is required."
-    ),
+    description=("Returns a single event together with all its sessions ordered by start time. Authentication is required."),
 )
 async def get_event_with_sessions(
     request: Request,

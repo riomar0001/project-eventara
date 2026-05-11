@@ -75,11 +75,7 @@ APPLICATION_ALREADY_EXISTS = {
     409: {
         "description": "User already has an active volunteer application",
         "model": ErrorResponse,
-        "content": {
-            "application/json": {
-                "example": {"success": False, "message": "An active volunteer application already exists"}
-            }
-        },
+        "content": {"application/json": {"example": {"success": False, "message": "An active volunteer application already exists"}}},
     }
 }
 

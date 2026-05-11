@@ -128,9 +128,7 @@ class VolunteerRepository:
         return self._to_volunteer_role_entity(orm) if orm else None
 
     async def get_volunteer_role_by_name(self, name: str) -> VolunteerRoleEntity | None:
-        result = await self.db.execute(
-            select(VolunteerRole).where(func.lower(VolunteerRole.name) == name.lower())
-        )
+        result = await self.db.execute(select(VolunteerRole).where(func.lower(VolunteerRole.name) == name.lower()))
         orm = result.scalar_one_or_none()
         return self._to_volunteer_role_entity(orm) if orm else None
 
@@ -217,9 +215,7 @@ class VolunteerRepository:
         new_status: ApplicationStatus,
     ) -> VolunteerApplicationEntity | None:
         """Update the status of a volunteer application and flush within the current transaction."""
-        result = await self.db.execute(
-            select(VolunteerApplicationModel).where(VolunteerApplicationModel.id == application_id)
-        )
+        result = await self.db.execute(select(VolunteerApplicationModel).where(VolunteerApplicationModel.id == application_id))
         orm = result.scalar_one_or_none()
         if not orm:
             return None

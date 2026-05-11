@@ -252,9 +252,7 @@ class TestUpdateProfileAvatar:
         updated = _make_profile(image_file_id=PUBLIC_URL)
         repo = _make_profile_repo(user=user, profile=profile, updated_profile=updated)
         db = AsyncMock()
-        result = await UpdateProfileAvatarUseCase(repo=repo, db=db).update_avatar(
-            UpdateProfileAvatarInput(user_id=USER_ID, image_url=PUBLIC_URL)
-        )
+        result = await UpdateProfileAvatarUseCase(repo=repo, db=db).update_avatar(UpdateProfileAvatarInput(user_id=USER_ID, image_url=PUBLIC_URL))
         assert result.profile is updated
         db.commit.assert_awaited_once()
 
@@ -263,9 +261,7 @@ class TestUpdateProfileAvatar:
         profile = _make_profile(image_file_id=OLD_URL)
         repo = _make_profile_repo(profile=profile)
         db = AsyncMock()
-        result = await UpdateProfileAvatarUseCase(repo=repo, db=db).update_avatar(
-            UpdateProfileAvatarInput(user_id=USER_ID, image_url=PUBLIC_URL)
-        )
+        result = await UpdateProfileAvatarUseCase(repo=repo, db=db).update_avatar(UpdateProfileAvatarInput(user_id=USER_ID, image_url=PUBLIC_URL))
         assert result.old_image_url == OLD_URL
 
     @pytest.mark.asyncio
@@ -273,9 +269,7 @@ class TestUpdateProfileAvatar:
         repo = _make_profile_repo(user=None)
         db = AsyncMock()
         with pytest.raises(UserNotFoundError):
-            await UpdateProfileAvatarUseCase(repo=repo, db=db).update_avatar(
-                UpdateProfileAvatarInput(user_id=USER_ID, image_url=PUBLIC_URL)
-            )
+            await UpdateProfileAvatarUseCase(repo=repo, db=db).update_avatar(UpdateProfileAvatarInput(user_id=USER_ID, image_url=PUBLIC_URL))
 
     @pytest.mark.asyncio
     async def test_user_inactive_raises(self):
@@ -283,9 +277,7 @@ class TestUpdateProfileAvatar:
         repo = _make_profile_repo(user=user)
         db = AsyncMock()
         with pytest.raises(UserInactiveError):
-            await UpdateProfileAvatarUseCase(repo=repo, db=db).update_avatar(
-                UpdateProfileAvatarInput(user_id=USER_ID, image_url=PUBLIC_URL)
-            )
+            await UpdateProfileAvatarUseCase(repo=repo, db=db).update_avatar(UpdateProfileAvatarInput(user_id=USER_ID, image_url=PUBLIC_URL))
 
     @pytest.mark.asyncio
     async def test_no_profile_raises(self):
@@ -293,9 +285,7 @@ class TestUpdateProfileAvatar:
         repo.update_profile_image = AsyncMock(return_value=None)
         db = AsyncMock()
         with pytest.raises(ProfileNotFoundError):
-            await UpdateProfileAvatarUseCase(repo=repo, db=db).update_avatar(
-                UpdateProfileAvatarInput(user_id=USER_ID, image_url=PUBLIC_URL)
-            )
+            await UpdateProfileAvatarUseCase(repo=repo, db=db).update_avatar(UpdateProfileAvatarInput(user_id=USER_ID, image_url=PUBLIC_URL))
 
     @pytest.mark.asyncio
     async def test_repo_returns_none_rolls_back_and_raises(self):
@@ -303,9 +293,7 @@ class TestUpdateProfileAvatar:
         repo.update_profile_image = AsyncMock(return_value=None)
         db = AsyncMock()
         with pytest.raises(ProfileNotFoundError):
-            await UpdateProfileAvatarUseCase(repo=repo, db=db).update_avatar(
-                UpdateProfileAvatarInput(user_id=USER_ID, image_url=PUBLIC_URL)
-            )
+            await UpdateProfileAvatarUseCase(repo=repo, db=db).update_avatar(UpdateProfileAvatarInput(user_id=USER_ID, image_url=PUBLIC_URL))
         db.rollback.assert_awaited_once()
 
     @pytest.mark.asyncio
@@ -314,7 +302,5 @@ class TestUpdateProfileAvatar:
         repo.update_profile_image = AsyncMock(side_effect=RuntimeError("db failure"))
         db = AsyncMock()
         with pytest.raises(RuntimeError):
-            await UpdateProfileAvatarUseCase(repo=repo, db=db).update_avatar(
-                UpdateProfileAvatarInput(user_id=USER_ID, image_url=PUBLIC_URL)
-            )
+            await UpdateProfileAvatarUseCase(repo=repo, db=db).update_avatar(UpdateProfileAvatarInput(user_id=USER_ID, image_url=PUBLIC_URL))
         db.rollback.assert_awaited_once()
