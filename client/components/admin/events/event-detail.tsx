@@ -19,8 +19,10 @@ import { useEvent } from '@/hooks/admin/events/use-event';
 import { getApiErrorMessage, getAuthHeaders } from '@/lib/system/api-request';
 import { cn } from '@/lib/utils';
 import { DeleteEventButton } from './event-delete-button';
+import { EventParticipantsPanel } from './event-participants-panel';
 import { EventSessionCreateDialog } from './event-session-create-dialog';
 import { EventSessionDeleteDialog } from './event-session-delete-dialog';
+import { EventVolunteersPanel } from './event-volunteers-panel';
 import { BackLink, DetailList, DetailPanel, PhotoPanel } from './events-shared';
 import { toast } from 'sonner';
 
@@ -434,6 +436,14 @@ export function EventDetail({ eventId }: { eventId: string }) {
                     ))}
                   </div>
                 )}
+              </DetailPanel>
+
+              <DetailPanel title="Volunteers" description="Volunteers assigned to this event and their current acceptance status.">
+                <EventVolunteersPanel eventId={event.id} />
+              </DetailPanel>
+
+              <DetailPanel title="Participants" description="All registered participants across every session of this event.">
+                <EventParticipantsPanel eventId={event.id} />
               </DetailPanel>
             </div>
 

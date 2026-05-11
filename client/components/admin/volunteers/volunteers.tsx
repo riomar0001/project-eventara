@@ -5,6 +5,7 @@ import { MobileFloatingAction, PrimaryPageAction } from '@/components/admin/shar
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { VolunteersTableToolbar } from './table/table-toolbar';
 import { VolunteersTableContent } from './table/volunteers-table';
+import { PotentialVolunteersTableContent } from './table/potential-volunteers-table';
 import { OperationsPageIntro } from './volunteers-shared';
 import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
 import type { VolunteerTableRecord } from './table/table-columns';
@@ -81,6 +82,19 @@ export function VolunteersPage() {
 
         <CardContent className="p-0">
           <VolunteersTableContent volunteers={filteredVolunteers} />
+        </CardContent>
+      </Card>
+
+      <Card className="border-0 bg-white shadow-none ring-1 ring-neutral-200">
+        <CardHeader className="border-b border-neutral-200/80">
+          <div className="space-y-1">
+            <CardTitle>Potential volunteers</CardTitle>
+            <CardDescription>Community members who already show up in the orbit around volunteering and can be moved into the active roster.</CardDescription>
+          </div>
+        </CardHeader>
+
+        <CardContent className="p-0">
+          <PotentialVolunteersTableContent />
         </CardContent>
       </Card>
     </div>

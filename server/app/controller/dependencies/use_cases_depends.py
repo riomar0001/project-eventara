@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.application.use_cases.account_settings_usecase import AccountSettingsUseCase
 from app.application.use_cases.volunteer_usecase import VolunteerApplicationUseCase, VolunteerUseCase
 from app.application.use_cases.audit_log_usecase import AuditLogUseCase
+from app.application.use_cases.event_volunteer_usecase import EventVolunteerUseCase
 from app.application.use_cases.auth_usecase import AuthUseCase
 from app.application.use_cases.event_deletion_usecase import EventDeletionUseCase
 from app.application.use_cases.event_participant_usecase import EventParticipantUseCase
@@ -26,6 +27,7 @@ from app.infrastructure.database.repositories.audit_log_repository import (
 from app.infrastructure.database.repositories.volunteer_repository import VolunteerRepository
 from app.infrastructure.database.repositories.event_participant_repository import EventParticipantRepository
 from app.infrastructure.database.repositories.event_repository import EventRepository
+from app.infrastructure.database.repositories.event_volunteer_repository import EventVolunteerRepository
 from app.infrastructure.database.repositories.role_repository import RoleRepository
 from app.infrastructure.database.repositories.user_repository import UserRepository
 from app.infrastructure.database.repositories.venue_rating_repository import VenueRatingRepository
@@ -164,6 +166,11 @@ def get_event_query_use_case(db: AsyncSession = Depends(get_db)) -> GetEventUseC
 def get_event_deletion_use_case(db: AsyncSession = Depends(get_db)) -> EventDeletionUseCase:
     """Construct an ``EventDeletionUseCase`` for the current request."""
     return EventDeletionUseCase(EventRepository(db), db)
+
+
+def get_event_volunteer_use_case(db: AsyncSession = Depends(get_db)) -> EventVolunteerUseCase:
+    """Construct an ``EventVolunteerUseCase`` for event volunteer management and participant queries."""
+    return EventVolunteerUseCase(EventVolunteerRepository(db), db)
 
 
 def get_volunteer_use_case(db: AsyncSession = Depends(get_db)) -> VolunteerUseCase:

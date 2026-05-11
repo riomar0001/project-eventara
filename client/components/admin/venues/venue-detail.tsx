@@ -33,7 +33,7 @@ function CompactField({ className, icon, label, value }: { className?: string; i
       <span className="mt-0.5 shrink-0 text-neutral-400">{icon}</span>
       <div className="min-w-0">
         <p className="text-[10px] font-semibold tracking-[0.14em] text-neutral-400 uppercase">{label}</p>
-        <p className="mt-0.5 text-sm leading-5 font-medium break-words text-neutral-900">{value}</p>
+        <p className="mt-0.5 text-sm leading-5 font-medium wrap-break-word text-neutral-900">{value}</p>
       </div>
     </div>
   );

@@ -53,6 +53,18 @@ _OPENAPI_TAGS = [
         "name": "Volunteers",
         "description": "Volunteer management — registration, role assignments, availability, and event participation tracking.",
     },
+    {
+        "name": "Event Volunteers",
+        "description": "Event volunteer roster — assign volunteers to events, manage acceptance/rejection lifecycle, and list the roster.",
+    },
+    {
+        "name": "Event Participants",
+        "description": "Event participant tracking — registration, attendance status updates, and cross-session participant queries.",
+    },
+    {
+        "name": "Events",
+        "description": "Event catalog — create, update, manage status, upload banners, and delete events with session management.",
+    },
 ]
 
 app = FastAPI(

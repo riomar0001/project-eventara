@@ -75,6 +75,13 @@ export const zAssignRoleRequest = z.object({
 });
 
 /**
+ * AssignVolunteerRequest
+ */
+export const zAssignVolunteerRequest = z.object({
+    alias: z.string()
+});
+
+/**
  * AuditLogStatus
  */
 export const zAuditLogStatus = z.enum(['success', 'failure']);
@@ -240,6 +247,18 @@ export const zEventBannerUploadData = z.object({
  */
 export const zEventBannerUploadRequest = z.object({
     content_type: z.string().min(1).max(100)
+});
+
+/**
+ * EventParticipantRecord
+ */
+export const zEventParticipantRecord = z.object({
+    id: z.uuid(),
+    user_id: z.uuid(),
+    event_session_id: z.uuid(),
+    status: z.string(),
+    created_at: z.iso.datetime().nullable(),
+    updated_at: z.iso.datetime().nullable()
 });
 
 /**
@@ -481,6 +500,46 @@ export const zEventUpdateRequest = z.object({
 });
 
 /**
+ * EventVolunteerRecordResponse
+ */
+export const zEventVolunteerRecordResponse = z.object({
+    id: z.uuid(),
+    volunteer_id: z.uuid(),
+    event_id: z.uuid(),
+    status: z.string(),
+    created_at: z.iso.datetime().nullable(),
+    updated_at: z.iso.datetime().nullable()
+});
+
+/**
+ * EventVolunteerListResponse
+ */
+export const zEventVolunteerListResponse = z.object({
+    success: z.boolean(),
+    message: z.string(),
+    data: z.array(zEventVolunteerRecordResponse)
+});
+
+/**
+ * EventVolunteerResponse
+ */
+export const zEventVolunteerResponse = z.object({
+    success: z.boolean(),
+    message: z.string(),
+    data: zEventVolunteerRecordResponse
+});
+
+/**
+ * EventVolunteerStatus
+ */
+export const zEventVolunteerStatus = z.enum([
+    'pending',
+    'joined',
+    'left',
+    'rejected'
+]);
+
+/**
  * EventWithSessionsResponse
  */
 export const zEventWithSessionsResponse = z.object({
@@ -669,26 +728,6 @@ export const zLogoutRequest = z.object({
 export const zLogoutResponse = z.object({
     success: z.boolean().optional().default(true),
     message: z.string().optional().default('Logged out successfully.')
-});
-
-/**
- * PaginationMeta
- */
-export const zPaginationMeta = z.object({
-    limit: z.int(),
-    total_pages: z.int(),
-    next_cursor: z.string().nullable(),
-    prev_cursor: z.string().nullable(),
-    has_next: z.boolean()
-});
-
-/**
- * GetAuditLogsResponse
- */
-export const zGetAuditLogsResponse = z.object({
-    success: z.boolean().optional().default(true),
-    data: z.array(zAuditLogResponse),
-    pagination: zPaginationMeta
 });
 
 /**
@@ -1004,6 +1043,13 @@ export const zSubmitApplicationRequest = z.object({
  */
 export const zUpdateAssignmentRequest = z.object({
     expires_at: z.iso.datetime().nullable()
+});
+
+/**
+ * UpdateEventVolunteerStatusRequest
+ */
+export const zUpdateEventVolunteerStatusRequest = z.object({
+    status: zEventVolunteerStatus
 });
 
 /**
@@ -1588,6 +1634,45 @@ export const zQueueStatsResponse = z.object({
     total_failed: z.int(),
     total_completed: z.int(),
     worker_health: z.array(zWorkerHealthEntrySchema)
+});
+
+/**
+ * PaginationMeta
+ */
+export const zAppControllerSchemasAuditLogSchemaPaginationMeta = z.object({
+    limit: z.int(),
+    total_pages: z.int(),
+    next_cursor: z.string().nullable(),
+    prev_cursor: z.string().nullable(),
+    has_next: z.boolean()
+});
+
+/**
+ * GetAuditLogsResponse
+ */
+export const zGetAuditLogsResponse = z.object({
+    success: z.boolean().optional().default(true),
+    data: z.array(zAuditLogResponse),
+    pagination: zAppControllerSchemasAuditLogSchemaPaginationMeta
+});
+
+/**
+ * PaginationMeta
+ */
+export const zAppControllerSchemasEventVolunteerSchemaPaginationMeta = z.object({
+    total: z.int(),
+    limit: z.int(),
+    offset: z.int()
+});
+
+/**
+ * EventParticipantsResponse
+ */
+export const zEventParticipantsResponse = z.object({
+    success: z.boolean(),
+    message: z.string(),
+    data: z.array(zEventParticipantRecord),
+    meta: zAppControllerSchemasEventVolunteerSchemaPaginationMeta
 });
 
 export const zRegisterUserAuthRegisterPostBody = zRegisterRequest;
@@ -2371,3 +2456,64 @@ export const zWithdrawApplicationVolunteerApplicationsApplicationIdDeletePath = 
  * Successful Response
  */
 export const zWithdrawApplicationVolunteerApplicationsApplicationIdDeleteResponse = z.record(z.string(), z.unknown());
+
+export const zListEventVolunteersEventsEventIdVolunteersGetPath = z.object({
+    event_id: z.uuid()
+});
+
+export const zListEventVolunteersEventsEventIdVolunteersGetQuery = z.object({
+    status: zEventVolunteerStatus.nullish()
+});
+
+/**
+ * Successful Response
+ */
+export const zListEventVolunteersEventsEventIdVolunteersGetResponse = zEventVolunteerListResponse;
+
+export const zAssignVolunteerEventsEventIdVolunteersPostBody = zAssignVolunteerRequest;
+
+export const zAssignVolunteerEventsEventIdVolunteersPostPath = z.object({
+    event_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zAssignVolunteerEventsEventIdVolunteersPostResponse = zEventVolunteerResponse;
+
+export const zRemoveEventVolunteerEventsEventIdVolunteersEventVolunteerIdDeletePath = z.object({
+    event_id: z.uuid(),
+    event_volunteer_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zRemoveEventVolunteerEventsEventIdVolunteersEventVolunteerIdDeleteResponse = zEventVolunteerResponse;
+
+export const zUpdateEventVolunteerStatusEventsEventIdVolunteersEventVolunteerIdPatchBody = zUpdateEventVolunteerStatusRequest;
+
+export const zUpdateEventVolunteerStatusEventsEventIdVolunteersEventVolunteerIdPatchPath = z.object({
+    event_id: z.uuid(),
+    event_volunteer_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zUpdateEventVolunteerStatusEventsEventIdVolunteersEventVolunteerIdPatchResponse = zEventVolunteerResponse;
+
+export const zGetEventParticipantsEventsEventIdParticipantsGetPath = z.object({
+    event_id: z.uuid()
+});
+
+export const zGetEventParticipantsEventsEventIdParticipantsGetQuery = z.object({
+    status: z.string().nullish(),
+    limit: z.int().gte(1).lte(200).optional().default(50),
+    offset: z.int().gte(0).optional().default(0)
+});
+
+/**
+ * Successful Response
+ */
+export const zGetEventParticipantsEventsEventIdParticipantsGetResponse = zEventParticipantsResponse;

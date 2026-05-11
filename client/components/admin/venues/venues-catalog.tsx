@@ -133,7 +133,7 @@ function SectionHeader({
           {accent === 'amber' ? 'Partnered' : 'Community'}
         </span>
       </div>
-      <div className={`mt-4 h-px bg-gradient-to-r ${theme.rail}`} />
+      <div className={`mt-4 h-px bg-linear-to-r ${theme.rail}`} />
     </div>
   );
 }
@@ -371,7 +371,7 @@ export function VenuesCatalog() {
         <div className="space-y-10">
 
           {/* Partnered Venues */}
-          <section className="space-y-4 rounded-[32px] border border-amber-100 bg-gradient-to-br from-amber-50/35 via-white to-white p-4 shadow-[0_20px_60px_-40px_rgba(180,83,9,0.28)]">
+          <section className="space-y-4 rounded-[32px] border border-amber-100 bg-linear-to-br from-amber-50/35 via-white to-white p-4 shadow-[0_20px_60px_-40px_rgba(180,83,9,0.28)]">
             <SectionHeader
               icon={<BadgeCheck className="size-4" />}
               label="Partnered venues"
@@ -396,7 +396,7 @@ export function VenuesCatalog() {
           </section>
 
           {/* Community Suggested Venues */}
-          <section className="space-y-4 rounded-[32px] border border-sky-100 bg-gradient-to-br from-sky-50/35 via-white to-white p-4 shadow-[0_20px_60px_-40px_rgba(14,165,233,0.26)]">
+          <section className="space-y-4 rounded-[32px] border border-sky-100 bg-linear-to-br from-sky-50/35 via-white to-white p-4 shadow-[0_20px_60px_-40px_rgba(14,165,233,0.26)]">
             <SectionHeader
               icon={<UsersRound className="size-4" />}
               label="Community Suggested Venues"

@@ -12,6 +12,7 @@ from app.controller.api.user_route import account_settings_router
 from app.controller.api.user_route import router as user_router
 from app.controller.api.venue_route import venue_router
 from app.controller.api.volunteer_route import volunteer_application_router, volunteer_role_router, volunteer_router
+from app.controller.api.event_volunteer_route import event_participant_query_router, event_volunteer_router
 
 router = APIRouter()
 router.include_router(auth_router)
@@ -30,3 +31,5 @@ router.include_router(participant_router)
 router.include_router(volunteer_router)
 router.include_router(volunteer_role_router)
 router.include_router(volunteer_application_router)
+router.include_router(event_volunteer_router)
+router.include_router(event_participant_query_router)
