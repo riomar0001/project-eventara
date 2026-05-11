@@ -1,9 +1,10 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { ArrowDown, ArrowUp, ArrowUpDown, Filter, Search, Users, X } from 'lucide-react';
+import { ArrowDown, ArrowUp, ArrowUpDown, Filter, Search, TrendingUp, Users, X } from 'lucide-react';
 import { flexRender, getCoreRowModel, getSortedRowModel, type ColumnDef, type SortingState, useReactTable } from '@tanstack/react-table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -98,7 +99,7 @@ function PotentialVolunteerToolbar({
   totalCount: number;
 }) {
   return (
-    <div className="border-b border-neutral-200/80 px-6 py-4">
+    <div className="border-b border-neutral-200/80 bg-[linear-gradient(180deg,_#f8fafc_0%,_#ffffff_100%)] px-6 py-4">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div className="space-y-1">
           <div className="inline-flex items-center gap-2 text-[10px] font-semibold tracking-[0.18em] text-sky-700 uppercase">
@@ -126,7 +127,7 @@ function PotentialVolunteerToolbar({
             value={search}
             onChange={(event) => onSearchChange(event.target.value)}
             placeholder="Search name, alias, or email..."
-            className="h-8 pl-9 text-sm"
+            className="h-9 rounded-xl border-neutral-200 bg-white pl-9 text-sm"
           />
           {search ? (
             <button
@@ -141,7 +142,7 @@ function PotentialVolunteerToolbar({
         </div>
 
         <Select value={participationFilter} onValueChange={(value) => onParticipationFilterChange(value as ParticipationFilter)}>
-          <SelectTrigger className="h-8 w-full text-sm sm:w-48">
+          <SelectTrigger className="h-9 w-full rounded-xl border-neutral-200 bg-white text-sm sm:w-52">
             <SelectValue placeholder="Participation" />
           </SelectTrigger>
           <SelectContent>
@@ -209,15 +210,19 @@ const potentialVolunteers: PotentialVolunteerRecord[] = [
 
 const potentialVolunteerColumns: ColumnDef<PotentialVolunteerRecord>[] = [
   {
-    id: 'profile',
-    header: 'Profile Picture',
+    id: 'candidate',
+    header: 'Candidate',
     enableSorting: false,
     cell: ({ row }) => (
-      <div className="flex items-center gap-3">
+      <div className="flex min-w-64 items-center gap-3">
         <Avatar size="lg">
           <AvatarImage src={row.original.photo} alt={row.original.fullName} />
           <AvatarFallback>{getInitials(row.original.fullName)}</AvatarFallback>
         </Avatar>
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold text-neutral-950">{row.original.fullName}</p>
+          <p className="truncate text-xs text-neutral-500">@{row.original.alias}</p>
+        </div>
       </div>
     ),
     meta: {
@@ -226,27 +231,9 @@ const potentialVolunteerColumns: ColumnDef<PotentialVolunteerRecord>[] = [
     } satisfies PotentialVolunteerColumnMeta
   },
   {
-    accessorKey: 'fullName',
-    header: 'Full Name',
-    cell: ({ row }) => <p className="text-sm font-medium text-neutral-950">{row.original.fullName}</p>,
-    meta: {
-      headerClassName: 'px-6',
-      cellClassName: 'px-6'
-    } satisfies PotentialVolunteerColumnMeta
-  },
-  {
-    accessorKey: 'alias',
-    header: 'Alias',
-    cell: ({ row }) => <p className="text-sm text-neutral-700">@{row.original.alias}</p>,
-    meta: {
-      headerClassName: 'px-6',
-      cellClassName: 'px-6'
-    } satisfies PotentialVolunteerColumnMeta
-  },
-  {
     accessorKey: 'email',
     header: 'Email',
-    cell: ({ row }) => <p className="text-sm text-neutral-700">{row.original.email}</p>,
+    cell: ({ row }) => <p className="text-sm font-medium text-neutral-700">{row.original.email}</p>,
     meta: {
       headerClassName: 'px-6',
       cellClassName: 'px-6'
@@ -254,11 +241,45 @@ const potentialVolunteerColumns: ColumnDef<PotentialVolunteerRecord>[] = [
   },
   {
     accessorKey: 'totalParticipatedEvents',
-    header: 'Total Participated Events',
-    cell: ({ row }) => <p className="text-sm font-medium text-neutral-950">{row.original.totalParticipatedEvents} events</p>,
+    header: 'Participated events',
+    cell: ({ row }) => {
+      const events = row.original.totalParticipatedEvents;
+
+      return (
+        <div className="flex justify-end">
+          <Badge className="rounded-full bg-sky-100 px-2.5 py-1 text-sky-800 hover:bg-sky-100">
+            {events} event{events === 1 ? '' : 's'}
+          </Badge>
+        </div>
+      );
+    },
     meta: {
       headerClassName: 'px-6 text-right',
       cellClassName: 'px-6 text-right'
+    } satisfies PotentialVolunteerColumnMeta
+  },
+  {
+    id: 'signal',
+    header: 'Signal',
+    enableSorting: false,
+    cell: ({ row }) => {
+      const totalEvents = row.original.totalParticipatedEvents;
+      const signal = totalEvents >= 11 ? 'High intent' : totalEvents >= 6 ? 'Warm' : 'Early';
+      const className =
+        totalEvents >= 11 ? 'bg-emerald-50 text-emerald-700' : totalEvents >= 6 ? 'bg-amber-50 text-amber-700' : 'bg-neutral-100 text-neutral-600';
+
+      return (
+        <div className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold">
+          <span className={cn('inline-flex items-center gap-1.5 rounded-full px-2.5 py-1', className)}>
+            <TrendingUp className="size-3.5" />
+            {signal}
+          </span>
+        </div>
+      );
+    },
+    meta: {
+      headerClassName: 'pr-6',
+      cellClassName: 'pr-6'
     } satisfies PotentialVolunteerColumnMeta
   }
 ];
@@ -311,7 +332,7 @@ export function PotentialVolunteersTableContent() {
         totalCount={potentialVolunteers.length}
       />
 
-      <Table className="min-w-240">
+      <Table className="min-w-220">
         <TableHeader className="bg-sky-50/80">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
@@ -356,13 +377,20 @@ export function PotentialVolunteersTableContent() {
                     {hasActiveFilters ? 'No potential volunteers match your filters' : 'No potential volunteers found'}
                   </p>
                   <p className="text-sm text-neutral-500">
-                    {hasActiveFilters ? 'Try widening the search or clearing the participation filter.' : 'Add candidates here when the source data is available.'}
+                    {hasActiveFilters
+                      ? 'Try widening the search or clearing the participation filter.'
+                      : 'Add candidates here when the source data is available.'}
                   </p>
                   {hasActiveFilters ? (
-                    <Button variant="outline" size="sm" className="mt-2" onClick={() => {
-                      setSearch('');
-                      setParticipationFilter('all');
-                    }}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mt-2"
+                      onClick={() => {
+                        setSearch('');
+                        setParticipationFilter('all');
+                      }}
+                    >
                       <X className="size-3.5" />
                       Clear filters
                     </Button>
@@ -372,7 +400,7 @@ export function PotentialVolunteersTableContent() {
             </TableRow>
           ) : (
             table.getRowModel().rows.map((row, index) => (
-              <TableRow key={row.id} className={cn('hover:bg-sky-50/50', index % 2 !== 0 && 'bg-sky-50/25')}>
+              <TableRow key={row.id} className={cn('transition-colors hover:bg-sky-50/60', index % 2 !== 0 && 'bg-sky-50/25')}>
                 {row.getVisibleCells().map((cell) => {
                   const meta = cell.column.columnDef.meta as PotentialVolunteerColumnMeta | undefined;
 

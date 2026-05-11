@@ -1,26 +1,27 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Loader2, RefreshCw, ShieldAlert, Tags } from 'lucide-react';
+import { Loader2, RefreshCw, Search, ShieldAlert, Tags, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
-import { Volunteers } from '@/api/sdk.gen';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
-import { getApiErrorMessage } from '@/lib/system/api-request';
-import { getAccessToken } from '@/store/auth-store';
-import { cn } from '@/lib/utils';
-import { buildVolunteerRoleColumns, type VolunteerRoleColumnMeta, type VolunteerRoleTableRecord } from './volunteer-role-columns';
 import { FieldLabel } from '../volunteers-shared';
+import { buildVolunteerRoleColumns, type VolunteerRoleColumnMeta, type VolunteerRoleTableRecord } from './volunteer-role-columns';
+import { Volunteers } from '@/api/sdk.gen';
+import { getApiErrorMessage } from '@/lib/system/api-request';
+import { cn } from '@/lib/utils';
+import { getAccessToken } from '@/store/auth-store';
 
 type StatusFilter = 'all' | 'active' | 'inactive';
 
 function VolunteerRolesToolbar({
+  hasActiveFilters,
+  onClearFilters,
   search,
   statusFilter,
   onSearchChange,
@@ -28,6 +29,8 @@ function VolunteerRolesToolbar({
   onRefresh,
   isLoading
 }: {
+  hasActiveFilters: boolean;
+  onClearFilters: () => void;
   search: string;
   statusFilter: StatusFilter;
   onSearchChange: (v: string) => void;
@@ -36,15 +39,28 @@ function VolunteerRolesToolbar({
   isLoading: boolean;
 }) {
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      <Input
-        className="h-8 w-48 text-sm"
-        placeholder="Search roles..."
-        value={search}
-        onChange={(e) => onSearchChange(e.target.value)}
-      />
+    <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
+      <div className="relative w-full sm:w-60">
+        <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-neutral-400" />
+        <Input
+          className="h-9 rounded-xl border-neutral-200 bg-white pl-9 text-sm"
+          placeholder="Search roles..."
+          value={search}
+          onChange={(e) => onSearchChange(e.target.value)}
+        />
+        {search ? (
+          <button
+            type="button"
+            onClick={() => onSearchChange('')}
+            className="absolute top-1/2 right-3 -translate-y-1/2 text-neutral-400 transition-colors hover:text-neutral-700"
+            aria-label="Clear volunteer role search"
+          >
+            <X className="size-4" />
+          </button>
+        ) : null}
+      </div>
       <Select value={statusFilter} onValueChange={(v) => onStatusFilterChange(v as StatusFilter)}>
-        <SelectTrigger className="h-8 w-32 text-sm">
+        <SelectTrigger className="h-9 w-full rounded-xl border-neutral-200 bg-white text-sm sm:w-36">
           <SelectValue placeholder="Status" />
         </SelectTrigger>
         <SelectContent>
@@ -53,7 +69,13 @@ function VolunteerRolesToolbar({
           <SelectItem value="inactive">Inactive</SelectItem>
         </SelectContent>
       </Select>
-      <Button variant="outline" size="sm" onClick={onRefresh} disabled={isLoading}>
+      {hasActiveFilters ? (
+        <Button type="button" variant="outline" size="sm" className="h-9 rounded-xl" onClick={onClearFilters}>
+          <X className="size-3.5" />
+          Clear
+        </Button>
+      ) : null}
+      <Button variant="outline" size="sm" className="h-9 rounded-xl" onClick={onRefresh} disabled={isLoading}>
         <RefreshCw className={cn('size-3.5', isLoading && 'animate-spin')} />
         Refresh
       </Button>
@@ -162,11 +184,7 @@ function EditRoleDialog({
 
           <div className="space-y-2">
             <FieldLabel>Status</FieldLabel>
-            <Select
-              value={isActive ? 'active' : 'inactive'}
-              onValueChange={(v) => setIsActive(v === 'active')}
-              disabled={isSaving}
-            >
+            <Select value={isActive ? 'active' : 'inactive'} onValueChange={(v) => setIsActive(v === 'active')} disabled={isSaving}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -246,20 +264,15 @@ function DeleteRoleDialog({
             Delete volunteer role
           </DialogTitle>
           <DialogDescription>
-            This will permanently delete{' '}
-            <span className="font-semibold text-neutral-950">{role?.name}</span> and remove all
-            volunteers currently assigned to this role. This action cannot be undone.
+            This will permanently delete <span className="font-semibold text-neutral-950">{role?.name}</span> and remove all volunteers currently assigned to
+            this role. This action cannot be undone.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isDeleting}>
             Cancel
           </Button>
-          <Button
-            className="bg-red-600 text-white hover:bg-red-700"
-            onClick={handleConfirm}
-            disabled={isDeleting}
-          >
+          <Button className="bg-red-600 text-white hover:bg-red-700" onClick={handleConfirm} disabled={isDeleting}>
             {isDeleting ? <Loader2 className="size-4 animate-spin" /> : null}
             {isDeleting ? 'Deleting...' : 'Delete role'}
           </Button>
@@ -297,8 +310,7 @@ export function VolunteerRolesTable({ refreshSignal }: { refreshSignal?: number 
             page: currentPage,
             page_size: PAGE_SIZE,
             search: search.trim() || undefined,
-            is_active:
-              statusFilter === 'active' ? true : statusFilter === 'inactive' ? false : undefined
+            is_active: statusFilter === 'active' ? true : statusFilter === 'inactive' ? false : undefined
           },
           headers: { Authorization: `Bearer ${accessToken}` },
           throwOnError: false
@@ -344,8 +356,8 @@ export function VolunteerRolesTable({ refreshSignal }: { refreshSignal?: number 
       setDeleteOpen(true);
     }
   });
+  const hasActiveFilters = search.trim().length > 0 || statusFilter !== 'all';
 
-  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data: roles,
     columns,
@@ -354,14 +366,21 @@ export function VolunteerRolesTable({ refreshSignal }: { refreshSignal?: number 
 
   return (
     <>
-      <div className="flex flex-col gap-4 border-b border-neutral-200 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 border-b border-neutral-200 bg-[linear-gradient(180deg,_#f8fafc_0%,_#ffffff_100%)] px-6 py-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="space-y-1">
-          <p className="font-medium text-neutral-950">All roles</p>
-          <p className="text-sm text-neutral-500">
-            {total} role{total !== 1 ? 's' : ''} total
-          </p>
+          <div className="inline-flex items-center gap-2 text-[10px] font-semibold tracking-[0.18em] text-emerald-700 uppercase">
+            <Tags className="size-3.5" />
+            Role inventory
+          </div>
+          <p className="font-medium text-neutral-950">All volunteer roles</p>
+          <p className="text-sm text-neutral-500">{isLoading ? 'Syncing role catalog...' : `${total} role${total !== 1 ? 's' : ''} total`}</p>
         </div>
         <VolunteerRolesToolbar
+          hasActiveFilters={hasActiveFilters}
+          onClearFilters={() => {
+            setSearch('');
+            setStatusFilter('all');
+          }}
           search={search}
           statusFilter={statusFilter}
           onSearchChange={setSearch}
@@ -372,16 +391,13 @@ export function VolunteerRolesTable({ refreshSignal }: { refreshSignal?: number 
       </div>
 
       <Table className="min-w-180">
-        <TableHeader className="bg-neutral-50/80">
+        <TableHeader className="bg-emerald-50/70">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
                 const meta = header.column.columnDef.meta as VolunteerRoleColumnMeta | undefined;
                 return (
-                  <TableHead
-                    key={header.id}
-                    className={cn('py-3 text-xs font-medium text-neutral-500', meta?.headerClassName)}
-                  >
+                  <TableHead key={header.id} className={cn('py-3 text-xs font-medium text-neutral-500', meta?.headerClassName)}>
                     {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                   </TableHead>
                 );
@@ -408,16 +424,28 @@ export function VolunteerRolesTable({ refreshSignal }: { refreshSignal?: number 
                   </div>
                   <p className="font-medium text-neutral-950">No roles found</p>
                   <p className="text-sm text-neutral-500">
-                    {search || statusFilter !== 'all'
-                      ? 'Try clearing your search or filter.'
-                      : 'Create your first volunteer role using the form above.'}
+                    {hasActiveFilters ? 'Try clearing your search or filter.' : 'Create your first volunteer role from the button above.'}
                   </p>
+                  {hasActiveFilters ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mt-2"
+                      onClick={() => {
+                        setSearch('');
+                        setStatusFilter('all');
+                      }}
+                    >
+                      <X className="size-3.5" />
+                      Clear filters
+                    </Button>
+                  ) : null}
                 </div>
               </TableCell>
             </TableRow>
           ) : (
             table.getRowModel().rows.map((row, index) => (
-              <TableRow key={row.id} className={cn('hover:bg-neutral-50/70', index % 2 !== 0 && 'bg-neutral-50/35')}>
+              <TableRow key={row.id} className={cn('transition-colors hover:bg-emerald-50/45', index % 2 !== 0 && 'bg-neutral-50/45')}>
                 {row.getVisibleCells().map((cell) => {
                   const meta = cell.column.columnDef.meta as VolunteerRoleColumnMeta | undefined;
                   return (
@@ -438,32 +466,17 @@ export function VolunteerRolesTable({ refreshSignal }: { refreshSignal?: number 
             Page {page} of {totalPages}
           </p>
           <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={page <= 1 || isLoading}
-              onClick={() => setPage((p) => p - 1)}
-            >
+            <Button variant="outline" size="sm" disabled={page <= 1 || isLoading} onClick={() => setPage((p) => p - 1)}>
               Previous
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={page >= totalPages || isLoading}
-              onClick={() => setPage((p) => p + 1)}
-            >
+            <Button variant="outline" size="sm" disabled={page >= totalPages || isLoading} onClick={() => setPage((p) => p + 1)}>
               Next
             </Button>
           </div>
         </div>
       )}
 
-      <EditRoleDialog
-        role={editingRole}
-        open={editOpen}
-        onOpenChange={setEditOpen}
-        onSaved={() => fetchRoles(page)}
-      />
+      <EditRoleDialog role={editingRole} open={editOpen} onOpenChange={setEditOpen} onSaved={() => fetchRoles(page)} />
       <DeleteRoleDialog
         role={deletingRole}
         open={deleteOpen}

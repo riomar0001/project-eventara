@@ -197,7 +197,7 @@ async def add_volunteer(
 async def create_volunteer_role(
     request: Request,
     body: CreateVolunteerRoleRequest,
-    caller_id: uuid.UUID = Depends(require_permission("volunteer_roles", RoleAction.CREATE)),
+    caller_id: uuid.UUID = Depends(require_permission("volunteer-roles", RoleAction.CREATE)),
     use_case: VolunteerUseCase = Depends(get_volunteer_use_case),
     audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> dict:
@@ -205,7 +205,7 @@ async def create_volunteer_role(
 
     # Error mapping
     - **401 Unauthorized** — missing, expired, or invalid Bearer token.
-    - **403 Forbidden** — caller lacks ``create`` permission on ``volunteer_roles``.
+    - **403 Forbidden** — caller lacks ``create`` permission on ``volunteer-roles``.
     - **409 Conflict** — a volunteer role with the same name already exists.
     - **422 Unprocessable Entity** — request body failed schema validation.
     """
@@ -470,7 +470,7 @@ async def get_all_volunteer_roles(
     page_size: int = Query(default=20, ge=1, le=100),
     search: str | None = Query(default=None, max_length=100),
     is_active: bool | None = Query(default=None),
-    caller_id: uuid.UUID = Depends(require_permission("volunteer_roles", RoleAction.READ)),
+    caller_id: uuid.UUID = Depends(require_permission("volunteer-roles", RoleAction.READ)),
     use_case: VolunteerRoleUseCase = Depends(get_volunteer_role_use_case),
     audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> dict:
@@ -478,7 +478,7 @@ async def get_all_volunteer_roles(
 
     # Error mapping
     - **401 Unauthorized** — missing, expired, or invalid Bearer token.
-    - **403 Forbidden** — caller lacks ``read`` permission on ``volunteer_roles``.
+    - **403 Forbidden** — caller lacks ``read`` permission on ``volunteer-roles``.
     - **422 Unprocessable Entity** — query parameter validation failed.
     """
     result = await use_case.get_all_volunteer_roles(
@@ -529,7 +529,7 @@ async def update_volunteer_role(
     request: Request,
     role_id: uuid.UUID,
     body: UpdateVolunteerRoleRequest,
-    caller_id: uuid.UUID = Depends(require_permission("volunteer_roles", RoleAction.UPDATE)),
+    caller_id: uuid.UUID = Depends(require_permission("volunteer-roles", RoleAction.UPDATE)),
     use_case: VolunteerRoleUseCase = Depends(get_volunteer_role_use_case),
     audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> dict:
@@ -537,7 +537,7 @@ async def update_volunteer_role(
 
     # Error mapping
     - **401 Unauthorized** — missing, expired, or invalid Bearer token.
-    - **403 Forbidden** — caller lacks ``update`` permission on ``volunteer_roles``.
+    - **403 Forbidden** — caller lacks ``update`` permission on ``volunteer-roles``.
     - **404 Not Found** — no volunteer role exists for the given ID.
     - **409 Conflict** — the requested new name is already taken by another role.
     - **422 Unprocessable Entity** — request body failed schema validation.
@@ -591,7 +591,7 @@ async def update_volunteer_role(
 async def delete_volunteer_role(
     request: Request,
     role_id: uuid.UUID,
-    caller_id: uuid.UUID = Depends(require_permission("volunteer_roles", RoleAction.DELETE)),
+    caller_id: uuid.UUID = Depends(require_permission("volunteer-roles", RoleAction.DELETE)),
     use_case: VolunteerRoleUseCase = Depends(get_volunteer_role_use_case),
     audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> dict:
@@ -599,7 +599,7 @@ async def delete_volunteer_role(
 
     # Error mapping
     - **401 Unauthorized** — missing, expired, or invalid Bearer token.
-    - **403 Forbidden** — caller lacks ``delete`` permission on ``volunteer_roles``.
+    - **403 Forbidden** — caller lacks ``delete`` permission on ``volunteer-roles``.
     - **404 Not Found** — no volunteer role exists for the given ID.
     """
     try:
