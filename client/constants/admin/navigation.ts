@@ -1,17 +1,4 @@
-import {
-  Blocks,
-  Calendar,
-  FlaskConical,
-  Headphones,
-  LayoutDashboard,
-  Logs,
-  MapPin,
-  Server,
-  Settings,
-  ShieldCheck,
-  User,
-  Users
-} from 'lucide-react';
+import { Blocks, Calendar, FlaskConical, Headphones, LayoutDashboard, Logs, MapPin, Server, Settings, ShieldCheck, User, Users } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
 

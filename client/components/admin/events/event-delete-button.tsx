@@ -1,20 +1,22 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { AlertTriangle, Loader2, Trash2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
 import { FieldLabel } from './events-shared';
+import { Events } from '@/api/sdk.gen';
+import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
+import { getAccessToken } from '@/store/auth-store';
 
 const STATUS_WARNINGS: Record<string, string> = {
   posted: 'This event is currently published and visible on the public calendar.',
   started: 'This event is currently in progress. All active participants will lose access immediately.',
   ended: 'This event has already ended. Historical records will be permanently removed.',
-  postponed: 'This event is postponed and may have participants waiting for updates.',
+  postponed: 'This event is postponed and may have participants waiting for updates.'
 };
 
 function extractErrorMessage(payload: unknown): string | undefined {
@@ -84,9 +86,7 @@ export function DeleteEventButton({ eventId, eventTitle, eventStatus }: { eventI
       <DialogContent showCloseButton={false} className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Delete event</DialogTitle>
-          <DialogDescription>
-            This will permanently delete this event and all its sessions. This action cannot be undone.
-          </DialogDescription>
+          <DialogDescription>This will permanently delete this event and all its sessions. This action cannot be undone.</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -99,10 +99,7 @@ export function DeleteEventButton({ eventId, eventTitle, eventStatus }: { eventI
 
           <div className="rounded-2xl border border-red-100 bg-red-50 px-4 py-3">
             <p className="mb-1 text-[10px] font-semibold tracking-[0.14em] text-red-500 uppercase">Event to delete</p>
-            <p
-              className="select-none text-sm font-medium text-red-900"
-              onCopy={(e) => e.preventDefault()}
-            >
+            <p className="text-sm font-medium text-red-900 select-none" onCopy={(e) => e.preventDefault()}>
               {eventTitle}
             </p>
           </div>

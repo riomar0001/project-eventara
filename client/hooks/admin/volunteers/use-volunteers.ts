@@ -51,10 +51,10 @@ export function useVolunteers(pageSize = 20) {
             page,
             page_size: pageSize,
             ...(statusFilter !== null ? { status: statusFilter } : {}),
-            ...(roleIdFilter !== null ? { role_id: roleIdFilter } : {}),
+            ...(roleIdFilter !== null ? { role_id: roleIdFilter } : {})
           },
           headers: getAuthHeaders(),
-          throwOnError: false,
+          throwOnError: false
         });
 
         if (!result.data) throw result.error ?? new Error('Unable to load volunteers.');
@@ -101,6 +101,6 @@ export function useVolunteers(pageSize = 20) {
     setPage,
     setStatusFilter,
     setRoleIdFilter,
-    refetch: () => setRefreshKey((k) => k + 1),
+    refetch: () => setRefreshKey((k) => k + 1)
   };
 }

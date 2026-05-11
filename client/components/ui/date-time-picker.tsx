@@ -89,16 +89,7 @@ interface DateTimePickerProps {
   className?: string;
 }
 
-export function DateTimePicker({
-  value,
-  onChange,
-  minDatetime,
-  maxDatetime,
-  disabled,
-  placeholder = 'Pick a date',
-  id,
-  className
-}: DateTimePickerProps) {
+export function DateTimePicker({ value, onChange, minDatetime, maxDatetime, disabled, placeholder = 'Pick a date', id, className }: DateTimePickerProps) {
   const [open, setOpen] = useState(false);
 
   const selected = useMemo(() => parseLocal(value), [value]);
@@ -116,10 +107,7 @@ export function DateTimePicker({
   }, [maxDatetime]);
 
   // Current time as a 30-min-slot option string (floored so it always hits an option)
-  const selectedTimeOption = useMemo(
-    () => (selected ? snapDown(selected.getHours(), selected.getMinutes()) : undefined),
-    [selected]
-  );
+  const selectedTimeOption = useMemo(() => (selected ? snapDown(selected.getHours(), selected.getMinutes()) : undefined), [selected]);
 
   // Filter options to those within the min/max window on the selected day
   const availableOptions = useMemo(() => {
@@ -187,13 +175,7 @@ export function DateTimePicker({
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
-          <Calendar
-            mode="single"
-            selected={selected}
-            onSelect={handleDaySelect}
-            disabled={calendarDisabled}
-            autoFocus
-          />
+          <Calendar mode="single" selected={selected} onSelect={handleDaySelect} disabled={calendarDisabled} autoFocus />
         </PopoverContent>
       </Popover>
 

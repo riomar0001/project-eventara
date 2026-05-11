@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight, Plus, UserPlus } from 'lucide-react';
-import type { VolunteerStatus } from '@/api/types.gen';
 import { AddVolunteerDialog, EditVolunteerDialog } from '@/components/admin/volunteers/volunteer-form';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,24 +10,14 @@ import { useVolunteers } from '@/hooks/admin/volunteers/use-volunteers';
 import { VolunteersTableToolbar } from './table/table-toolbar';
 import { VolunteersTableContent } from './table/volunteers-table';
 import { OperationsPageIntro } from './volunteers-shared';
+import type { VolunteerStatus } from '@/api/types.gen';
 
 export function VolunteersPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [editingVolunteer, setEditingVolunteer] = useState<VolunteerRecord | null>(null);
   const [search, setSearch] = useState('');
 
-  const {
-    volunteers,
-    total,
-    page,
-    totalPages,
-    statusFilter,
-    isLoading,
-    error,
-    setPage,
-    setStatusFilter,
-    refetch,
-  } = useVolunteers(20);
+  const { volunteers, total, page, totalPages, statusFilter, isLoading, error, setPage, setStatusFilter, refetch } = useVolunteers(20);
 
   const activeCount = volunteers.filter((v) => v.status === 'active').length;
 
@@ -134,21 +123,11 @@ export function VolunteersPage() {
               Page {page} of {totalPages} &middot; {total} volunteers
             </p>
             <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setPage(page - 1)}
-                disabled={page <= 1 || isLoading}
-              >
+              <Button variant="outline" size="sm" onClick={() => setPage(page - 1)} disabled={page <= 1 || isLoading}>
                 <ChevronLeft className="size-4" />
                 Previous
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setPage(page + 1)}
-                disabled={page >= totalPages || isLoading}
-              >
+              <Button variant="outline" size="sm" onClick={() => setPage(page + 1)} disabled={page >= totalPages || isLoading}>
                 Next
                 <ChevronRight className="size-4" />
               </Button>
@@ -163,7 +142,9 @@ export function VolunteersPage() {
         <EditVolunteerDialog
           volunteer={editingVolunteer}
           open={!!editingVolunteer}
-          onOpenChange={(open) => { if (!open) setEditingVolunteer(null); }}
+          onOpenChange={(open) => {
+            if (!open) setEditingVolunteer(null);
+          }}
           onSaved={handleVolunteerUpdated}
         />
       )}

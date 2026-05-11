@@ -2,24 +2,12 @@
 
 import { Sparkles, Target, UserRoundCheck } from 'lucide-react';
 import { usePotentialVolunteers } from '@/hooks/admin/volunteers/use-potential-volunteers';
-import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
 import { PotentialVolunteersTable } from './potential-volunteers-table';
 import { BackLink, OperationsPageIntro } from './volunteers-shared';
+import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
 
 export function PotentialVolunteersPage() {
-  const {
-    potentialVolunteers,
-    total,
-    page,
-    totalPages,
-    minEvents,
-    search,
-    isLoading,
-    error,
-    setPage,
-    setMinEvents,
-    setSearch,
-  } = usePotentialVolunteers(20);
+  const { potentialVolunteers, total, page, totalPages, minEvents, search, isLoading, error, setPage, setMinEvents, setSearch } = usePotentialVolunteers(20);
 
   return (
     <div className="space-y-6">

@@ -117,19 +117,17 @@ function SectionHeader({
   return (
     <div className={`overflow-hidden rounded-[28px] border px-5 py-4 ${theme.panel}`}>
       <div className="flex flex-wrap items-start gap-4">
-        <span className={`flex size-11 shrink-0 items-center justify-center rounded-2xl ring-1 ${theme.iconRing}`}>
-          {icon}
-        </span>
+        <span className={`flex size-11 shrink-0 items-center justify-center rounded-2xl ring-1 ${theme.iconRing}`}>{icon}</span>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <p className={`text-lg font-semibold tracking-tight ${theme.labelColor}`}>{label}</p>
-            <span className={`inline-flex h-7 items-center rounded-full border px-3 text-[11px] font-semibold uppercase tracking-[0.18em] ${theme.countPill}`}>
+            <span className={`inline-flex h-7 items-center rounded-full border px-3 text-[11px] font-semibold tracking-[0.18em] uppercase ${theme.countPill}`}>
               {count} {count === 1 ? 'venue' : 'venues'}
             </span>
           </div>
           <p className="mt-1.5 max-w-2xl text-sm leading-6 text-neutral-600">{description}</p>
         </div>
-        <span className={`inline-flex h-8 items-center rounded-full border px-3 text-[11px] font-semibold uppercase tracking-[0.18em] ${theme.sourcePill}`}>
+        <span className={`inline-flex h-8 items-center rounded-full border px-3 text-[11px] font-semibold tracking-[0.18em] uppercase ${theme.sourcePill}`}>
           {accent === 'amber' ? 'Partnered' : 'Community'}
         </span>
       </div>
@@ -143,9 +141,7 @@ function SectionHeader({
 function SectionEmpty({ hasFilters, label }: { hasFilters: boolean; label: string }) {
   return (
     <div className="rounded-2xl border border-dashed border-neutral-200 px-6 py-8 text-center">
-      <p className="text-sm font-medium text-neutral-500">
-        {hasFilters ? `No ${label} match the current filters.` : `No ${label} have been added yet.`}
-      </p>
+      <p className="text-sm font-medium text-neutral-500">{hasFilters ? `No ${label} match the current filters.` : `No ${label} have been added yet.`}</p>
     </div>
   );
 }
@@ -287,7 +283,9 @@ export function VenuesCatalog() {
         <div className="space-y-1.5">
           <p className="text-[11px] font-semibold tracking-[0.18em] text-neutral-500 uppercase">Capacity</p>
           <Select value={capacityKey} onValueChange={(v) => updateFilters(() => setCapacityKey(v))}>
-            <SelectTrigger className="w-full" size="default"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-full" size="default">
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent align="start">
               {CAPACITY_FILTERS.map((o) => (
                 <SelectItem key={o.key} value={o.key}>
@@ -301,7 +299,9 @@ export function VenuesCatalog() {
         <div className="space-y-1.5">
           <p className="text-[11px] font-semibold tracking-[0.18em] text-neutral-500 uppercase">Sort by</p>
           <Select value={sortKey} onValueChange={(v) => updateFilters(() => setSortKey(v))}>
-            <SelectTrigger className="w-full" size="default"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-full" size="default">
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent align="start">
               {SORT_OPTIONS.map((o) => (
                 <SelectItem key={o.key} value={o.key}>
@@ -375,7 +375,6 @@ export function VenuesCatalog() {
       {/* ── Sections ─────────────────────────────────────────────────────────── */}
       {!isLoading && !error && (
         <div className="space-y-10">
-
           {/* Partnered Venues */}
           <section className="space-y-4 rounded-[32px] border border-amber-100 bg-linear-to-br from-amber-50/35 via-white to-white p-4 shadow-[0_20px_60px_-40px_rgba(180,83,9,0.28)]">
             <SectionHeader
@@ -386,11 +385,7 @@ export function VenuesCatalog() {
               description="Managed spaces with direct relationships and stronger booking confidence."
             />
 
-            {pagedPartners.length === 0 ? (
-              <SectionEmpty hasFilters={hasActiveFilters} label="official partner venues" />
-            ) : (
-              <VenueGrid venues={pagedPartners} />
-            )}
+            {pagedPartners.length === 0 ? <SectionEmpty hasFilters={hasActiveFilters} label="official partner venues" /> : <VenueGrid venues={pagedPartners} />}
 
             <SectionPagination
               currentPage={partnerCurrentPage}
@@ -443,7 +438,6 @@ export function VenuesCatalog() {
               onGoto={setCommunityPage}
             />
           </section>
-
         </div>
       )}
     </div>

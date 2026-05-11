@@ -1,9 +1,9 @@
 'use client';
 
 import { Search, X } from 'lucide-react';
-import type { VolunteerStatus } from '@/api/types.gen';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import type { VolunteerStatus } from '@/api/types.gen';
 
 const ALL_SENTINEL = '__all__';
 
@@ -14,12 +14,7 @@ interface VolunteersTableToolbarProps {
   onSearchChange: (value: string) => void;
 }
 
-export function VolunteersTableToolbar({
-  statusFilter,
-  onStatusFilterChange,
-  search,
-  onSearchChange,
-}: VolunteersTableToolbarProps) {
+export function VolunteersTableToolbar({ statusFilter, onStatusFilterChange, search, onSearchChange }: VolunteersTableToolbarProps) {
   function handleStatusChange(value: string) {
     onStatusFilterChange(value === ALL_SENTINEL ? null : (value as VolunteerStatus));
   }
@@ -28,12 +23,7 @@ export function VolunteersTableToolbar({
     <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
       <div className="relative w-full sm:w-72">
         <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-neutral-400" />
-        <Input
-          value={search}
-          onChange={(event) => onSearchChange(event.target.value)}
-          placeholder="Search by name, alias or email..."
-          className="pl-9"
-        />
+        <Input value={search} onChange={(event) => onSearchChange(event.target.value)} placeholder="Search by name, alias or email..." className="pl-9" />
         {search ? (
           <button
             type="button"
@@ -45,10 +35,7 @@ export function VolunteersTableToolbar({
           </button>
         ) : null}
       </div>
-      <Select
-        value={statusFilter ?? ALL_SENTINEL}
-        onValueChange={handleStatusChange}
-      >
+      <Select value={statusFilter ?? ALL_SENTINEL} onValueChange={handleStatusChange}>
         <SelectTrigger className="sm:w-40">
           <SelectValue placeholder="Status" />
         </SelectTrigger>

@@ -44,10 +44,10 @@ export function usePotentialVolunteers(pageSize = 20) {
             page,
             page_size: pageSize,
             min_events: minEvents,
-            ...(search ? { search } : {}),
+            ...(search ? { search } : {})
           },
           headers: getAuthHeaders(),
-          throwOnError: false,
+          throwOnError: false
         });
 
         if (!result.data) throw result.error ?? new Error('Unable to load potential volunteers.');
@@ -94,6 +94,6 @@ export function usePotentialVolunteers(pageSize = 20) {
     setPage,
     setMinEvents,
     setSearch,
-    refetch: () => setRefreshKey((k) => k + 1),
+    refetch: () => setRefreshKey((k) => k + 1)
   };
 }

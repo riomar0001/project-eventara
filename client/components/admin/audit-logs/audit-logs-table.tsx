@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import type { AuditLogResponse, PaginationMeta } from '@/api/types.gen';
+import type { AuditLogResponse, AppControllerSchemasAuditLogSchemaPaginationMeta as PaginationMeta } from '@/api/types.gen';
 import { AUDIT_LOGS_TEXT } from '@/constants/admin/audit-logs';
 import {
   countAuditChanges,

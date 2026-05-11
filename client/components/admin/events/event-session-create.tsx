@@ -5,17 +5,17 @@ import { AlertCircle, Loader2, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { Events } from '@/api/sdk.gen';
 import { Button } from '@/components/ui/button';
 import { DateTimePicker } from '@/components/ui/date-time-picker';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
 import { useEvent } from '@/hooks/admin/events/use-event';
 import { useVenues } from '@/hooks/admin/venues/use-venues';
-import { getApiErrorMessage, getAuthHeaders } from '@/lib/system/api-request';
 import { BackLink, DetailPanel, FieldLabel } from './events-shared';
+import { Events } from '@/api/sdk.gen';
+import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
+import { getApiErrorMessage, getAuthHeaders } from '@/lib/system/api-request';
 
 function toLocalInput(iso: string) {
   const date = new Date(iso);
@@ -50,7 +50,7 @@ function CreateSessionSkeleton() {
 
 export function EventSessionCreateLoader({ eventId }: { eventId: string }) {
   const router = useRouter();
-  const { event, sessions, isLoading, error } = useEvent(eventId);
+  const { event, isLoading, error } = useEvent(eventId);
   const { venues, isLoading: venuesLoading, error: venuesError } = useVenues();
 
   const sortedVenues = useMemo(() => [...venues].sort((a, b) => a.name.localeCompare(b.name)), [venues]);
@@ -115,7 +115,7 @@ export function EventSessionCreateLoader({ eventId }: { eventId: string }) {
           description: description.trim() || null,
           start_datetime: new Date(startDatetime).toISOString(),
           end_datetime: new Date(endDatetime).toISOString(),
-          max_slots: maxSlotsValue ?? (selectedVenue?.capacity ?? null),
+          max_slots: maxSlotsValue ?? selectedVenue?.capacity ?? null
         },
         headers: getAuthHeaders(),
         throwOnError: false
@@ -169,110 +169,105 @@ export function EventSessionCreateLoader({ eventId }: { eventId: string }) {
         </div>
       )}
 
-      <DetailPanel
-        title="Session details"
-        description="Create one session for this event. The schedule must stay inside the event date range."
-      >
+      <DetailPanel title="Session details" description="Create one session for this event. The schedule must stay inside the event date range.">
         <form className="space-y-5" onSubmit={handleSubmit}>
+          <div className="space-y-2">
+            <FieldLabel htmlFor="session-venue">Venue *</FieldLabel>
+            <Select value={venueId} onValueChange={setVenueId} disabled={venuesLoading || Boolean(venuesError) || isSubmitting}>
+              <SelectTrigger id="session-venue">
+                <SelectValue placeholder={venuesLoading ? 'Loading venues…' : 'Select a venue'} />
+              </SelectTrigger>
+              <SelectContent>
+                {sortedVenues.map((venue) => (
+                  <SelectItem key={venue.id} value={venue.id}>
+                    {venue.name} · {venue.city} · {venue.capacity.toLocaleString()} seats
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {selectedVenue ? (
+              <p className="text-xs text-neutral-500">Selected venue capacity: {selectedVenue.capacity.toLocaleString()} guests.</p>
+            ) : (
+              <p className="text-xs text-neutral-400">Choose the venue that should host this session.</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <FieldLabel htmlFor="session-title">Session title *</FieldLabel>
+            <Input
+              id="session-title"
+              value={title}
+              onChange={(event) => setTitle(event.target.value)}
+              placeholder="Opening forum, keynote, workshop, and more"
+              maxLength={255}
+              disabled={isSubmitting}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <FieldLabel htmlFor="session-description">Session description</FieldLabel>
+            <Textarea
+              id="session-description"
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+              placeholder="Add a short operational or program note for this session."
+              className="min-h-24"
+              maxLength={5000}
+              disabled={isSubmitting}
+            />
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <FieldLabel htmlFor="session-venue">Venue *</FieldLabel>
-              <Select value={venueId} onValueChange={setVenueId} disabled={venuesLoading || Boolean(venuesError) || isSubmitting}>
-                <SelectTrigger id="session-venue">
-                  <SelectValue placeholder={venuesLoading ? 'Loading venues…' : 'Select a venue'} />
-                </SelectTrigger>
-                <SelectContent>
-                  {sortedVenues.map((venue) => (
-                    <SelectItem key={venue.id} value={venue.id}>
-                      {venue.name} · {venue.city} · {venue.capacity.toLocaleString()} seats
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {selectedVenue ? (
-                <p className="text-xs text-neutral-500">
-                  Selected venue capacity: {selectedVenue.capacity.toLocaleString()} guests.
+              <FieldLabel htmlFor="session-start">Start datetime *</FieldLabel>
+              <DateTimePicker
+                id="session-start"
+                value={startDatetime}
+                onChange={setStartDatetime}
+                minDatetime={eventStart}
+                maxDatetime={eventEnd}
+                disabled={isSubmitting}
+                placeholder="Pick session start"
+              />
+            </div>
+            <div className="space-y-2">
+              <FieldLabel htmlFor="session-end">End datetime *</FieldLabel>
+              <DateTimePicker
+                id="session-end"
+                value={endDatetime}
+                onChange={setEndDatetime}
+                minDatetime={startDatetime ? new Date(startDatetime) : eventStart}
+                maxDatetime={eventEnd}
+                disabled={isSubmitting}
+                placeholder="Pick session end"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <FieldLabel htmlFor="session-max-slots">Max slots</FieldLabel>
+            <Input
+              id="session-max-slots"
+              type="number"
+              min="1"
+              value={maxSlots}
+              onChange={(event) => setMaxSlots(event.target.value)}
+              placeholder={selectedVenue ? `Leave blank to use ${selectedVenue.capacity.toLocaleString()} seats` : 'Optional'}
+              disabled={isSubmitting}
+            />
+            {selectedVenue ? (
+              maxSlotsValue !== null && maxSlotsValue > selectedVenue.capacity ? (
+                <p className="flex items-center gap-1.5 text-xs text-amber-600">
+                  <AlertCircle className="size-3 shrink-0" />
+                  Exceeds venue capacity of {selectedVenue.capacity.toLocaleString()} seats
                 </p>
               ) : (
-                <p className="text-xs text-neutral-400">Choose the venue that should host this session.</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <FieldLabel htmlFor="session-title">Session title *</FieldLabel>
-              <Input
-                id="session-title"
-                value={title}
-                onChange={(event) => setTitle(event.target.value)}
-                placeholder="Opening forum, keynote, workshop, and more"
-                maxLength={255}
-                disabled={isSubmitting}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <FieldLabel htmlFor="session-description">Session description</FieldLabel>
-              <Textarea
-                id="session-description"
-                value={description}
-                onChange={(event) => setDescription(event.target.value)}
-                placeholder="Add a short operational or program note for this session."
-                className="min-h-24"
-                maxLength={5000}
-                disabled={isSubmitting}
-              />
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <FieldLabel htmlFor="session-start">Start datetime *</FieldLabel>
-                <DateTimePicker
-                  id="session-start"
-                  value={startDatetime}
-                  onChange={setStartDatetime}
-                  minDatetime={eventStart}
-                  maxDatetime={eventEnd}
-                  disabled={isSubmitting}
-                  placeholder="Pick session start"
-                />
-              </div>
-              <div className="space-y-2">
-                <FieldLabel htmlFor="session-end">End datetime *</FieldLabel>
-                <DateTimePicker
-                  id="session-end"
-                  value={endDatetime}
-                  onChange={setEndDatetime}
-                  minDatetime={startDatetime ? new Date(startDatetime) : eventStart}
-                  maxDatetime={eventEnd}
-                  disabled={isSubmitting}
-                  placeholder="Pick session end"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <FieldLabel htmlFor="session-max-slots">Max slots</FieldLabel>
-              <Input
-                id="session-max-slots"
-                type="number"
-                min="1"
-                value={maxSlots}
-                onChange={(event) => setMaxSlots(event.target.value)}
-                placeholder={selectedVenue ? `Leave blank to use ${selectedVenue.capacity.toLocaleString()} seats` : 'Optional'}
-                disabled={isSubmitting}
-              />
-              {selectedVenue ? (
-                maxSlotsValue !== null && maxSlotsValue > selectedVenue.capacity ? (
-                  <p className="flex items-center gap-1.5 text-xs text-amber-600">
-                    <AlertCircle className="size-3 shrink-0" />
-                    Exceeds venue capacity of {selectedVenue.capacity.toLocaleString()} seats
-                  </p>
-                ) : (
-                  <p className="text-xs text-neutral-500">Leave blank to use the venue capacity automatically.</p>
-                )
-              ) : (
-                <p className="text-xs text-neutral-400">Optional capacity limit for this session.</p>
-              )}
-            </div>
+                <p className="text-xs text-neutral-500">Leave blank to use the venue capacity automatically.</p>
+              )
+            ) : (
+              <p className="text-xs text-neutral-400">Optional capacity limit for this session.</p>
+            )}
+          </div>
 
           <div className="flex flex-wrap gap-2 border-t border-neutral-200/80 pt-5">
             <Button type="submit" disabled={isSubmitting || venuesLoading || Boolean(venuesError)} className="rounded-xl">

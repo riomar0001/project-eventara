@@ -2,33 +2,27 @@
 
 import { useState } from 'react';
 import { CheckCircle2, Loader2, MoreHorizontal, Plus, UserX, XCircle } from 'lucide-react';
+import { toast } from 'sonner';
 import { flexRender, getCoreRowModel, useReactTable, type ColumnDef } from '@tanstack/react-table';
-import { EventVolunteers } from '@/api/sdk.gen';
-import type { EventVolunteerRecordResponse, EventVolunteerStatus } from '@/api/types.gen';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useEventVolunteers } from '@/hooks/admin/events/use-event-volunteers';
+import { EventVolunteers } from '@/api/sdk.gen';
+import type { EventVolunteerRecordResponse, EventVolunteerStatus } from '@/api/types.gen';
 import { getApiErrorMessage, getAuthHeaders } from '@/lib/system/api-request';
 import { cn } from '@/lib/utils';
-import { toast } from 'sonner';
 
 type ColumnMeta = { cellClassName?: string; headerClassName?: string };
 
@@ -38,7 +32,7 @@ const STATUS_BADGE: Record<EventVolunteerStatus, string> = {
   pending: 'bg-amber-100 text-amber-800',
   joined: 'bg-emerald-100 text-emerald-800',
   left: 'bg-neutral-100 text-neutral-600',
-  rejected: 'bg-red-100 text-red-700',
+  rejected: 'bg-red-100 text-red-700'
 };
 
 function fmt(iso: string | null) {
@@ -80,7 +74,7 @@ function AssignVolunteerDialog({ eventId, onClose, onAssigned }: AssignDialogPro
         path: { event_id: eventId },
         body: { alias: trimmed },
         headers: getAuthHeaders(),
-        throwOnError: false,
+        throwOnError: false
       });
       if (!result.data) throw result.error ?? new Error('Unable to assign volunteer.');
       toast.success(result.data.message ?? 'Volunteer assigned successfully.');
@@ -102,14 +96,7 @@ function AssignVolunteerDialog({ eventId, onClose, onAssigned }: AssignDialogPro
         <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
           <div className="space-y-1.5">
             <p className="text-sm font-medium text-neutral-900">Volunteer alias</p>
-            <Input
-              id="volunteer-alias"
-              placeholder="e.g. johndoe"
-              value={alias}
-              onChange={(e) => setAlias(e.target.value)}
-              disabled={isSubmitting}
-              autoFocus
-            />
+            <Input id="volunteer-alias" placeholder="e.g. johndoe" value={alias} onChange={(e) => setAlias(e.target.value)} disabled={isSubmitting} autoFocus />
             <p className="text-xs text-neutral-500">The volunteer&apos;s account alias.</p>
           </div>
           <DialogFooter>
@@ -144,7 +131,7 @@ function RowActions({ record, eventId, onMutated }: RowActionsProps) {
         path: { event_id: eventId, event_volunteer_id: record.id },
         body: { status: newStatus },
         headers: getAuthHeaders(),
-        throwOnError: false,
+        throwOnError: false
       });
       if (!result.data) throw result.error ?? new Error('Unable to update volunteer status.');
       toast.success(result.data.message ?? 'Status updated.');
@@ -163,7 +150,7 @@ function RowActions({ record, eventId, onMutated }: RowActionsProps) {
       const result = await EventVolunteers.removeEventVolunteerEventsEventIdVolunteersEventVolunteerIdDelete({
         path: { event_id: eventId, event_volunteer_id: record.id },
         headers: getAuthHeaders(),
-        throwOnError: false,
+        throwOnError: false
       });
       if (!result.data) throw result.error ?? new Error('Unable to remove volunteer.');
       toast.success(result.data.message ?? 'Volunteer removed.');
@@ -226,27 +213,23 @@ function buildColumns(eventId: string, onMutated: () => void): ColumnDef<EventVo
     {
       id: 'volunteer_id',
       header: 'Volunteer ID',
-      cell: ({ row }) => (
-        <p className="font-mono text-xs text-neutral-700">{shortId(row.original.volunteer_id)}</p>
-      ),
-      meta: { headerClassName: 'pl-6', cellClassName: 'pl-6' } satisfies ColumnMeta,
+      cell: ({ row }) => <p className="font-mono text-xs text-neutral-700">{shortId(row.original.volunteer_id)}</p>,
+      meta: { headerClassName: 'pl-6', cellClassName: 'pl-6' } satisfies ColumnMeta
     },
     {
       id: 'assignment_id',
       header: 'Assignment ID',
-      cell: ({ row }) => (
-        <p className="font-mono text-xs text-neutral-500">{shortId(row.original.id)}</p>
-      ),
+      cell: ({ row }) => <p className="font-mono text-xs text-neutral-500">{shortId(row.original.id)}</p>
     },
     {
       id: 'status',
       header: 'Status',
-      cell: ({ row }) => <VolunteerStatusBadge status={row.original.status} />,
+      cell: ({ row }) => <VolunteerStatusBadge status={row.original.status} />
     },
     {
       id: 'assigned_on',
       header: 'Assigned on',
-      cell: ({ row }) => <p className="text-sm text-neutral-600">{fmt(row.original.created_at)}</p>,
+      cell: ({ row }) => <p className="text-sm text-neutral-600">{fmt(row.original.created_at)}</p>
     },
     {
       id: 'actions',
@@ -256,8 +239,8 @@ function buildColumns(eventId: string, onMutated: () => void): ColumnDef<EventVo
           <RowActions record={row.original} eventId={eventId} onMutated={onMutated} />
         </div>
       ),
-      meta: { headerClassName: 'px-6 text-right', cellClassName: 'px-6 text-right' } satisfies ColumnMeta,
-    },
+      meta: { headerClassName: 'px-6 text-right', cellClassName: 'px-6 text-right' } satisfies ColumnMeta
+    }
   ];
 }
 
@@ -269,10 +252,7 @@ export function EventVolunteersPanel({ eventId }: EventVolunteersPanelProps) {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [isAssignOpen, setIsAssignOpen] = useState(false);
 
-  const { volunteers, isLoading, error, refetch } = useEventVolunteers(
-    eventId,
-    statusFilter === 'all' ? null : statusFilter,
-  );
+  const { volunteers, isLoading, error, refetch } = useEventVolunteers(eventId, statusFilter === 'all' ? null : statusFilter);
 
   const columns = buildColumns(eventId, refetch);
 
@@ -280,25 +260,16 @@ export function EventVolunteersPanel({ eventId }: EventVolunteersPanelProps) {
   const table = useReactTable({
     data: volunteers,
     columns,
-    getCoreRowModel: getCoreRowModel(),
+    getCoreRowModel: getCoreRowModel()
   });
 
   return (
     <>
-      {isAssignOpen && (
-        <AssignVolunteerDialog
-          eventId={eventId}
-          onClose={() => setIsAssignOpen(false)}
-          onAssigned={refetch}
-        />
-      )}
+      {isAssignOpen && <AssignVolunteerDialog eventId={eventId} onClose={() => setIsAssignOpen(false)} onAssigned={refetch} />}
 
       <div className="space-y-0 overflow-hidden rounded-[24px] ring-1 ring-neutral-200/80">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-200/80 bg-neutral-50/60 px-5 py-3.5">
-          <Select
-            value={statusFilter}
-            onValueChange={(v) => setStatusFilter(v as StatusFilter)}
-          >
+          <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as StatusFilter)}>
             <SelectTrigger className="h-8 w-44 text-sm">
               <SelectValue placeholder="All statuses" />
             </SelectTrigger>
@@ -323,9 +294,7 @@ export function EventVolunteersPanel({ eventId }: EventVolunteersPanelProps) {
           </Button>
         </div>
 
-        {error && (
-          <div className="px-5 py-4 text-sm text-red-600">{error}</div>
-        )}
+        {error && <div className="px-5 py-4 text-sm text-red-600">{error}</div>}
 
         {isLoading ? (
           <div className="flex items-center justify-center px-5 py-12">
@@ -339,10 +308,7 @@ export function EventVolunteersPanel({ eventId }: EventVolunteersPanelProps) {
                   {headerGroup.headers.map((header) => {
                     const meta = header.column.columnDef.meta as ColumnMeta | undefined;
                     return (
-                      <TableHead
-                        key={header.id}
-                        className={cn('py-3 text-xs font-medium text-neutral-500', meta?.headerClassName)}
-                      >
+                      <TableHead key={header.id} className={cn('py-3 text-xs font-medium text-neutral-500', meta?.headerClassName)}>
                         {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                       </TableHead>
                     );
@@ -360,10 +326,7 @@ export function EventVolunteersPanel({ eventId }: EventVolunteersPanelProps) {
                 </TableRow>
               ) : (
                 table.getRowModel().rows.map((row, index) => (
-                  <TableRow
-                    key={row.id}
-                    className={cn('hover:bg-neutral-50/70', index % 2 !== 0 && 'bg-neutral-50/35')}
-                  >
+                  <TableRow key={row.id} className={cn('hover:bg-neutral-50/70', index % 2 !== 0 && 'bg-neutral-50/35')}>
                     {row.getVisibleCells().map((cell) => {
                       const meta = cell.column.columnDef.meta as ColumnMeta | undefined;
                       return (

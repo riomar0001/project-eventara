@@ -10,12 +10,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import type { VolunteerRecord } from '@/hooks/admin/volunteers/use-volunteers';
 import { BackLink, FieldLabel } from './volunteers-shared';
 import { Users, Volunteers } from '@/api/sdk.gen';
 import type { VolunteerStatus } from '@/api/types.gen';
 import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
 import { getAccessToken } from '@/store/auth-store';
-import type { VolunteerRecord } from '@/hooks/admin/volunteers/use-volunteers';
 
 function extractErrorMessage(payload: unknown): string | undefined {
   if (!payload || typeof payload !== 'object') return undefined;
@@ -48,7 +48,7 @@ function getVolunteerErrorMessage(error: unknown) {
 const VOLUNTEER_STATUS_OPTIONS: { label: string; value: VolunteerStatus }[] = [
   { label: 'Active', value: 'active' },
   { label: 'Inactive', value: 'inactive' },
-  { label: 'Suspended', value: 'suspended' },
+  { label: 'Suspended', value: 'suspended' }
 ];
 
 type VolunteerFormProps = {
@@ -193,7 +193,7 @@ export function VolunteerForm({ mode, initialData, onCancel, onSaved, variant = 
           path: { volunteer_id: initialData.id },
           body,
           headers: { Authorization: `Bearer ${accessToken}` },
-          throwOnError: false,
+          throwOnError: false
         });
 
         if (!result.data) throw result.error ?? new Error('Unable to update volunteer.');
@@ -353,7 +353,7 @@ export function EditVolunteerDialog({
   volunteer,
   open,
   onOpenChange,
-  onSaved,
+  onSaved
 }: {
   volunteer: VolunteerRecord;
   open: boolean;

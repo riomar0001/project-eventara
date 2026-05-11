@@ -3,8 +3,7 @@
 import { useState } from 'react';
 import { AlertCircle, AlertTriangle, ChevronDown, Clock, Info, Loader2, MapPin, Plus, RefreshCw, Trash2, Users } from 'lucide-react';
 import Link from 'next/link';
-import type { EventStatus } from '@/api/types.gen';
-import { Events } from '@/api/sdk.gen';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -14,17 +13,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
 import { useEvent } from '@/hooks/admin/events/use-event';
-import { getApiErrorMessage, getAuthHeaders } from '@/lib/system/api-request';
-import { cn } from '@/lib/utils';
 import { DeleteEventButton } from './event-delete-button';
 import { EventParticipantsPanel } from './event-participants-panel';
 import { EventSessionCreateDialog } from './event-session-create-dialog';
 import { EventSessionDeleteDialog } from './event-session-delete-dialog';
 import { EventVolunteersPanel } from './event-volunteers-panel';
 import { BackLink, DetailList, DetailPanel, PhotoPanel } from './events-shared';
-import { toast } from 'sonner';
+import { Events } from '@/api/sdk.gen';
+import type { EventStatus } from '@/api/types.gen';
+import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
+import { getApiErrorMessage, getAuthHeaders } from '@/lib/system/api-request';
+import { cn } from '@/lib/utils';
 
 const SESSION_STATUS_WARNINGS: Record<string, { message: string; icon: React.ElementType; className: string }> = {
   draft: {
@@ -51,7 +51,7 @@ const SESSION_STATUS_WARNINGS: Record<string, { message: string; icon: React.Ele
     message: 'This session has been postponed. Attendees may be awaiting updates.',
     icon: AlertTriangle,
     className: 'border-amber-100 bg-amber-50 text-amber-700'
-  },
+  }
 };
 
 function SessionStatusWarning({ status }: { status: string }) {
@@ -128,13 +128,9 @@ function getStatusActions(status: EventStatus): EventStatusAction[] {
         { status: 'cancelled', label: 'Cancel event', description: 'Close the event instead of rescheduling.', destructive: true }
       ];
     case 'ended':
-      return [
-        { status: 'draft', label: 'Reopen as draft', description: 'Restore the event as a draft to reschedule or reuse.' }
-      ];
+      return [{ status: 'draft', label: 'Reopen as draft', description: 'Restore the event as a draft to reschedule or reuse.' }];
     case 'cancelled':
-      return [
-        { status: 'draft', label: 'Reopen as draft', description: 'Restore the cancelled event as a draft.' }
-      ];
+      return [{ status: 'draft', label: 'Reopen as draft', description: 'Restore the cancelled event as a draft.' }];
     default:
       return [];
   }
@@ -150,26 +146,24 @@ function StatusBadge({ status }: { status: string }) {
     postponed: 'bg-amber-100 text-amber-700'
   };
   const cls = colorMap[status] ?? 'bg-neutral-100 text-neutral-700';
-  return (
-    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${cls}`}>
-      {formatStatusLabel(status)}
-    </span>
-  );
+  return <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${cls}`}>{formatStatusLabel(status)}</span>;
 }
 
-function UpdateStatusMenu({ currentStatus, isUpdating, onUpdate }: { currentStatus: EventStatus; isUpdating: boolean; onUpdate: (status: EventStatus) => Promise<void> }) {
+function UpdateStatusMenu({
+  currentStatus,
+  isUpdating,
+  onUpdate
+}: {
+  currentStatus: EventStatus;
+  isUpdating: boolean;
+  onUpdate: (status: EventStatus) => Promise<void>;
+}) {
   const actions = getStatusActions(currentStatus);
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          disabled={isUpdating}
-          className="rounded-xl border-sky-200 text-sky-700 hover:bg-sky-50"
-        >
+        <Button type="button" variant="outline" size="sm" disabled={isUpdating} className="rounded-xl border-sky-200 text-sky-700 hover:bg-sky-50">
           {isUpdating ? <Loader2 className="size-4 animate-spin" /> : <RefreshCw className="size-4" />}
           {isUpdating ? 'Updating…' : 'Update status'}
           <ChevronDown className="size-3.5" />
@@ -190,9 +184,7 @@ function UpdateStatusMenu({ currentStatus, isUpdating, onUpdate }: { currentStat
             >
               <div className="flex min-w-0 flex-col items-start gap-0.5">
                 <span className="font-medium">{action.label}</span>
-                <span className={cn('text-xs leading-5', action.destructive ? 'text-destructive/80' : 'text-neutral-500')}>
-                  {action.description}
-                </span>
+                <span className={cn('text-xs leading-5', action.destructive ? 'text-destructive/80' : 'text-neutral-500')}>{action.description}</span>
               </div>
             </DropdownMenuItem>
           ))
@@ -271,12 +263,7 @@ export function EventDetail({ eventId }: { eventId: string }) {
   return (
     <div className="space-y-6">
       {event && isCreateSessionOpen && (
-        <EventSessionCreateDialog
-          event={event}
-          sessionsCount={sessions.length}
-          onClose={() => setIsCreateSessionOpen(false)}
-          onCreated={refetch}
-        />
+        <EventSessionCreateDialog event={event} sessionsCount={sessions.length} onClose={() => setIsCreateSessionOpen(false)} onCreated={refetch} />
       )}
 
       {event && deletingSession && (
@@ -330,7 +317,7 @@ export function EventDetail({ eventId }: { eventId: string }) {
             <div className="space-y-6">
               <DetailPanel title="Description" description="The event narrative and public-facing copy shown to organizers and staff.">
                 <div className="rounded-2xl bg-neutral-50/70 p-5">
-                  <div className="prose prose-sm max-w-none text-neutral-700 prose-headings:font-semibold prose-p:leading-7 prose-p:my-0">
+                  <div className="prose prose-sm prose-headings:font-semibold prose-p:leading-7 prose-p:my-0 max-w-none text-neutral-700">
                     <div dangerouslySetInnerHTML={{ __html: event.description }} />
                   </div>
                 </div>
@@ -340,10 +327,16 @@ export function EventDetail({ eventId }: { eventId: string }) {
                 title={`Session schedule (${sessions.length})`}
                 description="Ordered by start time with venue, slots, and live status."
                 actions={
-                    <Button type="button" variant="outline" size="sm" className="rounded-xl border-sky-200 text-sky-700 hover:bg-sky-50" onClick={() => setIsCreateSessionOpen(true)}>
-                      <Plus className="size-4" />
-                      Add session
-                    </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="rounded-xl border-sky-200 text-sky-700 hover:bg-sky-50"
+                    onClick={() => setIsCreateSessionOpen(true)}
+                  >
+                    <Plus className="size-4" />
+                    Add session
+                  </Button>
                 }
               >
                 {sessions.length === 0 ? (
@@ -413,9 +406,7 @@ export function EventDetail({ eventId }: { eventId: string }) {
                                   <MapPin className="mt-0.5 size-4 shrink-0 text-sky-600" />
                                   <div className="min-w-0">
                                     <p className="text-sm font-medium text-neutral-950">{session.venue_name ?? '—'}</p>
-                                    {session.venue_location && (
-                                      <p className="text-xs text-neutral-500">{session.venue_location}</p>
-                                    )}
+                                    {session.venue_location && <p className="text-xs text-neutral-500">{session.venue_location}</p>}
                                   </div>
                                 </div>
                               </div>
@@ -453,9 +444,7 @@ export function EventDetail({ eventId }: { eventId: string }) {
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
                       <p className="text-[10px] font-semibold tracking-[0.16em] text-sky-700 uppercase">Current status</p>
-                      <p className="mt-1 text-sm leading-6 text-neutral-600">
-                        Use the update action in the header to move this event through its lifecycle.
-                      </p>
+                      <p className="mt-1 text-sm leading-6 text-neutral-600">Use the update action in the header to move this event through its lifecycle.</p>
                     </div>
                     <StatusBadge status={event.status} />
                   </div>

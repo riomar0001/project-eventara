@@ -31,10 +31,10 @@ export function useEventParticipants(eventId: string, statusFilter: EventPartici
           query: {
             limit: PAGE_SIZE,
             offset,
-            ...(statusFilter !== null ? { status: statusFilter } : {}),
+            ...(statusFilter !== null ? { status: statusFilter } : {})
           },
           headers: getAuthHeaders(),
-          throwOnError: false,
+          throwOnError: false
         });
 
         if (!result.data) throw result.error ?? new Error('Unable to load event participants.');
@@ -68,6 +68,6 @@ export function useEventParticipants(eventId: string, statusFilter: EventPartici
     isLoading,
     error,
     setPage: (p: number) => setOffset((p - 1) * PAGE_SIZE),
-    refetch: () => setRefreshKey((k) => k + 1),
+    refetch: () => setRefreshKey((k) => k + 1)
   };
 }

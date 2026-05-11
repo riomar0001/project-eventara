@@ -22,7 +22,7 @@ export function useEventVolunteers(eventId: string, statusFilter: EventVolunteer
           path: { event_id: eventId },
           query: statusFilter !== null ? { status: statusFilter } : undefined,
           headers: getAuthHeaders(),
-          throwOnError: false,
+          throwOnError: false
         });
 
         if (!result.data) throw result.error ?? new Error('Unable to load event volunteers.');
@@ -45,6 +45,6 @@ export function useEventVolunteers(eventId: string, statusFilter: EventVolunteer
     volunteers,
     isLoading,
     error,
-    refetch: () => setRefreshKey((k) => k + 1),
+    refetch: () => setRefreshKey((k) => k + 1)
   };
 }

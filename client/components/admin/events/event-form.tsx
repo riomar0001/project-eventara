@@ -462,13 +462,7 @@ export function EventForm({ mode, event, initialSessions = [] }: EventFormProps)
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
                     <FieldLabel htmlFor="event-start-date">Start date *</FieldLabel>
-                    <DateTimePicker
-                      id="event-start-date"
-                      value={startDate}
-                      onChange={setStartDate}
-                      disabled={isSubmitting}
-                      placeholder="Pick start date"
-                    />
+                    <DateTimePicker id="event-start-date" value={startDate} onChange={setStartDate} disabled={isSubmitting} placeholder="Pick start date" />
                   </div>
                   <div className="space-y-2">
                     <FieldLabel htmlFor="event-end-date">End date *</FieldLabel>

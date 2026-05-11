@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useDebounce } from '@/hooks/use-debounce';
 import type { AuditLogFilterValues } from '@/types/admin/audit-logs';
 import { AuditLogs } from '@/api/sdk.gen';
-import type { AuditLogResponse, PaginationMeta } from '@/api/types.gen';
+import type { AuditLogResponse, AppControllerSchemasAuditLogSchemaPaginationMeta as PaginationMeta } from '@/api/types.gen';
 import { DEFAULT_AUDIT_LOG_FILTERS } from '@/constants/admin/audit-logs';
 import { formatAuditDateBoundary, countActiveAuditFilters } from '@/lib/admin/audit-logs/helpers';
 import { getAccessToken } from '@/store/auth-store';

@@ -3,12 +3,12 @@
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { flexRender, getCoreRowModel, useReactTable, type ColumnDef } from '@tanstack/react-table';
-import type { EventParticipantRecord, EventParticipantStatus } from '@/api/types.gen';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useEventParticipants } from '@/hooks/admin/events/use-event-participants';
+import type { EventParticipantRecord, EventParticipantStatus } from '@/api/types.gen';
 import { cn } from '@/lib/utils';
 
 type ColumnMeta = { cellClassName?: string; headerClassName?: string };
@@ -19,7 +19,7 @@ const STATUS_BADGE: Record<EventParticipantStatus, string> = {
   registered: 'bg-sky-100 text-sky-800',
   attended: 'bg-emerald-100 text-emerald-800',
   cancelled: 'bg-red-100 text-red-700',
-  no_show: 'bg-neutral-100 text-neutral-600',
+  no_show: 'bg-neutral-100 text-neutral-600'
 };
 
 function fmt(iso: string | null) {
@@ -45,28 +45,24 @@ const participantColumns: ColumnDef<EventParticipantRecord>[] = [
   {
     id: 'user_id',
     header: 'User ID',
-    cell: ({ row }) => (
-      <p className="font-mono text-xs text-neutral-700">{shortId(row.original.user_id)}</p>
-    ),
-    meta: { headerClassName: 'pl-6', cellClassName: 'pl-6' } satisfies ColumnMeta,
+    cell: ({ row }) => <p className="font-mono text-xs text-neutral-700">{shortId(row.original.user_id)}</p>,
+    meta: { headerClassName: 'pl-6', cellClassName: 'pl-6' } satisfies ColumnMeta
   },
   {
     id: 'session_id',
     header: 'Session ID',
-    cell: ({ row }) => (
-      <p className="font-mono text-xs text-neutral-500">{shortId(row.original.event_session_id)}</p>
-    ),
+    cell: ({ row }) => <p className="font-mono text-xs text-neutral-500">{shortId(row.original.event_session_id)}</p>
   },
   {
     id: 'status',
     header: 'Status',
-    cell: ({ row }) => <ParticipantStatusBadge status={row.original.status} />,
+    cell: ({ row }) => <ParticipantStatusBadge status={row.original.status} />
   },
   {
     id: 'registered_on',
     header: 'Registered on',
-    cell: ({ row }) => <p className="text-sm text-neutral-600">{fmt(row.original.created_at)}</p>,
-  },
+    cell: ({ row }) => <p className="text-sm text-neutral-600">{fmt(row.original.created_at)}</p>
+  }
 ];
 
 export interface EventParticipantsPanelProps {
@@ -76,25 +72,19 @@ export interface EventParticipantsPanelProps {
 export function EventParticipantsPanel({ eventId }: EventParticipantsPanelProps) {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
 
-  const { participants, total, page, totalPages, isLoading, error, setPage } = useEventParticipants(
-    eventId,
-    statusFilter === 'all' ? null : statusFilter,
-  );
+  const { participants, total, page, totalPages, isLoading, error, setPage } = useEventParticipants(eventId, statusFilter === 'all' ? null : statusFilter);
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data: participants,
     columns: participantColumns,
-    getCoreRowModel: getCoreRowModel(),
+    getCoreRowModel: getCoreRowModel()
   });
 
   return (
     <div className="space-y-0 overflow-hidden rounded-[24px] ring-1 ring-neutral-200/80">
       <div className="flex flex-wrap items-center gap-3 border-b border-neutral-200/80 bg-neutral-50/60 px-5 py-3.5">
-        <Select
-          value={statusFilter}
-          onValueChange={(v) => setStatusFilter(v as StatusFilter)}
-        >
+        <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as StatusFilter)}>
           <SelectTrigger className="h-8 w-44 text-sm">
             <SelectValue placeholder="All statuses" />
           </SelectTrigger>
@@ -109,9 +99,7 @@ export function EventParticipantsPanel({ eventId }: EventParticipantsPanelProps)
         <span className="text-sm text-neutral-500">{total} total</span>
       </div>
 
-      {error && (
-        <div className="px-5 py-4 text-sm text-red-600">{error}</div>
-      )}
+      {error && <div className="px-5 py-4 text-sm text-red-600">{error}</div>}
 
       {isLoading ? (
         <div className="flex items-center justify-center px-5 py-12">
@@ -125,10 +113,7 @@ export function EventParticipantsPanel({ eventId }: EventParticipantsPanelProps)
                 {headerGroup.headers.map((header) => {
                   const meta = header.column.columnDef.meta as ColumnMeta | undefined;
                   return (
-                    <TableHead
-                      key={header.id}
-                      className={cn('py-3 text-xs font-medium text-neutral-500', meta?.headerClassName)}
-                    >
+                    <TableHead key={header.id} className={cn('py-3 text-xs font-medium text-neutral-500', meta?.headerClassName)}>
                       {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                     </TableHead>
                   );
@@ -146,10 +131,7 @@ export function EventParticipantsPanel({ eventId }: EventParticipantsPanelProps)
               </TableRow>
             ) : (
               table.getRowModel().rows.map((row, index) => (
-                <TableRow
-                  key={row.id}
-                  className={cn('hover:bg-neutral-50/70', index % 2 !== 0 && 'bg-neutral-50/35')}
-                >
+                <TableRow key={row.id} className={cn('hover:bg-neutral-50/70', index % 2 !== 0 && 'bg-neutral-50/35')}>
                   {row.getVisibleCells().map((cell) => {
                     const meta = cell.column.columnDef.meta as ColumnMeta | undefined;
                     return (
@@ -171,20 +153,10 @@ export function EventParticipantsPanel({ eventId }: EventParticipantsPanelProps)
             Page {page} of {totalPages}
           </span>
           <div className="flex gap-1">
-            <Button
-              variant="outline"
-              size="icon-sm"
-              onClick={() => setPage(page - 1)}
-              disabled={page <= 1}
-            >
+            <Button variant="outline" size="icon-sm" onClick={() => setPage(page - 1)} disabled={page <= 1}>
               <ChevronLeft className="size-4" />
             </Button>
-            <Button
-              variant="outline"
-              size="icon-sm"
-              onClick={() => setPage(page + 1)}
-              disabled={page >= totalPages}
-            >
+            <Button variant="outline" size="icon-sm" onClick={() => setPage(page + 1)} disabled={page >= totalPages}>
               <ChevronRight className="size-4" />
             </Button>
           </div>

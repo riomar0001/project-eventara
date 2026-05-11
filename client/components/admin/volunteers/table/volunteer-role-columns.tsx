@@ -34,9 +34,7 @@ export function buildVolunteerRoleColumns(actions: RoleActions): ColumnDef<Volun
       cell: ({ row }) => (
         <div className="space-y-0.5">
           <p className="font-medium text-neutral-950">{row.original.name}</p>
-          {row.original.description && (
-            <p className="max-w-xs truncate text-xs text-neutral-500">{row.original.description}</p>
-          )}
+          {row.original.description && <p className="max-w-xs truncate text-xs text-neutral-500">{row.original.description}</p>}
         </div>
       ),
       meta: {
@@ -48,14 +46,7 @@ export function buildVolunteerRoleColumns(actions: RoleActions): ColumnDef<Volun
       id: 'status',
       header: 'Status',
       cell: ({ row }) => (
-        <Badge
-          variant="secondary"
-          className={
-            row.original.is_active
-              ? 'bg-emerald-100 text-emerald-800'
-              : 'bg-neutral-100 text-neutral-500'
-          }
-        >
+        <Badge variant="secondary" className={row.original.is_active ? 'bg-emerald-100 text-emerald-800' : 'bg-neutral-100 text-neutral-500'}>
           {row.original.is_active ? 'Active' : 'Inactive'}
         </Badge>
       )
@@ -93,10 +84,7 @@ export function buildVolunteerRoleColumns(actions: RoleActions): ColumnDef<Volun
                 Edit role
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem
-                className="text-red-600 focus:text-red-600"
-                onClick={() => actions.onDelete(row.original)}
-              >
+              <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={() => actions.onDelete(row.original)}>
                 <Trash2 className="size-4" />
                 Delete role
               </DropdownMenuItem>

@@ -5,8 +5,8 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
 import type { VolunteerRecord } from '@/hooks/admin/volunteers/use-volunteers';
+import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
 
 export type VolunteerTableRecord = VolunteerRecord;
 
@@ -32,12 +32,10 @@ function getDisplayName(firstName: string | null, lastName: string | null, alias
 const STATUS_STYLES: Record<string, string> = {
   active: 'bg-emerald-100 text-emerald-800',
   inactive: 'bg-neutral-100 text-neutral-600',
-  suspended: 'bg-red-100 text-red-700',
+  suspended: 'bg-red-100 text-red-700'
 };
 
-export function createVolunteerColumns(
-  onEdit: (volunteer: VolunteerTableRecord) => void,
-): ColumnDef<VolunteerTableRecord>[] {
+export function createVolunteerColumns(onEdit: (volunteer: VolunteerTableRecord) => void): ColumnDef<VolunteerTableRecord>[] {
   return [
     {
       id: 'profile',
@@ -50,9 +48,7 @@ export function createVolunteerColumns(
         return (
           <div className="flex items-center gap-3">
             <Avatar size="lg">
-              <AvatarFallback className="bg-emerald-50 font-medium text-emerald-700">
-                {initials}
-              </AvatarFallback>
+              <AvatarFallback className="bg-emerald-50 font-medium text-emerald-700">{initials}</AvatarFallback>
             </Avatar>
             <div className="space-y-0.5">
               <p className="font-medium text-neutral-950">{displayName}</p>
@@ -69,34 +65,23 @@ export function createVolunteerColumns(
     {
       id: 'alias',
       header: 'Alias',
-      cell: ({ row }) => (
-        <p className="text-sm text-neutral-500">
-          {row.original.alias ? `@${row.original.alias}` : '—'}
-        </p>
-      )
+      cell: ({ row }) => <p className="text-sm text-neutral-500">{row.original.alias ? `@${row.original.alias}` : '—'}</p>
     },
     {
       id: 'role',
       header: 'Role',
-      cell: ({ row }) => (
-        <p className="text-sm text-neutral-700">{row.original.role_name ?? '—'}</p>
-      )
+      cell: ({ row }) => <p className="text-sm text-neutral-700">{row.original.role_name ?? '—'}</p>
     },
     {
       id: 'contact',
       header: 'Phone',
-      cell: ({ row }) => (
-        <p className="text-sm text-neutral-600">{row.original.contact_phone}</p>
-      )
+      cell: ({ row }) => <p className="text-sm text-neutral-600">{row.original.contact_phone}</p>
     },
     {
       id: 'status',
       header: 'Status',
       cell: ({ row }) => (
-        <Badge
-          variant="secondary"
-          className={STATUS_STYLES[row.original.status] ?? 'bg-neutral-100 text-neutral-600'}
-        >
+        <Badge variant="secondary" className={STATUS_STYLES[row.original.status] ?? 'bg-neutral-100 text-neutral-600'}>
           {row.original.status.charAt(0).toUpperCase() + row.original.status.slice(1)}
         </Badge>
       )

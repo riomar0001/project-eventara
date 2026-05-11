@@ -3,18 +3,18 @@
 import { useState } from 'react';
 import { AlertTriangle, Loader2, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { Events } from '@/api/sdk.gen';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { getApiErrorMessage, getAuthHeaders } from '@/lib/system/api-request';
 import { FieldLabel } from './events-shared';
+import { Events } from '@/api/sdk.gen';
+import { getApiErrorMessage, getAuthHeaders } from '@/lib/system/api-request';
 
 const STATUS_WARNINGS: Record<string, string> = {
   posted: 'This session is currently published and visible to attendees.',
   started: 'This session is currently in progress. Active participants will lose access immediately.',
   ended: 'This session has already ended. Historical records will be permanently removed.',
-  postponed: 'This session is postponed and may have registered attendees.',
+  postponed: 'This session is postponed and may have registered attendees.'
 };
 
 type EventSessionDeleteDialogProps = {
@@ -61,9 +61,7 @@ export function EventSessionDeleteDialog({ eventId, sessionId, sessionTitle, ses
       <DialogContent showCloseButton={false} className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Delete session</DialogTitle>
-          <DialogDescription>
-            This will permanently delete this session and all its participant records. This action cannot be undone.
-          </DialogDescription>
+          <DialogDescription>This will permanently delete this session and all its participant records. This action cannot be undone.</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -76,10 +74,7 @@ export function EventSessionDeleteDialog({ eventId, sessionId, sessionTitle, ses
 
           <div className="rounded-2xl border border-red-100 bg-red-50 px-4 py-3">
             <p className="mb-1 text-[10px] font-semibold tracking-[0.14em] text-red-500 uppercase">Session to delete</p>
-            <p
-              className="select-none text-sm font-medium text-red-900"
-              onCopy={(e) => e.preventDefault()}
-            >
+            <p className="text-sm font-medium text-red-900 select-none" onCopy={(e) => e.preventDefault()}>
               {sessionTitle}
             </p>
           </div>

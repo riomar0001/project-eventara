@@ -162,7 +162,7 @@ export function DetailList({ items }: { items: { label: string; value: string }[
       {items.map((item, index) => (
         <div key={item.label} className={cn('rounded-2xl px-4 py-3 shadow-sm', index % 2 === 0 ? 'bg-sky-50/70' : 'bg-neutral-50/80')}>
           <p className="text-[10px] font-semibold tracking-[0.16em] text-neutral-400 uppercase">{item.label}</p>
-          <p className="mt-1 text-sm font-medium leading-6 text-neutral-950">{item.value}</p>
+          <p className="mt-1 text-sm leading-6 font-medium text-neutral-950">{item.value}</p>
         </div>
       ))}
     </div>
