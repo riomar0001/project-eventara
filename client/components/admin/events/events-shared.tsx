@@ -121,14 +121,29 @@ export function CatalogCard({
   );
 }
 
-export function DetailPanel({ children, description, title }: { children: React.ReactNode; description?: string; title: string }) {
+export function DetailPanel({
+  actions,
+  children,
+  description,
+  title
+}: {
+  actions?: React.ReactNode;
+  children: React.ReactNode;
+  description?: string;
+  title: string;
+}) {
   return (
-    <Card className="border-0 bg-white shadow-none ring-1 ring-neutral-200">
-      <CardHeader className="pb-4">
-        <CardTitle>{title}</CardTitle>
-        {description ? <CardDescription>{description}</CardDescription> : null}
+    <Card className="overflow-hidden border-0 bg-white shadow-[0_24px_70px_-54px_rgba(15,23,42,0.32)] ring-1 ring-neutral-200/80">
+      <CardHeader className="border-b border-neutral-100/80 bg-gradient-to-r from-neutral-50/80 via-white to-white pb-4">
+        <div className={cn('flex flex-wrap items-start gap-3', actions ? 'justify-between' : '')}>
+          <div className="min-w-0">
+            <CardTitle className="text-lg tracking-tight text-neutral-950">{title}</CardTitle>
+            {description ? <CardDescription className="max-w-2xl text-sm leading-6">{description}</CardDescription> : null}
+          </div>
+          {actions ? <div className="flex flex-wrap items-center gap-2">{actions}</div> : null}
+        </div>
       </CardHeader>
-      <CardContent>{children}</CardContent>
+      <CardContent className="p-5 pt-5">{children}</CardContent>
     </Card>
   );
 }
@@ -143,11 +158,11 @@ export function FieldLabel({ children, htmlFor }: { children: React.ReactNode; h
 
 export function DetailList({ items }: { items: { label: string; value: string }[] }) {
   return (
-    <div className="divide-y divide-neutral-100">
-      {items.map((item) => (
-        <div key={item.label} className="flex items-center justify-between py-2.5 first:pt-0 last:pb-0">
-          <p className="text-[11px] tracking-[0.16em] text-neutral-400 uppercase">{item.label}</p>
-          <p className="text-sm font-medium text-neutral-950">{item.value}</p>
+    <div className="grid gap-3 sm:grid-cols-2">
+      {items.map((item, index) => (
+        <div key={item.label} className={cn('rounded-2xl px-4 py-3 shadow-sm', index % 2 === 0 ? 'bg-sky-50/70' : 'bg-neutral-50/80')}>
+          <p className="text-[10px] font-semibold tracking-[0.16em] text-neutral-400 uppercase">{item.label}</p>
+          <p className="mt-1 text-sm font-medium leading-6 text-neutral-950">{item.value}</p>
         </div>
       ))}
     </div>

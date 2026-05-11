@@ -86,26 +86,54 @@ function SectionHeader({
   icon,
   label,
   count,
-  accent
+  accent,
+  description
 }: {
   icon: React.ReactNode;
   label: string;
   count: number;
   accent: 'amber' | 'sky';
+  description: string;
 }) {
-  const iconRing = accent === 'amber' ? 'bg-amber-50 ring-amber-100 text-amber-600' : 'bg-sky-50 ring-sky-100 text-sky-600';
-  const labelColor = accent === 'amber' ? 'text-amber-700' : 'text-sky-700';
+  const theme =
+    accent === 'amber'
+      ? {
+          iconRing: 'bg-amber-100 ring-amber-200 text-amber-700',
+          labelColor: 'text-amber-950',
+          panel: 'border-amber-100 bg-gradient-to-br from-amber-50/80 via-white to-white shadow-[0_18px_45px_-34px_rgba(180,83,9,0.3)]',
+          countPill: 'border-amber-200 bg-amber-50 text-amber-700',
+          rail: 'from-amber-200 via-amber-100 to-transparent',
+          sourcePill: 'border-amber-200 bg-white text-amber-700'
+        }
+      : {
+          iconRing: 'bg-sky-100 ring-sky-200 text-sky-700',
+          labelColor: 'text-sky-950',
+          panel: 'border-sky-100 bg-gradient-to-br from-sky-50/80 via-white to-white shadow-[0_18px_45px_-34px_rgba(14,165,233,0.28)]',
+          countPill: 'border-sky-200 bg-sky-50 text-sky-700',
+          rail: 'from-sky-200 via-sky-100 to-transparent',
+          sourcePill: 'border-sky-200 bg-white text-sky-700'
+        };
 
   return (
-    <div className="flex items-center gap-3">
-      <span className={`flex size-8 shrink-0 items-center justify-center rounded-xl ring-1 ${iconRing}`}>
-        {icon}
-      </span>
-      <div className="min-w-0">
-        <p className={`text-sm font-semibold ${labelColor}`}>{label}</p>
-        <p className="text-xs text-neutral-500">{count} {count === 1 ? 'venue' : 'venues'}</p>
+    <div className={`overflow-hidden rounded-[28px] border px-5 py-4 ${theme.panel}`}>
+      <div className="flex flex-wrap items-start gap-4">
+        <span className={`flex size-11 shrink-0 items-center justify-center rounded-2xl ring-1 ${theme.iconRing}`}>
+          {icon}
+        </span>
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <p className={`text-lg font-semibold tracking-tight ${theme.labelColor}`}>{label}</p>
+            <span className={`inline-flex h-7 items-center rounded-full border px-3 text-[11px] font-semibold uppercase tracking-[0.18em] ${theme.countPill}`}>
+              {count} {count === 1 ? 'venue' : 'venues'}
+            </span>
+          </div>
+          <p className="mt-1.5 max-w-2xl text-sm leading-6 text-neutral-600">{description}</p>
+        </div>
+        <span className={`inline-flex h-8 items-center rounded-full border px-3 text-[11px] font-semibold uppercase tracking-[0.18em] ${theme.sourcePill}`}>
+          {accent === 'amber' ? 'Partnered' : 'Community'}
+        </span>
       </div>
-      <div className="flex-1 border-t border-neutral-200" />
+      <div className={`mt-4 h-px bg-gradient-to-r ${theme.rail}`} />
     </div>
   );
 }
@@ -342,13 +370,14 @@ export function VenuesCatalog() {
       {!isLoading && !error && (
         <div className="space-y-10">
 
-          {/* Official Partners */}
-          <section className="space-y-4">
+          {/* Partnered Venues */}
+          <section className="space-y-4 rounded-[32px] border border-amber-100 bg-gradient-to-br from-amber-50/35 via-white to-white p-4 shadow-[0_20px_60px_-40px_rgba(180,83,9,0.28)]">
             <SectionHeader
               icon={<BadgeCheck className="size-4" />}
-              label="Official Partners"
+              label="Partnered venues"
               count={filteredPartners.length}
               accent="amber"
+              description="Managed spaces with direct relationships and stronger booking confidence."
             />
 
             {pagedPartners.length === 0 ? (
@@ -366,13 +395,14 @@ export function VenuesCatalog() {
             />
           </section>
 
-          {/* Community Venues */}
-          <section className="space-y-4">
+          {/* Community Suggested Venues */}
+          <section className="space-y-4 rounded-[32px] border border-sky-100 bg-gradient-to-br from-sky-50/35 via-white to-white p-4 shadow-[0_20px_60px_-40px_rgba(14,165,233,0.26)]">
             <SectionHeader
               icon={<UsersRound className="size-4" />}
-              label="Community Venues"
+              label="Community Suggested Venues"
               count={filteredCommunity.length}
               accent="sky"
+              description="Community-submitted spaces that broaden the portfolio and invite review."
             />
 
             {pagedCommunity.length === 0 ? (

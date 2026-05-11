@@ -1024,6 +1024,21 @@ export type EventSessionCreateRequest = {
 };
 
 /**
+ * EventSessionCreatedResponse
+ */
+export type EventSessionCreatedResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Message
+     */
+    message?: string;
+    data: EventSessionRecordResponse;
+};
+
+/**
  * EventSessionDeletedResponse
  */
 export type EventSessionDeletedResponse = {
@@ -1054,6 +1069,14 @@ export type EventSessionRecordResponse = {
      * Venue Id
      */
     venue_id: string;
+    /**
+     * Venue Name
+     */
+    venue_name?: string | null;
+    /**
+     * Venue Location
+     */
+    venue_location?: string | null;
     /**
      * Title
      */
@@ -6290,6 +6313,52 @@ export type UpdateEventSessionEventsEventIdSessionSessionIdPatchResponses = {
 };
 
 export type UpdateEventSessionEventsEventIdSessionSessionIdPatchResponse = UpdateEventSessionEventsEventIdSessionSessionIdPatchResponses[keyof UpdateEventSessionEventsEventIdSessionSessionIdPatchResponses];
+
+export type CreateEventSessionEventsEventIdSessionPostData = {
+    body: EventSessionCreateRequest;
+    path: {
+        /**
+         * Event Id
+         */
+        event_id: string;
+    };
+    query?: never;
+    url: '/events/{event_id}/session';
+};
+
+export type CreateEventSessionEventsEventIdSessionPostErrors = {
+    /**
+     * Session date constraints violated
+     */
+    400: ErrorResponse;
+    /**
+     * Missing or invalid Bearer token
+     */
+    401: ErrorResponse;
+    /**
+     * Caller is not the event creator
+     */
+    403: ErrorResponse;
+    /**
+     * Session or venue not found
+     */
+    404: ErrorResponse;
+    /**
+     * Request body failed schema validation
+     */
+    422: ValidationErrorResponse;
+};
+
+export type CreateEventSessionEventsEventIdSessionPostError = CreateEventSessionEventsEventIdSessionPostErrors[keyof CreateEventSessionEventsEventIdSessionPostErrors];
+
+export type CreateEventSessionEventsEventIdSessionPostResponses = {
+    /**
+     * Successful Response
+     */
+    201: EventSessionCreatedResponse;
+};
+
+export type CreateEventSessionEventsEventIdSessionPostResponse = CreateEventSessionEventsEventIdSessionPostResponses[keyof CreateEventSessionEventsEventIdSessionPostResponses];
 
 export type UpdateEventStatusEventsEventIdStatusPatchData = {
     body: EventStatusUpdateRequest;

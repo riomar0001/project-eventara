@@ -321,6 +321,43 @@ EVENT_DETAIL_QUERY_EXAMPLE = {
     200: {
         "description": "Event with all its sessions",
         "model": EventDetailResponse,
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": True,
+                    "message": "Event retrieved successfully.",
+                    "data": {
+                        "id": "00000000-0000-0000-0000-000000000001",
+                        "title": "Davao Tech Summit 2025",
+                        "description": "<p>Annual technology summit.</p>",
+                        "start_date": "2025-09-01T08:00:00Z",
+                        "end_date": "2025-09-03T18:00:00Z",
+                        "status": "posted",
+                        "created_by": "00000000-0000-0000-0000-000000000002",
+                        "banner_url": None,
+                        "created_at": "2025-08-01T10:00:00Z",
+                        "updated_at": "2025-08-01T10:00:00Z",
+                    },
+                    "sessions": [
+                        {
+                            "id": "00000000-0000-0000-0000-000000000003",
+                            "event_id": "00000000-0000-0000-0000-000000000001",
+                            "venue_id": "00000000-0000-0000-0000-000000000004",
+                            "venue_name": "SMX Convention Center",
+                            "venue_location": "Davao City",
+                            "title": "Opening Keynote",
+                            "description": None,
+                            "start_datetime": "2025-09-01T09:00:00Z",
+                            "end_datetime": "2025-09-01T12:00:00Z",
+                            "status": "posted",
+                            "max_slots": 500,
+                            "created_at": "2025-08-01T10:00:00Z",
+                            "updated_at": "2025-08-01T10:00:00Z",
+                        }
+                    ],
+                }
+            }
+        },
     }
 }
 

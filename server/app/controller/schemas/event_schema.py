@@ -41,6 +41,8 @@ class EventSessionRecordResponse(BaseModel):
     id: uuid.UUID
     event_id: uuid.UUID
     venue_id: uuid.UUID
+    venue_name: str | None = None
+    venue_location: str | None = None
     title: str
     description: str | None
     start_datetime: datetime
@@ -113,6 +115,12 @@ class EventSessionUpdateRequest(BaseModel):
 class EventSessionUpdatedResponse(BaseModel):
     success: bool = True
     message: str = "Event session updated successfully."
+    data: EventSessionRecordResponse
+
+
+class EventSessionCreatedResponse(BaseModel):
+    success: bool = True
+    message: str = "Event session created successfully."
     data: EventSessionRecordResponse
 
 

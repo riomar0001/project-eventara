@@ -22,11 +22,11 @@ from app.infrastructure.database.repositories.event_repository import EventRepos
 
 _ALLOWED_EVENT_TRANSITIONS: dict[EventStatus, set[EventStatus]] = {
     EventStatus.DRAFT: {EventStatus.POSTED, EventStatus.CANCELLED},
-    EventStatus.POSTED: {EventStatus.STARTED, EventStatus.CANCELLED, EventStatus.POSTPONED},
-    EventStatus.STARTED: {EventStatus.ENDED, EventStatus.CANCELLED},
-    EventStatus.POSTPONED: {EventStatus.POSTED, EventStatus.CANCELLED},
-    EventStatus.ENDED: set(),
-    EventStatus.CANCELLED: set(),
+    EventStatus.POSTED: {EventStatus.DRAFT, EventStatus.STARTED, EventStatus.POSTPONED, EventStatus.CANCELLED},
+    EventStatus.STARTED: {EventStatus.DRAFT, EventStatus.POSTED, EventStatus.ENDED, EventStatus.CANCELLED},
+    EventStatus.POSTPONED: {EventStatus.DRAFT, EventStatus.POSTED, EventStatus.CANCELLED},
+    EventStatus.ENDED: {EventStatus.DRAFT},
+    EventStatus.CANCELLED: {EventStatus.DRAFT},
 }
 
 _ALLOWED_SESSION_TRANSITIONS: dict[EventSessionStatus, set[EventSessionStatus]] = {

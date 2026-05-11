@@ -352,6 +352,8 @@ export const zEventSessionRecordResponse = z.object({
     id: z.uuid(),
     event_id: z.uuid(),
     venue_id: z.uuid(),
+    venue_name: z.string().nullish(),
+    venue_location: z.string().nullish(),
     title: z.string(),
     description: z.string().nullable(),
     start_datetime: z.iso.datetime(),
@@ -370,6 +372,15 @@ export const zEventDetailResponse = z.object({
     message: z.string().optional().default('Event retrieved successfully.'),
     data: zEventRecordResponse,
     sessions: z.array(zEventSessionRecordResponse)
+});
+
+/**
+ * EventSessionCreatedResponse
+ */
+export const zEventSessionCreatedResponse = z.object({
+    success: z.boolean().optional().default(true),
+    message: z.string().optional().default('Event session created successfully.'),
+    data: zEventSessionRecordResponse
 });
 
 /**
@@ -2241,6 +2252,17 @@ export const zUpdateEventSessionEventsEventIdSessionSessionIdPatchPath = z.objec
  * Successful Response
  */
 export const zUpdateEventSessionEventsEventIdSessionSessionIdPatchResponse = zEventSessionUpdatedResponse;
+
+export const zCreateEventSessionEventsEventIdSessionPostBody = zEventSessionCreateRequest;
+
+export const zCreateEventSessionEventsEventIdSessionPostPath = z.object({
+    event_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zCreateEventSessionEventsEventIdSessionPostResponse = zEventSessionCreatedResponse;
 
 export const zUpdateEventStatusEventsEventIdStatusPatchBody = zEventStatusUpdateRequest;
 

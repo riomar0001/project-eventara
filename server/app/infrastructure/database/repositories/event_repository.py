@@ -61,7 +61,12 @@ class EventRepository:
         )
 
     @staticmethod
-    def _to_session_entity(orm: EventSession) -> EventSessionEntity:
+    def _to_session_entity(
+        orm: EventSession,
+        *,
+        venue_name: str | None = None,
+        venue_location: str | None = None,
+    ) -> EventSessionEntity:
         """Map an EventSession ORM row to its domain entity."""
         return EventSessionEntity(
             id=orm.id,
@@ -73,6 +78,8 @@ class EventRepository:
             end_datetime=orm.end_datetime,
             status=EventSessionStatus(orm.status),
             max_slots=orm.max_slots,
+            venue_name=venue_name,
+            venue_location=venue_location,
             created_at=orm.created_at,
             updated_at=orm.updated_at,
         )
@@ -170,14 +177,28 @@ class EventRepository:
     async def get_sessions_by_event_id(self, event_id: uuid.UUID) -> list[EventSessionEntity]:
         """Return all sessions belonging to an event, ordered by start time.
 
+        Each session is enriched with the venue's ``name`` (``venue_name``) and
+        ``city`` (``venue_location``) via a LEFT OUTER JOIN so that callers
+        receive a self-contained payload without a separate venue lookup.  The
+        join is an outer join so that sessions referencing a deleted venue row
+        are still returned with ``None`` for both venue fields.
+
         Args:
             event_id: UUID of the parent event.
 
         Returns:
             List of ``EventSessionEntity`` objects, earliest first.
         """
-        result = await self.db.execute(select(EventSession).where(EventSession.event_id == event_id).order_by(EventSession.start_datetime))
-        return [self._to_session_entity(orm) for orm in result.scalars().all()]
+        result = await self.db.execute(
+            select(EventSession, Venue.name.label("venue_name"), Venue.city.label("venue_location"))
+            .outerjoin(Venue, EventSession.venue_id == Venue.id)
+            .where(EventSession.event_id == event_id)
+            .order_by(EventSession.start_datetime)
+        )
+        return [
+            self._to_session_entity(row.EventSession, venue_name=row.venue_name, venue_location=row.venue_location)
+            for row in result.all()
+        ]
 
     async def create_event(
         self,

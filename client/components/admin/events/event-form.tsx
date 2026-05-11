@@ -298,7 +298,7 @@ export function EventForm({ mode, event, initialSessions = [] }: EventFormProps)
               description: s.description || null,
               start_datetime: toUtcIso(s.startDatetime),
               end_datetime: toUtcIso(s.endDatetime),
-              max_slots: s.maxSlots ? parseInt(s.maxSlots, 10) : null
+              max_slots: s.maxSlots ? parseInt(s.maxSlots, 10) : (venueCapacities[s.venueId] ?? null)
             }))
           },
           headers: { Authorization: `Bearer ${getAccessToken()}` },
@@ -362,7 +362,7 @@ export function EventForm({ mode, event, initialSessions = [] }: EventFormProps)
                   description: s.description || null,
                   start_datetime: toUtcIso(s.startDatetime),
                   end_datetime: toUtcIso(s.endDatetime),
-                  max_slots: s.maxSlots ? parseInt(s.maxSlots, 10) : null
+                  max_slots: s.maxSlots ? parseInt(s.maxSlots, 10) : (venueCapacities[s.venueId] ?? null)
                 },
                 headers: { Authorization: `Bearer ${getAccessToken()}` },
                 throwOnError: false
@@ -461,7 +461,7 @@ export function EventForm({ mode, event, initialSessions = [] }: EventFormProps)
                       value={startDate}
                       onChange={setStartDate}
                       disabled={isSubmitting}
-                      placeholder="Pick start date & time"
+                      placeholder="Pick start date"
                     />
                   </div>
                   <div className="space-y-2">
@@ -472,7 +472,7 @@ export function EventForm({ mode, event, initialSessions = [] }: EventFormProps)
                       onChange={setEndDate}
                       minDatetime={startDate ? new Date(startDate) : undefined}
                       disabled={isSubmitting}
-                      placeholder="Pick end date & time"
+                      placeholder="Pick end date"
                     />
                   </div>
                 </div>
