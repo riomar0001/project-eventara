@@ -16,6 +16,7 @@ from app.domain.exceptions.event_session_exceptions import (
 )
 from app.infrastructure.database.repositories.event_repository import EventRepository
 
+
 class EventDeletionUseCase:
     def __init__(self, event_repo: EventRepository, db: AsyncSession) -> None:
         self.event_repo = event_repo

@@ -4,7 +4,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application.dto.event_dto import (
     CreateEventInput,
-    CreateEventSessionInput,
     CreateEventSessionForEventInput,
     CreateEventSessionOutput,
     EventWithSessionsOutput,

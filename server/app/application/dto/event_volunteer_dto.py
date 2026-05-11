@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import uuid
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from app.domain.entities.event_entity import EventParticipant, EventVolunteer, EventVolunteerStatus
 

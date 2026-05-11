@@ -35,13 +35,17 @@ from app.domain.exceptions.event_volunteer_exceptions import (
 from app.domain.exceptions.volunteer_exceptions import VolunteerNotFoundError
 
 _ALLOWED_VOLUNTEER_TRANSITIONS: dict[EventVolunteerStatus, frozenset[EventVolunteerStatus]] = {
-    EventVolunteerStatus.PENDING: frozenset({
-        EventVolunteerStatus.JOINED,
-        EventVolunteerStatus.REJECTED,
-    }),
-    EventVolunteerStatus.JOINED: frozenset({
-        EventVolunteerStatus.LEFT,
-    }),
+    EventVolunteerStatus.PENDING: frozenset(
+        {
+            EventVolunteerStatus.JOINED,
+            EventVolunteerStatus.REJECTED,
+        }
+    ),
+    EventVolunteerStatus.JOINED: frozenset(
+        {
+            EventVolunteerStatus.LEFT,
+        }
+    ),
 }
 
 
@@ -112,9 +116,7 @@ class EventVolunteerUseCase:
             raise VolunteerNotFoundError(data.alias)
 
         try:
-            existing = await self.repo.get_event_volunteer_by_volunteer_and_event(
-                volunteer.id, data.event_id, for_update=True
-            )
+            existing = await self.repo.get_event_volunteer_by_volunteer_and_event(volunteer.id, data.event_id, for_update=True)
             if existing:
                 raise EventVolunteerAlreadyExistsError(str(volunteer.id), str(data.event_id))
 
@@ -137,9 +139,7 @@ class EventVolunteerUseCase:
         await self.db.commit()
         return AssignVolunteerOutput(event_volunteer=event_volunteer)
 
-    async def update_volunteer_status(
-        self, data: UpdateEventVolunteerStatusInput
-    ) -> UpdateEventVolunteerStatusOutput:
+    async def update_volunteer_status(self, data: UpdateEventVolunteerStatusInput) -> UpdateEventVolunteerStatusOutput:
         """Update the status of an event volunteer assignment.
 
         Acquires a row-level lock on the event-volunteer row before all checks
@@ -167,9 +167,7 @@ class EventVolunteerUseCase:
             InvalidEventVolunteerStatusTransitionError: The current status does not permit
                 the requested transition.
         """
-        event_volunteer = await self.repo.get_event_volunteer_by_id(
-            data.event_volunteer_id, for_update=True
-        )
+        event_volunteer = await self.repo.get_event_volunteer_by_id(data.event_volunteer_id, for_update=True)
         if not event_volunteer:
             raise EventVolunteerNotFoundError(str(data.event_volunteer_id))
 
@@ -190,9 +188,7 @@ class EventVolunteerUseCase:
             )
 
         try:
-            updated = await self.repo.update_event_volunteer_status(
-                data.event_volunteer_id, data.new_status
-            )
+            updated = await self.repo.update_event_volunteer_status(data.event_volunteer_id, data.new_status)
             if updated is None:
                 raise EventVolunteerNotFoundError(str(data.event_volunteer_id))
         except (
@@ -229,9 +225,7 @@ class EventVolunteerUseCase:
             EventNotFoundError:                      The parent event no longer exists.
             UnauthorizedEventVolunteerOperationError: Actor is not the event organizer.
         """
-        event_volunteer = await self.repo.get_event_volunteer_by_id(
-            data.event_volunteer_id, for_update=True
-        )
+        event_volunteer = await self.repo.get_event_volunteer_by_id(data.event_volunteer_id, for_update=True)
         if not event_volunteer:
             raise EventVolunteerNotFoundError(str(data.event_volunteer_id))
 
@@ -248,7 +242,7 @@ class EventVolunteerUseCase:
             deleted = await self.repo.delete_event_volunteer(data.event_volunteer_id)
             if not deleted:
                 raise EventVolunteerNotFoundError(str(data.event_volunteer_id))
-        except (EventVolunteerNotFoundError, UnauthorizedEventVolunteerOperationError):
+        except EventVolunteerNotFoundError, UnauthorizedEventVolunteerOperationError:
             await self.db.rollback()
             raise
         except Exception:
@@ -283,9 +277,7 @@ class EventVolunteerUseCase:
         if event.created_by != data.actor_id:
             raise UnauthorizedEventVolunteerOperationError()
 
-        event_volunteers = await self.repo.get_event_volunteers_by_event(
-            data.event_id, status=data.status
-        )
+        event_volunteers = await self.repo.get_event_volunteers_by_event(data.event_id, status=data.status)
         return ListEventVolunteersOutput(event_volunteers=event_volunteers)
 
     async def get_participants(self, data: GetEventParticipantsInput) -> GetEventParticipantsOutput:
@@ -316,9 +308,7 @@ class EventVolunteerUseCase:
             raise EventNotFoundError(str(data.event_id))
 
         if event.created_by != data.actor_id:
-            joined_assignment = await self.repo.get_joined_event_volunteer_for_user(
-                data.actor_id, data.event_id
-            )
+            joined_assignment = await self.repo.get_joined_event_volunteer_for_user(data.actor_id, data.event_id)
             if not joined_assignment:
                 raise UnauthorizedEventVolunteerOperationError()
 

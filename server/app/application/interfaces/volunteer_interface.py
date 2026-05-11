@@ -5,7 +5,15 @@ from typing import Protocol
 
 from app.domain.entities.authorization_entities import Role as RoleEntity
 from app.domain.entities.user_entity import User as UserEntity
-from app.domain.entities.volunteer_entity import ApplicationStatus, PotentialVolunteer, Volunteer, VolunteerApplication, VolunteerRole, VolunteerStatus, VolunteerSummary
+from app.domain.entities.volunteer_entity import (
+    ApplicationStatus,
+    PotentialVolunteer,
+    Volunteer,
+    VolunteerApplication,
+    VolunteerRole,
+    VolunteerStatus,
+    VolunteerSummary,
+)
 
 
 class IVolunteerRepository(Protocol):

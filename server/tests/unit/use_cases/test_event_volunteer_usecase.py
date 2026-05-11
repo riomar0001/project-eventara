@@ -1,6 +1,7 @@
 """Unit tests for EventVolunteerUseCase — assign, update status, remove, list, get participants."""
 
 import uuid
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -16,13 +17,20 @@ from app.application.dto.event_volunteer_dto import (
 from app.application.use_cases.event_volunteer_usecase import EventVolunteerUseCase
 from app.domain.entities.event_entity import (
     Event as EventEntity,
+)
+from app.domain.entities.event_entity import (
     EventParticipant as EventParticipantEntity,
+)
+from app.domain.entities.event_entity import (
     EventParticipantStatus,
     EventStatus,
-    EventVolunteer as EventVolunteerEntity,
     EventVolunteerStatus,
 )
-from app.domain.entities.volunteer_entity import Volunteer as VolunteerEntity, VolunteerStatus
+from app.domain.entities.event_entity import (
+    EventVolunteer as EventVolunteerEntity,
+)
+from app.domain.entities.volunteer_entity import Volunteer as VolunteerEntity
+from app.domain.entities.volunteer_entity import VolunteerStatus
 from app.domain.exceptions.event_exceptions import EventNotFoundError
 from app.domain.exceptions.event_volunteer_exceptions import (
     EventVolunteerAlreadyExistsError,
@@ -32,7 +40,6 @@ from app.domain.exceptions.event_volunteer_exceptions import (
 )
 from app.domain.exceptions.volunteer_exceptions import VolunteerNotFoundError
 from app.infrastructure.database.repositories.event_volunteer_repository import EventVolunteerRepository
-from datetime import datetime, timezone
 
 ORGANIZER_ID = uuid.UUID("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
 OTHER_USER_ID = uuid.UUID("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
@@ -43,7 +50,7 @@ EV_ID = uuid.UUID("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee")
 SESSION_ID = uuid.UUID("ffffffff-ffff-ffff-ffff-ffffffffffff")
 PARTICIPANT_ID = uuid.UUID("11111111-1111-1111-1111-111111111111")
 
-_NOW = datetime(2026, 1, 1, tzinfo=timezone.utc)
+_NOW = datetime(2026, 1, 1, tzinfo=UTC)
 
 
 def _sample_event(*, created_by: uuid.UUID = ORGANIZER_ID) -> EventEntity:
@@ -95,9 +102,7 @@ def _make_repo(**overrides) -> MagicMock:
     repo.get_joined_event_volunteer_for_user = AsyncMock(return_value=None)
     repo.get_event_volunteers_by_event = AsyncMock(return_value=[_sample_ev()])
     repo.create_event_volunteer = AsyncMock(return_value=_sample_ev())
-    repo.update_event_volunteer_status = AsyncMock(
-        side_effect=lambda ev_id, new_status: _sample_ev(status=new_status)
-    )
+    repo.update_event_volunteer_status = AsyncMock(side_effect=lambda ev_id, new_status: _sample_ev(status=new_status))
     repo.delete_event_volunteer = AsyncMock(return_value=True)
     repo.get_participants_by_event = AsyncMock(return_value=[_sample_participant()])
     repo.count_participants_by_event = AsyncMock(return_value=1)
@@ -178,9 +183,7 @@ class TestAssignVolunteer:
 
     @pytest.mark.asyncio
     async def test_assign_volunteer_raises_when_already_assigned(self):
-        repo = _make_repo(
-            get_event_volunteer_by_volunteer_and_event=AsyncMock(return_value=_sample_ev())
-        )
+        repo = _make_repo(get_event_volunteer_by_volunteer_and_event=AsyncMock(return_value=_sample_ev()))
         uc, _, db = _make_uc(repo=repo)
         with pytest.raises(EventVolunteerAlreadyExistsError):
             await uc.assign_volunteer(_assign_input())
@@ -207,9 +210,7 @@ class TestAssignVolunteer:
     async def test_assign_volunteer_locks_existing_assignment_row(self):
         uc, repo, _ = _make_uc()
         await uc.assign_volunteer(_assign_input())
-        repo.get_event_volunteer_by_volunteer_and_event.assert_called_once_with(
-            VOLUNTEER_ID, EVENT_ID, for_update=True
-        )
+        repo.get_event_volunteer_by_volunteer_and_event.assert_called_once_with(VOLUNTEER_ID, EVENT_ID, for_update=True)
 
     @pytest.mark.asyncio
     async def test_assign_volunteer_rollback_on_unexpected_exception(self):
@@ -292,9 +293,7 @@ class TestUpdateEventVolunteerStatus:
 
     @pytest.mark.asyncio
     async def test_update_status_rollback_on_unexpected_exception(self):
-        repo = _make_repo(
-            update_event_volunteer_status=AsyncMock(side_effect=RuntimeError("db error"))
-        )
+        repo = _make_repo(update_event_volunteer_status=AsyncMock(side_effect=RuntimeError("db error")))
         uc, _, db = _make_uc(repo=repo)
         with pytest.raises(RuntimeError):
             await uc.update_volunteer_status(_update_input())
@@ -388,9 +387,7 @@ class TestListEventVolunteers:
     async def test_list_passes_status_filter_to_repo(self):
         uc, repo, _ = _make_uc()
         await uc.list_volunteers(_list_input(status=EventVolunteerStatus.JOINED))
-        repo.get_event_volunteers_by_event.assert_called_once_with(
-            EVENT_ID, status=EventVolunteerStatus.JOINED
-        )
+        repo.get_event_volunteers_by_event.assert_called_once_with(EVENT_ID, status=EventVolunteerStatus.JOINED)
 
 
 # ---------------------------------------------------------------------------
@@ -443,7 +440,5 @@ class TestGetEventParticipants:
     async def test_get_participants_passes_status_filter_to_repo(self):
         uc, repo, _ = _make_uc()
         await uc.get_participants(_participants_input(status="registered", limit=10, offset=5))
-        repo.get_participants_by_event.assert_called_once_with(
-            EVENT_ID, status="registered", limit=10, offset=5
-        )
+        repo.get_participants_by_event.assert_called_once_with(EVENT_ID, status="registered", limit=10, offset=5)
         repo.count_participants_by_event.assert_called_once_with(EVENT_ID, status="registered")

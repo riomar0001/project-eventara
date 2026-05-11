@@ -1,7 +1,7 @@
 """Functional test cases for EventVolunteerUseCase."""
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -17,13 +17,20 @@ from app.application.dto.event_volunteer_dto import (
 from app.application.use_cases.event_volunteer_usecase import EventVolunteerUseCase
 from app.domain.entities.event_entity import (
     Event as EventEntity,
+)
+from app.domain.entities.event_entity import (
     EventParticipant as EventParticipantEntity,
+)
+from app.domain.entities.event_entity import (
     EventParticipantStatus,
     EventStatus,
-    EventVolunteer as EventVolunteerEntity,
     EventVolunteerStatus,
 )
-from app.domain.entities.volunteer_entity import Volunteer as VolunteerEntity, VolunteerStatus
+from app.domain.entities.event_entity import (
+    EventVolunteer as EventVolunteerEntity,
+)
+from app.domain.entities.volunteer_entity import Volunteer as VolunteerEntity
+from app.domain.entities.volunteer_entity import VolunteerStatus
 from app.domain.exceptions.event_exceptions import EventNotFoundError
 from app.domain.exceptions.event_volunteer_exceptions import (
     EventVolunteerAlreadyExistsError,
@@ -43,7 +50,7 @@ EV_ID = uuid.UUID("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee")
 SESSION_ID = uuid.UUID("ffffffff-ffff-ffff-ffff-ffffffffffff")
 PARTICIPANT_ID = uuid.UUID("11111111-1111-1111-1111-111111111111")
 
-_NOW = datetime(2026, 1, 1, tzinfo=timezone.utc)
+_NOW = datetime(2026, 1, 1, tzinfo=UTC)
 
 
 def _sample_event(*, created_by: uuid.UUID = ORGANIZER_ID) -> EventEntity:
@@ -95,9 +102,7 @@ def _make_repo(**overrides) -> MagicMock:
     repo.get_joined_event_volunteer_for_user = AsyncMock(return_value=None)
     repo.get_event_volunteers_by_event = AsyncMock(return_value=[_sample_ev()])
     repo.create_event_volunteer = AsyncMock(return_value=_sample_ev())
-    repo.update_event_volunteer_status = AsyncMock(
-        side_effect=lambda ev_id, new_status: _sample_ev(status=new_status)
-    )
+    repo.update_event_volunteer_status = AsyncMock(side_effect=lambda ev_id, new_status: _sample_ev(status=new_status))
     repo.delete_event_volunteer = AsyncMock(return_value=True)
     repo.get_participants_by_event = AsyncMock(return_value=[_sample_participant()])
     repo.count_participants_by_event = AsyncMock(return_value=1)
@@ -180,9 +185,7 @@ async def test_assign_volunteer_uses_pessimistic_lock_on_assignment_check():
     """Passes for_update=True when checking for duplicate assignments to prevent TOCTOU races."""
     uc, repo, _ = _make_uc()
     await uc.assign_volunteer(AssignVolunteerInput(event_id=EVENT_ID, alias=VOLUNTEER_ALIAS, actor_id=ORGANIZER_ID))
-    repo.get_event_volunteer_by_volunteer_and_event.assert_called_once_with(
-        VOLUNTEER_ID, EVENT_ID, for_update=True
-    )
+    repo.get_event_volunteer_by_volunteer_and_event.assert_called_once_with(VOLUNTEER_ID, EVENT_ID, for_update=True)
 
 
 @pytest.mark.asyncio
@@ -207,7 +210,9 @@ async def test_update_status_raises_when_assignment_not_found():
     repo = _make_repo(get_event_volunteer_by_id=AsyncMock(return_value=None))
     uc, _, db = _make_uc(repo=repo)
     with pytest.raises(EventVolunteerNotFoundError):
-        await uc.update_volunteer_status(UpdateEventVolunteerStatusInput(event_volunteer_id=EV_ID, actor_id=ORGANIZER_ID, new_status=EventVolunteerStatus.JOINED))
+        await uc.update_volunteer_status(
+            UpdateEventVolunteerStatusInput(event_volunteer_id=EV_ID, actor_id=ORGANIZER_ID, new_status=EventVolunteerStatus.JOINED)
+        )
     db.commit.assert_not_called()
 
 
@@ -217,7 +222,9 @@ async def test_update_status_raises_when_caller_is_not_organizer():
     repo = _make_repo(get_event_by_id=AsyncMock(return_value=_sample_event(created_by=OTHER_USER_ID)))
     uc, _, db = _make_uc(repo=repo)
     with pytest.raises(UnauthorizedEventVolunteerOperationError):
-        await uc.update_volunteer_status(UpdateEventVolunteerStatusInput(event_volunteer_id=EV_ID, actor_id=ORGANIZER_ID, new_status=EventVolunteerStatus.JOINED))
+        await uc.update_volunteer_status(
+            UpdateEventVolunteerStatusInput(event_volunteer_id=EV_ID, actor_id=ORGANIZER_ID, new_status=EventVolunteerStatus.JOINED)
+        )
 
 
 @pytest.mark.asyncio
@@ -227,7 +234,9 @@ async def test_update_status_raises_on_invalid_transition_from_rejected():
     repo = _make_repo(get_event_volunteer_by_id=AsyncMock(return_value=rejected_ev))
     uc, _, db = _make_uc(repo=repo)
     with pytest.raises(InvalidEventVolunteerStatusTransitionError):
-        await uc.update_volunteer_status(UpdateEventVolunteerStatusInput(event_volunteer_id=EV_ID, actor_id=ORGANIZER_ID, new_status=EventVolunteerStatus.JOINED))
+        await uc.update_volunteer_status(
+            UpdateEventVolunteerStatusInput(event_volunteer_id=EV_ID, actor_id=ORGANIZER_ID, new_status=EventVolunteerStatus.JOINED)
+        )
     db.commit.assert_not_called()
 
 
@@ -235,7 +244,9 @@ async def test_update_status_raises_on_invalid_transition_from_rejected():
 async def test_update_status_pending_to_joined_updates_and_commits():
     """Transitions status from PENDING to JOINED and commits the transaction."""
     uc, repo, db = _make_uc()
-    result = await uc.update_volunteer_status(UpdateEventVolunteerStatusInput(event_volunteer_id=EV_ID, actor_id=ORGANIZER_ID, new_status=EventVolunteerStatus.JOINED))
+    result = await uc.update_volunteer_status(
+        UpdateEventVolunteerStatusInput(event_volunteer_id=EV_ID, actor_id=ORGANIZER_ID, new_status=EventVolunteerStatus.JOINED)
+    )
     repo.update_event_volunteer_status.assert_called_once_with(EV_ID, EventVolunteerStatus.JOINED)
     db.commit.assert_called_once()
     assert result.event_volunteer.status == EventVolunteerStatus.JOINED
@@ -247,7 +258,9 @@ async def test_update_status_joined_to_left_updates_and_commits():
     joined_ev = _sample_ev(status=EventVolunteerStatus.JOINED)
     repo = _make_repo(get_event_volunteer_by_id=AsyncMock(return_value=joined_ev))
     uc, _, db = _make_uc(repo=repo)
-    result = await uc.update_volunteer_status(UpdateEventVolunteerStatusInput(event_volunteer_id=EV_ID, actor_id=ORGANIZER_ID, new_status=EventVolunteerStatus.LEFT))
+    result = await uc.update_volunteer_status(
+        UpdateEventVolunteerStatusInput(event_volunteer_id=EV_ID, actor_id=ORGANIZER_ID, new_status=EventVolunteerStatus.LEFT)
+    )
     db.commit.assert_called_once()
     assert result.old_status == EventVolunteerStatus.JOINED
 
@@ -256,7 +269,9 @@ async def test_update_status_joined_to_left_updates_and_commits():
 async def test_update_status_uses_pessimistic_lock_on_assignment_row():
     """Passes for_update=True when fetching the assignment to prevent concurrent status update conflicts."""
     uc, repo, _ = _make_uc()
-    await uc.update_volunteer_status(UpdateEventVolunteerStatusInput(event_volunteer_id=EV_ID, actor_id=ORGANIZER_ID, new_status=EventVolunteerStatus.JOINED))
+    await uc.update_volunteer_status(
+        UpdateEventVolunteerStatusInput(event_volunteer_id=EV_ID, actor_id=ORGANIZER_ID, new_status=EventVolunteerStatus.JOINED)
+    )
     repo.get_event_volunteer_by_id.assert_called_once_with(EV_ID, for_update=True)
 
 
@@ -266,7 +281,9 @@ async def test_update_status_rolls_back_and_reraises_on_unexpected_error():
     repo = _make_repo(update_event_volunteer_status=AsyncMock(side_effect=RuntimeError("db error")))
     uc, _, db = _make_uc(repo=repo)
     with pytest.raises(RuntimeError):
-        await uc.update_volunteer_status(UpdateEventVolunteerStatusInput(event_volunteer_id=EV_ID, actor_id=ORGANIZER_ID, new_status=EventVolunteerStatus.JOINED))
+        await uc.update_volunteer_status(
+            UpdateEventVolunteerStatusInput(event_volunteer_id=EV_ID, actor_id=ORGANIZER_ID, new_status=EventVolunteerStatus.JOINED)
+        )
     db.rollback.assert_called_once()
     db.commit.assert_not_called()
 

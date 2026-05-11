@@ -10,7 +10,6 @@ from app.application.dto.volunteer_dto import (
     DeleteVolunteerRoleInput,
     GetAllVolunteerRolesInput,
     UpdateVolunteerRoleInput,
-    _UNSET,
 )
 from app.application.use_cases.volunteer_usecase import VolunteerRoleUseCase
 from app.domain.entities.volunteer_entity import Volunteer, VolunteerRole, VolunteerStatus

@@ -195,10 +195,7 @@ class EventRepository:
             .where(EventSession.event_id == event_id)
             .order_by(EventSession.start_datetime)
         )
-        return [
-            self._to_session_entity(row.EventSession, venue_name=row.venue_name, venue_location=row.venue_location)
-            for row in result.all()
-        ]
+        return [self._to_session_entity(row.EventSession, venue_name=row.venue_name, venue_location=row.venue_location) for row in result.all()]
 
     async def create_event(
         self,

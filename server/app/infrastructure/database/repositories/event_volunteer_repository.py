@@ -23,13 +23,20 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.entities.event_entity import (
     Event as EventEntity,
+)
+from app.domain.entities.event_entity import (
     EventParticipant as EventParticipantEntity,
+)
+from app.domain.entities.event_entity import (
     EventParticipantStatus,
     EventStatus,
-    EventVolunteer as EventVolunteerEntity,
     EventVolunteerStatus,
 )
-from app.domain.entities.volunteer_entity import Volunteer as VolunteerEntity, VolunteerStatus
+from app.domain.entities.event_entity import (
+    EventVolunteer as EventVolunteerEntity,
+)
+from app.domain.entities.volunteer_entity import Volunteer as VolunteerEntity
+from app.domain.entities.volunteer_entity import VolunteerStatus
 from app.infrastructure.database.models.event_models import Event, EventParticipant, EventSession, EventVolunteer
 from app.infrastructure.database.models.user_models import User
 from app.infrastructure.database.models.volunteer_models import Volunteer
@@ -94,9 +101,7 @@ class EventVolunteerRepository:
             updated_at=orm.updated_at,
         )
 
-    async def get_event_by_id(
-        self, event_id: uuid.UUID, *, for_update: bool = False
-    ) -> EventEntity | None:
+    async def get_event_by_id(self, event_id: uuid.UUID, *, for_update: bool = False) -> EventEntity | None:
         """Return the event entity for the given ID, optionally locking the row.
 
         Args:
@@ -135,15 +140,11 @@ class EventVolunteerRepository:
         Returns:
             The matching entity, or ``None`` if no row exists.
         """
-        result = await self.db.execute(
-            select(Volunteer).join(User, Volunteer.user_id == User.id).where(User.alias == alias)
-        )
+        result = await self.db.execute(select(Volunteer).join(User, Volunteer.user_id == User.id).where(User.alias == alias))
         orm = result.scalar_one_or_none()
         return self._to_volunteer_entity(orm) if orm else None
 
-    async def get_event_volunteer_by_id(
-        self, event_volunteer_id: uuid.UUID, *, for_update: bool = False
-    ) -> EventVolunteerEntity | None:
+    async def get_event_volunteer_by_id(self, event_volunteer_id: uuid.UUID, *, for_update: bool = False) -> EventVolunteerEntity | None:
         """Return the event-volunteer entity for the given ID, optionally locking the row.
 
         Args:
@@ -187,9 +188,7 @@ class EventVolunteerRepository:
         orm = result.scalar_one_or_none()
         return self._to_event_volunteer_entity(orm) if orm else None
 
-    async def get_joined_event_volunteer_for_user(
-        self, user_id: uuid.UUID, event_id: uuid.UUID
-    ) -> EventVolunteerEntity | None:
+    async def get_joined_event_volunteer_for_user(self, user_id: uuid.UUID, event_id: uuid.UUID) -> EventVolunteerEntity | None:
         """Return the JOINED event-volunteer record for a user-event pair via a JOIN.
 
         Joins ``event_volunteers`` with ``volunteers`` on ``volunteer_id`` to look up
@@ -230,19 +229,13 @@ class EventVolunteerRepository:
         Returns:
             List of ``EventVolunteerEntity`` objects ordered by creation date descending.
         """
-        query = (
-            select(EventVolunteer)
-            .where(EventVolunteer.event_id == event_id)
-            .order_by(EventVolunteer.created_at.desc())
-        )
+        query = select(EventVolunteer).where(EventVolunteer.event_id == event_id).order_by(EventVolunteer.created_at.desc())
         if status is not None:
             query = query.where(EventVolunteer.status == status)
         result = await self.db.execute(query)
         return [self._to_event_volunteer_entity(orm) for orm in result.scalars().all()]
 
-    async def create_event_volunteer(
-        self, volunteer_id: uuid.UUID, event_id: uuid.UUID
-    ) -> EventVolunteerEntity:
+    async def create_event_volunteer(self, volunteer_id: uuid.UUID, event_id: uuid.UUID) -> EventVolunteerEntity:
         """Insert a new event-volunteer row with PENDING status and return the persisted entity."""
         orm = EventVolunteer(
             volunteer_id=volunteer_id,
@@ -254,9 +247,7 @@ class EventVolunteerRepository:
         await self.db.refresh(orm)
         return self._to_event_volunteer_entity(orm)
 
-    async def update_event_volunteer_status(
-        self, event_volunteer_id: uuid.UUID, new_status: EventVolunteerStatus
-    ) -> EventVolunteerEntity | None:
+    async def update_event_volunteer_status(self, event_volunteer_id: uuid.UUID, new_status: EventVolunteerStatus) -> EventVolunteerEntity | None:
         """Update the status of an existing event-volunteer row.
 
         The row must already be locked by the calling transaction via
@@ -269,11 +260,7 @@ class EventVolunteerRepository:
         Returns:
             The updated ``EventVolunteerEntity``, or ``None`` if no matching row exists.
         """
-        result = await self.db.execute(
-            select(EventVolunteer)
-            .where(EventVolunteer.id == event_volunteer_id)
-            .with_for_update()
-        )
+        result = await self.db.execute(select(EventVolunteer).where(EventVolunteer.id == event_volunteer_id).with_for_update())
         orm = result.scalar_one_or_none()
         if orm is None:
             return None
@@ -291,9 +278,7 @@ class EventVolunteerRepository:
         Returns:
             ``True`` if a row was deleted, ``False`` if no matching row existed.
         """
-        result = await self.db.execute(
-            select(EventVolunteer).where(EventVolunteer.id == event_volunteer_id)
-        )
+        result = await self.db.execute(select(EventVolunteer).where(EventVolunteer.id == event_volunteer_id))
         orm = result.scalar_one_or_none()
         if orm is None:
             return False
@@ -336,9 +321,7 @@ class EventVolunteerRepository:
         result = await self.db.execute(query)
         return [self._to_participant_entity(orm) for orm in result.scalars().all()]
 
-    async def count_participants_by_event(
-        self, event_id: uuid.UUID, *, status: str | None = None
-    ) -> int:
+    async def count_participants_by_event(self, event_id: uuid.UUID, *, status: str | None = None) -> int:
         """Return the total number of participants across all sessions of an event.
 
         Args:

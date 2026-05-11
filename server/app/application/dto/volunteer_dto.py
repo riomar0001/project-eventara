@@ -1,7 +1,15 @@
 import uuid
 from dataclasses import dataclass, field
 
-from app.domain.entities.volunteer_entity import ApplicationStatus, PotentialVolunteer, Volunteer, VolunteerApplication, VolunteerRole, VolunteerStatus, VolunteerSummary
+from app.domain.entities.volunteer_entity import (
+    ApplicationStatus,
+    PotentialVolunteer,
+    Volunteer,
+    VolunteerApplication,
+    VolunteerRole,
+    VolunteerStatus,
+    VolunteerSummary,
+)
 
 _UNSET: object = object()
 

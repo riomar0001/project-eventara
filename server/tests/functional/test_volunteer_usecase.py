@@ -19,7 +19,14 @@ from app.application.dto.volunteer_dto import (
 from app.application.use_cases.volunteer_usecase import GetVolunteerUseCase, UpdateVolunteerInfoUseCase, VolunteerApplicationUseCase, VolunteerUseCase
 from app.domain.entities.authorization_entities import Role as RoleEntity
 from app.domain.entities.user_entity import User as UserEntity
-from app.domain.entities.volunteer_entity import ApplicationStatus, PotentialVolunteer, Volunteer, VolunteerApplication, VolunteerRole, VolunteerStatus
+from app.domain.entities.volunteer_entity import (
+    ApplicationStatus,
+    PotentialVolunteer,
+    Volunteer,
+    VolunteerApplication,
+    VolunteerRole,
+    VolunteerStatus,
+)
 from app.domain.exceptions.user_exceptions import UserNotFoundError
 from app.domain.exceptions.volunteer_application_exceptions import (
     InvalidApplicationStatusTransitionError,
@@ -114,9 +121,7 @@ def _make_vol_repo(**overrides) -> MagicMock:
     repo.get_application_by_id = AsyncMock(return_value=_sample_application())
     repo.get_active_application_by_user_id = AsyncMock(return_value=None)
     repo.create_application = AsyncMock(return_value=_sample_application())
-    repo.update_application_status = AsyncMock(
-        side_effect=lambda app_id, new_status: _sample_application(status=new_status)
-    )
+    repo.update_application_status = AsyncMock(side_effect=lambda app_id, new_status: _sample_application(status=new_status))
     repo.get_all_volunteers = AsyncMock(return_value=([_sample_volunteer()], 1))
     repo.get_potential_volunteers = AsyncMock(return_value=([_sample_potential_volunteer()], 1))
     for key, value in overrides.items():
@@ -818,9 +823,7 @@ async def test_get_potential_volunteers_returns_data_with_pagination_metadata():
 @pytest.mark.asyncio
 async def test_get_potential_volunteers_calculates_total_pages_correctly():
     """Computes total_pages by ceiling-dividing total count by page_size."""
-    vol_repo = _make_vol_repo(
-        get_potential_volunteers=AsyncMock(return_value=([_sample_potential_volunteer()], 45))
-    )
+    vol_repo = _make_vol_repo(get_potential_volunteers=AsyncMock(return_value=([_sample_potential_volunteer()], 45)))
     uc, _ = _make_get_uc(vol_repo=vol_repo)
     result = await uc.get_potential_volunteers(_get_potential_input(page_size=20))
     assert result.total_pages == 3

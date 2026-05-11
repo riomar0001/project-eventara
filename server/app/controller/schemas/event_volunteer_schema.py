@@ -3,7 +3,7 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
-from app.domain.entities.event_entity import EventParticipantStatus, EventVolunteerStatus
+from app.domain.entities.event_entity import EventVolunteerStatus
 
 
 class AssignVolunteerRequest(BaseModel):

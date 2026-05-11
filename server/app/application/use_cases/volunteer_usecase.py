@@ -5,6 +5,7 @@ import math
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application.dto.volunteer_dto import (
+    _UNSET,
     AddVolunteerInput,
     AddVolunteerOutput,
     CreateVolunteerRoleInput,
@@ -27,7 +28,6 @@ from app.application.dto.volunteer_dto import (
     UpdateVolunteerRoleOutput,
     WithdrawApplicationInput,
     WithdrawApplicationOutput,
-    _UNSET,
 )
 from app.application.interfaces.volunteer_interface import IVolunteerRepository
 from app.domain.entities.volunteer_entity import ApplicationStatus
@@ -744,7 +744,7 @@ class UpdateVolunteerInfoUseCase:
             )
             if updated is None:
                 raise VolunteerNotFoundError(str(data.volunteer_id))
-        except (VolunteerNotFoundError, VolunteerRoleNotFoundError, VolunteerRoleInactiveError):
+        except VolunteerNotFoundError, VolunteerRoleNotFoundError, VolunteerRoleInactiveError:
             await self.db.rollback()
             raise
         except Exception:

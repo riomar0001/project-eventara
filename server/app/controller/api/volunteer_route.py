@@ -18,6 +18,7 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 
 from app.application.dto.volunteer_dto import (
+    _UNSET,
     AddVolunteerInput,
     CreateVolunteerRoleInput,
     DeleteVolunteerRoleInput,
@@ -29,10 +30,15 @@ from app.application.dto.volunteer_dto import (
     UpdateVolunteerInfoInput,
     UpdateVolunteerRoleInput,
     WithdrawApplicationInput,
-    _UNSET,
 )
 from app.application.use_cases.audit_log_usecase import AuditLogUseCase
-from app.application.use_cases.volunteer_usecase import GetVolunteerUseCase, UpdateVolunteerInfoUseCase, VolunteerApplicationUseCase, VolunteerRoleUseCase, VolunteerUseCase
+from app.application.use_cases.volunteer_usecase import (
+    GetVolunteerUseCase,
+    UpdateVolunteerInfoUseCase,
+    VolunteerApplicationUseCase,
+    VolunteerRoleUseCase,
+    VolunteerUseCase,
+)
 from app.controller.api.audit_helpers import safe_audit_log
 from app.controller.dependencies import (
     get_audit_log_use_case,
@@ -815,9 +821,7 @@ async def update_volunteer_role(
     responses={**UNAUTHORIZED, **FORBIDDEN, **VOLUNTEER_ROLE_NOT_FOUND, **VALIDATION_ERROR},
     summary="Delete a volunteer role",
     description=(
-        "Permanently delete a volunteer custom role. "
-        "All volunteers currently assigned to this role are also removed. "
-        "This operation is irreversible."
+        "Permanently delete a volunteer custom role. All volunteers currently assigned to this role are also removed. This operation is irreversible."
     ),
 )
 async def delete_volunteer_role(
@@ -835,9 +839,7 @@ async def delete_volunteer_role(
     - **404 Not Found** — no volunteer role exists for the given ID.
     """
     try:
-        result = await use_case.delete_volunteer_role(
-            DeleteVolunteerRoleInput(role_id=role_id, actor_id=caller_id)
-        )
+        result = await use_case.delete_volunteer_role(DeleteVolunteerRoleInput(role_id=role_id, actor_id=caller_id))
     except VolunteerRoleNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
 

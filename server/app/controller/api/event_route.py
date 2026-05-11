@@ -20,8 +20,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 
 from app.application.dto.event_dto import (
     CreateEventInput,
-    CreateEventSessionInput,
     CreateEventSessionForEventInput,
+    CreateEventSessionInput,
     DeleteEventInput,
     DeleteEventSessionInput,
     GetAllEventsInput,
@@ -78,8 +78,8 @@ from app.controller.schemas.event_schema import (
     EventMetadataUpdatedResponse,
     EventRecordResponse,
     EventSessionCreatedResponse,
-    EventSessionDeletedResponse,
     EventSessionCreateRequest,
+    EventSessionDeletedResponse,
     EventSessionRecordResponse,
     EventSessionStatusUpdatedResponse,
     EventSessionStatusUpdateRequest,

@@ -23,16 +23,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.entities.authorization_entities import Role as RoleEntity
 from app.domain.entities.user_entity import User as UserEntity
-from app.domain.entities.volunteer_entity import ApplicationStatus
+from app.domain.entities.volunteer_entity import ApplicationStatus, VolunteerStatus
 from app.domain.entities.volunteer_entity import PotentialVolunteer as PotentialVolunteerEntity
 from app.domain.entities.volunteer_entity import Volunteer as VolunteerEntity
 from app.domain.entities.volunteer_entity import VolunteerApplication as VolunteerApplicationEntity
 from app.domain.entities.volunteer_entity import VolunteerRole as VolunteerRoleEntity
-from app.domain.entities.volunteer_entity import VolunteerStatus
 from app.domain.entities.volunteer_entity import VolunteerSummary as VolunteerSummaryEntity
 from app.infrastructure.database.models.event_models import EventParticipant, EventSession
 from app.infrastructure.database.models.user_models import Role, User, UserProfile
-from app.infrastructure.database.models.volunteer_models import Volunteer, VolunteerApplication as VolunteerApplicationModel, VolunteerRole
+from app.infrastructure.database.models.volunteer_models import Volunteer, VolunteerRole
+from app.infrastructure.database.models.volunteer_models import VolunteerApplication as VolunteerApplicationModel
 
 
 class VolunteerRepository:
@@ -357,9 +357,7 @@ class VolunteerRepository:
 
     async def delete_volunteers_by_role_id(self, role_id: uuid.UUID) -> int:
         """Delete all volunteer records assigned to a given role and return the count removed."""
-        count_result = await self.db.execute(
-            select(func.count()).select_from(Volunteer).where(Volunteer.volunteer_role_id == role_id)
-        )
+        count_result = await self.db.execute(select(func.count()).select_from(Volunteer).where(Volunteer.volunteer_role_id == role_id))
         count = count_result.scalar_one()
         await self.db.execute(sql_delete(Volunteer).where(Volunteer.volunteer_role_id == role_id))
         await self.db.flush()

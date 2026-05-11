@@ -7,13 +7,13 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application.dto.volunteer_dto import (
+    _UNSET,
     DeleteVolunteerRoleInput,
     GetAllVolunteerRolesInput,
     UpdateVolunteerRoleInput,
-    _UNSET,
 )
 from app.application.use_cases.volunteer_usecase import VolunteerRoleUseCase
-from app.domain.entities.volunteer_entity import VolunteerRole, VolunteerStatus, Volunteer
+from app.domain.entities.volunteer_entity import Volunteer, VolunteerRole, VolunteerStatus
 from app.domain.exceptions.volunteer_role_exceptions import (
     VolunteerRoleAlreadyExistsError,
     VolunteerRoleNotFoundError,
@@ -104,17 +104,13 @@ class TestGetAllVolunteerRoles:
     async def test_get_all_passes_search_to_repository(self):
         uc, repo, _ = _make_uc()
         await uc.get_all_volunteer_roles(_get_input(search="coord"))
-        repo.get_all_volunteer_roles.assert_called_once_with(
-            search="coord", is_active=None, page=1, page_size=20
-        )
+        repo.get_all_volunteer_roles.assert_called_once_with(search="coord", is_active=None, page=1, page_size=20)
 
     @pytest.mark.asyncio
     async def test_get_all_passes_is_active_filter_to_repository(self):
         uc, repo, _ = _make_uc()
         await uc.get_all_volunteer_roles(_get_input(is_active=True))
-        repo.get_all_volunteer_roles.assert_called_once_with(
-            search=None, is_active=True, page=1, page_size=20
-        )
+        repo.get_all_volunteer_roles.assert_called_once_with(search=None, is_active=True, page=1, page_size=20)
 
     @pytest.mark.asyncio
     async def test_get_all_computes_total_pages_correctly_for_partial_last_page(self):
@@ -224,7 +220,7 @@ class TestDeleteVolunteerRole:
     @pytest.mark.asyncio
     async def test_delete_removes_volunteers_before_deleting_role(self):
         uc, repo, db = _make_uc()
-        result = await uc.delete_volunteer_role(_delete_input())
+        await uc.delete_volunteer_role(_delete_input())
         repo.delete_volunteers_by_role_id.assert_called_once_with(ROLE_ID)
         repo.delete_volunteer_role_by_id.assert_called_once_with(ROLE_ID)
         db.commit.assert_called_once()
