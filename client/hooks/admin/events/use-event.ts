@@ -21,7 +21,7 @@ export function useEvent(eventId: string) {
         const result = await Events.getEventWithSessionsEventsEventIdGet({
           path: { event_id: eventId },
           headers: getAuthHeaders(),
-          throwOnError: false,
+          throwOnError: false
         });
 
         if (cancelled) return;

@@ -8,11 +8,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CatalogCard, OperationsPageIntro } from './venues-shared';
 import { useVenues } from '@/hooks/admin/venues/use-venues';
+import { CatalogCard, OperationsPageIntro } from './venues-shared';
+import type { VenueRecordResponse } from '@/api/types.gen';
 import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
 import { resolveStorageImageUrl } from '@/lib/storage/image-url';
-import type { VenueRecordResponse } from '@/api/types.gen';
 
 const VENUE_PHOTO: Record<string, string> = {
   indoor: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=1400&q=80',
@@ -58,9 +58,7 @@ export function VenuesCatalog() {
       .filter((v) => (capacityMin ? v.capacity >= capacityMin : true))
       .filter((v) => {
         if (!lowerQuery) return true;
-        const haystack = [v.name, v.city, v.province, v.region, v.venue_type, v.contact_name ?? '', (v.amenities ?? []).join(' ')]
-          .join(' ')
-          .toLowerCase();
+        const haystack = [v.name, v.city, v.province, v.region, v.venue_type, v.contact_name ?? '', (v.amenities ?? []).join(' ')].join(' ').toLowerCase();
         return haystack.includes(lowerQuery);
       })
       .sort((a, b) => {
@@ -121,27 +119,54 @@ export function VenuesCatalog() {
           <Input
             placeholder="Search venues, city, region, or amenities"
             value={query}
-            onChange={(e) => { setQuery(e.target.value); setPage(1); }}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setPage(1);
+            }}
             className="h-10 pl-9"
           />
         </div>
 
         <div className="space-y-1.5">
           <p className="text-[11px] font-semibold tracking-[0.18em] text-neutral-500 uppercase">Capacity</p>
-          <Select value={capacityKey} onValueChange={(v) => { setCapacityKey(v); setPage(1); }}>
-            <SelectTrigger className="w-full" size="default"><SelectValue /></SelectTrigger>
+          <Select
+            value={capacityKey}
+            onValueChange={(v) => {
+              setCapacityKey(v);
+              setPage(1);
+            }}
+          >
+            <SelectTrigger className="w-full" size="default">
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent align="start">
-              {CAPACITY_FILTERS.map((o) => <SelectItem key={o.key} value={o.key}>{o.label}</SelectItem>)}
+              {CAPACITY_FILTERS.map((o) => (
+                <SelectItem key={o.key} value={o.key}>
+                  {o.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
 
         <div className="space-y-1.5">
           <p className="text-[11px] font-semibold tracking-[0.18em] text-neutral-500 uppercase">Sort by</p>
-          <Select value={sortKey} onValueChange={(v) => { setSortKey(v); setPage(1); }}>
-            <SelectTrigger className="w-full" size="default"><SelectValue /></SelectTrigger>
+          <Select
+            value={sortKey}
+            onValueChange={(v) => {
+              setSortKey(v);
+              setPage(1);
+            }}
+          >
+            <SelectTrigger className="w-full" size="default">
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent align="start">
-              {SORT_OPTIONS.map((o) => <SelectItem key={o.key} value={o.key}>{o.label}</SelectItem>)}
+              {SORT_OPTIONS.map((o) => (
+                <SelectItem key={o.key} value={o.key}>
+                  {o.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -162,7 +187,16 @@ export function VenuesCatalog() {
           {capacityKey !== 'any' && (
             <span className="inline-flex h-7 items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 text-xs font-medium text-amber-700">
               {capacityLabel}
-              <Button type="button" variant="ghost" size="icon-xs" className="-mr-1 text-amber-700" onClick={() => { setCapacityKey('any'); setPage(1); }}>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-xs"
+                className="-mr-1 text-amber-700"
+                onClick={() => {
+                  setCapacityKey('any');
+                  setPage(1);
+                }}
+              >
                 <X className="size-3" />
               </Button>
             </span>
@@ -170,7 +204,16 @@ export function VenuesCatalog() {
           {query.trim() && (
             <span className="inline-flex h-7 items-center gap-2 rounded-full border border-neutral-200 bg-white px-3 text-xs font-medium text-neutral-700">
               {`"${query.trim()}"`}
-              <Button type="button" variant="ghost" size="icon-xs" className="-mr-1 text-neutral-600" onClick={() => { setQuery(''); setPage(1); }}>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-xs"
+                className="-mr-1 text-neutral-600"
+                onClick={() => {
+                  setQuery('');
+                  setPage(1);
+                }}
+              >
                 <X className="size-3" />
               </Button>
             </span>
@@ -297,7 +340,11 @@ export function VenuesCatalog() {
                 badges={[venue.venue_type, ...(venue.is_partner ? ['Partner'] : [])]}
                 specs={[
                   { label: 'Location', value: [venue.city, venue.province].filter(Boolean).join(', '), icon: <MapPin className="size-3.5" /> },
-                  { label: 'Venue type', value: venue.venue_type.charAt(0).toUpperCase() + venue.venue_type.slice(1), icon: <Building2 className="size-3.5" /> },
+                  {
+                    label: 'Venue type',
+                    value: venue.venue_type.charAt(0).toUpperCase() + venue.venue_type.slice(1),
+                    icon: <Building2 className="size-3.5" />
+                  },
                   { label: 'Capacity', value: `${venue.capacity.toLocaleString()} guests`, icon: <Users className="size-3.5" /> }
                 ]}
                 tags={venue.amenities ?? []}

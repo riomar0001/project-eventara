@@ -1,13 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { Trash2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { Venues } from '@/api/sdk.gen';
-import type { DeleteVenueVenuesVenueIdDeleteData } from '@/api/types.gen';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Venues } from '@/api/sdk.gen';
+import type { DeleteVenueVenuesVenueIdDeleteData } from '@/api/types.gen';
 import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
 import { getAccessToken } from '@/store/auth-store';
 

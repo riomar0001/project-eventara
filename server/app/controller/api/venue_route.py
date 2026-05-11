@@ -37,8 +37,8 @@ from app.controller.docs.venue_management_docs import (
     UNAUTHORIZED,
     VALIDATION_ERROR,
     VENUE_CONFLICT,
-    VENUE_IMAGE_UPLOAD_OPENAPI_EXTRA,
     VENUE_IMAGE_STORAGE_UNAVAILABLE,
+    VENUE_IMAGE_UPLOAD_OPENAPI_EXTRA,
     VENUE_IN_USE,
     VENUE_NOT_FOUND,
     VENUE_UPDATE_OPENAPI_EXTRA,
@@ -386,9 +386,7 @@ async def get_venue_capacity(
         resource_id=str(venue_id),
         status=AuditLogStatus.SUCCESS,
     )
-    return VenueCapacityResponse(
-        data=VenueCapacityData(id=result.venue_id, name=result.name, capacity=result.capacity)
-    )
+    return VenueCapacityResponse(data=VenueCapacityData(id=result.venue_id, name=result.name, capacity=result.capacity))
 
 
 @venue_router.post(

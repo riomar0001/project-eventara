@@ -1,13 +1,12 @@
 'use client';
 
-import { AlertCircle, CalendarDays, Clock, MapPin, Users } from 'lucide-react';
+import { AlertCircle, Clock, MapPin, Users } from 'lucide-react';
 import Link from 'next/link';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
 import { useEvent } from '@/hooks/admin/events/use-event';
 import { DeleteEventButton } from './event-delete-button';
 import { BackLink, DetailList, DetailPanel, PhotoPanel } from './events-shared';
+import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
 
 function fmtDate(iso: string) {
   return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
@@ -19,7 +18,7 @@ function fmtDateTime(iso: string) {
     day: 'numeric',
     year: 'numeric',
     hour: 'numeric',
-    minute: '2-digit',
+    minute: '2-digit'
   });
 }
 
@@ -30,7 +29,7 @@ function StatusBadge({ status }: { status: string }) {
     started: 'bg-green-100 text-green-700',
     ended: 'bg-neutral-200 text-neutral-500',
     cancelled: 'bg-red-100 text-red-700',
-    postponed: 'bg-amber-100 text-amber-700',
+    postponed: 'bg-amber-100 text-amber-700'
   };
   const cls = colorMap[status] ?? 'bg-neutral-100 text-neutral-700';
   return (
@@ -102,10 +101,7 @@ export function EventDetail({ eventId }: { eventId: string }) {
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
             <div className="space-y-6">
               <DetailPanel title="Description">
-                <div
-                  className="prose prose-sm max-w-none text-neutral-700"
-                  dangerouslySetInnerHTML={{ __html: event.description }}
-                />
+                <div className="prose prose-sm max-w-none text-neutral-700" dangerouslySetInnerHTML={{ __html: event.description }} />
               </DetailPanel>
 
               <DetailPanel title={`Sessions (${sessions.length})`} description="All sessions for this event, ordered by start time.">
@@ -118,9 +114,7 @@ export function EventDetail({ eventId }: { eventId: string }) {
                         <div className="flex items-start justify-between gap-4">
                           <div className="min-w-0 flex-1">
                             <p className="font-medium text-neutral-950">{session.title}</p>
-                            {session.description && (
-                              <p className="mt-0.5 text-sm text-neutral-500">{session.description}</p>
-                            )}
+                            {session.description && <p className="mt-0.5 text-sm text-neutral-500">{session.description}</p>}
                             <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-neutral-500">
                               <span className="flex items-center gap-1">
                                 <Clock className="size-3" />
@@ -157,12 +151,12 @@ export function EventDetail({ eventId }: { eventId: string }) {
                     { label: 'Sessions', value: String(sessions.length) },
                     {
                       label: 'Created',
-                      value: event.created_at ? fmtDate(event.created_at) : '—',
+                      value: event.created_at ? fmtDate(event.created_at) : '—'
                     },
                     {
                       label: 'Last updated',
-                      value: event.updated_at ? fmtDate(event.updated_at) : '—',
-                    },
+                      value: event.updated_at ? fmtDate(event.updated_at) : '—'
+                    }
                   ]}
                 />
               </DetailPanel>

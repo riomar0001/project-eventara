@@ -3,11 +3,11 @@
 import { useState } from 'react';
 import { MobileFloatingAction, PrimaryPageAction } from '@/components/admin/shared/primary-page-action';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import type { VolunteerTableRecord } from './table/table-columns';
 import { VolunteersTableToolbar } from './table/table-toolbar';
 import { VolunteersTableContent } from './table/volunteers-table';
 import { OperationsPageIntro } from './volunteers-shared';
 import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
-import type { VolunteerTableRecord } from './table/table-columns';
 
 export function VolunteersPage() {
   const [search, setSearch] = useState('');

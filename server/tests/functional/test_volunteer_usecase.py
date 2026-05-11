@@ -98,9 +98,7 @@ def _make_vol_repo(**overrides) -> MagicMock:
     repo.get_application_by_id = AsyncMock(return_value=_sample_application())
     repo.get_active_application_by_user_id = AsyncMock(return_value=None)
     repo.create_application = AsyncMock(return_value=_sample_application())
-    repo.update_application_status = AsyncMock(
-        side_effect=lambda app_id, new_status: _sample_application(status=new_status)
-    )
+    repo.update_application_status = AsyncMock(side_effect=lambda app_id, new_status: _sample_application(status=new_status))
     for key, value in overrides.items():
         setattr(repo, key, value)
     return repo
@@ -358,9 +356,7 @@ async def test_submit_application_raises_when_user_is_already_a_volunteer():
 @pytest.mark.asyncio
 async def test_submit_application_raises_when_active_application_already_exists():
     """Raises VolunteerApplicationAlreadyExistsError when the user already has a PENDING or APPROVED application."""
-    vol_repo = _make_vol_repo(
-        get_active_application_by_user_id=AsyncMock(return_value=_sample_application())
-    )
+    vol_repo = _make_vol_repo(get_active_application_by_user_id=AsyncMock(return_value=_sample_application()))
     uc, _, _, db = _make_app_uc(vol_repo=vol_repo)
     with pytest.raises(VolunteerApplicationAlreadyExistsError):
         await uc.submit_application(_submit_input())
@@ -441,9 +437,7 @@ async def test_review_application_approves_and_creates_volunteer_record():
 async def test_review_application_rejects_without_creating_volunteer_record():
     """Rejects the application and does not create a Volunteer record."""
     uc, vol_repo, _, db = _make_app_uc()
-    result = await uc.review_application(
-        _review_input(new_status=ApplicationStatus.REJECTED, contact_phone=None, volunteer_role_id=None)
-    )
+    result = await uc.review_application(_review_input(new_status=ApplicationStatus.REJECTED, contact_phone=None, volunteer_role_id=None))
     vol_repo.create_volunteer.assert_not_called()
     db.commit.assert_called_once()
     assert result.volunteer is None
@@ -472,9 +466,7 @@ async def test_review_application_raises_when_volunteer_role_not_found_on_approv
 @pytest.mark.asyncio
 async def test_review_application_raises_when_volunteer_role_is_inactive_on_approval():
     """Raises VolunteerRoleInactiveError when the provided volunteer role is inactive during approval."""
-    vol_repo = _make_vol_repo(
-        get_volunteer_role_by_id=AsyncMock(return_value=_sample_volunteer_role(is_active=False))
-    )
+    vol_repo = _make_vol_repo(get_volunteer_role_by_id=AsyncMock(return_value=_sample_volunteer_role(is_active=False)))
     uc, _, _, db = _make_app_uc(vol_repo=vol_repo)
     with pytest.raises(VolunteerRoleInactiveError):
         await uc.review_application(_review_input())
@@ -515,9 +507,7 @@ async def test_review_application_assigns_rbac_volunteer_role_on_approval():
 @pytest.mark.asyncio
 async def test_review_application_rolls_back_and_reraises_on_unexpected_error():
     """Rolls back the transaction and re-raises when an unexpected error occurs during review."""
-    vol_repo = _make_vol_repo(
-        update_application_status=AsyncMock(side_effect=RuntimeError("db error"))
-    )
+    vol_repo = _make_vol_repo(update_application_status=AsyncMock(side_effect=RuntimeError("db error")))
     uc, _, _, db = _make_app_uc(vol_repo=vol_repo)
     with pytest.raises(RuntimeError):
         await uc.review_application(_review_input())
@@ -582,9 +572,7 @@ async def test_withdraw_application_uses_pessimistic_lock_on_application_row():
 @pytest.mark.asyncio
 async def test_withdraw_application_rolls_back_and_reraises_on_unexpected_error():
     """Rolls back the transaction and re-raises when an unexpected error occurs during withdrawal."""
-    vol_repo = _make_vol_repo(
-        update_application_status=AsyncMock(side_effect=RuntimeError("db error"))
-    )
+    vol_repo = _make_vol_repo(update_application_status=AsyncMock(side_effect=RuntimeError("db error")))
     uc, _, _, db = _make_app_uc(vol_repo=vol_repo)
     with pytest.raises(RuntimeError):
         await uc.withdraw_application(_withdraw_input())

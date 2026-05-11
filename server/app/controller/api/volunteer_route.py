@@ -150,7 +150,7 @@ async def add_volunteer(
         )
     except UserNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
-    except (VolunteerRoleNotFoundError) as exc:
+    except VolunteerRoleNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
     except VolunteerRoleInactiveError as exc:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))

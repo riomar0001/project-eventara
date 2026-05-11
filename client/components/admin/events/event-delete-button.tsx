@@ -1,14 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { Trash2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { Events } from '@/api/sdk.gen';
-import { getAccessToken } from '@/store/auth-store';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Events } from '@/api/sdk.gen';
 import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
+import { getAccessToken } from '@/store/auth-store';
 
 function extractErrorMessage(payload: unknown): string | undefined {
   if (!payload || typeof payload !== 'object') return undefined;
@@ -68,9 +68,7 @@ export function DeleteEventButton({ eventId, eventTitle }: { eventId: string; ev
       <DialogContent showCloseButton={false}>
         <DialogHeader>
           <DialogTitle>Delete event</DialogTitle>
-          <DialogDescription>
-            This will permanently delete &ldquo;{eventTitle}&rdquo; and all its sessions. This action cannot be undone.
-          </DialogDescription>
+          <DialogDescription>This will permanently delete &ldquo;{eventTitle}&rdquo; and all its sessions. This action cannot be undone.</DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <DialogClose asChild>
