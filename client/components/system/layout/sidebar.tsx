@@ -28,7 +28,7 @@ import { cn } from '@/lib/utils';
 
 export function AppSidebar() {
   const pathname = usePathname();
-  const [volunteerOpen, setVolunteerOpen] = React.useState(() => pathname.startsWith('/admin/volunteers'));
+  const [volunteerOpen, setVolunteerOpen] = React.useState(() => pathname.startsWith('/volunteers'));
   const { state } = useSidebar();
   const isCollapsed = state === 'collapsed';
   const { can } = usePermissions();
@@ -36,7 +36,7 @@ export function AppSidebar() {
   function isActiveHref(href: string) {
     if (!href.startsWith('/')) return false;
     const normalizedHref = href.split('#')[0];
-    if (normalizedHref === '/admin/dashboard') return pathname === '/admin/dashboard';
+    if (normalizedHref === '/dashboard') return pathname === '/dashboard';
     return pathname === normalizedHref || pathname.startsWith(`${normalizedHref}/`);
   }
 
@@ -46,7 +46,7 @@ export function AppSidebar() {
       return;
     }
 
-    if (pathname.startsWith('/admin/volunteers')) {
+    if (pathname.startsWith('/volunteers')) {
       setVolunteerOpen(true);
     }
   }, [isCollapsed, pathname]);

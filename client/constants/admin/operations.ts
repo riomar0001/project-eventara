@@ -1,19 +1,19 @@
 export const ADMIN_OPERATIONS_PATHS = {
-  venues: '/admin/venues',
-  venueCreate: '/admin/venues/new',
-  venueDetail: (venueId: string) => `/admin/venues/${venueId}`,
-  venueEdit: (venueId: string) => `/admin/venues/${venueId}/edit`,
-  events: '/admin/events',
-  eventCreate: '/admin/events/new',
-  eventDetail: (eventId: string) => `/admin/events/${eventId}`,
-  eventEdit: (eventId: string) => `/admin/events/${eventId}/edit`,
-  volunteers: '/admin/volunteers/roster',
-  volunteerCreate: '/admin/volunteers/new',
-  volunteerDetail: (volunteerId: string) => `/admin/volunteers/${volunteerId}`,
-  volunteerEdit: (volunteerId: string) => `/admin/volunteers/${volunteerId}/edit`,
-  volunteerPotentialVolunteers: '/admin/volunteers/potential-volunteers',
-  volunteerRoles: '/admin/volunteers/roles',
-  queues: '/admin/queues'
+  venues: '/venues',
+  venueCreate: '/venues/new',
+  venueDetail: (venueId: string) => `/venues/${venueId}`,
+  venueEdit: (venueId: string) => `/venues/${venueId}/edit`,
+  events: '/events',
+  eventCreate: '/events/new',
+  eventDetail: (eventId: string) => `/events/${eventId}`,
+  eventEdit: (eventId: string) => `/events/${eventId}/edit`,
+  volunteers: '/volunteers/roster',
+  volunteerCreate: '/volunteers/new',
+  volunteerDetail: (volunteerId: string) => `/volunteers/${volunteerId}`,
+  volunteerEdit: (volunteerId: string) => `/volunteers/${volunteerId}/edit`,
+  volunteerPotentialVolunteers: '/volunteers/potential-volunteers',
+  volunteerRoles: '/volunteers/roles',
+  queues: '/queues'
 } as const;
 
 export type VenueRecord = {
