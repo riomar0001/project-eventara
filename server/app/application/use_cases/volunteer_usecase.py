@@ -13,10 +13,16 @@ from app.application.dto.volunteer_dto import (
     DeleteVolunteerRoleOutput,
     GetAllVolunteerRolesInput,
     GetAllVolunteerRolesOutput,
+    GetAllVolunteersInput,
+    GetAllVolunteersOutput,
+    GetPotentialVolunteersInput,
+    GetPotentialVolunteersOutput,
     ReviewApplicationInput,
     ReviewApplicationOutput,
     SubmitApplicationInput,
     SubmitApplicationOutput,
+    UpdateVolunteerInfoInput,
+    UpdateVolunteerInfoOutput,
     UpdateVolunteerRoleInput,
     UpdateVolunteerRoleOutput,
     WithdrawApplicationInput,
@@ -33,7 +39,7 @@ from app.domain.exceptions.volunteer_application_exceptions import (
     VolunteerApplicationAlreadyExistsError,
     VolunteerApplicationNotFoundError,
 )
-from app.domain.exceptions.volunteer_exceptions import VolunteerAlreadyExistsError
+from app.domain.exceptions.volunteer_exceptions import VolunteerAlreadyExistsError, VolunteerNotFoundError
 from app.domain.exceptions.volunteer_role_exceptions import (
     VolunteerRoleAlreadyExistsError,
     VolunteerRoleInactiveError,
@@ -50,6 +56,79 @@ _ALLOWED_APPLICATION_TRANSITIONS: dict[ApplicationStatus, frozenset[ApplicationS
         ApplicationStatus.WITHDRAWN,
     }),
 }
+
+
+class GetVolunteerUseCase:
+    """Read-only application service for listing volunteers with optional filters.
+
+    Concurrency strategy — no locking:
+        This use case performs a pure read (SELECT with optional WHERE clauses and
+        OFFSET/LIMIT pagination).  There is no check-then-modify sequence, so no
+        TOCTOU race is possible and no pessimistic or optimistic lock is needed.
+        Reads execute at the database's default READ COMMITTED isolation level,
+        which guarantees each row is returned in a fully committed state.
+
+    Args:
+        repo: Concrete implementation of ``IVolunteerRepository``.
+    """
+
+    def __init__(self, repo: IVolunteerRepository) -> None:
+        self.repo = repo
+
+    async def get_all_volunteers(self, data: GetAllVolunteersInput) -> GetAllVolunteersOutput:
+        """Return a paginated, optionally filtered list of volunteers.
+
+        Args:
+            data: ``GetAllVolunteersInput`` with pagination parameters and optional
+                  status and volunteer-role-id filters.
+
+        Returns:
+            ``GetAllVolunteersOutput`` containing the matching volunteer slice,
+            the total record count, and computed pagination metadata.
+        """
+        volunteers, total = await self.repo.get_all_volunteers(
+            status=data.status,
+            role_id=data.role_id,
+            page=data.page,
+            page_size=data.page_size,
+        )
+        total_pages = max(1, math.ceil(total / data.page_size))
+        return GetAllVolunteersOutput(
+            volunteers=volunteers,
+            total=total,
+            page=data.page,
+            page_size=data.page_size,
+            total_pages=total_pages,
+        )
+
+    async def get_potential_volunteers(self, data: GetPotentialVolunteersInput) -> GetPotentialVolunteersOutput:
+        """Return a paginated list of users ranked by event participation who are not yet volunteers.
+
+        Users are ordered by descending event count so the most engaged participants
+        appear first, making them the highest-priority candidates for outreach.
+
+        Args:
+            data: ``GetPotentialVolunteersInput`` with pagination parameters, a
+                  minimum-event-count threshold, and an optional search string.
+
+        Returns:
+            ``GetPotentialVolunteersOutput`` containing the matching user slice,
+            the total record count, and computed pagination metadata.
+        """
+        potential_volunteers, total = await self.repo.get_potential_volunteers(
+            page=data.page,
+            page_size=data.page_size,
+            min_events=data.min_events,
+            search=data.search,
+        )
+        total_pages = max(1, math.ceil(total / data.page_size))
+        return GetPotentialVolunteersOutput(
+            potential_volunteers=potential_volunteers,
+            total=total,
+            page=data.page,
+            page_size=data.page_size,
+            total_pages=total_pages,
+        )
 
 
 class VolunteerUseCase:
@@ -598,3 +677,85 @@ class VolunteerApplicationUseCase:
             )
         except RoleAlreadyAssignedError:
             return
+
+
+class UpdateVolunteerInfoUseCase:
+    """Application service for updating an existing volunteer's contact and role information.
+
+    Owns the transaction lifecycle: commits on success, rolls back on any
+    validation or infrastructure failure, then re-raises the exception.
+
+    Concurrency strategy — pessimistic locking (SELECT … FOR UPDATE):
+        ``update_volunteer_info`` acquires a row-level lock on the target
+        volunteer row before applying changes.  This serialises concurrent
+        update requests for the same volunteer and prevents two callers from
+        reading the same state and then both attempting to persist conflicting
+        modifications.
+
+    Args:
+        repo: Concrete implementation of ``IVolunteerRepository``.
+        db:   The active async database session used for commit and rollback.
+    """
+
+    def __init__(self, repo: IVolunteerRepository, db: AsyncSession) -> None:
+        self.repo = repo
+        self.db = db
+
+    async def update_volunteer_info(self, data: UpdateVolunteerInfoInput) -> UpdateVolunteerInfoOutput:
+        """Update contact phone, volunteer role assignment, and/or status of a volunteer.
+
+        Only the fields explicitly provided (non-None) in ``data`` are changed.
+        When a new ``volunteer_role_id`` is specified the referenced role must
+        exist and be active.  A row-level lock is held from the initial fetch
+        through the commit to prevent concurrent updates from producing an
+        inconsistent state.
+
+        Args:
+            data: ``UpdateVolunteerInfoInput`` with the volunteer ID, the actor's
+                  user ID, and any subset of ``contact_phone``, ``volunteer_role_id``,
+                  and ``status`` to change.
+
+        Returns:
+            ``UpdateVolunteerInfoOutput`` containing the updated ``Volunteer``
+            entity and a snapshot of the state before the change.
+
+        Raises:
+            VolunteerNotFoundError: No volunteer record exists for ``data.volunteer_id``.
+            VolunteerRoleNotFoundError: The referenced new volunteer role does not exist.
+            VolunteerRoleInactiveError: The referenced new volunteer role is inactive.
+        """
+        volunteer = await self.repo.get_volunteer_by_id(data.volunteer_id, for_update=True)
+        if not volunteer:
+            raise VolunteerNotFoundError(str(data.volunteer_id))
+
+        old_values = {
+            "contact_phone": volunteer.contact_phone,
+            "volunteer_role_id": str(volunteer.volunteer_role_id),
+            "status": volunteer.status.value if hasattr(volunteer.status, "value") else volunteer.status,
+        }
+
+        if data.volunteer_role_id is not None:
+            role = await self.repo.get_volunteer_role_by_id(data.volunteer_role_id)
+            if not role:
+                raise VolunteerRoleNotFoundError(str(data.volunteer_role_id))
+            if not role.is_active:
+                raise VolunteerRoleInactiveError(str(data.volunteer_role_id))
+
+        try:
+            updated = await self.repo.update_volunteer(
+                volunteer_id=data.volunteer_id,
+                contact_phone=data.contact_phone,
+                volunteer_role_id=data.volunteer_role_id,
+                status=data.status,
+            )
+            if updated is None:
+                raise VolunteerNotFoundError(str(data.volunteer_id))
+        except (VolunteerNotFoundError, VolunteerRoleNotFoundError, VolunteerRoleInactiveError):
+            await self.db.rollback()
+            raise
+        except Exception:
+            await self.db.rollback()
+            raise
+
+        await self.db.commit()
+        return UpdateVolunteerInfoOutput(volunteer=updated, old_values=old_values)

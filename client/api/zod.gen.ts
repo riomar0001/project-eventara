@@ -1620,6 +1620,24 @@ export const zVerifyEmailResponse = z.object({
 });
 
 /**
+ * VolunteerStatus
+ */
+export const zVolunteerStatus = z.enum([
+    'active',
+    'inactive',
+    'suspended'
+]);
+
+/**
+ * UpdateVolunteerRequest
+ */
+export const zUpdateVolunteerRequest = z.object({
+    contact_phone: z.string().min(7).max(20).nullish(),
+    volunteer_role_id: z.uuid().nullish(),
+    status: zVolunteerStatus.nullish()
+});
+
+/**
  * WorkerHealthEntrySchema
  */
 export const zWorkerHealthEntrySchema = z.object({
@@ -2415,6 +2433,20 @@ export const zUpdateParticipantStatusEventsEventIdSessionSessionIdParticipantsPa
  */
 export const zUpdateParticipantStatusEventsEventIdSessionSessionIdParticipantsParticipantIdPatchResponse = zUpdateParticipantStatusResponse;
 
+export const zGetAllVolunteersVolunteersGetQuery = z.object({
+    page: z.int().gte(1).optional().default(1),
+    page_size: z.int().gte(1).lte(100).optional().default(20),
+    status: zVolunteerStatus.nullish(),
+    role_id: z.uuid().nullish()
+});
+
+/**
+ * Response Get All Volunteers Volunteers Get
+ *
+ * Successful Response
+ */
+export const zGetAllVolunteersVolunteersGetResponse = z.record(z.string(), z.unknown());
+
 export const zAddVolunteerVolunteersPostBody = zAddVolunteerRequest;
 
 /**
@@ -2423,6 +2455,33 @@ export const zAddVolunteerVolunteersPostBody = zAddVolunteerRequest;
  * Successful Response
  */
 export const zAddVolunteerVolunteersPostResponse = z.record(z.string(), z.unknown());
+
+export const zGetPotentialVolunteersVolunteersPotentialGetQuery = z.object({
+    page: z.int().gte(1).optional().default(1),
+    page_size: z.int().gte(1).lte(100).optional().default(20),
+    min_events: z.int().gte(1).optional().default(1),
+    search: z.string().max(100).nullish()
+});
+
+/**
+ * Response Get Potential Volunteers Volunteers Potential Get
+ *
+ * Successful Response
+ */
+export const zGetPotentialVolunteersVolunteersPotentialGetResponse = z.record(z.string(), z.unknown());
+
+export const zUpdateVolunteerInfoVolunteersVolunteerIdPatchBody = zUpdateVolunteerRequest;
+
+export const zUpdateVolunteerInfoVolunteersVolunteerIdPatchPath = z.object({
+    volunteer_id: z.uuid()
+});
+
+/**
+ * Response Update Volunteer Info Volunteers  Volunteer Id  Patch
+ *
+ * Successful Response
+ */
+export const zUpdateVolunteerInfoVolunteersVolunteerIdPatchResponse = z.record(z.string(), z.unknown());
 
 export const zGetAllVolunteerRolesVolunteerRolesGetQuery = z.object({
     page: z.int().gte(1).optional().default(1),

@@ -1,4 +1,4 @@
-"""Functional test cases for VolunteerUseCase and VolunteerApplicationUseCase."""
+"""Functional test cases for GetVolunteerUseCase, VolunteerUseCase, VolunteerApplicationUseCase, and UpdateVolunteerInfoUseCase."""
 
 import uuid
 from unittest.mock import AsyncMock, MagicMock
@@ -9,14 +9,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.application.dto.volunteer_dto import (
     AddVolunteerInput,
     CreateVolunteerRoleInput,
+    GetAllVolunteersInput,
+    GetPotentialVolunteersInput,
     ReviewApplicationInput,
     SubmitApplicationInput,
+    UpdateVolunteerInfoInput,
     WithdrawApplicationInput,
 )
-from app.application.use_cases.volunteer_usecase import VolunteerApplicationUseCase, VolunteerUseCase
+from app.application.use_cases.volunteer_usecase import GetVolunteerUseCase, UpdateVolunteerInfoUseCase, VolunteerApplicationUseCase, VolunteerUseCase
 from app.domain.entities.authorization_entities import Role as RoleEntity
 from app.domain.entities.user_entity import User as UserEntity
-from app.domain.entities.volunteer_entity import ApplicationStatus, Volunteer, VolunteerApplication, VolunteerRole, VolunteerStatus
+from app.domain.entities.volunteer_entity import ApplicationStatus, PotentialVolunteer, Volunteer, VolunteerApplication, VolunteerRole, VolunteerStatus
 from app.domain.exceptions.user_exceptions import UserNotFoundError
 from app.domain.exceptions.volunteer_application_exceptions import (
     InvalidApplicationStatusTransitionError,
@@ -24,7 +27,7 @@ from app.domain.exceptions.volunteer_application_exceptions import (
     VolunteerApplicationAlreadyExistsError,
     VolunteerApplicationNotFoundError,
 )
-from app.domain.exceptions.volunteer_exceptions import VolunteerAlreadyExistsError
+from app.domain.exceptions.volunteer_exceptions import VolunteerAlreadyExistsError, VolunteerNotFoundError
 from app.domain.exceptions.volunteer_role_exceptions import (
     VolunteerRoleAlreadyExistsError,
     VolunteerRoleInactiveError,
@@ -86,12 +89,25 @@ def _sample_application(*, status: ApplicationStatus = ApplicationStatus.PENDING
     )
 
 
+def _sample_potential_volunteer() -> PotentialVolunteer:
+    return PotentialVolunteer(
+        user_id=USER_ID,
+        first_name="Maya",
+        last_name="Chen",
+        alias="maya-chen",
+        email="user@example.com",
+        events_count=3,
+    )
+
+
 def _make_vol_repo(**overrides) -> MagicMock:
     repo = MagicMock(spec=VolunteerRepository)
     repo.get_user_by_id = AsyncMock(return_value=_sample_user())
     repo.get_volunteer_role_by_id = AsyncMock(return_value=_sample_volunteer_role())
     repo.get_volunteer_by_user_id = AsyncMock(return_value=None)
+    repo.get_volunteer_by_id = AsyncMock(return_value=_sample_volunteer())
     repo.create_volunteer = AsyncMock(return_value=_sample_volunteer())
+    repo.update_volunteer = AsyncMock(return_value=_sample_volunteer())
     repo.get_volunteer_role_by_name = AsyncMock(return_value=None)
     repo.create_volunteer_role = AsyncMock(return_value=_sample_volunteer_role())
     repo.get_rbac_role_by_name = AsyncMock(return_value=_sample_rbac_role())
@@ -101,6 +117,8 @@ def _make_vol_repo(**overrides) -> MagicMock:
     repo.update_application_status = AsyncMock(
         side_effect=lambda app_id, new_status: _sample_application(status=new_status)
     )
+    repo.get_all_volunteers = AsyncMock(return_value=([_sample_volunteer()], 1))
+    repo.get_potential_volunteers = AsyncMock(return_value=([_sample_potential_volunteer()], 1))
     for key, value in overrides.items():
         setattr(repo, key, value)
     return repo
@@ -113,6 +131,17 @@ def _make_role_repo(**overrides) -> MagicMock:
     for key, value in overrides.items():
         setattr(repo, key, value)
     return repo
+
+
+def _make_get_uc(vol_repo=None):
+    vol_repo = vol_repo or _make_vol_repo()
+    return GetVolunteerUseCase(vol_repo), vol_repo
+
+
+def _make_update_uc(vol_repo=None):
+    vol_repo = vol_repo or _make_vol_repo()
+    db = AsyncMock(spec=AsyncSession)
+    return UpdateVolunteerInfoUseCase(vol_repo, db), vol_repo, db
 
 
 def _make_uc(vol_repo=None, role_repo=None):
@@ -172,6 +201,74 @@ def _create_role_input(**overrides):
     )
     defaults.update(overrides)
     return CreateVolunteerRoleInput(**defaults)
+
+
+# ---------------------------------------------------------------------------
+# get_all_volunteers
+# ---------------------------------------------------------------------------
+
+
+def _get_all_input(**overrides):
+    defaults = dict(page=1, page_size=20, status=None, role_id=None)
+    defaults.update(overrides)
+    return GetAllVolunteersInput(**defaults)
+
+
+@pytest.mark.asyncio
+async def test_get_all_volunteers_returns_paginated_volunteers_on_success():
+    """Returns a paginated list of volunteers with correct total and metadata."""
+    uc, _ = _make_get_uc()
+    result = await uc.get_all_volunteers(_get_all_input())
+    assert len(result.volunteers) == 1
+    assert result.total == 1
+    assert result.page == 1
+    assert result.page_size == 20
+    assert result.total_pages == 1
+
+
+@pytest.mark.asyncio
+async def test_get_all_volunteers_passes_status_filter_to_repository():
+    """Delegates the status filter to the repository when provided."""
+    uc, vol_repo = _make_get_uc()
+    await uc.get_all_volunteers(_get_all_input(status=VolunteerStatus.ACTIVE))
+    vol_repo.get_all_volunteers.assert_called_once_with(
+        status=VolunteerStatus.ACTIVE,
+        role_id=None,
+        page=1,
+        page_size=20,
+    )
+
+
+@pytest.mark.asyncio
+async def test_get_all_volunteers_passes_role_id_filter_to_repository():
+    """Delegates the role_id filter to the repository when provided."""
+    uc, vol_repo = _make_get_uc()
+    await uc.get_all_volunteers(_get_all_input(role_id=ROLE_ID))
+    vol_repo.get_all_volunteers.assert_called_once_with(
+        status=None,
+        role_id=ROLE_ID,
+        page=1,
+        page_size=20,
+    )
+
+
+@pytest.mark.asyncio
+async def test_get_all_volunteers_calculates_total_pages_from_total_and_page_size():
+    """Computes total_pages as the ceiling of total divided by page_size."""
+    vol_repo = _make_vol_repo(get_all_volunteers=AsyncMock(return_value=([_sample_volunteer()], 45)))
+    uc, _ = _make_get_uc(vol_repo=vol_repo)
+    result = await uc.get_all_volunteers(_get_all_input(page_size=20))
+    assert result.total_pages == 3
+
+
+@pytest.mark.asyncio
+async def test_get_all_volunteers_returns_minimum_one_total_page_when_roster_is_empty():
+    """Returns total_pages of 1 and an empty volunteers list when no volunteers exist."""
+    vol_repo = _make_vol_repo(get_all_volunteers=AsyncMock(return_value=([], 0)))
+    uc, _ = _make_get_uc(vol_repo=vol_repo)
+    result = await uc.get_all_volunteers(_get_all_input())
+    assert result.total_pages == 1
+    assert result.volunteers == []
 
 
 # ---------------------------------------------------------------------------
@@ -590,3 +687,168 @@ async def test_withdraw_application_rolls_back_and_reraises_on_unexpected_error(
         await uc.withdraw_application(_withdraw_input())
     db.rollback.assert_called_once()
     db.commit.assert_not_called()
+
+
+# ---------------------------------------------------------------------------
+# update_volunteer_info
+# ---------------------------------------------------------------------------
+
+
+def _update_volunteer_input(**overrides):
+    defaults = dict(
+        volunteer_id=VOLUNTEER_ID,
+        actor_id=ACTOR_ID,
+        contact_phone=None,
+        volunteer_role_id=None,
+        status=None,
+    )
+    defaults.update(overrides)
+    return UpdateVolunteerInfoInput(**defaults)
+
+
+def _get_potential_input(**overrides):
+    defaults = dict(page=1, page_size=20, min_events=1, search=None)
+    defaults.update(overrides)
+    return GetPotentialVolunteersInput(**defaults)
+
+
+@pytest.mark.asyncio
+async def test_update_volunteer_info_raises_when_volunteer_not_found():
+    """Raises VolunteerNotFoundError when no volunteer record matches the given ID."""
+    vol_repo = _make_vol_repo(get_volunteer_by_id=AsyncMock(return_value=None))
+    uc, _, db = _make_update_uc(vol_repo=vol_repo)
+    with pytest.raises(VolunteerNotFoundError):
+        await uc.update_volunteer_info(_update_volunteer_input())
+    db.commit.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_update_volunteer_info_raises_when_new_role_not_found():
+    """Raises VolunteerRoleNotFoundError when the requested new volunteer role does not exist."""
+    vol_repo = _make_vol_repo(get_volunteer_role_by_id=AsyncMock(return_value=None))
+    uc, _, db = _make_update_uc(vol_repo=vol_repo)
+    with pytest.raises(VolunteerRoleNotFoundError):
+        await uc.update_volunteer_info(_update_volunteer_input(volunteer_role_id=ROLE_ID))
+    db.commit.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_update_volunteer_info_raises_when_new_role_is_inactive():
+    """Raises VolunteerRoleInactiveError when the requested new volunteer role is not active."""
+    inactive_role = _sample_volunteer_role(is_active=False)
+    vol_repo = _make_vol_repo(get_volunteer_role_by_id=AsyncMock(return_value=inactive_role))
+    uc, _, db = _make_update_uc(vol_repo=vol_repo)
+    with pytest.raises(VolunteerRoleInactiveError):
+        await uc.update_volunteer_info(_update_volunteer_input(volunteer_role_id=ROLE_ID))
+    db.commit.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_update_volunteer_info_persists_changes_and_commits():
+    """Applies the provided updates to the volunteer record and commits the transaction."""
+    uc, vol_repo, db = _make_update_uc()
+    result = await uc.update_volunteer_info(_update_volunteer_input(contact_phone="+9999999999"))
+    vol_repo.update_volunteer.assert_called_once_with(
+        volunteer_id=VOLUNTEER_ID,
+        contact_phone="+9999999999",
+        volunteer_role_id=None,
+        status=None,
+    )
+    db.commit.assert_called_once()
+    assert result.volunteer is not None
+
+
+@pytest.mark.asyncio
+async def test_update_volunteer_info_acquires_row_lock_before_update():
+    """Passes for_update=True when fetching the volunteer to prevent concurrent update conflicts."""
+    uc, vol_repo, _ = _make_update_uc()
+    await uc.update_volunteer_info(_update_volunteer_input(contact_phone="+9999999999"))
+    vol_repo.get_volunteer_by_id.assert_called_once_with(VOLUNTEER_ID, for_update=True)
+
+
+@pytest.mark.asyncio
+async def test_update_volunteer_info_includes_old_values_in_output():
+    """Returns a snapshot of the volunteer state before the change in old_values."""
+    uc, _, _ = _make_update_uc()
+    result = await uc.update_volunteer_info(_update_volunteer_input(contact_phone="+9999999999"))
+    assert "contact_phone" in result.old_values
+    assert "volunteer_role_id" in result.old_values
+    assert "status" in result.old_values
+
+
+@pytest.mark.asyncio
+async def test_update_volunteer_info_skips_role_check_when_no_role_change():
+    """Does not query the volunteer role when volunteer_role_id is not provided."""
+    uc, vol_repo, db = _make_update_uc()
+    await uc.update_volunteer_info(_update_volunteer_input(status=VolunteerStatus.INACTIVE))
+    vol_repo.get_volunteer_role_by_id.assert_not_called()
+    db.commit.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_update_volunteer_info_rolls_back_on_unexpected_error():
+    """Rolls back the transaction and re-raises when an unexpected error occurs during update."""
+    vol_repo = _make_vol_repo(update_volunteer=AsyncMock(side_effect=RuntimeError("db error")))
+    uc, _, db = _make_update_uc(vol_repo=vol_repo)
+    with pytest.raises(RuntimeError):
+        await uc.update_volunteer_info(_update_volunteer_input(contact_phone="+9999999999"))
+    db.rollback.assert_called_once()
+    db.commit.assert_not_called()
+
+
+# ---------------------------------------------------------------------------
+# get_potential_volunteers
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_get_potential_volunteers_passes_all_parameters_to_repo():
+    """Forwards page, page_size, min_events, and search to the repository unchanged."""
+    uc, vol_repo = _make_get_uc()
+    await uc.get_potential_volunteers(_get_potential_input(page=2, page_size=10, min_events=3, search="maya"))
+    vol_repo.get_potential_volunteers.assert_called_once_with(
+        page=2,
+        page_size=10,
+        min_events=3,
+        search="maya",
+    )
+
+
+@pytest.mark.asyncio
+async def test_get_potential_volunteers_returns_data_with_pagination_metadata():
+    """Returns the list of potential volunteers and correct pagination metadata."""
+    uc, _ = _make_get_uc()
+    result = await uc.get_potential_volunteers(_get_potential_input())
+    assert len(result.potential_volunteers) == 1
+    assert result.total == 1
+    assert result.page == 1
+    assert result.total_pages == 1
+
+
+@pytest.mark.asyncio
+async def test_get_potential_volunteers_calculates_total_pages_correctly():
+    """Computes total_pages by ceiling-dividing total count by page_size."""
+    vol_repo = _make_vol_repo(
+        get_potential_volunteers=AsyncMock(return_value=([_sample_potential_volunteer()], 45))
+    )
+    uc, _ = _make_get_uc(vol_repo=vol_repo)
+    result = await uc.get_potential_volunteers(_get_potential_input(page_size=20))
+    assert result.total_pages == 3
+
+
+@pytest.mark.asyncio
+async def test_get_potential_volunteers_returns_minimum_one_page_when_empty():
+    """Returns total_pages of 1 even when there are no results."""
+    vol_repo = _make_vol_repo(get_potential_volunteers=AsyncMock(return_value=([], 0)))
+    uc, _ = _make_get_uc(vol_repo=vol_repo)
+    result = await uc.get_potential_volunteers(_get_potential_input())
+    assert result.total_pages == 1
+    assert result.potential_volunteers == []
+
+
+@pytest.mark.asyncio
+async def test_get_potential_volunteers_result_includes_events_count():
+    """Each returned potential volunteer carries the count of distinct events participated in."""
+    uc, _ = _make_get_uc()
+    result = await uc.get_potential_volunteers(_get_potential_input())
+    assert result.potential_volunteers[0].events_count == 3

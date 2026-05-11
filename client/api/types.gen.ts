@@ -2579,6 +2579,21 @@ export type UpdateProfileResponse = {
 };
 
 /**
+ * UpdateVolunteerRequest
+ */
+export type UpdateVolunteerRequest = {
+    /**
+     * Contact Phone
+     */
+    contact_phone?: string | null;
+    /**
+     * Volunteer Role Id
+     */
+    volunteer_role_id?: string | null;
+    status?: VolunteerStatus | null;
+};
+
+/**
  * UpdateVolunteerRoleRequest
  */
 export type UpdateVolunteerRoleRequest = {
@@ -3337,6 +3352,11 @@ export type VerifyEmailResponse = {
      */
     message?: string;
 };
+
+/**
+ * VolunteerStatus
+ */
+export type VolunteerStatus = 'active' | 'inactive' | 'suspended';
 
 /**
  * WorkerHealthEntrySchema
@@ -6776,6 +6796,60 @@ export type UpdateParticipantStatusEventsEventIdSessionSessionIdParticipantsPart
 
 export type UpdateParticipantStatusEventsEventIdSessionSessionIdParticipantsParticipantIdPatchResponse = UpdateParticipantStatusEventsEventIdSessionSessionIdParticipantsParticipantIdPatchResponses[keyof UpdateParticipantStatusEventsEventIdSessionSessionIdParticipantsParticipantIdPatchResponses];
 
+export type GetAllVolunteersVolunteersGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Page
+         */
+        page?: number;
+        /**
+         * Page Size
+         */
+        page_size?: number;
+        /**
+         * Status
+         */
+        status?: VolunteerStatus | null;
+        /**
+         * Role Id
+         */
+        role_id?: string | null;
+    };
+    url: '/volunteers';
+};
+
+export type GetAllVolunteersVolunteersGetErrors = {
+    /**
+     * Missing or invalid Bearer token
+     */
+    401: ErrorResponse;
+    /**
+     * Insufficient permissions
+     */
+    403: ErrorResponse;
+    /**
+     * Request body failed schema validation
+     */
+    422: ValidationErrorResponse;
+};
+
+export type GetAllVolunteersVolunteersGetError = GetAllVolunteersVolunteersGetErrors[keyof GetAllVolunteersVolunteersGetErrors];
+
+export type GetAllVolunteersVolunteersGetResponses = {
+    /**
+     * Response Get All Volunteers Volunteers Get
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type GetAllVolunteersVolunteersGetResponse = GetAllVolunteersVolunteersGetResponses[keyof GetAllVolunteersVolunteersGetResponses];
+
 export type AddVolunteerVolunteersPostData = {
     body: AddVolunteerRequest;
     path?: never;
@@ -6820,6 +6894,106 @@ export type AddVolunteerVolunteersPostResponses = {
 };
 
 export type AddVolunteerVolunteersPostResponse = AddVolunteerVolunteersPostResponses[keyof AddVolunteerVolunteersPostResponses];
+
+export type GetPotentialVolunteersVolunteersPotentialGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Page
+         */
+        page?: number;
+        /**
+         * Page Size
+         */
+        page_size?: number;
+        /**
+         * Min Events
+         */
+        min_events?: number;
+        /**
+         * Search
+         */
+        search?: string | null;
+    };
+    url: '/volunteers/potential';
+};
+
+export type GetPotentialVolunteersVolunteersPotentialGetErrors = {
+    /**
+     * Missing or invalid Bearer token
+     */
+    401: ErrorResponse;
+    /**
+     * Insufficient permissions
+     */
+    403: ErrorResponse;
+    /**
+     * Request body failed schema validation
+     */
+    422: ValidationErrorResponse;
+};
+
+export type GetPotentialVolunteersVolunteersPotentialGetError = GetPotentialVolunteersVolunteersPotentialGetErrors[keyof GetPotentialVolunteersVolunteersPotentialGetErrors];
+
+export type GetPotentialVolunteersVolunteersPotentialGetResponses = {
+    /**
+     * Response Get Potential Volunteers Volunteers Potential Get
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type GetPotentialVolunteersVolunteersPotentialGetResponse = GetPotentialVolunteersVolunteersPotentialGetResponses[keyof GetPotentialVolunteersVolunteersPotentialGetResponses];
+
+export type UpdateVolunteerInfoVolunteersVolunteerIdPatchData = {
+    body: UpdateVolunteerRequest;
+    path: {
+        /**
+         * Volunteer Id
+         */
+        volunteer_id: string;
+    };
+    query?: never;
+    url: '/volunteers/{volunteer_id}';
+};
+
+export type UpdateVolunteerInfoVolunteersVolunteerIdPatchErrors = {
+    /**
+     * Missing or invalid Bearer token
+     */
+    401: ErrorResponse;
+    /**
+     * Insufficient permissions
+     */
+    403: ErrorResponse;
+    /**
+     * Volunteer custom role not found
+     */
+    404: ErrorResponse;
+    /**
+     * Request body failed schema validation
+     */
+    422: ValidationErrorResponse;
+};
+
+export type UpdateVolunteerInfoVolunteersVolunteerIdPatchError = UpdateVolunteerInfoVolunteersVolunteerIdPatchErrors[keyof UpdateVolunteerInfoVolunteersVolunteerIdPatchErrors];
+
+export type UpdateVolunteerInfoVolunteersVolunteerIdPatchResponses = {
+    /**
+     * Response Update Volunteer Info Volunteers  Volunteer Id  Patch
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type UpdateVolunteerInfoVolunteersVolunteerIdPatchResponse = UpdateVolunteerInfoVolunteersVolunteerIdPatchResponses[keyof UpdateVolunteerInfoVolunteersVolunteerIdPatchResponses];
 
 export type GetAllVolunteerRolesVolunteerRolesGetData = {
     body?: never;

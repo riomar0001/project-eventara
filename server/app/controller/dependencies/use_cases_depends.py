@@ -2,7 +2,7 @@ from fastapi import Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application.use_cases.account_settings_usecase import AccountSettingsUseCase
-from app.application.use_cases.volunteer_usecase import VolunteerApplicationUseCase, VolunteerRoleUseCase, VolunteerUseCase
+from app.application.use_cases.volunteer_usecase import GetVolunteerUseCase, UpdateVolunteerInfoUseCase, VolunteerApplicationUseCase, VolunteerRoleUseCase, VolunteerUseCase
 from app.application.use_cases.audit_log_usecase import AuditLogUseCase
 from app.application.use_cases.event_volunteer_usecase import EventVolunteerUseCase
 from app.application.use_cases.auth_usecase import AuthUseCase
@@ -186,3 +186,13 @@ def get_volunteer_application_use_case(db: AsyncSession = Depends(get_db)) -> Vo
 def get_volunteer_role_use_case(db: AsyncSession = Depends(get_db)) -> VolunteerRoleUseCase:
     """Construct a ``VolunteerRoleUseCase`` for volunteer role read, update, and delete operations."""
     return VolunteerRoleUseCase(VolunteerRepository(db), db)
+
+
+def get_all_volunteers_use_case(db: AsyncSession = Depends(get_db)) -> GetVolunteerUseCase:
+    """Construct a ``GetVolunteerUseCase`` for read-only volunteer listing and potential volunteer queries."""
+    return GetVolunteerUseCase(VolunteerRepository(db))
+
+
+def get_update_volunteer_use_case(db: AsyncSession = Depends(get_db)) -> UpdateVolunteerInfoUseCase:
+    """Construct an ``UpdateVolunteerInfoUseCase`` for updating volunteer contact and role data."""
+    return UpdateVolunteerInfoUseCase(VolunteerRepository(db), db)

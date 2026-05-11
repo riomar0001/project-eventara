@@ -113,6 +113,14 @@ UNAUTHORIZED_APPLICATION_OPERATION = {
     }
 }
 
+VOLUNTEER_NOT_FOUND = {
+    404: {
+        "description": "Volunteer record not found",
+        "model": ErrorResponse,
+        "content": {"application/json": {"example": {"success": False, "message": "Volunteer not found"}}},
+    }
+}
+
 VOLUNTEER_ROLE_DELETE_CONFLICT = {
     409: {
         "description": "Volunteer role cannot be deleted due to a conflict",

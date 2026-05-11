@@ -2,7 +2,7 @@ import uuid
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
-from app.domain.entities.volunteer_entity import ApplicationStatus
+from app.domain.entities.volunteer_entity import ApplicationStatus, VolunteerStatus
 
 
 class AddVolunteerRequest(BaseModel):
@@ -67,4 +67,15 @@ class UpdateVolunteerRoleRequest(BaseModel):
     @field_validator("description")
     @classmethod
     def strip_description(cls, v: str | None) -> str | None:
+        return v.strip() if v else v
+
+
+class UpdateVolunteerRequest(BaseModel):
+    contact_phone: str | None = Field(default=None, min_length=7, max_length=20)
+    volunteer_role_id: uuid.UUID | None = None
+    status: VolunteerStatus | None = None
+
+    @field_validator("contact_phone")
+    @classmethod
+    def strip_contact_phone(cls, v: str | None) -> str | None:
         return v.strip() if v else v

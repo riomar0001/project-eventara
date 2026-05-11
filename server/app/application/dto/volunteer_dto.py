@@ -1,7 +1,7 @@
 import uuid
 from dataclasses import dataclass, field
 
-from app.domain.entities.volunteer_entity import ApplicationStatus, Volunteer, VolunteerApplication, VolunteerRole
+from app.domain.entities.volunteer_entity import ApplicationStatus, PotentialVolunteer, Volunteer, VolunteerApplication, VolunteerRole, VolunteerStatus, VolunteerSummary
 
 _UNSET: object = object()
 
@@ -29,6 +29,23 @@ class CreateVolunteerRoleInput:
 @dataclass
 class CreateVolunteerRoleOutput:
     role: VolunteerRole
+
+
+@dataclass
+class GetAllVolunteersInput:
+    page: int
+    page_size: int
+    status: VolunteerStatus | None = None
+    role_id: uuid.UUID | None = None
+
+
+@dataclass
+class GetAllVolunteersOutput:
+    volunteers: list[VolunteerSummary]
+    total: int
+    page: int
+    page_size: int
+    total_pages: int
 
 
 @dataclass
@@ -109,3 +126,35 @@ class WithdrawApplicationInput:
 @dataclass
 class WithdrawApplicationOutput:
     application: VolunteerApplication
+
+
+@dataclass
+class UpdateVolunteerInfoInput:
+    volunteer_id: uuid.UUID
+    actor_id: uuid.UUID
+    contact_phone: str | None = None
+    volunteer_role_id: uuid.UUID | None = None
+    status: VolunteerStatus | None = None
+
+
+@dataclass
+class UpdateVolunteerInfoOutput:
+    volunteer: Volunteer
+    old_values: dict
+
+
+@dataclass
+class GetPotentialVolunteersInput:
+    page: int
+    page_size: int
+    min_events: int = 1
+    search: str | None = None
+
+
+@dataclass
+class GetPotentialVolunteersOutput:
+    potential_volunteers: list[PotentialVolunteer]
+    total: int
+    page: int
+    page_size: int
+    total_pages: int
