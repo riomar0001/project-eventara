@@ -1,5 +1,4 @@
 import {
-  ArrowLeftRight,
   Blocks,
   Calendar,
   FlaskConical,
@@ -48,7 +47,17 @@ export const dashboardNavGroups: DashboardNavGroup[] = [
     items: [
       { label: 'Venue', icon: MapPin, href: ADMIN_OPERATIONS_PATHS.venues, permission: { feature: 'venues', action: 'read' } },
       { label: 'Events', icon: Calendar, href: ADMIN_OPERATIONS_PATHS.events, permission: { feature: 'events', action: 'read' } },
-      { label: 'Volunteers', icon: Users, href: ADMIN_OPERATIONS_PATHS.volunteers, permission: { feature: 'volunteers', action: 'read' } }
+      {
+        label: 'Volunteer',
+        icon: Users,
+        href: ADMIN_OPERATIONS_PATHS.volunteers,
+        permission: { feature: 'volunteers', action: 'read' },
+        children: [
+          { label: 'Roster', href: ADMIN_OPERATIONS_PATHS.volunteers },
+          { label: 'Potential Volunteers', href: ADMIN_OPERATIONS_PATHS.volunteerPotentialVolunteers },
+          { label: 'Roles', href: ADMIN_OPERATIONS_PATHS.volunteerRoles }
+        ]
+      }
     ]
   },
   {
@@ -58,17 +67,7 @@ export const dashboardNavGroups: DashboardNavGroup[] = [
       { label: 'Roles', icon: ShieldCheck, href: '/admin/roles', permission: { feature: 'roles', action: 'read' } },
       { label: 'Users', icon: Users, href: '/admin/users', permission: { feature: 'user-accounts', action: 'read' } },
       { label: 'Queues', icon: Server, href: ADMIN_OPERATIONS_PATHS.queues, permission: { feature: 'queues', action: 'read' } },
-      { label: 'Audit Logs', icon: Logs, href: '/admin/audit-logs', permission: { feature: 'audit-logs', action: 'read' } },
-      {
-        label: 'Accordion Parent',
-        icon: ArrowLeftRight,
-        href: '#',
-        children: [
-          { label: 'Child 1', href: '#', badge: 19 },
-          { label: 'Child 2', href: '#' },
-          { label: 'Child 3', href: '#' }
-        ]
-      }
+      { label: 'Audit Logs', icon: Logs, href: '/admin/audit-logs', permission: { feature: 'audit-logs', action: 'read' } }
     ]
   },
   {

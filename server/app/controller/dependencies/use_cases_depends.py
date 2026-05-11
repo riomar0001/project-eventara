@@ -2,7 +2,7 @@ from fastapi import Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application.use_cases.account_settings_usecase import AccountSettingsUseCase
-from app.application.use_cases.volunteer_usecase import VolunteerApplicationUseCase, VolunteerUseCase
+from app.application.use_cases.volunteer_usecase import VolunteerApplicationUseCase, VolunteerRoleUseCase, VolunteerUseCase
 from app.application.use_cases.audit_log_usecase import AuditLogUseCase
 from app.application.use_cases.event_volunteer_usecase import EventVolunteerUseCase
 from app.application.use_cases.auth_usecase import AuthUseCase
@@ -181,3 +181,8 @@ def get_volunteer_use_case(db: AsyncSession = Depends(get_db)) -> VolunteerUseCa
 def get_volunteer_application_use_case(db: AsyncSession = Depends(get_db)) -> VolunteerApplicationUseCase:
     """Construct a ``VolunteerApplicationUseCase`` for the volunteer application lifecycle."""
     return VolunteerApplicationUseCase(VolunteerRepository(db), RoleRepository(db), db)
+
+
+def get_volunteer_role_use_case(db: AsyncSession = Depends(get_db)) -> VolunteerRoleUseCase:
+    """Construct a ``VolunteerRoleUseCase`` for volunteer role read, update, and delete operations."""
+    return VolunteerRoleUseCase(VolunteerRepository(db), db)

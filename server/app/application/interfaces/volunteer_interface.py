@@ -65,3 +65,25 @@ class IVolunteerRepository(Protocol):
         application_id: uuid.UUID,
         new_status: ApplicationStatus,
     ) -> VolunteerApplication | None: ...
+
+    async def get_all_volunteer_roles(
+        self,
+        search: str | None,
+        is_active: bool | None,
+        page: int,
+        page_size: int,
+    ) -> tuple[list[VolunteerRole], int]: ...
+
+    async def update_volunteer_role(
+        self,
+        role_id: uuid.UUID,
+        name: str | None,
+        description: object,
+        is_active: bool | None,
+        *,
+        for_update: bool = False,
+    ) -> VolunteerRole | None: ...
+
+    async def delete_volunteers_by_role_id(self, role_id: uuid.UUID) -> int: ...
+
+    async def delete_volunteer_role_by_id(self, role_id: uuid.UUID) -> None: ...

@@ -1101,6 +1101,15 @@ export const zUpdateProfileResponse = z.object({
 });
 
 /**
+ * UpdateVolunteerRoleRequest
+ */
+export const zUpdateVolunteerRoleRequest = z.object({
+    name: z.string().min(2).max(100).nullish(),
+    description: z.string().max(500).nullish(),
+    is_active: z.boolean().nullish()
+});
+
+/**
  * UserGrantResponse
  */
 export const zUserGrantResponse = z.object({
@@ -2415,6 +2424,20 @@ export const zAddVolunteerVolunteersPostBody = zAddVolunteerRequest;
  */
 export const zAddVolunteerVolunteersPostResponse = z.record(z.string(), z.unknown());
 
+export const zGetAllVolunteerRolesVolunteerRolesGetQuery = z.object({
+    page: z.int().gte(1).optional().default(1),
+    page_size: z.int().gte(1).lte(100).optional().default(20),
+    search: z.string().max(100).nullish(),
+    is_active: z.boolean().nullish()
+});
+
+/**
+ * Response Get All Volunteer Roles Volunteer Roles Get
+ *
+ * Successful Response
+ */
+export const zGetAllVolunteerRolesVolunteerRolesGetResponse = z.record(z.string(), z.unknown());
+
 export const zCreateVolunteerRoleVolunteerRolesPostBody = zCreateVolunteerRoleRequest;
 
 /**
@@ -2423,6 +2446,30 @@ export const zCreateVolunteerRoleVolunteerRolesPostBody = zCreateVolunteerRoleRe
  * Successful Response
  */
 export const zCreateVolunteerRoleVolunteerRolesPostResponse = z.record(z.string(), z.unknown());
+
+export const zDeleteVolunteerRoleVolunteerRolesRoleIdDeletePath = z.object({
+    role_id: z.uuid()
+});
+
+/**
+ * Response Delete Volunteer Role Volunteer Roles  Role Id  Delete
+ *
+ * Successful Response
+ */
+export const zDeleteVolunteerRoleVolunteerRolesRoleIdDeleteResponse = z.record(z.string(), z.unknown());
+
+export const zUpdateVolunteerRoleVolunteerRolesRoleIdPatchBody = zUpdateVolunteerRoleRequest;
+
+export const zUpdateVolunteerRoleVolunteerRolesRoleIdPatchPath = z.object({
+    role_id: z.uuid()
+});
+
+/**
+ * Response Update Volunteer Role Volunteer Roles  Role Id  Patch
+ *
+ * Successful Response
+ */
+export const zUpdateVolunteerRoleVolunteerRolesRoleIdPatchResponse = z.record(z.string(), z.unknown());
 
 export const zSubmitApplicationVolunteerApplicationsPostBody = zSubmitApplicationRequest;
 

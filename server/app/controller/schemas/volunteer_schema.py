@@ -52,3 +52,19 @@ class ReviewApplicationRequest(BaseModel):
     @classmethod
     def strip_contact_phone(cls, v: str | None) -> str | None:
         return v.strip() if v else v
+
+
+class UpdateVolunteerRoleRequest(BaseModel):
+    name: str | None = Field(default=None, min_length=2, max_length=100)
+    description: str | None = Field(default=None, max_length=500)
+    is_active: bool | None = None
+
+    @field_validator("name")
+    @classmethod
+    def strip_name(cls, v: str | None) -> str | None:
+        return v.strip() if v else v
+
+    @field_validator("description")
+    @classmethod
+    def strip_description(cls, v: str | None) -> str | None:
+        return v.strip() if v else v

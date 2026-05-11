@@ -1,7 +1,9 @@
 import uuid
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from app.domain.entities.volunteer_entity import ApplicationStatus, Volunteer, VolunteerApplication, VolunteerRole
+
+_UNSET: object = object()
 
 
 @dataclass
@@ -27,6 +29,49 @@ class CreateVolunteerRoleInput:
 @dataclass
 class CreateVolunteerRoleOutput:
     role: VolunteerRole
+
+
+@dataclass
+class GetAllVolunteerRolesInput:
+    page: int
+    page_size: int
+    search: str | None = None
+    is_active: bool | None = None
+
+
+@dataclass
+class GetAllVolunteerRolesOutput:
+    roles: list[VolunteerRole]
+    total: int
+    page: int
+    page_size: int
+    total_pages: int
+
+
+@dataclass
+class UpdateVolunteerRoleInput:
+    role_id: uuid.UUID
+    actor_id: uuid.UUID
+    name: str | None = None
+    description: object = field(default_factory=lambda: _UNSET)
+    is_active: bool | None = None
+
+
+@dataclass
+class UpdateVolunteerRoleOutput:
+    role: VolunteerRole
+
+
+@dataclass
+class DeleteVolunteerRoleInput:
+    role_id: uuid.UUID
+    actor_id: uuid.UUID
+
+
+@dataclass
+class DeleteVolunteerRoleOutput:
+    role_id: uuid.UUID
+    volunteers_removed: int
 
 
 @dataclass

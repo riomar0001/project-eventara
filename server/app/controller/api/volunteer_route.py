@@ -1,7 +1,8 @@
 """Volunteer management API routes.
 
-Exposes endpoints for adding new volunteers, creating dynamic volunteer roles, and
-managing the volunteer application lifecycle (submit, review, withdraw).
+Exposes endpoints for adding new volunteers, creating/reading/updating/deleting
+dynamic volunteer roles, and managing the volunteer application lifecycle
+(submit, review, withdraw).
 
 Error mapping summary:
   - 401  missing, expired, or invalid Bearer token
@@ -14,17 +15,21 @@ Error mapping summary:
 
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 
 from app.application.dto.volunteer_dto import (
     AddVolunteerInput,
     CreateVolunteerRoleInput,
+    DeleteVolunteerRoleInput,
+    GetAllVolunteerRolesInput,
     ReviewApplicationInput,
     SubmitApplicationInput,
+    UpdateVolunteerRoleInput,
     WithdrawApplicationInput,
+    _UNSET,
 )
 from app.application.use_cases.audit_log_usecase import AuditLogUseCase
-from app.application.use_cases.volunteer_usecase import VolunteerApplicationUseCase, VolunteerUseCase
+from app.application.use_cases.volunteer_usecase import VolunteerApplicationUseCase, VolunteerRoleUseCase, VolunteerUseCase
 from app.controller.api.audit_helpers import safe_audit_log
 from app.controller.dependencies import (
     get_audit_log_use_case,
@@ -33,6 +38,7 @@ from app.controller.dependencies import (
 )
 from app.controller.dependencies.use_cases_depends import (
     get_volunteer_application_use_case,
+    get_volunteer_role_use_case,
     get_volunteer_use_case,
 )
 from app.controller.docs.volunteer_docs import (
@@ -53,6 +59,7 @@ from app.controller.schemas.volunteer_schema import (
     CreateVolunteerRoleRequest,
     ReviewApplicationRequest,
     SubmitApplicationRequest,
+    UpdateVolunteerRoleRequest,
 )
 from app.domain.entities.audit_log import ActionType, AuditLogStatus
 from app.domain.entities.authorization_entities import RoleAction
@@ -443,4 +450,181 @@ async def withdraw_application(
         "success": True,
         "message": "Volunteer application withdrawn successfully.",
         "data": _serialize_application(result.application),
+    }
+
+
+@volunteer_role_router.get(
+    "",
+    status_code=status.HTTP_200_OK,
+    responses={**UNAUTHORIZED, **FORBIDDEN, **VALIDATION_ERROR},
+    summary="List volunteer roles",
+    description=(
+        "Return a paginated list of volunteer custom role definitions. "
+        "Optionally filter by name substring (case-insensitive) and active status. "
+        "Results are ordered by creation date descending."
+    ),
+)
+async def get_all_volunteer_roles(
+    request: Request,
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=20, ge=1, le=100),
+    search: str | None = Query(default=None, max_length=100),
+    is_active: bool | None = Query(default=None),
+    caller_id: uuid.UUID = Depends(require_permission("volunteer_roles", RoleAction.READ)),
+    use_case: VolunteerRoleUseCase = Depends(get_volunteer_role_use_case),
+    audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
+) -> dict:
+    """Return a paginated list of volunteer custom roles.
+
+    # Error mapping
+    - **401 Unauthorized** — missing, expired, or invalid Bearer token.
+    - **403 Forbidden** — caller lacks ``read`` permission on ``volunteer_roles``.
+    - **422 Unprocessable Entity** — query parameter validation failed.
+    """
+    result = await use_case.get_all_volunteer_roles(
+        GetAllVolunteerRolesInput(
+            page=page,
+            page_size=page_size,
+            search=search,
+            is_active=is_active,
+        )
+    )
+
+    await safe_audit_log(
+        audit_use_case,
+        request,
+        user_id=caller_id,
+        action_type=ActionType.READ,
+        resource_type="volunteer_custom_roles",
+        resource_id=None,
+        status=AuditLogStatus.SUCCESS,
+        additional_context={"page": page, "page_size": page_size, "search": search, "is_active": is_active},
+    )
+
+    return {
+        "success": True,
+        "message": "Volunteer roles retrieved successfully.",
+        "data": {
+            "roles": [_serialize_volunteer_role(r) for r in result.roles],
+            "total": result.total,
+            "page": result.page,
+            "page_size": result.page_size,
+            "total_pages": result.total_pages,
+        },
+    }
+
+
+@volunteer_role_router.patch(
+    "/{role_id}",
+    status_code=status.HTTP_200_OK,
+    responses={**UNAUTHORIZED, **FORBIDDEN, **VOLUNTEER_ROLE_NOT_FOUND, **VOLUNTEER_ROLE_ALREADY_EXISTS, **VALIDATION_ERROR},
+    summary="Update a volunteer role",
+    description=(
+        "Partially update a volunteer custom role. All fields are optional; "
+        "omitted fields are left unchanged. Role names remain case-insensitively unique. "
+        "Deactivating a role (is_active=false) prevents new volunteers from being assigned to it."
+    ),
+)
+async def update_volunteer_role(
+    request: Request,
+    role_id: uuid.UUID,
+    body: UpdateVolunteerRoleRequest,
+    caller_id: uuid.UUID = Depends(require_permission("volunteer_roles", RoleAction.UPDATE)),
+    use_case: VolunteerRoleUseCase = Depends(get_volunteer_role_use_case),
+    audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
+) -> dict:
+    """Partially update a volunteer custom role.
+
+    # Error mapping
+    - **401 Unauthorized** — missing, expired, or invalid Bearer token.
+    - **403 Forbidden** — caller lacks ``update`` permission on ``volunteer_roles``.
+    - **404 Not Found** — no volunteer role exists for the given ID.
+    - **409 Conflict** — the requested new name is already taken by another role.
+    - **422 Unprocessable Entity** — request body failed schema validation.
+    """
+    description_value = body.description if "description" in body.model_fields_set else _UNSET
+
+    try:
+        result = await use_case.update_volunteer_role(
+            UpdateVolunteerRoleInput(
+                role_id=role_id,
+                actor_id=caller_id,
+                name=body.name,
+                description=description_value,
+                is_active=body.is_active,
+            )
+        )
+    except VolunteerRoleNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except VolunteerRoleAlreadyExistsError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+
+    await safe_audit_log(
+        audit_use_case,
+        request,
+        user_id=caller_id,
+        action_type=ActionType.UPDATE,
+        resource_type="volunteer_custom_roles",
+        resource_id=str(role_id),
+        status=AuditLogStatus.SUCCESS,
+        new_values=_serialize_volunteer_role(result.role),
+    )
+
+    return {
+        "success": True,
+        "message": "Volunteer role updated successfully.",
+        "data": _serialize_volunteer_role(result.role),
+    }
+
+
+@volunteer_role_router.delete(
+    "/{role_id}",
+    status_code=status.HTTP_200_OK,
+    responses={**UNAUTHORIZED, **FORBIDDEN, **VOLUNTEER_ROLE_NOT_FOUND, **VALIDATION_ERROR},
+    summary="Delete a volunteer role",
+    description=(
+        "Permanently delete a volunteer custom role. "
+        "All volunteers currently assigned to this role are also removed. "
+        "This operation is irreversible."
+    ),
+)
+async def delete_volunteer_role(
+    request: Request,
+    role_id: uuid.UUID,
+    caller_id: uuid.UUID = Depends(require_permission("volunteer_roles", RoleAction.DELETE)),
+    use_case: VolunteerRoleUseCase = Depends(get_volunteer_role_use_case),
+    audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
+) -> dict:
+    """Delete a volunteer custom role and cascade-remove assigned volunteers.
+
+    # Error mapping
+    - **401 Unauthorized** — missing, expired, or invalid Bearer token.
+    - **403 Forbidden** — caller lacks ``delete`` permission on ``volunteer_roles``.
+    - **404 Not Found** — no volunteer role exists for the given ID.
+    """
+    try:
+        result = await use_case.delete_volunteer_role(
+            DeleteVolunteerRoleInput(role_id=role_id, actor_id=caller_id)
+        )
+    except VolunteerRoleNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+
+    await safe_audit_log(
+        audit_use_case,
+        request,
+        user_id=caller_id,
+        action_type=ActionType.DELETE,
+        resource_type="volunteer_custom_roles",
+        resource_id=str(role_id),
+        status=AuditLogStatus.SUCCESS,
+        additional_context={"volunteers_removed": result.volunteers_removed},
+    )
+
+    return {
+        "success": True,
+        "message": "Volunteer role deleted successfully.",
+        "data": {
+            "role_id": str(result.role_id),
+            "volunteers_removed": result.volunteers_removed,
+        },
     }
