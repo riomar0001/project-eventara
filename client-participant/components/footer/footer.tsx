@@ -90,7 +90,11 @@ export function Footer() {
         {/* Footer Links */}
         <div className="flex gap-[26px] text-[13.5px] text-[var(--text-dim)]">
           {FOOTER_LINKS.map((link) => (
-            <a key={link.label} href={link.href} className="hover:text-[var(--text)]">
+            <a
+              key={link.label}
+              href={link.href}
+              className="hover:text-[var(--text)]"
+            >
               {link.label}
             </a>
           ))}
@@ -99,7 +103,7 @@ export function Footer() {
         {/* Socials */}
         <div className="flex gap-2.5">
           <a
-            className="grid h-9 w-9 place-items-center rounded-[10px] border border-[var(--line-soft)] text-[var(--text-dim)] transition-all duration-[180ms] ease hover:border-[oklch(0.82_0.17_75_/_0.5)] hover:bg-[oklch(0.82_0.17_75_/_0.06)] hover:text-[var(--amber)]"
+            className="ease grid h-9 w-9 place-items-center rounded-[10px] border border-[var(--line-soft)] text-[var(--text-dim)] transition-all duration-[180ms] hover:border-[oklch(0.82_0.17_75_/_0.5)] hover:bg-[oklch(0.82_0.17_75_/_0.06)] hover:text-[var(--amber)]"
             href="#"
             aria-label="Twitter"
             target="_blank"
@@ -108,7 +112,7 @@ export function Footer() {
             <TwitterIcon size={15} />
           </a>
           <a
-            className="grid h-9 w-9 place-items-center rounded-[10px] border border-[var(--line-soft)] text-[var(--text-dim)] transition-all duration-[180ms] ease hover:border-[oklch(0.82_0.17_75_/_0.5)] hover:bg-[oklch(0.82_0.17_75_/_0.06)] hover:text-[var(--amber)]"
+            className="ease grid h-9 w-9 place-items-center rounded-[10px] border border-[var(--line-soft)] text-[var(--text-dim)] transition-all duration-[180ms] hover:border-[oklch(0.82_0.17_75_/_0.5)] hover:bg-[oklch(0.82_0.17_75_/_0.06)] hover:text-[var(--amber)]"
             href="#"
             aria-label="Discord"
             target="_blank"
@@ -117,7 +121,7 @@ export function Footer() {
             <DiscordIcon size={16} />
           </a>
           <a
-            className="grid h-9 w-9 place-items-center rounded-[10px] border border-[var(--line-soft)] text-[var(--text-dim)] transition-all duration-[180ms] ease hover:border-[oklch(0.82_0.17_75_/_0.5)] hover:bg-[oklch(0.82_0.17_75_/_0.06)] hover:text-[var(--amber)]"
+            className="ease grid h-9 w-9 place-items-center rounded-[10px] border border-[var(--line-soft)] text-[var(--text-dim)] transition-all duration-[180ms] hover:border-[oklch(0.82_0.17_75_/_0.5)] hover:bg-[oklch(0.82_0.17_75_/_0.06)] hover:text-[var(--amber)]"
             href="#"
             aria-label="Telegram"
             target="_blank"

@@ -1,29 +1,32 @@
 "use client"
 
-import { cn } from "@/lib/utils"
-import { HERO_STATS } from "@/constants/stats"
-import { Stat } from "@/types/common"
+export function StatsGrid() {
+  const stats = [
+    { value: "42", label: "Events this quarter", color: "lime" },
+    { value: "2,184", label: "Community members", color: "default" },
+    { value: "1 LIVE", label: "Happening now", color: "amber" },
+    { value: "Davao", label: "Home base · PH", color: "default" },
+  ]
 
-interface StatsGridProps {
-  stats?: Stat[]
-}
-
-export function StatsGrid({ stats = HERO_STATS }: StatsGridProps) {
   return (
-    <div className="grid grid-cols-3 divide-x divide-[var(--line-soft)] rounded-2xl border border-[var(--line-soft)] bg-[var(--surface)]">
+    <div className="grid grid-cols-4 border-t border-b border-[var(--line-soft)]">
       {stats.map((stat, index) => (
-        <div key={index} className="px-6 py-5.5 text-left">
+        <div
+          key={index}
+          className={`px-[18px] py-[22px] text-left ${index < stats.length - 1 ? "border-r border-[var(--line-soft)]" : ""}`}
+        >
           <div
-            className={cn(
-              "text-2xl font-semibold tracking-tight",
-              stat.color === "lime" && "text-[var(--lime)]",
-              stat.color === "amber" && "text-[var(--amber)]",
-              !stat.color && "text-[var(--text)]"
-            )}
+            className={`text-[28px] font-semibold tracking-[-0.03em] ${
+              stat.color === "lime"
+                ? "text-[var(--lime)]"
+                : stat.color === "amber"
+                  ? "text-[var(--amber)]"
+                  : "text-[var(--text)]"
+            }`}
           >
             {stat.value}
           </div>
-          <div className="mt-1 font-mono text-xs tracking-widest text-[var(--text-mute)] uppercase">
+          <div className="mt-1 font-mono text-[11px] tracking-[0.16em] text-[var(--text-mute)] uppercase">
             {stat.label}
           </div>
         </div>
