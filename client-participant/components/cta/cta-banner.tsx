@@ -23,7 +23,7 @@ export function CTABanner() {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 container mx-auto max-w-3xl px-8 text-center">
+      <div className="container relative z-10 mx-auto max-w-3xl px-8 text-center">
         <h2 className="text-4xl font-semibold tracking-tight text-[var(--text)] lg:text-5xl">
           Ready to join our community?
         </h2>

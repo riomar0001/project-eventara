@@ -13,9 +13,9 @@ export function LiveEventCard({ event = LIVE_EVENT }: LiveEventCardProps) {
   return (
     <section className="relative overflow-hidden bg-[var(--bg)] py-16">
       <div className="container mx-auto px-8">
-        <Card className="relative overflow-hidden before:pointer-events-none before:absolute before:inset-0 before:rounded-2xl before:bg-gradient-to-r before:from-[var(--lime)]/10 before:via-transparent before:to-[var(--amber)]/10">
+        <Card className="before:from-[var(--lime)]/10 before:to-[var(--amber)]/10 relative overflow-hidden before:pointer-events-none before:absolute before:inset-0 before:rounded-2xl before:bg-gradient-to-r before:via-transparent">
           {/* Visual header with stripes */}
-          <div className="relative h-48 overflow-hidden bg-gradient-to-br from-[var(--lime)]/20 to-[var(--amber)]/20 md:h-64">
+          <div className="from-[var(--lime)]/20 to-[var(--amber)]/20 relative h-48 overflow-hidden bg-gradient-to-br md:h-64">
             {/* Decorative stripes */}
             <div
               className="absolute inset-0"
@@ -34,7 +34,7 @@ export function LiveEventCard({ event = LIVE_EVENT }: LiveEventCardProps) {
             />
 
             {/* Live label */}
-            <div className="absolute top-6 left-6 flex items-center gap-2 rounded-full bg-[var(--surface)] px-3 py-1.5 text-xs font-semibold text-[var(--lime)] uppercase">
+            <div className="absolute left-6 top-6 flex items-center gap-2 rounded-full bg-[var(--surface)] px-3 py-1.5 text-xs font-semibold uppercase text-[var(--lime)]">
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--lime)]" />
               Live Now
             </div>
@@ -73,7 +73,7 @@ export function LiveEventCard({ event = LIVE_EVENT }: LiveEventCardProps) {
             {/* Meta info grid */}
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <div className="font-mono text-xs tracking-widest text-[var(--text-mute)] uppercase">
+                <div className="font-mono text-xs uppercase tracking-widest text-[var(--text-mute)]">
                   Topic
                 </div>
                 <div className="mt-1 text-sm font-medium text-[var(--text)]">
@@ -81,7 +81,7 @@ export function LiveEventCard({ event = LIVE_EVENT }: LiveEventCardProps) {
                 </div>
               </div>
               <div>
-                <div className="font-mono text-xs tracking-widest text-[var(--text-mute)] uppercase">
+                <div className="font-mono text-xs uppercase tracking-widest text-[var(--text-mute)]">
                   Time
                 </div>
                 <div className="mt-1 text-sm font-medium text-[var(--text)]">
@@ -92,7 +92,7 @@ export function LiveEventCard({ event = LIVE_EVENT }: LiveEventCardProps) {
 
             {/* Speaker info */}
             <div className="border-t border-[var(--line-soft)] pt-6">
-              <div className="mb-3 font-mono text-xs tracking-widest text-[var(--text-mute)] uppercase">
+              <div className="mb-3 font-mono text-xs uppercase tracking-widest text-[var(--text-mute)]">
                 Featured Speaker
               </div>
               <div className="flex items-center gap-4">

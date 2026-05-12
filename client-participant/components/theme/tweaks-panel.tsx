@@ -39,7 +39,7 @@ export function TweaksPanel() {
   }
 
   return (
-    <div className="fixed right-8 bottom-8 z-50">
+    <div className="fixed bottom-8 right-8 z-50">
       {/* Toggle button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
@@ -50,7 +50,7 @@ export function TweaksPanel() {
 
       {/* Panel */}
       {isOpen && (
-        <div className="absolute right-0 bottom-16 w-56 space-y-4 rounded-2xl border border-[var(--line-soft)] bg-[var(--surface)] p-4 shadow-lg">
+        <div className="absolute bottom-16 right-0 w-56 space-y-4 rounded-2xl border border-[var(--line-soft)] bg-[var(--surface)] p-4 shadow-lg">
           <h4 className="flex items-center gap-2 text-sm font-semibold text-[var(--text)]">
             <span className="h-1.5 w-1.5 rounded-full bg-[var(--lime)]" />
             Theme Presets

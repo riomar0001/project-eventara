@@ -1,70 +1,106 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { MOCK_EVENTS } from "@/constants/events"
-import { EventTabs } from "./event-tabs"
+import { UPCOMING_EVENTS } from "@/constants/events"
 import { EventCard } from "./event-card"
 
+interface UpcomingEvent {
+  id: number
+  date: string
+  title: string
+  desc: string
+  venue: string
+  chip: string
+  seats: string
+  orbColor: "lime" | "amber"
+  angle: string
+}
+
+const tabs = [
+  { id: "all", label: "All" },
+  { id: "workshops", label: "Workshops" },
+  { id: "panels", label: "Panels" },
+  { id: "hackathons", label: "Hackathons" },
+]
+
 interface EventsSectionProps {
-  onEventClick?: (eventId: string) => void
+  onEventClick?: (event: UpcomingEvent) => void
 }
 
 export function EventsSection({ onEventClick }: EventsSectionProps) {
-  const [selectedCategory, setSelectedCategory] = useState("all")
+  const [selectedTab, setSelectedTab] = useState("all")
 
-  // TODO: fetch from GET /api/events with filtering
   const filteredEvents = useMemo(() => {
-    if (selectedCategory === "all") {
-      return MOCK_EVENTS
+    if (selectedTab === "all") return UPCOMING_EVENTS
+    const chipMap: Record<string, string> = {
+      workshops: "Workshop",
+      panels: "Panel",
+      hackathons: "Hackathon",
     }
-    return MOCK_EVENTS.filter((event) => event.category === selectedCategory)
-  }, [selectedCategory])
+    return UPCOMING_EVENTS.filter((e) => e.chip === chipMap[selectedTab])
+  }, [selectedTab])
 
   return (
-    <section id="events" className="relative bg-[var(--bg)] py-20">
-      <div className="container mx-auto px-8">
-        {/* Section header */}
-        <div className="mb-12 flex flex-col items-start justify-between gap-6 lg:flex-row lg:items-end">
+    <section className="relative pt-10" style={{ padding: "40px 0" }}>
+      <div className="container mx-auto max-w-[1240px] px-8">
+        {/* Section head */}
+        <div className="mb-10 flex flex-wrap items-end justify-between gap-6">
           <div>
-            <div className="eyebrow mb-3">
-              <span className="eyebrow-dot" />
-              Upcoming Events
+            <div className="mb-2 inline-flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--text-mute)]">
+              <span
+                className="inline-block h-1.5 w-1.5 rounded-full"
+                style={{
+                  background: "var(--lime)",
+                  boxShadow: "0 0 12px var(--lime-glow)",
+                }}
+              />
+              CALENDAR · Q2 2026
             </div>
-            <h2 className="text-4xl font-semibold tracking-tight text-[var(--text)] lg:text-5xl">
-              Join Our Community Events
+            <h2 className="my-2.5 text-balance text-[clamp(30px,3.4vw,44px)] font-semibold tracking-[-0.03em] text-[var(--text)]">
+              Upcoming Events
             </h2>
-            <p className="mt-2 max-w-2xl text-[var(--text-dim)]">
-              Discover workshops, conferences, and meetups designed to help you
-              grow in the DeFi space.
-            </p>
+          </div>
+
+          {/* Tabs */}
+          <div className="inline-flex gap-1 rounded-full border border-[var(--line-soft)] bg-[var(--surface)] p-1">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setSelectedTab(tab.id)}
+                className={`duration-160 rounded-full px-4 py-2 text-[13px] font-medium transition-all ${
+                  selectedTab === tab.id
+                    ? "bg-[var(--lime)] font-semibold text-white"
+                    : "text-[var(--text-dim)] hover:text-[var(--text)]"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Category tabs */}
-        <div className="mb-8 flex justify-center lg:justify-start">
-          <EventTabs
-            selectedCategory={selectedCategory}
-            onCategoryChange={setSelectedCategory}
-          />
-        </div>
-
         {/* Events grid */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-3 gap-[22px]">
           {filteredEvents.map((event) => (
             <EventCard
               key={event.id}
               event={event}
-              onClick={() => onEventClick?.(event.id)}
+              onClick={() => onEventClick?.(event)}
             />
           ))}
         </div>
 
         {/* Empty state */}
         {filteredEvents.length === 0 && (
-          <div className="flex h-40 items-center justify-center rounded-2xl border border-[var(--line-soft)] bg-[var(--surface)]">
-            <p className="text-[var(--text-dim)]">
-              No events in this category yet.
-            </p>
+          <div
+            className="text-center text-[var(--text-mute)]"
+            style={{
+              padding: "60px 40px",
+              border: "1px dashed var(--line-soft)",
+              borderRadius: "18px",
+            }}
+          >
+            No {selectedTab} scheduled this quarter. Check back soon.
           </div>
         )}
       </div>
