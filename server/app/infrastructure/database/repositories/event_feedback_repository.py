@@ -12,7 +12,7 @@ Concurrency strategy:
 
 import uuid
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.entities.event_entity import EventFeedback as EventFeedbackEntity
@@ -78,3 +78,14 @@ class EventFeedbackRepository:
         await self.db.flush()
         await self.db.refresh(orm)
         return self._to_entity(orm)
+
+    async def list_by_event(self, event_id: uuid.UUID, *, limit: int = 20, offset: int = 0) -> list[EventFeedbackEntity]:
+        """Return feedback for an event, newest first."""
+        query = select(EventFeedback).where(EventFeedback.event_id == event_id).order_by(EventFeedback.created_at.desc()).limit(limit).offset(offset)
+        result = await self.db.execute(query)
+        return [self._to_entity(orm) for orm in result.scalars().all()]
+
+    async def count_by_event(self, event_id: uuid.UUID) -> int:
+        """Return the number of feedback rows submitted for an event."""
+        result = await self.db.execute(select(func.count()).select_from(EventFeedback).where(EventFeedback.event_id == event_id))
+        return result.scalar_one()

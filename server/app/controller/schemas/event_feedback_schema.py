@@ -32,3 +32,16 @@ class EventFeedbackResponse(BaseModel):
     success: bool = True
     message: str = "Event feedback submitted successfully."
     data: EventFeedbackRecordResponse
+
+
+class EventFeedbackPaginationMeta(BaseModel):
+    total: int
+    limit: int
+    offset: int
+
+
+class EventFeedbackListResponse(BaseModel):
+    success: bool = True
+    message: str = "Event feedback retrieved successfully."
+    data: list[EventFeedbackRecordResponse]
+    meta: EventFeedbackPaginationMeta

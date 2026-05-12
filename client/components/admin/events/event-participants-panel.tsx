@@ -27,6 +27,11 @@ function fmt(iso: string | null) {
   return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
+function fmtDateTime(iso: string | null) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' });
+}
+
 function shortId(id: string) {
   return id.slice(0, 8).toUpperCase();
 }
@@ -59,6 +64,20 @@ const participantColumns: ColumnDef<EventParticipantRecord>[] = [
     cell: ({ row }) => <ParticipantStatusBadge status={row.original.status} />
   },
   {
+    id: 'checked_in',
+    header: 'Checked in',
+    cell: ({ row }) => (
+      <Badge variant="secondary" className={row.original.is_checked_in ? 'bg-emerald-100 text-emerald-800' : 'bg-neutral-100 text-neutral-600'}>
+        {row.original.is_checked_in ? 'Yes' : 'No'}
+      </Badge>
+    )
+  },
+  {
+    id: 'checked_in_time',
+    header: 'Checked in date',
+    cell: ({ row }) => <p className="text-sm text-neutral-600">{fmtDateTime(row.original.checked_in_time)}</p>
+  },
+  {
     id: 'registered_on',
     header: 'Registered on',
     cell: ({ row }) => <p className="text-sm text-neutral-600">{fmt(row.original.created_at)}</p>
@@ -67,12 +86,13 @@ const participantColumns: ColumnDef<EventParticipantRecord>[] = [
 
 export interface EventParticipantsPanelProps {
   eventId: string;
+  refreshKey?: number;
 }
 
-export function EventParticipantsPanel({ eventId }: EventParticipantsPanelProps) {
+export function EventParticipantsPanel({ eventId, refreshKey = 0 }: EventParticipantsPanelProps) {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
 
-  const { participants, total, page, totalPages, isLoading, error, setPage } = useEventParticipants(eventId, statusFilter === 'all' ? null : statusFilter);
+  const { participants, total, page, totalPages, isLoading, error, setPage } = useEventParticipants(eventId, statusFilter === 'all' ? null : statusFilter, refreshKey);
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({

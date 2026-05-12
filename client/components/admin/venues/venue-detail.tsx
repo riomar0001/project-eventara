@@ -117,7 +117,7 @@ export function VenueDetail({ venueId }: { venueId: string }) {
       </PhotoPanel>
 
       {/* ── Stats strip ─────────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 z-50">
         <StatCell label="Capacity" value={venue.capacity.toLocaleString()} accent />
         <StatCell label="Venue type" value={venue.venue_type.charAt(0).toUpperCase() + venue.venue_type.slice(1)} />
         <StatCell label="Popularity" value={venue.popularity_count.toLocaleString()} />

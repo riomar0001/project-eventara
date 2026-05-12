@@ -45,7 +45,7 @@ export function PhotoPanel({ children, className, photo }: { children?: React.Re
   return (
     <div
       className={cn(
-        'relative overflow-hidden rounded-[32px] border border-white/60 bg-neutral-900 text-white shadow-[0_24px_80px_-38px_rgba(14,116,144,0.45)]',
+        'relative z-0 overflow-hidden rounded-[32px] border border-white/60 bg-neutral-900 text-white shadow-[0_24px_80px_-38px_rgba(14,116,144,0.45)]',
         className
       )}
       style={{
@@ -158,9 +158,9 @@ export function FieldLabel({ children, htmlFor }: { children: React.ReactNode; h
 
 export function DetailList({ items }: { items: { label: string; value: string }[] }) {
   return (
-    <div className="grid gap-3 sm:grid-cols-2">
-      {items.map((item, index) => (
-        <div key={item.label} className={cn('rounded-2xl px-4 py-3 shadow-sm', index % 2 === 0 ? 'bg-sky-50/70' : 'bg-neutral-50/80')}>
+    <div className="grid gap-2 sm:grid-cols-2">
+      {items.map((item) => (
+        <div key={item.label} className="px-4 py-3">
           <p className="text-[10px] font-semibold tracking-[0.16em] text-neutral-400 uppercase">{item.label}</p>
           <p className="mt-1 text-sm leading-6 font-medium text-neutral-950">{item.value}</p>
         </div>

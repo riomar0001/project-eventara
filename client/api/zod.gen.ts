@@ -171,6 +171,22 @@ export const zCheckAliasResponse = z.object({
 });
 
 /**
+ * CheckInParticipantQrCodeRequest
+ */
+export const zCheckInParticipantQrCodeRequest = z.object({
+    token: z.string()
+});
+
+/**
+ * CreateEventFeedbackRequest
+ */
+export const zCreateEventFeedbackRequest = z.object({
+    rating: z.int().gte(1).lte(5),
+    comment: z.string().max(2000).nullish(),
+    suggestion: z.string().max(2000).nullish()
+});
+
+/**
  * CreateVolunteerRoleRequest
  */
 export const zCreateVolunteerRoleRequest = z.object({
@@ -267,6 +283,30 @@ export const zEventBannerUploadRequest = z.object({
 });
 
 /**
+ * EventFeedbackRecordResponse
+ */
+export const zEventFeedbackRecordResponse = z.object({
+    id: z.uuid(),
+    user_id: z.uuid(),
+    event_id: z.uuid(),
+    participant_id: z.uuid(),
+    rating: z.int(),
+    comment: z.string().nullable(),
+    suggestion: z.string().nullable(),
+    created_at: z.iso.datetime().nullable(),
+    updated_at: z.iso.datetime().nullable()
+});
+
+/**
+ * EventFeedbackResponse
+ */
+export const zEventFeedbackResponse = z.object({
+    success: z.boolean().optional().default(true),
+    message: z.string().optional().default('Event feedback submitted successfully.'),
+    data: zEventFeedbackRecordResponse
+});
+
+/**
  * EventParticipantRecord
  */
 export const zEventParticipantRecord = z.object({
@@ -274,6 +314,9 @@ export const zEventParticipantRecord = z.object({
     user_id: z.uuid(),
     event_session_id: z.uuid(),
     status: z.string(),
+    is_checked_in: z.boolean(),
+    checked_in_time: z.iso.datetime().nullable(),
+    checked_in_by: z.uuid().nullable(),
     created_at: z.iso.datetime().nullable(),
     updated_at: z.iso.datetime().nullable()
 });
@@ -286,8 +329,20 @@ export const zEventParticipantRecordResponse = z.object({
     user_id: z.uuid(),
     event_session_id: z.uuid(),
     status: z.string(),
+    is_checked_in: z.boolean(),
+    checked_in_time: z.iso.datetime().nullable(),
+    checked_in_by: z.uuid().nullable(),
     created_at: z.iso.datetime().nullable(),
     updated_at: z.iso.datetime().nullable()
+});
+
+/**
+ * CheckInParticipantResponse
+ */
+export const zCheckInParticipantResponse = z.object({
+    success: z.boolean().optional().default(true),
+    message: z.string().optional().default('Participant checked in successfully.'),
+    data: zEventParticipantRecordResponse
 });
 
 /**
@@ -1694,6 +1749,15 @@ export const zUpdateVolunteerRequest = z.object({
 });
 
 /**
+ * WithdrawRegistrationResponse
+ */
+export const zWithdrawRegistrationResponse = z.object({
+    success: z.boolean().optional().default(true),
+    message: z.string().optional().default('Registration withdrawn successfully.'),
+    data: zEventParticipantRecordResponse
+});
+
+/**
  * WorkerHealthEntrySchema
  */
 export const zWorkerHealthEntrySchema = z.object({
@@ -2484,6 +2548,27 @@ export const zUploadEventBannerEventsEventIdBannerPostPath = z.object({
  */
 export const zUploadEventBannerEventsEventIdBannerPostResponse = zEventBannerUploadResponse;
 
+export const zCreateEventFeedbackEventsEventIdFeedbackPostBody = zCreateEventFeedbackRequest;
+
+export const zCreateEventFeedbackEventsEventIdFeedbackPostPath = z.object({
+    event_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zCreateEventFeedbackEventsEventIdFeedbackPostResponse = zEventFeedbackResponse;
+
+export const zWithdrawRegistrationEventsEventIdSessionSessionIdRegisterDeletePath = z.object({
+    event_id: z.uuid(),
+    session_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zWithdrawRegistrationEventsEventIdSessionSessionIdRegisterDeleteResponse = zWithdrawRegistrationResponse;
+
 export const zRegisterForSessionEventsEventIdSessionSessionIdRegisterPostPath = z.object({
     event_id: z.uuid(),
     session_id: z.uuid()
@@ -2506,6 +2591,24 @@ export const zUpdateParticipantStatusEventsEventIdSessionSessionIdParticipantsPa
  * Successful Response
  */
 export const zUpdateParticipantStatusEventsEventIdSessionSessionIdParticipantsParticipantIdPatchResponse = zUpdateParticipantStatusResponse;
+
+export const zCheckInParticipantEventsEventIdSessionSessionIdParticipantsParticipantIdCheckInPatchPath = z.object({
+    event_id: z.uuid(),
+    session_id: z.uuid(),
+    participant_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zCheckInParticipantEventsEventIdSessionSessionIdParticipantsParticipantIdCheckInPatchResponse = zCheckInParticipantResponse;
+
+export const zCheckInParticipantQrCodeEventsParticipantsCheckInQrPostBody = zCheckInParticipantQrCodeRequest;
+
+/**
+ * Successful Response
+ */
+export const zCheckInParticipantQrCodeEventsParticipantsCheckInQrPostResponse = zCheckInParticipantResponse;
 
 export const zGetAllVolunteersVolunteersGetQuery = z.object({
     page: z.int().gte(1).optional().default(1),

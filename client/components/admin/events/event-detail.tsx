@@ -13,13 +13,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useEvent } from '@/hooks/admin/events/use-event';
+import { useEventParticipantStats } from '@/hooks/admin/events/use-event-participant-stats';
 import { DeleteEventButton } from './event-delete-button';
 import { EventParticipantsPanel } from './event-participants-panel';
+import { EventQrScannerPanel } from './event-qr-scanner-panel';
 import { EventSessionCreateDialog } from './event-session-create-dialog';
 import { EventSessionDeleteDialog } from './event-session-delete-dialog';
 import { EventVolunteersPanel } from './event-volunteers-panel';
-import { BackLink, DetailList, DetailPanel, PhotoPanel } from './events-shared';
+import { BackLink, DetailPanel, PhotoPanel } from './events-shared';
 import { Events } from '@/api/sdk.gen';
 import type { EventStatus } from '@/api/types.gen';
 import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
@@ -149,6 +152,68 @@ function StatusBadge({ status }: { status: string }) {
   return <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${cls}`}>{formatStatusLabel(status)}</span>;
 }
 
+function SummaryTile({ label, value, tone = 'neutral' }: { label: string; value: React.ReactNode; tone?: 'neutral' | 'sky' | 'emerald' }) {
+  const toneClass = {
+    neutral: 'bg-neutral-50/80 text-neutral-950',
+    sky: 'bg-sky-50/80 text-sky-950',
+    emerald: 'bg-emerald-50/80 text-emerald-950'
+  }[tone];
+
+  return (
+    <div className={cn('rounded-2xl px-4 py-3 ring-1 ring-neutral-200/70', toneClass)}>
+      <p className="text-[10px] font-semibold tracking-[0.16em] text-neutral-400 uppercase">{label}</p>
+      <div className="mt-1 text-sm leading-6 font-medium">{value}</div>
+    </div>
+  );
+}
+
+function EventDetailsSummary({
+  attendeeCount,
+  event,
+  isStatsLoading,
+  registeredCount,
+  sessionsCount,
+  statsError
+}: {
+  attendeeCount: number;
+  event: {
+    created_at: string | null;
+    description: string;
+    end_date: string;
+    start_date: string;
+    status: string;
+  };
+  isStatsLoading: boolean;
+  registeredCount: number;
+  sessionsCount: number;
+  statsError: string | null;
+}) {
+  const loadingLabel = isStatsLoading ? 'Loading…' : null;
+
+  return (
+    <DetailPanel title="Event Details" description="Operational summary and public event information.">
+      <div className="space-y-5">
+        <div className="rounded-2xl bg-neutral-50/70 p-5">
+          <div className="prose prose-sm prose-headings:font-semibold prose-p:leading-7 prose-p:my-0 max-w-none text-neutral-700">
+            <div dangerouslySetInnerHTML={{ __html: event.description }} />
+          </div>
+        </div>
+
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+          <SummaryTile label="Status" value={<StatusBadge status={event.status} />} tone="sky" />
+          <SummaryTile label="Start Date and End Date" value={`${fmtDate(event.start_date)} - ${fmtDate(event.end_date)}`} />
+          <SummaryTile label="Number of Sessions" value={sessionsCount.toLocaleString()} />
+          <SummaryTile label="Created Date" value={event.created_at ? fmtDate(event.created_at) : '—'} />
+          <SummaryTile label="Number of Registered" value={loadingLabel ?? registeredCount.toLocaleString()} />
+          <SummaryTile label="Number of Attendees" value={loadingLabel ?? attendeeCount.toLocaleString()} tone="emerald" />
+        </div>
+
+        {statsError ? <p className="text-sm text-red-600">{statsError}</p> : null}
+      </div>
+    </DetailPanel>
+  );
+}
+
 function UpdateStatusMenu({
   currentStatus,
   isUpdating,
@@ -236,6 +301,8 @@ export function EventDetail({ eventId }: { eventId: string }) {
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const [isCreateSessionOpen, setIsCreateSessionOpen] = useState(false);
   const [deletingSession, setDeletingSession] = useState<{ id: string; title: string; status: string } | null>(null);
+  const [participantsRefreshKey, setParticipantsRefreshKey] = useState(0);
+  const participantStats = useEventParticipantStats(eventId, participantsRefreshKey);
 
   async function handleUpdateStatus(nextStatus: EventStatus) {
     if (!event || isUpdatingStatus) return;
@@ -301,7 +368,7 @@ export function EventDetail({ eventId }: { eventId: string }) {
 
       {!isLoading && !error && event && (
         <>
-          <PhotoPanel photo={event.banner_url ?? ''} className="h-72">
+          <PhotoPanel photo={event.banner_url ?? ''} className="h-72 z-0">
             <div className="flex h-full flex-col justify-end p-6 sm:p-8">
               <div className="flex flex-wrap items-center gap-2">
                 <StatusBadge status={event.status} />
@@ -313,16 +380,27 @@ export function EventDetail({ eventId }: { eventId: string }) {
             </div>
           </PhotoPanel>
 
-          <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-            <div className="space-y-6">
-              <DetailPanel title="Description" description="The event narrative and public-facing copy shown to organizers and staff.">
-                <div className="rounded-2xl bg-neutral-50/70 p-5">
-                  <div className="prose prose-sm prose-headings:font-semibold prose-p:leading-7 prose-p:my-0 max-w-none text-neutral-700">
-                    <div dangerouslySetInnerHTML={{ __html: event.description }} />
-                  </div>
-                </div>
-              </DetailPanel>
+          <Tabs defaultValue="details" className="z-50 mt-10">
+            <TabsList className="gap-10 bg-white">
+              <TabsTrigger value="details">Event Details</TabsTrigger>
+              <TabsTrigger value="sessions">Event Sessions</TabsTrigger>
+              <TabsTrigger value="qr">QR Check-in</TabsTrigger>
+              <TabsTrigger value="volunteers">Volunteers</TabsTrigger>
+              <TabsTrigger value="participants">Participants</TabsTrigger>
+            </TabsList>
 
+            <TabsContent value="details">
+              <EventDetailsSummary
+                attendeeCount={participantStats.attendeeCount}
+                event={event}
+                isStatsLoading={participantStats.isLoading}
+                registeredCount={participantStats.registeredCount}
+                sessionsCount={sessions.length}
+                statsError={participantStats.error}
+              />
+            </TabsContent>
+
+            <TabsContent value="sessions">
               <DetailPanel
                 title={`Session schedule (${sessions.length})`}
                 description="Ordered by start time with venue, slots, and live status."
@@ -428,49 +506,26 @@ export function EventDetail({ eventId }: { eventId: string }) {
                   </div>
                 )}
               </DetailPanel>
+            </TabsContent>
 
+            <TabsContent value="qr">
+              <DetailPanel title="QR Check-in" description="Scan attendee QR codes at the venue and mark participants checked in.">
+                <EventQrScannerPanel onCheckedIn={() => setParticipantsRefreshKey((key) => key + 1)} />
+              </DetailPanel>
+            </TabsContent>
+
+            <TabsContent value="volunteers">
               <DetailPanel title="Volunteers" description="Volunteers assigned to this event and their current acceptance status.">
                 <EventVolunteersPanel eventId={event.id} />
               </DetailPanel>
+            </TabsContent>
 
+            <TabsContent value="participants">
               <DetailPanel title="Participants" description="All registered participants across every session of this event.">
-                <EventParticipantsPanel eventId={event.id} />
+                <EventParticipantsPanel eventId={event.id} refreshKey={participantsRefreshKey} />
               </DetailPanel>
-            </div>
-
-            <div className="space-y-6">
-              <DetailPanel title="Event overview" description="Administrative snapshot for dates, status, and audit details.">
-                <div className="rounded-2xl bg-sky-50/70 px-4 py-4">
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                      <p className="text-[10px] font-semibold tracking-[0.16em] text-sky-700 uppercase">Current status</p>
-                      <p className="mt-1 text-sm leading-6 text-neutral-600">Use the update action in the header to move this event through its lifecycle.</p>
-                    </div>
-                    <StatusBadge status={event.status} />
-                  </div>
-                </div>
-
-                <div className="mt-4">
-                  <DetailList
-                    items={[
-                      { label: 'Status', value: formatStatusLabel(event.status) },
-                      { label: 'Start date', value: fmtDate(event.start_date) },
-                      { label: 'End date', value: fmtDate(event.end_date) },
-                      { label: 'Sessions', value: String(sessions.length) },
-                      {
-                        label: 'Created',
-                        value: event.created_at ? fmtDate(event.created_at) : '—'
-                      },
-                      {
-                        label: 'Last updated',
-                        value: event.updated_at ? fmtDate(event.updated_at) : '—'
-                      }
-                    ]}
-                  />
-                </div>
-              </DetailPanel>
-            </div>
-          </div>
+            </TabsContent>
+          </Tabs>
         </>
       )}
     </div>

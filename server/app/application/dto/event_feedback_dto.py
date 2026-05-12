@@ -16,3 +16,9 @@ class CreateEventFeedbackInput:
 @dataclass
 class EventFeedbackOutput:
     feedback: EventFeedback
+
+
+@dataclass
+class EventFeedbackListOutput:
+    feedback: list[EventFeedback]
+    total: int

@@ -15,7 +15,7 @@ Error mapping summary:
 
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 
 from app.application.dto.event_feedback_dto import CreateEventFeedbackInput
 from app.application.use_cases.audit_log_usecase import AuditLogUseCase
@@ -33,12 +33,14 @@ from app.controller.docs.event_feedback_docs import (
 )
 from app.controller.schemas.event_feedback_schema import (
     CreateEventFeedbackRequest,
+    EventFeedbackListResponse,
+    EventFeedbackPaginationMeta,
     EventFeedbackRecordResponse,
     EventFeedbackResponse,
 )
 from app.domain.entities.audit_log import ActionType, AuditLogStatus
 from app.domain.entities.event_entity import EventFeedback
-from app.domain.exceptions.event_exceptions import EventNotFoundError
+from app.domain.exceptions.event_exceptions import EventNotFoundError, UnauthorizedEventOperationError
 from app.domain.exceptions.event_feedback_exceptions import (
     DuplicateEventFeedbackError,
     EventFeedbackEligibilityError,
@@ -81,6 +83,34 @@ async def _audit_feedback_failure(
         resource_id=str(event_id),
         status=AuditLogStatus.FAILURE,
         additional_context={"event_id": str(event_id), "error": message},
+    )
+
+
+@event_feedback_router.get(
+    "/{event_id}/feedback",
+    response_model=EventFeedbackListResponse,
+    status_code=status.HTTP_200_OK,
+    summary="List event feedback",
+    description="Returns a paginated list of feedback submitted for an event. Only the event creator may view the table.",
+)
+async def list_event_feedback(
+    event_id: uuid.UUID,
+    limit: int = Query(default=20, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
+    user_id: uuid.UUID = Depends(get_current_user_id),
+    use_case: EventFeedbackUseCase = Depends(get_event_feedback_use_case),
+) -> EventFeedbackListResponse:
+    """Return submitted feedback for an event to the event creator."""
+    try:
+        result = await use_case.list_feedback_for_event(event_id=event_id, requested_by=user_id, limit=limit, offset=offset)
+    except EventNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except UnauthorizedEventOperationError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
+
+    return EventFeedbackListResponse(
+        data=[_to_feedback_response(feedback) for feedback in result.feedback],
+        meta=EventFeedbackPaginationMeta(total=result.total, limit=limit, offset=offset),
     )
 
 

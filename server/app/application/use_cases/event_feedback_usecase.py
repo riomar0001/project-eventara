@@ -11,9 +11,10 @@ requests.
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.application.dto.event_feedback_dto import CreateEventFeedbackInput, EventFeedbackOutput
+from app.application.dto.event_feedback_dto import CreateEventFeedbackInput, EventFeedbackListOutput, EventFeedbackOutput
 from app.domain.entities.event_entity import EventStatus
 from app.domain.exceptions.event_exceptions import EventNotFoundError
+from app.domain.exceptions.event_exceptions import UnauthorizedEventOperationError
 from app.domain.exceptions.event_feedback_exceptions import (
     DuplicateEventFeedbackError,
     EventFeedbackEligibilityError,
@@ -95,3 +96,16 @@ class EventFeedbackUseCase:
 
         await self.db.commit()
         return EventFeedbackOutput(feedback=feedback)
+
+    async def list_feedback_for_event(self, *, event_id, requested_by, limit: int, offset: int) -> EventFeedbackListOutput:
+        """Return feedback for an event to its creator."""
+        event = await self.event_repo.get_event_by_id(event_id)
+        if event is None:
+            raise EventNotFoundError(str(event_id))
+
+        if event.created_by != requested_by:
+            raise UnauthorizedEventOperationError(str(event_id))
+
+        feedback = await self.feedback_repo.list_by_event(event_id, limit=limit, offset=offset)
+        total = await self.feedback_repo.count_by_event(event_id)
+        return EventFeedbackListOutput(feedback=feedback, total=total)
