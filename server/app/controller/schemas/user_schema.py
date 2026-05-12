@@ -135,6 +135,48 @@ class UpdateProfileResponse(BaseModel):
     access_token: str
 
 
+class AttendedEventResponse(BaseModel):
+    participant_id: uuid.UUID
+    event_id: uuid.UUID
+    event_title: str
+    event_start_date: datetime
+    event_end_date: datetime
+    event_banner_url: str | None = None
+    session_id: uuid.UUID
+    session_title: str
+    session_start_datetime: datetime
+    session_end_datetime: datetime
+    attended_at: datetime | None = None
+
+
+class UserDetailsData(BaseModel):
+    user_id: uuid.UUID
+    email: str
+    alias: str
+    first_name: str
+    last_name: str
+    image: str | None = None
+    age_group: AgeGroup
+    gender: Gender
+    education_level: EducationLevel
+    occupation: str | None = None
+    bio: str | None = None
+    role: str | None = None
+    events_attended: list[AttendedEventResponse]
+
+
+class UserDetailsResponse(BaseModel):
+    success: bool = True
+    message: str = "User details retrieved successfully."
+    data: UserDetailsData
+
+
+class EventsAttendedResponse(BaseModel):
+    success: bool = True
+    message: str = "Events attended retrieved successfully."
+    data: list[AttendedEventResponse]
+
+
 class UserPermissionsResponse(BaseModel):
     success: bool = True
     permissions: dict[str, bool]
@@ -147,6 +189,7 @@ class ProfileAvatarUploadRequest(BaseModel):
 class ProfileAvatarData(BaseModel):
     user_id: uuid.UUID
     image: str
+    profile_picture_url: str
 
 
 class ProfileAvatarUploadData(BaseModel):
@@ -161,3 +204,4 @@ class ProfileAvatarUploadResponse(BaseModel):
     message: str = "Profile avatar upload URL generated. Use upload_url to PUT your image directly to storage."
     data: ProfileAvatarData
     upload: ProfileAvatarUploadData
+    access_token: str

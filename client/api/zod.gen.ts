@@ -82,6 +82,23 @@ export const zAssignVolunteerRequest = z.object({
 });
 
 /**
+ * AttendedEventResponse
+ */
+export const zAttendedEventResponse = z.object({
+    participant_id: z.uuid(),
+    event_id: z.uuid(),
+    event_title: z.string(),
+    event_start_date: z.iso.datetime(),
+    event_end_date: z.iso.datetime(),
+    event_banner_url: z.string().nullish(),
+    session_id: z.uuid(),
+    session_title: z.string(),
+    session_start_datetime: z.iso.datetime(),
+    session_end_datetime: z.iso.datetime(),
+    attended_at: z.iso.datetime().nullish()
+});
+
+/**
  * AuditLogStatus
  */
 export const zAuditLogStatus = z.enum(['success', 'failure']);
@@ -550,6 +567,15 @@ export const zEventWithSessionsResponse = z.object({
 });
 
 /**
+ * EventsAttendedResponse
+ */
+export const zEventsAttendedResponse = z.object({
+    success: z.boolean().optional().default(true),
+    message: z.string().optional().default('Events attended retrieved successfully.'),
+    data: z.array(zAttendedEventResponse)
+});
+
+/**
  * FeatureCreateRequest
  */
 export const zFeatureCreateRequest = z.object({
@@ -735,7 +761,8 @@ export const zLogoutResponse = z.object({
  */
 export const zProfileAvatarData = z.object({
     user_id: z.uuid(),
-    image: z.string()
+    image: z.string(),
+    profile_picture_url: z.string()
 });
 
 /**
@@ -762,7 +789,8 @@ export const zProfileAvatarUploadResponse = z.object({
     success: z.boolean().optional().default(true),
     message: z.string().optional().default('Profile avatar upload URL generated. Use upload_url to PUT your image directly to storage.'),
     data: zProfileAvatarData,
-    upload: zProfileAvatarUploadData
+    upload: zProfileAvatarUploadData,
+    access_token: z.string()
 });
 
 /**
@@ -1107,6 +1135,34 @@ export const zUpdateVolunteerRoleRequest = z.object({
     name: z.string().min(2).max(100).nullish(),
     description: z.string().max(500).nullish(),
     is_active: z.boolean().nullish()
+});
+
+/**
+ * UserDetailsData
+ */
+export const zUserDetailsData = z.object({
+    user_id: z.uuid(),
+    email: z.string(),
+    alias: z.string(),
+    first_name: z.string(),
+    last_name: z.string(),
+    image: z.string().nullish(),
+    age_group: zAgeGroup,
+    gender: zGender,
+    education_level: zEducationLevel,
+    occupation: z.string().nullish(),
+    bio: z.string().nullish(),
+    role: z.string().nullish(),
+    events_attended: z.array(zAttendedEventResponse)
+});
+
+/**
+ * UserDetailsResponse
+ */
+export const zUserDetailsResponse = z.object({
+    success: z.boolean().optional().default(true),
+    message: z.string().optional().default('User details retrieved successfully.'),
+    data: zUserDetailsData
 });
 
 /**
@@ -1799,12 +1855,30 @@ export const zUserOnboardingUserOnboardPostBody = zUserOnboardingRequest;
  */
 export const zUserOnboardingUserOnboardPostResponse = zUserOnboardingResponse;
 
+export const zGetUserDetailsUserProfileGetQuery = z.object({
+    attended_events_limit: z.int().gte(0).lte(50).optional().default(10)
+});
+
+/**
+ * Successful Response
+ */
+export const zGetUserDetailsUserProfileGetResponse = zUserDetailsResponse;
+
 export const zUpdateProfileUserProfilePatchBody = zUpdateProfileRequest;
 
 /**
  * Successful Response
  */
 export const zUpdateProfileUserProfilePatchResponse = zUpdateProfileResponse;
+
+export const zGetEventsAttendedUserProfileEventsAttendedGetQuery = z.object({
+    limit: z.int().gte(0).lte(50).optional().default(10)
+});
+
+/**
+ * Successful Response
+ */
+export const zGetEventsAttendedUserProfileEventsAttendedGetResponse = zEventsAttendedResponse;
 
 export const zUploadProfileAvatarUserProfileAvatarPatchBody = zProfileAvatarUploadRequest;
 

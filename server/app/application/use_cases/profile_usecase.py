@@ -2,8 +2,12 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application.dto.profile_dto import (
+    GetEventsAttendedInput,
+    GetEventsAttendedOutput,
     GetLoginHistoryInput,
     GetLoginHistoryOutput,
+    GetUserDetailsInput,
+    GetUserDetailsOutput,
     UpdateProfileAvatarInput,
     UpdateProfileAvatarOutput,
     UpdateProfileInput,
@@ -151,6 +155,7 @@ class UpdateProfileUseCase:
         if not current_profile:
             raise ProfileNotFoundError()
 
+        current_profile.email = user.email
         if data.alias != current_profile.alias:
             if await self.repo.get_by_alias(data.alias):
                 raise AliasAlreadyTakenError(data.alias)
@@ -175,6 +180,7 @@ class UpdateProfileUseCase:
             await self.db.rollback()
             raise ProfileNotFoundError()
 
+        updated_profile.email = user.email
         await self.db.commit()
         return UpdateProfileOutput(profile=updated_profile, previous_profile=current_profile)
 
@@ -215,6 +221,7 @@ class UpdateProfileAvatarUseCase:
         if not current_profile:
             raise ProfileNotFoundError()
 
+        current_profile.email = user.email
         old_image_url = current_profile.image_file_id
 
         try:
@@ -227,8 +234,91 @@ class UpdateProfileAvatarUseCase:
             await self.db.rollback()
             raise ProfileNotFoundError()
 
+        updated_profile.email = user.email
         await self.db.commit()
         return UpdateProfileAvatarOutput(profile=updated_profile, old_image_url=old_image_url)
+
+
+class GetEventsAttendedUseCase:
+    """Retrieves events the authenticated user has attended.
+
+    This is a read-only query over committed participant rows with ``ATTENDED``
+    status.  No pessimistic lock is required because the use case performs no
+    check-then-write sequence; the database transaction snapshot is sufficient
+    to prevent partial reads while attendance updates are committed atomically
+    by the participant status use case.
+    """
+
+    def __init__(self, repo: IUserRepository) -> None:
+        self.repo = repo
+
+    async def execute(self, data: GetEventsAttendedInput) -> GetEventsAttendedOutput:
+        """Return attended events for an active authenticated user.
+
+        Args:
+            data: ``GetEventsAttendedInput`` with the authenticated user's ID
+                and maximum number of events to return.
+
+        Returns:
+            ``GetEventsAttendedOutput`` containing newest attended events first.
+
+        Raises:
+            UserNotFoundError: No user exists for the given ID.
+            UserInactiveError: The account is inactive or deleted.
+        """
+        user = await self.repo.get_by_id(data.user_id)
+        if not user:
+            raise UserNotFoundError()
+        if user.status in (UserStatus.INACTIVE, UserStatus.DELETED):
+            raise UserInactiveError()
+
+        events = await self.repo.list_attended_events_by_user_id(data.user_id, data.limit)
+        return GetEventsAttendedOutput(events=events)
+
+
+class GetUserDetailsUseCase:
+    """Retrieves the authenticated user's profile and attended event history.
+
+    This read model combines the profile row, active role name, and recent
+    attended event records into one response for the client profile screen.
+    The query path is read-only, so it relies on the database's committed
+    transaction snapshot rather than row-level locks; mutations remain
+    serialised in the update-specific use cases.
+    """
+
+    def __init__(self, repo: IUserRepository) -> None:
+        self.repo = repo
+
+    async def execute(self, data: GetUserDetailsInput) -> GetUserDetailsOutput:
+        """Return the current profile details for an active authenticated user.
+
+        Args:
+            data: ``GetUserDetailsInput`` with the authenticated user's ID and
+                attended-event limit.
+
+        Returns:
+            ``GetUserDetailsOutput`` with profile details, role name, and
+            attended events.
+
+        Raises:
+            UserNotFoundError: No user exists for the given ID.
+            UserInactiveError: The account is inactive or deleted.
+            ProfileNotFoundError: The user has not completed onboarding.
+        """
+        user = await self.repo.get_by_id(data.user_id)
+        if not user:
+            raise UserNotFoundError()
+        if user.status in (UserStatus.INACTIVE, UserStatus.DELETED):
+            raise UserInactiveError()
+
+        profile = await self.repo.get_profile_by_user_id(data.user_id)
+        if not profile:
+            raise ProfileNotFoundError()
+
+        profile.email = user.email
+        role_name = await self.repo.get_active_role_name_by_user_id(data.user_id)
+        events = await self.repo.list_attended_events_by_user_id(data.user_id, data.attended_events_limit)
+        return GetUserDetailsOutput(profile=profile, events_attended=events, role_name=role_name)
 
 
 class CheckAliasUseCase:
