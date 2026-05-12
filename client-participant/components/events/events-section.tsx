@@ -103,6 +103,25 @@ export function EventsSection({ onEventClick }: EventsSectionProps) {
             No {selectedTab} scheduled this quarter. Check back soon.
           </div>
         )}
+
+        {/* View Full Calendar button */}
+        <div className="mt-8 text-center">
+          <button className="px-5.5 duration-180 inline-flex items-center justify-center gap-2.5 rounded-full border border-[var(--line)] bg-[oklch(1_0_0_/_0.02)] py-3.5 text-sm font-semibold text-[var(--text)] transition-all hover:border-[var(--text)] hover:bg-[var(--line-soft)] hover:text-[var(--text)]">
+            View Full Calendar
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 16 16"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M6 12l4-4-4-4" />
+            </svg>
+          </button>
+        </div>
       </div>
     </section>
   )
