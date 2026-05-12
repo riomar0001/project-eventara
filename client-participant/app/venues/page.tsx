@@ -5,6 +5,7 @@
 "use client"
 
 import { AuthenticatedNav } from "@/components/navigation"
+import { Footer } from "@/components/footer/footer"
 import {
   PageHeader,
   ActionBar,
@@ -51,63 +52,113 @@ export default function VenuesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--bg)]">
-      {/* Navigation */}
-      <AuthenticatedNav
-        userName="Camille"
-        userTier="Participant"
-        activeLink="Venue Hub"
-      />
+    <div className="relative min-h-screen bg-[var(--bg)]">
+      {/* Page Mesh - Ambient orbs */}
+      <div className="pointer-events-none absolute inset-0 top-0 z-0 h-[620px] overflow-hidden">
+        {/* Lime orb (top-left) */}
+        <div
+          className="absolute rounded-full blur-[90px]"
+          style={{
+            width: "640px",
+            height: "640px",
+            left: "-180px",
+            top: "-220px",
+            background:
+              "radial-gradient(circle, oklch(0.9 0.22 128 / 0.4), transparent 65%)",
+          }}
+        />
+        {/* Amber orb (top-right) */}
+        <div
+          className="absolute rounded-full blur-[90px]"
+          style={{
+            width: "540px",
+            height: "540px",
+            right: "-140px",
+            top: "-120px",
+            background:
+              "radial-gradient(circle, oklch(0.82 0.17 75 / 0.28), transparent 65%)",
+          }}
+        />
+        {/* Grid overlay */}
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `
+              linear-gradient(var(--line-soft) 1px, transparent 1px),
+              linear-gradient(90deg, var(--line-soft) 1px, transparent 1px)
+            `,
+            backgroundSize: "64px 64px",
+            maskImage:
+              "radial-gradient(ellipse 80% 60% at 50% 0%, black 30%, transparent 75%)",
+            opacity: 0.35,
+          }}
+        />
+      </div>
 
-      {/* Page Header */}
-      <PageHeader totalVenues={MOCK_VENUES.length} />
+      {/* Content */}
+      <div className="relative z-10">
+        {/* Navigation */}
+        <AuthenticatedNav
+          userName="Camille"
+          userTier="Participant"
+          activeLink="Venue Hub"
+        />
 
-      {/* Action Bar */}
-      <ActionBar
-        query={filters.query}
-        onQueryChange={filters.setQuery}
-        capacityKey={filters.capacityKey}
-        onCapacityChange={filters.setCapacityKey}
-        sortKey={filters.sortKey}
-        onSortChange={filters.setSortKey}
-        onAddVenue={modals.openAddVenue}
-      />
+        {/* Page Header */}
+        <PageHeader totalVenues={MOCK_VENUES.length} />
 
-      {/* Main Content */}
-      <main className="px-8 py-8">
-        <div className="mx-auto max-w-[1240px]">
-          {/* Results Bar */}
-          {(activeFilters.length > 0 || filters.filteredVenues.length > 0) && (
-            <ResultsBar
-              count={filters.filteredVenues.length}
-              activeFilters={activeFilters}
-            />
-          )}
+        {/* Action Bar */}
+        <ActionBar
+          query={filters.query}
+          onQueryChange={filters.setQuery}
+          capacityKey={filters.capacityKey}
+          onCapacityChange={filters.setCapacityKey}
+          sortKey={filters.sortKey}
+          onSortChange={filters.setSortKey}
+          onAddVenue={modals.openAddVenue}
+        />
 
-          {/* Venue Grid */}
-          <div className="py-8">
-            <VenueGrid
-              venues={filters.paginatedVenues}
-              onViewDetail={modals.openDetail}
-              onEditVenue={modals.openEditVenue}
-              onShareVenue={(v) => {
-                modals.showToast(`Shared: ${v.name}`)
-              }}
-              onReportVenue={modals.openReport}
-              onAddVenue={modals.openAddVenue}
-            />
+        {/* Main Content */}
+        <main className="px-8 py-8">
+          <div className="mx-auto max-w-[1240px]">
+            {/* Results Bar */}
+            {(activeFilters.length > 0 ||
+              filters.filteredVenues.length > 0) && (
+              <ResultsBar
+                count={filters.filteredVenues.length}
+                activeFilters={activeFilters}
+              />
+            )}
+
+            {/* Venue Grid */}
+            <div className="py-8">
+              <VenueGrid
+                venues={filters.paginatedVenues}
+                currentPage={filters.page}
+                onViewDetail={modals.openDetail}
+                onEditVenue={modals.openEditVenue}
+                onShareVenue={(v) => {
+                  modals.showToast(`Shared: ${v.name}`)
+                }}
+                onReportVenue={modals.openReport}
+                onAddVenue={modals.openAddVenue}
+              />
+            </div>
+
+            {/* Pagination */}
+            {filters.totalPages > 1 && (
+              <Pagination
+                currentPage={filters.page}
+                totalPages={filters.totalPages}
+                onPageChange={filters.setPage}
+              />
+            )}
           </div>
+        </main>
 
-          {/* Pagination */}
-          {filters.totalPages > 1 && (
-            <Pagination
-              currentPage={filters.page}
-              totalPages={filters.totalPages}
-              onPageChange={filters.setPage}
-            />
-          )}
-        </div>
-      </main>
+        {/* Footer */}
+        <Footer />
+      </div>
 
       {/* Modals */}
       <AddVenueModal

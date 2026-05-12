@@ -34,7 +34,7 @@ export function useVenueFilters(venues: Venue[]): UseVenueFiltersReturn {
   }, [venues, query, capacityKey, sortKey])
 
   const { items: paginatedVenues, totalPages } = useMemo(() => {
-    return paginate(filteredVenues, page, 9)
+    return paginate(filteredVenues, page)
   }, [filteredVenues, page])
 
   return {

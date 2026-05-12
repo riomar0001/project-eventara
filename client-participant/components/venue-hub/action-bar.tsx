@@ -42,7 +42,7 @@ export function ActionBar({
   }
 
   return (
-    <div className="border-b border-[var(--line-soft)] px-8 py-6">
+    <div className="px-8 py-6">
       <div className="mx-auto max-w-[1240px]">
         <div className="grid grid-cols-[1fr_auto_auto_auto] items-stretch gap-3">
           {/* Search Input */}
@@ -57,7 +57,7 @@ export function ActionBar({
               placeholder="Search venues, locations..."
               value={query}
               onChange={(e) => onQueryChange(e.target.value)}
-              className="h-14 w-full rounded-[14px] border border-[var(--line-soft)] bg-[var(--surface)] py-4 pl-[52px] pr-[18px] text-[15px] text-[var(--text)] placeholder-[var(--text-mute)] transition-all focus:border-[var(--lime)] focus:outline-none focus:ring-4 focus:ring-[oklch(0.9_0.22_128_/_0.1)] focus:bg-[var(--surface-2)]"
+              className="h-14 w-full rounded-[14px] border border-[var(--line-soft)] bg-[var(--surface)] py-4 pl-[52px] pr-[18px] text-[15px] text-[var(--text)] placeholder-[var(--text-mute)] transition-all focus:border-[var(--lime)] focus:bg-[var(--surface-2)] focus:outline-none focus:ring-4 focus:ring-[oklch(0.9_0.22_128_/_0.1)]"
             />
           </div>
 
@@ -67,15 +67,20 @@ export function ActionBar({
               onClick={() => setCapacityOpen(!capacityOpen)}
               className="flex h-14 min-w-[180px] items-center justify-between gap-2 rounded-[14px] border border-[var(--line-soft)] bg-[var(--surface)] px-[18px] py-4 text-sm transition-all hover:border-[var(--text-mute)]"
             >
-              <div className="flex flex-col items-start">
+              <div className="flex flex-row items-center gap-1.5">
                 <span className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-[var(--text-mute)]">
                   Capacity
                 </span>
                 <span className="text-[14px] font-medium text-[var(--text)]">
-                  {CAPACITY_FILTERS.find((f) => f.key === capacityKey)?.label || "Any"}
+                  {CAPACITY_FILTERS.find((f) => f.key === capacityKey)?.label ||
+                    "Any"}
                 </span>
               </div>
-              <Icon name="chevronDown" size={14} className="text-[var(--text-mute)]" />
+              <Icon
+                name="chevronDown"
+                size={14}
+                className="flex items-center text-[var(--text-mute)]"
+              />
             </button>
 
             {/* Capacity Dropdown Menu */}
@@ -104,15 +109,20 @@ export function ActionBar({
               onClick={() => setSortOpen(!sortOpen)}
               className="flex h-14 min-w-[180px] items-center justify-between gap-2 rounded-[14px] border border-[var(--line-soft)] bg-[var(--surface)] px-[18px] py-4 text-sm transition-all hover:border-[var(--text-mute)]"
             >
-              <div className="flex flex-col items-start">
+              <div className="flex flex-row items-center gap-1.5">
                 <span className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-[var(--text-mute)]">
                   Sort
                 </span>
                 <span className="text-[14px] font-medium text-[var(--text)]">
-                  {SORT_OPTIONS.find((o) => o.key === sortKey)?.label || "Rating"}
+                  {SORT_OPTIONS.find((o) => o.key === sortKey)?.label ||
+                    "Rating"}
                 </span>
               </div>
-              <Icon name="chevronDown" size={14} className="text-[var(--text-mute)]" />
+              <Icon
+                name="chevronDown"
+                size={14}
+                className="flex items-center text-[var(--text-mute)]"
+              />
             </button>
 
             {/* Sort Dropdown Menu */}
@@ -143,8 +153,8 @@ export function ActionBar({
               boxShadow: "0 8px 28px -10px var(--lime-glow)",
             }}
           >
-            <Icon name="plus" size={16} />
-            <span className="hidden sm:inline">Add venue</span>
+            <Icon name="plus" size={16} className="text-white" />
+            <span className="hidden text-white sm:inline">Add Venue Post</span>
           </button>
         </div>
       </div>

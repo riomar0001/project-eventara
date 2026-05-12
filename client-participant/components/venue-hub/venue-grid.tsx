@@ -15,6 +15,7 @@ interface VenueGridProps {
   onShareVenue: (v: Venue) => void
   onReportVenue: (v: Venue) => void
   onAddVenue: () => void
+  currentPage?: number
 }
 
 export function VenueGrid({
@@ -24,6 +25,7 @@ export function VenueGrid({
   onShareVenue,
   onReportVenue,
   onAddVenue,
+  currentPage = 1,
 }: VenueGridProps) {
   if (venues.length === 0) {
     return (
@@ -39,9 +41,17 @@ export function VenueGrid({
     )
   }
 
+  // On page 1: show top 3, banner, then remaining
+  // On other pages: show all, then banner
+  const isFirstPage = currentPage === 1
+  const partnerCount = isFirstPage ? 3 : 0
+  const partneredVenues = venues.slice(0, partnerCount)
+  const communityVenues = venues.slice(partnerCount)
+
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-      {venues.map((venue, idx) => (
+      {/* Partnered venues (top 3 on page 1) */}
+      {partneredVenues.map((venue) => (
         <div key={venue.id}>
           <VenueCard
             venue={venue}
@@ -50,15 +60,35 @@ export function VenueGrid({
             onShare={onShareVenue}
             onReport={onReportVenue}
           />
-
-          {/* Contribution banner after 3rd card */}
-          {idx === 2 && (
-            <div className="col-span-1 md:col-span-2 lg:col-span-3">
-              <ContributionBanner onAddVenue={onAddVenue} />
-            </div>
-          )}
         </div>
       ))}
+
+      {/* Contribution banner - only after partnered venues on page 1, or after all on other pages */}
+      {isFirstPage && (
+        <div className="col-span-1 md:col-span-2 lg:col-span-3">
+          <ContributionBanner onAddVenue={onAddVenue} />
+        </div>
+      )}
+
+      {/* Community venues (rest on page 1, all on other pages) */}
+      {communityVenues.map((venue) => (
+        <div key={venue.id}>
+          <VenueCard
+            venue={venue}
+            onView={onViewDetail}
+            onEdit={onEditVenue}
+            onShare={onShareVenue}
+            onReport={onReportVenue}
+          />
+        </div>
+      ))}
+
+      {/* Contribution banner on page 2+ */}
+      {!isFirstPage && (
+        <div className="col-span-1 md:col-span-2 lg:col-span-3">
+          <ContributionBanner onAddVenue={onAddVenue} />
+        </div>
+      )}
     </div>
   )
 }

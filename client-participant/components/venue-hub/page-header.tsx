@@ -27,7 +27,10 @@ export function PageHeader({
               />
               VENUES · HUB
             </div>
-            <h1 className="m-0 text-[clamp(42px,5.5vw,72px)] font-bold tracking-[-0.035em] text-[var(--text)]" style={{ lineHeight: 1 }}>
+            <h1
+              className="m-0 text-[clamp(42px,5.5vw,72px)] font-bold tracking-[-0.035em] text-[var(--text)]"
+              style={{ lineHeight: 1 }}
+            >
               Venue Hub
             </h1>
           </div>

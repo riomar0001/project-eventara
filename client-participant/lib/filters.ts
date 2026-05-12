@@ -61,11 +61,22 @@ export const applyFilters = (
 
 export const paginate = <T>(
   items: T[],
-  page: number,
-  perPage: number = 9
+  page: number
 ): { items: T[]; totalPages: number } => {
-  const totalPages = Math.ceil(items.length / perPage)
-  const start = (page - 1) * perPage
-  const end = start + perPage
-  return { items: items.slice(start, end), totalPages }
+  // Page 1 shows 6 items (3 partnered + 3 community), page 2+ shows 3 per page
+  if (page === 1) {
+    const firstPageItems = 6
+    const remainingPerPage = 3
+    const totalPages =
+      Math.ceil((items.length - firstPageItems) / remainingPerPage) + 1
+    return { items: items.slice(0, firstPageItems), totalPages }
+  } else {
+    const firstPageItems = 6
+    const itemsPerPage = 3
+    const start = firstPageItems + (page - 2) * itemsPerPage
+    const end = start + itemsPerPage
+    const totalPages =
+      Math.ceil((items.length - firstPageItems) / itemsPerPage) + 1
+    return { items: items.slice(start, end), totalPages }
+  }
 }

@@ -29,7 +29,7 @@ export function VenueCard({
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   return (
-    <div className="duration-280 overflow-hidden rounded-2xl border border-[var(--line-soft)] bg-[var(--surface)] transition-all hover:border-[oklch(0.9_0.22_128_/_0.45)] hover:shadow-lg hover:shadow-[oklch(0.9_0.22_128_/_0.15)]">
+    <div className="duration-280 flex h-[580px] flex-col overflow-hidden rounded-2xl border border-[var(--line-soft)] bg-[var(--surface)] transition-all hover:border-[oklch(0.9_0.22_128_/_0.45)] hover:shadow-lg hover:shadow-[oklch(0.9_0.22_128_/_0.15)]">
       {/* Visual Section */}
       <div className="relative aspect-video overflow-hidden bg-gradient-to-br from-[oklch(0.2_0.01_150)] to-[oklch(0.15_0.008_150)]">
         {/* Stripe pattern */}
@@ -79,7 +79,7 @@ export function VenueCard({
       </div>
 
       {/* Body Section */}
-      <div className="flex flex-col gap-2.5 p-5">
+      <div className="flex flex-1 flex-col gap-2.5 p-5">
         {/* Title & Contributor */}
         <div className="flex items-start justify-between gap-2">
           <h3 className="m-0 text-lg font-semibold tracking-[-0.02em] text-[var(--text)]">
@@ -125,6 +125,9 @@ export function VenueCard({
             ))}
           </div>
         )}
+
+        {/* Spacer to push action row to bottom */}
+        <div className="flex-1" />
 
         {/* Action row */}
         <div className="border-t border-dashed border-[var(--line-soft)] pt-2.5">

@@ -5,8 +5,8 @@
 import type { SortOption } from "@/types/filters"
 
 export const SORT_OPTIONS: SortOption[] = [
-  { key: "rating", label: "Rating (highest)" },
-  { key: "newest", label: "Newest" },
-  { key: "capacity", label: "Capacity (largest)" },
-  { key: "name", label: "Name (A–Z)" },
+  { key: "rating", label: "Highest rated" },
+  { key: "newest", label: "Newest first" },
+  { key: "capacity", label: "largest Capacity" },
+  { key: "name", label: "A–Z" },
 ]

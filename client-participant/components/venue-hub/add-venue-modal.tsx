@@ -5,7 +5,7 @@
 "use client"
 
 import { useState } from "react"
-import type { Venue, VenueType } from "@/types/venue"
+import type { Venue, VenueType, Amenity } from "@/types/venue"
 import type { AddVenueFormData } from "@/types"
 import { ModalBackdrop } from "./modal-backdrop"
 import { Icon } from "@/components/ui/icon"
@@ -51,12 +51,12 @@ export function AddVenueModal({
     }))
   }
 
-  const handleAmenityToggle = (amenity: string) => {
+  const handleAmenityToggle = (amenity: Amenity) => {
     setFormData((prev) => ({
       ...prev,
-      amenities: prev.amenities.includes(amenity as any)
+      amenities: prev.amenities.includes(amenity)
         ? prev.amenities.filter((a) => a !== amenity)
-        : [...prev.amenities, amenity as any],
+        : [...prev.amenities, amenity],
     }))
   }
 
@@ -192,7 +192,7 @@ export function AddVenueModal({
                   type="button"
                   onClick={() => handleAmenityToggle(option.key)}
                   className={`rounded-lg border px-3 py-2 text-sm font-medium transition-all ${
-                    formData.amenities.includes(option.key as any)
+                    formData.amenities.includes(option.key as Amenity)
                       ? "border-[var(--lime)] bg-[oklch(0.9_0.22_128_/_0.06)] text-[var(--lime)]"
                       : "border-[var(--line-soft)] bg-transparent text-[var(--text-dim)] hover:border-[var(--text-mute)] hover:text-[var(--text)]"
                   }`}
@@ -228,7 +228,9 @@ export function AddVenueModal({
             Cancel
           </button>
           <button
-            onClick={(e) => handleSubmit(e as any)}
+            onClick={(e) =>
+              handleSubmit(e as React.MouseEvent<HTMLButtonElement>)
+            }
             className="flex-1 rounded-full bg-[var(--lime)] px-4 py-2.5 font-semibold text-[#0a1005] transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[var(--lime-glow)]"
             style={{
               boxShadow:

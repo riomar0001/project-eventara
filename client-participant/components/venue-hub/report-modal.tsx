@@ -141,7 +141,9 @@ export function ReportModal({
             Cancel
           </button>
           <button
-            onClick={(e) => handleSubmit(e as any)}
+            onClick={(e) =>
+              handleSubmit(e as React.MouseEvent<HTMLButtonElement>)
+            }
             className="flex-1 rounded-full border border-[var(--amber)] bg-[oklch(0.82_0.17_75_/_0.12)] px-4 py-2.5 font-semibold text-[var(--amber)] transition-all hover:bg-[oklch(0.82_0.17_75_/_0.2)]"
           >
             Submit report

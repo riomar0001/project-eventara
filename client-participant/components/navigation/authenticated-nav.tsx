@@ -7,7 +7,6 @@
 "use client"
 
 import { useState } from "react"
-import { Icon } from "@/components/ui/icon"
 
 interface AuthenticatedNavProps {
   userName?: string
@@ -33,12 +32,12 @@ export function AuthenticatedNav({
   const navLinks = ["Home", "Events", "Venue Hub", "About"] as const
 
   return (
-    <nav className="sticky top-0 z-40 border-b border-[var(--line-soft)] bg-whtie backdrop-blur-[18px] backdrop-saturate-140">
+    <nav className="sticky top-0 z-40 border-b border-[var(--line-soft)] bg-white">
       <div className="mx-auto max-w-[1240px] px-8">
         <div className="grid h-[68px] grid-cols-[1fr_auto_1fr] items-center gap-6">
           {/* Left: Logo */}
           <div className="flex items-center gap-2.5 font-bold tracking-[-0.02em]">
-            <div className="flex h-6.5 w-6.5 items-center justify-center rounded-lg bg-gradient-to-br from-[var(--lime)] to-[oklch(0.78_0.19_128)] shadow-lg shadow-[var(--lime-glow)]">
+            <div className="h-6.5 w-6.5 flex items-center justify-center rounded-lg bg-gradient-to-br from-[var(--lime)] to-[oklch(0.78_0.19_128)] shadow-lg shadow-[var(--lime-glow)]">
               <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
                 <path
                   d="M10 2L15 8H12V14H8V8H5L10 2Z"
