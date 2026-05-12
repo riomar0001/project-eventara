@@ -134,6 +134,21 @@ def serialize_event_participant(participant) -> dict:
         "user_id": str(participant.user_id),
         "event_session_id": str(participant.event_session_id),
         "status": participant.status.value if hasattr(participant.status, "value") else participant.status,
+        "is_checked_in": participant.is_checked_in,
+        "checked_in_time": participant.checked_in_time.isoformat() if participant.checked_in_time else None,
+        "checked_in_by": str(participant.checked_in_by) if participant.checked_in_by else None,
+    }
+
+
+def serialize_event_feedback(feedback) -> dict:
+    return {
+        "id": str(feedback.id),
+        "user_id": str(feedback.user_id),
+        "event_id": str(feedback.event_id),
+        "participant_id": str(feedback.participant_id),
+        "rating": feedback.rating,
+        "comment": feedback.comment,
+        "suggestion": feedback.suggestion,
     }
 
 

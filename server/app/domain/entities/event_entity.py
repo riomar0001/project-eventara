@@ -76,6 +76,9 @@ class EventParticipant(BaseModel):
     user_id: uuid.UUID
     event_session_id: uuid.UUID
     status: EventParticipantStatus = EventParticipantStatus.REGISTERED
+    is_checked_in: bool = False
+    checked_in_time: datetime | None = None
+    checked_in_by: uuid.UUID | None = None
     created_at: datetime | None = None
     updated_at: datetime | None = None
 
@@ -97,6 +100,20 @@ class EventRating(BaseModel):
     helpful_count: int = Field(default=0, ge=0)
     creator_response: str | None = Field(default=None, max_length=1000)
     creator_responded_at: datetime | None = None
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+
+    model_config = {"from_attributes": True}
+
+
+class EventFeedback(BaseModel):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4)
+    user_id: uuid.UUID
+    event_id: uuid.UUID
+    participant_id: uuid.UUID
+    rating: int = Field(ge=1, le=5)
+    comment: str | None = Field(default=None, max_length=2000)
+    suggestion: str | None = Field(default=None, max_length=2000)
     created_at: datetime | None = None
     updated_at: datetime | None = None
 

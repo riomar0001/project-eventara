@@ -5,6 +5,7 @@ from app.application.use_cases.account_settings_usecase import AccountSettingsUs
 from app.application.use_cases.audit_log_usecase import AuditLogUseCase
 from app.application.use_cases.auth_usecase import AuthUseCase
 from app.application.use_cases.event_deletion_usecase import EventDeletionUseCase
+from app.application.use_cases.event_feedback_usecase import EventFeedbackUseCase
 from app.application.use_cases.event_participant_usecase import EventParticipantUseCase
 from app.application.use_cases.event_query_usecase import GetEventUseCase
 from app.application.use_cases.event_status_usecase import EventStatusUseCase
@@ -38,6 +39,7 @@ from app.infrastructure.cache.repositories.password_reset_repository import Pass
 from app.infrastructure.database.repositories.audit_log_repository import (
     AuditLogRepository,
 )
+from app.infrastructure.database.repositories.event_feedback_repository import EventFeedbackRepository
 from app.infrastructure.database.repositories.event_participant_repository import EventParticipantRepository
 from app.infrastructure.database.repositories.event_repository import EventRepository
 from app.infrastructure.database.repositories.event_volunteer_repository import EventVolunteerRepository
@@ -179,7 +181,32 @@ def get_event_status_use_case(db: AsyncSession = Depends(get_db)) -> EventStatus
 
 def get_event_participant_use_case(db: AsyncSession = Depends(get_db)) -> EventParticipantUseCase:
     """Construct an ``EventParticipantUseCase`` for the current request."""
-    return EventParticipantUseCase(EventParticipantRepository(db), EventRepository(db), RoleRepository(db), db)
+    return EventParticipantUseCase(
+        EventParticipantRepository(db),
+        EventRepository(db),
+        RoleRepository(db),
+        db,
+        EventVolunteerRepository(db),
+        UserRepository(db),
+    )
+
+
+def get_event_participant_check_in_use_case(request: Request, db: AsyncSession = Depends(get_db)) -> EventParticipantUseCase:
+    """Construct an ``EventParticipantUseCase`` with queue support for check-in receipts."""
+    return EventParticipantUseCase(
+        EventParticipantRepository(db),
+        EventRepository(db),
+        RoleRepository(db),
+        db,
+        EventVolunteerRepository(db),
+        UserRepository(db),
+        request.app.state.arq,
+    )
+
+
+def get_event_feedback_use_case(db: AsyncSession = Depends(get_db)) -> EventFeedbackUseCase:
+    """Construct an ``EventFeedbackUseCase`` for checked-in attendee feedback."""
+    return EventFeedbackUseCase(EventFeedbackRepository(db), EventRepository(db), EventParticipantRepository(db), db)
 
 
 def get_event_query_use_case(db: AsyncSession = Depends(get_db)) -> GetEventUseCase:

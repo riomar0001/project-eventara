@@ -68,3 +68,18 @@ class SessionSlotsFullError(Exception):
         else:
             msg = "Session is full — no slots remaining"
         super().__init__(msg)
+
+
+class EventParticipantAlreadyCheckedInError(Exception):
+    def __init__(self, participant_id: str = "") -> None:
+        msg = f"Event participant is already checked in: {participant_id}" if participant_id else "Event participant is already checked in"
+        super().__init__(msg)
+
+
+class EventParticipantCheckInNotOpenError(Exception):
+    def __init__(self, session_id: str = "", current_status: str = "") -> None:
+        if session_id and current_status:
+            msg = f"Check-in is not open for session {session_id}: session status is {current_status}"
+        else:
+            msg = "Check-in is not open for this session"
+        super().__init__(msg)

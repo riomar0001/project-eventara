@@ -14,13 +14,14 @@ Concurrency strategy — pessimistic locking (SELECT … FOR UPDATE) on mutating
 """
 
 import uuid
+from datetime import datetime
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.entities.event_entity import EventParticipant as EventParticipantEntity
 from app.domain.entities.event_entity import EventParticipantStatus
-from app.infrastructure.database.models.event_models import EventParticipant
+from app.infrastructure.database.models.event_models import EventParticipant, EventSession
 
 
 class EventParticipantRepository:
@@ -37,6 +38,9 @@ class EventParticipantRepository:
             user_id=orm.user_id,
             event_session_id=orm.event_session_id,
             status=EventParticipantStatus(orm.status),
+            is_checked_in=orm.is_checked_in,
+            checked_in_time=orm.checked_in_time,
+            checked_in_by=orm.checked_in_by,
             created_at=orm.created_at,
             updated_at=orm.updated_at,
         )
@@ -88,6 +92,35 @@ class EventParticipantRepository:
             query = query.with_for_update()
         result = await self.db.execute(query)
         orm = result.scalar_one_or_none()
+        return self._to_entity(orm) if orm else None
+
+    async def get_by_user_and_event(
+        self,
+        user_id: uuid.UUID,
+        event_id: uuid.UUID,
+        *,
+        for_update: bool = False,
+    ) -> EventParticipantEntity | None:
+        """Return a participant row for a user within an event, preferring checked-in rows.
+
+        Args:
+            user_id: UUID of the attendee.
+            event_id: UUID of the parent event.
+            for_update: When ``True``, acquires a row-level lock before eligibility checks.
+
+        Returns:
+            A matching participant entity, or ``None`` when the user has no registration for the event.
+        """
+        query = (
+            select(EventParticipant)
+            .join(EventSession, EventParticipant.event_session_id == EventSession.id)
+            .where(EventParticipant.user_id == user_id, EventSession.event_id == event_id)
+            .order_by(EventParticipant.is_checked_in.desc(), EventParticipant.created_at.desc())
+        )
+        if for_update:
+            query = query.with_for_update()
+        result = await self.db.execute(query)
+        orm = result.scalars().first()
         return self._to_entity(orm) if orm else None
 
     async def count_active_participants(self, session_id: uuid.UUID) -> int:
@@ -153,6 +186,38 @@ class EventParticipantRepository:
         if orm is None:
             return None
         orm.status = new_status
+        await self.db.flush()
+        await self.db.refresh(orm)
+        return self._to_entity(orm)
+
+    async def check_in(
+        self,
+        *,
+        participant_id: uuid.UUID,
+        checked_in_by: uuid.UUID,
+        checked_in_time: datetime,
+    ) -> EventParticipantEntity | None:
+        """Mark an existing participant as checked in and return the updated entity.
+
+        The row must already be locked by the calling transaction via
+        ``get_by_id(for_update=True)`` before this method is invoked.
+
+        Args:
+            participant_id: Primary key of the participant to check in.
+            checked_in_by: UUID of the organizer or joined volunteer performing check-in.
+            checked_in_time: Timestamp to persist for the check-in action.
+
+        Returns:
+            The updated ``EventParticipantEntity``, or ``None`` if no matching row exists.
+        """
+        result = await self.db.execute(select(EventParticipant).where(EventParticipant.id == participant_id).with_for_update())
+        orm = result.scalar_one_or_none()
+        if orm is None:
+            return None
+        orm.is_checked_in = True
+        orm.checked_in_time = checked_in_time
+        orm.checked_in_by = checked_in_by
+        orm.status = EventParticipantStatus.ATTENDED
         await self.db.flush()
         await self.db.refresh(orm)
         return self._to_entity(orm)

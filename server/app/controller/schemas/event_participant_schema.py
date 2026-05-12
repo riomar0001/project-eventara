@@ -11,6 +11,9 @@ class EventParticipantRecordResponse(BaseModel):
     user_id: uuid.UUID
     event_session_id: uuid.UUID
     status: str
+    is_checked_in: bool
+    checked_in_time: datetime | None
+    checked_in_by: uuid.UUID | None
     created_at: datetime | None
     updated_at: datetime | None
 
@@ -30,4 +33,16 @@ class UpdateParticipantStatusRequest(BaseModel):
 class UpdateParticipantStatusResponse(BaseModel):
     success: bool = True
     message: str = "Participant status updated successfully."
+    data: EventParticipantRecordResponse
+
+
+class WithdrawRegistrationResponse(BaseModel):
+    success: bool = True
+    message: str = "Registration withdrawn successfully."
+    data: EventParticipantRecordResponse
+
+
+class CheckInParticipantResponse(BaseModel):
+    success: bool = True
+    message: str = "Participant checked in successfully."
     data: EventParticipantRecordResponse

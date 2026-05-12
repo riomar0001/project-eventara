@@ -29,6 +29,7 @@ class Event(Base):
     creator = relationship("User", back_populates="events")
     volunteers = relationship("EventVolunteer", back_populates="event")
     ratings = relationship("EventRating", back_populates="event")
+    feedback = relationship("EventFeedback", back_populates="event")
     sessions = relationship("EventSession", back_populates="event")
 
     __table_args__ = (
@@ -70,14 +71,21 @@ class EventParticipant(Base):
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     event_session_id: Mapped[UUID] = mapped_column(ForeignKey("event_sessions.id", ondelete="CASCADE"), nullable=False)
     status: Mapped[str] = mapped_column(Enum(EventParticipantStatus, native_enum=False), nullable=False, default="registered")
+    is_checked_in: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    checked_in_time: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    checked_in_by: Mapped[UUID | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
 
-    user = relationship("User", back_populates="event_participants")
+    user = relationship("User", back_populates="event_participants", foreign_keys=[user_id])
+    check_in_operator = relationship("User", foreign_keys=[checked_in_by])
     event_session = relationship("EventSession", back_populates="participants")
+    feedback = relationship("EventFeedback", back_populates="participant")
 
     __table_args__ = (
         Index("idx_event_participants_user_id", "user_id"),
         Index("idx_event_participants_event_session_id", "event_session_id"),
         Index("idx_event_participants_status", "status"),
+        Index("idx_event_participants_is_checked_in", "is_checked_in"),
+        Index("idx_event_participants_checked_in_by", "checked_in_by"),
         Index("idx_event_participants_user_session", "user_id", "event_session_id", unique=True),
     )
 
@@ -109,6 +117,29 @@ class EventRating(Base):
         Index("idx_event_ratings_helpful", "helpful_count"),
         Index("idx_event_ratings_recommend", "would_recommend"),
         Index("idx_event_ratings_user_event", "user_id", "event_id", unique=True),
+    )
+
+
+class EventFeedback(Base):
+    __tablename__ = "event_feedback"
+
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    event_id: Mapped[UUID] = mapped_column(ForeignKey("events.id", ondelete="CASCADE"), nullable=False)
+    participant_id: Mapped[UUID] = mapped_column(ForeignKey("event_participants.id", ondelete="CASCADE"), nullable=False)
+    rating: Mapped[int] = mapped_column(Integer, nullable=False)
+    comment: Mapped[str | None] = mapped_column(Text, nullable=True)
+    suggestion: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    user = relationship("User", back_populates="event_feedback", foreign_keys=[user_id])
+    event = relationship("Event", back_populates="feedback")
+    participant = relationship("EventParticipant", back_populates="feedback")
+
+    __table_args__ = (
+        Index("idx_event_feedback_user_id", "user_id"),
+        Index("idx_event_feedback_event_id", "event_id"),
+        Index("idx_event_feedback_participant_id", "participant_id"),
+        Index("idx_event_feedback_rating", "event_id", "rating"),
+        Index("idx_event_feedback_user_event", "user_id", "event_id", unique=True),
     )
 
 

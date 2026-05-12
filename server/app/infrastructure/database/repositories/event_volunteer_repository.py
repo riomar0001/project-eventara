@@ -97,6 +97,9 @@ class EventVolunteerRepository:
             user_id=orm.user_id,
             event_session_id=orm.event_session_id,
             status=EventParticipantStatus(orm.status),
+            is_checked_in=orm.is_checked_in,
+            checked_in_time=orm.checked_in_time,
+            checked_in_by=orm.checked_in_by,
             created_at=orm.created_at,
             updated_at=orm.updated_at,
         )

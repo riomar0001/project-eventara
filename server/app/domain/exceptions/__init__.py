@@ -15,8 +15,15 @@ from app.domain.exceptions.event_exceptions import (
     EventValidationError,
     UnauthorizedEventOperationError,
 )
+from app.domain.exceptions.event_feedback_exceptions import (
+    DuplicateEventFeedbackError,
+    EventFeedbackEligibilityError,
+    EventFeedbackNotOpenError,
+)
 from app.domain.exceptions.event_participant_exceptions import (
     DuplicateEventParticipantError,
+    EventParticipantAlreadyCheckedInError,
+    EventParticipantCheckInNotOpenError,
     EventParticipantNotFoundError,
     EventParticipantValidationError,
     InvalidEventParticipantStatusTransitionError,
@@ -110,6 +117,7 @@ __all__ = [
     "ApplicationStatusError",
     "AuditLogWriteError",
     "DuplicateEventParticipantError",
+    "DuplicateEventFeedbackError",
     "DuplicateEventRatingError",
     "DuplicateFeedbackReportError",
     "DuplicateUserGrantError",
@@ -117,8 +125,12 @@ __all__ = [
     "EmailAlreadyVerifiedError",
     "EmailNotVerifiedError",
     "EventDateValidationError",
+    "EventFeedbackEligibilityError",
+    "EventFeedbackNotOpenError",
     "EventNotFoundError",
     "EventNotRatableError",
+    "EventParticipantAlreadyCheckedInError",
+    "EventParticipantCheckInNotOpenError",
     "EventParticipantNotFoundError",
     "EventParticipantValidationError",
     "EventRatingNotFoundError",

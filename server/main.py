@@ -62,6 +62,10 @@ _OPENAPI_TAGS = [
         "description": "Event participant tracking — registration, attendance status updates, and cross-session participant queries.",
     },
     {
+        "name": "Event Feedback",
+        "description": "Checked-in attendee feedback — submit post-event ratings, comments, and suggestions.",
+    },
+    {
         "name": "Events",
         "description": "Event catalog — create, update, manage status, upload banners, and delete events with session management.",
     },
