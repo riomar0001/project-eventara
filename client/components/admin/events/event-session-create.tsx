@@ -51,7 +51,7 @@ function CreateSessionSkeleton() {
 export function EventSessionCreateLoader({ eventId }: { eventId: string }) {
   const router = useRouter();
   const { event, isLoading, error } = useEvent(eventId);
-  const { venues, isLoading: venuesLoading, error: venuesError } = useVenues();
+  const { venues, isLoading: venuesLoading, error: venuesError } = useVenues({ isPartner: true });
 
   const sortedVenues = useMemo(() => [...venues].sort((a, b) => a.name.localeCompare(b.name)), [venues]);
 

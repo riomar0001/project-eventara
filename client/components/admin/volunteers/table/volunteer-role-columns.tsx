@@ -22,12 +22,12 @@ export type VolunteerRoleColumnMeta = {
 };
 
 type RoleActions = {
-  onEdit: (role: VolunteerRoleTableRecord) => void;
-  onDelete: (role: VolunteerRoleTableRecord) => void;
+  onEdit?: (role: VolunteerRoleTableRecord) => void;
+  onDelete?: (role: VolunteerRoleTableRecord) => void;
 };
 
 export function buildVolunteerRoleColumns(actions: RoleActions): ColumnDef<VolunteerRoleTableRecord>[] {
-  return [
+  const columns: ColumnDef<VolunteerRoleTableRecord>[] = [
     {
       id: 'name',
       header: 'Role name',
@@ -65,8 +65,12 @@ export function buildVolunteerRoleColumns(actions: RoleActions): ColumnDef<Volun
             : '—'}
         </p>
       )
-    },
-    {
+    }
+  ];
+
+  if (!actions.onEdit && !actions.onDelete) return columns;
+
+  columns.push({
       id: 'actions',
       header: () => <div className="text-right">Actions</div>,
       cell: ({ row }) => (
@@ -79,15 +83,19 @@ export function buildVolunteerRoleColumns(actions: RoleActions): ColumnDef<Volun
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => actions.onEdit(row.original)}>
-                <Pencil className="size-4" />
-                Edit role
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={() => actions.onDelete(row.original)}>
-                <Trash2 className="size-4" />
-                Delete role
-              </DropdownMenuItem>
+              {actions.onEdit ? (
+                <DropdownMenuItem onClick={() => actions.onEdit?.(row.original)}>
+                  <Pencil className="size-4" />
+                  Edit role
+                </DropdownMenuItem>
+              ) : null}
+              {actions.onEdit && actions.onDelete ? <DropdownMenuSeparator /> : null}
+              {actions.onDelete ? (
+                <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={() => actions.onDelete?.(row.original)}>
+                  <Trash2 className="size-4" />
+                  Delete role
+                </DropdownMenuItem>
+              ) : null}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -96,6 +104,7 @@ export function buildVolunteerRoleColumns(actions: RoleActions): ColumnDef<Volun
         headerClassName: 'px-6 text-right',
         cellClassName: 'px-6 text-right'
       } satisfies VolunteerRoleColumnMeta
-    }
-  ];
+    });
+
+  return columns;
 }

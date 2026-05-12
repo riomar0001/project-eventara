@@ -89,6 +89,11 @@ class EventRepository:
         result = await self.db.execute(select(Venue.id).where(Venue.id == venue_id))
         return result.scalar_one_or_none() is not None
 
+    async def venue_is_partner(self, venue_id: uuid.UUID) -> bool:
+        """Return True when a venue row exists and is marked as a partner venue."""
+        result = await self.db.execute(select(Venue.is_partner).where(Venue.id == venue_id))
+        return result.scalar_one_or_none() is True
+
     async def get_venue_capacity(self, venue_id: uuid.UUID) -> int | None:
         """Return the maximum capacity of the venue, or ``None`` if the venue does not exist.
 
@@ -258,6 +263,7 @@ class EventRepository:
         start_date: datetime,
         end_date: datetime,
         banner_url: str | None = None,
+        status: EventStatus | None = None,
     ) -> EventEntity | None:
         """Apply field updates to an existing event row.
 
@@ -270,6 +276,7 @@ class EventRepository:
             description: Replacement HTML description.
             start_date:  Replacement start datetime.
             end_date:    Replacement end datetime.
+            status:      Optional replacement status derived from the new date range.
 
         Returns:
             The updated ``EventEntity``, or ``None`` if no matching row exists.
@@ -284,6 +291,8 @@ class EventRepository:
         orm.start_date = start_date
         orm.end_date = end_date
         orm.banner_url = banner_url
+        if status is not None:
+            orm.status = status
 
         await self.db.flush()
         await self.db.refresh(orm)
@@ -299,6 +308,7 @@ class EventRepository:
         start_datetime: datetime,
         end_datetime: datetime,
         max_slots: int | None = None,
+        status: EventSessionStatus | None = None,
     ) -> EventSessionEntity | None:
         """Apply field updates to an existing event session row.
 
@@ -310,6 +320,7 @@ class EventRepository:
             start_datetime: Replacement session start.
             end_datetime:   Replacement session end.
             max_slots:      Replacement slot cap, or ``None`` to fall back to venue capacity.
+            status:         Optional replacement status derived from the new schedule.
 
         Returns:
             The updated ``EventSessionEntity``, or ``None`` if no matching row exists.
@@ -325,6 +336,8 @@ class EventRepository:
         orm.start_datetime = start_datetime
         orm.end_datetime = end_datetime
         orm.max_slots = max_slots
+        if status is not None:
+            orm.status = status
 
         await self.db.flush()
         await self.db.refresh(orm)

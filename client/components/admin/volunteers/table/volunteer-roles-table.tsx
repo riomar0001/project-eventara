@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
+import { usePermissions } from '@/context/permissions-context';
 import { FieldLabel } from '../volunteers-shared';
 import { buildVolunteerRoleColumns, type VolunteerRoleColumnMeta, type VolunteerRoleTableRecord } from './volunteer-role-columns';
 import { Volunteers } from '@/api/sdk.gen';
@@ -283,6 +284,7 @@ function DeleteRoleDialog({
 }
 
 export function VolunteerRolesTable({ refreshSignal }: { refreshSignal?: number }) {
+  const { can } = usePermissions();
   const [roles, setRoles] = useState<VolunteerRoleTableRecord[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -295,6 +297,7 @@ export function VolunteerRolesTable({ refreshSignal }: { refreshSignal?: number 
   const [editOpen, setEditOpen] = useState(false);
   const [deletingRole, setDeletingRole] = useState<VolunteerRoleTableRecord | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const canCreateVolunteerRole = can('volunteer-roles', 'create');
 
   const PAGE_SIZE = 20;
 
@@ -347,14 +350,18 @@ export function VolunteerRolesTable({ refreshSignal }: { refreshSignal?: number 
   }, [fetchRoles, page, refreshSignal]);
 
   const columns = buildVolunteerRoleColumns({
-    onEdit: (role) => {
-      setEditingRole(role);
-      setEditOpen(true);
-    },
-    onDelete: (role) => {
-      setDeletingRole(role);
-      setDeleteOpen(true);
-    }
+    onEdit: can('volunteer-roles', 'update')
+      ? (role) => {
+          setEditingRole(role);
+          setEditOpen(true);
+        }
+      : undefined,
+    onDelete: can('volunteer-roles', 'delete')
+      ? (role) => {
+          setDeletingRole(role);
+          setDeleteOpen(true);
+        }
+      : undefined
   });
   const hasActiveFilters = search.trim().length > 0 || statusFilter !== 'all';
 
@@ -424,7 +431,11 @@ export function VolunteerRolesTable({ refreshSignal }: { refreshSignal?: number 
                   </div>
                   <p className="font-medium text-neutral-950">No roles found</p>
                   <p className="text-sm text-neutral-500">
-                    {hasActiveFilters ? 'Try clearing your search or filter.' : 'Create your first volunteer role from the button above.'}
+                    {hasActiveFilters
+                      ? 'Try clearing your search or filter.'
+                      : canCreateVolunteerRole
+                        ? 'Create your first volunteer role from the button above.'
+                        : 'No volunteer roles are available yet.'}
                   </p>
                   {hasActiveFilters ? (
                     <Button

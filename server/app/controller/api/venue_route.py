@@ -406,7 +406,7 @@ async def get_venue_capacity(
 async def create_community_venue(
     request: Request,
     body: CommunityVenueCreateRequest,
-    caller_id: uuid.UUID = Depends(require_permission("venues", RoleAction.CREATE)),
+    caller_id: uuid.UUID = Depends(require_permission("venues", RoleAction.READ)),
     use_case: VenueManagementUseCase = Depends(get_venue_management_use_case),
     audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> VenueResponse:

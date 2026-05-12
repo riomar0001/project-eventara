@@ -3,11 +3,11 @@
 Exposes endpoints for creating events, updating event metadata, updating
 individual event sessions, manually transitioning event or session statuses,
 and physically deleting events or sessions that are still in a deletable state.
-Authentication is required; no RBAC feature gate is applied so any verified
-user may create, update, or delete their own events.
+Authentication and RBAC permissions are required for every event operation.
+Ownership checks still apply to creator-only mutations.
 
 Error mapping summary:
-  - 400  date, business-rule, invalid status transition, or deletion-not-allowed
+  - 400  date, business-rule, invalid status transition, ineligible venue, or deletion-not-allowed
   - 401  missing, expired, or invalid Bearer token
   - 403  caller is not the event creator (update/delete only)
   - 404  event, session, or venue not found
@@ -37,7 +37,7 @@ from app.application.use_cases.event_query_usecase import GetEventUseCase
 from app.application.use_cases.event_status_usecase import EventStatusUseCase
 from app.application.use_cases.event_usecase import EventUseCase
 from app.controller.api.audit_helpers import safe_audit_log, serialize_event, serialize_event_sessions
-from app.controller.dependencies import get_audit_log_use_case, get_current_user_id
+from app.controller.dependencies import get_audit_log_use_case, require_permission
 from app.controller.dependencies.storage_depends import get_storage_service
 from app.controller.dependencies.use_cases_depends import (
     get_event_deletion_use_case,
@@ -65,6 +65,7 @@ from app.controller.docs.event_docs import (
     EVENT_UNAUTHORIZED_OPERATION,
     EVENT_UPDATE_OPENAPI_EXTRA,
     EVENT_VALIDATION_ERROR,
+    EVENT_VENUE_NOT_PARTNER,
     UNAUTHORIZED,
 )
 from app.controller.schemas.event_schema import (
@@ -91,6 +92,7 @@ from app.controller.schemas.event_schema import (
     EventWithSessionsResponse,
 )
 from app.domain.entities.audit_log import ActionType, AuditLogStatus
+from app.domain.entities.authorization_entities import RoleAction
 from app.domain.entities.event_entity import Event as EventEntity
 from app.domain.entities.event_entity import EventSession as EventSessionEntity
 from app.domain.entities.event_entity import EventStatus
@@ -110,7 +112,7 @@ from app.domain.exceptions.event_session_exceptions import (
     EventSessionStatusTransitionError,
     InvalidEventSessionDateError,
 )
-from app.domain.exceptions.venue_exceptions import VenueNotFoundError
+from app.domain.exceptions.venue_exceptions import VenueNotFoundError, VenueNotPartnerError
 from app.infrastructure.storage.storage_service import StorageService
 
 event_router = APIRouter(prefix="/events", tags=["Events"])
@@ -166,7 +168,7 @@ async def get_all_events(
     event_status: EventStatus | None = Query(default=None, alias="status", description="Filter by event status"),
     page: int = Query(default=1, ge=1, description="Page number (1-based)"),
     page_size: int = Query(default=20, ge=1, le=100, description="Items per page (max 100)"),
-    user_id: uuid.UUID = Depends(get_current_user_id),
+    user_id: uuid.UUID = Depends(require_permission("events", RoleAction.READ)),
     use_case: GetEventUseCase = Depends(get_event_query_use_case),
     audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> EventListResponse:
@@ -209,7 +211,7 @@ async def get_all_events(
 async def get_event_with_sessions(
     request: Request,
     event_id: uuid.UUID,
-    user_id: uuid.UUID = Depends(get_current_user_id),
+    user_id: uuid.UUID = Depends(require_permission("events", RoleAction.READ)),
     use_case: GetEventUseCase = Depends(get_event_query_use_case),
     audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> EventDetailResponse:
@@ -240,12 +242,13 @@ async def get_event_with_sessions(
     "",
     response_model=EventWithSessionsResponse,
     status_code=status.HTTP_201_CREATED,
-    responses={**UNAUTHORIZED, **EVENT_NOT_FOUND, **EVENT_DATE_INVALID, **EVENT_VALIDATION_ERROR},
+    responses={**UNAUTHORIZED, **EVENT_NOT_FOUND, **EVENT_VENUE_NOT_PARTNER, **EVENT_DATE_INVALID, **EVENT_VALIDATION_ERROR},
     summary="Create a new event with sessions",
     description=(
         "Creates an event and its associated sessions atomically. "
         "At least one session is required. "
         "Session date windows must fall within the event date range. "
+        "Session venues must be partnered venues. "
         "An optional ``banner_url`` may be supplied when the banner has already been uploaded through the feature-specific banner endpoint. "
         "The event description accepts raw HTML produced by a WYSIWYG editor."
     ),
@@ -254,7 +257,7 @@ async def get_event_with_sessions(
 async def create_event(
     request: Request,
     body: EventCreateRequest,
-    user_id: uuid.UUID = Depends(get_current_user_id),
+    user_id: uuid.UUID = Depends(require_permission("events", RoleAction.CREATE)),
     use_case: EventUseCase = Depends(get_event_use_case),
     audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> EventWithSessionsResponse:
@@ -283,7 +286,13 @@ async def create_event(
                 sessions=session_inputs,
             )
         )
-    except (EventDateValidationError, EventValidationError, InvalidEventSessionDateError, EventSessionExceedsEventBoundsError) as exc:
+    except (
+        EventDateValidationError,
+        EventValidationError,
+        InvalidEventSessionDateError,
+        EventSessionExceedsEventBoundsError,
+        VenueNotPartnerError,
+    ) as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
     except VenueNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
@@ -324,7 +333,8 @@ async def create_event(
     description=(
         "Updates an event's title, description, date range, and optional banner object key. "
         "Only the event creator may perform this operation. "
-        "The event description accepts raw HTML produced by a WYSIWYG editor."
+        "The event description accepts raw HTML produced by a WYSIWYG editor. "
+        "When dates change, the event's clock-derived lifecycle status is recalculated."
     ),
     openapi_extra=EVENT_UPDATE_OPENAPI_EXTRA,
 )
@@ -332,7 +342,7 @@ async def update_event_metadata(
     request: Request,
     event_id: uuid.UUID,
     body: EventUpdateRequest,
-    user_id: uuid.UUID = Depends(get_current_user_id),
+    user_id: uuid.UUID = Depends(require_permission("events", RoleAction.UPDATE)),
     use_case: EventUseCase = Depends(get_event_use_case),
     audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> EventMetadataUpdatedResponse:
@@ -379,6 +389,7 @@ async def update_event_metadata(
         **UNAUTHORIZED,
         **EVENT_UNAUTHORIZED_OPERATION,
         **EVENT_SESSION_NOT_FOUND,
+        **EVENT_VENUE_NOT_PARTNER,
         **EVENT_SESSION_DATE_INVALID,
         **EVENT_VALIDATION_ERROR,
     },
@@ -386,7 +397,7 @@ async def update_event_metadata(
     description=(
         "Updates a single event session by its ID. "
         "Only the creator of the parent event may perform this operation. "
-        "The session date window must fall within the parent event's date range."
+        "The session date window must fall within the parent event's date range, and the venue must be partnered."
     ),
 )
 async def update_event_session(
@@ -394,7 +405,7 @@ async def update_event_session(
     event_id: uuid.UUID,
     session_id: uuid.UUID,
     body: EventSessionUpdateRequest,
-    user_id: uuid.UUID = Depends(get_current_user_id),
+    user_id: uuid.UUID = Depends(require_permission("events", RoleAction.UPDATE)),
     use_case: EventUseCase = Depends(get_event_use_case),
     audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> EventSessionUpdatedResponse:
@@ -416,7 +427,7 @@ async def update_event_session(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
     except (EventSessionNotFoundError, VenueNotFoundError) as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
-    except (InvalidEventSessionDateError, EventSessionExceedsEventBoundsError) as exc:
+    except (InvalidEventSessionDateError, EventSessionExceedsEventBoundsError, VenueNotPartnerError) as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
 
     await safe_audit_log(
@@ -443,6 +454,7 @@ async def update_event_session(
         **EVENT_UNAUTHORIZED_OPERATION,
         **EVENT_METADATA_NOT_FOUND,
         **EVENT_SESSION_NOT_FOUND,
+        **EVENT_VENUE_NOT_PARTNER,
         **EVENT_SESSION_DATE_INVALID,
         **EVENT_VALIDATION_ERROR,
     },
@@ -450,14 +462,14 @@ async def update_event_session(
     description=(
         "Creates a single session for an existing event. "
         "Only the event creator may perform this operation. "
-        "The session date window must fall within the parent event date range."
+        "The session date window must fall within the parent event date range, and the venue must be partnered."
     ),
 )
 async def create_event_session(
     request: Request,
     event_id: uuid.UUID,
     body: EventSessionCreateRequest,
-    user_id: uuid.UUID = Depends(get_current_user_id),
+    user_id: uuid.UUID = Depends(require_permission("events", RoleAction.CREATE)),
     use_case: EventUseCase = Depends(get_event_use_case),
     audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> EventSessionCreatedResponse:
@@ -479,7 +491,7 @@ async def create_event_session(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
     except EventNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
-    except (InvalidEventSessionDateError, EventSessionExceedsEventBoundsError) as exc:
+    except (InvalidEventSessionDateError, EventSessionExceedsEventBoundsError, VenueNotPartnerError) as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
     except VenueNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
@@ -525,7 +537,7 @@ async def update_event_status(
     request: Request,
     event_id: uuid.UUID,
     body: EventStatusUpdateRequest,
-    user_id: uuid.UUID = Depends(get_current_user_id),
+    user_id: uuid.UUID = Depends(require_permission("events", RoleAction.UPDATE)),
     use_case: EventStatusUseCase = Depends(get_event_status_use_case),
     audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> EventStatusUpdatedResponse:
@@ -588,7 +600,7 @@ async def update_event_session_status(
     event_id: uuid.UUID,
     session_id: uuid.UUID,
     body: EventSessionStatusUpdateRequest,
-    user_id: uuid.UUID = Depends(get_current_user_id),
+    user_id: uuid.UUID = Depends(require_permission("events", RoleAction.UPDATE)),
     use_case: EventStatusUseCase = Depends(get_event_status_use_case),
     audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> EventSessionStatusUpdatedResponse:
@@ -645,7 +657,7 @@ async def update_event_session_status(
 async def delete_event(
     request: Request,
     event_id: uuid.UUID,
-    user_id: uuid.UUID = Depends(get_current_user_id),
+    user_id: uuid.UUID = Depends(require_permission("events", RoleAction.DELETE)),
     use_case: EventDeletionUseCase = Depends(get_event_deletion_use_case),
     audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> EventDeletedResponse:
@@ -698,7 +710,7 @@ async def delete_event_session(
     request: Request,
     event_id: uuid.UUID,
     session_id: uuid.UUID,
-    user_id: uuid.UUID = Depends(get_current_user_id),
+    user_id: uuid.UUID = Depends(require_permission("events", RoleAction.DELETE)),
     use_case: EventDeletionUseCase = Depends(get_event_deletion_use_case),
     audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> EventSessionDeletedResponse:
@@ -758,7 +770,7 @@ async def upload_event_banner(
     request: Request,
     event_id: uuid.UUID,
     body: EventBannerUploadRequest,
-    user_id: uuid.UUID = Depends(get_current_user_id),
+    user_id: uuid.UUID = Depends(require_permission("events", RoleAction.UPDATE)),
     use_case: EventUseCase = Depends(get_event_use_case),
     audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
     storage: StorageService = Depends(get_storage_service),

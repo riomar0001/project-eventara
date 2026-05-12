@@ -23,6 +23,29 @@ EV_FORBIDDEN = {
     }
 }
 
+EV_APPLICATION_CLOSED = {
+    400: {
+        "description": "Event is not accepting volunteer applications",
+        "model": ErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "message": "Event volunteer applications are closed",
+                }
+            }
+        },
+    }
+}
+
+EV_VOLUNTEER_INACTIVE = {
+    403: {
+        "description": "Caller has an inactive volunteer profile",
+        "model": ErrorResponse,
+        "content": {"application/json": {"example": {"success": False, "message": "Volunteer is inactive"}}},
+    }
+}
+
 EV_EVENT_NOT_FOUND = {
     404: {
         "description": "Event not found",
@@ -82,20 +105,5 @@ EV_VALIDATION_ERROR = {
         "description": "Request body failed schema validation",
         "model": ValidationErrorResponse,
         "content": {"application/json": {"example": {"success": False, "message": "Validation failed."}}},
-    }
-}
-
-PARTICIPANTS_FORBIDDEN = {
-    403: {
-        "description": "Caller is neither the event organizer nor a joined volunteer",
-        "model": ErrorResponse,
-        "content": {
-            "application/json": {
-                "example": {
-                    "success": False,
-                    "message": "You do not have permission to view participants for this event",
-                }
-            }
-        },
     }
 }

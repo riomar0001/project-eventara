@@ -9,6 +9,7 @@ import { ImageUpload } from '@/components/ui/image-upload';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { usePermissions } from '@/context/permissions-context';
 import { useVenueForm } from '@/hooks/admin/venues/use-venue-form';
 import { BackLink, FieldLabel, PhotoPanel } from './venues-shared';
 import type { VenueRecordResponse } from '@/api/types.gen';
@@ -94,9 +95,15 @@ function CategoryTile({
 export function VenueForm({ mode, venue }: { mode: 'create' | 'edit'; venue?: VenueRecordResponse }) {
   const [form, setForm] = useState<VenueFormValues>(() => defaultValues(venue));
   const { submitCreate, submitEdit, isSubmitting } = useVenueForm();
+  const { can } = usePermissions();
   const amenityInputRef = useRef<HTMLInputElement>(null);
   const [amenityDraft, setAmenityDraft] = useState('');
   const [pendingImageFile, setPendingImageFile] = useState<File | null>(null);
+  const canCreatePartnerVenue = can('venues', 'create');
+  const canUpdateVenue = can('venues', 'update');
+  const canUseOfficialVenueCategory = mode === 'edit' ? canUpdateVenue : canCreatePartnerVenue;
+  const venueCategory = canUseOfficialVenueCategory ? form.venue_category : 'community';
+  const formTitle = mode === 'create' ? (canCreatePartnerVenue ? 'Add venue' : 'Suggest venue') : `Edit ${venue?.name ?? 'venue'}`;
 
   const previewPhoto =
     resolveStorageImageUrl(form.image_url) || 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=1400&q=80';
@@ -131,13 +138,13 @@ export function VenueForm({ mode, venue }: { mode: 'create' | 'edit'; venue?: Ve
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     if (mode === 'create') {
-      await submitCreate(form, pendingImageFile);
+      await submitCreate({ ...form, venue_category: venueCategory }, pendingImageFile);
     } else if (venue?.id) {
       await submitEdit(venue.id, form);
     }
   }
 
-  const isOfficial = form.venue_category === 'official';
+  const isOfficial = venueCategory === 'official';
 
   return (
     <div className="space-y-6">
@@ -147,7 +154,7 @@ export function VenueForm({ mode, venue }: { mode: 'create' | 'edit'; venue?: Ve
         {/* ── Left column: form ──────────────────────────────────────────── */}
         <Card className="border-0 bg-white shadow-none ring-1 ring-neutral-200">
           <CardHeader className="border-b border-neutral-200/80 pb-5">
-            <CardTitle>{mode === 'create' ? 'Add venue' : `Edit ${venue?.name ?? 'venue'}`}</CardTitle>
+            <CardTitle>{formTitle}</CardTitle>
             <CardDescription>Fill in the details below. Fields marked * are required.</CardDescription>
           </CardHeader>
 
@@ -159,20 +166,22 @@ export function VenueForm({ mode, venue }: { mode: 'create' | 'edit'; venue?: Ve
                 <div className="flex gap-3">
                   <CategoryTile
                     value="community"
-                    current={form.venue_category}
+                    current={venueCategory}
                     icon={Users}
                     label="Community suggestion"
                     description="A venue suggested by the community. Lead contact is required."
                     onSelect={(v) => set('venue_category', v)}
                   />
-                  <CategoryTile
-                    value="official"
-                    current={form.venue_category}
-                    icon={Building2}
-                    label="Official partner venue"
-                    description="An officially managed partner space. Contact info is required."
-                    onSelect={(v) => set('venue_category', v)}
-                  />
+                  {canUseOfficialVenueCategory ? (
+                    <CategoryTile
+                      value="official"
+                      current={venueCategory}
+                      icon={Building2}
+                      label="Official partner venue"
+                      description="An officially managed partner space. Contact info is required."
+                      onSelect={(v) => set('venue_category', v)}
+                    />
+                  ) : null}
                 </div>
               </fieldset>
 
@@ -406,7 +415,7 @@ export function VenueForm({ mode, venue }: { mode: 'create' | 'edit'; venue?: Ve
               <div className="flex flex-wrap gap-2 pt-2">
                 <Button type="submit" disabled={isSubmitting}>
                   <Save className="size-4" />
-                  {isSubmitting ? 'Saving…' : mode === 'create' ? 'Save venue' : 'Save changes'}
+                  {isSubmitting ? 'Saving…' : mode === 'create' ? (canCreatePartnerVenue ? 'Save venue' : 'Submit suggestion') : 'Save changes'}
                 </Button>
                 <Button type="button" variant="outline" asChild>
                   <Link href={ADMIN_OPERATIONS_PATHS.venues}>Cancel</Link>

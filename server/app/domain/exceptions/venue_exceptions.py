@@ -3,6 +3,24 @@ class VenueNotFoundError(Exception):
         super().__init__(f"Venue not found: {venue_id}" if venue_id else "Venue not found")
 
 
+class VenueNotPartnerError(Exception):
+    def __init__(self, venue_id: str = "") -> None:
+        super().__init__(
+            f"Only partner venues can be used for event sessions: {venue_id}"
+            if venue_id
+            else "Only partner venues can be used for event sessions"
+        )
+
+
+class VenueNotCommunitySuggestionError(Exception):
+    def __init__(self, venue_id: str = "") -> None:
+        super().__init__(
+            f"Only community suggested venues can be managed through this endpoint: {venue_id}"
+            if venue_id
+            else "Only community suggested venues can be managed through this endpoint"
+        )
+
+
 class UnauthorizedVenueOperationError(Exception):
     def __init__(self, venue_id: str = "") -> None:
         super().__init__(

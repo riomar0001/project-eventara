@@ -10,6 +10,8 @@ from app.application.dto.event_participant_dto import (
     CheckInParticipantInput,
     CheckInParticipantOutput,
     CheckInParticipantQrCodeInput,
+    GetEventParticipantsInput,
+    GetEventParticipantsOutput,
     RegisterForSessionInput,
     RegisterForSessionOutput,
     UpdateParticipantStatusInput,
@@ -449,6 +451,47 @@ class EventParticipantUseCase:
         await self.db.commit()
         await self._send_check_in_receipt(updated, event.title, session.title)
         return CheckInParticipantOutput(participant=updated, old_participant=old_participant)
+
+    async def get_participants(self, data: GetEventParticipantsInput) -> GetEventParticipantsOutput:
+        """Retrieve all participants for an event through the event-participants feature.
+
+        Access is granted to the event organizer and to volunteers with a JOINED
+        assignment on the event. This keeps QR scanning, participant listing, and
+        participant status management behind the same feature boundary while
+        reusing the volunteer assignment table only as an authorization source.
+        The read path is not locked because it does not modify state; check-in
+        and status mutations still use participant row locks.
+
+        Args:
+            data: ``GetEventParticipantsInput`` with event ID, actor ID, optional
+                  status filter, limit, and offset.
+
+        Returns:
+            ``GetEventParticipantsOutput`` with paginated participants and total.
+
+        Raises:
+            EventNotFoundError: No event exists for ``data.event_id``.
+            UnauthorizedEventParticipantOperationError: Caller is neither the event organizer nor a JOINED volunteer.
+        """
+        event = await self.event_repo.get_event_by_id(data.event_id)
+        if event is None:
+            raise EventNotFoundError(str(data.event_id))
+
+        if event.created_by != data.actor_id:
+            joined_assignment = None
+            if self.event_volunteer_repo is not None:
+                joined_assignment = await self.event_volunteer_repo.get_joined_event_volunteer_for_user(data.actor_id, data.event_id)
+            if joined_assignment is None:
+                raise UnauthorizedEventParticipantOperationError(str(data.event_id))
+
+        participants = await self.participant_repo.get_participants_by_event(
+            data.event_id,
+            status=data.status,
+            limit=data.limit,
+            offset=data.offset,
+        )
+        total = await self.participant_repo.count_participants_by_event(data.event_id, status=data.status)
+        return GetEventParticipantsOutput(participants=participants, total=total)
 
     def _decode_qr_payload(self, token: str) -> dict:
         """Decode an event QR token and normalize all token errors.

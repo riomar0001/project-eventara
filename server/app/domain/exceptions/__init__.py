@@ -45,6 +45,7 @@ from app.domain.exceptions.event_session_exceptions import (
 )
 from app.domain.exceptions.event_volunteer_exceptions import (
     EventVolunteerAlreadyExistsError,
+    EventVolunteerApplicationClosedError,
     EventVolunteerNotFoundError,
     EventVolunteerValidationError,
     InvalidEventVolunteerStatusTransitionError,
@@ -141,6 +142,7 @@ __all__ = [
     "EventStatusTransitionError",
     "EventValidationError",
     "EventVolunteerAlreadyExistsError",
+    "EventVolunteerApplicationClosedError",
     "EventVolunteerNotFoundError",
     "EventVolunteerValidationError",
     "FeatureNotFoundError",

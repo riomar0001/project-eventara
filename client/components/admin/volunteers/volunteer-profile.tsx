@@ -1,11 +1,17 @@
+'use client';
+
 import { Users } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { usePermissions } from '@/context/permissions-context';
 import { BackLink } from './volunteers-shared';
 import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
 
 export function VolunteerProfile({ volunteerId }: { volunteerId: string }) {
+  const { can } = usePermissions();
+  const canCreateVolunteer = can('volunteers', 'create');
+
   return (
     <div className="space-y-6">
       <BackLink href={ADMIN_OPERATIONS_PATHS.volunteers} label="Back to volunteers" />
@@ -19,9 +25,11 @@ export function VolunteerProfile({ volunteerId }: { volunteerId: string }) {
           <p className="mt-2 max-w-lg text-sm leading-6 text-neutral-500">
             Volunteer ID {volunteerId} will render here once the volunteers read endpoint is exposed to the client.
           </p>
-          <Button asChild className="mt-6 rounded-xl bg-emerald-600 text-white hover:bg-emerald-500">
-            <Link href={ADMIN_OPERATIONS_PATHS.volunteerCreate}>Add volunteer</Link>
-          </Button>
+          {canCreateVolunteer ? (
+            <Button asChild className="mt-6 rounded-xl bg-emerald-600 text-white hover:bg-emerald-500">
+              <Link href={ADMIN_OPERATIONS_PATHS.volunteerCreate}>Add volunteer</Link>
+            </Button>
+          ) : null}
         </CardContent>
       </Card>
     </div>

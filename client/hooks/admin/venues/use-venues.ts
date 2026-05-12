@@ -24,7 +24,12 @@ function getVenueErrorMessage(error: unknown, fallback: string): string {
   return fallback;
 }
 
-export function useVenues() {
+type UseVenuesOptions = {
+  isPartner?: boolean | null;
+};
+
+export function useVenues(options: UseVenuesOptions = {}) {
+  const isPartner = options.isPartner ?? null;
   const [venues, setVenues] = useState<VenueRecordResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -38,7 +43,7 @@ export function useVenues() {
 
       try {
         const result = await Venues.listVenuesVenuesGet({
-          query: { page_size: 100 },
+          query: { page_size: 100, ...(isPartner !== null ? { is_partner: isPartner } : {}) },
           headers: { Authorization: `Bearer ${getAccessToken()}` },
           throwOnError: false
         });
@@ -56,7 +61,7 @@ export function useVenues() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [isPartner]);
 
   return { venues, isLoading, error };
 }

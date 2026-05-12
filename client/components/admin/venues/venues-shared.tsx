@@ -72,7 +72,7 @@ export function CatalogCard({
 }: {
   badges: string[];
   description: string;
-  editHref: string;
+  editHref?: string;
   href: string;
   specs: { icon: React.ReactNode; label: string; value: string }[];
   tags: string[];
@@ -132,9 +132,11 @@ export function CatalogCard({
               <ArrowUpRight className="size-4" />
             </Link>
           </Button>
-          <Button asChild variant="outline" size="sm">
-            <Link href={editHref}>Edit</Link>
-          </Button>
+          {editHref ? (
+            <Button asChild variant="outline" size="sm">
+              <Link href={editHref}>Edit</Link>
+            </Button>
+          ) : null}
         </div>
       </CardContent>
     </Card>

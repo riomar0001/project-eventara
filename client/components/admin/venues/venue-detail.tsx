@@ -1,9 +1,10 @@
 'use client';
 
-import { Building2, CalendarRange, CalendarSync, Globe, Mail, MapPin, PencilLine, Phone, User, Users } from 'lucide-react';
+import { Building2, Globe, Mail, MapPin, PencilLine, Phone, User } from 'lucide-react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { usePermissions } from '@/context/permissions-context';
 import { useVenue } from '@/hooks/admin/venues/use-venue';
 import { DeleteVenueButton } from './venue-delete-button';
 import { BackLink, PhotoPanel } from './venues-shared';
@@ -18,7 +19,7 @@ const VENUE_PHOTO: Record<string, string> = {
 
 function CompactPanel({ children, className, title }: { children: React.ReactNode; className?: string; title: string }) {
   return (
-    <section className={`rounded-2xl border border-neutral-200 bg-white shadow-[0_18px_55px_-42px_rgba(15,23,42,0.35)] ${className ?? ''}`}>
+    <section className={`rounded-2xl bg-white shadow-[0_18px_55px_-42px_rgba(15,23,42,0.35)] ring-1 ring-neutral-200/80 ${className ?? ''}`}>
       <div className="flex min-h-12 items-center border-b border-neutral-100 px-4">
         <h2 className="text-sm font-semibold tracking-tight text-neutral-950">{title}</h2>
       </div>
@@ -29,7 +30,7 @@ function CompactPanel({ children, className, title }: { children: React.ReactNod
 
 function CompactField({ className, icon, label, value }: { className?: string; icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className={`flex min-h-14 items-start gap-2.5 rounded-xl bg-neutral-50/70 px-3 py-2.5 ${className ?? ''}`}>
+    <div className={`flex min-h-14 items-start gap-2.5 py-2.5 ${className ?? ''}`}>
       <span className="mt-0.5 shrink-0 text-neutral-400">{icon}</span>
       <div className="min-w-0">
         <p className="text-[10px] font-semibold tracking-[0.14em] text-neutral-400 uppercase">{label}</p>
@@ -41,15 +42,25 @@ function CompactField({ className, icon, label, value }: { className?: string; i
 
 function StatCell({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
   return (
-    <div className="rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-center">
+    <div className="min-w-[8rem]">
       <p className={`text-2xl font-semibold tracking-tight ${accent ? 'text-amber-600' : 'text-neutral-900'}`}>{value}</p>
       <p className="mt-0.5 text-[11px] font-semibold tracking-[0.14em] text-neutral-400 uppercase">{label}</p>
     </div>
   );
 }
 
+function VenueFact({ accent, label, value }: { accent?: boolean; label: string; value: React.ReactNode }) {
+  return (
+    <div className="min-w-[8.5rem] max-w-[18rem]">
+      <dt className="text-[10px] font-semibold tracking-[0.16em] text-neutral-400 uppercase">{label}</dt>
+      <dd className={`mt-1.5 text-sm leading-6 font-semibold ${accent ? 'text-amber-700' : 'text-neutral-950'}`}>{value}</dd>
+    </div>
+  );
+}
+
 export function VenueDetail({ venueId }: { venueId: string }) {
   const { venue, isLoading, error } = useVenue(venueId);
+  const { can } = usePermissions();
 
   if (isLoading) {
     return (
@@ -80,19 +91,23 @@ export function VenueDetail({ venueId }: { venueId: string }) {
   const fullAddress = [venue.address_line, venue.city, venue.province, venue.postal_code, venue.region, venue.country].filter(Boolean).join(', ');
   const hasContact = venue.contact_name || venue.contact_email || venue.contact_phone;
   const amenities = venue.amenities ?? [];
+  const canUpdateVenue = can('venues', 'update');
+  const canDeleteVenue = can('venues', 'delete');
 
   return (
     <div className="space-y-6">
       {/* ── Action bar ──────────────────────────────────────────────────────── */}
       <div className="flex flex-wrap items-center gap-2">
         <BackLink href={ADMIN_OPERATIONS_PATHS.venues} label="Back to venues" />
-        <Button asChild variant="outline" size="sm">
-          <Link href={ADMIN_OPERATIONS_PATHS.venueEdit(venue.id)}>
-            <PencilLine className="size-4" />
-            Edit venue
-          </Link>
-        </Button>
-        <DeleteVenueButton venueId={venue.id} venueName={venue.name} />
+        {canUpdateVenue ? (
+          <Button asChild variant="outline" size="sm">
+            <Link href={ADMIN_OPERATIONS_PATHS.venueEdit(venue.id)}>
+              <PencilLine className="size-4" />
+              Edit venue
+            </Link>
+          </Button>
+        ) : null}
+        {canDeleteVenue ? <DeleteVenueButton venueId={venue.id} venueName={venue.name} /> : null}
       </div>
 
       {/* ── Hero photo panel ─────────────────────────────────────────────────── */}
@@ -117,7 +132,7 @@ export function VenueDetail({ venueId }: { venueId: string }) {
       </PhotoPanel>
 
       {/* ── Stats strip ─────────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 z-50">
+      <div className="z-50 flex flex-wrap gap-x-10 gap-y-5 rounded-2xl bg-white px-5 py-4 shadow-[0_18px_55px_-46px_rgba(15,23,42,0.3)] ring-1 ring-neutral-200/80">
         <StatCell label="Capacity" value={venue.capacity.toLocaleString()} accent />
         <StatCell label="Venue type" value={venue.venue_type.charAt(0).toUpperCase() + venue.venue_type.slice(1)} />
         <StatCell label="Popularity" value={venue.popularity_count.toLocaleString()} />
@@ -126,7 +141,7 @@ export function VenueDetail({ venueId }: { venueId: string }) {
 
       <div className="grid gap-4 xl:grid-cols-12">
         <CompactPanel title="Location" className={hasContact ? 'xl:col-span-7' : 'xl:col-span-12'}>
-          <div className="rounded-xl bg-amber-50/80 px-3 py-2.5">
+          <div>
             <p className="text-[10px] font-semibold tracking-[0.16em] text-amber-700 uppercase">Full address</p>
             <p className="mt-1 text-sm leading-5 font-medium text-neutral-900">{fullAddress}</p>
           </div>
@@ -169,53 +184,46 @@ export function VenueDetail({ venueId }: { venueId: string }) {
         )}
 
         <CompactPanel title="Venue details" className="xl:col-span-12">
-          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-            <CompactField icon={<Users className="size-4" />} label="Capacity" value={`${venue.capacity.toLocaleString()} guests`} />
-            <CompactField
-              icon={<Building2 className="size-4" />}
-              label="Venue type"
-              value={venue.venue_type.charAt(0).toUpperCase() + venue.venue_type.slice(1)}
-            />
-            <CompactField icon={<CalendarSync className="size-4" />} label="Usage" value={`${venue.usage_count} bookings`} />
-            <CompactField icon={<Users className="size-4" />} label="Popularity" value={`${venue.popularity_count} interactions`} />
-            <CompactField
-              className="lg:col-span-2"
-              icon={<Building2 className="size-4" />}
-              label="Partner status"
-              value={venue.is_partner ? 'Eventara partner venue' : 'Community suggestion'}
-            />
-            {venue.created_at && (
-              <CompactField
-                icon={<CalendarRange className="size-4" />}
-                label="Created"
-                value={new Date(venue.created_at).toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' })}
-              />
-            )}
-            {venue.updated_at && (
-              <CompactField
-                icon={<CalendarRange className="size-4" />}
-                label="Last updated"
-                value={new Date(venue.updated_at).toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' })}
-              />
-            )}
-          </div>
+          <div className="space-y-6">
+            <dl className="flex flex-wrap gap-x-10 gap-y-5">
+              <VenueFact accent label="Capacity" value={`${venue.capacity.toLocaleString()} guests`} />
+              <VenueFact label="Venue type" value={venue.venue_type.charAt(0).toUpperCase() + venue.venue_type.slice(1)} />
+              <VenueFact label="Usage" value={`${venue.usage_count} bookings`} />
+              <VenueFact label="Popularity" value={`${venue.popularity_count} interactions`} />
+              <VenueFact label="Partner status" value={venue.is_partner ? 'Eventara partner venue' : 'Community suggestion'} />
+              {venue.created_at && (
+                <VenueFact
+                  label="Created"
+                  value={new Date(venue.created_at).toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' })}
+                />
+              )}
+              {venue.updated_at && (
+                <VenueFact
+                  label="Last updated"
+                  value={new Date(venue.updated_at).toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' })}
+                />
+              )}
+            </dl>
 
-          <div className="mt-4 border-t border-neutral-100 pt-4">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="text-[10px] font-semibold tracking-[0.16em] text-neutral-400 uppercase">Amenities</p>
-              {amenities.length > 0 && <p className="text-xs text-neutral-400">{amenities.length} listed</p>}
-            </div>
-            {amenities.length > 0 ? (
-              <div className="mt-3 flex flex-wrap gap-1.5">
-                {amenities.map((amenity) => (
-                  <Badge key={amenity} variant="secondary" className="h-6 rounded-full bg-neutral-100 px-2.5 text-[11px] font-medium text-neutral-700">
-                    {amenity}
-                  </Badge>
-                ))}
+            <div className="h-px bg-neutral-200/80" />
+
+            <div>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="text-[10px] font-semibold tracking-[0.16em] text-neutral-400 uppercase">Amenities</p>
+                {amenities.length > 0 && <p className="text-xs text-neutral-400">{amenities.length} listed</p>}
               </div>
-            ) : (
-              <p className="mt-3 text-sm text-neutral-400">No amenities listed for this venue.</p>
-            )}
+              {amenities.length > 0 ? (
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  {amenities.map((amenity) => (
+                    <Badge key={amenity} variant="secondary" className="h-6 rounded-full bg-neutral-100 px-2.5 text-[11px] font-medium text-neutral-700">
+                      {amenity}
+                    </Badge>
+                  ))}
+                </div>
+              ) : (
+                <p className="mt-3 text-sm text-neutral-400">No amenities listed for this venue.</p>
+              )}
+            </div>
           </div>
         </CompactPanel>
       </div>

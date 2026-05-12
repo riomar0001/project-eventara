@@ -3,7 +3,7 @@ from __future__ import annotations
 import uuid
 from dataclasses import dataclass
 
-from app.domain.entities.event_entity import EventParticipant, EventVolunteer, EventVolunteerStatus
+from app.domain.entities.event_entity import EventVolunteer, EventVolunteerStatus
 
 
 @dataclass
@@ -15,6 +15,18 @@ class AssignVolunteerInput:
 
 @dataclass
 class AssignVolunteerOutput:
+    event_volunteer: EventVolunteer
+
+
+@dataclass
+class ApplyEventVolunteerInput:
+    event_id: uuid.UUID
+    actor_id: uuid.UUID
+    message: str | None = None
+
+
+@dataclass
+class ApplyEventVolunteerOutput:
     event_volunteer: EventVolunteer
 
 
@@ -52,18 +64,3 @@ class ListEventVolunteersInput:
 @dataclass
 class ListEventVolunteersOutput:
     event_volunteers: list[EventVolunteer]
-
-
-@dataclass
-class GetEventParticipantsInput:
-    event_id: uuid.UUID
-    actor_id: uuid.UUID
-    status: str | None = None
-    limit: int = 50
-    offset: int = 0
-
-
-@dataclass
-class GetEventParticipantsOutput:
-    participants: list[EventParticipant]
-    total: int

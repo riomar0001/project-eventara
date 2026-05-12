@@ -22,6 +22,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.domain.entities.event_entity import EventParticipant as EventParticipantEntity
 from app.domain.entities.event_entity import EventParticipantStatus
 from app.infrastructure.database.models.event_models import EventParticipant, EventSession
+from app.infrastructure.database.models.user_models import UserProfile
 
 
 class EventParticipantRepository:
@@ -31,7 +32,15 @@ class EventParticipantRepository:
         self.db = db
 
     @staticmethod
-    def _to_entity(orm: EventParticipant) -> EventParticipantEntity:
+    def _to_entity(
+        orm: EventParticipant,
+        *,
+        user_first_name: str | None = None,
+        user_last_name: str | None = None,
+        user_alias: str | None = None,
+        user_profile_picture_url: str | None = None,
+        event_session_title: str | None = None,
+    ) -> EventParticipantEntity:
         """Map an EventParticipant ORM row to its domain entity."""
         return EventParticipantEntity(
             id=orm.id,
@@ -41,6 +50,11 @@ class EventParticipantRepository:
             is_checked_in=orm.is_checked_in,
             checked_in_time=orm.checked_in_time,
             checked_in_by=orm.checked_in_by,
+            user_first_name=user_first_name,
+            user_last_name=user_last_name,
+            user_alias=user_alias,
+            user_profile_picture_url=user_profile_picture_url,
+            event_session_title=event_session_title,
             created_at=orm.created_at,
             updated_at=orm.updated_at,
         )
@@ -221,3 +235,62 @@ class EventParticipantRepository:
         await self.db.flush()
         await self.db.refresh(orm)
         return self._to_entity(orm)
+
+    async def get_participants_by_event(
+        self,
+        event_id: uuid.UUID,
+        *,
+        status: str | None = None,
+        limit: int = 50,
+        offset: int = 0,
+    ) -> list[EventParticipantEntity]:
+        """Return paginated participants across all sessions of an event.
+
+        Joins participant records to event sessions for event scoping and to user
+        profiles for display fields required by the participant management UI.
+        This read path belongs to the event-participants feature because it is
+        the listing counterpart of registration, status management, and QR
+        check-in.
+        """
+        query = (
+            select(
+                EventParticipant,
+                EventSession.title.label("event_session_title"),
+                UserProfile.first_name.label("user_first_name"),
+                UserProfile.last_name.label("user_last_name"),
+                UserProfile.alias.label("user_alias"),
+                UserProfile.image_file_id.label("user_profile_picture_url"),
+            )
+            .join(EventSession, EventParticipant.event_session_id == EventSession.id)
+            .outerjoin(UserProfile, EventParticipant.user_id == UserProfile.user_id)
+            .where(EventSession.event_id == event_id)
+            .order_by(EventParticipant.created_at.desc())
+        )
+        if status is not None:
+            query = query.where(EventParticipant.status == status)
+        query = query.limit(limit).offset(offset)
+        result = await self.db.execute(query)
+        return [
+            self._to_entity(
+                orm,
+                user_first_name=user_first_name,
+                user_last_name=user_last_name,
+                user_alias=user_alias,
+                user_profile_picture_url=user_profile_picture_url,
+                event_session_title=event_session_title,
+            )
+            for orm, event_session_title, user_first_name, user_last_name, user_alias, user_profile_picture_url in result.all()
+        ]
+
+    async def count_participants_by_event(self, event_id: uuid.UUID, *, status: str | None = None) -> int:
+        """Return the total participant count across all sessions of an event."""
+        query = (
+            select(func.count())
+            .select_from(EventParticipant)
+            .join(EventSession, EventParticipant.event_session_id == EventSession.id)
+            .where(EventSession.event_id == event_id)
+        )
+        if status is not None:
+            query = query.where(EventParticipant.status == status)
+        result = await self.db.execute(query)
+        return result.scalar_one()

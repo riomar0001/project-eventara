@@ -7,6 +7,7 @@ import { MobileFloatingAction, PrimaryPageAction } from '@/components/admin/shar
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { usePermissions } from '@/context/permissions-context';
 import { useVenues } from '@/hooks/admin/venues/use-venues';
 import { CatalogCard, OperationsPageIntro } from './venues-shared';
 import type { VenueRecordResponse } from '@/api/types.gen';
@@ -148,7 +149,7 @@ function SectionEmpty({ hasFilters, label }: { hasFilters: boolean; label: strin
 
 // ── Venue card grid ────────────────────────────────────────────────────────────
 
-function VenueGrid({ venues }: { venues: VenueRecordResponse[] }) {
+function VenueGrid({ canUpdateVenue, venues }: { canUpdateVenue: boolean; venues: VenueRecordResponse[] }) {
   return (
     <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
       {venues.map((venue) => (
@@ -159,7 +160,7 @@ function VenueGrid({ venues }: { venues: VenueRecordResponse[] }) {
           photo={venuePhoto(venue)}
           description={venue.description ?? 'No description provided.'}
           href={ADMIN_OPERATIONS_PATHS.venueDetail(venue.id)}
-          editHref={ADMIN_OPERATIONS_PATHS.venueEdit(venue.id)}
+          editHref={canUpdateVenue ? ADMIN_OPERATIONS_PATHS.venueEdit(venue.id) : undefined}
           badges={[venue.venue_type]}
           specs={[
             { label: 'Location', value: [venue.city, venue.province].filter(Boolean).join(', '), icon: <MapPin className="size-3.5" /> },
@@ -177,6 +178,7 @@ function VenueGrid({ venues }: { venues: VenueRecordResponse[] }) {
 
 export function VenuesCatalog() {
   const { venues, isLoading, error } = useVenues();
+  const { can } = usePermissions();
   const [query, setQuery] = useState('');
   const [capacityKey, setCapacityKey] = useState('any');
   const [sortKey, setSortKey] = useState('name');
@@ -186,6 +188,9 @@ export function VenuesCatalog() {
   const partnerCount = useMemo(() => venues.filter((v) => v.is_partner).length, [venues]);
   const communityCount = useMemo(() => venues.filter((v) => !v.is_partner).length, [venues]);
   const totalCapacity = useMemo(() => venues.reduce((sum, v) => sum + v.capacity, 0), [venues]);
+  const canCreatePartnerVenue = can('venues', 'create');
+  const canUpdateVenue = can('venues', 'update');
+  const venueActionLabel = canCreatePartnerVenue ? 'Add venue' : 'Suggest venue';
 
   const capacityMin = CAPACITY_FILTERS.find((o) => o.key === capacityKey)?.min ?? 0;
   const hasActiveFilters = capacityKey !== 'any' || Boolean(query.trim());
@@ -246,7 +251,7 @@ export function VenuesCatalog() {
 
   return (
     <div className="space-y-6">
-      <MobileFloatingAction cta="Add venue" href={ADMIN_OPERATIONS_PATHS.venueCreate} theme="amber" />
+      <MobileFloatingAction cta={venueActionLabel} href={ADMIN_OPERATIONS_PATHS.venueCreate} theme="amber" />
 
       <OperationsPageIntro
         eyebrow="Venue Portfolio"
@@ -259,8 +264,8 @@ export function VenuesCatalog() {
         ]}
         actions={
           <PrimaryPageAction
-            cta="Add venue"
-            helper="Create a new space entry right from the command surface."
+            cta={venueActionLabel}
+            helper={canCreatePartnerVenue ? 'Create a new space entry right from the command surface.' : 'Suggest a community venue for review.'}
             href={ADMIN_OPERATIONS_PATHS.venueCreate}
             label="Primary Action"
             theme="amber"
@@ -313,7 +318,7 @@ export function VenuesCatalog() {
         </div>
 
         <Button asChild className="h-10 w-full rounded-xl" variant="amber">
-          <Link href={ADMIN_OPERATIONS_PATHS.venueCreate}>Add venue</Link>
+          <Link href={ADMIN_OPERATIONS_PATHS.venueCreate}>{venueActionLabel}</Link>
         </Button>
       </div>
 
@@ -385,7 +390,11 @@ export function VenuesCatalog() {
               description="Managed spaces with direct relationships and stronger booking confidence."
             />
 
-            {pagedPartners.length === 0 ? <SectionEmpty hasFilters={hasActiveFilters} label="official partner venues" /> : <VenueGrid venues={pagedPartners} />}
+            {pagedPartners.length === 0 ? (
+              <SectionEmpty hasFilters={hasActiveFilters} label="official partner venues" />
+            ) : (
+              <VenueGrid venues={pagedPartners} canUpdateVenue={canUpdateVenue} />
+            )}
 
             <SectionPagination
               currentPage={partnerCurrentPage}
@@ -410,7 +419,7 @@ export function VenuesCatalog() {
               <SectionEmpty hasFilters={hasActiveFilters} label="community venues" />
             ) : (
               <>
-                <VenueGrid venues={pagedCommunity} />
+                <VenueGrid venues={pagedCommunity} canUpdateVenue={canUpdateVenue} />
                 {!hasActiveFilters && communityCurrentPage === 1 && filteredCommunity.length > 0 && (
                   <div className="overflow-hidden rounded-2xl border border-sky-100 bg-sky-50 px-5 py-4">
                     <div className="flex flex-wrap items-center justify-between gap-3">

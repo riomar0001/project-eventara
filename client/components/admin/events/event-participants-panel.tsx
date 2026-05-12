@@ -32,8 +32,9 @@ function fmtDateTime(iso: string | null) {
   return new Date(iso).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' });
 }
 
-function shortId(id: string) {
-  return id.slice(0, 8).toUpperCase();
+function participantName(participant: EventParticipantRecord) {
+  const fullName = [participant.user_first_name, participant.user_last_name].filter(Boolean).join(' ').trim();
+  return fullName || participant.user_alias || 'Unnamed participant';
 }
 
 function ParticipantStatusBadge({ status }: { status: string }) {
@@ -48,15 +49,20 @@ function ParticipantStatusBadge({ status }: { status: string }) {
 
 const participantColumns: ColumnDef<EventParticipantRecord>[] = [
   {
-    id: 'user_id',
-    header: 'User ID',
-    cell: ({ row }) => <p className="font-mono text-xs text-neutral-700">{shortId(row.original.user_id)}</p>,
+    id: 'participant',
+    header: 'Full name and alias',
+    cell: ({ row }) => (
+      <div>
+        <p className="text-sm font-semibold text-neutral-950">{participantName(row.original)}</p>
+        <p className="text-xs text-neutral-500">{row.original.user_alias ? `@${row.original.user_alias}` : 'No alias'}</p>
+      </div>
+    ),
     meta: { headerClassName: 'pl-6', cellClassName: 'pl-6' } satisfies ColumnMeta
   },
   {
-    id: 'session_id',
-    header: 'Session ID',
-    cell: ({ row }) => <p className="font-mono text-xs text-neutral-500">{shortId(row.original.event_session_id)}</p>
+    id: 'event_session',
+    header: 'Event Session Name',
+    cell: ({ row }) => <p className="max-w-72 truncate text-sm font-medium text-neutral-800">{row.original.event_session_title ?? 'Unknown session'}</p>
   },
   {
     id: 'status',

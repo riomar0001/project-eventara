@@ -71,8 +71,10 @@ export function AppSidebar() {
               {group.label && <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">{group.label}</SidebarGroupLabel>}
               <SidebarGroupContent>
                 <SidebarMenu className="gap-2">
-                  {visibleItems.map((item) =>
-                    item.children ? (
+                  {visibleItems.map((item) => {
+                    const visibleChildren = item.children?.filter((child) => !child.permission || can(child.permission.feature, child.permission.action));
+
+                    return item.children ? (
                       <Collapsible key={item.label} open={volunteerOpen} onOpenChange={setVolunteerOpen} asChild>
                         <SidebarMenuItem>
                           <CollapsibleTrigger asChild>
@@ -86,7 +88,7 @@ export function AppSidebar() {
                           </CollapsibleTrigger>
                           <CollapsibleContent>
                             <SidebarMenuSub>
-                              {item.children.map((child) => (
+                              {visibleChildren?.map((child) => (
                                 <SidebarMenuSubItem key={child.label}>
                                   <SidebarMenuSubButton asChild isActive={isActiveHref(child.href)} className="h-8 text-sm">
                                     <Link href={child.href} className="flex items-center">
@@ -116,8 +118,8 @@ export function AppSidebar() {
                           )}
                         </SidebarMenuButton>
                       </SidebarMenuItem>
-                    )
-                  )}
+                    );
+                  })}
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>

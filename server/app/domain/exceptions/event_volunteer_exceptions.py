@@ -8,6 +8,11 @@ class EventVolunteerValidationError(Exception):
         super().__init__(f"Event volunteer validation failed: {message}")
 
 
+class EventVolunteerApplicationClosedError(Exception):
+    def __init__(self, event_id: str = "") -> None:
+        super().__init__(f"Event volunteer applications are closed for event: {event_id}" if event_id else "Event volunteer applications are closed")
+
+
 class EventVolunteerAlreadyExistsError(Exception):
     def __init__(self, volunteer_id: str = "", event_id: str = "") -> None:
         if volunteer_id and event_id:

@@ -71,7 +71,7 @@ export function CatalogCard({
 }: {
   badges: string[];
   description: string;
-  editHref: string;
+  editHref?: string;
   href: string;
   meta: { label: string; value: string }[];
   photo: string;
@@ -112,9 +112,11 @@ export function CatalogCard({
               <ArrowUpRight className="size-4" />
             </Link>
           </Button>
-          <Button asChild variant="outline" size="sm">
-            <Link href={editHref}>Edit</Link>
-          </Button>
+          {editHref ? (
+            <Button asChild variant="outline" size="sm">
+              <Link href={editHref}>Edit</Link>
+            </Button>
+          ) : null}
         </div>
       </CardContent>
     </Card>
@@ -124,17 +126,21 @@ export function CatalogCard({
 export function DetailPanel({
   actions,
   children,
+  className,
+  contentClassName,
   description,
   title
 }: {
   actions?: React.ReactNode;
   children: React.ReactNode;
+  className?: string;
+  contentClassName?: string;
   description?: string;
   title: string;
 }) {
   return (
-    <Card className="overflow-hidden border-0 bg-white shadow-[0_24px_70px_-54px_rgba(15,23,42,0.32)] ring-1 ring-neutral-200/80">
-      <CardHeader className="border-b border-neutral-100/80 bg-gradient-to-r from-neutral-50/80 via-white to-white pb-4">
+    <Card className={cn('flex flex-col overflow-hidden border-0 bg-white shadow-[0_24px_70px_-54px_rgba(15,23,42,0.32)] ring-1 ring-neutral-200/80', className)}>
+      <CardHeader className="border-b border-red-100/80 bg-linear-to-r from-neutral-50/80 via-white to-white">
         <div className={cn('flex flex-wrap items-start gap-3', actions ? 'justify-between' : '')}>
           <div className="min-w-0">
             <CardTitle className="text-lg tracking-tight text-neutral-950">{title}</CardTitle>
@@ -143,7 +149,7 @@ export function DetailPanel({
           {actions ? <div className="flex flex-wrap items-center gap-2">{actions}</div> : null}
         </div>
       </CardHeader>
-      <CardContent className="p-5 pt-5">{children}</CardContent>
+      <CardContent className={cn('flex-1 p-5', contentClassName)}>{children}</CardContent>
     </Card>
   );
 }

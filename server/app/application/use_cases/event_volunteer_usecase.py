@@ -1,10 +1,10 @@
-"""Use cases for event volunteer assignment management and event participant queries.
+"""Use cases for event volunteer assignment management.
 
 Business rules:
   - Only the event organizer (``event.created_by``) may assign, update, remove, or list
     event volunteers.
-  - Only the event organizer OR a volunteer whose ``EventVolunteer.status`` is JOINED
-    for that specific event may retrieve the full participant list.
+  - Active volunteers may apply to public/active events, which creates a PENDING
+    event-volunteer row for organizer review.
   - Status transitions for event volunteers are PENDING → JOINED, PENDING → REJECTED,
     and JOINED → LEFT.  All other transitions are rejected.
 """
@@ -12,10 +12,10 @@ Business rules:
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application.dto.event_volunteer_dto import (
+    ApplyEventVolunteerInput,
+    ApplyEventVolunteerOutput,
     AssignVolunteerInput,
     AssignVolunteerOutput,
-    GetEventParticipantsInput,
-    GetEventParticipantsOutput,
     ListEventVolunteersInput,
     ListEventVolunteersOutput,
     RemoveEventVolunteerInput,
@@ -24,15 +24,17 @@ from app.application.dto.event_volunteer_dto import (
     UpdateEventVolunteerStatusOutput,
 )
 from app.application.interfaces.event_volunteer_interface import IEventVolunteerRepository
-from app.domain.entities.event_entity import EventVolunteerStatus
+from app.domain.entities.event_entity import EventStatus, EventVolunteerStatus
+from app.domain.entities.volunteer_entity import VolunteerStatus
 from app.domain.exceptions.event_exceptions import EventNotFoundError
 from app.domain.exceptions.event_volunteer_exceptions import (
     EventVolunteerAlreadyExistsError,
+    EventVolunteerApplicationClosedError,
     EventVolunteerNotFoundError,
     InvalidEventVolunteerStatusTransitionError,
     UnauthorizedEventVolunteerOperationError,
 )
-from app.domain.exceptions.volunteer_exceptions import VolunteerNotFoundError
+from app.domain.exceptions.volunteer_exceptions import VolunteerInactiveError, VolunteerNotFoundError
 
 _ALLOWED_VOLUNTEER_TRANSITIONS: dict[EventVolunteerStatus, frozenset[EventVolunteerStatus]] = {
     EventVolunteerStatus.PENDING: frozenset(
@@ -48,9 +50,11 @@ _ALLOWED_VOLUNTEER_TRANSITIONS: dict[EventVolunteerStatus, frozenset[EventVolunt
     ),
 }
 
+_APPLICATION_OPEN_EVENT_STATUSES = frozenset({EventStatus.POSTED, EventStatus.STARTED})
+
 
 class EventVolunteerUseCase:
-    """Application service for event volunteer assignment and participant retrieval.
+    """Application service for event volunteer assignment management.
 
     Owns the transaction lifecycle for every mutating operation: commits on
     success, rolls back on any validation or infrastructure failure, then
@@ -64,6 +68,11 @@ class EventVolunteerUseCase:
         event: the second request blocks on the lock, observes the committed row,
         and raises ``EventVolunteerAlreadyExistsError``.  The unique database
         index on ``(volunteer_id, event_id)`` provides a secondary safety net.
+
+        ``apply_to_event`` — acquires the same parent event row lock before the
+        event-state check and duplicate-assignment check.  This serialises two
+        concurrent self-application requests for the same event so the later
+        request observes the committed assignment and returns a conflict.
 
         ``update_volunteer_status`` — acquires a row-level lock on the
         event-volunteer row before the ownership and transition checks to
@@ -84,7 +93,7 @@ class EventVolunteerUseCase:
         self.db = db
 
     async def assign_volunteer(self, data: AssignVolunteerInput) -> AssignVolunteerOutput:
-        """Assign a volunteer to an event in PENDING status.
+        """Assign and accept a volunteer to an event.
 
         Only the event organizer may perform this action.  Acquiring a lock on
         the parent event row first prevents a concurrent event deletion from
@@ -96,7 +105,7 @@ class EventVolunteerUseCase:
 
         Returns:
             ``AssignVolunteerOutput`` wrapping the newly created
-            ``EventVolunteer`` entity with PENDING status.
+            ``EventVolunteer`` entity with JOINED status.
 
         Raises:
             EventNotFoundError:                No event exists for ``data.event_id``.
@@ -138,6 +147,69 @@ class EventVolunteerUseCase:
 
         await self.db.commit()
         return AssignVolunteerOutput(event_volunteer=event_volunteer)
+
+    async def apply_to_event(self, data: ApplyEventVolunteerInput) -> ApplyEventVolunteerOutput:
+        """Create a pending event-volunteer application for the authenticated volunteer.
+
+        The caller is resolved through their volunteer profile rather than an
+        organizer-supplied alias.  A row-level lock on the event serialises
+        concurrent applications for the same event and protects the status check
+        from racing with event updates.
+
+        Args:
+            data: ``ApplyEventVolunteerInput`` containing the event ID, actor ID,
+                  and optional applicant message for audit context.
+
+        Returns:
+            ``ApplyEventVolunteerOutput`` wrapping the newly created
+            ``EventVolunteer`` entity with PENDING status.
+
+        Raises:
+            EventNotFoundError: No event exists for ``data.event_id``.
+            EventVolunteerApplicationClosedError: Event status does not accept applications.
+            VolunteerNotFoundError: The caller has no volunteer profile.
+            VolunteerInactiveError: The caller's volunteer profile is not active.
+            EventVolunteerAlreadyExistsError: The volunteer already has an event assignment/application.
+        """
+        event = await self.repo.get_event_by_id(data.event_id, for_update=True)
+        if not event:
+            raise EventNotFoundError(str(data.event_id))
+
+        if event.status not in _APPLICATION_OPEN_EVENT_STATUSES:
+            raise EventVolunteerApplicationClosedError(str(data.event_id))
+
+        volunteer = await self.repo.get_volunteer_by_user_id(data.actor_id)
+        if not volunteer:
+            raise VolunteerNotFoundError(str(data.actor_id))
+
+        if volunteer.status != VolunteerStatus.ACTIVE:
+            raise VolunteerInactiveError(str(volunteer.id))
+
+        try:
+            existing = await self.repo.get_event_volunteer_by_volunteer_and_event(volunteer.id, data.event_id, for_update=True)
+            if existing:
+                raise EventVolunteerAlreadyExistsError(str(volunteer.id), str(data.event_id))
+
+            event_volunteer = await self.repo.create_event_volunteer(
+                volunteer_id=volunteer.id,
+                event_id=data.event_id,
+                status=EventVolunteerStatus.PENDING,
+            )
+        except (
+            EventVolunteerAlreadyExistsError,
+            EventNotFoundError,
+            EventVolunteerApplicationClosedError,
+            VolunteerInactiveError,
+            VolunteerNotFoundError,
+        ):
+            await self.db.rollback()
+            raise
+        except Exception:
+            await self.db.rollback()
+            raise
+
+        await self.db.commit()
+        return ApplyEventVolunteerOutput(event_volunteer=event_volunteer)
 
     async def update_volunteer_status(self, data: UpdateEventVolunteerStatusInput) -> UpdateEventVolunteerStatusOutput:
         """Update the status of an event volunteer assignment.
@@ -279,44 +351,3 @@ class EventVolunteerUseCase:
 
         event_volunteers = await self.repo.get_event_volunteers_by_event(data.event_id, status=data.status)
         return ListEventVolunteersOutput(event_volunteers=event_volunteers)
-
-    async def get_participants(self, data: GetEventParticipantsInput) -> GetEventParticipantsOutput:
-        """Retrieve all participants for an event, available to organizers and joined volunteers.
-
-        Access is granted to:
-          1. The event organizer (``event.created_by == data.actor_id``).
-          2. Any volunteer whose ``EventVolunteer`` record for this event has
-             status JOINED.
-
-        All other callers receive ``UnauthorizedEventVolunteerOperationError``.
-        The result is paginated and optionally filtered by participant status.
-
-        Args:
-            data: ``GetEventParticipantsInput`` with the event ID, actor's user
-                  ID, optional status filter, limit, and offset.
-
-        Returns:
-            ``GetEventParticipantsOutput`` with the participant list and total count.
-
-        Raises:
-            EventNotFoundError:                      No event exists for ``data.event_id``.
-            UnauthorizedEventVolunteerOperationError: Caller is neither the event organizer
-                nor a JOINED volunteer for this event.
-        """
-        event = await self.repo.get_event_by_id(data.event_id)
-        if not event:
-            raise EventNotFoundError(str(data.event_id))
-
-        if event.created_by != data.actor_id:
-            joined_assignment = await self.repo.get_joined_event_volunteer_for_user(data.actor_id, data.event_id)
-            if not joined_assignment:
-                raise UnauthorizedEventVolunteerOperationError()
-
-        participants = await self.repo.get_participants_by_event(
-            data.event_id,
-            status=data.status,
-            limit=data.limit,
-            offset=data.offset,
-        )
-        total = await self.repo.count_participants_by_event(data.event_id, status=data.status)
-        return GetEventParticipantsOutput(participants=participants, total=total)

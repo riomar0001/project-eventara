@@ -59,3 +59,18 @@ class CheckInParticipantOutput:
 class CheckInParticipantQrCodeInput:
     token: str
     checked_in_by: uuid.UUID
+
+
+@dataclass
+class GetEventParticipantsInput:
+    event_id: uuid.UUID
+    actor_id: uuid.UUID
+    status: str | None = None
+    limit: int = 50
+    offset: int = 0
+
+
+@dataclass
+class GetEventParticipantsOutput:
+    participants: list[EventParticipant]
+    total: int

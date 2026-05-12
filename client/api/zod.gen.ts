@@ -66,6 +66,13 @@ export const zApplicationStatus = z.enum([
 ]);
 
 /**
+ * ApplyEventVolunteerRequest
+ */
+export const zApplyEventVolunteerRequest = z.object({
+    message: z.string().max(500).nullish()
+});
+
+/**
  * AssignRoleRequest
  */
 export const zAssignRoleRequest = z.object({
@@ -283,6 +290,15 @@ export const zEventBannerUploadRequest = z.object({
 });
 
 /**
+ * EventFeedbackPaginationMeta
+ */
+export const zEventFeedbackPaginationMeta = z.object({
+    total: z.int(),
+    limit: z.int(),
+    offset: z.int()
+});
+
+/**
  * EventFeedbackRecordResponse
  */
 export const zEventFeedbackRecordResponse = z.object({
@@ -295,6 +311,16 @@ export const zEventFeedbackRecordResponse = z.object({
     suggestion: z.string().nullable(),
     created_at: z.iso.datetime().nullable(),
     updated_at: z.iso.datetime().nullable()
+});
+
+/**
+ * EventFeedbackListResponse
+ */
+export const zEventFeedbackListResponse = z.object({
+    success: z.boolean().optional().default(true),
+    message: z.string().optional().default('Event feedback retrieved successfully.'),
+    data: z.array(zEventFeedbackRecordResponse),
+    meta: zEventFeedbackPaginationMeta
 });
 
 /**
@@ -317,6 +343,11 @@ export const zEventParticipantRecord = z.object({
     is_checked_in: z.boolean(),
     checked_in_time: z.iso.datetime().nullable(),
     checked_in_by: z.uuid().nullable(),
+    user_first_name: z.string().nullish(),
+    user_last_name: z.string().nullish(),
+    user_alias: z.string().nullish(),
+    user_profile_picture_url: z.string().nullish(),
+    event_session_title: z.string().nullish(),
     created_at: z.iso.datetime().nullable(),
     updated_at: z.iso.datetime().nullable()
 });
@@ -579,6 +610,12 @@ export const zEventVolunteerRecordResponse = z.object({
     volunteer_id: z.uuid(),
     event_id: z.uuid(),
     status: z.string(),
+    volunteer_user_id: z.uuid().nullish(),
+    volunteer_first_name: z.string().nullish(),
+    volunteer_last_name: z.string().nullish(),
+    volunteer_alias: z.string().nullish(),
+    volunteer_profile_picture_url: z.string().nullish(),
+    volunteer_role_name: z.string().nullish(),
     created_at: z.iso.datetime().nullable(),
     updated_at: z.iso.datetime().nullable()
 });
@@ -1806,7 +1843,7 @@ export const zGetAuditLogsResponse = z.object({
 /**
  * PaginationMeta
  */
-export const zAppControllerSchemasEventVolunteerSchemaPaginationMeta = z.object({
+export const zAppControllerSchemasEventParticipantSchemaPaginationMeta = z.object({
     total: z.int(),
     limit: z.int(),
     offset: z.int()
@@ -1819,7 +1856,7 @@ export const zEventParticipantsResponse = z.object({
     success: z.boolean(),
     message: z.string(),
     data: z.array(zEventParticipantRecord),
-    meta: zAppControllerSchemasEventVolunteerSchemaPaginationMeta
+    meta: zAppControllerSchemasEventParticipantSchemaPaginationMeta
 });
 
 export const zRegisterUserAuthRegisterPostBody = zRegisterRequest;
@@ -2548,6 +2585,20 @@ export const zUploadEventBannerEventsEventIdBannerPostPath = z.object({
  */
 export const zUploadEventBannerEventsEventIdBannerPostResponse = zEventBannerUploadResponse;
 
+export const zListEventFeedbackEventsEventIdFeedbackGetPath = z.object({
+    event_id: z.uuid()
+});
+
+export const zListEventFeedbackEventsEventIdFeedbackGetQuery = z.object({
+    limit: z.int().gte(1).lte(100).optional().default(20),
+    offset: z.int().gte(0).optional().default(0)
+});
+
+/**
+ * Successful Response
+ */
+export const zListEventFeedbackEventsEventIdFeedbackGetResponse = zEventFeedbackListResponse;
+
 export const zCreateEventFeedbackEventsEventIdFeedbackPostBody = zCreateEventFeedbackRequest;
 
 export const zCreateEventFeedbackEventsEventIdFeedbackPostPath = z.object({
@@ -2558,6 +2609,21 @@ export const zCreateEventFeedbackEventsEventIdFeedbackPostPath = z.object({
  * Successful Response
  */
 export const zCreateEventFeedbackEventsEventIdFeedbackPostResponse = zEventFeedbackResponse;
+
+export const zGetEventParticipantsEventsEventIdParticipantsGetPath = z.object({
+    event_id: z.uuid()
+});
+
+export const zGetEventParticipantsEventsEventIdParticipantsGetQuery = z.object({
+    status: z.string().nullish(),
+    limit: z.int().gte(1).lte(200).optional().default(50),
+    offset: z.int().gte(0).optional().default(0)
+});
+
+/**
+ * Successful Response
+ */
+export const zGetEventParticipantsEventsEventIdParticipantsGetResponse = zEventParticipantsResponse;
 
 export const zWithdrawRegistrationEventsEventIdSessionSessionIdRegisterDeletePath = z.object({
     event_id: z.uuid(),
@@ -2740,6 +2806,20 @@ export const zWithdrawApplicationVolunteerApplicationsApplicationIdDeletePath = 
  */
 export const zWithdrawApplicationVolunteerApplicationsApplicationIdDeleteResponse = z.record(z.string(), z.unknown());
 
+/**
+ * Body
+ */
+export const zApplyToEventEventsEventIdVolunteersApplyPostBody = zApplyEventVolunteerRequest.nullable();
+
+export const zApplyToEventEventsEventIdVolunteersApplyPostPath = z.object({
+    event_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zApplyToEventEventsEventIdVolunteersApplyPostResponse = zEventVolunteerResponse;
+
 export const zListEventVolunteersEventsEventIdVolunteersGetPath = z.object({
     event_id: z.uuid()
 });
@@ -2785,18 +2865,3 @@ export const zUpdateEventVolunteerStatusEventsEventIdVolunteersEventVolunteerIdP
  * Successful Response
  */
 export const zUpdateEventVolunteerStatusEventsEventIdVolunteersEventVolunteerIdPatchResponse = zEventVolunteerResponse;
-
-export const zGetEventParticipantsEventsEventIdParticipantsGetPath = z.object({
-    event_id: z.uuid()
-});
-
-export const zGetEventParticipantsEventsEventIdParticipantsGetQuery = z.object({
-    status: z.string().nullish(),
-    limit: z.int().gte(1).lte(200).optional().default(50),
-    offset: z.int().gte(0).optional().default(0)
-});
-
-/**
- * Successful Response
- */
-export const zGetEventParticipantsEventsEventIdParticipantsGetResponse = zEventParticipantsResponse;

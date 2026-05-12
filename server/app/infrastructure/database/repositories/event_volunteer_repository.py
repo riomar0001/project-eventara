@@ -1,4 +1,4 @@
-"""Data-access layer for event volunteer assignments and cross-event participant queries.
+"""Data-access layer for event volunteer assignments.
 
 All write methods flush changes within the current transaction boundary.
 The use-case layer owns commit and rollback.
@@ -18,17 +18,13 @@ Concurrency strategy — pessimistic locking (SELECT … FOR UPDATE) on mutating
 
 import uuid
 
-from sqlalchemy import func, select
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.entities.event_entity import (
     Event as EventEntity,
 )
 from app.domain.entities.event_entity import (
-    EventParticipant as EventParticipantEntity,
-)
-from app.domain.entities.event_entity import (
-    EventParticipantStatus,
     EventStatus,
     EventVolunteerStatus,
 )
@@ -37,13 +33,13 @@ from app.domain.entities.event_entity import (
 )
 from app.domain.entities.volunteer_entity import Volunteer as VolunteerEntity
 from app.domain.entities.volunteer_entity import VolunteerStatus
-from app.infrastructure.database.models.event_models import Event, EventParticipant, EventSession, EventVolunteer
-from app.infrastructure.database.models.user_models import User
-from app.infrastructure.database.models.volunteer_models import Volunteer
+from app.infrastructure.database.models.event_models import Event, EventVolunteer
+from app.infrastructure.database.models.user_models import User, UserProfile
+from app.infrastructure.database.models.volunteer_models import Volunteer, VolunteerRole
 
 
 class EventVolunteerRepository:
-    """Data-access layer for event volunteer assignments and event participant queries."""
+    """Data-access layer for event volunteer assignments."""
 
     def __init__(self, db: AsyncSession) -> None:
         self.db = db
@@ -78,28 +74,28 @@ class EventVolunteerRepository:
         )
 
     @staticmethod
-    def _to_event_volunteer_entity(orm: EventVolunteer) -> EventVolunteerEntity:
+    def _to_event_volunteer_entity(
+        orm: EventVolunteer,
+        *,
+        volunteer_user_id: uuid.UUID | None = None,
+        volunteer_first_name: str | None = None,
+        volunteer_last_name: str | None = None,
+        volunteer_alias: str | None = None,
+        volunteer_profile_picture_url: str | None = None,
+        volunteer_role_name: str | None = None,
+    ) -> EventVolunteerEntity:
         """Map an EventVolunteer ORM row to its domain entity."""
         return EventVolunteerEntity(
             id=orm.id,
             volunteer_id=orm.volunteer_id,
             event_id=orm.event_id,
             status=EventVolunteerStatus(orm.status),
-            created_at=orm.created_at,
-            updated_at=orm.updated_at,
-        )
-
-    @staticmethod
-    def _to_participant_entity(orm: EventParticipant) -> EventParticipantEntity:
-        """Map an EventParticipant ORM row to its domain entity."""
-        return EventParticipantEntity(
-            id=orm.id,
-            user_id=orm.user_id,
-            event_session_id=orm.event_session_id,
-            status=EventParticipantStatus(orm.status),
-            is_checked_in=orm.is_checked_in,
-            checked_in_time=orm.checked_in_time,
-            checked_in_by=orm.checked_in_by,
+            volunteer_user_id=volunteer_user_id,
+            volunteer_first_name=volunteer_first_name,
+            volunteer_last_name=volunteer_last_name,
+            volunteer_alias=volunteer_alias,
+            volunteer_profile_picture_url=volunteer_profile_picture_url,
+            volunteer_role_name=volunteer_role_name,
             created_at=orm.created_at,
             updated_at=orm.updated_at,
         )
@@ -134,6 +130,19 @@ class EventVolunteerRepository:
         orm = result.scalar_one_or_none()
         return self._to_volunteer_entity(orm) if orm else None
 
+    async def get_volunteer_by_user_id(self, user_id: uuid.UUID) -> VolunteerEntity | None:
+        """Return the volunteer entity linked to the given user ID.
+
+        Args:
+            user_id: UUID of the authenticated user.
+
+        Returns:
+            The matching entity, or ``None`` if the user is not a volunteer.
+        """
+        result = await self.db.execute(select(Volunteer).where(Volunteer.user_id == user_id))
+        orm = result.scalar_one_or_none()
+        return self._to_volunteer_entity(orm) if orm else None
+
     async def get_volunteer_by_alias(self, alias: str) -> VolunteerEntity | None:
         """Return the volunteer entity whose linked user has the given alias.
 
@@ -143,7 +152,12 @@ class EventVolunteerRepository:
         Returns:
             The matching entity, or ``None`` if no row exists.
         """
-        result = await self.db.execute(select(Volunteer).join(User, Volunteer.user_id == User.id).where(User.alias == alias))
+        result = await self.db.execute(
+            select(Volunteer)
+            .join(User, Volunteer.user_id == User.id)
+            .join(UserProfile, UserProfile.user_id == User.id)
+            .where(UserProfile.alias == alias)
+        )
         orm = result.scalar_one_or_none()
         return self._to_volunteer_entity(orm) if orm else None
 
@@ -232,18 +246,61 @@ class EventVolunteerRepository:
         Returns:
             List of ``EventVolunteerEntity`` objects ordered by creation date descending.
         """
-        query = select(EventVolunteer).where(EventVolunteer.event_id == event_id).order_by(EventVolunteer.created_at.desc())
+        query = (
+            select(
+                EventVolunteer,
+                Volunteer.user_id.label("volunteer_user_id"),
+                UserProfile.first_name.label("volunteer_first_name"),
+                UserProfile.last_name.label("volunteer_last_name"),
+                UserProfile.alias.label("volunteer_alias"),
+                UserProfile.image_file_id.label("volunteer_profile_picture_url"),
+                VolunteerRole.name.label("volunteer_role_name"),
+            )
+            .join(Volunteer, EventVolunteer.volunteer_id == Volunteer.id)
+            .outerjoin(UserProfile, Volunteer.user_id == UserProfile.user_id)
+            .outerjoin(VolunteerRole, Volunteer.volunteer_role_id == VolunteerRole.id)
+            .where(EventVolunteer.event_id == event_id)
+            .order_by(EventVolunteer.created_at.desc())
+        )
         if status is not None:
             query = query.where(EventVolunteer.status == status)
         result = await self.db.execute(query)
-        return [self._to_event_volunteer_entity(orm) for orm in result.scalars().all()]
+        event_volunteers = []
+        for row in result.all():
+            (
+                orm,
+                volunteer_user_id,
+                volunteer_first_name,
+                volunteer_last_name,
+                volunteer_alias,
+                volunteer_profile_picture_url,
+                volunteer_role_name,
+            ) = row
+            event_volunteers.append(
+                self._to_event_volunteer_entity(
+                    orm,
+                    volunteer_user_id=volunteer_user_id,
+                    volunteer_first_name=volunteer_first_name,
+                    volunteer_last_name=volunteer_last_name,
+                    volunteer_alias=volunteer_alias,
+                    volunteer_profile_picture_url=volunteer_profile_picture_url,
+                    volunteer_role_name=volunteer_role_name,
+                )
+            )
+        return event_volunteers
 
-    async def create_event_volunteer(self, volunteer_id: uuid.UUID, event_id: uuid.UUID) -> EventVolunteerEntity:
-        """Insert a new event-volunteer row with PENDING status and return the persisted entity."""
+    async def create_event_volunteer(
+        self,
+        volunteer_id: uuid.UUID,
+        event_id: uuid.UUID,
+        *,
+        status: EventVolunteerStatus = EventVolunteerStatus.JOINED,
+    ) -> EventVolunteerEntity:
+        """Insert a new event-volunteer row with the requested status and return the persisted entity."""
         orm = EventVolunteer(
             volunteer_id=volunteer_id,
             event_id=event_id,
-            status=EventVolunteerStatus.PENDING,
+            status=status,
         )
         self.db.add(orm)
         await self.db.flush()
@@ -288,59 +345,3 @@ class EventVolunteerRepository:
         await self.db.delete(orm)
         await self.db.flush()
         return True
-
-    async def get_participants_by_event(
-        self,
-        event_id: uuid.UUID,
-        *,
-        status: str | None = None,
-        limit: int = 50,
-        offset: int = 0,
-    ) -> list[EventParticipantEntity]:
-        """Return paginated participants across all sessions of an event.
-
-        Joins ``event_participants`` with ``event_sessions`` on ``event_session_id``
-        to filter by the parent event ID, since participants belong to sessions rather
-        than events directly.
-
-        Args:
-            event_id: UUID of the parent event.
-            status:   When provided, restricts results to participants with the given status.
-            limit:    Maximum number of rows to return.
-            offset:   Number of rows to skip before collecting results.
-
-        Returns:
-            List of ``EventParticipantEntity`` objects ordered by creation date descending.
-        """
-        query = (
-            select(EventParticipant)
-            .join(EventSession, EventParticipant.event_session_id == EventSession.id)
-            .where(EventSession.event_id == event_id)
-            .order_by(EventParticipant.created_at.desc())
-        )
-        if status is not None:
-            query = query.where(EventParticipant.status == status)
-        query = query.limit(limit).offset(offset)
-        result = await self.db.execute(query)
-        return [self._to_participant_entity(orm) for orm in result.scalars().all()]
-
-    async def count_participants_by_event(self, event_id: uuid.UUID, *, status: str | None = None) -> int:
-        """Return the total number of participants across all sessions of an event.
-
-        Args:
-            event_id: UUID of the parent event.
-            status:   When provided, counts only participants with the given status.
-
-        Returns:
-            Integer row count.
-        """
-        query = (
-            select(func.count())
-            .select_from(EventParticipant)
-            .join(EventSession, EventParticipant.event_session_id == EventSession.id)
-            .where(EventSession.event_id == event_id)
-        )
-        if status is not None:
-            query = query.where(EventParticipant.status == status)
-        result = await self.db.execute(query)
-        return result.scalar_one()

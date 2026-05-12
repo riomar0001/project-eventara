@@ -15,11 +15,12 @@ Error mapping summary:
 
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 
 from app.application.dto.event_participant_dto import (
     CheckInParticipantInput,
     CheckInParticipantQrCodeInput,
+    GetEventParticipantsInput,
     RegisterForSessionInput,
     UpdateParticipantStatusInput,
     WithdrawRegistrationInput,
@@ -27,7 +28,7 @@ from app.application.dto.event_participant_dto import (
 from app.application.use_cases.audit_log_usecase import AuditLogUseCase
 from app.application.use_cases.event_participant_usecase import EventParticipantUseCase
 from app.controller.api.audit_helpers import safe_audit_log, serialize_event_participant
-from app.controller.dependencies import get_audit_log_use_case, get_current_user_id
+from app.controller.dependencies import get_audit_log_use_case, require_permission
 from app.controller.dependencies.use_cases_depends import get_event_participant_check_in_use_case, get_event_participant_use_case
 from app.controller.docs.event_participant_docs import (
     PARTICIPANT_ALREADY_CHECKED_IN,
@@ -42,17 +43,22 @@ from app.controller.docs.event_participant_docs import (
     PARTICIPANT_UNAUTHORIZED,
     PARTICIPANT_UNAUTHORIZED_OPERATION,
     PARTICIPANT_VALIDATION_ERROR,
+    PARTICIPANTS_FORBIDDEN,
 )
 from app.controller.schemas.event_participant_schema import (
     CheckInParticipantQrCodeRequest,
     CheckInParticipantResponse,
+    EventParticipantRecord,
     EventParticipantRecordResponse,
+    EventParticipantsResponse,
+    PaginationMeta,
     RegisterForSessionResponse,
     UpdateParticipantStatusRequest,
     UpdateParticipantStatusResponse,
     WithdrawRegistrationResponse,
 )
 from app.domain.entities.audit_log import ActionType, AuditLogStatus
+from app.domain.entities.authorization_entities import RoleAction
 from app.domain.entities.event_entity import EventParticipant as EventParticipantEntity
 from app.domain.exceptions.event_exceptions import EventNotFoundError
 from app.domain.exceptions.event_participant_exceptions import (
@@ -86,6 +92,25 @@ def _to_participant_response(participant: EventParticipantEntity) -> EventPartic
     )
 
 
+def _to_participant_record(participant: EventParticipantEntity) -> EventParticipantRecord:
+    return EventParticipantRecord(
+        id=participant.id,
+        user_id=participant.user_id,
+        event_session_id=participant.event_session_id,
+        status=participant.status.value if hasattr(participant.status, "value") else participant.status,
+        is_checked_in=participant.is_checked_in,
+        checked_in_time=participant.checked_in_time,
+        checked_in_by=participant.checked_in_by,
+        user_first_name=participant.user_first_name,
+        user_last_name=participant.user_last_name,
+        user_alias=participant.user_alias,
+        user_profile_picture_url=participant.user_profile_picture_url,
+        event_session_title=participant.event_session_title,
+        created_at=participant.created_at,
+        updated_at=participant.updated_at,
+    )
+
+
 async def _audit_failure(
     audit_use_case: AuditLogUseCase,
     request: Request,
@@ -113,6 +138,83 @@ async def _audit_failure(
     )
 
 
+@participant_router.get(
+    "/{event_id}/participants",
+    response_model=EventParticipantsResponse,
+    status_code=status.HTTP_200_OK,
+    responses={
+        **PARTICIPANT_UNAUTHORIZED,
+        **PARTICIPANTS_FORBIDDEN,
+        404: {
+            "description": "Event not found",
+        },
+    },
+    summary="Get all event participants",
+    description=(
+        "Retrieve all participants across all sessions of the specified event. "
+        "Access is granted to the event organizer and to any volunteer with JOINED "
+        "status for this event. "
+        "Optional status filter restricts results to a specific participant state. "
+        "Results are paginated via limit and offset query parameters. "
+        "Responses include participant profile and session display fields for table rendering."
+    ),
+)
+async def get_event_participants(
+    request: Request,
+    event_id: uuid.UUID,
+    participant_status: str | None = Query(default=None, alias="status"),
+    limit: int = Query(default=50, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
+    user_id: uuid.UUID = Depends(require_permission("event-participants", RoleAction.READ)),
+    use_case: EventParticipantUseCase = Depends(get_event_participant_use_case),
+    audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
+) -> EventParticipantsResponse:
+    """Retrieve all event participants through the event-participants feature.
+
+    # Error mapping
+    - **401 Unauthorized** — missing, expired, or invalid Bearer token.
+    - **403 Forbidden** — caller is neither the event organizer nor a JOINED volunteer.
+    - **404 Not Found** — event does not exist.
+    """
+    try:
+        result = await use_case.get_participants(
+            GetEventParticipantsInput(
+                event_id=event_id,
+                actor_id=user_id,
+                status=participant_status,
+                limit=limit,
+                offset=offset,
+            )
+        )
+    except EventNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except UnauthorizedEventParticipantOperationError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
+
+    await safe_audit_log(
+        audit_use_case,
+        request,
+        user_id=user_id,
+        action_type=ActionType.READ,
+        resource_type="event_participants",
+        resource_id=str(event_id),
+        status=AuditLogStatus.SUCCESS,
+        additional_context={
+            "event_id": str(event_id),
+            "filter_status": participant_status,
+            "total": result.total,
+            "feature": "event_participants",
+        },
+    )
+
+    return EventParticipantsResponse(
+        success=True,
+        message="Event participants retrieved successfully.",
+        data=[_to_participant_record(participant) for participant in result.participants],
+        meta=PaginationMeta(total=result.total, limit=limit, offset=offset),
+    )
+
+
 @participant_router.post(
     "/{event_id}/session/{session_id}/register",
     response_model=RegisterForSessionResponse,
@@ -137,7 +239,7 @@ async def register_for_session(
     request: Request,
     event_id: uuid.UUID,
     session_id: uuid.UUID,
-    user_id: uuid.UUID = Depends(get_current_user_id),
+    user_id: uuid.UUID = Depends(require_permission("event-participants", RoleAction.CREATE)),
     use_case: EventParticipantUseCase = Depends(get_event_participant_use_case),
     audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> RegisterForSessionResponse:
@@ -189,7 +291,7 @@ async def withdraw_registration(
     request: Request,
     event_id: uuid.UUID,
     session_id: uuid.UUID,
-    user_id: uuid.UUID = Depends(get_current_user_id),
+    user_id: uuid.UUID = Depends(require_permission("event-participants", RoleAction.DELETE)),
     use_case: EventParticipantUseCase = Depends(get_event_participant_use_case),
     audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> WithdrawRegistrationResponse:
@@ -274,7 +376,7 @@ async def update_participant_status(
     session_id: uuid.UUID,
     participant_id: uuid.UUID,
     body: UpdateParticipantStatusRequest,
-    user_id: uuid.UUID = Depends(get_current_user_id),
+    user_id: uuid.UUID = Depends(require_permission("event-participants", RoleAction.UPDATE)),
     use_case: EventParticipantUseCase = Depends(get_event_participant_use_case),
     audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> UpdateParticipantStatusResponse:
@@ -338,7 +440,7 @@ async def check_in_participant(
     event_id: uuid.UUID,
     session_id: uuid.UUID,
     participant_id: uuid.UUID,
-    user_id: uuid.UUID = Depends(get_current_user_id),
+    user_id: uuid.UUID = Depends(require_permission("event-participants", RoleAction.UPDATE)),
     use_case: EventParticipantUseCase = Depends(get_event_participant_check_in_use_case),
     audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> CheckInParticipantResponse:
@@ -458,7 +560,7 @@ async def check_in_participant(
 async def check_in_participant_qr_code(
     request: Request,
     body: CheckInParticipantQrCodeRequest,
-    user_id: uuid.UUID = Depends(get_current_user_id),
+    user_id: uuid.UUID = Depends(require_permission("event-participants", RoleAction.UPDATE)),
     use_case: EventParticipantUseCase = Depends(get_event_participant_check_in_use_case),
     audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> CheckInParticipantResponse:

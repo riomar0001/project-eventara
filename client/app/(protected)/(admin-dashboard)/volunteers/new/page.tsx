@@ -1,5 +1,10 @@
 import { VolunteerForm } from '@/components/admin/volunteers/volunteer-form';
+import { PermissionGate } from '@/components/auth/permission-gate';
 
 export default function AdminVolunteerCreatePage() {
-  return <VolunteerForm mode="create" />;
+  return (
+    <PermissionGate feature="volunteers" action="create">
+      <VolunteerForm mode="create" />
+    </PermissionGate>
+  );
 }

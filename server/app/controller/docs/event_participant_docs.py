@@ -129,3 +129,18 @@ PARTICIPANT_QR_TOKEN_INVALID = {
         "content": {"application/json": {"example": {"success": False, "message": "Invalid QR code token"}}},
     }
 }
+
+PARTICIPANTS_FORBIDDEN = {
+    403: {
+        "description": "Caller is neither the event organizer nor a joined volunteer",
+        "model": ErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "message": "You do not have permission to view participants for this event",
+                }
+            }
+        },
+    }
+}

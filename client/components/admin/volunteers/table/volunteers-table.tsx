@@ -14,7 +14,7 @@ interface VolunteersTableContentProps {
 }
 
 export function VolunteersTableContent({ volunteers, isLoading, error, onEditVolunteer }: VolunteersTableContentProps) {
-  const columns = createVolunteerColumns(onEditVolunteer ?? (() => {}));
+  const columns = createVolunteerColumns(onEditVolunteer);
 
   // TanStack Table is intentionally used here for the shadcn data table pattern.
   // eslint-disable-next-line react-hooks/incompatible-library

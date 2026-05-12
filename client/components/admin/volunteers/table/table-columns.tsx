@@ -35,7 +35,7 @@ const STATUS_STYLES: Record<string, string> = {
   suspended: 'bg-red-100 text-red-700'
 };
 
-export function createVolunteerColumns(onEdit: (volunteer: VolunteerTableRecord) => void): ColumnDef<VolunteerTableRecord>[] {
+export function createVolunteerColumns(onEdit?: (volunteer: VolunteerTableRecord) => void): ColumnDef<VolunteerTableRecord>[] {
   return [
     {
       id: 'profile',
@@ -105,10 +105,12 @@ export function createVolunteerColumns(onEdit: (volunteer: VolunteerTableRecord)
                   View profile
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onEdit(row.original)}>
-                <PencilLine className="size-4" />
-                Edit volunteer
-              </DropdownMenuItem>
+              {onEdit ? (
+                <DropdownMenuItem onClick={() => onEdit(row.original)}>
+                  <PencilLine className="size-4" />
+                  Edit volunteer
+                </DropdownMenuItem>
+              ) : null}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

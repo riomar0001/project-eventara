@@ -180,13 +180,13 @@ export function EventForm({ mode, event, initialSessions = [] }: EventFormProps)
     async function loadVenues() {
       try {
         const result = await Venues.listVenuesVenuesGet({
-          query: { page_size: 100 },
+          query: { page_size: 100, is_partner: true },
           headers: { Authorization: `Bearer ${getAccessToken()}` },
           throwOnError: false
         });
         if (result.data && !cancelled) setVenues(result.data.data.map((v) => ({ id: v.id, name: v.name })));
       } catch {
-        // leave empty — venue IDs can still be typed manually if needed
+        if (!cancelled) setVenues([]);
       } finally {
         if (!cancelled) setVenuesLoading(false);
       }

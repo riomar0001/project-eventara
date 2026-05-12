@@ -92,6 +92,14 @@ EVENT_NOT_FOUND = {
     }
 }
 
+EVENT_VENUE_NOT_PARTNER = {
+    400: {
+        "description": "Referenced venue is not a partner venue",
+        "model": ErrorResponse,
+        "content": {"application/json": {"example": {"success": False, "message": "Only partner venues can be used for event sessions"}}},
+    }
+}
+
 EVENT_DATE_INVALID = {
     400: {
         "description": "Event or session date constraints violated",

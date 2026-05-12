@@ -1,5 +1,7 @@
 """Use cases for event creation, metadata update, and individual session update."""
 
+from datetime import UTC, datetime
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application.dto.event_dto import (
@@ -14,6 +16,7 @@ from app.application.dto.event_dto import (
     UpdateEventSessionInput,
     UpdateEventSessionOutput,
 )
+from app.domain.entities.event_entity import EventSessionStatus, EventStatus
 from app.domain.exceptions.event_exceptions import (
     EventDateValidationError,
     EventNotFoundError,
@@ -25,8 +28,65 @@ from app.domain.exceptions.event_session_exceptions import (
     EventSessionNotFoundError,
     InvalidEventSessionDateError,
 )
-from app.domain.exceptions.venue_exceptions import VenueNotFoundError
+from app.domain.exceptions.venue_exceptions import VenueNotFoundError, VenueNotPartnerError
 from app.infrastructure.database.repositories.event_repository import EventRepository
+
+_DATE_RECONCILED_EVENT_STATUSES = {EventStatus.POSTED, EventStatus.STARTED, EventStatus.ENDED}
+_DATE_RECONCILED_EVENT_SESSION_STATUSES = {EventSessionStatus.POSTED, EventSessionStatus.STARTED, EventSessionStatus.ENDED}
+
+
+def _to_utc(value: datetime) -> datetime:
+    """Return a timezone-aware UTC datetime for date comparison in status reconciliation."""
+    if value.tzinfo is None:
+        return value.replace(tzinfo=UTC)
+    return value.astimezone(UTC)
+
+
+def resolve_event_status_for_dates(current_status: EventStatus, start_date: datetime, end_date: datetime, now: datetime | None = None) -> EventStatus:
+    """Resolve the event lifecycle status after a date-range update.
+
+    Only time-managed lifecycle states are recalculated. Draft, cancelled, and
+    postponed events retain their explicit editorial state because those statuses
+    represent organizer intent rather than clock-derived progress.
+    """
+    if current_status not in _DATE_RECONCILED_EVENT_STATUSES:
+        return current_status
+
+    current_time = _to_utc(now or datetime.now(UTC))
+    start = _to_utc(start_date)
+    end = _to_utc(end_date)
+
+    if current_time < start:
+        return EventStatus.POSTED
+    if current_time >= end:
+        return EventStatus.ENDED
+    return EventStatus.STARTED
+
+
+def resolve_event_session_status_for_dates(
+    current_status: EventSessionStatus,
+    start_datetime: datetime,
+    end_datetime: datetime,
+    now: datetime | None = None,
+) -> EventSessionStatus:
+    """Resolve the event session lifecycle status after a date-range update.
+
+    Only time-managed lifecycle states are recalculated. Draft, cancelled, and
+    postponed sessions retain their explicit organizer state because those
+    statuses represent manual intent rather than clock-derived progress.
+    """
+    if current_status not in _DATE_RECONCILED_EVENT_SESSION_STATUSES:
+        return current_status
+
+    current_time = _to_utc(now or datetime.now(UTC))
+    start = _to_utc(start_datetime)
+    end = _to_utc(end_datetime)
+
+    if current_time < start:
+        return EventSessionStatus.POSTED
+    if current_time >= end:
+        return EventSessionStatus.ENDED
+    return EventSessionStatus.STARTED
 
 
 class EventUseCase:
@@ -54,6 +114,20 @@ class EventUseCase:
         self.repo = repo
         self.db = db
 
+    async def _ensure_partner_venue(self, venue_id) -> None:
+        """Ensure a session venue exists and is eligible for event scheduling.
+
+        Event sessions are restricted to partner venues so organizer-created
+        events cannot reserve community-suggested or otherwise unapproved
+        locations. Existence and partner checks stay separate so callers receive
+        a precise not-found error for missing venues and a business validation
+        error for existing but ineligible venues.
+        """
+        if not await self.repo.venue_exists(venue_id):
+            raise VenueNotFoundError(str(venue_id))
+        if not await self.repo.venue_is_partner(venue_id):
+            raise VenueNotPartnerError(str(venue_id))
+
     async def create_event(self, data: CreateEventInput) -> EventWithSessionsOutput:
         """Create an event and all its sessions in a single atomic transaction.
 
@@ -62,7 +136,7 @@ class EventUseCase:
         2. Non-empty sessions list.
         3. Per-session: end must be strictly after start.
         4. Per-session: window must fall within the event date range.
-        5. Per-session: the referenced venue must exist.
+        5. Per-session: the referenced venue must exist and be partnered.
 
         Raises:
             EventDateValidationError: ``end_date`` ≤ ``start_date``.
@@ -70,6 +144,7 @@ class EventUseCase:
             InvalidEventSessionDateError: A session's ``end_datetime`` ≤ ``start_datetime``.
             EventSessionExceedsEventBoundsError: A session window outside event range.
             VenueNotFoundError: A session references a non-existent venue.
+            VenueNotPartnerError: A session references a non-partner venue.
         """
         if data.end_date <= data.start_date:
             raise EventDateValidationError("Event end_date must be after start_date")
@@ -89,8 +164,7 @@ class EventUseCase:
                 )
 
         for s in data.sessions:
-            if not await self.repo.venue_exists(s.venue_id):
-                raise VenueNotFoundError()
+            await self._ensure_partner_venue(s.venue_id)
 
         try:
             event = await self.repo.create_event(
@@ -129,7 +203,7 @@ class EventUseCase:
         2. Caller is the event creator.
         3. Session end must be after session start.
         4. Session window must fall within the parent event date range.
-        5. Referenced venue must exist.
+        5. Referenced venue must exist and be partnered.
 
         Raises:
             EventNotFoundError: No event exists for ``data.event_id``.
@@ -137,6 +211,7 @@ class EventUseCase:
             InvalidEventSessionDateError: ``end_datetime`` ≤ ``start_datetime``.
             EventSessionExceedsEventBoundsError: Session outside event range.
             VenueNotFoundError: Referenced venue does not exist.
+            VenueNotPartnerError: Referenced venue is not partnered.
         """
         event = await self.repo.get_event_by_id(data.event_id, for_update=True)
         if event is None:
@@ -156,8 +231,7 @@ class EventUseCase:
                 str(event.end_date),
             )
 
-        if not await self.repo.venue_exists(data.venue_id):
-            raise VenueNotFoundError()
+        await self._ensure_partner_venue(data.venue_id)
 
         try:
             session = await self.repo.create_session(
@@ -177,12 +251,14 @@ class EventUseCase:
         return CreateEventSessionOutput(session=session)
 
     async def update_event_metadata(self, data: UpdateEventMetadataInput) -> UpdateEventMetadataOutput:
-        """Update title, description, and date range for an existing event.
+        """Update title, description, date range, banner, and clock-derived lifecycle status for an existing event.
 
         Validation order:
         1. Event exists (with row lock).
         2. Caller is the event creator.
         3. Event date range is valid (end strictly after start).
+        4. Time-managed event statuses are reconciled from the submitted date
+           range using the request-time clock before persistence.
 
         Raises:
             EventNotFoundError: No event exists for ``data.event_id``.
@@ -199,6 +275,8 @@ class EventUseCase:
         if data.end_date <= data.start_date:
             raise EventDateValidationError("Event end_date must be after start_date")
 
+        new_status = resolve_event_status_for_dates(event.status, data.start_date, data.end_date)
+
         try:
             updated_event = await self.repo.update_event(
                 event_id=data.event_id,
@@ -207,6 +285,7 @@ class EventUseCase:
                 start_date=data.start_date,
                 end_date=data.end_date,
                 banner_url=data.banner_url,
+                status=new_status,
             )
         except Exception:
             await self.db.rollback()
@@ -258,7 +337,7 @@ class EventUseCase:
         return UpdateEventBannerOutput(event=updated_event, old_banner_url=old_banner_url)
 
     async def update_event_session(self, data: UpdateEventSessionInput) -> UpdateEventSessionOutput:
-        """Update the fields of a single event session by its ID.
+        """Update the fields and clock-derived lifecycle status of a single event session by its ID.
 
         Validation order:
         1. Session exists.
@@ -266,7 +345,9 @@ class EventUseCase:
         3. Caller is the event creator.
         4. Session end strictly after start.
         5. Session window within the current event date range.
-        6. Referenced venue exists.
+        6. Referenced venue exists and is partnered.
+        7. Time-managed session statuses are reconciled from the submitted
+           schedule using the request-time clock before persistence.
 
         Raises:
             EventSessionNotFoundError: No session for ``data.session_id``.
@@ -275,6 +356,7 @@ class EventUseCase:
             InvalidEventSessionDateError: ``end_datetime`` ≤ ``start_datetime``.
             EventSessionExceedsEventBoundsError: Session outside event range.
             VenueNotFoundError: Referenced venue does not exist.
+            VenueNotPartnerError: Referenced venue is not partnered.
         """
         old_session = await self.repo.get_session_by_id(data.session_id)
         if old_session is None:
@@ -298,8 +380,9 @@ class EventUseCase:
                 str(event.end_date),
             )
 
-        if not await self.repo.venue_exists(data.venue_id):
-            raise VenueNotFoundError()
+        await self._ensure_partner_venue(data.venue_id)
+
+        new_status = resolve_event_session_status_for_dates(old_session.status, data.start_datetime, data.end_datetime)
 
         try:
             updated_session = await self.repo.update_session(
@@ -310,6 +393,7 @@ class EventUseCase:
                 start_datetime=data.start_datetime,
                 end_datetime=data.end_datetime,
                 max_slots=data.max_slots,
+                status=new_status,
             )
             if updated_session is None:
                 raise EventSessionNotFoundError(str(data.session_id))

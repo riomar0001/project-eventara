@@ -3,6 +3,7 @@
 import { use } from 'react';
 import { VenueForm } from '@/components/admin/venues/venue-form';
 import { BackLink } from '@/components/admin/venues/venues-shared';
+import { PermissionGate } from '@/components/auth/permission-gate';
 import { useVenue } from '@/hooks/admin/venues/use-venue';
 import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
 
@@ -34,5 +35,9 @@ function VenueEditContent({ venueId }: { venueId: string }) {
 
 export default function AdminVenueEditPage({ params }: { params: Promise<{ venueId: string }> }) {
   const { venueId } = use(params);
-  return <VenueEditContent venueId={venueId} />;
+  return (
+    <PermissionGate feature="venues" action="update">
+      <VenueEditContent venueId={venueId} />
+    </PermissionGate>
+  );
 }

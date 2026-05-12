@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { AlertCircle, Loader2, Plus } from 'lucide-react';
+import { AlertCircle, Loader2, Save } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { DateTimePicker } from '@/components/ui/date-time-picker';
@@ -12,14 +12,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { useVenues } from '@/hooks/admin/venues/use-venues';
 import { DetailPanel, FieldLabel } from './events-shared';
 import { Events } from '@/api/sdk.gen';
-import type { EventRecordResponse } from '@/api/types.gen';
+import type { EventRecordResponse, EventSessionRecordResponse } from '@/api/types.gen';
 import { getApiErrorMessage, getAuthHeaders } from '@/lib/system/api-request';
 
-type EventSessionCreateDialogProps = {
+type EventSessionEditDialogProps = {
   event: EventRecordResponse;
-  sessionsCount: number;
+  session: EventSessionRecordResponse;
   onClose: () => void;
-  onCreated?: () => void;
+  onUpdated?: () => void;
 };
 
 function toLocalInput(iso: string) {
@@ -28,22 +28,16 @@ function toLocalInput(iso: string) {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
-function addHours(iso: string, hours: number) {
-  const next = new Date(iso);
-  next.setHours(next.getHours() + hours);
-  return next.toISOString();
-}
-
-export function EventSessionCreateDialog({ event, onClose, onCreated }: EventSessionCreateDialogProps) {
+export function EventSessionEditDialog({ event, session, onClose, onUpdated }: EventSessionEditDialogProps) {
   const { venues, isLoading: venuesLoading, error: venuesError } = useVenues({ isPartner: true });
   const sortedVenues = useMemo(() => [...venues].sort((a, b) => a.name.localeCompare(b.name)), [venues]);
 
-  const [venueId, setVenueId] = useState('');
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [startDatetime, setStartDatetime] = useState(() => toLocalInput(event.start_date));
-  const [endDatetime, setEndDatetime] = useState(() => toLocalInput(addHours(event.start_date, 1)));
-  const [maxSlots, setMaxSlots] = useState('');
+  const [venueId, setVenueId] = useState(session.venue_id);
+  const [title, setTitle] = useState(session.title);
+  const [description, setDescription] = useState(session.description ?? '');
+  const [startDatetime, setStartDatetime] = useState(() => toLocalInput(session.start_datetime));
+  const [endDatetime, setEndDatetime] = useState(() => toLocalInput(session.end_datetime));
+  const [maxSlots, setMaxSlots] = useState(session.max_slots !== null ? String(session.max_slots) : '');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const selectedVenue = useMemo(() => sortedVenues.find((venue) => venue.id === venueId) ?? null, [sortedVenues, venueId]);
@@ -83,8 +77,8 @@ export function EventSessionCreateDialog({ event, onClose, onCreated }: EventSes
 
     setIsSubmitting(true);
     try {
-      const result = await Events.createEventSessionEventsEventIdSessionPost({
-        path: { event_id: event.id },
+      const result = await Events.updateEventSessionEventsEventIdSessionSessionIdPatch({
+        path: { event_id: event.id, session_id: session.id },
         body: {
           venue_id: venueId,
           title: title.trim(),
@@ -97,13 +91,13 @@ export function EventSessionCreateDialog({ event, onClose, onCreated }: EventSes
         throwOnError: false
       });
 
-      if (!result.data) throw result.error ?? new Error('Unable to create session right now.');
+      if (!result.data) throw result.error ?? new Error('Unable to update session right now.');
 
-      toast.success(result.data.message ?? 'Event session created successfully.');
-      onCreated?.();
+      toast.success(result.data.message ?? 'Event session updated successfully.');
+      onUpdated?.();
       onClose();
     } catch (submitError) {
-      toast.error(getApiErrorMessage(submitError, 'Unable to create session right now.'));
+      toast.error(getApiErrorMessage(submitError, 'Unable to update session right now.'));
     } finally {
       setIsSubmitting(false);
     }
@@ -114,9 +108,9 @@ export function EventSessionCreateDialog({ event, onClose, onCreated }: EventSes
       <DialogContent className="max-h-[92vh] overflow-hidden border-0 bg-white p-0 shadow-2xl sm:max-w-6xl">
         <div className="max-h-[92vh] overflow-y-auto">
           <DialogHeader className="border-b border-neutral-200/80 px-6 pt-6 pb-4">
-            <DialogTitle className="text-xl tracking-tight text-neutral-950">Create event session</DialogTitle>
+            <DialogTitle className="text-xl tracking-tight text-neutral-950">Update event session</DialogTitle>
             <DialogDescription className="max-w-2xl text-sm leading-6">
-              Add a session to {event.title}. The new session must stay within the event window and uses the selected venue capacity.
+              Update {session.title}. The session schedule must stay inside the event date range.
             </DialogDescription>
           </DialogHeader>
 
@@ -128,12 +122,12 @@ export function EventSessionCreateDialog({ event, onClose, onCreated }: EventSes
               </div>
             )}
 
-            <DetailPanel title="Session details" description="Create one session for this event. The schedule must stay inside the event date range.">
+            <DetailPanel title="Session details" description="Edit the venue, schedule, title, and capacity for this session.">
               <form className="space-y-5" onSubmit={handleSubmit}>
                 <div className="space-y-2">
-                  <FieldLabel htmlFor="session-venue">Venue *</FieldLabel>
+                  <FieldLabel htmlFor="edit-session-venue">Venue *</FieldLabel>
                   <Select value={venueId} onValueChange={setVenueId} disabled={venuesLoading || Boolean(venuesError) || isSubmitting}>
-                    <SelectTrigger id="session-venue">
+                    <SelectTrigger id="edit-session-venue">
                       <SelectValue placeholder={venuesLoading ? 'Loading venues…' : 'Select a venue'} />
                     </SelectTrigger>
                     <SelectContent>
@@ -152,11 +146,11 @@ export function EventSessionCreateDialog({ event, onClose, onCreated }: EventSes
                 </div>
 
                 <div className="space-y-2">
-                  <FieldLabel htmlFor="session-title">Session title *</FieldLabel>
+                  <FieldLabel htmlFor="edit-session-title">Session title *</FieldLabel>
                   <Input
-                    id="session-title"
+                    id="edit-session-title"
                     value={title}
-                    onChange={(event) => setTitle(event.target.value)}
+                    onChange={(inputEvent) => setTitle(inputEvent.target.value)}
                     placeholder="Opening forum, keynote, workshop, and more"
                     maxLength={255}
                     disabled={isSubmitting}
@@ -164,11 +158,11 @@ export function EventSessionCreateDialog({ event, onClose, onCreated }: EventSes
                 </div>
 
                 <div className="space-y-2">
-                  <FieldLabel htmlFor="session-description">Session description</FieldLabel>
+                  <FieldLabel htmlFor="edit-session-description">Session description</FieldLabel>
                   <Textarea
-                    id="session-description"
+                    id="edit-session-description"
                     value={description}
-                    onChange={(event) => setDescription(event.target.value)}
+                    onChange={(inputEvent) => setDescription(inputEvent.target.value)}
                     placeholder="Add a short operational or program note for this session."
                     className="min-h-24"
                     maxLength={5000}
@@ -178,9 +172,9 @@ export function EventSessionCreateDialog({ event, onClose, onCreated }: EventSes
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <FieldLabel htmlFor="session-start">Start datetime *</FieldLabel>
+                    <FieldLabel htmlFor="edit-session-start">Start datetime *</FieldLabel>
                     <DateTimePicker
-                      id="session-start"
+                      id="edit-session-start"
                       value={startDatetime}
                       onChange={setStartDatetime}
                       minDatetime={eventStart}
@@ -190,9 +184,9 @@ export function EventSessionCreateDialog({ event, onClose, onCreated }: EventSes
                     />
                   </div>
                   <div className="space-y-2">
-                    <FieldLabel htmlFor="session-end">End datetime *</FieldLabel>
+                    <FieldLabel htmlFor="edit-session-end">End datetime *</FieldLabel>
                     <DateTimePicker
-                      id="session-end"
+                      id="edit-session-end"
                       value={endDatetime}
                       onChange={setEndDatetime}
                       minDatetime={startDatetime ? new Date(startDatetime) : eventStart}
@@ -204,13 +198,13 @@ export function EventSessionCreateDialog({ event, onClose, onCreated }: EventSes
                 </div>
 
                 <div className="space-y-2">
-                  <FieldLabel htmlFor="session-max-slots">Max slots</FieldLabel>
+                  <FieldLabel htmlFor="edit-session-max-slots">Max slots</FieldLabel>
                   <Input
-                    id="session-max-slots"
+                    id="edit-session-max-slots"
                     type="number"
                     min="1"
                     value={maxSlots}
-                    onChange={(event) => setMaxSlots(event.target.value)}
+                    onChange={(inputEvent) => setMaxSlots(inputEvent.target.value)}
                     placeholder={selectedVenue ? `Leave blank to use ${selectedVenue.capacity.toLocaleString()} seats` : 'Optional'}
                     disabled={isSubmitting}
                   />
@@ -230,8 +224,8 @@ export function EventSessionCreateDialog({ event, onClose, onCreated }: EventSes
 
                 <DialogFooter className="border-t border-neutral-200/80 pt-5">
                   <Button type="submit" disabled={isSubmitting || venuesLoading || Boolean(venuesError)} className="rounded-xl">
-                    {isSubmitting ? <Loader2 className="size-4 animate-spin" /> : <Plus className="size-4" />}
-                    {isSubmitting ? 'Creating…' : 'Create session'}
+                    {isSubmitting ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
+                    {isSubmitting ? 'Saving…' : 'Save changes'}
                   </Button>
                   <Button type="button" variant="outline" onClick={onClose} className="rounded-xl">
                     Cancel

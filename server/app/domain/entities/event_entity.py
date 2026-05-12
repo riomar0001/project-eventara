@@ -79,6 +79,11 @@ class EventParticipant(BaseModel):
     is_checked_in: bool = False
     checked_in_time: datetime | None = None
     checked_in_by: uuid.UUID | None = None
+    user_first_name: str | None = None
+    user_last_name: str | None = None
+    user_alias: str | None = None
+    user_profile_picture_url: str | None = None
+    event_session_title: str | None = None
     created_at: datetime | None = None
     updated_at: datetime | None = None
 
@@ -125,6 +130,12 @@ class EventVolunteer(BaseModel):
     volunteer_id: uuid.UUID
     event_id: uuid.UUID
     status: EventVolunteerStatus = EventVolunteerStatus.PENDING
+    volunteer_user_id: uuid.UUID | None = None
+    volunteer_first_name: str | None = None
+    volunteer_last_name: str | None = None
+    volunteer_alias: str | None = None
+    volunteer_profile_picture_url: str | None = None
+    volunteer_role_name: str | None = None
     created_at: datetime | None = None
     updated_at: datetime | None = None
 

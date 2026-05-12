@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.application.dto.event_participant_dto import RegisterForSessionInput, UpdateParticipantStatusInput
+from app.application.dto.event_participant_dto import GetEventParticipantsInput, RegisterForSessionInput, UpdateParticipantStatusInput
 from app.application.use_cases.event_participant_usecase import EventParticipantUseCase
 from app.domain.entities.event_entity import (
     Event,
@@ -29,6 +29,7 @@ from app.domain.exceptions.event_participant_exceptions import (
 from app.domain.exceptions.event_session_exceptions import EventSessionNotFoundError
 from app.infrastructure.database.repositories.event_participant_repository import EventParticipantRepository
 from app.infrastructure.database.repositories.event_repository import EventRepository
+from app.infrastructure.database.repositories.event_volunteer_repository import EventVolunteerRepository
 from app.infrastructure.database.repositories.role_repository import RoleRepository
 from app.infrastructure.database.repositories.user_repository import UserRepository
 
@@ -127,6 +128,39 @@ def _make_register_uc(event_repo=None, participant_repo=None, role_repo=None):
     role_repo = role_repo or _make_role_repo()
     db = AsyncMock(spec=AsyncSession)
     return EventParticipantUseCase(participant_repo, event_repo, role_repo, db), event_repo, participant_repo, db
+
+
+def _make_participant_access_uc(event_repo=None, participant_repo=None, event_volunteer_repo=None):
+    if event_repo is None:
+        event_repo = MagicMock(spec=EventRepository)
+        event_repo.get_event_by_id = AsyncMock(return_value=_sample_event())
+
+    participant_repo = participant_repo or MagicMock(spec=EventParticipantRepository)
+    participant_repo.get_participants_by_event = AsyncMock(
+        return_value=[
+            _sample_participant(
+                user_first_name="Test",
+                user_last_name="Participant",
+                user_alias="testparticipant",
+                event_session_title="Opening Session",
+            )
+        ]
+    )
+    participant_repo.count_participants_by_event = AsyncMock(return_value=1)
+
+    if event_volunteer_repo is None:
+        event_volunteer_repo = MagicMock(spec=EventVolunteerRepository)
+        event_volunteer_repo.get_joined_event_volunteer_for_user = AsyncMock(return_value=None)
+
+    db = AsyncMock(spec=AsyncSession)
+    uc = EventParticipantUseCase(participant_repo, event_repo, _make_role_repo(), db, event_volunteer_repo=event_volunteer_repo)
+    return uc, event_repo, participant_repo, event_volunteer_repo
+
+
+def _participants_input(**overrides):
+    defaults = dict(event_id=EVENT_ID, actor_id=CREATOR_ID)
+    defaults.update(overrides)
+    return GetEventParticipantsInput(**defaults)
 
 
 def _make_register_uc_with_email(event_repo=None, participant_repo=None, role_repo=None):
@@ -256,6 +290,54 @@ async def test_register_returns_registered_participant():
     result = await uc.register_for_session(_register_input())
     assert result.participant.id == PARTICIPANT_ID
     assert result.participant.status == EventParticipantStatus.REGISTERED
+
+
+@pytest.mark.asyncio
+async def test_get_participants_raises_when_event_not_found():
+    event_repo = MagicMock(spec=EventRepository)
+    event_repo.get_event_by_id = AsyncMock(return_value=None)
+    uc, _, _, _ = _make_participant_access_uc(event_repo=event_repo)
+    with pytest.raises(EventNotFoundError):
+        await uc.get_participants(_participants_input())
+
+
+@pytest.mark.asyncio
+async def test_get_participants_allowed_for_event_organizer():
+    uc, _, participant_repo, event_volunteer_repo = _make_participant_access_uc()
+    result = await uc.get_participants(_participants_input(actor_id=CREATOR_ID))
+    event_volunteer_repo.get_joined_event_volunteer_for_user.assert_not_called()
+    participant_repo.get_participants_by_event.assert_called_once()
+    assert result.total == 1
+    assert result.participants[0].event_session_title == "Opening Session"
+    assert result.participants[0].user_alias == "testparticipant"
+
+
+@pytest.mark.asyncio
+async def test_get_participants_allowed_for_joined_volunteer():
+    event_repo = MagicMock(spec=EventRepository)
+    event_repo.get_event_by_id = AsyncMock(return_value=_sample_event(created_by=CREATOR_ID))
+    event_volunteer_repo = MagicMock(spec=EventVolunteerRepository)
+    event_volunteer_repo.get_joined_event_volunteer_for_user = AsyncMock(return_value=MagicMock())
+    uc, _, _, _ = _make_participant_access_uc(event_repo=event_repo, event_volunteer_repo=event_volunteer_repo)
+    result = await uc.get_participants(_participants_input(actor_id=OTHER_ID))
+    assert result.total == 1
+
+
+@pytest.mark.asyncio
+async def test_get_participants_raises_for_non_joined_volunteer():
+    event_repo = MagicMock(spec=EventRepository)
+    event_repo.get_event_by_id = AsyncMock(return_value=_sample_event(created_by=CREATOR_ID))
+    uc, _, _, _ = _make_participant_access_uc(event_repo=event_repo)
+    with pytest.raises(UnauthorizedEventParticipantOperationError):
+        await uc.get_participants(_participants_input(actor_id=OTHER_ID))
+
+
+@pytest.mark.asyncio
+async def test_get_participants_passes_status_filter_to_repo():
+    uc, _, participant_repo, _ = _make_participant_access_uc()
+    await uc.get_participants(_participants_input(status="registered", limit=10, offset=5))
+    participant_repo.get_participants_by_event.assert_called_once_with(EVENT_ID, status="registered", limit=10, offset=5)
+    participant_repo.count_participants_by_event.assert_called_once_with(EVENT_ID, status="registered")
 
 
 @pytest.mark.asyncio

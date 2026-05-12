@@ -21,7 +21,7 @@ from app.application.dto.event_feedback_dto import CreateEventFeedbackInput
 from app.application.use_cases.audit_log_usecase import AuditLogUseCase
 from app.application.use_cases.event_feedback_usecase import EventFeedbackUseCase
 from app.controller.api.audit_helpers import safe_audit_log, serialize_event_feedback
-from app.controller.dependencies import get_audit_log_use_case, get_current_user_id
+from app.controller.dependencies import get_audit_log_use_case, require_permission
 from app.controller.dependencies.use_cases_depends import get_event_feedback_use_case
 from app.controller.docs.event_feedback_docs import (
     EVENT_FEEDBACK_DUPLICATE,
@@ -39,6 +39,7 @@ from app.controller.schemas.event_feedback_schema import (
     EventFeedbackResponse,
 )
 from app.domain.entities.audit_log import ActionType, AuditLogStatus
+from app.domain.entities.authorization_entities import RoleAction
 from app.domain.entities.event_entity import EventFeedback
 from app.domain.exceptions.event_exceptions import EventNotFoundError, UnauthorizedEventOperationError
 from app.domain.exceptions.event_feedback_exceptions import (
@@ -97,7 +98,7 @@ async def list_event_feedback(
     event_id: uuid.UUID,
     limit: int = Query(default=20, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
-    user_id: uuid.UUID = Depends(get_current_user_id),
+    user_id: uuid.UUID = Depends(require_permission("event-feedback", RoleAction.READ)),
     use_case: EventFeedbackUseCase = Depends(get_event_feedback_use_case),
 ) -> EventFeedbackListResponse:
     """Return submitted feedback for an event to the event creator."""
@@ -137,7 +138,7 @@ async def create_event_feedback(
     request: Request,
     event_id: uuid.UUID,
     body: CreateEventFeedbackRequest,
-    user_id: uuid.UUID = Depends(get_current_user_id),
+    user_id: uuid.UUID = Depends(require_permission("event-feedback", RoleAction.CREATE)),
     use_case: EventFeedbackUseCase = Depends(get_event_feedback_use_case),
     audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> EventFeedbackResponse:

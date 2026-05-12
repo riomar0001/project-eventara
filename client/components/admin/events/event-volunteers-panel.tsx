@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { CheckCircle2, Loader2, MoreHorizontal, Plus, UserX, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { flexRender, getCoreRowModel, useReactTable, type ColumnDef } from '@tanstack/react-table';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -21,6 +22,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useEventVolunteers } from '@/hooks/admin/events/use-event-volunteers';
 import { EventVolunteers } from '@/api/sdk.gen';
 import type { EventVolunteerRecordResponse, EventVolunteerStatus } from '@/api/types.gen';
+import { resolveStorageImageUrl } from '@/lib/storage/image-url';
 import { getApiErrorMessage, getAuthHeaders } from '@/lib/system/api-request';
 import { cn } from '@/lib/utils';
 
@@ -40,8 +42,18 @@ function fmt(iso: string | null) {
   return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
-function shortId(id: string) {
-  return id.slice(0, 8).toUpperCase();
+function volunteerName(record: EventVolunteerRecordResponse) {
+  const fullName = [record.volunteer_first_name, record.volunteer_last_name].filter(Boolean).join(' ').trim();
+  return fullName || record.volunteer_alias || 'Unnamed volunteer';
+}
+
+function volunteerInitials(record: EventVolunteerRecordResponse) {
+  const source = [record.volunteer_first_name, record.volunteer_last_name].filter(Boolean).join(' ').trim() || record.volunteer_alias || 'V';
+  return source
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join('');
 }
 
 function VolunteerStatusBadge({ status }: { status: string }) {
@@ -211,15 +223,26 @@ function RowActions({ record, eventId, onMutated }: RowActionsProps) {
 function buildColumns(eventId: string, onMutated: () => void): ColumnDef<EventVolunteerRecordResponse>[] {
   return [
     {
-      id: 'volunteer_id',
-      header: 'Volunteer ID',
-      cell: ({ row }) => <p className="font-mono text-xs text-neutral-700">{shortId(row.original.volunteer_id)}</p>,
+      id: 'volunteer',
+      header: 'Volunteer name',
+      cell: ({ row }) => (
+        <div className="flex items-center gap-3">
+          <Avatar size="lg">
+            <AvatarImage src={resolveStorageImageUrl(row.original.volunteer_profile_picture_url)} alt={volunteerName(row.original)} />
+            <AvatarFallback className="bg-sky-50 font-semibold text-sky-700">{volunteerInitials(row.original)}</AvatarFallback>
+          </Avatar>
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold text-neutral-950">{volunteerName(row.original)}</p>
+            <p className="text-xs text-neutral-500">{row.original.volunteer_alias ? `@${row.original.volunteer_alias}` : 'No alias'}</p>
+          </div>
+        </div>
+      ),
       meta: { headerClassName: 'pl-6', cellClassName: 'pl-6' } satisfies ColumnMeta
     },
     {
-      id: 'assignment_id',
-      header: 'Assignment ID',
-      cell: ({ row }) => <p className="font-mono text-xs text-neutral-500">{shortId(row.original.id)}</p>
+      id: 'volunteer_role',
+      header: 'Volunteer role',
+      cell: ({ row }) => <p className="text-sm font-medium text-neutral-800">{row.original.volunteer_role_name ?? 'Unassigned role'}</p>
     },
     {
       id: 'status',

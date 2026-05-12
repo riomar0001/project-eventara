@@ -4,6 +4,7 @@ import { AlertCircle, CalendarCheck, CalendarPlus, ChevronLeft, ChevronRight, Im
 import Link from 'next/link';
 import { MobileFloatingAction, PrimaryPageAction } from '@/components/admin/shared/primary-page-action';
 import { Button } from '@/components/ui/button';
+import { usePermissions } from '@/context/permissions-context';
 import { useEvents } from '@/hooks/admin/events/use-events';
 import { CatalogCard, OperationsPageIntro } from './events-shared';
 import type { EventStatus } from '@/api/types.gen';
@@ -37,7 +38,7 @@ function stripAndTruncate(html: string, max = 150) {
   return plain.length > max ? plain.slice(0, max).trimEnd() + '…' : plain;
 }
 
-function EventsEmptyState() {
+function EventsEmptyState({ canCreateEvent }: { canCreateEvent: boolean }) {
   return (
     <div className="overflow-hidden rounded-[24px] border border-neutral-200 bg-white shadow-[0_24px_70px_-46px_rgba(15,23,42,0.45)]">
       <div className="grid lg:grid-cols-[minmax(0,1fr)_340px]">
@@ -56,14 +57,16 @@ function EventsEmptyState() {
             Add the event details, attach a banner, and schedule at least one venue session so the pipeline can move from planning to published.
           </p>
 
-          <div className="mt-6 flex flex-wrap gap-2">
-            <Button asChild className="rounded-xl bg-sky-600 text-white hover:bg-sky-500">
-              <Link href={ADMIN_OPERATIONS_PATHS.eventCreate}>
-                <Plus className="size-4" />
-                Add event
-              </Link>
-            </Button>
-          </div>
+          {canCreateEvent ? (
+            <div className="mt-6 flex flex-wrap gap-2">
+              <Button asChild className="rounded-xl bg-sky-600 text-white hover:bg-sky-500">
+                <Link href={ADMIN_OPERATIONS_PATHS.eventCreate}>
+                  <Plus className="size-4" />
+                  Add event
+                </Link>
+              </Button>
+            </div>
+          ) : null}
 
           <div className="mt-8 grid gap-3 sm:grid-cols-3">
             {EVENT_EMPTY_CHECKLIST.map(({ label, value, icon: Icon }) => (
@@ -126,12 +129,15 @@ function EventCardSkeleton() {
 
 export function EventsCatalog() {
   const { events, total, page, totalPages, statusFilter, isLoading, error, setPage, setStatusFilter } = useEvents(12);
+  const { can } = usePermissions();
 
   const upcomingCount = events.filter((e) => e.status === 'posted' || e.status === 'started').length;
+  const canCreateEvent = can('events', 'create');
+  const canUpdateEvent = can('events', 'update');
 
   return (
     <div className="space-y-6">
-      <MobileFloatingAction cta="Add event" href={ADMIN_OPERATIONS_PATHS.eventCreate} theme="sky" />
+      {canCreateEvent ? <MobileFloatingAction cta="Add event" href={ADMIN_OPERATIONS_PATHS.eventCreate} theme="sky" /> : null}
 
       <OperationsPageIntro
         eyebrow="Event Pipeline"
@@ -155,13 +161,15 @@ export function EventsCatalog() {
           }
         ]}
         actions={
-          <PrimaryPageAction
-            cta="Add event"
-            helper="Start a new event draft without hunting through the page."
-            href={ADMIN_OPERATIONS_PATHS.eventCreate}
-            label="Primary Action"
-            theme="sky"
-          />
+          canCreateEvent ? (
+            <PrimaryPageAction
+              cta="Add event"
+              helper="Start a new event draft without hunting through the page."
+              href={ADMIN_OPERATIONS_PATHS.eventCreate}
+              label="Primary Action"
+              theme="sky"
+            />
+          ) : null
         }
       />
 
@@ -195,7 +203,7 @@ export function EventsCatalog() {
         </div>
       )}
 
-      {!isLoading && !error && events.length === 0 && <EventsEmptyState />}
+      {!isLoading && !error && events.length === 0 && <EventsEmptyState canCreateEvent={canCreateEvent} />}
 
       {!isLoading && !error && events.length > 0 && (
         <>
@@ -205,7 +213,7 @@ export function EventsCatalog() {
                 key={event.id}
                 badges={[event.status.charAt(0).toUpperCase() + event.status.slice(1)]}
                 description={stripAndTruncate(event.description)}
-                editHref={ADMIN_OPERATIONS_PATHS.eventEdit(event.id)}
+                editHref={canUpdateEvent ? ADMIN_OPERATIONS_PATHS.eventEdit(event.id) : undefined}
                 href={ADMIN_OPERATIONS_PATHS.eventDetail(event.id)}
                 meta={[
                   { label: 'Start', value: fmtDate(event.start_date) },

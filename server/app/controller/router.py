@@ -5,7 +5,7 @@ from app.controller.api.auth_route import router as auth_router
 from app.controller.api.event_feedback_route import event_feedback_router
 from app.controller.api.event_participant_route import participant_router
 from app.controller.api.event_route import event_router
-from app.controller.api.event_volunteer_route import event_participant_query_router, event_volunteer_router
+from app.controller.api.event_volunteer_route import event_volunteer_router
 from app.controller.api.features_route import feature_router
 from app.controller.api.queue_route import router as queue_router
 from app.controller.api.role_route import grant_router, role_management_router, role_router
@@ -34,4 +34,3 @@ router.include_router(volunteer_router)
 router.include_router(volunteer_role_router)
 router.include_router(volunteer_application_router)
 router.include_router(event_volunteer_router)
-router.include_router(event_participant_query_router)

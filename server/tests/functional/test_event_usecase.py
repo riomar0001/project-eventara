@@ -1,7 +1,7 @@
 """Functional test cases for CreateEventUseCase, UpdateEventMetadataUseCase, and UpdateEventSessionUseCase."""
 
 import uuid
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application.dto.event_dto import (
     CreateEventInput,
+    CreateEventSessionForEventInput,
     CreateEventSessionInput,
     UpdateEventMetadataInput,
     UpdateEventSessionInput,
@@ -26,7 +27,7 @@ from app.domain.exceptions.event_session_exceptions import (
     EventSessionNotFoundError,
     InvalidEventSessionDateError,
 )
-from app.domain.exceptions.venue_exceptions import VenueNotFoundError
+from app.domain.exceptions.venue_exceptions import VenueNotFoundError, VenueNotPartnerError
 from app.infrastructure.database.repositories.event_repository import EventRepository
 
 EVENT_ID = uuid.UUID("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
@@ -82,6 +83,7 @@ def _sample_session(**overrides) -> EventSession:
 def _make_create_repo():
     repo = MagicMock(spec=EventRepository)
     repo.venue_exists = AsyncMock(return_value=True)
+    repo.venue_is_partner = AsyncMock(return_value=True)
     repo.create_event = AsyncMock(return_value=_sample_event())
     repo.create_session = AsyncMock(return_value=_sample_session())
     return repo
@@ -115,6 +117,7 @@ def _create_session_input(**overrides):
         description=None,
         start_datetime=SESSION_START,
         end_datetime=SESSION_END,
+        max_slots=None,
     )
     defaults.update(overrides)
     return CreateEventSessionInput(**defaults)
@@ -189,6 +192,16 @@ async def test_create_raises_venue_not_found():
 
 
 @pytest.mark.asyncio
+async def test_create_raises_venue_not_partner():
+    """Rejects event when a session references a venue that is not partnered."""
+    repo = _make_create_repo()
+    repo.venue_is_partner = AsyncMock(return_value=False)
+    uc, _, _ = _make_create_uc(repo)
+    with pytest.raises(VenueNotPartnerError):
+        await uc.create_event(_create_input())
+
+
+@pytest.mark.asyncio
 async def test_create_persists_event_and_sessions():
     """Calls create_event and create_session when all inputs are valid."""
     uc, repo, _ = _make_create_uc()
@@ -240,6 +253,17 @@ async def test_create_does_not_commit_when_venue_not_found():
     repo.venue_exists = AsyncMock(return_value=False)
     uc, _, db = _make_create_uc(repo)
     with pytest.raises(VenueNotFoundError):
+        await uc.create_event(_create_input())
+    db.commit.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_create_does_not_commit_when_venue_not_partner():
+    """Does not commit when partner venue validation fails before any DB write."""
+    repo = _make_create_repo()
+    repo.venue_is_partner = AsyncMock(return_value=False)
+    uc, _, db = _make_create_uc(repo)
+    with pytest.raises(VenueNotPartnerError):
         await uc.create_event(_create_input())
     db.commit.assert_not_called()
 
@@ -330,6 +354,7 @@ async def test_meta_calls_update_event_with_new_values():
         start_date=EVENT_START,
         end_date=EVENT_END,
         banner_url="https://cdn.example.com/updated-banner.jpg",
+        status=EventStatus.DRAFT,
     )
 
 
@@ -339,6 +364,37 @@ async def test_meta_commits_transaction_on_success():
     uc, _, db = _make_meta_uc()
     await uc.update_event_metadata(_meta_input())
     db.commit.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_meta_updates_posted_event_to_started_when_new_dates_are_active():
+    """Sends STARTED to the repository when a posted event date range now contains the current time."""
+    now = datetime.now(UTC)
+    repo = _make_meta_repo()
+    repo.get_event_by_id = AsyncMock(return_value=_sample_event(status=EventStatus.POSTED))
+    uc, repo, _ = _make_meta_uc(repo)
+    await uc.update_event_metadata(_meta_input(start_date=now - timedelta(days=1), end_date=now + timedelta(days=1)))
+    assert repo.update_event.call_args.kwargs["status"] == EventStatus.STARTED
+
+
+@pytest.mark.asyncio
+async def test_meta_updates_started_event_to_ended_when_new_dates_are_past():
+    """Sends ENDED to the repository when a started event date range is already over."""
+    now = datetime.now(UTC)
+    repo = _make_meta_repo()
+    repo.get_event_by_id = AsyncMock(return_value=_sample_event(status=EventStatus.STARTED))
+    uc, repo, _ = _make_meta_uc(repo)
+    await uc.update_event_metadata(_meta_input(start_date=now - timedelta(days=2), end_date=now - timedelta(days=1)))
+    assert repo.update_event.call_args.kwargs["status"] == EventStatus.ENDED
+
+
+@pytest.mark.asyncio
+async def test_meta_keeps_draft_status_when_dates_are_active():
+    """Keeps explicit DRAFT status even when the new date range is active."""
+    now = datetime.now(UTC)
+    uc, repo, _ = _make_meta_uc()
+    await uc.update_event_metadata(_meta_input(start_date=now - timedelta(days=1), end_date=now + timedelta(days=1)))
+    assert repo.update_event.call_args.kwargs["status"] == EventStatus.DRAFT
 
 
 @pytest.mark.asyncio
@@ -371,7 +427,9 @@ def _make_session_repo():
     repo.get_session_by_id = AsyncMock(return_value=_sample_session())
     repo.get_event_by_id = AsyncMock(return_value=_sample_event())
     repo.venue_exists = AsyncMock(return_value=True)
+    repo.venue_is_partner = AsyncMock(return_value=True)
     repo.update_session = AsyncMock(return_value=_sample_session(title="Updated Session"))
+    repo.create_session = AsyncMock(return_value=_sample_session(title="Created Session"))
     return repo
 
 
@@ -390,9 +448,44 @@ def _session_input(**overrides):
         description=None,
         start_datetime=SESSION_START,
         end_datetime=SESSION_END,
+        max_slots=None,
     )
     defaults.update(overrides)
     return UpdateEventSessionInput(**defaults)
+
+
+def _create_event_session_input(**overrides):
+    defaults = dict(
+        event_id=EVENT_ID,
+        updated_by=CREATOR_ID,
+        venue_id=VENUE_ID,
+        title="Created Session",
+        description=None,
+        start_datetime=SESSION_START,
+        end_datetime=SESSION_END,
+        max_slots=None,
+    )
+    defaults.update(overrides)
+    return CreateEventSessionForEventInput(**defaults)
+
+
+@pytest.mark.asyncio
+async def test_create_session_raises_venue_not_partner():
+    """Rejects session creation when the selected venue is not partnered."""
+    repo = _make_session_repo()
+    repo.venue_is_partner = AsyncMock(return_value=False)
+    uc, _, _ = _make_session_uc(repo)
+    with pytest.raises(VenueNotPartnerError):
+        await uc.create_event_session(_create_event_session_input())
+
+
+@pytest.mark.asyncio
+async def test_create_session_persists_when_venue_is_partner():
+    """Creates a session when the selected venue is partnered."""
+    uc, repo, db = _make_session_uc()
+    await uc.create_event_session(_create_event_session_input())
+    repo.create_session.assert_called_once()
+    db.commit.assert_called_once()
 
 
 @pytest.mark.asyncio
@@ -468,6 +561,16 @@ async def test_session_raises_venue_not_found():
 
 
 @pytest.mark.asyncio
+async def test_session_raises_venue_not_partner():
+    """Raises VenueNotPartnerError when the referenced venue is not partnered."""
+    repo = _make_session_repo()
+    repo.venue_is_partner = AsyncMock(return_value=False)
+    uc, _, _ = _make_session_uc(repo)
+    with pytest.raises(VenueNotPartnerError):
+        await uc.update_event_session(_session_input())
+
+
+@pytest.mark.asyncio
 async def test_session_raises_not_found_when_concurrent_delete_wins():
     """Raises EventSessionNotFoundError when update_session returns None (concurrent delete)."""
     repo = _make_session_repo()
@@ -497,7 +600,62 @@ async def test_session_calls_update_session_with_correct_args():
         description=None,
         start_datetime=SESSION_START,
         end_datetime=SESSION_END,
+        max_slots=None,
+        status=EventSessionStatus.ENDED,
     )
+
+
+@pytest.mark.asyncio
+async def test_session_updates_ended_session_to_posted_when_new_dates_are_future():
+    """Sends POSTED to the repository when an ended session is rescheduled into the future."""
+    now = datetime.now(UTC)
+    event_start = now + timedelta(days=1)
+    event_end = now + timedelta(days=5)
+    session_start = now + timedelta(days=2)
+    session_end = now + timedelta(days=3)
+    repo = _make_session_repo()
+    repo.get_session_by_id = AsyncMock(
+        return_value=_sample_session(
+            status=EventSessionStatus.ENDED,
+            start_datetime=now - timedelta(days=3),
+            end_datetime=now - timedelta(days=2),
+        )
+    )
+    repo.get_event_by_id = AsyncMock(return_value=_sample_event(start_date=event_start, end_date=event_end))
+    uc, repo, _ = _make_session_uc(repo)
+    await uc.update_event_session(_session_input(start_datetime=session_start, end_datetime=session_end))
+    assert repo.update_session.call_args.kwargs["status"] == EventSessionStatus.POSTED
+
+
+@pytest.mark.asyncio
+async def test_session_updates_posted_session_to_started_when_new_dates_are_active():
+    """Sends STARTED to the repository when a posted session date range now contains the current time."""
+    now = datetime.now(UTC)
+    event_start = now - timedelta(days=2)
+    event_end = now + timedelta(days=2)
+    session_start = now - timedelta(hours=1)
+    session_end = now + timedelta(hours=1)
+    repo = _make_session_repo()
+    repo.get_event_by_id = AsyncMock(return_value=_sample_event(start_date=event_start, end_date=event_end))
+    uc, repo, _ = _make_session_uc(repo)
+    await uc.update_event_session(_session_input(start_datetime=session_start, end_datetime=session_end))
+    assert repo.update_session.call_args.kwargs["status"] == EventSessionStatus.STARTED
+
+
+@pytest.mark.asyncio
+async def test_session_keeps_draft_status_when_new_dates_are_active():
+    """Keeps explicit DRAFT status even when the new session date range is active."""
+    now = datetime.now(UTC)
+    event_start = now - timedelta(days=2)
+    event_end = now + timedelta(days=2)
+    session_start = now - timedelta(hours=1)
+    session_end = now + timedelta(hours=1)
+    repo = _make_session_repo()
+    repo.get_session_by_id = AsyncMock(return_value=_sample_session(status=EventSessionStatus.DRAFT))
+    repo.get_event_by_id = AsyncMock(return_value=_sample_event(start_date=event_start, end_date=event_end))
+    uc, repo, _ = _make_session_uc(repo)
+    await uc.update_event_session(_session_input(start_datetime=session_start, end_datetime=session_end))
+    assert repo.update_session.call_args.kwargs["status"] == EventSessionStatus.DRAFT
 
 
 @pytest.mark.asyncio

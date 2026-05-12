@@ -254,6 +254,16 @@ export type AgeGroup = 'child' | 'teen' | 'adult' | 'senior';
 export type ApplicationStatus = 'pending' | 'approved' | 'rejected' | 'withdrawn';
 
 /**
+ * ApplyEventVolunteerRequest
+ */
+export type ApplyEventVolunteerRequest = {
+    /**
+     * Message
+     */
+    message?: string | null;
+};
+
+/**
  * AssignRoleRequest
  */
 export type AssignRoleRequest = {
@@ -967,6 +977,43 @@ export type EventDetailResponse = {
 };
 
 /**
+ * EventFeedbackListResponse
+ */
+export type EventFeedbackListResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Message
+     */
+    message?: string;
+    /**
+     * Data
+     */
+    data: Array<EventFeedbackRecordResponse>;
+    meta: EventFeedbackPaginationMeta;
+};
+
+/**
+ * EventFeedbackPaginationMeta
+ */
+export type EventFeedbackPaginationMeta = {
+    /**
+     * Total
+     */
+    total: number;
+    /**
+     * Limit
+     */
+    limit: number;
+    /**
+     * Offset
+     */
+    offset: number;
+};
+
+/**
  * EventFeedbackRecordResponse
  */
 export type EventFeedbackRecordResponse = {
@@ -1105,6 +1152,26 @@ export type EventParticipantRecord = {
      */
     checked_in_by: string | null;
     /**
+     * User First Name
+     */
+    user_first_name?: string | null;
+    /**
+     * User Last Name
+     */
+    user_last_name?: string | null;
+    /**
+     * User Alias
+     */
+    user_alias?: string | null;
+    /**
+     * User Profile Picture Url
+     */
+    user_profile_picture_url?: string | null;
+    /**
+     * Event Session Title
+     */
+    event_session_title?: string | null;
+    /**
      * Created At
      */
     created_at: string | null;
@@ -1177,7 +1244,7 @@ export type EventParticipantsResponse = {
      * Data
      */
     data: Array<EventParticipantRecord>;
-    meta: AppControllerSchemasEventVolunteerSchemaPaginationMeta;
+    meta: AppControllerSchemasEventParticipantSchemaPaginationMeta;
 };
 
 /**
@@ -1507,6 +1574,30 @@ export type EventVolunteerRecordResponse = {
      * Status
      */
     status: string;
+    /**
+     * Volunteer User Id
+     */
+    volunteer_user_id?: string | null;
+    /**
+     * Volunteer First Name
+     */
+    volunteer_first_name?: string | null;
+    /**
+     * Volunteer Last Name
+     */
+    volunteer_last_name?: string | null;
+    /**
+     * Volunteer Alias
+     */
+    volunteer_alias?: string | null;
+    /**
+     * Volunteer Profile Picture Url
+     */
+    volunteer_profile_picture_url?: string | null;
+    /**
+     * Volunteer Role Name
+     */
+    volunteer_role_name?: string | null;
     /**
      * Created At
      */
@@ -3700,7 +3791,7 @@ export type AppControllerSchemasAuditLogSchemaPaginationMeta = {
 /**
  * PaginationMeta
  */
-export type AppControllerSchemasEventVolunteerSchemaPaginationMeta = {
+export type AppControllerSchemasEventParticipantSchemaPaginationMeta = {
     /**
      * Total
      */
@@ -7055,6 +7146,45 @@ export type UploadEventBannerEventsEventIdBannerPostResponses = {
 
 export type UploadEventBannerEventsEventIdBannerPostResponse = UploadEventBannerEventsEventIdBannerPostResponses[keyof UploadEventBannerEventsEventIdBannerPostResponses];
 
+export type ListEventFeedbackEventsEventIdFeedbackGetData = {
+    body?: never;
+    path: {
+        /**
+         * Event Id
+         */
+        event_id: string;
+    };
+    query?: {
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Offset
+         */
+        offset?: number;
+    };
+    url: '/events/{event_id}/feedback';
+};
+
+export type ListEventFeedbackEventsEventIdFeedbackGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListEventFeedbackEventsEventIdFeedbackGetError = ListEventFeedbackEventsEventIdFeedbackGetErrors[keyof ListEventFeedbackEventsEventIdFeedbackGetErrors];
+
+export type ListEventFeedbackEventsEventIdFeedbackGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: EventFeedbackListResponse;
+};
+
+export type ListEventFeedbackEventsEventIdFeedbackGetResponse = ListEventFeedbackEventsEventIdFeedbackGetResponses[keyof ListEventFeedbackEventsEventIdFeedbackGetResponses];
+
 export type CreateEventFeedbackEventsEventIdFeedbackPostData = {
     body: CreateEventFeedbackRequest;
     path: {
@@ -7104,6 +7234,61 @@ export type CreateEventFeedbackEventsEventIdFeedbackPostResponses = {
 };
 
 export type CreateEventFeedbackEventsEventIdFeedbackPostResponse = CreateEventFeedbackEventsEventIdFeedbackPostResponses[keyof CreateEventFeedbackEventsEventIdFeedbackPostResponses];
+
+export type GetEventParticipantsEventsEventIdParticipantsGetData = {
+    body?: never;
+    path: {
+        /**
+         * Event Id
+         */
+        event_id: string;
+    };
+    query?: {
+        /**
+         * Status
+         */
+        status?: string | null;
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Offset
+         */
+        offset?: number;
+    };
+    url: '/events/{event_id}/participants';
+};
+
+export type GetEventParticipantsEventsEventIdParticipantsGetErrors = {
+    /**
+     * Missing or invalid Bearer token
+     */
+    401: ErrorResponse;
+    /**
+     * Caller is neither the event organizer nor a joined volunteer
+     */
+    403: ErrorResponse;
+    /**
+     * Event not found
+     */
+    404: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetEventParticipantsEventsEventIdParticipantsGetError = GetEventParticipantsEventsEventIdParticipantsGetErrors[keyof GetEventParticipantsEventsEventIdParticipantsGetErrors];
+
+export type GetEventParticipantsEventsEventIdParticipantsGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: EventParticipantsResponse;
+};
+
+export type GetEventParticipantsEventsEventIdParticipantsGetResponse = GetEventParticipantsEventsEventIdParticipantsGetResponses[keyof GetEventParticipantsEventsEventIdParticipantsGetResponses];
 
 export type WithdrawRegistrationEventsEventIdSessionSessionIdRegisterDeleteData = {
     body?: never;
@@ -7885,6 +8070,59 @@ export type WithdrawApplicationVolunteerApplicationsApplicationIdDeleteResponses
 
 export type WithdrawApplicationVolunteerApplicationsApplicationIdDeleteResponse = WithdrawApplicationVolunteerApplicationsApplicationIdDeleteResponses[keyof WithdrawApplicationVolunteerApplicationsApplicationIdDeleteResponses];
 
+export type ApplyToEventEventsEventIdVolunteersApplyPostData = {
+    /**
+     * Body
+     */
+    body?: ApplyEventVolunteerRequest | null;
+    path: {
+        /**
+         * Event Id
+         */
+        event_id: string;
+    };
+    query?: never;
+    url: '/events/{event_id}/volunteers/apply';
+};
+
+export type ApplyToEventEventsEventIdVolunteersApplyPostErrors = {
+    /**
+     * Event is not accepting volunteer applications
+     */
+    400: ErrorResponse;
+    /**
+     * Missing or invalid Bearer token
+     */
+    401: ErrorResponse;
+    /**
+     * Caller has an inactive volunteer profile
+     */
+    403: ErrorResponse;
+    /**
+     * Volunteer not found
+     */
+    404: ErrorResponse;
+    /**
+     * Volunteer is already assigned to this event
+     */
+    409: ErrorResponse;
+    /**
+     * Request body failed schema validation
+     */
+    422: ValidationErrorResponse;
+};
+
+export type ApplyToEventEventsEventIdVolunteersApplyPostError = ApplyToEventEventsEventIdVolunteersApplyPostErrors[keyof ApplyToEventEventsEventIdVolunteersApplyPostErrors];
+
+export type ApplyToEventEventsEventIdVolunteersApplyPostResponses = {
+    /**
+     * Successful Response
+     */
+    201: EventVolunteerResponse;
+};
+
+export type ApplyToEventEventsEventIdVolunteersApplyPostResponse = ApplyToEventEventsEventIdVolunteersApplyPostResponses[keyof ApplyToEventEventsEventIdVolunteersApplyPostResponses];
+
 export type ListEventVolunteersEventsEventIdVolunteersGetData = {
     body?: never;
     path: {
@@ -8069,61 +8307,6 @@ export type UpdateEventVolunteerStatusEventsEventIdVolunteersEventVolunteerIdPat
 };
 
 export type UpdateEventVolunteerStatusEventsEventIdVolunteersEventVolunteerIdPatchResponse = UpdateEventVolunteerStatusEventsEventIdVolunteersEventVolunteerIdPatchResponses[keyof UpdateEventVolunteerStatusEventsEventIdVolunteersEventVolunteerIdPatchResponses];
-
-export type GetEventParticipantsEventsEventIdParticipantsGetData = {
-    body?: never;
-    path: {
-        /**
-         * Event Id
-         */
-        event_id: string;
-    };
-    query?: {
-        /**
-         * Status
-         */
-        status?: string | null;
-        /**
-         * Limit
-         */
-        limit?: number;
-        /**
-         * Offset
-         */
-        offset?: number;
-    };
-    url: '/events/{event_id}/participants';
-};
-
-export type GetEventParticipantsEventsEventIdParticipantsGetErrors = {
-    /**
-     * Missing or invalid Bearer token
-     */
-    401: ErrorResponse;
-    /**
-     * Caller is neither the event organizer nor a joined volunteer
-     */
-    403: ErrorResponse;
-    /**
-     * Event not found
-     */
-    404: ErrorResponse;
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type GetEventParticipantsEventsEventIdParticipantsGetError = GetEventParticipantsEventsEventIdParticipantsGetErrors[keyof GetEventParticipantsEventsEventIdParticipantsGetErrors];
-
-export type GetEventParticipantsEventsEventIdParticipantsGetResponses = {
-    /**
-     * Successful Response
-     */
-    200: EventParticipantsResponse;
-};
-
-export type GetEventParticipantsEventsEventIdParticipantsGetResponse = GetEventParticipantsEventsEventIdParticipantsGetResponses[keyof GetEventParticipantsEventsEventIdParticipantsGetResponses];
 
 export type RootGetData = {
     body?: never;

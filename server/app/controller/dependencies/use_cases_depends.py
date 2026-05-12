@@ -221,7 +221,7 @@ def get_event_deletion_use_case(db: AsyncSession = Depends(get_db)) -> EventDele
 
 
 def get_event_volunteer_use_case(db: AsyncSession = Depends(get_db)) -> EventVolunteerUseCase:
-    """Construct an ``EventVolunteerUseCase`` for event volunteer management and participant queries."""
+    """Construct an ``EventVolunteerUseCase`` for event volunteer management."""
     return EventVolunteerUseCase(EventVolunteerRepository(db), db)
 
 

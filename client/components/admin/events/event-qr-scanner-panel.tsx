@@ -5,7 +5,6 @@ import jsQR from 'jsqr';
 import { AlertCircle, Camera, CheckCircle2, Loader2, QrCode, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
 import { EventParticipants } from '@/api/sdk.gen';
 import { getApiErrorMessage, getAuthHeaders } from '@/lib/system/api-request';
 import { cn } from '@/lib/utils';
@@ -44,7 +43,6 @@ export function EventQrScannerPanel({ onCheckedIn }: { onCheckedIn: () => void }
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [scannerError, setScannerError] = useState<string | null>(null);
-  const [manualToken, setManualToken] = useState('');
   const [result, setResult] = useState<ScanResult | null>(null);
 
   useEffect(() => {
@@ -94,7 +92,6 @@ export function EventQrScannerPanel({ onCheckedIn }: { onCheckedIn: () => void }
           title: 'Checked In Successfully',
           message: response.data.message ?? 'Participant checked in successfully.'
         });
-        setManualToken('');
         onCheckedIn();
       } catch (error) {
         setResult(getResultFromError(error));
@@ -146,12 +143,10 @@ export function EventQrScannerPanel({ onCheckedIn }: { onCheckedIn: () => void }
 
       if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA && width > 0 && height > 0) {
         try {
-          const context = canvas.getContext('2d', { willReadFrequently: true });
-          if (context) {
-            canvas.width = width;
-            canvas.height = height;
-            context.drawImage(video, 0, 0, width, height);
-            const imageData = context.getImageData(0, 0, width, height);
+          const context = canvas.getContext('2d');
+          if (context && videoRef.current.readyState === videoRef.current.HAVE_ENOUGH_DATA) {
+            context.drawImage(videoRef.current, 0, 0, canvasRef.current.width, canvasRef.current.height);
+            const imageData = context.getImageData(0, 0, canvasRef.current.width, canvasRef.current.height);
             const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'dontInvert' });
 
             if (code?.data) {
@@ -215,10 +210,10 @@ export function EventQrScannerPanel({ onCheckedIn }: { onCheckedIn: () => void }
       </Dialog>
 
       <div className="mx-auto max-w-lg space-y-4">
-        <div className="overflow-hidden rounded-2xl bg-neutral-950 ring-1 ring-neutral-800">
-          <div className="relative mx-auto aspect-[4/3] max-h-[360px] bg-neutral-900">
+        <div className="overflow-hidden rounded-2xl bg-neutral-950">
+          <div className="relative mx-auto aspect-9/16">
             <video ref={videoRef} className="h-full w-full object-cover" muted playsInline />
-            <canvas ref={canvasRef} className="hidden" />
+            <canvas ref={canvasRef} className="hidden" width={640} height={480} />
             {!isCameraActive && (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-neutral-400">
                 <QrCode className="size-8" />
@@ -241,27 +236,14 @@ export function EventQrScannerPanel({ onCheckedIn }: { onCheckedIn: () => void }
         )}
 
         <div className="flex flex-wrap justify-center gap-2">
-          <Button type="button" onClick={() => void startCamera()} disabled={isCameraActive || isSubmitting || !!result} className="rounded-xl">
+          <Button type="button" onClick={() => void startCamera()} disabled={isCameraActive || isSubmitting || !!result} className="rounded-xl w-full">
             {isSubmitting ? <Loader2 className="size-4 animate-spin" /> : <Camera className="size-4" />}
             Start scanner
           </Button>
-          <Button type="button" variant="outline" onClick={stopCamera} disabled={!isCameraActive || isSubmitting}>
+          <Button type="button" variant="outline" onClick={stopCamera} disabled={!isCameraActive || isSubmitting} className="w-full">
             Stop
           </Button>
         </div>
-
-        <form
-          className="flex flex-col gap-2 sm:flex-row"
-          onSubmit={(event) => {
-            event.preventDefault();
-            void checkInToken(manualToken);
-          }}
-        >
-          <Input value={manualToken} onChange={(event) => setManualToken(event.target.value)} placeholder="Paste QR token" disabled={isSubmitting || !!result} />
-          <Button type="submit" variant="outline" disabled={!manualToken.trim() || isSubmitting || !!result}>
-            Check in
-          </Button>
-        </form>
       </div>
     </>
   );
