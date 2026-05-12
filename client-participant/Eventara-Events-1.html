@@ -1,0 +1,1267 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Events — Eventara</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<style>
+  :root {
+    --bg: oklch(0.17 0.008 150);
+    --bg-2: oklch(0.21 0.01 150);
+    --surface: oklch(0.23 0.012 150);
+    --surface-2: oklch(0.27 0.014 150);
+    --line: oklch(0.32 0.015 150);
+    --line-soft: oklch(0.28 0.012 150 / 0.6);
+    --text: oklch(0.98 0.005 150);
+    --text-dim: oklch(0.78 0.01 150);
+    --text-mute: oklch(0.58 0.012 150);
+    --lime: oklch(0.9 0.22 128);
+    --lime-dim: oklch(0.78 0.19 128);
+    --lime-glow: oklch(0.9 0.22 128 / 0.35);
+    --amber: oklch(0.82 0.17 75);
+    --amber-dim: oklch(0.72 0.16 75);
+    --amber-glow: oklch(0.82 0.17 75 / 0.4);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "ss01", "cv11";
+    overflow-x: hidden;
+  }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+  input { font-family: inherit; }
+  a { color: inherit; text-decoration: none; }
+  .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+  .container { max-width: 1240px; margin: 0 auto; padding: 0 32px; }
+
+  /* ---- ambient mesh ---- */
+  .page-mesh {
+    position: absolute; inset: 0 0 auto 0; height: 620px;
+    overflow: hidden; pointer-events: none; z-index: 0;
+  }
+  .page-mesh::before, .page-mesh::after {
+    content: ""; position: absolute; border-radius: 50%;
+    filter: blur(90px);
+  }
+  .page-mesh::before {
+    width: 640px; height: 640px; left: -180px; top: -220px;
+    background: radial-gradient(circle, oklch(0.9 0.22 128 / 0.45), transparent 65%);
+  }
+  .page-mesh::after {
+    width: 540px; height: 540px; right: -140px; top: -120px;
+    background: radial-gradient(circle, oklch(0.82 0.17 75 / 0.28), transparent 65%);
+  }
+  .grid-overlay {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(var(--line-soft) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line-soft) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 30%, transparent 75%);
+    opacity: 0.35;
+  }
+
+  /* ---- nav ---- */
+  .nav {
+    position: sticky; top: 0; z-index: 40;
+    backdrop-filter: blur(18px) saturate(140%);
+    background: oklch(0.17 0.008 150 / 0.75);
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .nav-inner {
+    display: grid; grid-template-columns: 1fr auto 1fr;
+    align-items: center; height: 68px; gap: 24px;
+  }
+  .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: -0.02em; font-size: 18px; }
+  .logo-mark {
+    width: 26px; height: 26px; display: grid; place-items: center;
+    border-radius: 8px;
+    background: linear-gradient(145deg, var(--lime), var(--lime-dim));
+    color: #0a1005;
+    box-shadow: 0 0 18px -4px var(--lime-glow);
+  }
+  .nav-center { display: flex; gap: 4px; justify-content: center; }
+  .nav-link {
+    position: relative;
+    padding: 8px 16px; border-radius: 10px;
+    font-size: 14.5px; color: var(--text-dim);
+    transition: color 150ms;
+  }
+  .nav-link:hover { color: var(--text); }
+  .nav-link.active { color: var(--lime); }
+  .nav-link.active::after {
+    content: "";
+    position: absolute; left: 16px; right: 16px; bottom: -1px; height: 2px;
+    background: var(--lime);
+    box-shadow: 0 0 14px var(--lime-glow);
+    border-radius: 2px;
+  }
+  .nav-right { display: flex; justify-content: flex-end; align-items: center; gap: 10px; }
+  .avatar-btn {
+    display: flex; align-items: center; gap: 10px;
+    padding: 4px 14px 4px 4px;
+    border: 1px solid var(--line-soft);
+    border-radius: 999px;
+    transition: all 180ms;
+  }
+  .avatar-btn:hover { border-color: var(--text-mute); background: oklch(1 0 0 / 0.03); }
+  .avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--lime), var(--amber));
+    display: grid; place-items: center;
+    color: #0a1005; font-weight: 700; font-size: 12.5px;
+  }
+  .avatar-btn .name { font-size: 13.5px; color: var(--text); font-weight: 500; }
+  .avatar-btn .tier { font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--lime); font-family: 'JetBrains Mono', monospace; }
+
+  /* ---- buttons ---- */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+    padding: 13px 20px; border-radius: 999px;
+    font-size: 14px; font-weight: 600; letter-spacing: -0.01em;
+    transition: all 180ms ease;
+    white-space: nowrap;
+  }
+  .btn-primary { background: var(--lime); color: #0a1005; box-shadow: 0 8px 28px -10px var(--lime-glow); }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 14px 40px -10px var(--lime-glow); }
+  .btn-ghost { color: var(--text-dim); border: 1px solid var(--line); background: oklch(1 0 0 / 0.02); }
+  .btn-ghost:hover { color: var(--text); border-color: oklch(1 0 0 / 0.2); }
+  .btn-outline {
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--text);
+  }
+  .btn-outline:hover { border-color: var(--lime); color: var(--lime); box-shadow: 0 0 24px -8px var(--lime-glow); }
+
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--text-mute);
+    display: inline-flex; align-items: center; gap: 10px;
+  }
+  .eyebrow .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--lime); box-shadow: 0 0 12px var(--lime-glow); }
+
+  /* ---- page header ---- */
+  .page-header { position: relative; padding: 64px 0 36px; }
+  .page-header h1 {
+    font-size: clamp(42px, 5.5vw, 72px);
+    letter-spacing: -0.035em; font-weight: 700;
+    line-height: 1; margin: 18px 0 14px;
+  }
+  .page-header .lead {
+    color: var(--text-dim); font-size: 16px; max-width: 58ch; margin: 0 0 36px;
+    line-height: 1.55;
+  }
+  .header-top { display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 20px; }
+  .header-meta { text-align: right; }
+  .header-meta .count { font-size: 40px; font-weight: 600; letter-spacing: -0.03em; color: var(--lime); font-family: 'JetBrains Mono', monospace; }
+  .header-meta .count-lbl { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-mute); font-family: 'JetBrains Mono', monospace; margin-top: 2px; }
+
+  /* ---- search ---- */
+  .search-row {
+    display: grid; grid-template-columns: 1fr auto; gap: 14px;
+    align-items: center; margin-top: 8px;
+  }
+  .search {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--line-soft);
+    border-radius: 14px;
+    transition: all 200ms ease;
+  }
+  .search:focus-within {
+    border-color: var(--lime);
+    box-shadow: 0 0 0 4px oklch(0.9 0.22 128 / 0.1);
+    background: var(--surface-2);
+  }
+  .search .icon { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: var(--text-mute); }
+  .search input {
+    width: 100%; background: transparent; border: none;
+    padding: 18px 18px 18px 52px;
+    color: var(--text); font-size: 15.5px; letter-spacing: -0.01em;
+  }
+  .search input::placeholder { color: var(--text-mute); }
+  .search input:focus { outline: none; }
+  .search .kbd {
+    position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+    font-family: 'JetBrains Mono', monospace; font-size: 10.5px;
+    padding: 4px 8px; border-radius: 6px;
+    background: var(--bg); border: 1px solid var(--line-soft); color: var(--text-mute);
+  }
+  .sort-select {
+    background: var(--surface); border: 1px solid var(--line-soft);
+    color: var(--text); padding: 0 18px; height: 56px;
+    border-radius: 14px; font-size: 14px;
+    display: flex; align-items: center; gap: 10px;
+    transition: border-color 160ms;
+    min-width: 180px;
+  }
+  .sort-select:hover { border-color: var(--text-mute); }
+  .sort-select .label { color: var(--text-mute); font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; }
+  .sort-select .val { font-weight: 500; }
+
+  /* ---- filter pills ---- */
+  .filters { margin-top: 22px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .pill {
+    padding: 9px 18px; border-radius: 999px;
+    font-size: 13px; font-weight: 500;
+    border: 1px solid var(--line); color: var(--text-dim);
+    background: transparent;
+    transition: all 180ms ease;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .pill:hover { color: var(--text); border-color: var(--text-mute); }
+  .pill.active {
+    background: var(--lime); color: #0a1005; border-color: var(--lime);
+    box-shadow: 0 0 0 4px oklch(0.9 0.22 128 / 0.12);
+    font-weight: 600;
+  }
+  .pill .count {
+    font-family: 'JetBrains Mono', monospace; font-size: 10.5px;
+    padding: 2px 6px; border-radius: 4px;
+    background: oklch(1 0 0 / 0.06);
+    color: inherit;
+  }
+  .pill.active .count { background: oklch(0 0 0 / 0.15); color: #0a1005; }
+
+  .filter-sep {
+    width: 1px; height: 24px;
+    background: var(--line-soft);
+    margin: 0 4px;
+  }
+
+  /* ---- featured banner ---- */
+  .featured {
+    margin-top: 40px; position: relative;
+    display: grid; grid-template-columns: 1.25fr 1fr;
+    border-radius: 24px; overflow: hidden;
+    background: linear-gradient(180deg, oklch(0.23 0.012 150), oklch(0.18 0.01 150));
+    border: 1px solid var(--line);
+    min-height: 340px;
+  }
+  .featured::before {
+    content: ""; position: absolute; inset: 0;
+    background: radial-gradient(circle at 85% 20%, oklch(0.82 0.17 75 / 0.18), transparent 45%);
+    pointer-events: none;
+  }
+  .featured-body { padding: 40px 44px; display: flex; flex-direction: column; gap: 14px; position: relative; }
+  .featured-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 12px 6px 10px;
+    background: oklch(0.82 0.17 75 / 0.12);
+    border: 1px solid oklch(0.82 0.17 75 / 0.4);
+    border-radius: 999px;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.16em;
+    color: var(--amber); width: fit-content;
+  }
+  .featured-tag .star { width: 4px; height: 4px; background: var(--amber); border-radius: 50%; box-shadow: 0 0 10px var(--amber-glow); }
+  .featured-body h2 {
+    font-size: clamp(28px, 3.2vw, 40px);
+    letter-spacing: -0.03em; font-weight: 600;
+    line-height: 1.08; margin: 4px 0 2px;
+    max-width: 18ch; text-wrap: balance;
+  }
+  .featured-body p.desc {
+    font-size: 14.5px; color: var(--text-dim); line-height: 1.55;
+    max-width: 48ch; margin: 0;
+  }
+  .featured-meta {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+    padding: 18px 0;
+    border-top: 1px solid var(--line-soft);
+    border-bottom: 1px solid var(--line-soft);
+    margin-top: 8px;
+  }
+  .featured-meta .k { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-mute); }
+  .featured-meta .v { font-size: 14px; font-weight: 500; margin-top: 3px; color: var(--text); }
+  .featured-actions { display: flex; gap: 10px; margin-top: auto; }
+  .featured-visual {
+    position: relative; overflow: hidden;
+    border-left: 1px solid var(--line-soft);
+    background:
+      radial-gradient(circle at 30% 70%, oklch(0.9 0.22 128 / 0.28), transparent 55%),
+      radial-gradient(circle at 80% 25%, oklch(0.82 0.17 75 / 0.35), transparent 55%),
+      linear-gradient(135deg, oklch(0.2 0.01 150), oklch(0.14 0.008 150));
+  }
+  .featured-visual .stripes {
+    position: absolute; inset: 0;
+    background-image: repeating-linear-gradient(105deg, transparent 0 24px, oklch(1 0 0 / 0.028) 24px 26px);
+  }
+  .featured-visual .orb-a { position: absolute; left: 20%; top: 30%; width: 220px; height: 220px; border-radius: 50%; filter: blur(34px); background: var(--lime); opacity: 0.3; }
+  .featured-visual .orb-b { position: absolute; right: 12%; bottom: 18%; width: 180px; height: 180px; border-radius: 50%; filter: blur(30px); background: var(--amber); opacity: 0.45; }
+  .featured-visual .label { position: absolute; bottom: 16px; left: 20px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: oklch(1 0 0 / 0.3); }
+  .featured-visual .year {
+    position: absolute; top: 32px; right: 40px;
+    font-size: clamp(80px, 12vw, 160px); font-weight: 700; letter-spacing: -0.05em;
+    color: transparent;
+    -webkit-text-stroke: 1.5px oklch(1 0 0 / 0.12);
+    line-height: 0.8;
+  }
+
+  /* ---- list controls ---- */
+  .list-controls {
+    margin-top: 56px; margin-bottom: 22px;
+    display: flex; align-items: end; justify-content: space-between; gap: 24px; flex-wrap: wrap;
+  }
+  .list-controls h3 {
+    font-size: 24px; letter-spacing: -0.02em; font-weight: 600; margin: 0;
+  }
+  .list-controls .results { color: var(--text-mute); font-family: 'JetBrains Mono', monospace; font-size: 12px; margin-top: 4px; }
+  .view-toggle { display: flex; border: 1px solid var(--line-soft); border-radius: 10px; padding: 3px; gap: 2px; }
+  .view-toggle button { padding: 7px 10px; border-radius: 7px; color: var(--text-mute); font-size: 12px; transition: all 140ms; display: flex; align-items: center; gap: 6px; }
+  .view-toggle button.active { background: var(--surface); color: var(--text); box-shadow: 0 0 0 1px var(--line-soft); }
+
+  /* ---- events grid ---- */
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+  .event-card {
+    background: var(--surface);
+    border: 1px solid var(--line-soft);
+    border-radius: 20px;
+    overflow: hidden;
+    display: flex; flex-direction: column;
+    transition: transform 280ms ease, border-color 280ms ease, box-shadow 280ms ease;
+    position: relative;
+  }
+  .event-card:hover {
+    transform: translateY(-6px);
+    border-color: oklch(0.9 0.22 128 / 0.45);
+    box-shadow: 0 20px 60px -20px oklch(0.9 0.22 128 / 0.22);
+  }
+  .event-card.urgent:hover {
+    border-color: oklch(0.82 0.17 75 / 0.55);
+    box-shadow: 0 20px 60px -20px oklch(0.82 0.17 75 / 0.28);
+  }
+  .event-visual {
+    aspect-ratio: 16/9;
+    position: relative; overflow: hidden;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .event-visual .stripes {
+    position: absolute; inset: 0;
+    background-image: repeating-linear-gradient(var(--angle, 115deg), transparent 0 20px, oklch(1 0 0 / 0.035) 20px 22px);
+  }
+  .event-visual .orb {
+    position: absolute; border-radius: 50%; filter: blur(32px); opacity: 0.5;
+  }
+  .date-badge {
+    position: absolute; top: 14px; left: 14px; z-index: 2;
+    background: oklch(0 0 0 / 0.55);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--line-soft);
+    border-radius: 10px;
+    padding: 8px 10px;
+    text-align: center;
+    min-width: 54px;
+  }
+  .date-badge .mo { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: var(--lime); font-weight: 500; }
+  .date-badge .day { font-size: 20px; font-weight: 700; color: var(--text); letter-spacing: -0.03em; line-height: 1; margin-top: 1px; }
+  .status-pill {
+    position: absolute; top: 14px; right: 14px; z-index: 2;
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 9px 5px 8px;
+    border-radius: 999px;
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    backdrop-filter: blur(8px);
+  }
+  .status-pill.closing {
+    background: oklch(0.82 0.17 75 / 0.15);
+    border: 1px solid oklch(0.82 0.17 75 / 0.4);
+    color: var(--amber);
+  }
+  .status-pill.live {
+    background: oklch(0.82 0.17 75 / 0.15);
+    border: 1px solid oklch(0.82 0.17 75 / 0.4);
+    color: var(--amber);
+  }
+  .status-pill.new {
+    background: oklch(0.9 0.22 128 / 0.12);
+    border: 1px solid oklch(0.9 0.22 128 / 0.4);
+    color: var(--lime);
+  }
+  .pulse-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; position: relative; }
+  .pulse-dot::after {
+    content: ""; position: absolute; inset: -3px; border-radius: 50%;
+    background: currentColor; opacity: 0.5;
+    animation: ping 1.6s cubic-bezier(0,0,0.2,1) infinite;
+  }
+  @keyframes ping { 0% { transform: scale(0.6); opacity: 0.6; } 80%, 100% { transform: scale(2); opacity: 0; } }
+
+  .event-visual .ph-label {
+    position: absolute; bottom: 12px; left: 14px;
+    font-family: 'JetBrains Mono', monospace; font-size: 9.5px;
+    letter-spacing: 0.14em; color: oklch(1 0 0 / 0.3);
+    text-transform: uppercase;
+  }
+
+  .event-body { padding: 20px 20px 22px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+  .event-title { font-size: 18px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.28; margin: 0; }
+  .tag-row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tag {
+    font-size: 11px; font-weight: 500;
+    padding: 3px 9px; border-radius: 999px;
+    background: oklch(1 0 0 / 0.04);
+    border: 1px solid var(--line-soft);
+    color: var(--text-dim);
+  }
+  .event-details {
+    font-size: 12.5px; color: var(--text-dim);
+    display: flex; flex-direction: column; gap: 6px;
+    padding: 6px 0;
+  }
+  .event-details .row { display: flex; align-items: center; gap: 8px; }
+  .event-details .row svg { color: var(--text-mute); flex-shrink: 0; }
+  .event-footer {
+    margin-top: auto;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 10px;
+  }
+  .seat-bar-wrap {
+    flex: 1; height: 3px;
+    background: oklch(1 0 0 / 0.05); border-radius: 2px;
+    overflow: hidden;
+  }
+  .seat-bar { height: 100%; background: var(--lime); border-radius: 2px; }
+  .seat-bar.low { background: var(--amber); }
+  .seat-lbl { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--text-mute); }
+  .seat-lbl .num { color: var(--text); }
+  .seat-lbl.low .num { color: var(--amber); }
+  .view-btn {
+    width: 100%; padding: 11px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    font-size: 13px; font-weight: 500; color: var(--text);
+    background: transparent;
+    transition: all 180ms ease;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .view-btn:hover { border-color: var(--lime); color: var(--lime); background: oklch(0.9 0.22 128 / 0.05); }
+  .event-card.urgent .view-btn:hover { border-color: var(--amber); color: var(--amber); background: oklch(0.82 0.17 75 / 0.05); }
+
+  /* ---- pagination ---- */
+  .paginate-wrap { margin: 56px 0 32px; display: flex; flex-direction: column; gap: 28px; align-items: center; }
+  .load-progress {
+    width: 220px; height: 4px; border-radius: 3px;
+    background: oklch(1 0 0 / 0.05); overflow: hidden;
+    position: relative;
+  }
+  .load-progress-fill {
+    height: 100%; background: linear-gradient(90deg, var(--lime), var(--amber));
+    border-radius: 3px;
+    transition: width 400ms ease;
+  }
+  .load-progress-lbl {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: var(--text-mute); letter-spacing: 0.14em; text-transform: uppercase;
+  }
+  .pagination {
+    display: flex; gap: 6px; align-items: center;
+  }
+  .page-btn {
+    min-width: 38px; height: 38px; padding: 0 12px;
+    border-radius: 10px;
+    border: 1px solid var(--line-soft);
+    color: var(--text-dim);
+    font-size: 13.5px; font-weight: 500;
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    transition: all 160ms ease;
+  }
+  .page-btn:hover { color: var(--text); border-color: var(--text-mute); }
+  .page-btn.active {
+    background: var(--lime); color: #0a1005;
+    border-color: var(--lime);
+    box-shadow: 0 0 0 3px oklch(0.9 0.22 128 / 0.15);
+    font-weight: 600;
+  }
+  .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .page-ellipsis { color: var(--text-mute); padding: 0 4px; }
+
+  /* ---- empty state ---- */
+  .empty {
+    grid-column: 1 / -1;
+    padding: 80px 40px; text-align: center;
+    border: 1px dashed var(--line-soft);
+    border-radius: 20px;
+    background: oklch(1 0 0 / 0.015);
+  }
+  .empty .empty-icon {
+    width: 56px; height: 56px; border-radius: 16px;
+    background: oklch(1 0 0 / 0.04);
+    display: grid; place-items: center;
+    color: var(--text-mute); margin: 0 auto 18px;
+  }
+  .empty h4 { font-size: 20px; margin: 0 0 6px; letter-spacing: -0.02em; }
+  .empty p { color: var(--text-dim); font-size: 14px; margin: 0; }
+
+  /* ---- footer ---- */
+  .footer {
+    border-top: 1px solid var(--line-soft);
+    padding: 48px 0 40px; margin-top: 40px;
+  }
+  .footer-inner { display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+  .footer-links { display: flex; gap: 26px; font-size: 13.5px; color: var(--text-dim); }
+  .footer-links a:hover { color: var(--text); }
+  .socials { display: flex; gap: 10px; }
+  .social-btn {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: grid; place-items: center;
+    border: 1px solid var(--line-soft); color: var(--text-dim);
+    transition: all 180ms ease;
+  }
+  .social-btn:hover { color: var(--amber); border-color: oklch(0.82 0.17 75 / 0.5); background: oklch(0.82 0.17 75 / 0.06); }
+  .copyright { font-size: 12.5px; color: var(--text-mute); font-family: 'JetBrains Mono', monospace; }
+
+  /* ---- dropdown ---- */
+  .dropdown { position: relative; }
+  .dropdown-menu {
+    position: absolute; right: 0; top: calc(100% + 8px);
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 12px; padding: 6px;
+    min-width: 200px; z-index: 50;
+    box-shadow: 0 20px 60px -20px oklch(0 0 0 / 0.5);
+  }
+  .dropdown-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 12px; border-radius: 8px;
+    font-size: 13px; color: var(--text-dim);
+    width: 100%; text-align: left;
+    transition: all 140ms;
+  }
+  .dropdown-item:hover { background: oklch(1 0 0 / 0.04); color: var(--text); }
+  .dropdown-item.selected { color: var(--lime); }
+
+  /* ---- detail modal (shared with landing vocabulary) ---- */
+  .modal-backdrop {
+    position: fixed; inset: 0; z-index: 100;
+    background: oklch(0.1 0.005 150 / 0.7);
+    backdrop-filter: blur(10px);
+    display: grid; place-items: center; padding: 24px;
+    animation: fadein 220ms ease;
+  }
+  @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes pop { from { opacity: 0; transform: translateY(12px) scale(0.98); } to { opacity: 1; transform: none; } }
+  .modal {
+    width: 100%; max-width: 580px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    position: relative;
+    animation: pop 260ms cubic-bezier(0.22, 1, 0.36, 1);
+    box-shadow: 0 30px 80px -20px oklch(0 0 0 / 0.6);
+    overflow: hidden;
+  }
+  .modal-close {
+    position: absolute; top: 14px; right: 14px; z-index: 3;
+    width: 32px; height: 32px; border-radius: 10px;
+    color: var(--text-mute);
+    background: oklch(0 0 0 / 0.35); backdrop-filter: blur(10px);
+    transition: all 150ms;
+  }
+  .modal-close:hover { background: oklch(0 0 0 / 0.6); color: var(--text); }
+  .detail-cover { aspect-ratio: 16/7; position: relative; overflow: hidden; }
+  .detail-body { padding: 24px 28px 28px; }
+  .detail-body h3 { font-size: 22px; margin: 0 0 8px; letter-spacing: -0.025em; }
+  .detail-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 18px 0; }
+  .detail-cell { padding: 12px 14px; background: var(--bg); border: 1px solid var(--line-soft); border-radius: 10px; }
+  .detail-cell .k { font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-mute); font-family: 'JetBrains Mono', monospace; }
+  .detail-cell .v { font-size: 14px; font-weight: 500; margin-top: 3px; }
+
+  /* ---- Tweaks panel ---- */
+  .tweaks {
+    position: fixed; right: 20px; bottom: 20px; z-index: 80;
+    width: 280px; background: var(--surface);
+    border: 1px solid var(--line); border-radius: 16px; padding: 16px;
+    box-shadow: 0 20px 60px -20px oklch(0 0 0 / 0.5); font-size: 13px;
+    animation: pop 200ms ease;
+  }
+  .tweaks h4 { margin: 0 0 12px; font-size: 13px; display: flex; align-items: center; gap: 8px; }
+  .tweaks h4::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--lime); }
+  .tweak-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-top: 1px solid var(--line-soft); gap: 10px; }
+  .tweak-row:first-of-type { border-top: none; }
+  .tweak-row label { color: var(--text-dim); font-size: 12.5px; }
+  .tweak-row select { background: var(--bg); border: 1px solid var(--line-soft); color: var(--text); border-radius: 6px; padding: 4px 6px; font-size: 12px; }
+
+  /* ---- responsive ---- */
+  @media (max-width: 1024px) {
+    .grid { grid-template-columns: repeat(2, 1fr); }
+    .featured { grid-template-columns: 1fr; }
+    .featured-visual { order: -1; min-height: 200px; border-left: none; border-bottom: 1px solid var(--line-soft); }
+  }
+  @media (max-width: 700px) {
+    .container { padding: 0 18px; }
+    .nav-inner { grid-template-columns: auto auto; }
+    .nav-center { display: none; }
+    .grid { grid-template-columns: 1fr; }
+    .search-row { grid-template-columns: 1fr; }
+    .page-header { padding: 40px 0 28px; }
+    .header-top { flex-direction: column; align-items: start; }
+    .header-meta { text-align: left; }
+    .featured-meta { grid-template-columns: 1fr 1fr; }
+    .avatar-btn .tier, .avatar-btn .name { display: none; }
+    .avatar-btn { padding: 4px; }
+  }
+</style>
+
+<style id="__light-theme">
+  :root {
+    --bg: oklch(0.985 0.004 150) !important;
+    --bg-2: oklch(0.965 0.005 150) !important;
+    --surface: oklch(1 0 0) !important;
+    --surface-2: oklch(0.975 0.005 150) !important;
+    --line: oklch(0.86 0.01 150) !important;
+    --line-soft: oklch(0.9 0.008 150 / 0.85) !important;
+    --text: oklch(0.2 0.012 150) !important;
+    --text-dim: oklch(0.42 0.012 150) !important;
+    --text-mute: oklch(0.58 0.012 150) !important;
+    --lime: oklch(0.7 0.2 130) !important;
+    --lime-dim: oklch(0.6 0.18 130) !important;
+    --lime-glow: oklch(0.7 0.2 130 / 0.32) !important;
+    --amber: oklch(0.62 0.16 60) !important;
+    --amber-dim: oklch(0.55 0.15 60) !important;
+    --amber-glow: oklch(0.62 0.16 60 / 0.32) !important;
+  }
+  body { color: var(--text) !important; background: var(--bg) !important; }
+  .nav { background: oklch(0.985 0.004 150 / 0.82) !important; border-bottom-color: var(--line-soft) !important; }
+  /* surfaces */
+  .card, .event-card, .venue-card, .live-card, .featured, .modal, .tweaks, .modal-tab.active, .toast, .dropdown-menu, .menu-dropdown {
+    background: var(--surface) !important;
+    border-color: var(--line) !important;
+  }
+  .now-playing, .modal-tabs, .modal-foot, .tabs, .view-toggle, .field input, .field select, .field textarea, .check, .search, .sort-select, .select-box, .detail-cell {
+    background: var(--bg) !important;
+    border-color: var(--line) !important;
+  }
+  .modal-foot { background: var(--bg-2) !important; }
+  /* white-tint overlays on now-light surfaces -> subtle dark tint */
+  .tag, .pill, .chip { background: oklch(0 0 0 / 0.025) !important; }
+  /* primary lime button: white text */
+  .btn-primary { color: #fff !important; }
+  .logo-mark { color: #fff !important; }
+  .logo-mark svg path { stroke: #fff !important; }
+  .logo-mark svg circle { fill: #fff !important; }
+  .avatar, .speaker-avatar, .mini-avatar { color: #fff !important; }
+  .pill.active { color: #fff !important; background: var(--lime) !important; }
+  .pill.active .count { background: oklch(0 0 0 / 0.2) !important; color: #fff !important; }
+  .tab.active { color: #fff !important; }
+  .page-btn.active { color: #fff !important; }
+  .modal-tab.active { background: var(--surface) !important; }
+  .btn-ghost { background: transparent !important; }
+  .btn-ghost:hover { background: oklch(0 0 0 / 0.04) !important; border-color: var(--text-mute) !important; }
+  .btn-white-outline { color: var(--text) !important; border-color: var(--line) !important; }
+  .btn-white-outline:hover { background: oklch(0 0 0 / 0.04) !important; }
+  /* hero hl gradient: keep darker lime so it's readable on white */
+  .hero .hl { background: linear-gradient(100deg, oklch(0.55 0.2 130) 20%, oklch(0.7 0.2 130) 70%) !important; -webkit-background-clip: text !important; background-clip: text !important; color: transparent !important; }
+  /* status badges that previously sat on dark visuals — keep dark/translucent */
+  .date-badge, .status-pill, .rating-badge, .capacity-badge, .ev-chip, .modal-close { background: oklch(0 0 0 / 0.55) !important; }
+  .date-badge .day { color: #fff !important; }
+  /* page mesh & hero mesh — soften so they don't blow out on white */
+  .mesh::before, .page-mesh::before { background: radial-gradient(circle, oklch(0.7 0.2 130 / 0.22), transparent 65%) !important; }
+  .mesh::after, .page-mesh::after { background: radial-gradient(circle, oklch(0.62 0.16 60 / 0.18), transparent 65%) !important; }
+  .grid-overlay { opacity: 0.5 !important; }
+  /* CTA banner background -> light */
+  .cta { background: linear-gradient(180deg, oklch(0.985 0.004 150), oklch(0.95 0.008 150)) !important; }
+  .cta::after { background: radial-gradient(circle at 15% 20%, oklch(0.7 0.2 130 / 0.12), transparent 45%), radial-gradient(circle at 85% 80%, oklch(0.62 0.16 60 / 0.1), transparent 45%) !important; }
+  /* Featured banner */
+  .featured { background: linear-gradient(180deg, oklch(1 0 0), oklch(0.97 0.005 150)) !important; }
+  .featured::before { background: radial-gradient(circle at 85% 20%, oklch(0.62 0.16 60 / 0.1), transparent 45%) !important; }
+  /* Live card */
+  .live-card { background: linear-gradient(180deg, oklch(1 0 0), oklch(0.97 0.005 150)) !important; }
+  .live-card::before { background: radial-gradient(circle at 90% 10%, oklch(0.62 0.16 60 / 0.1), transparent 45%) !important; }
+  /* contribution banner */
+  .contrib-banner { background: linear-gradient(180deg, oklch(1 0 0), oklch(0.97 0.005 150)) !important; }
+  /* card visuals (placeholders) -> keep dark for contrast */
+  .event-visual, .featured-visual, .live-visual, .venue-visual, .detail-cover {
+    background: linear-gradient(135deg, oklch(0.22 0.012 150), oklch(0.16 0.008 150)) !important;
+  }
+  .event-visual .ev-label, .live-visual .label-art, .featured-visual .label, .venue-visual .ph-label {
+    color: oklch(1 1 1 / 0.45) !important;
+  }
+  /* modal backdrop: fog */
+  .modal-backdrop { background: oklch(0.5 0.01 150 / 0.45) !important; }
+  /* footer socials/etc — make sure borders visible */
+  .social-btn, .view-btn, .menu-btn, .page-btn { border-color: var(--line) !important; }
+  /* ghost & outline button text on light */
+  .btn-ghost { color: var(--text) !important; }
+  /* dotted dividers */
+  .event-foot, .action-row { border-top-color: var(--line) !important; }
+  /* hero stats border */
+  .hero-stats { border-color: var(--line) !important; }
+  .hero-stats > div { border-right-color: var(--line) !important; }
+  /* date-badge mo color: keep lime */
+  .date-badge .mo { color: oklch(0.85 0.22 130) !important; }
+  /* modal close on light cover */
+  .modal-close { color: #fff !important; }
+  /* search kbd */
+  .search .kbd { background: oklch(0 0 0 / 0.04) !important; border-color: var(--line) !important; }
+  /* tweak panel inputs */
+  .tweak-row select, .tweak-row input[type="range"] { background: var(--bg) !important; border-color: var(--line) !important; color: var(--text) !important; }
+  /* live now-playing pulse */
+  .pulse, .pulse-dot { box-shadow: 0 0 8px var(--amber-glow); }
+  /* live tag bg */
+  .live-tag, .featured-tag { background: oklch(0.62 0.16 60 / 0.1) !important; }
+  /* contributor color */
+  .contributor .uname { color: var(--text-dim) !important; }
+  /* outlined lime btn */
+  .btn-outline-lime { background: oklch(0.7 0.2 130 / 0.06) !important; }
+  /* CTA gradient border use less bright colors */
+  .cta::before { background: linear-gradient(135deg, var(--lime) 0%, transparent 40%, transparent 60%, var(--amber) 100%) !important; }
+  /* event-card dashed footer border */
+  .event-foot { border-top-style: dashed !important; }
+  /* nav active underline glow softer */
+  .nav-link.active::after { box-shadow: 0 0 10px var(--lime-glow) !important; }
+  /* dropdowns shadow */
+  .dropdown-menu, .menu-dropdown { box-shadow: 0 12px 40px -16px oklch(0 0 0 / 0.18) !important; }
+  /* avatar btn hover */
+  .avatar-btn:hover { background: oklch(0 0 0 / 0.03) !important; }
+  /* event hover shadow tint -> green tint, but lighter */
+  .event-card:hover, .venue-card:hover { box-shadow: 0 18px 50px -22px oklch(0.7 0.2 130 / 0.3) !important; }
+  /* event-card.urgent hover */
+  .event-card.urgent:hover { box-shadow: 0 18px 50px -22px oklch(0.62 0.16 60 / 0.32) !important; }
+  /* tag border visibility */
+  .tag { border-color: var(--line) !important; color: var(--text-dim) !important; }
+  /* seat-bar bg */
+  .seat-bar-wrap { background: oklch(0 0 0 / 0.06) !important; }
+  /* load progress bg */
+  .load-progress { background: oklch(0 0 0 / 0.06) !important; }
+  /* empty state */
+  .empty { background: oklch(0 0 0 / 0.015) !important; }
+  .empty .empty-icon { background: oklch(0 0 0 / 0.04) !important; }
+  /* stat & header counters */
+  .stat-cell .num.lime, .header-meta .count { color: var(--lime) !important; }
+  /* check on (lime) */
+  .check.on { background: oklch(0.7 0.2 130 / 0.08) !important; }
+  .check-dot { border-color: var(--line) !important; }
+  /* event-card hover border */
+  .event-card:hover { border-color: oklch(0.7 0.2 130 / 0.5) !important; }
+  /* modal text inputs focus */
+  .field input:focus, .field select:focus, .field textarea:focus, .search:focus-within { border-color: var(--lime) !important; box-shadow: 0 0 0 3px oklch(0.7 0.2 130 / 0.15) !important; }
+</style>
+
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useMemo, useRef } = React;
+
+const TWEAKS_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "density": "comfortable",
+  "bannerVariant": "featured",
+  "badgeStyle": "floating",
+  "accentMix": "lime-amber",
+  "showBgMesh": true,
+  "cardDensity": "compact",
+  "heroVariant": "centered"
+}/*EDITMODE-END*/;
+
+/* ------------------------- Icons ------------------------- */
+const Icon = ({ name, size = 16 }) => {
+  const s = size;
+  const common = { width: s, height: s, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.75, strokeLinecap: "round", strokeLinejoin: "round" };
+  switch (name) {
+    case "search": return <svg {...common}><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>;
+    case "arrow-right": return <svg {...common}><path d="M5 12h14M13 6l6 6-6 6"/></svg>;
+    case "arrow-left": return <svg {...common}><path d="M19 12H5M11 6l-6 6 6 6"/></svg>;
+    case "pin": return <svg {...common}><path d="M12 21s-7-6.5-7-12a7 7 0 1 1 14 0c0 5.5-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/></svg>;
+    case "clock": return <svg {...common}><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>;
+    case "users": return <svg {...common}><path d="M16 20v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 20v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>;
+    case "calendar": return <svg {...common}><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>;
+    case "grid": return <svg {...common}><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>;
+    case "list": return <svg {...common}><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>;
+    case "chevron-down": return <svg {...common}><path d="m6 9 6 6 6-6"/></svg>;
+    case "x": return <svg {...common}><path d="M18 6 6 18M6 6l12 12"/></svg>;
+    case "twitter": return <svg {...common}><path d="M18 4h3l-7.5 8.5L22 22h-6.5l-5-6.5L5 22H2l8-9L2 4h6.5l4.5 6L18 4z" fill="currentColor" stroke="none"/></svg>;
+    case "discord": return <svg viewBox="0 0 24 24" width={s} height={s} fill="currentColor"><path d="M20.3 4.4a16 16 0 0 0-4-1.3l-.2.4a14 14 0 0 0-4.2 0l-.2-.4a16 16 0 0 0-4 1.3 17.7 17.7 0 0 0-3 11.7 16 16 0 0 0 4.9 2.5l1-1.5a11 11 0 0 1-1.7-.8l.4-.3a11.5 11.5 0 0 0 9.6 0l.4.3a11 11 0 0 1-1.7.8l1 1.5a16 16 0 0 0 5-2.5 17.6 17.6 0 0 0-3-11.7zM9 14c-1 0-1.8-.9-1.8-2s.8-2 1.8-2 1.8.9 1.8 2-.8 2-1.8 2zm6 0c-1 0-1.8-.9-1.8-2s.8-2 1.8-2 1.8.9 1.8 2-.8 2-1.8 2z"/></svg>;
+    case "telegram": return <svg viewBox="0 0 24 24" width={s} height={s} fill="currentColor"><path d="M21.5 4.3 2.8 11.6c-1 .4-1 1 0 1.3l4.4 1.4 1.7 5.3c.2.6.4.8 1 .6l3-2.5 4.4 3.2c.9.5 1.5.2 1.7-.8l3-14c.3-1.2-.5-1.7-1.5-1.3zm-3.3 3.4-8.6 7.7-.3 3.6-1.7-5.3 10.6-6.7c.5-.3.9-.1.5.7z"/></svg>;
+    default: return null;
+  }
+};
+
+/* ------------------------- Data ------------------------- */
+const ALL_EVENTS = [
+  { id: 1,  day: "04", mo: "MAY", year: 2026, date: "May 04, 2026", time: "6:00 PM – 9:00 PM", title: "Liquidity Provision 101", desc: "Hands-on workshop for first-time LPs. Walk through adding, rebalancing, and exiting positions.", venue: "Matina Town Square", cat: "Workshops", tags: ["DeFi", "Beginner"], seats: 48, total: 80, status: null, orb: "lime", angle: "115deg" },
+  { id: 2,  day: "17", mo: "MAY", year: 2026, date: "May 17, 2026", time: "2:00 PM – 5:00 PM", title: "Cross-Chain Roundtable", desc: "Panel with founders from three L2 ecosystems on bridge safety, shared sequencers, composability.", venue: "Abreeza Ayala Mall", cat: "Meetups", tags: ["L2", "Panel"], seats: 22, total: 60, status: "closing", orb: "amber", angle: "95deg" },
+  { id: 3,  day: "01", mo: "JUN", year: 2026, date: "June 01, 2026", time: "10:00 AM – 6:00 PM (2-day)", title: "DeFi Builder's Weekend", desc: "Two-day hackathon for Mindanao developers. Ship a prototype, win grants, meet regional VCs.", venue: "MAFBEX Grounds", cat: "Hackathons", tags: ["Hackathon", "Grants"], seats: 0, total: 120, status: null, orb: "lime", angle: "135deg" },
+  { id: 4,  day: "22", mo: "APR", year: 2026, date: "April 22, 2026", time: "7:00 PM – 10:00 PM", title: "Women in Web3 — Davao Chapter", desc: "Monthly mixer spotlighting Mindanao women building and leading in crypto, DeFi and infra.", venue: "Seda Abreeza", cat: "Meetups", tags: ["Community", "Networking"], seats: 8, total: 50, status: "closing", orb: "amber", angle: "105deg" },
+  { id: 5,  day: "08", mo: "MAY", year: 2026, date: "May 08, 2026", time: "9:00 AM – 1:00 PM", title: "Smart Contract Auditing Primer", desc: "Intro to audit methodology: common patterns, tools, and how to file a meaningful disclosure.", venue: "Ateneo de Davao", cat: "Workshops", tags: ["Security", "Solidity"], seats: 30, total: 40, status: "new", orb: "lime", angle: "125deg" },
+  { id: 6,  day: "29", mo: "APR", year: 2026, date: "April 29, 2026", time: "3:00 PM – 6:00 PM", title: "Stablecoin Forum: Asia Edition", desc: "What's next for PHP-pegged stables, remittance rails, and regulatory clarity across ASEAN.", venue: "Park Inn Davao", cat: "Meetups", tags: ["Stablecoins", "Policy"], seats: 34, total: 90, status: null, orb: "amber", angle: "100deg" },
+  { id: 7,  day: "15", mo: "JUN", year: 2026, date: "June 15, 2026", time: "10:00 AM – 2:00 PM", title: "On-Chain Identity Workshop", desc: "Soul-bound tokens, attestations, and ENS — practical patterns for community membership.", venue: "SMX Convention Center", cat: "Workshops", tags: ["Identity", "ENS"], seats: 42, total: 70, status: null, orb: "lime", angle: "110deg" },
+  { id: 8,  day: "24", mo: "JUN", year: 2026, date: "June 24, 2026", time: "4:00 PM – 8:00 PM", title: "Treasury Management for DAOs", desc: "Case studies from three active DAOs. Diversification, streaming, and multi-sig hygiene.", venue: "Dusit Thani Davao", cat: "Meetups", tags: ["DAO", "Treasury"], seats: 52, total: 80, status: null, orb: "lime", angle: "130deg" },
+  { id: 9,  day: "05", mo: "JUL", year: 2026, date: "July 05, 2026", time: "9:00 AM – 6:00 PM", title: "Mindanao ZK Summit", desc: "A full-day deep dive on zero-knowledge proofs, circuits, and the developer toolchain.", venue: "SMX Convention Center", cat: "Meetups", tags: ["ZK", "Research"], seats: 128, total: 250, status: "new", orb: "amber", angle: "115deg" },
+];
+
+const CATEGORIES = [
+  { key: "All", label: "All Events" },
+  { key: "Workshops", label: "Workshops" },
+  { key: "Meetups", label: "Meetups" },
+  { key: "Hackathons", label: "Hackathons" },
+];
+
+const FEATURED = {
+  tag: "FEATURED",
+  title: "Davao DeFi End-of-Year Gala 2026",
+  desc: "A black-tie celebration closing a landmark year for the Davao DeFi community — keynote, awards, live panel, and an after-hours builder's mixer.",
+  date: "December 12, 2026",
+  time: "6:00 PM – 12:00 AM",
+  venue: "Marco Polo Davao, Grand Ballroom"
+};
+
+/* ------------------------- Nav ------------------------- */
+const Nav = () => {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  useEffect(() => {
+    const onClick = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener("click", onClick);
+    return () => document.removeEventListener("click", onClick);
+  }, []);
+
+  return (
+    <nav className="nav">
+      <div className="container nav-inner">
+        <a className="logo" href="Eventara Landing.html">
+          <div className="logo-mark">
+            <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
+              <path d="M2 10 L10 2 L18 10 L10 18 Z" stroke="#0a1005" strokeWidth="2" fill="none" />
+              <circle cx="10" cy="10" r="2.5" fill="#0a1005"/>
+            </svg>
+          </div>
+          <span>Eventara</span>
+        </a>
+        <div className="nav-center">
+          <a className="nav-link" href="Eventara Landing.html">Home</a>
+          <a className="nav-link active" href="#">Events</a>
+          <a className="nav-link" href="#">Venue Hub</a>
+          <a className="nav-link" href="#">About</a>
+        </div>
+        <div className="nav-right">
+          <div className="dropdown" ref={ref}>
+            <button className="avatar-btn" onClick={() => setOpen(o => !o)}>
+              <div className="avatar">JD</div>
+              <div style={{ textAlign: "left" }}>
+                <div className="name">Juan D.</div>
+                <div className="tier">Member</div>
+              </div>
+              <Icon name="chevron-down" size={14} />
+            </button>
+            {open && (
+              <div className="dropdown-menu">
+                <button className="dropdown-item">My Dashboard <Icon name="arrow-right" size={12} /></button>
+                <button className="dropdown-item">My Registrations</button>
+                <button className="dropdown-item">Wallet</button>
+                <div style={{ height: 1, background: "var(--line-soft)", margin: "6px 0" }} />
+                <button className="dropdown-item" style={{ color: "var(--amber)" }}>Sign out</button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </nav>
+  );
+};
+
+/* ------------------------- Featured Banner ------------------------- */
+const Featured = ({ onOpen }) => (
+  <div className="featured">
+    <div className="featured-body">
+      <div className="featured-tag"><span className="star" /> FEATURED · END OF YEAR</div>
+      <h2>{FEATURED.title}</h2>
+      <p className="desc">{FEATURED.desc}</p>
+      <div className="featured-meta">
+        <div>
+          <div className="k">Date</div>
+          <div className="v">{FEATURED.date}</div>
+        </div>
+        <div>
+          <div className="k">Time</div>
+          <div className="v">{FEATURED.time}</div>
+        </div>
+        <div>
+          <div className="k">Venue</div>
+          <div className="v">{FEATURED.venue}</div>
+        </div>
+      </div>
+      <div className="featured-actions">
+        <button className="btn btn-primary" onClick={onOpen}>Register Now <Icon name="arrow-right" size={14} /></button>
+        <button className="btn btn-ghost">View Details</button>
+      </div>
+    </div>
+    <div className="featured-visual">
+      <div className="stripes" />
+      <div className="orb-a" />
+      <div className="orb-b" />
+      <div className="year">'26</div>
+      <div className="label">[ event cover · 16:9 ]</div>
+    </div>
+  </div>
+);
+
+/* ------------------------- Event Card ------------------------- */
+const EventCard = ({ ev, onOpen }) => {
+  const isLow = ev.seats > 0 && ev.seats <= ev.total * 0.2;
+  const isFull = ev.seats === 0;
+  const pct = Math.max(3, Math.round(((ev.total - ev.seats) / ev.total) * 100));
+  const urgent = ev.status === "closing" || ev.status === "live";
+
+  return (
+    <article className={`event-card ${urgent ? "urgent" : ""}`}>
+      <div className="event-visual" style={{ "--angle": ev.angle }}>
+        <div className="stripes" />
+        <div className="orb" style={{ left: "20%", top: "25%", width: 150, height: 150, background: ev.orb === "lime" ? "var(--lime)" : "var(--amber)" }} />
+        <div className="orb" style={{ right: "15%", bottom: "12%", width: 110, height: 110, background: ev.orb === "lime" ? "var(--amber)" : "var(--lime)", opacity: 0.32 }} />
+        <div className="date-badge">
+          <div className="mo">{ev.mo}</div>
+          <div className="day">{ev.day}</div>
+        </div>
+        {ev.status === "closing" && <div className="status-pill closing"><span className="pulse-dot" /> Closing Soon</div>}
+        {ev.status === "live" && <div className="status-pill live"><span className="pulse-dot" /> Live</div>}
+        {ev.status === "new" && <div className="status-pill new">New</div>}
+        <div className="ph-label">[ event cover · 16:9 ]</div>
+      </div>
+      <div className="event-body">
+        <h3 className="event-title">{ev.title}</h3>
+        <div className="tag-row">
+          {ev.tags.map(t => <span key={t} className="tag">{t}</span>)}
+        </div>
+        <div className="event-details">
+          <div className="row"><Icon name="clock" size={13} /> {ev.time}</div>
+          <div className="row"><Icon name="pin" size={13} /> {ev.venue}</div>
+        </div>
+        <div className="event-footer" style={{ flexDirection: "column", alignItems: "stretch", gap: 10 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div className="seat-bar-wrap">
+              <div className={`seat-bar ${isLow ? "low" : ""}`} style={{ width: `${pct}%` }} />
+            </div>
+            <div className={`seat-lbl ${isLow ? "low" : ""}`}>
+              {isFull ? <span style={{ color: "var(--amber)" }}>Full</span> : <><span className="num">{ev.seats}</span> left</>}
+            </div>
+          </div>
+          <button className="view-btn" onClick={() => onOpen(ev)}>
+            View Details <Icon name="arrow-right" size={13} />
+          </button>
+        </div>
+      </div>
+    </article>
+  );
+};
+
+/* ------------------------- Detail Modal ------------------------- */
+const EventDetail = ({ ev, onClose }) => (
+  <div className="modal-backdrop" onClick={onClose}>
+    <div className="modal" onClick={e => e.stopPropagation()}>
+      <button className="modal-close" onClick={onClose}><Icon name="x" size={16} /></button>
+      <div className="detail-cover" style={{ background: "linear-gradient(135deg, oklch(0.22 0.012 150), oklch(0.15 0.008 150))" }}>
+        <div style={{ position: "absolute", inset: 0, backgroundImage: `repeating-linear-gradient(${ev.angle}, transparent 0 22px, oklch(1 0 0 / 0.04) 22px 24px)` }} />
+        <div style={{ position: "absolute", left: "18%", top: "20%", width: 220, height: 220, borderRadius: "50%", filter: "blur(38px)", background: ev.orb === "lime" ? "var(--lime)" : "var(--amber)", opacity: 0.5 }} />
+        <div style={{ position: "absolute", right: "15%", bottom: "10%", width: 160, height: 160, borderRadius: "50%", filter: "blur(32px)", background: ev.orb === "lime" ? "var(--amber)" : "var(--lime)", opacity: 0.4 }} />
+        <div className="date-badge" style={{ top: 16, left: 20 }}>
+          <div className="mo">{ev.mo}</div>
+          <div className="day">{ev.day}</div>
+        </div>
+      </div>
+      <div className="detail-body">
+        <div className="tag-row" style={{ marginBottom: 10 }}>
+          {ev.tags.map(t => <span key={t} className="tag">{t}</span>)}
+        </div>
+        <h3>{ev.title}</h3>
+        <p style={{ color: "var(--text-dim)", fontSize: 14.5, lineHeight: 1.6, margin: "6px 0 0" }}>{ev.desc}</p>
+        <div className="detail-grid">
+          <div className="detail-cell"><div className="k">Date</div><div className="v">{ev.date}</div></div>
+          <div className="detail-cell"><div className="k">Time</div><div className="v">{ev.time}</div></div>
+          <div className="detail-cell"><div className="k">Venue</div><div className="v">{ev.venue}</div></div>
+          <div className="detail-cell"><div className="k">Seats</div><div className="v" style={{ color: ev.seats === 0 ? "var(--amber)" : "var(--lime)" }}>{ev.seats === 0 ? "Full — waitlist" : `${ev.seats} of ${ev.total} left`}</div></div>
+        </div>
+        <div style={{ display: "flex", gap: 10 }}>
+          <button className="btn btn-primary" style={{ flex: 1 }}>{ev.seats === 0 ? "Join Waitlist" : "Reserve Seat"} <Icon name="arrow-right" size={14} /></button>
+          <button className="btn btn-ghost"><Icon name="calendar" size={14} /> Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+/* ------------------------- Tweaks ------------------------- */
+const Tweaks = ({ tweaks, setTweaks, onClose }) => (
+  <div className="tweaks">
+    <h4>Tweaks <button style={{ marginLeft: "auto", color: "var(--text-mute)" }} onClick={onClose}><Icon name="x" size={14}/></button></h4>
+    <div className="tweak-row">
+      <label>Grid density</label>
+      <select value={tweaks.density} onChange={e => setTweaks({ ...tweaks, density: e.target.value })}>
+        <option value="comfortable">Comfortable (3)</option>
+        <option value="compact">Compact (4)</option>
+      </select>
+    </div>
+    <div className="tweak-row">
+      <label>Featured banner</label>
+      <select value={tweaks.bannerVariant} onChange={e => setTweaks({ ...tweaks, bannerVariant: e.target.value })}>
+        <option value="featured">Show banner</option>
+        <option value="hidden">Hide banner</option>
+      </select>
+    </div>
+    <div className="tweak-row">
+      <label>Date badge</label>
+      <select value={tweaks.badgeStyle} onChange={e => setTweaks({ ...tweaks, badgeStyle: e.target.value })}>
+        <option value="floating">Floating (dark)</option>
+        <option value="lime">Solid lime</option>
+      </select>
+    </div>
+  </div>
+);
+
+/* ------------------------- App ------------------------- */
+const App = () => {
+  const [tweaks, setTweaks] = useState(TWEAKS_DEFAULTS);
+  const [editMode, setEditMode] = useState(false);
+  const [q, setQ] = useState("");
+  const [cat, setCat] = useState("All");
+  const [sort, setSort] = useState("date");
+  const [sortOpen, setSortOpen] = useState(false);
+  const [view, setView] = useState("grid");
+  const [page, setPage] = useState(1);
+  const [detail, setDetail] = useState(null);
+
+  const PER_PAGE = tweaks.density === "compact" ? 8 : 6;
+
+  useEffect(() => {
+    const onMsg = (e) => {
+      const t = e.data?.type;
+      if (t === "__activate_edit_mode") setEditMode(true);
+      if (t === "__deactivate_edit_mode") setEditMode(false);
+    };
+    window.addEventListener("message", onMsg);
+    window.parent.postMessage({ type: "__edit_mode_available" }, "*");
+    return () => window.removeEventListener("message", onMsg);
+  }, []);
+
+  useEffect(() => {
+    window.parent.postMessage({ type: "__edit_mode_set_keys", edits: tweaks }, "*");
+  }, [tweaks]);
+
+  // Apply badge style via CSS var
+  useEffect(() => {
+    const sheet = document.getElementById("badge-style") || (() => {
+      const s = document.createElement("style"); s.id = "badge-style"; document.head.appendChild(s); return s;
+    })();
+    if (tweaks.badgeStyle === "lime") {
+      sheet.textContent = `.date-badge { background: var(--lime) !important; border-color: var(--lime) !important; } .date-badge .mo, .date-badge .day { color: #0a1005 !important; }`;
+    } else sheet.textContent = "";
+  }, [tweaks.badgeStyle]);
+
+  const filtered = useMemo(() => {
+    let list = ALL_EVENTS.slice();
+    if (cat !== "All") list = list.filter(e => e.cat === cat);
+    if (q.trim()) {
+      const needle = q.toLowerCase();
+      list = list.filter(e =>
+        e.title.toLowerCase().includes(needle) ||
+        e.venue.toLowerCase().includes(needle) ||
+        e.tags.some(t => t.toLowerCase().includes(needle)) ||
+        e.cat.toLowerCase().includes(needle)
+      );
+    }
+    const monthIdx = { JAN:0, FEB:1, MAR:2, APR:3, MAY:4, JUN:5, JUL:6, AUG:7, SEP:8, OCT:9, NOV:10, DEC:11 };
+    list.sort((a, b) => {
+      if (sort === "date") return new Date(a.year, monthIdx[a.mo], +a.day) - new Date(b.year, monthIdx[b.mo], +b.day);
+      if (sort === "popularity") return (b.total - b.seats) - (a.total - a.seats);
+      if (sort === "availability") return b.seats - a.seats;
+      return 0;
+    });
+    return list;
+  }, [q, cat, sort]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
+  const currentPage = Math.min(page, totalPages);
+  const paged = filtered.slice((currentPage - 1) * PER_PAGE, currentPage * PER_PAGE);
+
+  const counts = useMemo(() => {
+    const obj = { All: ALL_EVENTS.length };
+    for (const c of CATEGORIES) if (c.key !== "All") obj[c.key] = ALL_EVENTS.filter(e => e.cat === c.key).length;
+    return obj;
+  }, []);
+
+  const loadedPct = Math.round((currentPage * PER_PAGE / filtered.length) * 100);
+
+  const changeCat = (c) => { setCat(c); setPage(1); };
+  const changeQ = (v) => { setQ(v); setPage(1); };
+
+  return (
+    <>
+      <Nav />
+      <div style={{ position: "relative" }}>
+        <div className="page-mesh"><div className="grid-overlay" /></div>
+
+        <div className="container" style={{ position: "relative", zIndex: 1 }}>
+          <header className="page-header">
+            <div className="header-top">
+              <div>
+                <span className="eyebrow"><span className="dot" /> EVENT DIRECTORY · APR–JUL 2026</span>
+                <h1>Discover Events</h1>
+                <p className="lead">Browse {ALL_EVENTS.length} upcoming workshops, meetups and hackathons across the Davao DeFi community.</p>
+              </div>
+              <div className="header-meta">
+                <div className="count">{String(ALL_EVENTS.length).padStart(2, "0")}</div>
+                <div className="count-lbl">Active listings</div>
+              </div>
+            </div>
+
+            <div className="search-row">
+              <div className="search">
+                <span className="icon"><Icon name="search" size={18} /></span>
+                <input
+                  placeholder="Search events, venues, tags…"
+                  value={q}
+                  onChange={e => changeQ(e.target.value)}
+                />
+                <span className="kbd">⌘ K</span>
+              </div>
+              <button className="sort-select" onClick={() => setSortOpen(o => !o)} style={{ position: "relative" }}>
+                <span className="label">Sort</span>
+                <span className="val">{sort === "date" ? "By date" : sort === "popularity" ? "Popularity" : "Availability"}</span>
+                <Icon name="chevron-down" size={14} />
+                {sortOpen && (
+                  <div className="dropdown-menu" style={{ top: "calc(100% + 6px)" }} onClick={e => e.stopPropagation()}>
+                    {[["date","By date"],["popularity","Most popular"],["availability","Most available"]].map(([k, lbl]) => (
+                      <button key={k} className={`dropdown-item ${sort === k ? "selected" : ""}`} onClick={() => { setSort(k); setSortOpen(false); }}>{lbl}</button>
+                    ))}
+                  </div>
+                )}
+              </button>
+            </div>
+
+            <div className="filters">
+              {CATEGORIES.map(c => (
+                <button key={c.key} className={`pill ${cat === c.key ? "active" : ""}`} onClick={() => changeCat(c.key)}>
+                  {c.label}
+                  <span className="count">{counts[c.key]}</span>
+                </button>
+              ))}
+              <div className="filter-sep" />
+              <button className="pill">This month</button>
+              <button className="pill">Free</button>
+              <button className="pill">Members only</button>
+            </div>
+
+            {tweaks.bannerVariant === "featured" && <Featured onOpen={() => setDetail({ ...ALL_EVENTS[2], title: FEATURED.title, desc: FEATURED.desc, date: FEATURED.date, time: FEATURED.time, venue: FEATURED.venue })} />}
+          </header>
+
+          <section>
+            <div className="list-controls">
+              <div>
+                <h3>{cat === "All" ? "All events" : cat}</h3>
+                <div className="results">
+                  {filtered.length} result{filtered.length !== 1 ? "s" : ""}{q && <> · query <span style={{ color: "var(--lime)" }}>"{q}"</span></>}
+                </div>
+              </div>
+              <div className="view-toggle">
+                <button className={view === "grid" ? "active" : ""} onClick={() => setView("grid")}>
+                  <Icon name="grid" size={13} /> Grid
+                </button>
+                <button className={view === "list" ? "active" : ""} onClick={() => setView("list")}>
+                  <Icon name="list" size={13} /> List
+                </button>
+              </div>
+            </div>
+
+            <div className="grid" style={{ gridTemplateColumns: view === "list" ? "1fr" : (tweaks.density === "compact" ? "repeat(4, 1fr)" : "repeat(3, 1fr)") }}>
+              {paged.length === 0 ? (
+                <div className="empty">
+                  <div className="empty-icon"><Icon name="search" size={22} /></div>
+                  <h4>No events match your filters</h4>
+                  <p>Try a broader search or reset your category selection.</p>
+                </div>
+              ) : paged.map(ev => <EventCard key={ev.id} ev={ev} onOpen={setDetail} />)}
+            </div>
+          </section>
+
+          {filtered.length > 0 && (
+            <div className="paginate-wrap">
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+                <div className="load-progress">
+                  <div className="load-progress-fill" style={{ width: `${Math.min(100, loadedPct)}%` }} />
+                </div>
+                <div className="load-progress-lbl">
+                  Showing {(currentPage - 1) * PER_PAGE + 1}–{Math.min(currentPage * PER_PAGE, filtered.length)} of {filtered.length}
+                </div>
+              </div>
+
+              {currentPage < totalPages ? (
+                <button className="btn btn-outline" onClick={() => setPage(p => p + 1)}>
+                  Load more events <Icon name="arrow-right" size={14} />
+                </button>
+              ) : (
+                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: "var(--text-mute)", letterSpacing: "0.14em" }}>
+                  — END OF LIST —
+                </div>
+              )}
+
+              <div className="pagination">
+                <button className="page-btn" disabled={currentPage === 1} onClick={() => setPage(p => Math.max(1, p - 1))}>
+                  <Icon name="arrow-left" size={13} />
+                </button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(n => (
+                  <button key={n} className={`page-btn ${n === currentPage ? "active" : ""}`} onClick={() => setPage(n)}>{n}</button>
+                ))}
+                <button className="page-btn" disabled={currentPage === totalPages} onClick={() => setPage(p => Math.min(totalPages, p + 1))}>
+                  <Icon name="arrow-right" size={13} />
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <footer className="footer">
+        <div className="container footer-inner">
+          <div className="logo">
+            <div className="logo-mark">
+              <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
+                <path d="M2 10 L10 2 L18 10 L10 18 Z" stroke="#0a1005" strokeWidth="2" fill="none" />
+                <circle cx="10" cy="10" r="2.5" fill="#0a1005"/>
+              </svg>
+            </div>
+            <span>Eventara</span>
+          </div>
+          <div className="footer-links">
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Service</a>
+            <a href="#">Contact</a>
+          </div>
+          <div className="socials">
+            <a className="social-btn" href="#"><Icon name="twitter" size={15} /></a>
+            <a className="social-btn" href="#"><Icon name="discord" size={16} /></a>
+            <a className="social-btn" href="#"><Icon name="telegram" size={16} /></a>
+          </div>
+        </div>
+        <div className="container" style={{ marginTop: 28, display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+          <div className="copyright">© 2026 EVENTARA — Built for the Davao DeFi Community PH.</div>
+          <div className="copyright" style={{ color: "var(--text-dim)" }}>
+            <span style={{ color: "var(--lime)" }}>●</span> All systems operational
+          </div>
+        </div>
+      </footer>
+
+      {detail && <EventDetail ev={detail} onClose={() => setDetail(null)} />}
+      {editMode && <Tweaks tweaks={tweaks} setTweaks={setTweaks} onClose={() => setEditMode(false)} />}
+    </>
+  );
+};
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+
+<noscript><div style="padding:48px;font-family:system-ui;color:#fff">Enable JavaScript to view the Eventara Events Directory.</div></noscript>
+</body>
+</html>
