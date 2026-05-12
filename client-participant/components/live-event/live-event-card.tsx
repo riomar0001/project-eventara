@@ -1,142 +1,307 @@
 "use client"
 
-import Image from "next/image"
+import { useState, useEffect } from "react"
 import { LIVE_EVENT } from "@/constants/events"
-import { LiveEvent } from "@/types/event"
-import { Card } from "@/components/ui/card"
 
-interface LiveEventCardProps {
-  event?: LiveEvent
-}
+export function LiveEventCard() {
+  const [countdown, setCountdown] = useState({ h: 1, m: 24, s: 6 })
 
-export function LiveEventCard({ event = LIVE_EVENT }: LiveEventCardProps) {
+  useEffect(() => {
+    const t = setInterval(() => {
+      setCountdown((c) => {
+        let { h, m, s } = c
+        s -= 1
+        if (s < 0) {
+          s = 59
+          m -= 1
+        }
+        if (m < 0) {
+          m = 59
+          h -= 1
+        }
+        if (h < 0) return { h: 0, m: 0, s: 0 }
+        return { h, m, s }
+      })
+    }, 1000)
+    return () => clearInterval(t)
+  }, [])
+
+  const pad = (n: number) => String(n).padStart(2, "0")
+
   return (
-    <section className="relative overflow-hidden bg-[var(--bg)] py-16">
-      <div className="container mx-auto px-8">
-        <Card className="before:from-[var(--lime)]/10 before:to-[var(--amber)]/10 relative overflow-hidden before:pointer-events-none before:absolute before:inset-0 before:rounded-2xl before:bg-gradient-to-r before:via-transparent">
-          {/* Visual header with stripes */}
-          <div className="from-[var(--lime)]/20 to-[var(--amber)]/20 relative h-48 overflow-hidden bg-gradient-to-br md:h-64">
-            {/* Decorative stripes */}
+    <section className="relative pt-10" style={{ padding: "40px 0" }}>
+      <div className="container mx-auto max-w-[1240px] px-8">
+        {/* Section head */}
+        <div className="mb-10 flex flex-wrap items-end justify-between gap-6">
+          <div>
+            <div className="mb-2 inline-flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--text-mute)]">
+              <span
+                className="inline-block h-1.5 w-1.5 rounded-full"
+                style={{
+                  background: "var(--amber)",
+                  boxShadow: "0 0 12px var(--amber-glow)",
+                }}
+              />
+              ON NOW
+            </div>
+            <h2 className="my-2.5 text-balance text-[clamp(30px,3.4vw,44px)] font-semibold tracking-[-0.03em] text-[var(--text)]">
+              Happening Now
+            </h2>
+          </div>
+          <p className="max-w-[46ch] text-[15px] text-[var(--text-dim)]">
+            One session is live on the Eventara network. Jump in, or catch up
+            later — sessions are archived within 24 hours.
+          </p>
+        </div>
+
+        {/* Live card */}
+        <div
+          className="relative overflow-hidden rounded-[24px] border border-[var(--line)] p-0"
+          style={{
+            background:
+              "linear-gradient(180deg, oklch(0.23 0.012 150) 0%, oklch(0.2 0.01 150) 100%)",
+            display: "grid",
+            gridTemplateColumns: "1.1fr 1fr",
+            minHeight: "420px",
+          }}
+        >
+          {/* Glow overlay */}
+          <div
+            className="pointer-events-none absolute inset-0"
+            style={{
+              background:
+                "radial-gradient(circle at 90% 10%, oklch(0.82 0.17 75 / 0.18), transparent 40%)",
+            }}
+          />
+
+          {/* Live body (left) */}
+          <div
+            className="relative flex flex-col gap-[18px] bg-white p-10"
+            style={{ paddingRight: "40px", paddingLeft: "36px" }}
+          >
+            {/* Live tag */}
+            <div
+              className="inline-flex w-fit items-center gap-2 rounded-full font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--amber)]"
+              style={{
+                padding: "6px 12px 6px 10px",
+                background: "oklch(0.82 0.17 75 / 0.12)",
+                border: "1px solid oklch(0.82 0.17 75 / 0.35)",
+              }}
+            >
+              <span
+                className="relative inline-block h-2 w-2 rounded-full"
+                style={{
+                  background: "var(--amber)",
+                  animation: "ping 1.6s cubic-bezier(0,0,0.2,1) infinite",
+                }}
+              />
+              LIVE · DAY 02 OF 03
+            </div>
+
+            {/* Title */}
+            <h3
+              className="m-0 font-semibold text-[var(--text)]"
+              style={{
+                fontSize: "clamp(26px, 2.6vw, 34px)",
+                letterSpacing: "-0.025em",
+                lineHeight: "1.1",
+              }}
+            >
+              {LIVE_EVENT.title}
+            </h3>
+
+            {/* Meta grid */}
+            <div className="grid grid-cols-2 gap-[18px] gap-x-[28px]">
+              <div>
+                <div className="font-mono text-[10.5px] uppercase tracking-[0.16em] text-[var(--text-mute)]">
+                  Venue
+                </div>
+                <div className="mt-1 text-[14.5px] font-medium text-[var(--text)]">
+                  {LIVE_EVENT.venue}
+                </div>
+              </div>
+              <div>
+                <div className="font-mono text-[10.5px] uppercase tracking-[0.16em] text-[var(--text-mute)]">
+                  Session
+                </div>
+                <div className="mt-1 text-[14.5px] font-medium text-[var(--text)]">
+                  {LIVE_EVENT.session}
+                </div>
+              </div>
+              <div>
+                <div className="font-mono text-[10.5px] uppercase tracking-[0.16em] text-[var(--text-mute)]">
+                  Attendance
+                </div>
+                <div className="mt-1 text-[14.5px] font-medium text-[var(--text)]">
+                  {LIVE_EVENT.attendees}
+                </div>
+              </div>
+              <div>
+                <div className="font-mono text-[10.5px] uppercase tracking-[0.16em] text-[var(--text-mute)]">
+                  Ends in
+                </div>
+                <div
+                  className="font-mono text-[14.5px] font-medium"
+                  style={{ color: "var(--amber)", marginTop: "4px" }}
+                >
+                  {pad(countdown.h)}:{pad(countdown.m)}:{pad(countdown.s)}
+                </div>
+              </div>
+            </div>
+
+            {/* Now playing */}
+            <div
+              className="mt-auto flex items-center gap-[14px] rounded-[14px] border border-[var(--line-soft)]"
+              style={{
+                background: "oklch(1 0 0 / 0.03)",
+                padding: "14px 16px",
+              }}
+            >
+              <div
+                className="flex h-[42px] w-[42px] flex-shrink-0 items-center justify-center rounded-full text-[14px] font-bold"
+                style={{
+                  background:
+                    "linear-gradient(135deg, var(--amber), oklch(0.72 0.16 75))",
+                  color: "#1a1005",
+                }}
+              >
+                AM
+              </div>
+              <div className="min-w-0">
+                <div className="text-[14.5px] font-semibold">
+                  {LIVE_EVENT.speaker.name}
+                </div>
+                <div className="text-[12.5px] text-[var(--text-dim)]">
+                  Now &quot;{LIVE_EVENT.topic}&quot;
+                </div>
+              </div>
+              <div className="ml-auto flex items-end gap-[3px]">
+                {[10, 16, 22, 14, 18].map((height, i) => (
+                  <span
+                    key={i}
+                    className="block w-[3px] rounded-[2px] bg-[var(--lime)]"
+                    style={{
+                      height: `${height}px`,
+                      animation: `wave 1.1s ease-in-out infinite`,
+                      animationDelay: `${[0, 0.15, 0.3, 0.45, 0.2][i]}s`,
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Buttons */}
+            <div className="flex gap-2.5">
+              <button
+                className="px-5.5 duration-180 flex flex-1 items-center justify-center gap-2.5 rounded-full bg-[var(--lime)] py-3.5 text-sm font-semibold text-[#0a1005] transition-all hover:-translate-y-0.5"
+                style={{
+                  boxShadow:
+                    "0 8px 28px -10px var(--lime-glow), inset 0 -1px 0 oklch(0.7 0.2 128)",
+                }}
+              >
+                ▶ Join Session
+              </button>
+              <button className="px-5.5 duration-180 inline-flex items-center justify-center gap-2.5 rounded-full border border-[var(--line)] bg-[oklch(1_0_0_/_0.02)] py-3.5 text-sm font-semibold text-[var(--text-dim)] transition-all hover:border-[oklch(1_0_0_/_0.2)] hover:text-[var(--text)]">
+                View Agenda
+              </button>
+            </div>
+          </div>
+
+          {/* Live visual (right) */}
+          <div
+            className="relative overflow-hidden border-l border-[var(--line-soft)]"
+            style={{
+              background:
+                "linear-gradient(135deg, oklch(0.2 0.01 150), oklch(0.15 0.008 150))",
+            }}
+          >
+            {/* Stripe art */}
             <div
               className="absolute inset-0"
               style={{
-                backgroundImage: `
-                  repeating-linear-gradient(
-                    45deg,
-                    transparent,
-                    transparent 15px,
-                    var(--line-soft) 15px,
-                    var(--line-soft) 30px
-                  )
-                `,
-                opacity: 0.5,
+                backgroundImage:
+                  "repeating-linear-gradient(110deg, transparent 0 22px, oklch(1 0 0 / 0.025) 22px 24px)",
               }}
             />
 
-            {/* Live label */}
-            <div className="absolute left-6 top-6 flex items-center gap-2 rounded-full bg-[var(--surface)] px-3 py-1.5 text-xs font-semibold uppercase text-[var(--lime)]">
-              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--lime)]" />
-              Live Now
-            </div>
-
-            {/* Decorative orbs */}
+            {/* Orbs */}
             <div
-              className="absolute rounded-full opacity-40 blur-3xl"
-              style={{
-                width: "280px",
-                height: "280px",
-                right: "-80px",
-                top: "-40px",
-                background: "radial-gradient(circle, var(--lime), transparent)",
-              }}
-            />
-            <div
-              className="absolute rounded-full opacity-30 blur-3xl"
+              className="absolute rounded-full opacity-30 blur-[26px]"
               style={{
                 width: "220px",
                 height: "220px",
-                left: "-60px",
-                bottom: "-20px",
-                background:
-                  "radial-gradient(circle, var(--amber), transparent)",
+                left: "18%",
+                top: "22%",
+                background: "var(--lime)",
               }}
             />
-          </div>
+            <div
+              className="absolute rounded-full opacity-40 blur-[26px]"
+              style={{
+                width: "180px",
+                height: "180px",
+                right: "14%",
+                bottom: "18%",
+                background: "var(--amber)",
+              }}
+            />
 
-          {/* Content */}
-          <div className="relative space-y-6 p-8 md:p-10">
-            {/* Title */}
-            <h3 className="text-2xl font-semibold tracking-tight text-[var(--text)] md:text-3xl">
-              {event.title}
-            </h3>
-
-            {/* Meta info grid */}
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <div className="font-mono text-xs uppercase tracking-widest text-[var(--text-mute)]">
-                  Topic
-                </div>
-                <div className="mt-1 text-sm font-medium text-[var(--text)]">
-                  {event.topic}
-                </div>
-              </div>
-              <div>
-                <div className="font-mono text-xs uppercase tracking-widest text-[var(--text-mute)]">
-                  Time
-                </div>
-                <div className="mt-1 text-sm font-medium text-[var(--text)]">
-                  {event.startTime} - {event.endTime}
-                </div>
-              </div>
+            {/* Stream badge */}
+            <div
+              className="absolute right-5 top-5 inline-flex items-center gap-2 rounded-full font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--text-dim)]"
+              style={{
+                padding: "6px 10px",
+                background: "oklch(0 0 0 / 0.4)",
+                backdropFilter: "blur(8px)",
+                border: "1px solid oklch(1 0 0 / 0.1)",
+              }}
+            >
+              <span
+                className="relative inline-block h-1.5 w-1.5 rounded-full"
+                style={{
+                  background: "var(--amber)",
+                  animation: "ping 1.6s cubic-bezier(0,0,0.2,1) infinite",
+                }}
+              />
+              STREAM · 1080p
             </div>
 
-            {/* Speaker info */}
-            <div className="border-t border-[var(--line-soft)] pt-6">
-              <div className="mb-3 font-mono text-xs uppercase tracking-widest text-[var(--text-mute)]">
-                Featured Speaker
-              </div>
-              <div className="flex items-center gap-4">
-                {event.speaker.avatar && (
-                  <div className="relative h-12 w-12 overflow-hidden rounded-full border border-[var(--line-soft)]">
-                    <Image
-                      src={event.speaker.avatar}
-                      alt={event.speaker.name}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                )}
-                <div>
-                  <div className="font-semibold text-[var(--text)]">
-                    {event.speaker.name}
-                  </div>
-                  <div className="text-sm text-[var(--text-dim)]">
-                    {event.speaker.role}
-                  </div>
-                </div>
-                {/* Wave animation indicator */}
-                <div className="ml-auto flex items-end gap-1">
-                  {[...Array(5)].map((_, i) => (
-                    <div
-                      key={i}
-                      className="h-2 w-1 rounded-sm bg-[var(--lime)]"
-                      style={{
-                        animation: `wave 0.6s ease-in-out infinite`,
-                        animationDelay: `${i * 0.15}s`,
-                      }}
-                    />
-                  ))}
-                </div>
-              </div>
+            {/* Label */}
+            <div
+              className="absolute bottom-4 left-4 font-mono text-[9.5px] uppercase tracking-[0.15em]"
+              style={{
+                color: "oklch(1 0 0 / 0.3)",
+              }}
+            >
+              [ event cover · 16:9 placeholder ]
             </div>
-
-            {/* Description */}
-            <p className="text-sm text-[var(--text-dim)]">
-              {event.description}
-            </p>
           </div>
-        </Card>
+        </div>
       </div>
+
+      <style>{`
+        @keyframes wave {
+          0%, 100% {
+            transform: scaleY(0.5);
+            opacity: 0.6;
+          }
+          50% {
+            transform: scaleY(1);
+            opacity: 1;
+          }
+        }
+        @keyframes ping {
+          0% {
+            transform: scale(0.6);
+            opacity: 0.6;
+          }
+          80%,
+          100% {
+            transform: scale(1.8);
+            opacity: 0;
+          }
+        }
+      `}</style>
     </section>
   )
 }

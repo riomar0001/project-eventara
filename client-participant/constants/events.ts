@@ -140,6 +140,9 @@ export const LIVE_EVENT: LiveEvent = {
   id: "live-001",
   title: "Building DApps in 2026",
   status: "live",
+  venue: "Abreeza Ayala Mall · Main Theater",
+  session: "Session 3 · Advanced Track",
+  attendees: "342 live attendees",
   speaker: {
     name: "Alex Rivera",
     role: "Smart Contract Engineer",
