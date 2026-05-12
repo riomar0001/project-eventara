@@ -25,7 +25,7 @@ export default function Page() {
       <LiveEventCard />
 
       {/* Events Section */}
-      <EventsSection onEventClick={openModal} />
+      <EventsSection onEventClick={(event) => openModal(String(event.id))} />
 
       {/* CTA Banner */}
       <CTABanner />
