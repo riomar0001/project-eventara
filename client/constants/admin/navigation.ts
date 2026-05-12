@@ -1,4 +1,4 @@
-import { Blocks, Calendar, FlaskConical, Headphones, LayoutDashboard, Logs, MapPin, Server, Settings, ShieldCheck, User, Users } from 'lucide-react';
+import { Blocks, Calendar, Headphones, LayoutDashboard, Logs, MapPin, Server, Settings, ShieldCheck, User, Users } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
 
@@ -57,10 +57,6 @@ export const dashboardNavGroups: DashboardNavGroup[] = [
       { label: 'Queues', icon: Server, href: ADMIN_OPERATIONS_PATHS.queues, permission: { feature: 'queues', action: 'read' } },
       { label: 'Audit Logs', icon: Logs, href: '/audit-logs', permission: { feature: 'audit-logs', action: 'read' } }
     ]
-  },
-  {
-    label: 'Dev',
-    items: [{ label: 'Kitchen Sink', icon: FlaskConical, href: '/kitchen-sink' }]
   }
 ];
 
