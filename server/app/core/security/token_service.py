@@ -14,6 +14,9 @@ Four token types are in use:
   endpoint can resolve the user without exposing the user ID in the request body.
   Signed with ``JWT_VERIFICATION_TOKEN_SECRET`` (separate ``type`` claim prevents
   cross-use).  Expires in ``OTP_TTL_MINUTES`` minutes.
+- **event_qr** — admission QR JWT emailed after event session registration and
+  scanned at check-in. Signed with ``ADMISSION_TOKEN_SECRET`` and expires at the
+  event session end datetime.
 
 All types are decoded through the shared ``_decode`` helper, which enforces
 signature, expiry, and the ``type`` claim in one place.
@@ -327,6 +330,82 @@ def verify_password_reset_token(token: str) -> TokenPayload:
     """
     payload = _decode(token, secret=settings.JWT_VERIFICATION_TOKEN_SECRET, expected_type="password_reset")
     return TokenPayload(**payload)
+
+
+def _admission_token_secret() -> str:
+    """Return the configured admission-token signing secret.
+
+    Returns:
+        The configured ``ADMISSION_TOKEN_SECRET`` value.
+
+    Raises:
+        ValueError: The admission token secret is not configured.
+    """
+    if not settings.ADMISSION_TOKEN_SECRET:
+        raise ValueError("Admission token secret is not configured")
+    return settings.ADMISSION_TOKEN_SECRET
+
+
+def create_event_qr_token(
+    *,
+    user_id: uuid.UUID,
+    participant_id: uuid.UUID,
+    event_id: uuid.UUID,
+    event_name: str,
+    event_session_id: uuid.UUID,
+    event_session_name: str,
+    expires_at: datetime,
+) -> str:
+    """Build and sign an event attendance QR token.
+
+    The QR token is sent to a registered attendee after successful session
+    registration. It embeds the attendee, participant record, event, and
+    session identity so a scan can verify the token and resolve the exact
+    registration to check in. Its ``exp`` claim is the event session end
+    datetime, which makes the QR code unusable after the attendance window.
+
+    Args:
+        user_id: The attendee user's UUID, stored in the ``sub`` claim.
+        participant_id: The event participant row that will be checked in.
+        event_id: The parent event UUID.
+        event_name: The parent event title.
+        event_session_id: The event session UUID.
+        event_session_name: The session title.
+        expires_at: Session end datetime used as the JWT expiration.
+
+    Returns:
+        A signed JWT string suitable for encoding in a QR code.
+    """
+    now = datetime.now(UTC)
+    exp = expires_at if expires_at.tzinfo else expires_at.replace(tzinfo=UTC)
+    payload = {
+        "sub": str(user_id),
+        "participant_id": str(participant_id),
+        "event_id": str(event_id),
+        "event_name": event_name,
+        "event_session_id": str(event_session_id),
+        "event_session_name": event_session_name,
+        "type": "event_qr",
+        "jti": str(uuid.uuid4()),
+        "iat": now,
+        "exp": exp,
+    }
+    return jwt.encode(payload, _admission_token_secret(), algorithm=settings.JWT_ALGORITHM)
+
+
+def verify_event_qr_token(token: str) -> dict:
+    """Decode and validate an event attendance QR token.
+
+    Args:
+        token: The raw JWT string extracted from the attendee's QR code.
+
+    Returns:
+        The decoded QR token claims.
+
+    Raises:
+        ValueError: The token is expired, invalid, or not an ``event_qr`` token.
+    """
+    return _decode(token, secret=_admission_token_secret(), expected_type="event_qr")
 
 
 def _decode(token: str, secret: str, expected_type: str) -> dict:

@@ -1,5 +1,6 @@
 """Use cases for event session registration, withdrawal, check-in, and participant status management."""
 
+import uuid
 from datetime import UTC, datetime
 
 from arq.connections import ArqRedis
@@ -8,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.application.dto.event_participant_dto import (
     CheckInParticipantInput,
     CheckInParticipantOutput,
+    CheckInParticipantQrCodeInput,
     RegisterForSessionInput,
     RegisterForSessionOutput,
     UpdateParticipantStatusInput,
@@ -22,6 +24,8 @@ from app.domain.exceptions.event_participant_exceptions import (
     EventParticipantAlreadyCheckedInError,
     EventParticipantCheckInNotOpenError,
     EventParticipantNotFoundError,
+    EventParticipantQrTokenInvalidError,
+    EventParticipantQrTokenMismatchError,
     InvalidEventParticipantStatusTransitionError,
     RegistrationNotOpenError,
     SessionSlotsFullError,
@@ -73,10 +77,11 @@ class EventParticipantUseCase:
         concurrent status updates on the same participant and eliminating TOCTOU
         races between the transition validity check and the subsequent update.
 
-        ``withdraw_registration`` and ``check_in_participant`` lock the participant
-        row before eligibility checks and mutation so a cancellation, status update,
-        and check-in for the same attendee cannot interleave into an impossible
-        state.
+        ``withdraw_registration``, ``check_in_participant``, and
+        ``check_in_participant_with_qr_code`` lock the participant row before
+        eligibility checks and mutation so a cancellation, status update, manual
+        check-in, and QR scan for the same attendee cannot interleave into an
+        impossible state.
 
     Args:
         participant_repo: Concrete ``EventParticipantRepository`` providing participant access.
@@ -84,6 +89,14 @@ class EventParticipantUseCase:
         role_repo:        ``RoleRepository`` used to assign the RBAC 'participant' role on
                           successful registration without opening a separate transaction.
         db:               The active async database session used for commit and rollback.
+        event_volunteer_repo: Optional repository for joined-volunteer check-in authorization.
+        user_repo: Optional repository used to resolve attendee emails for QR and receipt delivery.
+        arq: Optional ARQ queue used to enqueue email jobs after durable database commits.
+        qr_token_factory: Optional JWT factory override for isolated tests.
+        qr_token_verifier: Optional JWT verifier override for isolated tests.
+        email_sender: Optional email queueing callable override for isolated tests.
+        registration_qr_email_template: Optional registration QR template override for isolated tests.
+        check_in_receipt_email_template: Optional check-in receipt template override for isolated tests.
     """
 
     def __init__(
@@ -95,6 +108,11 @@ class EventParticipantUseCase:
         event_volunteer_repo: EventVolunteerRepository | None = None,
         user_repo: UserRepository | None = None,
         arq: ArqRedis | None = None,
+        qr_token_factory=None,
+        qr_token_verifier=None,
+        email_sender=None,
+        registration_qr_email_template=None,
+        check_in_receipt_email_template=None,
     ) -> None:
         self.participant_repo = participant_repo
         self.event_repo = event_repo
@@ -103,6 +121,11 @@ class EventParticipantUseCase:
         self.event_volunteer_repo = event_volunteer_repo
         self.user_repo = user_repo
         self.arq = arq
+        self.qr_token_factory = qr_token_factory
+        self.qr_token_verifier = qr_token_verifier
+        self.email_sender = email_sender
+        self.registration_qr_email_template = registration_qr_email_template
+        self.check_in_receipt_email_template = check_in_receipt_email_template
 
     async def register_for_session(self, data: RegisterForSessionInput) -> RegisterForSessionOutput:
         """Register the authenticated user for an event session.
@@ -162,6 +185,7 @@ class EventParticipantUseCase:
             raise
 
         await self.db.commit()
+        await self._send_registration_qr_email(participant, session)
         return RegisterForSessionOutput(participant=participant)
 
     async def withdraw_registration(self, data: WithdrawRegistrationInput) -> WithdrawRegistrationOutput:
@@ -334,36 +358,12 @@ class EventParticipantUseCase:
         if old_participant.event_session_id != data.session_id:
             raise EventParticipantNotFoundError(str(data.participant_id))
 
-        session = await self.event_repo.get_session_by_id(old_participant.event_session_id)
-        if session is None:
-            raise EventSessionNotFoundError(str(old_participant.event_session_id))
-
-        if session.event_id != data.event_id:
-            raise EventSessionNotFoundError(str(data.session_id))
-
-        event = await self.event_repo.get_event_by_id(session.event_id)
-        if event is None:
-            raise EventNotFoundError(str(session.event_id))
-
-        if event.created_by != data.checked_in_by:
-            joined_assignment = None
-            if self.event_volunteer_repo is not None:
-                joined_assignment = await self.event_volunteer_repo.get_joined_event_volunteer_for_user(data.checked_in_by, event.id)
-            if joined_assignment is None:
-                raise UnauthorizedEventParticipantOperationError(str(old_participant.id))
-
-        if session.status not in _CHECK_IN_OPEN_STATUSES:
-            raise EventParticipantCheckInNotOpenError(str(session.id), session.status.value)
-
-        if old_participant.is_checked_in:
-            raise EventParticipantAlreadyCheckedInError(str(old_participant.id))
-
-        if old_participant.status != EventParticipantStatus.REGISTERED:
-            raise InvalidEventParticipantStatusTransitionError(
-                str(old_participant.id),
-                old_participant.status.value,
-                EventParticipantStatus.ATTENDED.value,
-            )
+        session, event = await self._validate_check_in_context(
+            old_participant=old_participant,
+            event_id=data.event_id,
+            session_id=data.session_id,
+            checked_in_by=data.checked_in_by,
+        )
 
         try:
             updated = await self.participant_repo.check_in(
@@ -380,6 +380,229 @@ class EventParticipantUseCase:
         await self.db.commit()
         await self._send_check_in_receipt(updated, event.title, session.title)
         return CheckInParticipantOutput(participant=updated, old_participant=old_participant)
+
+    async def check_in_participant_with_qr_code(self, data: CheckInParticipantQrCodeInput) -> CheckInParticipantOutput:
+        """Verify a QR JWT and check in the registration it represents.
+
+        The QR JWT is signed with the server verification secret and expires at
+        the event session end datetime. After the token is decoded, the target
+        participant row is locked with ``SELECT … FOR UPDATE`` before checking
+        token claims and mutating attendance state. This pessimistic lock is
+        chosen because QR scans can happen concurrently from multiple devices;
+        serialising updates on the participant row prevents duplicate check-ins
+        and preserves a single authoritative attendance timestamp.
+
+        Args:
+            data: ``CheckInParticipantQrCodeInput`` containing the scanned JWT
+                  and the authenticated organizer or joined volunteer actor.
+
+        Returns:
+            ``CheckInParticipantOutput`` with the checked-in participant and its
+            pre-update snapshot for audit logging.
+
+        Raises:
+            EventParticipantQrTokenInvalidError: The JWT is malformed, expired, or not an event QR token.
+            EventParticipantQrTokenMismatchError: The decoded claims do not match the locked participant/session/event.
+            EventParticipantNotFoundError: The participant represented by the QR token does not exist.
+            EventSessionNotFoundError: The participant's session no longer exists.
+            EventNotFoundError: The parent event no longer exists.
+            UnauthorizedEventParticipantOperationError: Actor cannot check in attendees.
+            EventParticipantAlreadyCheckedInError: Participant was already checked in.
+            EventParticipantCheckInNotOpenError: Session status does not permit check-in.
+            InvalidEventParticipantStatusTransitionError: Participant is not in REGISTERED status.
+        """
+        payload = self._decode_qr_payload(data.token)
+        participant_id = self._payload_uuid(payload, "participant_id")
+        user_id = self._payload_uuid(payload, "sub")
+        event_id = self._payload_uuid(payload, "event_id")
+        session_id = self._payload_uuid(payload, "event_session_id")
+
+        old_participant = await self.participant_repo.get_by_id(participant_id, for_update=True)
+        if old_participant is None:
+            raise EventParticipantNotFoundError(str(participant_id))
+
+        if old_participant.user_id != user_id or old_participant.event_session_id != session_id:
+            raise EventParticipantQrTokenMismatchError()
+
+        session, event = await self._validate_check_in_context(
+            old_participant=old_participant,
+            event_id=event_id,
+            session_id=session_id,
+            checked_in_by=data.checked_in_by,
+        )
+
+        if event.title != payload.get("event_name") or session.title != payload.get("event_session_name"):
+            raise EventParticipantQrTokenMismatchError()
+
+        try:
+            updated = await self.participant_repo.check_in(
+                participant_id=participant_id,
+                checked_in_by=data.checked_in_by,
+                checked_in_time=datetime.now(UTC),
+            )
+            if updated is None:
+                raise EventParticipantNotFoundError(str(participant_id))
+        except Exception:
+            await self.db.rollback()
+            raise
+
+        await self.db.commit()
+        await self._send_check_in_receipt(updated, event.title, session.title)
+        return CheckInParticipantOutput(participant=updated, old_participant=old_participant)
+
+    def _decode_qr_payload(self, token: str) -> dict:
+        """Decode an event QR token and normalize all token errors.
+
+        Args:
+            token: Raw scanned JWT string.
+
+        Returns:
+            The decoded JWT claims.
+
+        Raises:
+            EventParticipantQrTokenInvalidError: The token cannot be trusted.
+        """
+        try:
+            verifier = self.qr_token_verifier
+            if verifier is None:
+                from app.core.security.token_service import verify_event_qr_token
+
+                verifier = verify_event_qr_token
+            return verifier(token)
+        except ValueError as exc:
+            raise EventParticipantQrTokenInvalidError(str(exc)) from exc
+
+    def _payload_uuid(self, payload: dict, field: str) -> uuid.UUID:
+        """Read and validate a UUID claim from a decoded QR payload.
+
+        Args:
+            payload: Decoded QR token claims.
+            field: Claim name to parse.
+
+        Returns:
+            Parsed UUID value.
+
+        Raises:
+            EventParticipantQrTokenInvalidError: The claim is missing or not a UUID.
+        """
+        try:
+            return uuid.UUID(str(payload[field]))
+        except (KeyError, TypeError, ValueError) as exc:
+            raise EventParticipantQrTokenInvalidError("QR code token is missing required claims") from exc
+
+    async def _validate_check_in_context(self, *, old_participant, event_id, session_id, checked_in_by):
+        """Validate session, event, actor authorization, and participant state before check-in.
+
+        Args:
+            old_participant: Locked participant snapshot to validate.
+            event_id: Expected parent event UUID.
+            session_id: Expected session UUID.
+            checked_in_by: Actor performing the check-in.
+
+        Returns:
+            A tuple of ``(session, event)`` used for the subsequent mutation and receipt email.
+
+        Raises:
+            EventSessionNotFoundError: The session is missing or does not match the token/request.
+            EventNotFoundError: The parent event is missing.
+            UnauthorizedEventParticipantOperationError: Actor cannot check in attendees.
+            EventParticipantAlreadyCheckedInError: Participant was already checked in.
+            EventParticipantCheckInNotOpenError: Session status does not permit check-in.
+            InvalidEventParticipantStatusTransitionError: Participant is not in REGISTERED status.
+        """
+        session = await self.event_repo.get_session_by_id(old_participant.event_session_id)
+        if session is None:
+            raise EventSessionNotFoundError(str(old_participant.event_session_id))
+
+        if session.id != session_id or session.event_id != event_id:
+            raise EventSessionNotFoundError(str(session_id))
+
+        event = await self.event_repo.get_event_by_id(session.event_id)
+        if event is None:
+            raise EventNotFoundError(str(session.event_id))
+
+        if event.created_by != checked_in_by:
+            joined_assignment = None
+            if self.event_volunteer_repo is not None:
+                joined_assignment = await self.event_volunteer_repo.get_joined_event_volunteer_for_user(checked_in_by, event.id)
+            if joined_assignment is None:
+                raise UnauthorizedEventParticipantOperationError(str(old_participant.id))
+
+        if session.status not in _CHECK_IN_OPEN_STATUSES:
+            raise EventParticipantCheckInNotOpenError(str(session.id), session.status.value)
+
+        if old_participant.is_checked_in:
+            raise EventParticipantAlreadyCheckedInError(str(old_participant.id))
+
+        if old_participant.status != EventParticipantStatus.REGISTERED:
+            raise InvalidEventParticipantStatusTransitionError(
+                str(old_participant.id),
+                old_participant.status.value,
+                EventParticipantStatus.ATTENDED.value,
+            )
+
+        return session, event
+
+    async def _send_registration_qr_email(self, participant, session) -> None:
+        """Queue a registration confirmation email containing the attendee QR code.
+
+        Args:
+            participant: Newly registered participant entity.
+            session: Event session entity used to define the QR expiration.
+
+        Side effects:
+            Enqueues a ``send_email_job`` through ARQ when user, event, and queue
+            dependencies are available. Queue or template failures are swallowed
+            so the already-committed registration remains durable.
+        """
+        if self.arq is None or self.user_repo is None:
+            return
+
+        attendee = await self.user_repo.get_by_id(participant.user_id)
+        event = await self.event_repo.get_event_by_id(session.event_id)
+        if attendee is None or event is None:
+            return
+
+        try:
+            qr_token_factory = self.qr_token_factory
+            if qr_token_factory is None:
+                from app.core.security.token_service import create_event_qr_token
+
+                qr_token_factory = create_event_qr_token
+
+            qr_token = qr_token_factory(
+                user_id=participant.user_id,
+                participant_id=participant.id,
+                event_id=event.id,
+                event_name=event.title,
+                event_session_id=session.id,
+                event_session_name=session.title,
+                expires_at=session.end_datetime,
+            )
+            template = self.registration_qr_email_template
+            if template is None:
+                from app.core.email_template.event import event_registration_qr_email_html
+
+                template = event_registration_qr_email_html
+            html = template(
+                event_title=event.title,
+                session_title=session.title,
+                session_end_datetime=session.end_datetime.isoformat(),
+                qr_token=qr_token,
+            )
+            email_sender = self.email_sender
+            if email_sender is None:
+                from app.infrastructure.messaging.email import send_email
+
+                email_sender = send_email
+            await email_sender(
+                self.arq,
+                attendee.email,
+                f"QR code for {event.title}",
+                html,
+            )
+        except Exception:
+            return
 
     async def _send_check_in_receipt(self, participant, event_title: str, session_title: str) -> None:
         """Queue a check-in receipt email for the attendee when email dependencies are available.
@@ -404,17 +627,24 @@ class EventParticipantUseCase:
 
         checker_label = checker.email if checker else str(participant.checked_in_by)
         checked_in_time = participant.checked_in_time.isoformat() if participant.checked_in_time else ""
-        html = (
-            f"<p>Your check-in for <strong>{event_title}</strong> is confirmed.</p>"
-            f"<p>Session: {session_title}</p>"
-            f"<p>Checked in at: {checked_in_time}</p>"
-            f"<p>Checked in by: {checker_label}</p>"
-        )
-
         try:
-            from app.infrastructure.messaging.email import send_email
+            template = self.check_in_receipt_email_template
+            if template is None:
+                from app.core.email_template.event import check_in_receipt_email_html
 
-            await send_email(
+                template = check_in_receipt_email_html
+            html = template(
+                event_title=event_title,
+                session_title=session_title,
+                checked_in_time=checked_in_time,
+                checked_in_by=checker_label,
+            )
+            email_sender = self.email_sender
+            if email_sender is None:
+                from app.infrastructure.messaging.email import send_email
+
+                email_sender = send_email
+            await email_sender(
                 self.arq,
                 attendee.email,
                 f"Check-in receipt for {event_title}",

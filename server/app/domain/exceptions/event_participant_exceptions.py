@@ -83,3 +83,13 @@ class EventParticipantCheckInNotOpenError(Exception):
         else:
             msg = "Check-in is not open for this session"
         super().__init__(msg)
+
+
+class EventParticipantQrTokenInvalidError(Exception):
+    def __init__(self, message: str = "Invalid QR code token") -> None:
+        super().__init__(message)
+
+
+class EventParticipantQrTokenMismatchError(Exception):
+    def __init__(self, message: str = "QR code token does not match the registered participant") -> None:
+        super().__init__(message)

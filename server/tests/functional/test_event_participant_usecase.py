@@ -30,6 +30,7 @@ from app.domain.exceptions.event_session_exceptions import EventSessionNotFoundE
 from app.infrastructure.database.repositories.event_participant_repository import EventParticipantRepository
 from app.infrastructure.database.repositories.event_repository import EventRepository
 from app.infrastructure.database.repositories.role_repository import RoleRepository
+from app.infrastructure.database.repositories.user_repository import UserRepository
 
 EVENT_ID = uuid.UUID("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
 CREATOR_ID = uuid.UUID("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
@@ -100,6 +101,7 @@ def _sample_participant(**overrides) -> EventParticipant:
 def _make_register_repos():
     event_repo = MagicMock(spec=EventRepository)
     event_repo.get_session_by_id = AsyncMock(return_value=_sample_session())
+    event_repo.get_event_by_id = AsyncMock(return_value=_sample_event())
     event_repo.get_venue_capacity = AsyncMock(return_value=100)
 
     participant_repo = MagicMock(spec=EventParticipantRepository)
@@ -125,6 +127,35 @@ def _make_register_uc(event_repo=None, participant_repo=None, role_repo=None):
     role_repo = role_repo or _make_role_repo()
     db = AsyncMock(spec=AsyncSession)
     return EventParticipantUseCase(participant_repo, event_repo, role_repo, db), event_repo, participant_repo, db
+
+
+def _make_register_uc_with_email(event_repo=None, participant_repo=None, role_repo=None):
+    default_event_repo, default_participant_repo = _make_register_repos()
+    event_repo = event_repo or default_event_repo
+    participant_repo = participant_repo or default_participant_repo
+    role_repo = role_repo or _make_role_repo()
+    user_repo = MagicMock(spec=UserRepository)
+    user_repo.get_by_id = AsyncMock(return_value=MagicMock(email="attendee@example.com"))
+    arq = MagicMock()
+    email_sender = AsyncMock()
+    db = AsyncMock(spec=AsyncSession)
+    qr_token_factory = MagicMock(return_value="signed.qr.jwt")
+    registration_qr_email_template = MagicMock(side_effect=lambda **kwargs: kwargs["qr_token"])
+    return (
+        EventParticipantUseCase(
+            participant_repo,
+            event_repo,
+            role_repo,
+            db,
+            user_repo=user_repo,
+            arq=arq,
+            qr_token_factory=qr_token_factory,
+            email_sender=email_sender,
+            registration_qr_email_template=registration_qr_email_template,
+        ),
+        email_sender,
+        qr_token_factory,
+    )
 
 
 def _register_input(**overrides):
@@ -236,6 +267,16 @@ async def test_register_returns_participant_with_registered_status():
     result = await uc.register_for_session(_register_input())
     assert result.participant.id == PARTICIPANT_ID
     assert result.participant.status == EventParticipantStatus.REGISTERED
+
+
+@pytest.mark.asyncio
+async def test_register_queues_qr_email_after_commit_when_email_dependencies_exist():
+    """Queues an email containing the signed QR JWT after registration commits."""
+    uc, email_sender, qr_token_factory = _make_register_uc_with_email()
+    await uc.register_for_session(_register_input())
+    qr_token_factory.assert_called_once()
+    email_sender.assert_called_once()
+    assert "signed.qr.jwt" in email_sender.call_args.args[3]
 
 
 @pytest.mark.asyncio

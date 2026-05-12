@@ -121,3 +121,11 @@ PARTICIPANT_VALIDATION_ERROR = {
         },
     }
 }
+
+PARTICIPANT_QR_TOKEN_INVALID = {
+    400: {
+        "description": "QR token is invalid, expired, or does not match the registered participant",
+        "model": ErrorResponse,
+        "content": {"application/json": {"example": {"success": False, "message": "Invalid QR code token"}}},
+    }
+}

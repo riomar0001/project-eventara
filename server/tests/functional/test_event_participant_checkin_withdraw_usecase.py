@@ -5,13 +5,15 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.application.dto.event_participant_dto import CheckInParticipantInput, WithdrawRegistrationInput
+from app.application.dto.event_participant_dto import CheckInParticipantInput, CheckInParticipantQrCodeInput, WithdrawRegistrationInput
 from app.application.use_cases.event_participant_usecase import EventParticipantUseCase
 from app.domain.entities.event_entity import Event, EventParticipant, EventParticipantStatus, EventSession, EventSessionStatus, EventStatus
 from app.domain.exceptions.event_participant_exceptions import (
     EventParticipantAlreadyCheckedInError,
     EventParticipantCheckInNotOpenError,
     EventParticipantNotFoundError,
+    EventParticipantQrTokenInvalidError,
+    EventParticipantQrTokenMismatchError,
     InvalidEventParticipantStatusTransitionError,
 )
 from app.domain.exceptions.event_session_exceptions import EventSessionNotFoundError
@@ -69,7 +71,7 @@ def _participant(**overrides):
     return EventParticipant(**defaults)
 
 
-def _use_case(participant_repo=None, event_repo=None):
+def _use_case(participant_repo=None, event_repo=None, qr_token_verifier=None):
     if participant_repo is None:
         participant_repo = MagicMock(spec=EventParticipantRepository)
         participant_repo.get_by_user_and_session = AsyncMock(return_value=_participant())
@@ -90,7 +92,13 @@ def _use_case(participant_repo=None, event_repo=None):
     user_repo = MagicMock(spec=UserRepository)
     user_repo.get_by_id = AsyncMock(return_value=None)
     db = AsyncMock(spec=AsyncSession)
-    return EventParticipantUseCase(participant_repo, event_repo, role_repo, db, event_volunteer_repo, user_repo), participant_repo, event_repo, db
+    qr_token_verifier = qr_token_verifier or MagicMock(return_value=_qr_payload())
+    return (
+        EventParticipantUseCase(participant_repo, event_repo, role_repo, db, event_volunteer_repo, user_repo, qr_token_verifier=qr_token_verifier),
+        participant_repo,
+        event_repo,
+        db,
+    )
 
 
 def _withdraw_input():
@@ -99,6 +107,23 @@ def _withdraw_input():
 
 def _check_in_input():
     return CheckInParticipantInput(event_id=EVENT_ID, session_id=SESSION_ID, participant_id=PARTICIPANT_ID, checked_in_by=CREATOR_ID)
+
+
+def _qr_input():
+    return CheckInParticipantQrCodeInput(token="qr.jwt", checked_in_by=CREATOR_ID)
+
+
+def _qr_payload(**overrides):
+    defaults = {
+        "sub": str(USER_ID),
+        "participant_id": str(PARTICIPANT_ID),
+        "event_id": str(EVENT_ID),
+        "event_name": "Test Event",
+        "event_session_id": str(SESSION_ID),
+        "event_session_name": "Session Title",
+    }
+    defaults.update(overrides)
+    return defaults
 
 
 @pytest.mark.asyncio
@@ -197,3 +222,42 @@ async def test_check_in_fails_when_participant_status_is_cancelled():
     uc, _, _, _ = _use_case(participant_repo=participant_repo)
     with pytest.raises(InvalidEventParticipantStatusTransitionError):
         await uc.check_in_participant(_check_in_input())
+
+
+@pytest.mark.asyncio
+async def test_qr_check_in_verifies_token_and_locks_participant_before_update():
+    """Verifies QR token and locks the participant before mutating check-in state."""
+    qr_token_verifier = MagicMock(return_value=_qr_payload())
+    uc, participant_repo, _, _ = _use_case(qr_token_verifier=qr_token_verifier)
+    await uc.check_in_participant_with_qr_code(_qr_input())
+    qr_token_verifier.assert_called_once_with("qr.jwt")
+    participant_repo.get_by_id.assert_called_once_with(PARTICIPANT_ID, for_update=True)
+
+
+@pytest.mark.asyncio
+async def test_qr_check_in_records_actor_and_commits():
+    """Marks the QR participant checked in with the actor ID and commits."""
+    uc, participant_repo, _, db = _use_case()
+    result = await uc.check_in_participant_with_qr_code(_qr_input())
+    assert participant_repo.check_in.call_args.kwargs["participant_id"] == PARTICIPANT_ID
+    assert participant_repo.check_in.call_args.kwargs["checked_in_by"] == CREATOR_ID
+    assert result.participant.is_checked_in is True
+    db.commit.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_qr_check_in_fails_when_token_invalid():
+    """Raises EventParticipantQrTokenInvalidError when QR token verification fails."""
+    qr_token_verifier = MagicMock(side_effect=ValueError("Token has expired"))
+    uc, _, _, _ = _use_case(qr_token_verifier=qr_token_verifier)
+    with pytest.raises(EventParticipantQrTokenInvalidError):
+        await uc.check_in_participant_with_qr_code(_qr_input())
+
+
+@pytest.mark.asyncio
+async def test_qr_check_in_fails_when_token_user_does_not_match_participant():
+    """Raises EventParticipantQrTokenMismatchError when token attendee differs from participant."""
+    qr_token_verifier = MagicMock(return_value=_qr_payload(sub=str(uuid.uuid4())))
+    uc, _, _, _ = _use_case(qr_token_verifier=qr_token_verifier)
+    with pytest.raises(EventParticipantQrTokenMismatchError):
+        await uc.check_in_participant_with_qr_code(_qr_input())

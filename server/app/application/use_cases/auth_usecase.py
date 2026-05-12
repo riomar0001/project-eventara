@@ -24,6 +24,7 @@ from app.application.dto.auth_dto import (
     VerifiedEmailOutput,
 )
 from app.application.interfaces.user_interface import IUserRepository
+from app.core.email_template import otp_email_html, reset_password_email_html
 from app.core.security.constants import LOCKOUT_DURATION, MAX_FAILED_LOGIN_ATTEMPTS
 from app.core.security.hashing import hash_string, verify_hash
 from app.core.security.token_service import (
@@ -62,7 +63,6 @@ from app.infrastructure.cache.repositories.password_reset_repository import Pass
 from app.infrastructure.database.repositories.refresh_token_repository import (
     RefreshTokenRepository,
 )
-from app.infrastructure.messaging.auth_email_templates import otp_email_html, reset_password_email_html
 from app.infrastructure.messaging.email import email_verified_html, send_email, verification_email_html
 
 

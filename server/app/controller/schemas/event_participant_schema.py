@@ -46,3 +46,7 @@ class CheckInParticipantResponse(BaseModel):
     success: bool = True
     message: str = "Participant checked in successfully."
     data: EventParticipantRecordResponse
+
+
+class CheckInParticipantQrCodeRequest(BaseModel):
+    token: str

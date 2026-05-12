@@ -1,15 +1,15 @@
 """Event participant management API routes.
 
-Exposes two endpoints: one for any authenticated user to register themselves
-for a session, and one for the event creator to update a participant's
-attendance status (mark as attended, no-show, or cancelled).
+Exposes endpoints for authenticated users to register for sessions, withdraw
+their own registrations, and for authorized organizers or joined volunteers to
+update/check in participants, including check-in by QR JWT.
 
 Error mapping summary:
   - 400  session not open for registration or invalid status transition
   - 401  missing, expired, or invalid Bearer token
   - 403  caller is not the event creator (status update only)
   - 404  session or participant not found
-  - 409  user is already registered for the session
+  - 409  user is already registered for the session or participant already checked in
   - 422  request body failed schema validation
 """
 
@@ -19,6 +19,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 
 from app.application.dto.event_participant_dto import (
     CheckInParticipantInput,
+    CheckInParticipantQrCodeInput,
     RegisterForSessionInput,
     UpdateParticipantStatusInput,
     WithdrawRegistrationInput,
@@ -34,6 +35,7 @@ from app.controller.docs.event_participant_docs import (
     PARTICIPANT_CHECK_IN_NOT_OPEN,
     PARTICIPANT_INVALID_STATUS_TRANSITION,
     PARTICIPANT_NOT_FOUND,
+    PARTICIPANT_QR_TOKEN_INVALID,
     PARTICIPANT_REGISTRATION_NOT_OPEN,
     PARTICIPANT_SESSION_NOT_FOUND,
     PARTICIPANT_SLOTS_FULL,
@@ -42,6 +44,7 @@ from app.controller.docs.event_participant_docs import (
     PARTICIPANT_VALIDATION_ERROR,
 )
 from app.controller.schemas.event_participant_schema import (
+    CheckInParticipantQrCodeRequest,
     CheckInParticipantResponse,
     EventParticipantRecordResponse,
     RegisterForSessionResponse,
@@ -57,6 +60,8 @@ from app.domain.exceptions.event_participant_exceptions import (
     EventParticipantAlreadyCheckedInError,
     EventParticipantCheckInNotOpenError,
     EventParticipantNotFoundError,
+    EventParticipantQrTokenInvalidError,
+    EventParticipantQrTokenMismatchError,
     InvalidEventParticipantStatusTransitionError,
     RegistrationNotOpenError,
     SessionSlotsFullError,
@@ -422,6 +427,135 @@ async def check_in_participant(
             "event_id": str(event_id),
             "session_id": str(session_id),
             "checked_in_by": str(user_id),
+        },
+    )
+
+    return CheckInParticipantResponse(data=_to_participant_response(result.participant))
+
+
+@participant_router.post(
+    "/participants/check-in/qr",
+    response_model=CheckInParticipantResponse,
+    status_code=status.HTTP_200_OK,
+    responses={
+        **PARTICIPANT_UNAUTHORIZED,
+        **PARTICIPANT_UNAUTHORIZED_OPERATION,
+        **PARTICIPANT_QR_TOKEN_INVALID,
+        **PARTICIPANT_NOT_FOUND,
+        **PARTICIPANT_CHECK_IN_NOT_OPEN,
+        **PARTICIPANT_ALREADY_CHECKED_IN,
+        **PARTICIPANT_INVALID_STATUS_TRANSITION,
+        **PARTICIPANT_VALIDATION_ERROR,
+    },
+    summary="Check in an event participant by QR code",
+    description=(
+        "Accepts the JWT contained in an attendee QR code, verifies its signature and expiration, "
+        "validates that the token claims match the registered participant, then marks the attendee checked in. "
+        "The QR JWT contains the event name, event session name, event ID, session ID, participant ID, "
+        "and attendee user ID. The JWT expires at the event session end datetime."
+    ),
+)
+async def check_in_participant_qr_code(
+    request: Request,
+    body: CheckInParticipantQrCodeRequest,
+    user_id: uuid.UUID = Depends(get_current_user_id),
+    use_case: EventParticipantUseCase = Depends(get_event_participant_check_in_use_case),
+    audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
+) -> CheckInParticipantResponse:
+    """Verify an attendee QR JWT and check in its participant record."""
+    try:
+        result = await use_case.check_in_participant_with_qr_code(
+            CheckInParticipantQrCodeInput(
+                token=body.token,
+                checked_in_by=user_id,
+            )
+        )
+    except (EventParticipantQrTokenInvalidError, EventParticipantQrTokenMismatchError) as exc:
+        await _audit_failure(
+            audit_use_case,
+            request,
+            user_id=user_id,
+            action_type=ActionType.UPDATE,
+            resource_type="event_participants",
+            resource_id=None,
+            message=str(exc),
+            additional_context={"qr_token_present": bool(body.token)},
+        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
+    except UnauthorizedEventParticipantOperationError as exc:
+        await _audit_failure(
+            audit_use_case,
+            request,
+            user_id=user_id,
+            action_type=ActionType.UPDATE,
+            resource_type="event_participants",
+            resource_id=None,
+            message=str(exc),
+            additional_context={"qr_token_present": bool(body.token)},
+        )
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
+    except (EventParticipantNotFoundError, EventSessionNotFoundError, EventNotFoundError) as exc:
+        await _audit_failure(
+            audit_use_case,
+            request,
+            user_id=user_id,
+            action_type=ActionType.UPDATE,
+            resource_type="event_participants",
+            resource_id=None,
+            message=str(exc),
+            additional_context={"qr_token_present": bool(body.token)},
+        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except EventParticipantCheckInNotOpenError as exc:
+        await _audit_failure(
+            audit_use_case,
+            request,
+            user_id=user_id,
+            action_type=ActionType.UPDATE,
+            resource_type="event_participants",
+            resource_id=None,
+            message=str(exc),
+            additional_context={"qr_token_present": bool(body.token)},
+        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
+    except EventParticipantAlreadyCheckedInError as exc:
+        await _audit_failure(
+            audit_use_case,
+            request,
+            user_id=user_id,
+            action_type=ActionType.UPDATE,
+            resource_type="event_participants",
+            resource_id=None,
+            message=str(exc),
+            additional_context={"qr_token_present": bool(body.token)},
+        )
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+    except InvalidEventParticipantStatusTransitionError as exc:
+        await _audit_failure(
+            audit_use_case,
+            request,
+            user_id=user_id,
+            action_type=ActionType.UPDATE,
+            resource_type="event_participants",
+            resource_id=None,
+            message=str(exc),
+            additional_context={"qr_token_present": bool(body.token)},
+        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
+
+    await safe_audit_log(
+        audit_use_case,
+        request,
+        user_id=user_id,
+        action_type=ActionType.UPDATE,
+        resource_type="event_participants",
+        resource_id=str(result.participant.id),
+        status=AuditLogStatus.SUCCESS,
+        old_values=serialize_event_participant(result.old_participant),
+        new_values=serialize_event_participant(result.participant),
+        additional_context={
+            "checked_in_by": str(user_id),
+            "check_in_source": "qr_code",
         },
     )
 

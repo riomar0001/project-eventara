@@ -179,8 +179,8 @@ def get_event_status_use_case(db: AsyncSession = Depends(get_db)) -> EventStatus
     return EventStatusUseCase(EventRepository(db), db)
 
 
-def get_event_participant_use_case(db: AsyncSession = Depends(get_db)) -> EventParticipantUseCase:
-    """Construct an ``EventParticipantUseCase`` for the current request."""
+def get_event_participant_use_case(request: Request, db: AsyncSession = Depends(get_db)) -> EventParticipantUseCase:
+    """Construct an ``EventParticipantUseCase`` with queue support for registration QR emails."""
     return EventParticipantUseCase(
         EventParticipantRepository(db),
         EventRepository(db),
@@ -188,6 +188,7 @@ def get_event_participant_use_case(db: AsyncSession = Depends(get_db)) -> EventP
         db,
         EventVolunteerRepository(db),
         UserRepository(db),
+        request.app.state.arq,
     )
 
 

@@ -53,3 +53,9 @@ class CheckInParticipantInput:
 class CheckInParticipantOutput:
     participant: EventParticipant
     old_participant: EventParticipant
+
+
+@dataclass
+class CheckInParticipantQrCodeInput:
+    token: str
+    checked_in_by: uuid.UUID

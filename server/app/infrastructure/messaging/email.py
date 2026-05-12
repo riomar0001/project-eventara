@@ -7,13 +7,14 @@ from email.mime.text import MIMEText
 from arq.connections import ArqRedis
 
 from app.core.config import settings
-from app.infrastructure.messaging.auth_email_templates import (
+from app.core.email_template import (
     email_verified_html,
+    event_registration_qr_email_html,
     otp_email_html,
     verification_email_html,
 )
 
-__all__ = ["email_verified_html", "otp_email_html", "send_email", "verification_email_html"]
+__all__ = ["email_verified_html", "event_registration_qr_email_html", "otp_email_html", "send_email", "verification_email_html"]
 
 
 async def send_email(arq: ArqRedis, to: str, subject: str, html: str) -> None:
