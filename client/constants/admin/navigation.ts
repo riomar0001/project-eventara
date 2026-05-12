@@ -25,8 +25,8 @@ export const dashboardNavGroups: DashboardNavGroup[] = [
   {
     label: '',
     items: [
-      { label: 'Dashboard', icon: LayoutDashboard, href: '/admin/dashboard' },
-      { label: 'Profile', icon: User, href: '/admin/user/profile' }
+      { label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
+      { label: 'Profile', icon: User, href: '/user/profile' }
     ]
   },
   {
@@ -50,11 +50,11 @@ export const dashboardNavGroups: DashboardNavGroup[] = [
   {
     label: 'Administration',
     items: [
-      { label: 'Features', icon: Blocks, href: '/admin/features', permission: { feature: 'features', action: 'read' } },
-      { label: 'Roles', icon: ShieldCheck, href: '/admin/roles', permission: { feature: 'roles', action: 'read' } },
-      { label: 'Users', icon: Users, href: '/admin/users', permission: { feature: 'user-accounts', action: 'read' } },
+      { label: 'Features', icon: Blocks, href: '/features', permission: { feature: 'features', action: 'read' } },
+      { label: 'Roles', icon: ShieldCheck, href: '/roles', permission: { feature: 'roles', action: 'read' } },
+      { label: 'Users', icon: Users, href: '/users', permission: { feature: 'user-accounts', action: 'read' } },
       { label: 'Queues', icon: Server, href: ADMIN_OPERATIONS_PATHS.queues, permission: { feature: 'queues', action: 'read' } },
-      { label: 'Audit Logs', icon: Logs, href: '/admin/audit-logs', permission: { feature: 'audit-logs', action: 'read' } }
+      { label: 'Audit Logs', icon: Logs, href: '/audit-logs', permission: { feature: 'audit-logs', action: 'read' } }
     ]
   },
   {
@@ -64,6 +64,6 @@ export const dashboardNavGroups: DashboardNavGroup[] = [
 ];
 
 export const dashboardBottomNavItems: DashboardNavItem[] = [
-  { label: 'Settings', icon: Settings, href: '/admin/user/settings/profile' },
+  { label: 'Settings', icon: Settings, href: '/user/settings/profile' },
   { label: 'Support', icon: Headphones, href: '#' }
 ];

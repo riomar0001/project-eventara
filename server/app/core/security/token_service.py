@@ -36,6 +36,18 @@ from app.infrastructure.database.repositories.refresh_token_repository import (
 )
 
 
+def _public_image_url(image_file_id: str | None) -> str | None:
+    if not image_file_id:
+        return None
+    if image_file_id.startswith(("http://", "https://")):
+        return image_file_id
+
+    public_base = (settings.STORAGE_PUBLIC_URL or "").rstrip("/")
+    if not public_base:
+        return image_file_id
+    return f"{public_base}/{image_file_id.lstrip('/')}"
+
+
 def create_access_token(
     user_id: uuid.UUID,
     email: str,
@@ -86,6 +98,7 @@ def create_access_token(
                 "education_level": user.education_level,
                 "occupation": user.occupation,
                 "bio": user.bio,
+                "image": _public_image_url(user.image_file_id),
             }
         )
 

@@ -735,7 +735,7 @@ export const zLogoutResponse = z.object({
  */
 export const zProfileAvatarData = z.object({
     user_id: z.uuid(),
-    image_file_id: z.string()
+    image: z.string()
 });
 
 /**

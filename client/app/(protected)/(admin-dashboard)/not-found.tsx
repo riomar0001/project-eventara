@@ -99,7 +99,7 @@ export default function NotFound() {
       {/* Action buttons */}
       <div className="flex flex-col items-center gap-2.5 sm:flex-row">
         <Link
-          href="/admin/dashboard"
+          href="/dashboard"
           className="inline-flex h-9 items-center justify-center rounded-lg px-5 text-sm font-medium transition-all hover:opacity-90 active:scale-[0.98]"
           style={{
             background: 'var(--primary)',

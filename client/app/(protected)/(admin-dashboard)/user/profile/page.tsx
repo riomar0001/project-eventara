@@ -54,7 +54,7 @@ export default function UserProfilePage() {
           <CardContent className="flex h-full flex-col px-6 py-7">
             <div className="flex flex-col items-center text-center">
               <Avatar className="size-32 shadow-sm">
-                <AvatarImage src={resolveStorageImageUrl(user.imageFileId)} alt={displayName} />
+                <AvatarImage src={resolveStorageImageUrl(user.image)} alt={displayName} />
                 <AvatarFallback className="bg-white text-2xl font-semibold">{initials}</AvatarFallback>
               </Avatar>
 
@@ -68,7 +68,7 @@ export default function UserProfilePage() {
             </div>
 
             <Button asChild className="mt-6 w-full">
-              <Link href="/admin/user/settings/profile">
+              <Link href="/user/settings/profile">
                 <PencilLine className="size-4" />
                 Edit profile
               </Link>
@@ -91,7 +91,7 @@ export default function UserProfilePage() {
                   <p className="text-muted-foreground mt-1 text-sm">Your personal details and profile information.</p>
                 </div>
                 <Button asChild size="xs" variant="outline">
-                  <Link href="/admin/user/settings/profile">
+                  <Link href="/user/settings/profile">
                     Edit
                     <PencilLine className="size-3" />
                   </Link>

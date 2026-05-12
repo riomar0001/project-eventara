@@ -132,7 +132,7 @@ export function LoginVerifyForm() {
     setAuth(result.data.access_token, result.data.refresh_token, user);
     sessionStorage.removeItem(`otp-expiry:${activeToken}`);
     setVerified(true);
-    setTimeout(() => router.replace('/admin/dashboard'), 1500);
+    setTimeout(() => router.replace('/dashboard'), 1500);
   };
 
   const handleResend = async () => {
