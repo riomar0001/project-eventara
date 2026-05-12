@@ -27,6 +27,9 @@ export interface LiveEvent {
   id: string
   title: string
   status: "live" | "upcoming"
+  venue: string
+  session: string
+  attendees: string
   speaker: {
     name: string
     role: string

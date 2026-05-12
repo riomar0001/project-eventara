@@ -4,7 +4,7 @@ import { StatsGrid } from "./stats-grid"
 
 export function HeroSection() {
   return (
-    <section className="relative pt-[96px] pb-[120px] text-center">
+    <section className="relative pb-[120px] pt-[96px] text-center">
       {/* Mesh background */}
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
         {/* Lime orb */}
@@ -47,9 +47,9 @@ export function HeroSection() {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 container mx-auto max-w-[1240px] px-8">
+      <div className="container relative z-10 mx-auto max-w-[1240px] px-8">
         {/* Eyebrow */}
-        <div className="inline-flex items-center gap-2.5 font-mono text-[11px] tracking-[0.18em] text-[var(--text-mute)] uppercase">
+        <div className="inline-flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--text-mute)]">
           <span
             className="inline-block h-1.5 w-1.5 rounded-full"
             style={{
@@ -62,7 +62,7 @@ export function HeroSection() {
 
         {/* Headline */}
         <h1
-          className="mx-auto my-[22px] mb-[24px] max-w-[14ch] text-[clamp(55px,6.4vw,100px)] leading-[0.98] font-bold tracking-[-0.025em]"
+          className="mx-auto my-[22px] mb-[24px] max-w-[14ch] text-[clamp(55px,6.4vw,100px)] font-bold leading-[0.98] tracking-[-0.025em]"
           style={{
             textWrap: "balance",
           }}

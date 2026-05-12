@@ -52,7 +52,7 @@ export function Footer() {
   const year = new Date().getFullYear()
 
   return (
-    <footer className="border-t border-[var(--line-soft)] pt-12 pb-10">
+    <footer className="border-t border-[var(--line-soft)] pb-10 pt-12">
       <div className="mx-auto flex max-w-[1240px] flex-wrap items-center justify-between gap-6 px-8 max-[900px]:px-5">
         {/* Logo */}
         <a

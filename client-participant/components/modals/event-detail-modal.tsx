@@ -36,7 +36,7 @@ export function EventDetailModal({
       <DialogContent className="max-w-2xl">
         {/* Cover image area */}
         <div
-          className="relative -m-6 -mt-6 h-48 overflow-hidden rounded-t-2xl bg-gradient-to-br from-[var(--lime)]/20 to-[var(--amber)]/20"
+          className="from-[var(--lime)]/20 to-[var(--amber)]/20 relative -m-6 -mt-6 h-48 overflow-hidden rounded-t-2xl bg-gradient-to-br"
           style={{
             backgroundImage: `
               repeating-linear-gradient(
@@ -71,7 +71,7 @@ export function EventDetailModal({
                 {event.description}
               </DialogDescription>
             </div>
-            <div className="rounded-full bg-[var(--surface)] px-3 py-1.5 text-xs font-medium text-[var(--lime)] uppercase">
+            <div className="rounded-full bg-[var(--surface)] px-3 py-1.5 text-xs font-medium uppercase text-[var(--lime)]">
               {event.category}
             </div>
           </div>
@@ -80,7 +80,7 @@ export function EventDetailModal({
         {/* Content grid */}
         <div className="grid grid-cols-2 gap-3">
           <div className="rounded-lg border border-[var(--line-soft)] bg-[var(--bg)] p-3">
-            <div className="font-mono text-xs tracking-widest text-[var(--text-mute)] uppercase">
+            <div className="font-mono text-xs uppercase tracking-widest text-[var(--text-mute)]">
               Date
             </div>
             <div className="mt-2 font-medium text-[var(--text)]">
@@ -89,7 +89,7 @@ export function EventDetailModal({
           </div>
 
           <div className="rounded-lg border border-[var(--line-soft)] bg-[var(--bg)] p-3">
-            <div className="font-mono text-xs tracking-widest text-[var(--text-mute)] uppercase">
+            <div className="font-mono text-xs uppercase tracking-widest text-[var(--text-mute)]">
               Time
             </div>
             <div className="mt-2 font-medium text-[var(--text)]">
@@ -98,7 +98,7 @@ export function EventDetailModal({
           </div>
 
           <div className="rounded-lg border border-[var(--line-soft)] bg-[var(--bg)] p-3">
-            <div className="font-mono text-xs tracking-widest text-[var(--text-mute)] uppercase">
+            <div className="font-mono text-xs uppercase tracking-widest text-[var(--text-mute)]">
               Location
             </div>
             <div className="mt-2 font-medium text-[var(--text)]">
@@ -107,7 +107,7 @@ export function EventDetailModal({
           </div>
 
           <div className="rounded-lg border border-[var(--line-soft)] bg-[var(--bg)] p-3">
-            <div className="font-mono text-xs tracking-widest text-[var(--text-mute)] uppercase">
+            <div className="font-mono text-xs uppercase tracking-widest text-[var(--text-mute)]">
               Venue
             </div>
             <div className="mt-2 font-medium text-[var(--text)]">
@@ -120,7 +120,7 @@ export function EventDetailModal({
         <div className="space-y-3 border-t border-[var(--line-soft)] pt-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="font-mono text-xs tracking-widest text-[var(--text-mute)] uppercase">
+              <div className="font-mono text-xs uppercase tracking-widest text-[var(--text-mute)]">
                 Capacity
               </div>
               <div className="mt-1 font-medium text-[var(--text)]">

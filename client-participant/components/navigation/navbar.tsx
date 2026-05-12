@@ -39,7 +39,7 @@ export function Navbar() {
         <div className="flex items-center gap-1.5">
           <a
             href="#events"
-            className="rounded-[10px] px-3.5 py-2 text-[14.5px] text-[var(--text)] text-[var(--text-dim)] transition-colors duration-150 hover:text-[var(--text)]"
+            className="rounded-[10px] px-3.5 py-2 text-[14.5px] text-[var(--text)] transition-colors duration-150 hover:text-[var(--text)]"
           >
             Events
           </a>

@@ -89,11 +89,60 @@ export const MOCK_EVENTS: Event[] = [
   },
 ]
 
+export const UPCOMING_EVENTS: Array<{
+  id: number
+  date: string
+  title: string
+  desc: string
+  venue: string
+  chip: string
+  seats: string
+  orbColor: "lime" | "amber"
+  angle: string
+}> = [
+  {
+    id: 1,
+    date: "MAY 04 · 6:00 PM",
+    title: "Liquidity Provision 101",
+    desc: "A hands-on workshop for first-time LPs — walk through adding, rebalancing, and exiting positions on native Davao pools.",
+    venue: "Matina Town Square",
+    chip: "Workshop",
+    seats: "48 left",
+    orbColor: "lime",
+    angle: "115deg",
+  },
+  {
+    id: 2,
+    date: "MAY 17 · 2:00 PM",
+    title: "Cross-Chain Roundtable",
+    desc: "Panel with founders from three L2 ecosystems discussing bridge safety, shared sequencers, and what's next for DeFi composability.",
+    venue: "Abreeza Ayala Mall",
+    chip: "Panel",
+    seats: "22 left",
+    orbColor: "amber",
+    angle: "95deg",
+  },
+  {
+    id: 3,
+    date: "JUN 01 · 10:00 AM",
+    title: "DeFi Builder's Weekend",
+    desc: "A two-day hackathon for Mindanao-based developers. Ship a prototype, win grants, and meet the VCs investing in SEA Web3.",
+    venue: "MAFBEX Grounds",
+    chip: "Hackathon",
+    seats: "Full — waitlist",
+    orbColor: "lime",
+    angle: "135deg",
+  },
+]
+
 // TODO: replace with GET /api/events/live
 export const LIVE_EVENT: LiveEvent = {
   id: "live-001",
   title: "Building DApps in 2026",
   status: "live",
+  venue: "Abreeza Ayala Mall · Main Theater",
+  session: "Session 3 · Advanced Track",
+  attendees: "342 live attendees",
   speaker: {
     name: "Alex Rivera",
     role: "Smart Contract Engineer",

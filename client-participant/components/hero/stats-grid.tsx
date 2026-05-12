@@ -9,7 +9,7 @@ export function StatsGrid() {
   ]
 
   return (
-    <div className="grid grid-cols-4 border-t border-b border-[var(--line-soft)]">
+    <div className="grid grid-cols-4 border-b border-t border-[var(--line-soft)]">
       {stats.map((stat, index) => (
         <div
           key={index}
@@ -26,7 +26,7 @@ export function StatsGrid() {
           >
             {stat.value}
           </div>
-          <div className="mt-1 font-mono text-[11px] tracking-[0.16em] text-[var(--text-mute)] uppercase">
+          <div className="mt-1 font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--text-mute)]">
             {stat.label}
           </div>
         </div>
