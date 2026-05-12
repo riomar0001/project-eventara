@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { toast } from 'sonner';
 import { type AliasStatus, normalizeAlias, useAliasAvailability } from '@/hooks/onboarding/use-alias-availability';
-import { Profile } from '@/api/sdk.gen';
+import { AccountSettings, Profile } from '@/api/sdk.gen';
 import type { AgeGroup, EducationLevel, Gender } from '@/api/types.gen';
 import { PROFILE_ALIAS_MIN_LENGTH, PROFILE_ALIAS_PATTERN, PROFILE_COMPLETION_FIELDS } from '@/constants/user/profile';
 import { decodeTokenUser, rememberProfileAvatar } from '@/lib/auth/token';
@@ -204,8 +204,33 @@ export function useProfileSettingsForm() {
         return;
       }
 
-      updateUser(normalizedProfile);
-      toast.success('Profile updated in this session. A server update endpoint is not available yet.');
+      const result = await AccountSettings.updateProfileUserProfilePatch({
+        body: {
+          alias: normalizedProfile.alias ?? '',
+          first_name: normalizedProfile.firstName ?? '',
+          last_name: normalizedProfile.lastName ?? '',
+          age_group: normalizedProfile.ageGroup as AgeGroup,
+          gender: normalizedProfile.gender as Gender,
+          education_level: normalizedProfile.educationLevel as EducationLevel,
+          occupation: normalizedProfile.occupation,
+          bio: normalizedProfile.bio
+        },
+        throwOnError: false
+      });
+
+      if (result.error || !result.data) {
+        toast.error(getErrorMessage(result.error));
+        return;
+      }
+
+      const nextUser = decodeTokenUser(result.data.access_token);
+      if (nextUser && refreshToken) {
+        setAuth(result.data.access_token, refreshToken, nextUser);
+      } else {
+        updateUser(normalizedProfile);
+      }
+
+      toast.success('Profile updated successfully.');
     } catch (error) {
       toast.error(getErrorMessage(error));
     } finally {

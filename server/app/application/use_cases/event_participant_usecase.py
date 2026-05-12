@@ -1,17 +1,26 @@
-"""Use cases for event session registration and participant status management."""
+"""Use cases for event session registration, withdrawal, check-in, and participant status management."""
 
+from datetime import UTC, datetime
+
+from arq.connections import ArqRedis
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application.dto.event_participant_dto import (
+    CheckInParticipantInput,
+    CheckInParticipantOutput,
     RegisterForSessionInput,
     RegisterForSessionOutput,
     UpdateParticipantStatusInput,
     UpdateParticipantStatusOutput,
+    WithdrawRegistrationInput,
+    WithdrawRegistrationOutput,
 )
 from app.domain.entities.event_entity import EventParticipantStatus, EventSessionStatus
 from app.domain.exceptions.event_exceptions import EventNotFoundError
 from app.domain.exceptions.event_participant_exceptions import (
     DuplicateEventParticipantError,
+    EventParticipantAlreadyCheckedInError,
+    EventParticipantCheckInNotOpenError,
     EventParticipantNotFoundError,
     InvalidEventParticipantStatusTransitionError,
     RegistrationNotOpenError,
@@ -22,9 +31,12 @@ from app.domain.exceptions.event_session_exceptions import EventSessionNotFoundE
 from app.domain.exceptions.role_exceptions import RoleAlreadyAssignedError
 from app.infrastructure.database.repositories.event_participant_repository import EventParticipantRepository
 from app.infrastructure.database.repositories.event_repository import EventRepository
+from app.infrastructure.database.repositories.event_volunteer_repository import EventVolunteerRepository
 from app.infrastructure.database.repositories.role_repository import RoleRepository
+from app.infrastructure.database.repositories.user_repository import UserRepository
 
 _REGISTRATION_OPEN_STATUSES = frozenset({EventSessionStatus.POSTED})
+_CHECK_IN_OPEN_STATUSES = frozenset({EventSessionStatus.POSTED, EventSessionStatus.STARTED})
 _PARTICIPANT_RBAC_ROLE_NAME = "participant"
 
 _ALLOWED_PARTICIPANT_TRANSITIONS: dict[EventParticipantStatus, frozenset[EventParticipantStatus]] = {
@@ -39,7 +51,7 @@ _ALLOWED_PARTICIPANT_TRANSITIONS: dict[EventParticipantStatus, frozenset[EventPa
 
 
 class EventParticipantUseCase:
-    """Application service for event session registration and participant status management.
+    """Application service for event session registration, withdrawal, check-in, and participant status management.
 
     Owns the transaction lifecycle for every mutating operation: commits on
     success, rolls back on any validation or infrastructure failure, then
@@ -61,6 +73,11 @@ class EventParticipantUseCase:
         concurrent status updates on the same participant and eliminating TOCTOU
         races between the transition validity check and the subsequent update.
 
+        ``withdraw_registration`` and ``check_in_participant`` lock the participant
+        row before eligibility checks and mutation so a cancellation, status update,
+        and check-in for the same attendee cannot interleave into an impossible
+        state.
+
     Args:
         participant_repo: Concrete ``EventParticipantRepository`` providing participant access.
         event_repo:       Concrete ``EventRepository`` providing session and event access.
@@ -75,11 +92,17 @@ class EventParticipantUseCase:
         event_repo: EventRepository,
         role_repo: RoleRepository,
         db: AsyncSession,
+        event_volunteer_repo: EventVolunteerRepository | None = None,
+        user_repo: UserRepository | None = None,
+        arq: ArqRedis | None = None,
     ) -> None:
         self.participant_repo = participant_repo
         self.event_repo = event_repo
         self.role_repo = role_repo
         self.db = db
+        self.event_volunteer_repo = event_volunteer_repo
+        self.user_repo = user_repo
+        self.arq = arq
 
     async def register_for_session(self, data: RegisterForSessionInput) -> RegisterForSessionOutput:
         """Register the authenticated user for an event session.
@@ -140,6 +163,58 @@ class EventParticipantUseCase:
 
         await self.db.commit()
         return RegisterForSessionOutput(participant=participant)
+
+    async def withdraw_registration(self, data: WithdrawRegistrationInput) -> WithdrawRegistrationOutput:
+        """Cancel the authenticated user's own registration for an event session.
+
+        The participant row is locked before validation so concurrent withdrawal,
+        check-in, and organizer status updates on the same registration are
+        serialised. Only REGISTERED, not-yet-checked-in participants can withdraw.
+
+        Args:
+            data: ``WithdrawRegistrationInput`` containing the authenticated user's
+                  ID, event ID, and event session ID.
+
+        Returns:
+            ``WithdrawRegistrationOutput`` with the updated participant and the
+            original participant snapshot for audit logging.
+
+        Raises:
+            EventParticipantNotFoundError: No registration exists for the user-session pair.
+            EventParticipantAlreadyCheckedInError: The attendee has already checked in.
+            InvalidEventParticipantStatusTransitionError: The current participant status is terminal.
+        """
+        old_participant = await self.participant_repo.get_by_user_and_session(data.user_id, data.session_id, for_update=True)
+        if old_participant is None:
+            raise EventParticipantNotFoundError(str(data.session_id))
+
+        session = await self.event_repo.get_session_by_id(data.session_id)
+        if session is None or session.event_id != data.event_id:
+            raise EventSessionNotFoundError(str(data.session_id))
+
+        if old_participant.is_checked_in:
+            raise EventParticipantAlreadyCheckedInError(str(old_participant.id))
+
+        if old_participant.status != EventParticipantStatus.REGISTERED:
+            raise InvalidEventParticipantStatusTransitionError(
+                str(old_participant.id),
+                old_participant.status.value,
+                EventParticipantStatus.CANCELLED.value,
+            )
+
+        try:
+            updated = await self.participant_repo.update_status(
+                participant_id=old_participant.id,
+                new_status=EventParticipantStatus.CANCELLED,
+            )
+            if updated is None:
+                raise EventParticipantNotFoundError(str(old_participant.id))
+        except Exception:
+            await self.db.rollback()
+            raise
+
+        await self.db.commit()
+        return WithdrawRegistrationOutput(participant=updated, old_participant=old_participant)
 
     async def _assign_rbac_participant_role(self, user_id) -> None:
         """Assign the platform 'participant' RBAC role to the user if available.
@@ -223,3 +298,127 @@ class EventParticipantUseCase:
 
         await self.db.commit()
         return UpdateParticipantStatusOutput(participant=updated, old_participant=old_participant)
+
+    async def check_in_participant(self, data: CheckInParticipantInput) -> CheckInParticipantOutput:
+        """Check in a registered attendee and queue an email receipt.
+
+        A participant row lock serialises concurrent check-in and cancellation
+        requests for the same attendee. The event/session read validates that
+        check-in is being performed by the event creator or a joined volunteer
+        while the session is open for arrival. The email receipt is queued after
+        the database commit so email delivery cannot roll back a successful
+        check-in.
+
+        Args:
+            data: ``CheckInParticipantInput`` containing the event ID, session ID,
+                  participant ID, and actor ID of the organizer or joined volunteer
+                  doing check-in.
+
+        Returns:
+            ``CheckInParticipantOutput`` with the checked-in participant and the
+            original participant snapshot for audit logging.
+
+        Raises:
+            EventParticipantNotFoundError: No participant record exists.
+            EventSessionNotFoundError: The participant's session no longer exists.
+            EventNotFoundError: The parent event no longer exists.
+            UnauthorizedEventParticipantOperationError: Actor cannot check in attendees.
+            EventParticipantAlreadyCheckedInError: Participant was already checked in.
+            EventParticipantCheckInNotOpenError: Session status does not permit check-in.
+            InvalidEventParticipantStatusTransitionError: Participant is not in REGISTERED status.
+        """
+        old_participant = await self.participant_repo.get_by_id(data.participant_id, for_update=True)
+        if old_participant is None:
+            raise EventParticipantNotFoundError(str(data.participant_id))
+
+        if old_participant.event_session_id != data.session_id:
+            raise EventParticipantNotFoundError(str(data.participant_id))
+
+        session = await self.event_repo.get_session_by_id(old_participant.event_session_id)
+        if session is None:
+            raise EventSessionNotFoundError(str(old_participant.event_session_id))
+
+        if session.event_id != data.event_id:
+            raise EventSessionNotFoundError(str(data.session_id))
+
+        event = await self.event_repo.get_event_by_id(session.event_id)
+        if event is None:
+            raise EventNotFoundError(str(session.event_id))
+
+        if event.created_by != data.checked_in_by:
+            joined_assignment = None
+            if self.event_volunteer_repo is not None:
+                joined_assignment = await self.event_volunteer_repo.get_joined_event_volunteer_for_user(data.checked_in_by, event.id)
+            if joined_assignment is None:
+                raise UnauthorizedEventParticipantOperationError(str(old_participant.id))
+
+        if session.status not in _CHECK_IN_OPEN_STATUSES:
+            raise EventParticipantCheckInNotOpenError(str(session.id), session.status.value)
+
+        if old_participant.is_checked_in:
+            raise EventParticipantAlreadyCheckedInError(str(old_participant.id))
+
+        if old_participant.status != EventParticipantStatus.REGISTERED:
+            raise InvalidEventParticipantStatusTransitionError(
+                str(old_participant.id),
+                old_participant.status.value,
+                EventParticipantStatus.ATTENDED.value,
+            )
+
+        try:
+            updated = await self.participant_repo.check_in(
+                participant_id=data.participant_id,
+                checked_in_by=data.checked_in_by,
+                checked_in_time=datetime.now(UTC),
+            )
+            if updated is None:
+                raise EventParticipantNotFoundError(str(data.participant_id))
+        except Exception:
+            await self.db.rollback()
+            raise
+
+        await self.db.commit()
+        await self._send_check_in_receipt(updated, event.title, session.title)
+        return CheckInParticipantOutput(participant=updated, old_participant=old_participant)
+
+    async def _send_check_in_receipt(self, participant, event_title: str, session_title: str) -> None:
+        """Queue a check-in receipt email for the attendee when email dependencies are available.
+
+        Args:
+            participant: The checked-in participant entity.
+            event_title: Title of the event that owns the session.
+            session_title: Title of the checked-in session.
+
+        Side effects:
+            Enqueues a ``send_email_job`` through ARQ when user and queue
+            dependencies were provided. Any queue failure is intentionally
+            swallowed so the committed check-in remains durable.
+        """
+        if self.arq is None or self.user_repo is None:
+            return
+
+        attendee = await self.user_repo.get_by_id(participant.user_id)
+        checker = await self.user_repo.get_by_id(participant.checked_in_by) if participant.checked_in_by else None
+        if attendee is None:
+            return
+
+        checker_label = checker.email if checker else str(participant.checked_in_by)
+        checked_in_time = participant.checked_in_time.isoformat() if participant.checked_in_time else ""
+        html = (
+            f"<p>Your check-in for <strong>{event_title}</strong> is confirmed.</p>"
+            f"<p>Session: {session_title}</p>"
+            f"<p>Checked in at: {checked_in_time}</p>"
+            f"<p>Checked in by: {checker_label}</p>"
+        )
+
+        try:
+            from app.infrastructure.messaging.email import send_email
+
+            await send_email(
+                self.arq,
+                attendee.email,
+                f"Check-in receipt for {event_title}",
+                html,
+            )
+        except Exception:
+            return

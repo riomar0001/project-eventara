@@ -54,6 +54,7 @@ class User(Base):
     volunteer = relationship("Volunteer", back_populates="user", uselist=False)
     volunteer_applications = relationship("VolunteerApplication", back_populates="user", foreign_keys="VolunteerApplication.user_id")
     event_ratings = relationship("EventRating", back_populates="user", foreign_keys="EventRating.user_id")
+    event_feedback = relationship("EventFeedback", back_populates="user", foreign_keys="EventFeedback.user_id")
     event_participants = relationship("EventParticipant", back_populates="user", foreign_keys="EventParticipant.user_id")
 
     __table_args__ = (

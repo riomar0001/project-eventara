@@ -95,6 +95,9 @@ def _to_participant_record(p: EventParticipant) -> EventParticipantRecord:
         user_id=p.user_id,
         event_session_id=p.event_session_id,
         status=p.status.value if hasattr(p.status, "value") else p.status,
+        is_checked_in=p.is_checked_in,
+        checked_in_time=p.checked_in_time,
+        checked_in_by=p.checked_in_by,
         created_at=p.created_at,
         updated_at=p.updated_at,
     )

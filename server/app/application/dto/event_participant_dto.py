@@ -26,3 +26,30 @@ class UpdateParticipantStatusInput:
 class UpdateParticipantStatusOutput:
     participant: EventParticipant
     old_participant: EventParticipant
+
+
+@dataclass
+class WithdrawRegistrationInput:
+    user_id: uuid.UUID
+    event_id: uuid.UUID
+    session_id: uuid.UUID
+
+
+@dataclass
+class WithdrawRegistrationOutput:
+    participant: EventParticipant
+    old_participant: EventParticipant
+
+
+@dataclass
+class CheckInParticipantInput:
+    event_id: uuid.UUID
+    session_id: uuid.UUID
+    participant_id: uuid.UUID
+    checked_in_by: uuid.UUID
+
+
+@dataclass
+class CheckInParticipantOutput:
+    participant: EventParticipant
+    old_participant: EventParticipant

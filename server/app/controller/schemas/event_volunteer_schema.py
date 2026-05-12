@@ -40,6 +40,9 @@ class EventParticipantRecord(BaseModel):
     user_id: uuid.UUID
     event_session_id: uuid.UUID
     status: str
+    is_checked_in: bool
+    checked_in_time: datetime | None
+    checked_in_by: uuid.UUID | None
     created_at: datetime | None
     updated_at: datetime | None
 

@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { AccountSettings, Events, Venues } from '@/api/sdk.gen';
-import { getAccessToken } from '@/store/auth-store';
+import { decodeTokenUser } from '@/lib/auth/token';
+import { getAccessToken, useAuthStore } from '@/store/auth-store';
 
 export type UploadResourceType = 'event-cover-banner' | 'venue-image' | 'user-profile';
 
@@ -23,6 +24,12 @@ interface PresignedUpload {
   upload_url: string;
   object_key: string;
   public_url: string;
+}
+
+interface UploadRequestResult {
+  upload: PresignedUpload;
+  accessToken?: string;
+  profilePictureUrl?: string;
 }
 
 function extractUploadError(payload: unknown): string | undefined {
@@ -49,7 +56,7 @@ function parseUploadError(error: unknown): string {
   return 'Upload failed.';
 }
 
-async function requestFeatureUpload(file: File, resourceType: UploadResourceType, context?: UploadContext): Promise<PresignedUpload> {
+async function requestFeatureUpload(file: File, resourceType: UploadResourceType, context?: UploadContext): Promise<UploadRequestResult> {
   const headers = { Authorization: `Bearer ${getAccessToken()}` };
 
   if (resourceType === 'event-cover-banner') {
@@ -61,7 +68,7 @@ async function requestFeatureUpload(file: File, resourceType: UploadResourceType
       throwOnError: false
     });
     if (!result.data) throw result.error ?? new Error('Failed to get event banner upload URL.');
-    return result.data.upload;
+    return { upload: result.data.upload };
   }
 
   if (resourceType === 'venue-image') {
@@ -73,7 +80,7 @@ async function requestFeatureUpload(file: File, resourceType: UploadResourceType
       throwOnError: false
     });
     if (!result.data) throw result.error ?? new Error('Failed to get venue image upload URL.');
-    return result.data.upload;
+    return { upload: result.data.upload };
   }
 
   const result = await AccountSettings.uploadProfileAvatarUserProfileAvatarPatch({
@@ -82,7 +89,7 @@ async function requestFeatureUpload(file: File, resourceType: UploadResourceType
     throwOnError: false
   });
   if (!result.data) throw result.error ?? new Error('Failed to get profile picture upload URL.');
-  return result.data.upload;
+  return { upload: result.data.upload, accessToken: result.data.access_token, profilePictureUrl: result.data.data.profile_picture_url };
 }
 
 export function useUpload() {
@@ -98,7 +105,9 @@ export function useUpload() {
 
     setIsUploading(true);
     try {
-      const { upload_url, object_key, public_url } = await requestFeatureUpload(file, resourceType, context);
+      const { upload: presignedUpload, accessToken, profilePictureUrl } = await requestFeatureUpload(file, resourceType, context);
+      const { upload_url, object_key, public_url: presignedPublicUrl } = presignedUpload;
+      const publicUrl = profilePictureUrl ?? presignedPublicUrl;
 
       const putResp = await fetch(upload_url, {
         method: 'PUT',
@@ -110,7 +119,17 @@ export function useUpload() {
         throw new Error('Upload to storage failed. Please try again.');
       }
 
-      return { objectKey: object_key, publicUrl: public_url };
+      if (accessToken) {
+        const nextUser = decodeTokenUser(accessToken);
+        const { refreshToken, setAuth, updateUser } = useAuthStore.getState();
+        if (nextUser && refreshToken) {
+          setAuth(accessToken, refreshToken, nextUser);
+        } else {
+          updateUser({ image: publicUrl });
+        }
+      }
+
+      return { objectKey: object_key, publicUrl };
     } catch (err) {
       throw new Error(parseUploadError(err));
     } finally {

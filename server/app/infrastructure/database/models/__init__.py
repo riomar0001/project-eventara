@@ -1,6 +1,7 @@
 from app.infrastructure.database.models.audit_log_models import AuditLog
 from app.infrastructure.database.models.event_models import (
     Event,
+    EventFeedback,
     EventParticipant,
     EventRating,
     EventSession,
@@ -26,6 +27,7 @@ from app.infrastructure.database.models.volunteer_models import Volunteer, Volun
 __all__ = [
     "AuditLog",
     "Event",
+    "EventFeedback",
     "EventParticipant",
     "EventRating",
     "EventSession",

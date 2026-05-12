@@ -10,6 +10,7 @@ from app.domain.entities.authorization_entities import (
 )
 from app.domain.entities.event_entity import (
     Event,
+    EventFeedback,
     EventParticipant,
     EventParticipantStatus,
     EventRating,
@@ -68,6 +69,7 @@ __all__ = [
     "EventSessionStatus",
     "EventParticipant",
     "EventParticipantStatus",
+    "EventFeedback",
     "EventRating",
     "EventVolunteer",
     "EventVolunteerStatus",

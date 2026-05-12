@@ -47,6 +47,22 @@ PARTICIPANT_ALREADY_REGISTERED = {
     }
 }
 
+PARTICIPANT_ALREADY_CHECKED_IN = {
+    409: {
+        "description": "Participant is already checked in",
+        "model": ErrorResponse,
+        "content": {"application/json": {"example": {"success": False, "message": "Event participant is already checked in"}}},
+    }
+}
+
+PARTICIPANT_CHECK_IN_NOT_OPEN = {
+    400: {
+        "description": "Session is not open for participant check-in",
+        "model": ErrorResponse,
+        "content": {"application/json": {"example": {"success": False, "message": "Check-in is not open for this session"}}},
+    }
+}
+
 PARTICIPANT_NOT_FOUND = {
     404: {
         "description": "Participant record not found",

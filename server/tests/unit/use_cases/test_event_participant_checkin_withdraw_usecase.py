@@ -1,0 +1,195 @@
+import uuid
+from datetime import UTC, datetime
+from unittest.mock import AsyncMock, MagicMock
+
+import pytest
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.application.dto.event_participant_dto import CheckInParticipantInput, WithdrawRegistrationInput
+from app.application.use_cases.event_participant_usecase import EventParticipantUseCase
+from app.domain.entities.event_entity import Event, EventParticipant, EventParticipantStatus, EventSession, EventSessionStatus, EventStatus
+from app.domain.exceptions.event_participant_exceptions import (
+    EventParticipantAlreadyCheckedInError,
+    EventParticipantCheckInNotOpenError,
+    EventParticipantNotFoundError,
+    InvalidEventParticipantStatusTransitionError,
+)
+from app.domain.exceptions.event_session_exceptions import EventSessionNotFoundError
+from app.infrastructure.database.repositories.event_participant_repository import EventParticipantRepository
+from app.infrastructure.database.repositories.event_repository import EventRepository
+from app.infrastructure.database.repositories.event_volunteer_repository import EventVolunteerRepository
+from app.infrastructure.database.repositories.role_repository import RoleRepository
+from app.infrastructure.database.repositories.user_repository import UserRepository
+
+EVENT_ID = uuid.UUID("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
+CREATOR_ID = uuid.UUID("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
+VOLUNTEER_USER_ID = uuid.UUID("cccccccc-cccc-cccc-cccc-cccccccccccc")
+USER_ID = uuid.UUID("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee")
+SESSION_ID = uuid.UUID("dddddddd-dddd-dddd-dddd-dddddddddddd")
+PARTICIPANT_ID = uuid.UUID("ffffffff-ffff-ffff-ffff-ffffffffffff")
+VENUE_ID = uuid.uuid4()
+
+
+def _event(**overrides):
+    defaults = dict(
+        id=EVENT_ID,
+        title="Test Event",
+        description="desc",
+        start_date=datetime(2026, 1, 1, tzinfo=UTC),
+        end_date=datetime(2026, 1, 2, tzinfo=UTC),
+        status=EventStatus.STARTED,
+        created_by=CREATOR_ID,
+    )
+    defaults.update(overrides)
+    return Event(**defaults)
+
+
+def _session(**overrides):
+    defaults = dict(
+        id=SESSION_ID,
+        event_id=EVENT_ID,
+        venue_id=VENUE_ID,
+        title="Session Title",
+        start_datetime=datetime(2026, 1, 1, tzinfo=UTC),
+        end_datetime=datetime(2026, 1, 1, 1, tzinfo=UTC),
+        status=EventSessionStatus.STARTED,
+    )
+    defaults.update(overrides)
+    return EventSession(**defaults)
+
+
+def _participant(**overrides):
+    defaults = dict(
+        id=PARTICIPANT_ID,
+        user_id=USER_ID,
+        event_session_id=SESSION_ID,
+        status=EventParticipantStatus.REGISTERED,
+        is_checked_in=False,
+    )
+    defaults.update(overrides)
+    return EventParticipant(**defaults)
+
+
+def _use_case(participant_repo=None, event_repo=None, event_volunteer_repo=None, user_repo=None, arq=None):
+    if participant_repo is None:
+        participant_repo = MagicMock(spec=EventParticipantRepository)
+        participant_repo.get_by_user_and_session = AsyncMock(return_value=_participant())
+        participant_repo.get_by_id = AsyncMock(return_value=_participant())
+        participant_repo.update_status = AsyncMock(return_value=_participant(status=EventParticipantStatus.CANCELLED))
+        participant_repo.check_in = AsyncMock(
+            return_value=_participant(status=EventParticipantStatus.ATTENDED, is_checked_in=True, checked_in_by=CREATOR_ID)
+        )
+
+    if event_repo is None:
+        event_repo = MagicMock(spec=EventRepository)
+        event_repo.get_session_by_id = AsyncMock(return_value=_session())
+        event_repo.get_event_by_id = AsyncMock(return_value=_event())
+
+    role_repo = MagicMock(spec=RoleRepository)
+    event_volunteer_repo = event_volunteer_repo or MagicMock(spec=EventVolunteerRepository)
+    event_volunteer_repo.get_joined_event_volunteer_for_user = AsyncMock(return_value=None)
+    user_repo = user_repo or MagicMock(spec=UserRepository)
+    user_repo.get_by_id = AsyncMock(return_value=None)
+    db = AsyncMock(spec=AsyncSession)
+    return (
+        EventParticipantUseCase(participant_repo, event_repo, role_repo, db, event_volunteer_repo, user_repo, arq),
+        participant_repo,
+        event_repo,
+        db,
+    )
+
+
+def _withdraw_input():
+    return WithdrawRegistrationInput(user_id=USER_ID, event_id=EVENT_ID, session_id=SESSION_ID)
+
+
+def _check_in_input():
+    return CheckInParticipantInput(event_id=EVENT_ID, session_id=SESSION_ID, participant_id=PARTICIPANT_ID, checked_in_by=CREATOR_ID)
+
+
+@pytest.mark.asyncio
+async def test_withdraw_locks_user_session_registration_before_update():
+    uc, participant_repo, _, _ = _use_case()
+    await uc.withdraw_registration(_withdraw_input())
+    participant_repo.get_by_user_and_session.assert_called_once_with(USER_ID, SESSION_ID, for_update=True)
+
+
+@pytest.mark.asyncio
+async def test_withdraw_sets_status_to_cancelled_and_commits():
+    uc, participant_repo, _, db = _use_case()
+    result = await uc.withdraw_registration(_withdraw_input())
+    participant_repo.update_status.assert_called_once_with(participant_id=PARTICIPANT_ID, new_status=EventParticipantStatus.CANCELLED)
+    assert result.participant.status == EventParticipantStatus.CANCELLED
+    db.commit.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_withdraw_fails_when_registration_missing():
+    participant_repo = MagicMock(spec=EventParticipantRepository)
+    participant_repo.get_by_user_and_session = AsyncMock(return_value=None)
+    uc, _, _, _ = _use_case(participant_repo=participant_repo)
+    with pytest.raises(EventParticipantNotFoundError):
+        await uc.withdraw_registration(_withdraw_input())
+
+
+@pytest.mark.asyncio
+async def test_withdraw_fails_when_participant_already_checked_in():
+    participant_repo = MagicMock(spec=EventParticipantRepository)
+    participant_repo.get_by_user_and_session = AsyncMock(return_value=_participant(is_checked_in=True))
+    uc, _, _, _ = _use_case(participant_repo=participant_repo)
+    with pytest.raises(EventParticipantAlreadyCheckedInError):
+        await uc.withdraw_registration(_withdraw_input())
+
+
+@pytest.mark.asyncio
+async def test_check_in_locks_participant_before_update():
+    uc, participant_repo, _, _ = _use_case()
+    await uc.check_in_participant(_check_in_input())
+    participant_repo.get_by_id.assert_called_once_with(PARTICIPANT_ID, for_update=True)
+
+
+@pytest.mark.asyncio
+async def test_check_in_records_actor_and_commits():
+    uc, participant_repo, _, db = _use_case()
+    result = await uc.check_in_participant(_check_in_input())
+    assert participant_repo.check_in.call_args.kwargs["participant_id"] == PARTICIPANT_ID
+    assert participant_repo.check_in.call_args.kwargs["checked_in_by"] == CREATOR_ID
+    assert result.participant.is_checked_in is True
+    db.commit.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_check_in_fails_when_participant_missing():
+    participant_repo = MagicMock(spec=EventParticipantRepository)
+    participant_repo.get_by_id = AsyncMock(return_value=None)
+    uc, _, _, _ = _use_case(participant_repo=participant_repo)
+    with pytest.raises(EventParticipantNotFoundError):
+        await uc.check_in_participant(_check_in_input())
+
+
+@pytest.mark.asyncio
+async def test_check_in_fails_when_session_missing():
+    event_repo = MagicMock(spec=EventRepository)
+    event_repo.get_session_by_id = AsyncMock(return_value=None)
+    uc, _, _, _ = _use_case(event_repo=event_repo)
+    with pytest.raises(EventSessionNotFoundError):
+        await uc.check_in_participant(_check_in_input())
+
+
+@pytest.mark.asyncio
+async def test_check_in_fails_when_session_not_open():
+    event_repo = MagicMock(spec=EventRepository)
+    event_repo.get_session_by_id = AsyncMock(return_value=_session(status=EventSessionStatus.ENDED))
+    event_repo.get_event_by_id = AsyncMock(return_value=_event())
+    uc, _, _, _ = _use_case(event_repo=event_repo)
+    with pytest.raises(EventParticipantCheckInNotOpenError):
+        await uc.check_in_participant(_check_in_input())
+
+
+@pytest.mark.asyncio
+async def test_check_in_fails_when_participant_status_is_cancelled():
+    participant_repo = MagicMock(spec=EventParticipantRepository)
+    participant_repo.get_by_id = AsyncMock(return_value=_participant(status=EventParticipantStatus.CANCELLED))
+    uc, _, _, _ = _use_case(participant_repo=participant_repo)
+    with pytest.raises(InvalidEventParticipantStatusTransitionError):
+        await uc.check_in_participant(_check_in_input())
