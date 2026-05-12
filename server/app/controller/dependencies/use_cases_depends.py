@@ -13,7 +13,9 @@ from app.application.use_cases.event_volunteer_usecase import EventVolunteerUseC
 from app.application.use_cases.feature_usecase import FeatureManagementUseCase
 from app.application.use_cases.profile_usecase import (
     CheckAliasUseCase,
+    GetEventsAttendedUseCase,
     GetLoginHistoryUseCase,
+    GetUserDetailsUseCase,
     OnboardingUseCase,
     UpdateProfileAvatarUseCase,
     UpdateProfileUseCase,
@@ -82,6 +84,16 @@ def get_update_profile_use_case(db: AsyncSession = Depends(get_db)) -> UpdatePro
 def get_update_profile_avatar_use_case(db: AsyncSession = Depends(get_db)) -> UpdateProfileAvatarUseCase:
     """Construct an ``UpdateProfileAvatarUseCase`` for the current request."""
     return UpdateProfileAvatarUseCase(UserRepository(db), db)
+
+
+def get_user_details_use_case(db: AsyncSession = Depends(get_db)) -> GetUserDetailsUseCase:
+    """Construct a ``GetUserDetailsUseCase`` for the current request."""
+    return GetUserDetailsUseCase(UserRepository(db))
+
+
+def get_events_attended_use_case(db: AsyncSession = Depends(get_db)) -> GetEventsAttendedUseCase:
+    """Construct a ``GetEventsAttendedUseCase`` for the current request."""
+    return GetEventsAttendedUseCase(UserRepository(db))
 
 
 def get_change_password_use_case(db: AsyncSession = Depends(get_db)) -> AccountSettingsUseCase:

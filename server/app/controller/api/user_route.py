@@ -5,7 +5,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application.dto.account_settings_dto import ChangePasswordInput, RequestAccountDeletionInput
 from app.application.dto.profile_dto import (
+    GetEventsAttendedInput,
     GetLoginHistoryInput,
+    GetUserDetailsInput,
     UpdateProfileAvatarInput,
     UpdateProfileInput,
     UserOnboardingInput,
@@ -14,13 +16,22 @@ from app.application.use_cases.account_settings_usecase import AccountSettingsUs
 from app.application.use_cases.audit_log_usecase import AuditLogUseCase
 from app.application.use_cases.profile_usecase import (
     CheckAliasUseCase,
+    GetEventsAttendedUseCase,
     GetLoginHistoryUseCase,
+    GetUserDetailsUseCase,
     OnboardingUseCase,
     UpdateProfileAvatarUseCase,
     UpdateProfileUseCase,
 )
 from app.controller.api.audit_helpers import safe_audit_log, serialize_profile
-from app.controller.dependencies import get_audit_log_use_case, get_current_user_id, get_onboarding_use_case, get_update_profile_use_case
+from app.controller.dependencies import (
+    get_audit_log_use_case,
+    get_current_user_id,
+    get_events_attended_use_case,
+    get_onboarding_use_case,
+    get_update_profile_use_case,
+    get_user_details_use_case,
+)
 from app.controller.dependencies.storage_depends import get_storage_service
 from app.controller.dependencies.use_cases_depends import (
     get_change_password_use_case,
@@ -52,11 +63,13 @@ from app.controller.docs.user_docs import (
 )
 from app.controller.schemas.user_schema import (
     _ALIAS_RE,
+    AttendedEventResponse,
     ChangePasswordRequest,
     ChangePasswordResponse,
     CheckAliasResponse,
     DeleteAccountRequest,
     DeleteAccountResponse,
+    EventsAttendedResponse,
     LoginHistoryEntryResponse,
     LoginHistoryListResponse,
     ProfileAvatarData,
@@ -65,6 +78,8 @@ from app.controller.schemas.user_schema import (
     ProfileAvatarUploadResponse,
     UpdateProfileRequest,
     UpdateProfileResponse,
+    UserDetailsData,
+    UserDetailsResponse,
     UserOnboardingRequest,
     UserOnboardingResponse,
     UserPermissionsResponse,
@@ -90,6 +105,159 @@ from app.infrastructure.storage.storage_service import StorageService
 
 router = APIRouter(prefix="/user", tags=["Profile"])
 account_settings_router = APIRouter(prefix="/user", tags=["Account Settings"])
+
+
+def _to_attended_event_response(event) -> AttendedEventResponse:
+    return AttendedEventResponse(
+        participant_id=event.participant_id,
+        event_id=event.event_id,
+        event_title=event.event_title,
+        event_start_date=event.event_start_date,
+        event_end_date=event.event_end_date,
+        event_banner_url=event.event_banner_url,
+        session_id=event.session_id,
+        session_title=event.session_title,
+        session_start_datetime=event.session_start_datetime,
+        session_end_datetime=event.session_end_datetime,
+        attended_at=event.attended_at,
+    )
+
+
+async def _audit_profile_failure(
+    audit_use_case: AuditLogUseCase,
+    request: Request,
+    user_id: uuid.UUID,
+    action_type: ActionType,
+    resource_type: str,
+    reason: str,
+) -> None:
+    await safe_audit_log(
+        audit_use_case,
+        request,
+        user_id=user_id,
+        action_type=action_type,
+        resource_type=resource_type,
+        resource_id=str(user_id),
+        status=AuditLogStatus.FAILURE,
+        additional_context={"reason": reason},
+    )
+
+
+@account_settings_router.get(
+    "/profile",
+    response_model=UserDetailsResponse,
+    status_code=status.HTTP_200_OK,
+    responses={**UNAUTHORIZED, **UPDATE_PROFILE_FORBIDDEN, **PROFILE_NOT_FOUND},
+    summary="Get user details",
+    description=(
+        "Return the authenticated user's profile details, active role, and recent attended events. "
+        "This endpoint is read-only and uses the database transaction snapshot for a consistent committed view; "
+        "mutating profile operations use row-level locks in their dedicated use cases."
+    ),
+)
+async def get_user_details(
+    request: Request,
+    attended_events_limit: int = Query(default=10, ge=0, le=50),
+    user_id: uuid.UUID = Depends(get_current_user_id),
+    use_case: GetUserDetailsUseCase = Depends(get_user_details_use_case),
+    audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
+) -> UserDetailsResponse:
+    """Retrieve the authenticated user's profile and attended events.
+
+    # Error mapping
+    - **401 Unauthorized** — missing, expired, or invalid Bearer token.
+    - **403 Forbidden** — account is inactive or deleted.
+    - **404 Not Found** — no user or profile found for the authenticated account.
+    """
+    try:
+        result = await use_case.execute(GetUserDetailsInput(user_id=user_id, attended_events_limit=attended_events_limit))
+    except UserNotFoundError as exc:
+        await _audit_profile_failure(audit_use_case, request, user_id, ActionType.READ, "profile", str(exc))
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except UserInactiveError as exc:
+        await _audit_profile_failure(audit_use_case, request, user_id, ActionType.READ, "profile", str(exc))
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
+    except ProfileNotFoundError as exc:
+        await _audit_profile_failure(audit_use_case, request, user_id, ActionType.READ, "profile", str(exc))
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+
+    p = result.profile
+    response = UserDetailsResponse(
+        data=UserDetailsData(
+            user_id=p.user_id,
+            email=p.email or "",
+            alias=p.alias,
+            first_name=p.first_name,
+            last_name=p.last_name,
+            image=StorageService.public_url_for_object_key(p.image_file_id),
+            age_group=p.age_group,
+            gender=p.gender,
+            education_level=p.education_level,
+            occupation=p.occupation,
+            bio=p.bio,
+            role=result.role_name,
+            events_attended=[_to_attended_event_response(event) for event in result.events_attended],
+        )
+    )
+    await safe_audit_log(
+        audit_use_case,
+        request,
+        user_id=user_id,
+        action_type=ActionType.READ,
+        resource_type="profile",
+        resource_id=str(user_id),
+        status=AuditLogStatus.SUCCESS,
+        new_values={"events_attended_count": len(result.events_attended)},
+    )
+    return response
+
+
+@account_settings_router.get(
+    "/profile/events-attended",
+    response_model=EventsAttendedResponse,
+    status_code=status.HTTP_200_OK,
+    responses={**UNAUTHORIZED, **UPDATE_PROFILE_FORBIDDEN, **USER_NOT_FOUND},
+    summary="Events attended",
+    description=(
+        "Return recent events where the authenticated user has an attended participant record. "
+        "The query is read-only and relies on committed transaction snapshots; "
+        "attendance status mutations remain serialised by the event participant use case."
+    ),
+)
+async def get_events_attended(
+    request: Request,
+    limit: int = Query(default=10, ge=0, le=50),
+    user_id: uuid.UUID = Depends(get_current_user_id),
+    use_case: GetEventsAttendedUseCase = Depends(get_events_attended_use_case),
+    audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
+) -> EventsAttendedResponse:
+    """Retrieve attended event history for the authenticated user.
+
+    # Error mapping
+    - **401 Unauthorized** — missing, expired, or invalid Bearer token.
+    - **403 Forbidden** — account is inactive or deleted.
+    - **404 Not Found** — no user found for the ID encoded in the token.
+    """
+    try:
+        result = await use_case.execute(GetEventsAttendedInput(user_id=user_id, limit=limit))
+    except UserNotFoundError as exc:
+        await _audit_profile_failure(audit_use_case, request, user_id, ActionType.READ, "events_attended", str(exc))
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except UserInactiveError as exc:
+        await _audit_profile_failure(audit_use_case, request, user_id, ActionType.READ, "events_attended", str(exc))
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
+
+    await safe_audit_log(
+        audit_use_case,
+        request,
+        user_id=user_id,
+        action_type=ActionType.READ,
+        resource_type="events_attended",
+        resource_id=str(user_id),
+        status=AuditLogStatus.SUCCESS,
+        new_values={"events_attended_count": len(result.events)},
+    )
+    return EventsAttendedResponse(data=[_to_attended_event_response(event) for event in result.events])
 
 
 @account_settings_router.patch(
@@ -143,12 +311,16 @@ async def update_profile(
             )
         )
     except UserNotFoundError as exc:
+        await _audit_profile_failure(audit_use_case, request, user_id, ActionType.UPDATE, "profile", str(exc))
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
     except UserInactiveError as exc:
+        await _audit_profile_failure(audit_use_case, request, user_id, ActionType.UPDATE, "profile", str(exc))
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
     except ProfileNotFoundError as exc:
+        await _audit_profile_failure(audit_use_case, request, user_id, ActionType.UPDATE, "profile", str(exc))
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
     except AliasAlreadyTakenError as exc:
+        await _audit_profile_failure(audit_use_case, request, user_id, ActionType.UPDATE, "profile", str(exc))
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
 
     p = result.profile
@@ -210,6 +382,7 @@ async def upload_profile_avatar(
     use_case: UpdateProfileAvatarUseCase = Depends(get_update_profile_avatar_use_case),
     audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
     storage: StorageService = Depends(get_storage_service),
+    db: AsyncSession = Depends(get_db),
 ) -> ProfileAvatarUploadResponse:
     """Generate a presigned avatar upload URL and persist the resulting object key on the user profile."""
     try:
@@ -218,8 +391,10 @@ async def upload_profile_avatar(
             content_type=body.content_type,
         )
     except ValueError as exc:
+        await _audit_profile_failure(audit_use_case, request, user_id, ActionType.UPDATE, "profile", str(exc))
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))
     except RuntimeError as exc:
+        await _audit_profile_failure(audit_use_case, request, user_id, ActionType.UPDATE, "profile", str(exc))
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc))
 
     try:
@@ -230,10 +405,13 @@ async def upload_profile_avatar(
             )
         )
     except UserNotFoundError as exc:
+        await _audit_profile_failure(audit_use_case, request, user_id, ActionType.UPDATE, "profile", str(exc))
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
     except UserInactiveError as exc:
+        await _audit_profile_failure(audit_use_case, request, user_id, ActionType.UPDATE, "profile", str(exc))
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
     except ProfileNotFoundError as exc:
+        await _audit_profile_failure(audit_use_case, request, user_id, ActionType.UPDATE, "profile", str(exc))
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
 
     await safe_audit_log(
@@ -249,13 +427,23 @@ async def upload_profile_avatar(
         additional_context={"public_url": public_url},
     )
 
+    p = result.profile
+    role_name = await UserRepository(db).get_active_role_name_by_user_id(user_id)
+
     return ProfileAvatarUploadResponse(
-        data=ProfileAvatarData(user_id=user_id, image=public_url),
+        data=ProfileAvatarData(user_id=user_id, image=public_url, profile_picture_url=public_url),
         upload=ProfileAvatarUploadData(
             upload_url=upload_url,
             object_key=object_key,
             public_url=public_url,
             expires_in=expires_in,
+        ),
+        access_token=create_access_token(
+            user_id=p.user_id,
+            email=p.email or "",
+            done_onboarding=True,
+            role=role_name,
+            user=p,
         ),
     )
 

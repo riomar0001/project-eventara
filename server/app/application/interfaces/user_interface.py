@@ -2,6 +2,7 @@ import uuid
 from datetime import datetime
 from typing import Protocol
 
+from app.application.dto.profile_dto import AttendedEventRecord
 from app.application.dto.users_dto import AdminUserAccountDetail, AdminUserAccountSummary
 from app.domain.entities.user_entity import (
     AgeGroup,
@@ -29,6 +30,8 @@ class IUserRepository(Protocol):
     async def get_profile_by_user_id(self, user_id: uuid.UUID) -> UserProfile | None: ...
 
     async def get_profile_by_user_id_for_update(self, user_id: uuid.UUID) -> UserProfile | None: ...
+
+    async def list_attended_events_by_user_id(self, user_id: uuid.UUID, limit: int = 10) -> list[AttendedEventRecord]: ...
 
     async def update_profile(
         self,

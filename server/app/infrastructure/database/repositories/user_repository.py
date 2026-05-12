@@ -7,7 +7,9 @@ from sqlalchemy.engine import CursorResult
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from app.application.dto.profile_dto import AttendedEventRecord
 from app.application.dto.users_dto import AdminUserAccountDetail, AdminUserAccountSummary
+from app.domain.entities.event_entity import EventParticipantStatus
 from app.domain.entities.user_entity import (
     AgeGroup,
     EducationLevel,
@@ -30,6 +32,7 @@ from app.domain.entities.user_entity import (
 from app.domain.entities.user_entity import (
     UserSecurity as DomainUserSecurity,
 )
+from app.infrastructure.database.models.event_models import Event, EventParticipant, EventSession
 from app.infrastructure.database.models.user_models import (
     Role,
     User,
@@ -465,6 +468,56 @@ class UserRepository:
             bio=orm_profile.bio,
             preferences=orm_profile.preferences,
         )
+
+    async def list_attended_events_by_user_id(self, user_id: uuid.UUID, limit: int = 10) -> list[AttendedEventRecord]:
+        """Return events attended by a user, newest attendance first.
+
+        This read-only projection joins participant, session, and event rows and
+        filters to ``ATTENDED`` participant records.  No row lock is acquired
+        because no state is modified; the database transaction snapshot provides
+        a coherent committed view while status changes are committed atomically
+        by the participant repository.
+        """
+        result = await self.db.execute(
+            select(
+                EventParticipant.id.label("participant_id"),
+                Event.id.label("event_id"),
+                Event.title.label("event_title"),
+                Event.start_date.label("event_start_date"),
+                Event.end_date.label("event_end_date"),
+                Event.banner_url.label("event_banner_url"),
+                EventSession.id.label("session_id"),
+                EventSession.title.label("session_title"),
+                EventSession.start_datetime.label("session_start_datetime"),
+                EventSession.end_datetime.label("session_end_datetime"),
+                EventParticipant.updated_at.label("attended_at"),
+            )
+            .select_from(EventParticipant)
+            .join(EventSession, EventSession.id == EventParticipant.event_session_id)
+            .join(Event, Event.id == EventSession.event_id)
+            .where(
+                EventParticipant.user_id == user_id,
+                EventParticipant.status == EventParticipantStatus.ATTENDED,
+            )
+            .order_by(EventParticipant.updated_at.desc(), EventSession.start_datetime.desc())
+            .limit(limit)
+        )
+        return [
+            AttendedEventRecord(
+                participant_id=row.participant_id,
+                event_id=row.event_id,
+                event_title=row.event_title,
+                event_start_date=row.event_start_date,
+                event_end_date=row.event_end_date,
+                event_banner_url=row.event_banner_url,
+                session_id=row.session_id,
+                session_title=row.session_title,
+                session_start_datetime=row.session_start_datetime,
+                session_end_datetime=row.session_end_datetime,
+                attended_at=row.attended_at,
+            )
+            for row in result.all()
+        ]
 
     async def get_profile_by_user_id_for_update(self, user_id: uuid.UUID) -> DomainUserProfile | None:
         """Return the profile while holding a row-level write lock.
