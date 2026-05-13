@@ -1,0 +1,92 @@
+services:
+
+  # ─────────────────────────────────────────────────────────
+  # Data layer — persistent volumes, no public ports
+  # ─────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - eventara
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    # --appendonly yes  → AOF persistence (survives restarts)
+    # --save 60 1       → RDB snapshot every 60 s if ≥1 key changed
+    command: >
+      redis-server
+      --requirepass ${REDIS_PASSWORD}
+      --appendonly yes
+      --save 60 1
+    volumes:
+      - redis_data:/data
+    networks:
+      - eventara
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─────────────────────────────────────────────────────────
+  # Application layer
+  # ─────────────────────────────────────────────────────────
+  api:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - eventara
+    ports:
+      - "8000:8000"
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_STORAGE_PUBLIC_URL: ${NEXT_PUBLIC_STORAGE_PUBLIC_URL:-}
+    restart: unless-stopped
+    environment:
+      # Runtime: points to the api service inside the Docker network.
+      # The Next.js rewrite rule proxies /api/* to this URL server-side.
+      API_URL: http://api:8000
+    depends_on:
+      - api
+    networks:
+      - eventara
+    ports:
+      - "3001:3000"
+
+# ─────────────────────────────────────────────────────────
+# Persistent volumes
+# ─────────────────────────────────────────────────────────
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  eventara:
+    name: eventara
+    driver: bridge

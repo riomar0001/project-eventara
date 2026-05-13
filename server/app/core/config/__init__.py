@@ -43,6 +43,8 @@ class Settings(BaseSettings):
     MAIL_PASS: str
 
     CORS_ORIGIN: str
+    # Comma-separated string in .env: https://a.com,https://b.com
+    # Parsed into a list via the model_validator below.
     ALLOWED_ORIGINS: str = "*"
 
     ADMIN_EMAIL: str
@@ -66,6 +68,10 @@ class Settings(BaseSettings):
         if isinstance(v, timedelta):
             return v
         return _parse_duration(str(v))
+
+    @property
+    def allowed_origins_list(self) -> list[str]:
+        return [o.strip() for o in self.ALLOWED_ORIGINS.split(",") if o.strip()]
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
