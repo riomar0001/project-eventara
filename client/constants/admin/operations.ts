@@ -13,7 +13,8 @@ export const ADMIN_OPERATIONS_PATHS = {
   volunteerEdit: (volunteerId: string) => `/volunteers/${volunteerId}/edit`,
   volunteerPotentialVolunteers: '/volunteers/potential-volunteers',
   volunteerRoles: '/volunteers/roles',
-  queues: '/queues'
+  queues: '/queues',
+  feedback: '/feedback'
 } as const;
 
 export type VenueRecord = {

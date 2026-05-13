@@ -1,6 +1,8 @@
 from fastapi import HTTPException, Request, status
 
 from app.core.security.constants import (
+    APP_FEEDBACK_IP_RATE_LIMIT_MAX_ATTEMPTS,
+    APP_FEEDBACK_IP_RATE_LIMIT_WINDOW_SECONDS,
     LOGIN_ACCOUNT_RATE_LIMIT_MAX_ATTEMPTS,
     LOGIN_ACCOUNT_RATE_LIMIT_WINDOW_SECONDS,
     LOGIN_IP_RATE_LIMIT_MAX_ATTEMPTS,
@@ -61,3 +63,27 @@ async def login_rate_limit(request: Request) -> None:
                 detail=f"Too many login attempts for this account. Try again in {ttl} second(s).",
                 headers={"Retry-After": str(ttl)},
             )
+
+
+async def app_feedback_rate_limit(request: Request) -> None:
+    """FastAPI dependency that enforces a per-IP fixed-window rate limit on anonymous feedback.
+
+    Uses a single Redis counter keyed by IP address.  The window is set only on
+    the first hit of each window (``EXPIRE … NX``) so the clock is not reset by
+    subsequent requests.  The ``Retry-After`` header on 429 responses tells clients
+    the exact number of seconds remaining in the current window.
+    """
+    repo = RateLimitRepository(request.app.state.redis)
+    ip = request.client.host if request.client else "unknown"
+
+    count = await repo.hit(
+        f"rate_limit:app_feedback:ip:{ip}",
+        APP_FEEDBACK_IP_RATE_LIMIT_WINDOW_SECONDS,
+    )
+    if count > APP_FEEDBACK_IP_RATE_LIMIT_MAX_ATTEMPTS:
+        ttl = await repo.get_ttl(f"rate_limit:app_feedback:ip:{ip}")
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail=f"Too many feedback submissions. Try again in {ttl} second(s).",
+            headers={"Retry-After": str(ttl)},
+        )

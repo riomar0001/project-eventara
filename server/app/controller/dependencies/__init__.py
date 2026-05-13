@@ -2,12 +2,14 @@ from app.controller.dependencies.auth_depends import (
     get_current_user_id,
     require_completed_onboarding,
 )
-from app.controller.dependencies.rate_limit_depends import login_rate_limit
+from app.controller.dependencies.rate_limit_depends import app_feedback_rate_limit, login_rate_limit
 from app.controller.dependencies.rbac_depends import require_permission
 from app.controller.dependencies.use_cases_depends import (
     get_admin_user_account_use_case,
+    get_app_feedback_use_case,
     get_audit_log_use_case,
     get_auth_use_case,
+    get_dashboard_use_case,
     get_delete_account_use_case,
     get_event_feedback_use_case,
     get_event_participant_check_in_use_case,
@@ -30,10 +32,13 @@ from app.controller.dependencies.use_cases_depends import (
 )
 
 __all__ = [
+    "app_feedback_rate_limit",
     "get_admin_user_account_use_case",
+    "get_app_feedback_use_case",
     "get_audit_log_use_case",
     "get_auth_use_case",
     "get_current_user_id",
+    "get_dashboard_use_case",
     "get_delete_account_use_case",
     "get_event_feedback_use_case",
     "get_event_participant_check_in_use_case",

@@ -56,6 +56,36 @@ export const zAgeGroup = z.enum([
 ]);
 
 /**
+ * AppFeedbackRecordResponse
+ */
+export const zAppFeedbackRecordResponse = z.object({
+    id: z.uuid(),
+    rating: z.int(),
+    comment: z.string().nullable(),
+    created_at: z.iso.datetime()
+});
+
+/**
+ * AppFeedbackListData
+ */
+export const zAppFeedbackListData = z.object({
+    feedback: z.array(zAppFeedbackRecordResponse),
+    total: z.int(),
+    page: z.int(),
+    page_size: z.int(),
+    total_pages: z.int()
+});
+
+/**
+ * AppFeedbackListResponse
+ */
+export const zAppFeedbackListResponse = z.object({
+    success: z.boolean().optional().default(true),
+    message: z.string().optional().default('Feedback retrieved successfully'),
+    data: zAppFeedbackListData
+});
+
+/**
  * ApplicationStatus
  */
 export const zApplicationStatus = z.enum([
@@ -592,6 +622,18 @@ export const zEventStatusUpdatedResponse = z.object({
 });
 
 /**
+ * EventSummaryResponse
+ */
+export const zEventSummaryResponse = z.object({
+    id: z.uuid(),
+    title: z.string(),
+    status: z.string(),
+    start_date: z.iso.datetime(),
+    end_date: z.iso.datetime(),
+    created_at: z.iso.datetime().nullish()
+});
+
+/**
  * EventUpdateRequest
  */
 export const zEventUpdateRequest = z.object({
@@ -846,6 +888,17 @@ export const zLogoutRequest = z.object({
 export const zLogoutResponse = z.object({
     success: z.boolean().optional().default(true),
     message: z.string().optional().default('Logged out successfully.')
+});
+
+/**
+ * ParticipantLeaderboardResponse
+ */
+export const zParticipantLeaderboardResponse = z.object({
+    user_id: z.uuid(),
+    full_name: z.string().nullish(),
+    alias: z.string().nullish(),
+    profile_picture_url: z.string().nullish(),
+    count: z.int()
 });
 
 /**
@@ -1152,6 +1205,23 @@ export const zSendUserPasswordResetResponse = z.object({
 });
 
 /**
+ * SubmitAppFeedbackRequest
+ */
+export const zSubmitAppFeedbackRequest = z.object({
+    rating: z.int().gte(1).lte(5),
+    comment: z.string().max(2000).nullish()
+});
+
+/**
+ * SubmitAppFeedbackResponse
+ */
+export const zSubmitAppFeedbackResponse = z.object({
+    success: z.boolean().optional().default(true),
+    message: z.string().optional().default('Feedback submitted successfully'),
+    data: zAppFeedbackRecordResponse
+});
+
+/**
  * SubmitApplicationRequest
  */
 export const zSubmitApplicationRequest = z.object({
@@ -1329,6 +1399,15 @@ export const zUserOnboardingResponse = z.object({
 export const zUserPermissionsResponse = z.object({
     success: z.boolean().optional().default(true),
     permissions: z.record(z.string(), z.boolean())
+});
+
+/**
+ * UserRegistrationWeekResponse
+ */
+export const zUserRegistrationWeekResponse = z.object({
+    week_start: z.iso.datetime(),
+    week_end: z.iso.datetime(),
+    count: z.int()
 });
 
 /**
@@ -1778,6 +1857,17 @@ export const zVenueUpdateRequest = z.object({
 });
 
 /**
+ * VenueUsageResponse
+ */
+export const zVenueUsageResponse = z.object({
+    venue_id: z.uuid(),
+    name: z.string(),
+    city: z.string().nullish(),
+    province: z.string().nullish(),
+    event_session_count: z.int()
+});
+
+/**
  * VerifyEmailResponse
  */
 export const zVerifyEmailResponse = z.object({
@@ -1786,6 +1876,43 @@ export const zVerifyEmailResponse = z.object({
     refresh_token: z.string(),
     token_type: z.string().optional().default('bearer'),
     message: z.string().optional().default('Email verified successfully.')
+});
+
+/**
+ * VolunteerLeaderboardResponse
+ */
+export const zVolunteerLeaderboardResponse = z.object({
+    volunteer_id: z.uuid().nullish(),
+    user_id: z.uuid().nullish(),
+    full_name: z.string().nullish(),
+    alias: z.string().nullish(),
+    profile_picture_url: z.string().nullish(),
+    role_name: z.string().nullish(),
+    count: z.int()
+});
+
+/**
+ * DashboardMetricsResponse
+ */
+export const zDashboardMetricsResponse = z.object({
+    recent_events: z.array(zEventSummaryResponse),
+    ongoing_events: z.array(zEventSummaryResponse),
+    upcoming_events: z.array(zEventSummaryResponse),
+    top_weekly_participants: z.array(zParticipantLeaderboardResponse),
+    top_weekly_volunteer_applications: z.array(zVolunteerLeaderboardResponse),
+    top_active_volunteers: z.array(zVolunteerLeaderboardResponse),
+    top_active_participants: z.array(zParticipantLeaderboardResponse),
+    top_venues: z.array(zVenueUsageResponse),
+    users_per_week: z.array(zUserRegistrationWeekResponse)
+});
+
+/**
+ * DashboardDataResponse
+ */
+export const zDashboardDataResponse = z.object({
+    success: z.boolean().optional().default(true),
+    message: z.string().optional().default('Dashboard data retrieved successfully'),
+    data: zDashboardMetricsResponse
 });
 
 /**
@@ -1804,6 +1931,32 @@ export const zUpdateVolunteerRequest = z.object({
     contact_phone: z.string().min(7).max(20).nullish(),
     volunteer_role_id: z.uuid().nullish(),
     status: zVolunteerStatus.nullish()
+});
+
+/**
+ * WeeklyRegistrationEntry
+ */
+export const zWeeklyRegistrationEntry = z.object({
+    week_start: z.iso.datetime(),
+    week_end: z.iso.datetime(),
+    count: z.int()
+});
+
+/**
+ * UsersPerWeekData
+ */
+export const zUsersPerWeekData = z.object({
+    entries: z.array(zWeeklyRegistrationEntry),
+    weeks: z.int()
+});
+
+/**
+ * UsersPerWeekResponse
+ */
+export const zUsersPerWeekResponse = z.object({
+    success: z.boolean().optional().default(true),
+    message: z.string().optional().default('Weekly user registrations retrieved successfully'),
+    data: zUsersPerWeekData
 });
 
 /**
@@ -1879,6 +2032,37 @@ export const zEventParticipantsResponse = z.object({
     data: z.array(zEventParticipantRecord),
     meta: zAppControllerSchemasEventParticipantSchemaPaginationMeta
 });
+
+export const zListAppFeedbackAppFeedbackGetQuery = z.object({
+    page: z.int().gte(1).optional().default(1),
+    page_size: z.int().gte(1).lte(100).optional().default(20)
+});
+
+/**
+ * Successful Response
+ */
+export const zListAppFeedbackAppFeedbackGetResponse = zAppFeedbackListResponse;
+
+export const zSubmitAppFeedbackAppFeedbackPostBody = zSubmitAppFeedbackRequest;
+
+/**
+ * Successful Response
+ */
+export const zSubmitAppFeedbackAppFeedbackPostResponse = zSubmitAppFeedbackResponse;
+
+export const zGetUsersPerWeekAppFeedbackUsersPerWeekGetQuery = z.object({
+    weeks: z.int().gte(1).lte(52).optional().default(12)
+});
+
+/**
+ * Successful Response
+ */
+export const zGetUsersPerWeekAppFeedbackUsersPerWeekGetResponse = zUsersPerWeekResponse;
+
+/**
+ * Successful Response
+ */
+export const zGetDashboardDataDashboardGetResponse = zDashboardDataResponse;
 
 export const zRegisterUserAuthRegisterPostBody = zRegisterRequest;
 

@@ -1,4 +1,4 @@
-import { Blocks, Calendar, Headphones, LayoutDashboard, Logs, MapPin, Server, Settings, ShieldCheck, User, Users } from 'lucide-react';
+import { Blocks, Calendar, Headphones, LayoutDashboard, Logs, MapPin, MessageSquare, Server, Settings, ShieldCheck, User, Users } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
 
@@ -55,7 +55,8 @@ export const dashboardNavGroups: DashboardNavGroup[] = [
       { label: 'Roles', icon: ShieldCheck, href: '/roles', permission: { feature: 'roles', action: 'read' } },
       { label: 'Users', icon: Users, href: '/users', permission: { feature: 'user-accounts', action: 'read' } },
       { label: 'Queues', icon: Server, href: ADMIN_OPERATIONS_PATHS.queues, permission: { feature: 'queues', action: 'read' } },
-      { label: 'Audit Logs', icon: Logs, href: '/audit-logs', permission: { feature: 'audit-logs', action: 'read' } }
+      { label: 'Audit Logs', icon: Logs, href: '/audit-logs', permission: { feature: 'audit-logs', action: 'read' } },
+      { label: 'Feedback', icon: MessageSquare, href: ADMIN_OPERATIONS_PATHS.feedback, permission: { feature: 'app_feedback', action: 'read' } }
     ]
   }
 ];

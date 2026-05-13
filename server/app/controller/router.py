@@ -1,7 +1,9 @@
 from fastapi import APIRouter
 
+from app.controller.api.app_feedback_route import app_feedback_router
 from app.controller.api.audit_log_route import router as audit_log_router
 from app.controller.api.auth_route import router as auth_router
+from app.controller.api.dashboard_route import dashboard_router
 from app.controller.api.event_feedback_route import event_feedback_router
 from app.controller.api.event_participant_route import participant_router
 from app.controller.api.event_route import event_router
@@ -16,6 +18,8 @@ from app.controller.api.venue_route import venue_router
 from app.controller.api.volunteer_route import volunteer_application_router, volunteer_role_router, volunteer_router
 
 router = APIRouter()
+router.include_router(app_feedback_router)
+router.include_router(dashboard_router)
 router.include_router(auth_router)
 router.include_router(user_router)
 router.include_router(account_settings_router)

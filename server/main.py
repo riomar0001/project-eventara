@@ -70,6 +70,14 @@ _OPENAPI_TAGS = [
         "name": "Events",
         "description": "Event catalog — create, update, manage status, upload banners, and delete events with session management.",
     },
+    {
+        "name": "Dashboard",
+        "description": "Admin dashboard metrics — aggregated event status, participant and volunteer leaderboards, top venues, and weekly user growth trends.",
+    },
+    {
+        "name": "App Feedback",
+        "description": "Anonymous app feedback — submit 1–5 star ratings with optional comments, and retrieve paginated feedback with weekly user registration analytics for admins.",
+    },
 ]
 
 app = FastAPI(

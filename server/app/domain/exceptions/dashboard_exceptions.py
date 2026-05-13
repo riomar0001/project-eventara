@@ -1,0 +1,2 @@
+class DashboardDataFetchError(Exception):
+    pass

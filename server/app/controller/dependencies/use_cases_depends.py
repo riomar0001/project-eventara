@@ -2,7 +2,9 @@ from fastapi import Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application.use_cases.account_settings_usecase import AccountSettingsUseCase
+from app.application.use_cases.app_feedback_usecase import AppFeedbackUseCase
 from app.application.use_cases.audit_log_usecase import AuditLogUseCase
+from app.application.use_cases.dashboard_usecase import DashboardUseCase
 from app.application.use_cases.auth_usecase import AuthUseCase
 from app.application.use_cases.event_deletion_usecase import EventDeletionUseCase
 from app.application.use_cases.event_feedback_usecase import EventFeedbackUseCase
@@ -34,6 +36,8 @@ from app.application.use_cases.volunteer_usecase import (
     VolunteerRoleUseCase,
     VolunteerUseCase,
 )
+from app.infrastructure.database.repositories.app_feedback_repository import AppFeedbackRepository
+from app.infrastructure.database.repositories.dashboard_repository import DashboardRepository
 from app.infrastructure.cache.repositories.otp_repository import OTPRepository
 from app.infrastructure.cache.repositories.password_reset_repository import PasswordResetRepository
 from app.infrastructure.database.repositories.audit_log_repository import (
@@ -248,3 +252,13 @@ def get_all_volunteers_use_case(db: AsyncSession = Depends(get_db)) -> GetVolunt
 def get_update_volunteer_use_case(db: AsyncSession = Depends(get_db)) -> UpdateVolunteerInfoUseCase:
     """Construct an ``UpdateVolunteerInfoUseCase`` for updating volunteer contact and role data."""
     return UpdateVolunteerInfoUseCase(VolunteerRepository(db), db)
+
+
+def get_app_feedback_use_case(db: AsyncSession = Depends(get_db)) -> AppFeedbackUseCase:
+    """Construct an ``AppFeedbackUseCase`` for anonymous feedback submission and admin analytics."""
+    return AppFeedbackUseCase(AppFeedbackRepository(db), db)
+
+
+def get_dashboard_use_case(db: AsyncSession = Depends(get_db)) -> DashboardUseCase:
+    """Construct a ``DashboardUseCase`` backed by a read-only aggregate repository."""
+    return DashboardUseCase(DashboardRepository(db))

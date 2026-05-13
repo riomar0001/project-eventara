@@ -43,6 +43,18 @@ LOGIN_ACCOUNT_RATE_LIMIT_WINDOW_SECONDS: int = 60
 
 
 # ---------------------------------------------------------------------------
+# Anonymous app feedback rate limiting (Redis)
+# Fixed-window per-IP counter prevents submission spam without requiring auth.
+# ---------------------------------------------------------------------------
+
+APP_FEEDBACK_IP_RATE_LIMIT_MAX_ATTEMPTS: int = 10
+"""Maximum anonymous feedback submissions allowed per IP within one window."""
+
+APP_FEEDBACK_IP_RATE_LIMIT_WINDOW_SECONDS: int = 3600
+"""Length of the per-IP app-feedback rate-limit window in seconds (1 hour)."""
+
+
+# ---------------------------------------------------------------------------
 # One-time passcodes (OTP)
 # ---------------------------------------------------------------------------
 

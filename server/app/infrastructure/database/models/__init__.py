@@ -1,3 +1,4 @@
+from app.infrastructure.database.models.app_feedback_models import AppFeedback as AppFeedbackModel
 from app.infrastructure.database.models.audit_log_models import AuditLog
 from app.infrastructure.database.models.event_models import (
     Event,
@@ -25,6 +26,7 @@ from app.infrastructure.database.models.venue_models import Venue, VenueRating
 from app.infrastructure.database.models.volunteer_models import Volunteer, VolunteerApplication, VolunteerRole
 
 __all__ = [
+    "AppFeedbackModel",
     "AuditLog",
     "Event",
     "EventFeedback",
