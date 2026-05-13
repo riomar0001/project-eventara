@@ -56,7 +56,7 @@ export const dashboardNavGroups: DashboardNavGroup[] = [
       { label: 'Users', icon: Users, href: '/users', permission: { feature: 'user-accounts', action: 'read' } },
       { label: 'Queues', icon: Server, href: ADMIN_OPERATIONS_PATHS.queues, permission: { feature: 'queues', action: 'read' } },
       { label: 'Audit Logs', icon: Logs, href: '/audit-logs', permission: { feature: 'audit-logs', action: 'read' } },
-      { label: 'Feedback', icon: MessageSquare, href: ADMIN_OPERATIONS_PATHS.feedback, permission: { feature: 'app_feedback', action: 'read' } }
+      { label: 'Feedback', icon: MessageSquare, href: ADMIN_OPERATIONS_PATHS.feedback, permission: { feature: 'app-feedback', action: 'read' } }
     ]
   }
 ];

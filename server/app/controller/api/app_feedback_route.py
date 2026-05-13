@@ -160,7 +160,7 @@ async def list_app_feedback(
     request: Request,
     page: int = Query(default=1, ge=1, description="Page number (1-indexed)"),
     page_size: int = Query(default=20, ge=1, le=100, description="Records per page (max 100)"),
-    current_user_id: uuid.UUID = Depends(require_permission("app_feedback", RoleAction.READ)),
+    current_user_id: uuid.UUID = Depends(require_permission("app-feedback", RoleAction.READ)),
     use_case: AppFeedbackUseCase = Depends(get_app_feedback_use_case),
     audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> AppFeedbackListResponse:
@@ -246,7 +246,7 @@ async def list_app_feedback(
 async def get_users_per_week(
     request: Request,
     weeks: int = Query(default=12, ge=1, le=52, description="Number of past ISO weeks to return"),
-    current_user_id: uuid.UUID = Depends(require_permission("app_feedback", RoleAction.READ)),
+    current_user_id: uuid.UUID = Depends(require_permission("app-feedback", RoleAction.READ)),
     use_case: AppFeedbackUseCase = Depends(get_app_feedback_use_case),
     audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> UsersPerWeekResponse:
