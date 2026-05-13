@@ -69,18 +69,21 @@ def _sample_session(**overrides) -> EventSession:
     return EventSession(**defaults)
 
 
-def _make_event_status_repo(event=None, updated_event=None):
+_UNSET = object()
+
+
+def _make_event_status_repo(event=_UNSET, updated_event=_UNSET):
     repo = MagicMock(spec=EventRepository)
-    repo.get_event_by_id = AsyncMock(return_value=event or _sample_event())
-    repo.update_event_status = AsyncMock(return_value=updated_event or _sample_event(status=EventStatus.POSTED))
+    repo.get_event_by_id = AsyncMock(return_value=_sample_event() if event is _UNSET else event)
+    repo.update_event_status = AsyncMock(return_value=_sample_event(status=EventStatus.POSTED) if updated_event is _UNSET else updated_event)
     return repo
 
 
-def _make_session_status_repo(session=None, event=None, updated_session=None):
+def _make_session_status_repo(session=_UNSET, event=_UNSET, updated_session=_UNSET):
     repo = MagicMock(spec=EventRepository)
-    repo.get_session_by_id = AsyncMock(return_value=session or _sample_session())
-    repo.get_event_by_id = AsyncMock(return_value=event or _sample_event())
-    repo.update_session_status = AsyncMock(return_value=updated_session or _sample_session(status=EventSessionStatus.POSTED))
+    repo.get_session_by_id = AsyncMock(return_value=_sample_session() if session is _UNSET else session)
+    repo.get_event_by_id = AsyncMock(return_value=_sample_event() if event is _UNSET else event)
+    repo.update_session_status = AsyncMock(return_value=_sample_session(status=EventSessionStatus.POSTED) if updated_session is _UNSET else updated_session)
     return repo
 
 

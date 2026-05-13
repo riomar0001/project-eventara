@@ -6,15 +6,21 @@ from app.application.dto.event_dto import (
     DeleteEventSessionInput,
     DeleteEventSessionOutput,
 )
+from app.domain.entities.event_entity import EventSessionStatus, EventStatus
 from app.domain.exceptions.event_exceptions import (
+    EventDeletionNotAllowedError,
     EventNotFoundError,
     UnauthorizedEventOperationError,
 )
 from app.domain.exceptions.event_session_exceptions import (
     EventLastSessionError,
+    EventSessionDeletionNotAllowedError,
     EventSessionNotFoundError,
 )
 from app.infrastructure.database.repositories.event_repository import EventRepository
+
+_UNDELETABLE_EVENT_STATUSES = {EventStatus.POSTED, EventStatus.STARTED, EventStatus.ENDED}
+_UNDELETABLE_SESSION_STATUSES = {EventSessionStatus.POSTED, EventSessionStatus.STARTED, EventSessionStatus.ENDED}
 
 
 class EventDeletionUseCase:
@@ -29,6 +35,8 @@ class EventDeletionUseCase:
                 raise EventNotFoundError(str(data.event_id))
             if event.created_by != data.deleted_by:
                 raise UnauthorizedEventOperationError(str(data.event_id))
+            if event.status in _UNDELETABLE_EVENT_STATUSES:
+                raise EventDeletionNotAllowedError(str(data.event_id))
             await self.event_repo.delete_event(data.event_id)
             return DeleteEventOutput(event=event)
 
@@ -42,6 +50,8 @@ class EventDeletionUseCase:
             session = await self.event_repo.get_session_by_id(data.session_id)
             if session is None or session.event_id != data.event_id:
                 raise EventSessionNotFoundError(str(data.session_id))
+            if session.status in _UNDELETABLE_SESSION_STATUSES:
+                raise EventSessionDeletionNotAllowedError(str(data.session_id))
             session_count = await self.event_repo.count_sessions_by_event_id(data.event_id)
             if session_count <= 1:
                 raise EventLastSessionError(str(data.event_id))

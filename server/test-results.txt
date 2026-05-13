@@ -1,0 +1,1048 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.4, pytest-9.0.3, pluggy-1.6.0 -- E:\coding-projects\eventara\server\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: E:\coding-projects\eventara\server
+configfile: pyproject.toml
+plugins: anyio-4.13.0, asyncio-1.3.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 596 items
+
+tests/functional/test_account_settings_usecase.py::TestChangePasswordUseCase::test_success PASSED [  0%]
+tests/functional/test_account_settings_usecase.py::TestChangePasswordUseCase::test_user_not_found PASSED [  0%]
+tests/functional/test_account_settings_usecase.py::TestChangePasswordUseCase::test_inactive_user PASSED [  0%]
+tests/functional/test_account_settings_usecase.py::TestChangePasswordUseCase::test_deleted_user PASSED [  0%]
+tests/functional/test_account_settings_usecase.py::TestChangePasswordUseCase::test_email_not_verified PASSED [  0%]
+tests/functional/test_account_settings_usecase.py::TestChangePasswordUseCase::test_no_security_record PASSED [  1%]
+tests/functional/test_account_settings_usecase.py::TestChangePasswordUseCase::test_wrong_current_password PASSED [  1%]
+tests/functional/test_account_settings_usecase.py::TestChangePasswordUseCase::test_same_password PASSED [  1%]
+tests/functional/test_account_settings_usecase.py::TestChangePasswordUseCase::test_update_returns_false_raises_not_found PASSED [  1%]
+tests/functional/test_account_settings_usecase.py::TestDeleteAccountUseCase::test_self_service_success PASSED [  1%]
+tests/functional/test_account_settings_usecase.py::TestDeleteAccountUseCase::test_self_service_user_not_found PASSED [  1%]
+tests/functional/test_account_settings_usecase.py::TestDeleteAccountUseCase::test_self_service_inactive_user PASSED [  2%]
+tests/functional/test_account_settings_usecase.py::TestDeleteAccountUseCase::test_self_service_already_scheduled PASSED [  2%]
+tests/functional/test_account_settings_usecase.py::TestDeleteAccountUseCase::test_self_service_grace_expired PASSED [  2%]
+tests/functional/test_account_settings_usecase.py::TestDeleteAccountUseCase::test_self_service_wrong_password PASSED [  2%]
+tests/functional/test_account_settings_usecase.py::TestDeleteAccountUseCase::test_admin_deletion_success PASSED [  2%]
+tests/functional/test_account_settings_usecase.py::TestDeleteAccountUseCase::test_admin_deletion_user_not_found PASSED [  2%]
+tests/functional/test_account_settings_usecase.py::TestDeleteAccountUseCase::test_admin_deletion_inactive_user PASSED [  3%]
+tests/functional/test_account_settings_usecase.py::TestDeleteAccountUseCase::test_schedule_fails_concurrent_request_raises_already_scheduled PASSED [  3%]
+tests/functional/test_account_settings_usecase.py::TestFinalizeAccountDeletionUseCase::test_returns_true_when_account_finalized PASSED [  3%]
+tests/functional/test_account_settings_usecase.py::TestFinalizeAccountDeletionUseCase::test_returns_false_when_request_was_canceled PASSED [  3%]
+tests/functional/test_audit_log_usecase.py::TestCreateAuditLogUseCase::test_enqueues_via_redis_when_available PASSED [  3%]
+tests/functional/test_audit_log_usecase.py::TestCreateAuditLogUseCase::test_falls_back_to_sync_write_on_redis_failure PASSED [  3%]
+tests/functional/test_audit_log_usecase.py::TestCreateAuditLogUseCase::test_writes_synchronously_when_no_redis PASSED [  4%]
+tests/functional/test_audit_log_usecase.py::TestCreateAuditLogUseCase::test_sync_write_failure_raises_audit_log_write_error PASSED [  4%]
+tests/functional/test_audit_log_usecase.py::TestGetAuditLogsUseCase::test_returns_paginated_logs PASSED [  4%]
+tests/functional/test_audit_log_usecase.py::TestGetAuditLogsUseCase::test_clamps_limit_to_max PASSED [  4%]
+tests/functional/test_audit_log_usecase.py::TestGetAuditLogsUseCase::test_applies_default_limit_when_none PASSED [  4%]
+tests/functional/test_audit_log_usecase.py::TestGetAuditLogsUseCase::test_has_next_false_when_no_cursor PASSED [  4%]
+tests/functional/test_audit_log_usecase.py::TestGetAuditLogsUseCase::test_passes_all_filters_to_repo PASSED [  5%]
+tests/functional/test_auth_usecase.py::TestParseUserAgent::test_none_returns_all_none PASSED [  5%]
+tests/functional/test_auth_usecase.py::TestParseUserAgent::test_chrome_windows_desktop PASSED [  5%]
+tests/functional/test_auth_usecase.py::TestParseUserAgent::test_firefox_macos_desktop PASSED [  5%]
+tests/functional/test_auth_usecase.py::TestParseUserAgent::test_safari_ios_mobile PASSED [  5%]
+tests/functional/test_auth_usecase.py::TestParseUserAgent::test_edge_windows_desktop PASSED [  5%]
+tests/functional/test_auth_usecase.py::TestParseUserAgent::test_android_mobile PASSED [  6%]
+tests/functional/test_auth_usecase.py::TestParseUserAgent::test_ipad_tablet PASSED [  6%]
+tests/functional/test_auth_usecase.py::TestParseUserAgent::test_unknown_agent PASSED [  6%]
+tests/functional/test_auth_usecase.py::TestIsDeletionGraceExpired::test_no_scheduled_deletion PASSED [  6%]
+tests/functional/test_auth_usecase.py::TestIsDeletionGraceExpired::test_future_deletion_not_expired PASSED [  6%]
+tests/functional/test_auth_usecase.py::TestIsDeletionGraceExpired::test_past_deletion_is_expired PASSED [  6%]
+tests/functional/test_auth_usecase.py::TestRegisterUser::test_success PASSED [  7%]
+tests/functional/test_auth_usecase.py::TestRegisterUser::test_email_already_taken PASSED [  7%]
+tests/functional/test_auth_usecase.py::TestRegisterUser::test_integrity_error_race PASSED [  7%]
+tests/functional/test_auth_usecase.py::TestVerifyEmail::test_success PASSED [  7%]
+tests/functional/test_auth_usecase.py::TestVerifyEmail::test_expired_token PASSED [  7%]
+tests/functional/test_auth_usecase.py::TestVerifyEmail::test_invalid_token PASSED [  7%]
+tests/functional/test_auth_usecase.py::TestVerifyEmail::test_user_not_found PASSED [  8%]
+tests/functional/test_auth_usecase.py::TestVerifyEmail::test_already_verified PASSED [  8%]
+tests/functional/test_auth_usecase.py::TestLogin::test_success PASSED    [  8%]
+tests/functional/test_auth_usecase.py::TestLogin::test_user_not_found PASSED [  8%]
+tests/functional/test_auth_usecase.py::TestLogin::test_inactive_user PASSED [  8%]
+tests/functional/test_auth_usecase.py::TestLogin::test_deleted_user PASSED [  8%]
+tests/functional/test_auth_usecase.py::TestLogin::test_deletion_grace_expired PASSED [  9%]
+tests/functional/test_auth_usecase.py::TestLogin::test_account_locked PASSED [  9%]
+tests/functional/test_auth_usecase.py::TestLogin::test_wrong_password PASSED [  9%]
+tests/functional/test_auth_usecase.py::TestLogin::test_email_not_verified PASSED [  9%]
+tests/functional/test_auth_usecase.py::TestLogin::test_no_otp_repo PASSED [  9%]
+tests/functional/test_auth_usecase.py::TestLoginVerify::test_success PASSED [  9%]
+tests/functional/test_auth_usecase.py::TestLoginVerify::test_expired_otp_token PASSED [ 10%]
+tests/functional/test_auth_usecase.py::TestLoginVerify::test_invalid_otp_token PASSED [ 10%]
+tests/functional/test_auth_usecase.py::TestLoginVerify::test_wrong_otp_code PASSED [ 10%]
+tests/functional/test_auth_usecase.py::TestLoginVerify::test_user_not_found PASSED [ 10%]
+tests/functional/test_auth_usecase.py::TestLoginVerify::test_inactive_user PASSED [ 10%]
+tests/functional/test_auth_usecase.py::TestLoginVerify::test_deletion_grace_expired PASSED [ 10%]
+tests/functional/test_auth_usecase.py::TestResendOtp::test_success PASSED [ 11%]
+tests/functional/test_auth_usecase.py::TestResendOtp::test_expired_token PASSED [ 11%]
+tests/functional/test_auth_usecase.py::TestResendOtp::test_invalid_token PASSED [ 11%]
+tests/functional/test_auth_usecase.py::TestResendOtp::test_user_not_found PASSED [ 11%]
+tests/functional/test_auth_usecase.py::TestLogout::test_success PASSED   [ 11%]
+tests/functional/test_auth_usecase.py::TestLogout::test_expired_token_is_silent PASSED [ 11%]
+tests/functional/test_auth_usecase.py::TestLogout::test_invalid_token_raises PASSED [ 12%]
+tests/functional/test_auth_usecase.py::TestRefresh::test_success PASSED  [ 12%]
+tests/functional/test_auth_usecase.py::TestRefresh::test_expired_token PASSED [ 12%]
+tests/functional/test_auth_usecase.py::TestRefresh::test_invalid_token PASSED [ 12%]
+tests/functional/test_auth_usecase.py::TestRefresh::test_already_revoked PASSED [ 12%]
+tests/functional/test_auth_usecase.py::TestRefresh::test_user_not_found PASSED [ 12%]
+tests/functional/test_auth_usecase.py::TestRefresh::test_inactive_user PASSED [ 13%]
+tests/functional/test_auth_usecase.py::TestRefresh::test_deletion_grace_expired PASSED [ 13%]
+tests/functional/test_auth_usecase.py::TestResendVerification::test_success PASSED [ 13%]
+tests/functional/test_auth_usecase.py::TestResendVerification::test_user_not_found_is_silent PASSED [ 13%]
+tests/functional/test_auth_usecase.py::TestResendVerification::test_inactive_user_is_silent PASSED [ 13%]
+tests/functional/test_auth_usecase.py::TestResendVerification::test_already_verified_is_silent PASSED [ 13%]
+tests/functional/test_auth_usecase.py::TestForgotPassword::test_success PASSED [ 14%]
+tests/functional/test_auth_usecase.py::TestForgotPassword::test_user_not_found_is_silent PASSED [ 14%]
+tests/functional/test_auth_usecase.py::TestForgotPassword::test_inactive_user_is_silent PASSED [ 14%]
+tests/functional/test_auth_usecase.py::TestForgotPassword::test_unverified_email_is_silent PASSED [ 14%]
+tests/functional/test_auth_usecase.py::TestForgotPassword::test_no_reset_repo PASSED [ 14%]
+tests/functional/test_auth_usecase.py::TestResetPassword::test_success PASSED [ 14%]
+tests/functional/test_auth_usecase.py::TestResetPassword::test_expired_token PASSED [ 15%]
+tests/functional/test_auth_usecase.py::TestResetPassword::test_invalid_token PASSED [ 15%]
+tests/functional/test_auth_usecase.py::TestResetPassword::test_token_already_consumed PASSED [ 15%]
+tests/functional/test_auth_usecase.py::TestResetPassword::test_user_not_found PASSED [ 15%]
+tests/functional/test_auth_usecase.py::TestResetPassword::test_update_password_fails PASSED [ 15%]
+tests/functional/test_event_deletion_usecase.py::test_delete_draft_event_returns_snapshot PASSED [ 15%]
+tests/functional/test_event_deletion_usecase.py::test_delete_cancelled_event_returns_snapshot PASSED [ 16%]
+tests/functional/test_event_deletion_usecase.py::test_delete_event_acquires_row_lock PASSED [ 16%]
+tests/functional/test_event_deletion_usecase.py::test_delete_event_raises_not_found_when_missing PASSED [ 16%]
+tests/functional/test_event_deletion_usecase.py::test_delete_event_raises_unauthorized_for_non_creator PASSED [ 16%]
+tests/functional/test_event_deletion_usecase.py::test_delete_posted_event_raises_deletion_not_allowed PASSED [ 16%]
+tests/functional/test_event_deletion_usecase.py::test_delete_started_event_raises_deletion_not_allowed PASSED [ 16%]
+tests/functional/test_event_deletion_usecase.py::test_delete_ended_event_raises_deletion_not_allowed PASSED [ 17%]
+tests/functional/test_event_deletion_usecase.py::test_delete_event_does_not_call_delete_when_unauthorized PASSED [ 17%]
+tests/functional/test_event_deletion_usecase.py::test_delete_draft_session_returns_snapshot PASSED [ 17%]
+tests/functional/test_event_deletion_usecase.py::test_delete_cancelled_session_returns_snapshot PASSED [ 17%]
+tests/functional/test_event_deletion_usecase.py::test_delete_session_acquires_event_row_lock PASSED [ 17%]
+tests/functional/test_event_deletion_usecase.py::test_delete_session_with_two_sessions_remaining_succeeds PASSED [ 17%]
+tests/functional/test_event_deletion_usecase.py::test_delete_session_raises_not_found_when_event_missing PASSED [ 18%]
+tests/functional/test_event_deletion_usecase.py::test_delete_session_raises_unauthorized_for_non_creator PASSED [ 18%]
+tests/functional/test_event_deletion_usecase.py::test_delete_session_raises_not_found_when_session_missing PASSED [ 18%]
+tests/functional/test_event_deletion_usecase.py::test_delete_session_raises_not_found_when_session_belongs_to_other_event PASSED [ 18%]
+tests/functional/test_event_deletion_usecase.py::test_delete_posted_session_raises_deletion_not_allowed PASSED [ 18%]
+tests/functional/test_event_deletion_usecase.py::test_delete_started_session_raises_deletion_not_allowed PASSED [ 18%]
+tests/functional/test_event_deletion_usecase.py::test_delete_ended_session_raises_deletion_not_allowed PASSED [ 19%]
+tests/functional/test_event_deletion_usecase.py::test_delete_only_session_raises_last_session_error PASSED [ 19%]
+tests/functional/test_event_deletion_usecase.py::test_delete_session_does_not_call_delete_when_last_session PASSED [ 19%]
+tests/functional/test_event_feedback_usecase.py::test_create_feedback_locks_event_before_eligibility_checks PASSED [ 19%]
+tests/functional/test_event_feedback_usecase.py::test_create_feedback_requires_event_to_exist PASSED [ 19%]
+tests/functional/test_event_feedback_usecase.py::test_create_feedback_requires_event_to_be_ended PASSED [ 19%]
+tests/functional/test_event_feedback_usecase.py::test_create_feedback_requires_checked_in_participant PASSED [ 20%]
+tests/functional/test_event_feedback_usecase.py::test_create_feedback_rejects_duplicate_submission PASSED [ 20%]
+tests/functional/test_event_feedback_usecase.py::test_create_feedback_persists_feedback_and_commits PASSED [ 20%]
+tests/functional/test_event_participant_checkin_withdraw_usecase.py::test_withdraw_locks_user_session_registration_before_update PASSED [ 20%]
+tests/functional/test_event_participant_checkin_withdraw_usecase.py::test_withdraw_sets_status_to_cancelled_and_commits PASSED [ 20%]
+tests/functional/test_event_participant_checkin_withdraw_usecase.py::test_withdraw_fails_when_registration_missing PASSED [ 20%]
+tests/functional/test_event_participant_checkin_withdraw_usecase.py::test_withdraw_fails_when_participant_already_checked_in PASSED [ 21%]
+tests/functional/test_event_participant_checkin_withdraw_usecase.py::test_check_in_locks_participant_before_update PASSED [ 21%]
+tests/functional/test_event_participant_checkin_withdraw_usecase.py::test_check_in_records_actor_and_commits PASSED [ 21%]
+tests/functional/test_event_participant_checkin_withdraw_usecase.py::test_check_in_fails_when_participant_missing PASSED [ 21%]
+tests/functional/test_event_participant_checkin_withdraw_usecase.py::test_check_in_fails_when_session_missing PASSED [ 21%]
+tests/functional/test_event_participant_checkin_withdraw_usecase.py::test_check_in_fails_when_session_not_open PASSED [ 21%]
+tests/functional/test_event_participant_checkin_withdraw_usecase.py::test_check_in_fails_when_participant_status_is_cancelled PASSED [ 22%]
+tests/functional/test_event_participant_checkin_withdraw_usecase.py::test_qr_check_in_verifies_token_and_locks_participant_before_update PASSED [ 22%]
+tests/functional/test_event_participant_checkin_withdraw_usecase.py::test_qr_check_in_records_actor_and_commits PASSED [ 22%]
+tests/functional/test_event_participant_checkin_withdraw_usecase.py::test_qr_check_in_fails_when_token_invalid PASSED [ 22%]
+tests/functional/test_event_participant_checkin_withdraw_usecase.py::test_qr_check_in_fails_when_token_user_does_not_match_participant PASSED [ 22%]
+tests/functional/test_event_participant_usecase.py::test_register_raises_session_not_found_when_session_missing PASSED [ 22%]
+tests/functional/test_event_participant_usecase.py::test_register_raises_registration_not_open_when_session_is_draft PASSED [ 23%]
+tests/functional/test_event_participant_usecase.py::test_register_raises_registration_not_open_when_session_is_started PASSED [ 23%]
+tests/functional/test_event_participant_usecase.py::test_register_raises_registration_not_open_when_session_is_cancelled PASSED [ 23%]
+tests/functional/test_event_participant_usecase.py::test_register_raises_duplicate_when_user_already_registered PASSED [ 23%]
+tests/functional/test_event_participant_usecase.py::test_register_acquires_session_lock_to_serialise_concurrent_registrations PASSED [ 23%]
+tests/functional/test_event_participant_usecase.py::test_register_creates_participant_with_correct_user_and_session PASSED [ 23%]
+tests/functional/test_event_participant_usecase.py::test_register_commits_transaction_on_success PASSED [ 24%]
+tests/functional/test_event_participant_usecase.py::test_register_rolls_back_on_repo_failure PASSED [ 24%]
+tests/functional/test_event_participant_usecase.py::test_register_does_not_commit_when_session_not_found PASSED [ 24%]
+tests/functional/test_event_participant_usecase.py::test_register_returns_participant_with_registered_status PASSED [ 24%]
+tests/functional/test_event_participant_usecase.py::test_get_participants_raises_when_event_not_found PASSED [ 24%]
+tests/functional/test_event_participant_usecase.py::test_get_participants_allowed_for_event_organizer PASSED [ 25%]
+tests/functional/test_event_participant_usecase.py::test_get_participants_allowed_for_joined_volunteer PASSED [ 25%]
+tests/functional/test_event_participant_usecase.py::test_get_participants_raises_for_non_joined_volunteer PASSED [ 25%]
+tests/functional/test_event_participant_usecase.py::test_get_participants_passes_status_filter_to_repo PASSED [ 25%]
+tests/functional/test_event_participant_usecase.py::test_register_queues_qr_email_after_commit_when_email_dependencies_exist PASSED [ 25%]
+tests/functional/test_event_participant_usecase.py::test_register_raises_slots_full_when_session_max_slots_exhausted PASSED [ 25%]
+tests/functional/test_event_participant_usecase.py::test_register_raises_slots_full_when_venue_capacity_exhausted PASSED [ 26%]
+tests/functional/test_event_participant_usecase.py::test_register_uses_session_max_slots_over_venue_capacity PASSED [ 26%]
+tests/functional/test_event_participant_usecase.py::test_register_succeeds_when_slot_count_is_below_max_slots PASSED [ 26%]
+tests/functional/test_event_participant_usecase.py::test_register_fetches_venue_capacity_when_session_max_slots_is_none PASSED [ 26%]
+tests/functional/test_event_participant_usecase.py::test_register_skips_venue_capacity_lookup_when_session_max_slots_set PASSED [ 26%]
+tests/functional/test_event_participant_usecase.py::test_update_raises_participant_not_found_when_record_missing PASSED [ 26%]
+tests/functional/test_event_participant_usecase.py::test_update_raises_session_not_found_when_session_missing PASSED [ 27%]
+tests/functional/test_event_participant_usecase.py::test_update_raises_event_not_found_when_parent_event_missing PASSED [ 27%]
+tests/functional/test_event_participant_usecase.py::test_update_raises_unauthorized_when_caller_is_not_event_creator PASSED [ 27%]
+tests/functional/test_event_participant_usecase.py::test_update_raises_transition_error_when_transitioning_from_attended PASSED [ 27%]
+tests/functional/test_event_participant_usecase.py::test_update_raises_transition_error_when_transitioning_from_no_show PASSED [ 27%]
+tests/functional/test_event_participant_usecase.py::test_update_raises_transition_error_when_transitioning_from_cancelled PASSED [ 27%]
+tests/functional/test_event_participant_usecase.py::test_update_raises_participant_not_found_when_concurrent_delete_wins PASSED [ 28%]
+tests/functional/test_event_participant_usecase.py::test_update_acquires_participant_row_lock_before_read PASSED [ 28%]
+tests/functional/test_event_participant_usecase.py::test_update_calls_update_status_with_correct_args PASSED [ 28%]
+tests/functional/test_event_participant_usecase.py::test_update_commits_transaction_on_success PASSED [ 28%]
+tests/functional/test_event_participant_usecase.py::test_update_rolls_back_on_repo_failure PASSED [ 28%]
+tests/functional/test_event_participant_usecase.py::test_update_returns_updated_participant_and_pre_update_snapshot PASSED [ 28%]
+tests/functional/test_event_query_usecase.py::TestGetAllEventsUseCase::test_returns_events_and_pagination_metadata PASSED [ 29%]
+tests/functional/test_event_query_usecase.py::TestGetAllEventsUseCase::test_calls_repository_with_correct_offset_for_page_three PASSED [ 29%]
+tests/functional/test_event_query_usecase.py::TestGetAllEventsUseCase::test_caps_page_size_at_max_page_size PASSED [ 29%]
+tests/functional/test_event_query_usecase.py::TestGetAllEventsUseCase::test_passes_none_status_when_no_filter_is_supplied PASSED [ 29%]
+tests/functional/test_event_query_usecase.py::TestGetAllEventsUseCase::test_passes_status_filter_to_both_repository_calls PASSED [ 29%]
+tests/functional/test_event_query_usecase.py::TestGetAllEventsUseCase::test_returns_empty_list_and_zero_totals_when_no_events_exist PASSED [ 29%]
+tests/functional/test_event_query_usecase.py::TestGetAllEventsUseCase::test_calculates_total_pages_as_ceiling_of_total_divided_by_page_size PASSED [ 30%]
+tests/functional/test_event_query_usecase.py::TestGetAllEventsUseCase::test_total_pages_is_one_when_total_exactly_equals_page_size PASSED [ 30%]
+tests/functional/test_event_query_usecase.py::TestGetAllEventsUseCase::test_effective_page_size_is_reflected_in_output PASSED [ 30%]
+tests/functional/test_event_query_usecase.py::TestGetEventWithSessionsUseCase::test_returns_event_and_sessions_for_valid_event_id PASSED [ 30%]
+tests/functional/test_event_query_usecase.py::TestGetEventWithSessionsUseCase::test_raises_event_not_found_when_no_row_exists_for_event_id PASSED [ 30%]
+tests/functional/test_event_query_usecase.py::TestGetEventWithSessionsUseCase::test_skips_session_query_entirely_when_event_is_not_found PASSED [ 30%]
+tests/functional/test_event_query_usecase.py::TestGetEventWithSessionsUseCase::test_returns_event_with_empty_sessions_when_event_has_no_sessions PASSED [ 31%]
+tests/functional/test_event_query_usecase.py::TestGetEventWithSessionsUseCase::test_fetches_sessions_using_the_supplied_event_id PASSED [ 31%]
+tests/functional/test_event_query_usecase.py::TestGetEventWithSessionsUseCase::test_fetches_event_without_acquiring_a_row_lock PASSED [ 31%]
+tests/functional/test_event_query_usecase.py::TestGetEventWithSessionsUseCase::test_sessions_carry_venue_name_and_location_populated_by_repository PASSED [ 31%]
+tests/functional/test_event_query_usecase.py::TestGetEventWithSessionsUseCase::test_sessions_have_none_for_venue_fields_when_repository_omits_them PASSED [ 31%]
+tests/functional/test_event_status_usecase.py::TestUpdateEventStatus::test_raises_not_found_when_event_does_not_exist PASSED [ 31%]
+tests/functional/test_event_status_usecase.py::TestUpdateEventStatus::test_raises_unauthorized_when_caller_is_not_creator PASSED [ 32%]
+tests/functional/test_event_status_usecase.py::TestUpdateEventStatus::test_raises_transition_error_for_invalid_transition_from_draft PASSED [ 32%]
+tests/functional/test_event_status_usecase.py::TestUpdateEventStatus::test_raises_transition_error_from_terminal_ended_state PASSED [ 32%]
+tests/functional/test_event_status_usecase.py::TestUpdateEventStatus::test_raises_transition_error_from_terminal_cancelled_state PASSED [ 32%]
+tests/functional/test_event_status_usecase.py::TestUpdateEventStatus::test_transitions_draft_to_posted_successfully PASSED [ 32%]
+tests/functional/test_event_status_usecase.py::TestUpdateEventStatus::test_transitions_draft_to_cancelled_successfully PASSED [ 32%]
+tests/functional/test_event_status_usecase.py::TestUpdateEventStatus::test_transitions_posted_to_started_successfully PASSED [ 33%]
+tests/functional/test_event_status_usecase.py::TestUpdateEventStatus::test_transitions_posted_to_postponed_successfully PASSED [ 33%]
+tests/functional/test_event_status_usecase.py::TestUpdateEventStatus::test_transitions_started_to_ended_successfully PASSED [ 33%]
+tests/functional/test_event_status_usecase.py::TestUpdateEventStatus::test_transitions_postponed_to_posted_successfully PASSED [ 33%]
+tests/functional/test_event_status_usecase.py::TestUpdateEventStatus::test_rolls_back_and_reraises_on_repository_failure PASSED [ 33%]
+tests/functional/test_event_status_usecase.py::TestUpdateEventStatus::test_does_not_commit_when_event_not_found PASSED [ 33%]
+tests/functional/test_event_status_usecase.py::TestUpdateEventSessionStatus::test_raises_not_found_when_session_does_not_exist PASSED [ 34%]
+tests/functional/test_event_status_usecase.py::TestUpdateEventSessionStatus::test_raises_not_found_when_parent_event_does_not_exist PASSED [ 34%]
+tests/functional/test_event_status_usecase.py::TestUpdateEventSessionStatus::test_raises_unauthorized_when_caller_is_not_creator PASSED [ 34%]
+tests/functional/test_event_status_usecase.py::TestUpdateEventSessionStatus::test_raises_transition_error_for_invalid_transition_from_draft PASSED [ 34%]
+tests/functional/test_event_status_usecase.py::TestUpdateEventSessionStatus::test_raises_transition_error_from_terminal_ended_state PASSED [ 34%]
+tests/functional/test_event_status_usecase.py::TestUpdateEventSessionStatus::test_raises_transition_error_from_terminal_cancelled_state PASSED [ 34%]
+tests/functional/test_event_status_usecase.py::TestUpdateEventSessionStatus::test_transitions_draft_to_posted_successfully PASSED [ 35%]
+tests/functional/test_event_status_usecase.py::TestUpdateEventSessionStatus::test_transitions_posted_to_started_successfully PASSED [ 35%]
+tests/functional/test_event_status_usecase.py::TestUpdateEventSessionStatus::test_transitions_posted_to_postponed_successfully PASSED [ 35%]
+tests/functional/test_event_status_usecase.py::TestUpdateEventSessionStatus::test_transitions_started_to_ended_successfully PASSED [ 35%]
+tests/functional/test_event_status_usecase.py::TestUpdateEventSessionStatus::test_transitions_postponed_to_cancelled_successfully PASSED [ 35%]
+tests/functional/test_event_status_usecase.py::TestUpdateEventSessionStatus::test_rolls_back_and_reraises_on_repository_failure PASSED [ 35%]
+tests/functional/test_event_status_usecase.py::TestUpdateEventSessionStatus::test_raises_not_found_and_rolls_back_when_update_returns_none PASSED [ 36%]
+tests/functional/test_event_status_usecase.py::TestUpdateEventSessionStatus::test_does_not_commit_when_session_not_found PASSED [ 36%]
+tests/functional/test_event_usecase.py::test_create_raises_date_error_when_end_before_start PASSED [ 36%]
+tests/functional/test_event_usecase.py::test_create_raises_date_error_when_end_equals_start PASSED [ 36%]
+tests/functional/test_event_usecase.py::test_create_raises_validation_error_when_sessions_empty PASSED [ 36%]
+tests/functional/test_event_usecase.py::test_create_raises_invalid_session_date_when_end_before_start PASSED [ 36%]
+tests/functional/test_event_usecase.py::test_create_raises_invalid_session_date_when_end_equals_start PASSED [ 37%]
+tests/functional/test_event_usecase.py::test_create_raises_bounds_error_when_session_start_before_event PASSED [ 37%]
+tests/functional/test_event_usecase.py::test_create_raises_bounds_error_when_session_end_after_event PASSED [ 37%]
+tests/functional/test_event_usecase.py::test_create_raises_venue_not_found PASSED [ 37%]
+tests/functional/test_event_usecase.py::test_create_raises_venue_not_partner PASSED [ 37%]
+tests/functional/test_event_usecase.py::test_create_persists_event_and_sessions PASSED [ 37%]
+tests/functional/test_event_usecase.py::test_create_persists_multiple_sessions PASSED [ 38%]
+tests/functional/test_event_usecase.py::test_create_commits_transaction_on_success PASSED [ 38%]
+tests/functional/test_event_usecase.py::test_create_rolls_back_on_failure PASSED [ 38%]
+tests/functional/test_event_usecase.py::test_create_returns_event_with_all_sessions PASSED [ 38%]
+tests/functional/test_event_usecase.py::test_create_does_not_commit_when_venue_not_found PASSED [ 38%]
+tests/functional/test_event_usecase.py::test_create_does_not_commit_when_venue_not_partner PASSED [ 38%]
+tests/functional/test_event_usecase.py::test_meta_raises_not_found_when_event_missing PASSED [ 39%]
+tests/functional/test_event_usecase.py::test_meta_raises_unauthorized_when_not_creator PASSED [ 39%]
+tests/functional/test_event_usecase.py::test_meta_raises_date_error_when_end_before_start PASSED [ 39%]
+tests/functional/test_event_usecase.py::test_meta_raises_date_error_when_end_equals_start PASSED [ 39%]
+tests/functional/test_event_usecase.py::test_meta_acquires_row_lock_before_read PASSED [ 39%]
+tests/functional/test_event_usecase.py::test_meta_calls_update_event_with_new_values PASSED [ 39%]
+tests/functional/test_event_usecase.py::test_meta_commits_transaction_on_success PASSED [ 40%]
+tests/functional/test_event_usecase.py::test_meta_updates_posted_event_to_started_when_new_dates_are_active PASSED [ 40%]
+tests/functional/test_event_usecase.py::test_meta_updates_started_event_to_ended_when_new_dates_are_past PASSED [ 40%]
+tests/functional/test_event_usecase.py::test_meta_keeps_draft_status_when_dates_are_active PASSED [ 40%]
+tests/functional/test_event_usecase.py::test_meta_rolls_back_on_repo_failure PASSED [ 40%]
+tests/functional/test_event_usecase.py::test_meta_returns_updated_event_and_pre_update_snapshot PASSED [ 40%]
+tests/functional/test_event_usecase.py::test_create_session_raises_venue_not_partner PASSED [ 41%]
+tests/functional/test_event_usecase.py::test_create_session_persists_when_venue_is_partner PASSED [ 41%]
+tests/functional/test_event_usecase.py::test_session_raises_not_found_when_session_missing PASSED [ 41%]
+tests/functional/test_event_usecase.py::test_session_raises_not_found_when_parent_event_missing PASSED [ 41%]
+tests/functional/test_event_usecase.py::test_session_raises_unauthorized_when_not_creator PASSED [ 41%]
+tests/functional/test_event_usecase.py::test_session_raises_invalid_date_when_end_before_start PASSED [ 41%]
+tests/functional/test_event_usecase.py::test_session_raises_invalid_date_when_end_equals_start PASSED [ 42%]
+tests/functional/test_event_usecase.py::test_session_raises_bounds_error_when_start_before_event PASSED [ 42%]
+tests/functional/test_event_usecase.py::test_session_raises_bounds_error_when_end_after_event PASSED [ 42%]
+tests/functional/test_event_usecase.py::test_session_raises_venue_not_found PASSED [ 42%]
+tests/functional/test_event_usecase.py::test_session_raises_venue_not_partner PASSED [ 42%]
+tests/functional/test_event_usecase.py::test_session_raises_not_found_when_concurrent_delete_wins PASSED [ 42%]
+tests/functional/test_event_usecase.py::test_session_acquires_event_lock_via_session_event_id PASSED [ 43%]
+tests/functional/test_event_usecase.py::test_session_calls_update_session_with_correct_args PASSED [ 43%]
+tests/functional/test_event_usecase.py::test_session_updates_ended_session_to_posted_when_new_dates_are_future PASSED [ 43%]
+tests/functional/test_event_usecase.py::test_session_updates_posted_session_to_started_when_new_dates_are_active PASSED [ 43%]
+tests/functional/test_event_usecase.py::test_session_keeps_draft_status_when_new_dates_are_active PASSED [ 43%]
+tests/functional/test_event_usecase.py::test_session_commits_transaction_on_success PASSED [ 43%]
+tests/functional/test_event_usecase.py::test_session_rolls_back_on_repo_failure PASSED [ 44%]
+tests/functional/test_event_usecase.py::test_session_returns_updated_session_and_pre_update_snapshot PASSED [ 44%]
+tests/functional/test_event_volunteer_usecase.py::test_assign_volunteer_raises_when_event_not_found PASSED [ 44%]
+tests/functional/test_event_volunteer_usecase.py::test_assign_volunteer_raises_when_caller_is_not_organizer PASSED [ 44%]
+tests/functional/test_event_volunteer_usecase.py::test_assign_volunteer_raises_when_volunteer_not_found PASSED [ 44%]
+tests/functional/test_event_volunteer_usecase.py::test_assign_volunteer_raises_when_already_assigned PASSED [ 44%]
+tests/functional/test_event_volunteer_usecase.py::test_assign_volunteer_creates_joined_assignment_and_commits PASSED [ 45%]
+tests/functional/test_event_volunteer_usecase.py::test_assign_volunteer_uses_pessimistic_lock_on_event_row PASSED [ 45%]
+tests/functional/test_event_volunteer_usecase.py::test_assign_volunteer_uses_pessimistic_lock_on_assignment_check PASSED [ 45%]
+tests/functional/test_event_volunteer_usecase.py::test_assign_volunteer_rolls_back_and_reraises_on_unexpected_error PASSED [ 45%]
+tests/functional/test_event_volunteer_usecase.py::test_apply_to_event_raises_when_event_not_found PASSED [ 45%]
+tests/functional/test_event_volunteer_usecase.py::test_apply_to_event_raises_when_event_applications_closed PASSED [ 45%]
+tests/functional/test_event_volunteer_usecase.py::test_apply_to_event_raises_when_user_has_no_volunteer_profile PASSED [ 46%]
+tests/functional/test_event_volunteer_usecase.py::test_apply_to_event_raises_when_volunteer_inactive PASSED [ 46%]
+tests/functional/test_event_volunteer_usecase.py::test_apply_to_event_raises_when_already_assigned PASSED [ 46%]
+tests/functional/test_event_volunteer_usecase.py::test_apply_to_event_creates_pending_assignment_and_commits PASSED [ 46%]
+tests/functional/test_event_volunteer_usecase.py::test_apply_to_event_uses_pessimistic_lock_on_event_row PASSED [ 46%]
+tests/functional/test_event_volunteer_usecase.py::test_apply_to_event_uses_pessimistic_lock_on_assignment_check PASSED [ 46%]
+tests/functional/test_event_volunteer_usecase.py::test_apply_to_event_rolls_back_and_reraises_on_unexpected_error PASSED [ 47%]
+tests/functional/test_event_volunteer_usecase.py::test_update_status_raises_when_assignment_not_found PASSED [ 47%]
+tests/functional/test_event_volunteer_usecase.py::test_update_status_raises_when_caller_is_not_organizer PASSED [ 47%]
+tests/functional/test_event_volunteer_usecase.py::test_update_status_raises_on_invalid_transition_from_rejected PASSED [ 47%]
+tests/functional/test_event_volunteer_usecase.py::test_update_status_pending_to_joined_updates_and_commits PASSED [ 47%]
+tests/functional/test_event_volunteer_usecase.py::test_update_status_joined_to_left_updates_and_commits PASSED [ 47%]
+tests/functional/test_event_volunteer_usecase.py::test_update_status_uses_pessimistic_lock_on_assignment_row PASSED [ 48%]
+tests/functional/test_event_volunteer_usecase.py::test_update_status_rolls_back_and_reraises_on_unexpected_error PASSED [ 48%]
+tests/functional/test_event_volunteer_usecase.py::test_remove_volunteer_raises_when_assignment_not_found PASSED [ 48%]
+tests/functional/test_event_volunteer_usecase.py::test_remove_volunteer_raises_when_caller_is_not_organizer PASSED [ 48%]
+tests/functional/test_event_volunteer_usecase.py::test_remove_volunteer_deletes_record_and_commits PASSED [ 48%]
+tests/functional/test_event_volunteer_usecase.py::test_remove_volunteer_uses_pessimistic_lock_on_assignment_row PASSED [ 48%]
+tests/functional/test_event_volunteer_usecase.py::test_remove_volunteer_rolls_back_and_reraises_on_unexpected_error PASSED [ 49%]
+tests/functional/test_event_volunteer_usecase.py::test_list_volunteers_raises_when_event_not_found PASSED [ 49%]
+tests/functional/test_event_volunteer_usecase.py::test_list_volunteers_raises_when_caller_is_not_organizer PASSED [ 49%]
+tests/functional/test_event_volunteer_usecase.py::test_list_volunteers_returns_all_assignments_for_organizer PASSED [ 49%]
+tests/functional/test_event_volunteer_usecase.py::test_list_volunteers_passes_status_filter_to_repository PASSED [ 49%]
+tests/functional/test_feature_usecase.py::TestListFeatures::test_returns_all_features PASSED [ 50%]
+tests/functional/test_feature_usecase.py::TestListFeatures::test_returns_empty_list_when_none PASSED [ 50%]
+tests/functional/test_feature_usecase.py::TestGetFeature::test_success PASSED [ 50%]
+tests/functional/test_feature_usecase.py::TestGetFeature::test_not_found PASSED [ 50%]
+tests/functional/test_feature_usecase.py::TestCreateFeature::test_success PASSED [ 50%]
+tests/functional/test_feature_usecase.py::TestCreateFeature::test_duplicate_slug_raises_already_exists PASSED [ 50%]
+tests/functional/test_feature_usecase.py::TestCreateFeature::test_unexpected_error_rolls_back PASSED [ 51%]
+tests/functional/test_feature_usecase.py::TestUpdateFeature::test_success_same_slug PASSED [ 51%]
+tests/functional/test_feature_usecase.py::TestUpdateFeature::test_success_slug_change_no_dependents PASSED [ 51%]
+tests/functional/test_feature_usecase.py::TestUpdateFeature::test_slug_change_with_role_permissions_raises_in_use PASSED [ 51%]
+tests/functional/test_feature_usecase.py::TestUpdateFeature::test_slug_change_with_user_grants_raises_in_use PASSED [ 51%]
+tests/functional/test_feature_usecase.py::TestUpdateFeature::test_feature_not_found PASSED [ 51%]
+tests/functional/test_feature_usecase.py::TestUpdateFeature::test_update_returns_none_raises_not_found PASSED [ 52%]
+tests/functional/test_feature_usecase.py::TestUpdateFeature::test_integrity_error_raises_already_exists PASSED [ 52%]
+tests/functional/test_feature_usecase.py::TestUpdateFeature::test_unexpected_error_rolls_back PASSED [ 52%]
+tests/functional/test_feature_usecase.py::TestDeleteFeature::test_success PASSED [ 52%]
+tests/functional/test_feature_usecase.py::TestDeleteFeature::test_not_found PASSED [ 52%]
+tests/functional/test_feature_usecase.py::TestDeleteFeature::test_has_role_permissions_raises_in_use PASSED [ 52%]
+tests/functional/test_feature_usecase.py::TestDeleteFeature::test_has_user_grants_raises_in_use PASSED [ 53%]
+tests/functional/test_feature_usecase.py::TestDeleteFeature::test_delete_returns_false_raises_not_found PASSED [ 53%]
+tests/functional/test_feature_usecase.py::TestDeleteFeature::test_unexpected_error_rolls_back PASSED [ 53%]
+tests/functional/test_profile_usecase.py::TestOnboardingUseCase::test_success PASSED [ 53%]
+tests/functional/test_profile_usecase.py::TestOnboardingUseCase::test_user_not_found PASSED [ 53%]
+tests/functional/test_profile_usecase.py::TestOnboardingUseCase::test_inactive_user PASSED [ 53%]
+tests/functional/test_profile_usecase.py::TestOnboardingUseCase::test_deleted_user PASSED [ 54%]
+tests/functional/test_profile_usecase.py::TestOnboardingUseCase::test_email_not_verified PASSED [ 54%]
+tests/functional/test_profile_usecase.py::TestOnboardingUseCase::test_no_security_record PASSED [ 54%]
+tests/functional/test_profile_usecase.py::TestOnboardingUseCase::test_onboarding_already_completed PASSED [ 54%]
+tests/functional/test_profile_usecase.py::TestOnboardingUseCase::test_alias_already_taken PASSED [ 54%]
+tests/functional/test_profile_usecase.py::TestOnboardingUseCase::test_integrity_error_alias_raises_alias_taken PASSED [ 54%]
+tests/functional/test_profile_usecase.py::TestOnboardingUseCase::test_integrity_error_other_raises_onboarding_completed PASSED [ 55%]
+tests/functional/test_profile_usecase.py::TestOnboardingUseCase::test_complete_onboarding_returns_false_raises_already_completed PASSED [ 55%]
+tests/functional/test_profile_usecase.py::TestCheckAliasUseCase::test_alias_available PASSED [ 55%]
+tests/functional/test_profile_usecase.py::TestCheckAliasUseCase::test_alias_taken PASSED [ 55%]
+tests/functional/test_profile_usecase.py::TestGetLoginHistoryUseCase::test_returns_entries PASSED [ 55%]
+tests/functional/test_profile_usecase.py::TestGetLoginHistoryUseCase::test_empty_history PASSED [ 55%]
+tests/functional/test_profile_usecase.py::TestGetLoginHistoryUseCase::test_respects_limit PASSED [ 56%]
+tests/functional/test_profile_usecase.py::TestGetEventsAttendedUseCase::test_returns_attended_events_for_active_user PASSED [ 56%]
+tests/functional/test_profile_usecase.py::TestGetEventsAttendedUseCase::test_raises_user_not_found_when_user_missing PASSED [ 56%]
+tests/functional/test_profile_usecase.py::TestGetEventsAttendedUseCase::test_raises_user_inactive_when_user_inactive PASSED [ 56%]
+tests/functional/test_profile_usecase.py::TestGetUserDetailsUseCase::test_returns_profile_role_and_attended_events PASSED [ 56%]
+tests/functional/test_profile_usecase.py::TestGetUserDetailsUseCase::test_raises_user_not_found_when_user_missing PASSED [ 56%]
+tests/functional/test_profile_usecase.py::TestGetUserDetailsUseCase::test_raises_user_inactive_when_user_deleted PASSED [ 57%]
+tests/functional/test_profile_usecase.py::TestGetUserDetailsUseCase::test_raises_profile_not_found_when_profile_missing PASSED [ 57%]
+tests/functional/test_queue_usecase.py::TestGetQueueStatsUseCase::test_counts_failed_and_in_progress_jobs PASSED [ 57%]
+tests/functional/test_queue_usecase.py::TestGetQueueStatsUseCase::test_redis_error_raises_inspection_error PASSED [ 57%]
+tests/functional/test_queue_usecase.py::TestListDeadJobsUseCase::test_returns_paginated_dead_jobs PASSED [ 57%]
+tests/functional/test_queue_usecase.py::TestListDeadJobsUseCase::test_skips_successful_jobs PASSED [ 57%]
+tests/functional/test_queue_usecase.py::TestListDeadJobsUseCase::test_pagination_slices_correctly PASSED [ 58%]
+tests/functional/test_queue_usecase.py::TestRetryDeadJobUseCase::test_success PASSED [ 58%]
+tests/functional/test_queue_usecase.py::TestRetryDeadJobUseCase::test_lock_not_acquired_raises_conflict PASSED [ 58%]
+tests/functional/test_queue_usecase.py::TestRetryDeadJobUseCase::test_job_not_found PASSED [ 58%]
+tests/functional/test_queue_usecase.py::TestRetryDeadJobUseCase::test_job_not_dead PASSED [ 58%]
+tests/functional/test_queue_usecase.py::TestDeleteDeadJobUseCase::test_success PASSED [ 58%]
+tests/functional/test_queue_usecase.py::TestDeleteDeadJobUseCase::test_job_not_found PASSED [ 59%]
+tests/functional/test_queue_usecase.py::TestDeleteDeadJobUseCase::test_job_not_dead PASSED [ 59%]
+tests/functional/test_queue_usecase.py::TestPurgeDeadJobsUseCase::test_purges_all_dead_jobs PASSED [ 59%]
+tests/functional/test_queue_usecase.py::TestPurgeDeadJobsUseCase::test_empty_dlq_returns_zero PASSED [ 59%]
+tests/functional/test_role_usecase.py::TestAssignRole::test_success PASSED [ 59%]
+tests/functional/test_role_usecase.py::TestAssignRole::test_user_not_found PASSED [ 59%]
+tests/functional/test_role_usecase.py::TestAssignRole::test_role_not_found PASSED [ 60%]
+tests/functional/test_role_usecase.py::TestAssignRole::test_already_assigned PASSED [ 60%]
+tests/functional/test_role_usecase.py::TestGetUserRoles::test_success PASSED [ 60%]
+tests/functional/test_role_usecase.py::TestGetUserRoles::test_user_not_found PASSED [ 60%]
+tests/functional/test_role_usecase.py::TestGetAssignment::test_success PASSED [ 60%]
+tests/functional/test_role_usecase.py::TestGetAssignment::test_not_found PASSED [ 60%]
+tests/functional/test_role_usecase.py::TestUpdateAssignment::test_success PASSED [ 61%]
+tests/functional/test_role_usecase.py::TestUpdateAssignment::test_not_found PASSED [ 61%]
+tests/functional/test_role_usecase.py::TestRevokeAssignment::test_success PASSED [ 61%]
+tests/functional/test_role_usecase.py::TestRevokeAssignment::test_not_found PASSED [ 61%]
+tests/functional/test_role_usecase.py::TestCreateGrants::test_success PASSED [ 61%]
+tests/functional/test_role_usecase.py::TestCreateGrants::test_user_not_found PASSED [ 61%]
+tests/functional/test_role_usecase.py::TestCreateGrants::test_role_not_found PASSED [ 62%]
+tests/functional/test_role_usecase.py::TestCreateGrants::test_feature_not_found PASSED [ 62%]
+tests/functional/test_role_usecase.py::TestCreateGrants::test_duplicate_grant PASSED [ 62%]
+tests/functional/test_role_usecase.py::TestRevokeGrant::test_success PASSED [ 62%]
+tests/functional/test_role_usecase.py::TestRevokeGrant::test_not_found PASSED [ 62%]
+tests/functional/test_role_usecase.py::TestCreateRole::test_success PASSED [ 62%]
+tests/functional/test_role_usecase.py::TestCreateRole::test_duplicate_name_raises_already_exists PASSED [ 63%]
+tests/functional/test_role_usecase.py::TestCreateRole::test_feature_not_found_rolls_back PASSED [ 63%]
+tests/functional/test_role_usecase.py::TestUpdateRole::test_success_same_name PASSED [ 63%]
+tests/functional/test_role_usecase.py::TestUpdateRole::test_name_change_with_dependencies_raises_in_use PASSED [ 63%]
+tests/functional/test_role_usecase.py::TestUpdateRole::test_not_found PASSED [ 63%]
+tests/functional/test_role_usecase.py::TestUpdateRole::test_integrity_error_raises_already_exists PASSED [ 63%]
+tests/functional/test_role_usecase.py::TestDeleteRole::test_success PASSED [ 64%]
+tests/functional/test_role_usecase.py::TestDeleteRole::test_not_found PASSED [ 64%]
+tests/functional/test_role_usecase.py::TestDeleteRole::test_protected_system_role_raises PASSED [ 64%]
+tests/functional/test_role_usecase.py::TestDeleteRole::test_has_user_assignments_raises_in_use PASSED [ 64%]
+tests/functional/test_role_usecase.py::TestDeleteRole::test_has_user_grants_raises_in_use PASSED [ 64%]
+tests/functional/test_role_usecase.py::TestDeleteRole::test_delete_returns_false_raises_not_found PASSED [ 64%]
+tests/functional/test_role_usecase.py::TestDeleteRole::test_unexpected_error_rolls_back PASSED [ 65%]
+tests/functional/test_update_profile_usecase.py::TestUpdateProfileSuccess::test_commits_and_returns_updated_profile PASSED [ 65%]
+tests/functional/test_update_profile_usecase.py::TestUpdateProfileSuccess::test_previous_profile_is_pre_update_snapshot PASSED [ 65%]
+tests/functional/test_update_profile_usecase.py::TestUpdateProfileSuccess::test_skips_alias_check_when_alias_unchanged PASSED [ 65%]
+tests/functional/test_update_profile_usecase.py::TestUpdateProfileSuccess::test_checks_alias_uniqueness_when_alias_changes PASSED [ 65%]
+tests/functional/test_update_profile_usecase.py::TestUpdateProfileGuards::test_raises_user_not_found_when_user_missing PASSED [ 65%]
+tests/functional/test_update_profile_usecase.py::TestUpdateProfileGuards::test_raises_user_inactive_when_account_is_inactive PASSED [ 66%]
+tests/functional/test_update_profile_usecase.py::TestUpdateProfileGuards::test_raises_user_inactive_when_account_is_deleted PASSED [ 66%]
+tests/functional/test_update_profile_usecase.py::TestUpdateProfileGuards::test_raises_profile_not_found_when_no_profile_exists PASSED [ 66%]
+tests/functional/test_update_profile_usecase.py::TestUpdateProfileGuards::test_raises_alias_taken_when_new_alias_owned_by_other PASSED [ 66%]
+tests/functional/test_update_profile_usecase.py::TestUpdateProfileGuards::test_integrity_error_raises_alias_taken_and_rolls_back PASSED [ 66%]
+tests/functional/test_update_profile_usecase.py::TestUpdateProfileGuards::test_repo_update_returns_none_raises_profile_not_found_and_rolls_back PASSED [ 66%]
+tests/functional/test_upload_usecase.py::TestUpdateEventBanner::test_success_commits_and_returns_output PASSED [ 67%]
+tests/functional/test_upload_usecase.py::TestUpdateEventBanner::test_captures_old_banner_url PASSED [ 67%]
+tests/functional/test_upload_usecase.py::TestUpdateEventBanner::test_event_not_found_raises PASSED [ 67%]
+tests/functional/test_upload_usecase.py::TestUpdateEventBanner::test_unauthorized_raises PASSED [ 67%]
+tests/functional/test_upload_usecase.py::TestUpdateEventBanner::test_repo_error_rolls_back PASSED [ 67%]
+tests/functional/test_upload_usecase.py::TestUpdateVenueImage::test_success_commits_and_returns_output PASSED [ 67%]
+tests/functional/test_upload_usecase.py::TestUpdateVenueImage::test_captures_old_image_url PASSED [ 68%]
+tests/functional/test_upload_usecase.py::TestUpdateVenueImage::test_venue_not_found_raises PASSED [ 68%]
+tests/functional/test_upload_usecase.py::TestUpdateVenueImage::test_unauthorized_raises PASSED [ 68%]
+tests/functional/test_upload_usecase.py::TestUpdateVenueImage::test_repo_error_rolls_back PASSED [ 68%]
+tests/functional/test_upload_usecase.py::TestUpdateProfileAvatar::test_success_commits_and_returns_output PASSED [ 68%]
+tests/functional/test_upload_usecase.py::TestUpdateProfileAvatar::test_captures_old_image_url PASSED [ 68%]
+tests/functional/test_upload_usecase.py::TestUpdateProfileAvatar::test_user_not_found_raises PASSED [ 69%]
+tests/functional/test_upload_usecase.py::TestUpdateProfileAvatar::test_user_inactive_raises PASSED [ 69%]
+tests/functional/test_upload_usecase.py::TestUpdateProfileAvatar::test_no_profile_raises PASSED [ 69%]
+tests/functional/test_upload_usecase.py::TestUpdateProfileAvatar::test_repo_returns_none_rolls_back_and_raises PASSED [ 69%]
+tests/functional/test_upload_usecase.py::TestUpdateProfileAvatar::test_repo_error_rolls_back PASSED [ 69%]
+tests/functional/test_users_usecase.py::TestListUserAccounts::test_returns_paginated_results PASSED [ 69%]
+tests/functional/test_users_usecase.py::TestListUserAccounts::test_total_pages_calculated_correctly PASSED [ 70%]
+tests/functional/test_users_usecase.py::TestListUserAccounts::test_zero_total_gives_zero_pages PASSED [ 70%]
+tests/functional/test_users_usecase.py::TestListUserAccounts::test_passes_filters_to_repo PASSED [ 70%]
+tests/functional/test_users_usecase.py::TestGetUserAccountDetail::test_success_without_role PASSED [ 70%]
+tests/functional/test_users_usecase.py::TestGetUserAccountDetail::test_success_fetches_role_permissions PASSED [ 70%]
+tests/functional/test_users_usecase.py::TestGetUserAccountDetail::test_user_not_found PASSED [ 70%]
+tests/functional/test_users_usecase.py::TestListRoles::test_returns_roles_with_permissions PASSED [ 71%]
+tests/functional/test_users_usecase.py::TestListRoles::test_returns_empty_when_no_roles PASSED [ 71%]
+tests/functional/test_users_usecase.py::TestChangeRole::test_success PASSED [ 71%]
+tests/functional/test_users_usecase.py::TestChangeRole::test_lock_fails_raises_user_not_found PASSED [ 71%]
+tests/functional/test_users_usecase.py::TestChangeRole::test_user_not_found PASSED [ 71%]
+tests/functional/test_users_usecase.py::TestChangeRole::test_inactive_user PASSED [ 71%]
+tests/functional/test_users_usecase.py::TestChangeRole::test_deleted_user PASSED [ 72%]
+tests/functional/test_users_usecase.py::TestChangeRole::test_role_not_found PASSED [ 72%]
+tests/functional/test_users_usecase.py::TestChangeRole::test_role_already_current PASSED [ 72%]
+tests/functional/test_users_usecase.py::TestChangeRole::test_rolls_back_on_exception PASSED [ 72%]
+tests/functional/test_users_usecase.py::TestChangeEmail::test_success PASSED [ 72%]
+tests/functional/test_users_usecase.py::TestChangeEmail::test_user_not_found PASSED [ 72%]
+tests/functional/test_users_usecase.py::TestChangeEmail::test_inactive_user PASSED [ 73%]
+tests/functional/test_users_usecase.py::TestChangeEmail::test_same_email_raises PASSED [ 73%]
+tests/functional/test_users_usecase.py::TestChangeEmail::test_same_email_case_insensitive PASSED [ 73%]
+tests/functional/test_users_usecase.py::TestChangeEmail::test_integrity_error_raises_email_taken PASSED [ 73%]
+tests/functional/test_users_usecase.py::TestChangeEmail::test_rolls_back_on_exception PASSED [ 73%]
+tests/functional/test_users_usecase.py::TestSendPasswordReset::test_success PASSED [ 73%]
+tests/functional/test_users_usecase.py::TestSendPasswordReset::test_user_not_found PASSED [ 74%]
+tests/functional/test_users_usecase.py::TestSendPasswordReset::test_inactive_user PASSED [ 74%]
+tests/functional/test_users_usecase.py::TestSendPasswordReset::test_deleted_user PASSED [ 74%]
+tests/functional/test_users_usecase.py::TestSendPasswordReset::test_no_security_record_raises PASSED [ 74%]
+tests/functional/test_users_usecase.py::TestSendPasswordReset::test_email_not_verified_raises PASSED [ 74%]
+tests/functional/test_venue_query_usecase.py::TestGetVenueCapacityUseCase::test_returns_capacity_for_valid_venue_id PASSED [ 75%]
+tests/functional/test_venue_query_usecase.py::TestGetVenueCapacityUseCase::test_returns_venue_id_in_output PASSED [ 75%]
+tests/functional/test_venue_query_usecase.py::TestGetVenueCapacityUseCase::test_returns_venue_name_in_output PASSED [ 75%]
+tests/functional/test_venue_query_usecase.py::TestGetVenueCapacityUseCase::test_raises_venue_not_found_when_repo_returns_none PASSED [ 75%]
+tests/functional/test_venue_query_usecase.py::TestGetVenueCapacityUseCase::test_calls_repository_with_supplied_venue_id PASSED [ 75%]
+tests/functional/test_venue_query_usecase.py::TestGetVenueCapacityUseCase::test_does_not_request_row_lock_for_read_only_query PASSED [ 75%]
+tests/functional/test_venue_query_usecase.py::TestGetVenueCapacityUseCase::test_returns_correct_capacity_for_large_venue PASSED [ 76%]
+tests/functional/test_venue_query_usecase.py::TestGetVenueCapacityUseCase::test_venue_not_found_error_message_contains_venue_id PASSED [ 76%]
+tests/functional/test_venue_query_usecase.py::TestGetVenueCapacityUseCase::test_output_venue_id_matches_input_venue_id PASSED [ 76%]
+tests/functional/test_venue_rating_usecase.py::TestCreateRating::test_success_commits_and_returns_rating PASSED [ 76%]
+tests/functional/test_venue_rating_usecase.py::TestCreateRating::test_raises_venue_not_found_when_venue_missing PASSED [ 76%]
+tests/functional/test_venue_rating_usecase.py::TestCreateRating::test_raises_already_exists_when_rating_present PASSED [ 76%]
+tests/functional/test_venue_rating_usecase.py::TestCreateRating::test_integrity_error_raises_already_exists_and_rolls_back PASSED [ 77%]
+tests/functional/test_venue_rating_usecase.py::TestCreateRating::test_unexpected_error_rolls_back PASSED [ 77%]
+tests/functional/test_venue_rating_usecase.py::TestGetMyRating::test_success_returns_rating PASSED [ 77%]
+tests/functional/test_venue_rating_usecase.py::TestGetMyRating::test_raises_venue_not_found_when_venue_missing PASSED [ 77%]
+tests/functional/test_venue_rating_usecase.py::TestGetMyRating::test_raises_not_found_when_no_rating_exists PASSED [ 77%]
+tests/functional/test_venue_rating_usecase.py::TestUpdateRating::test_success_commits_and_returns_updated_rating PASSED [ 77%]
+tests/functional/test_venue_rating_usecase.py::TestUpdateRating::test_raises_venue_not_found_when_venue_missing PASSED [ 78%]
+tests/functional/test_venue_rating_usecase.py::TestUpdateRating::test_raises_not_found_when_no_existing_rating PASSED [ 78%]
+tests/functional/test_venue_rating_usecase.py::TestUpdateRating::test_repo_update_returns_none_raises_not_found_and_rolls_back PASSED [ 78%]
+tests/functional/test_venue_rating_usecase.py::TestUpdateRating::test_unexpected_error_rolls_back PASSED [ 78%]
+tests/functional/test_venue_rating_usecase.py::TestDeleteRating::test_success_commits_and_decrements_popularity PASSED [ 78%]
+tests/functional/test_venue_rating_usecase.py::TestDeleteRating::test_raises_venue_not_found_when_venue_missing PASSED [ 78%]
+tests/functional/test_venue_rating_usecase.py::TestDeleteRating::test_raises_not_found_when_no_existing_rating PASSED [ 79%]
+tests/functional/test_venue_rating_usecase.py::TestDeleteRating::test_repo_delete_returns_false_raises_not_found_and_rolls_back PASSED [ 79%]
+tests/functional/test_venue_rating_usecase.py::TestDeleteRating::test_unexpected_error_rolls_back PASSED [ 79%]
+tests/functional/test_venue_rating_usecase.py::TestListRatings::test_success_returns_ratings_and_total PASSED [ 79%]
+tests/functional/test_venue_rating_usecase.py::TestListRatings::test_returns_empty_when_no_ratings PASSED [ 79%]
+tests/functional/test_venue_rating_usecase.py::TestListRatings::test_raises_venue_not_found_when_venue_missing PASSED [ 79%]
+tests/functional/test_venue_rating_usecase.py::TestListRatings::test_computes_total_pages_correctly PASSED [ 80%]
+tests/functional/test_venue_usecase.py::TestNormaliseAmenities::test_returns_none_when_input_is_none PASSED [ 80%]
+tests/functional/test_venue_usecase.py::TestNormaliseAmenities::test_converts_to_title_case PASSED [ 80%]
+tests/functional/test_venue_usecase.py::TestNormaliseAmenities::test_strips_whitespace PASSED [ 80%]
+tests/functional/test_venue_usecase.py::TestNormaliseAmenities::test_deduplicates_case_insensitive PASSED [ 80%]
+tests/functional/test_venue_usecase.py::TestNormaliseAmenities::test_discards_blank_strings PASSED [ 80%]
+tests/functional/test_venue_usecase.py::TestNormaliseAmenities::test_returns_none_when_all_entries_blank PASSED [ 81%]
+tests/functional/test_venue_usecase.py::TestListVenues::test_returns_venues_and_total PASSED [ 81%]
+tests/functional/test_venue_usecase.py::TestListVenues::test_returns_empty_when_no_venues PASSED [ 81%]
+tests/functional/test_venue_usecase.py::TestListVenues::test_computes_total_pages_correctly PASSED [ 81%]
+tests/functional/test_venue_usecase.py::TestGetVenue::test_success PASSED [ 81%]
+tests/functional/test_venue_usecase.py::TestGetVenue::test_raises_not_found_when_missing PASSED [ 81%]
+tests/functional/test_venue_usecase.py::TestCreateVenue::test_success_commits_and_returns_venue PASSED [ 82%]
+tests/functional/test_venue_usecase.py::TestCreateVenue::test_normalises_amenities_to_title_case PASSED [ 82%]
+tests/functional/test_venue_usecase.py::TestCreateVenue::test_duplicate_name_in_city_raises_already_exists PASSED [ 82%]
+tests/functional/test_venue_usecase.py::TestCreateVenue::test_unexpected_error_rolls_back PASSED [ 82%]
+tests/functional/test_venue_usecase.py::TestUpdateVenue::test_success_commits_and_returns_venue PASSED [ 82%]
+tests/functional/test_venue_usecase.py::TestUpdateVenue::test_skips_uniqueness_check_when_name_and_city_unchanged PASSED [ 82%]
+tests/functional/test_venue_usecase.py::TestUpdateVenue::test_checks_uniqueness_when_name_changes PASSED [ 83%]
+tests/functional/test_venue_usecase.py::TestUpdateVenue::test_normalises_amenities_to_title_case PASSED [ 83%]
+tests/functional/test_venue_usecase.py::TestUpdateVenue::test_venue_not_found_raises PASSED [ 83%]
+tests/functional/test_venue_usecase.py::TestUpdateVenue::test_name_conflict_raises_already_exists PASSED [ 83%]
+tests/functional/test_venue_usecase.py::TestUpdateVenue::test_repo_update_returns_none_raises_not_found PASSED [ 83%]
+tests/functional/test_venue_usecase.py::TestUpdateVenue::test_unexpected_error_rolls_back PASSED [ 83%]
+tests/functional/test_venue_usecase.py::TestDeleteVenue::test_success_commits PASSED [ 84%]
+tests/functional/test_venue_usecase.py::TestDeleteVenue::test_venue_not_found_raises PASSED [ 84%]
+tests/functional/test_venue_usecase.py::TestDeleteVenue::test_venue_with_event_sessions_raises_in_use PASSED [ 84%]
+tests/functional/test_venue_usecase.py::TestDeleteVenue::test_delete_returns_false_raises_not_found PASSED [ 84%]
+tests/functional/test_venue_usecase.py::TestDeleteVenue::test_unexpected_error_rolls_back PASSED [ 84%]
+tests/functional/test_venue_usecase.py::TestCreateCommunityVenue::test_is_partner_stored_as_false PASSED [ 84%]
+tests/functional/test_venue_usecase.py::TestCreateCommunityVenue::test_contact_fields_are_none_when_omitted PASSED [ 85%]
+tests/functional/test_venue_usecase.py::TestCreateCommunityVenue::test_optional_contact_fields_passed_when_provided PASSED [ 85%]
+tests/functional/test_venue_usecase.py::TestCreateCommunityVenue::test_success_commits_and_returns_venue PASSED [ 85%]
+tests/functional/test_venue_usecase.py::TestCreateCommunityVenue::test_duplicate_name_raises_already_exists PASSED [ 85%]
+tests/functional/test_venue_usecase.py::TestUpdateSuggestedVenue::test_success_updates_owner_suggestion_and_returns_old_state PASSED [ 85%]
+tests/functional/test_venue_usecase.py::TestUpdateSuggestedVenue::test_raises_not_found_when_venue_missing PASSED [ 85%]
+tests/functional/test_venue_usecase.py::TestUpdateSuggestedVenue::test_raises_when_venue_is_partner PASSED [ 86%]
+tests/functional/test_venue_usecase.py::TestUpdateSuggestedVenue::test_raises_when_actor_is_not_creator PASSED [ 86%]
+tests/functional/test_venue_usecase.py::TestUpdateSuggestedVenue::test_duplicate_name_raises_already_exists PASSED [ 86%]
+tests/functional/test_venue_usecase.py::TestDeleteSuggestedVenue::test_success_deletes_owner_suggestion_and_returns_old_state PASSED [ 86%]
+tests/functional/test_venue_usecase.py::TestDeleteSuggestedVenue::test_raises_not_found_when_venue_missing PASSED [ 86%]
+tests/functional/test_venue_usecase.py::TestDeleteSuggestedVenue::test_raises_when_venue_is_partner PASSED [ 86%]
+tests/functional/test_venue_usecase.py::TestDeleteSuggestedVenue::test_raises_when_actor_is_not_creator PASSED [ 87%]
+tests/functional/test_venue_usecase.py::TestDeleteSuggestedVenue::test_raises_when_venue_has_event_sessions PASSED [ 87%]
+tests/functional/test_venue_usecase.py::TestCreateOfficialVenue::test_is_partner_stored_as_true PASSED [ 87%]
+tests/functional/test_venue_usecase.py::TestCreateOfficialVenue::test_contact_fields_passed_to_repo PASSED [ 87%]
+tests/functional/test_venue_usecase.py::TestCreateOfficialVenue::test_success_commits_and_returns_venue PASSED [ 87%]
+tests/functional/test_venue_usecase.py::TestCreateOfficialVenue::test_duplicate_name_raises_already_exists PASSED [ 87%]
+tests/functional/test_volunteer_role_usecase.py::test_get_all_roles_returns_paginated_list_with_metadata PASSED [ 88%]
+tests/functional/test_volunteer_role_usecase.py::test_get_all_roles_forwards_search_filter_to_repository PASSED [ 88%]
+tests/functional/test_volunteer_role_usecase.py::test_get_all_roles_forwards_is_active_filter_to_repository PASSED [ 88%]
+tests/functional/test_volunteer_role_usecase.py::test_get_all_roles_computes_total_pages_for_partial_page PASSED [ 88%]
+tests/functional/test_volunteer_role_usecase.py::test_get_all_roles_returns_at_least_one_page_when_no_results PASSED [ 88%]
+tests/functional/test_volunteer_role_usecase.py::test_update_volunteer_role_raises_when_role_not_found PASSED [ 88%]
+tests/functional/test_volunteer_role_usecase.py::test_update_volunteer_role_raises_when_new_name_already_taken PASSED [ 89%]
+tests/functional/test_volunteer_role_usecase.py::test_update_volunteer_role_skips_uniqueness_check_when_name_is_unchanged PASSED [ 89%]
+tests/functional/test_volunteer_role_usecase.py::test_update_volunteer_role_commits_and_returns_updated_entity PASSED [ 89%]
+tests/functional/test_volunteer_role_usecase.py::test_update_volunteer_role_acquires_pessimistic_lock_on_role_row PASSED [ 89%]
+tests/functional/test_volunteer_role_usecase.py::test_update_volunteer_role_rolls_back_and_reraises_on_unexpected_error PASSED [ 89%]
+tests/functional/test_volunteer_role_usecase.py::test_delete_volunteer_role_raises_when_role_not_found PASSED [ 89%]
+tests/functional/test_volunteer_role_usecase.py::test_delete_volunteer_role_removes_volunteers_then_role_in_same_transaction PASSED [ 90%]
+tests/functional/test_volunteer_role_usecase.py::test_delete_volunteer_role_returns_role_id_and_volunteer_count PASSED [ 90%]
+tests/functional/test_volunteer_role_usecase.py::test_delete_volunteer_role_succeeds_with_no_assigned_volunteers PASSED [ 90%]
+tests/functional/test_volunteer_role_usecase.py::test_delete_volunteer_role_acquires_pessimistic_lock_on_role_row PASSED [ 90%]
+tests/functional/test_volunteer_role_usecase.py::test_delete_volunteer_role_rolls_back_and_reraises_on_unexpected_error PASSED [ 90%]
+tests/functional/test_volunteer_usecase.py::test_get_all_volunteers_returns_paginated_volunteers_on_success PASSED [ 90%]
+tests/functional/test_volunteer_usecase.py::test_get_all_volunteers_passes_status_filter_to_repository PASSED [ 91%]
+tests/functional/test_volunteer_usecase.py::test_get_all_volunteers_passes_role_id_filter_to_repository PASSED [ 91%]
+tests/functional/test_volunteer_usecase.py::test_get_all_volunteers_calculates_total_pages_from_total_and_page_size PASSED [ 91%]
+tests/functional/test_volunteer_usecase.py::test_get_all_volunteers_returns_minimum_one_total_page_when_roster_is_empty PASSED [ 91%]
+tests/functional/test_volunteer_usecase.py::test_add_volunteer_raises_when_user_not_found PASSED [ 91%]
+tests/functional/test_volunteer_usecase.py::test_add_volunteer_raises_when_volunteer_role_not_found PASSED [ 91%]
+tests/functional/test_volunteer_usecase.py::test_add_volunteer_raises_when_volunteer_role_inactive PASSED [ 92%]
+tests/functional/test_volunteer_usecase.py::test_add_volunteer_raises_when_user_is_already_a_volunteer PASSED [ 92%]
+tests/functional/test_volunteer_usecase.py::test_add_volunteer_creates_record_and_commits_on_success PASSED [ 92%]
+tests/functional/test_volunteer_usecase.py::test_add_volunteer_uses_pessimistic_lock_for_existence_check PASSED [ 92%]
+tests/functional/test_volunteer_usecase.py::test_add_volunteer_assigns_rbac_volunteer_role_when_role_exists PASSED [ 92%]
+tests/functional/test_volunteer_usecase.py::test_add_volunteer_skips_rbac_assignment_when_platform_role_missing PASSED [ 92%]
+tests/functional/test_volunteer_usecase.py::test_add_volunteer_skips_rbac_assignment_when_role_already_assigned PASSED [ 93%]
+tests/functional/test_volunteer_usecase.py::test_add_volunteer_rolls_back_and_reraises_on_unexpected_error PASSED [ 93%]
+tests/functional/test_volunteer_usecase.py::test_create_volunteer_role_raises_when_name_already_exists PASSED [ 93%]
+tests/functional/test_volunteer_usecase.py::test_create_volunteer_role_creates_and_commits_on_success PASSED [ 93%]
+tests/functional/test_volunteer_usecase.py::test_create_volunteer_role_rolls_back_and_reraises_on_unexpected_error PASSED [ 93%]
+tests/functional/test_volunteer_usecase.py::test_create_volunteer_role_returns_active_role_with_correct_creator PASSED [ 93%]
+tests/functional/test_volunteer_usecase.py::test_submit_application_raises_when_user_not_found PASSED [ 94%]
+tests/functional/test_volunteer_usecase.py::test_submit_application_raises_when_user_is_already_a_volunteer PASSED [ 94%]
+tests/functional/test_volunteer_usecase.py::test_submit_application_raises_when_active_application_already_exists PASSED [ 94%]
+tests/functional/test_volunteer_usecase.py::test_submit_application_creates_record_and_commits_on_success PASSED [ 94%]
+tests/functional/test_volunteer_usecase.py::test_submit_application_uses_pessimistic_lock_for_duplicate_check PASSED [ 94%]
+tests/functional/test_volunteer_usecase.py::test_submit_application_rolls_back_and_reraises_on_unexpected_error PASSED [ 94%]
+tests/functional/test_volunteer_usecase.py::test_review_application_raises_when_application_not_found PASSED [ 95%]
+tests/functional/test_volunteer_usecase.py::test_review_application_raises_on_invalid_status_transition PASSED [ 95%]
+tests/functional/test_volunteer_usecase.py::test_review_application_approves_and_creates_volunteer_record PASSED [ 95%]
+tests/functional/test_volunteer_usecase.py::test_review_application_rejects_without_creating_volunteer_record PASSED [ 95%]
+tests/functional/test_volunteer_usecase.py::test_review_application_approves_without_volunteer_when_no_contact_info_provided PASSED [ 95%]
+tests/functional/test_volunteer_usecase.py::test_review_application_raises_when_volunteer_role_not_found_on_approval PASSED [ 95%]
+tests/functional/test_volunteer_usecase.py::test_review_application_raises_when_volunteer_role_is_inactive_on_approval PASSED [ 96%]
+tests/functional/test_volunteer_usecase.py::test_review_application_raises_when_applicant_is_already_a_volunteer PASSED [ 96%]
+tests/functional/test_volunteer_usecase.py::test_review_application_uses_pessimistic_lock_on_application_row PASSED [ 96%]
+tests/functional/test_volunteer_usecase.py::test_review_application_assigns_rbac_volunteer_role_on_approval PASSED [ 96%]
+tests/functional/test_volunteer_usecase.py::test_review_application_rolls_back_and_reraises_on_unexpected_error PASSED [ 96%]
+tests/functional/test_volunteer_usecase.py::test_withdraw_application_raises_when_application_not_found PASSED [ 96%]
+tests/functional/test_volunteer_usecase.py::test_withdraw_application_raises_when_caller_is_not_the_owner PASSED [ 97%]
+tests/functional/test_volunteer_usecase.py::test_withdraw_application_raises_when_application_is_not_pending PASSED [ 97%]
+tests/functional/test_volunteer_usecase.py::test_withdraw_application_updates_status_to_withdrawn_and_commits PASSED [ 97%]
+tests/functional/test_volunteer_usecase.py::test_withdraw_application_uses_pessimistic_lock_on_application_row PASSED [ 97%]
+tests/functional/test_volunteer_usecase.py::test_withdraw_application_rolls_back_and_reraises_on_unexpected_error PASSED [ 97%]
+tests/functional/test_volunteer_usecase.py::test_update_volunteer_info_raises_when_volunteer_not_found PASSED [ 97%]
+tests/functional/test_volunteer_usecase.py::test_update_volunteer_info_raises_when_new_role_not_found PASSED [ 98%]
+tests/functional/test_volunteer_usecase.py::test_update_volunteer_info_raises_when_new_role_is_inactive PASSED [ 98%]
+tests/functional/test_volunteer_usecase.py::test_update_volunteer_info_persists_changes_and_commits PASSED [ 98%]
+tests/functional/test_volunteer_usecase.py::test_update_volunteer_info_acquires_row_lock_before_update PASSED [ 98%]
+tests/functional/test_volunteer_usecase.py::test_update_volunteer_info_includes_old_values_in_output PASSED [ 98%]
+tests/functional/test_volunteer_usecase.py::test_update_volunteer_info_skips_role_check_when_no_role_change PASSED [ 98%]
+tests/functional/test_volunteer_usecase.py::test_update_volunteer_info_rolls_back_on_unexpected_error PASSED [ 99%]
+tests/functional/test_volunteer_usecase.py::test_get_potential_volunteers_passes_all_parameters_to_repo PASSED [ 99%]
+tests/functional/test_volunteer_usecase.py::test_get_potential_volunteers_returns_data_with_pagination_metadata PASSED [ 99%]
+tests/functional/test_volunteer_usecase.py::test_get_potential_volunteers_calculates_total_pages_correctly PASSED [ 99%]
+tests/functional/test_volunteer_usecase.py::test_get_potential_volunteers_returns_minimum_one_page_when_empty PASSED [ 99%]
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "E:\coding-projects\eventara\server\.venv\Lib\site-packages\pytest\__main__.py", line 9, in <module>
+    raise SystemExit(pytest.console_main())
+                     ~~~~~~~~~~~~~~~~~~~^^
+  File "E:\coding-projects\eventara\server\.venv\Lib\site-packages\_pytest\config\__init__.py", line 223, in console_main
+    code = main()
+  File "E:\coding-projects\eventara\server\.venv\Lib\site-packages\_pytest\config\__init__.py", line 199, in main
+    ret: ExitCode | int = config.hook.pytest_cmdline_main(config=config)
+                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\coding-projects\eventara\server\.venv\Lib\site-packages\pluggy\_hooks.py", line 512, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\coding-projects\eventara\server\.venv\Lib\site-packages\pluggy\_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\coding-projects\eventara\server\.venv\Lib\site-packages\pluggy\_callers.py", line 167, in _multicall
+    raise exception
+  File "E:\coding-projects\eventara\server\.venv\Lib\site-packages\pluggy\_callers.py", line 121, in _multicall
+    res = hook_impl.function(*args)
+  File "E:\coding-projects\eventara\server\.venv\Lib\site-packages\_pytest\main.py", line 365, in pytest_cmdline_main
+    return wrap_session(config, _main)
+  File "E:\coding-projects\eventara\server\.venv\Lib\site-packages\_pytest\main.py", line 353, in wrap_session
+    config.hook.pytest_sessionfinish(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        session=session, exitstatus=session.exitstatus
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "E:\coding-projects\eventara\server\.venv\Lib\site-packages\pluggy\_hooks.py", line 512, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\coding-projects\eventara\server\.venv\Lib\site-packages\pluggy\_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\coding-projects\eventara\server\.venv\Lib\site-packages\pluggy\_callers.py", line 167, in _multicall
+    raise exception
+  File "E:\coding-projects\eventara\server\.venv\Lib\site-packages\pluggy\_callers.py", line 139, in _multicall
+    teardown.throw(exception)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "E:\coding-projects\eventara\server\.venv\Lib\site-packages\_pytest\logging.py", line 873, in pytest_sessionfinish
+    return (yield)
+            ^^^^^
+  File "E:\coding-projects\eventara\server\.venv\Lib\site-packages\pluggy\_callers.py", line 152, in _multicall
+    teardown.send(result)
+    ~~~~~~~~~~~~~^^^^^^^^
+  File "E:\coding-projects\eventara\server\.venv\Lib\site-packages\_pytest\terminal.py", line 970, in pytest_sessionfinish
+    self.config.hook.pytest_terminal_summary(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        terminalreporter=self, exitstatus=exitstatus, config=self.config
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "E:\coding-projects\eventara\server\.venv\Lib\site-packages\pluggy\_hooks.py", line 512, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\coding-projects\eventara\server\.venv\Lib\site-packages\pluggy\_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\coding-projects\eventara\server\.venv\Lib\site-packages\pluggy\_callers.py", line 167, in _multicall
+    raise exception
+  File "E:\coding-projects\eventara\server\.venv\Lib\site-packages\pluggy\_callers.py", line 139, in _multicall
+    teardown.throw(exception)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "E:\coding-projects\eventara\server\.venv\Lib\site-packages\_pytest\terminal.py", line 992, in pytest_terminal_summary
+    return (yield)
+            ^^^^^
+  File "E:\coding-projects\eventara\server\.venv\Lib\site-packages\pluggy\_callers.py", line 139, in _multicall
+    teardown.throw(exception)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "E:\coding-projects\eventara\server\.venv\Lib\site-packages\_pytest\warnings.py", line 109, in pytest_terminal_summary
+    return (yield)
+            ^^^^^
+  File "E:\coding-projects\eventara\server\.venv\Lib\site-packages\pluggy\_callers.py", line 121, in _multicall
+    res = hook_impl.function(*args)
+  File "E:\coding-projects\eventara\server\tests\conftest.py", line 112, in pytest_terminal_summary
+    _print_table(title, rows)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "E:\coding-projects\eventara\server\tests\conftest.py", line 96, in _print_table
+    print(_row([r["scenario"], r["expected"], r["actual"], r["result"], r["action"]]))
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\riomar\AppData\Local\Python\pythoncore-3.14-64\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2192' in position 107: character maps to <undefined>
+tests/functional/test_volunteer_usecase.py::test_get_potential_volunteers_result_includes_events_count PASSED [100%]
+
+
+
+  test_account_settings_usecase.py  [functional]
++===================================================================================+================================================================================================+===============+=============+========+
+| SCENARIOS                                                                         | EXPECTED RESULT                                                                                | ACTUAL RESULT | TEST RESULT | ACTION |
++===================================================================================+================================================================================================+===============+=============+========+
+| ChangePasswordUseCase - Success                                                   | Hashes the new password, updates the database, and revokes all active refresh tokens           | As expected   | PASS        |        |
+| ChangePasswordUseCase - User Not Found                                            | Raises UserNotFoundError when no account exists for the authenticated user ID                  | As expected   | PASS        |        |
+| ChangePasswordUseCase - Inactive User                                             | Raises UserInactiveError when the account is deactivated                                       | As expected   | PASS        |        |
+| ChangePasswordUseCase - Deleted User                                              | Raises UserInactiveError when the account is soft-deleted                                      | As expected   | PASS        |        |
+| ChangePasswordUseCase - Email Not Verified                                        | Raises EmailNotVerifiedError when the account email has not been confirmed                     | As expected   | PASS        |        |
+| ChangePasswordUseCase - No Security Record                                        | Raises EmailNotVerifiedError when the security record is missing entirely                      | As expected   | PASS        |        |
+| ChangePasswordUseCase - Wrong Current Password                                    | Raises InvalidCredentialsError when the supplied current password is incorrect                 | As expected   | PASS        |        |
+| ChangePasswordUseCase - Same Password                                             | Raises SamePasswordError when the new password is identical to the current one                 | As expected   | PASS        |        |
+| ChangePasswordUseCase - Update Returns False Raises Not Found                     | Raises UserNotFoundError when the password UPDATE matches no row                               | As expected   | PASS        |        |
++-----------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| DeleteAccountUseCase - Self Service Success                                       | Validates password, persists the deletion window, and enqueues the deferred finalization job   | As expected   | PASS        |        |
+| DeleteAccountUseCase - Self Service User Not Found                                | Raises UserNotFoundError when no account exists for the authenticated user ID                  | As expected   | PASS        |        |
+| DeleteAccountUseCase - Self Service Inactive User                                 | Raises UserInactiveError when the account is deactivated or deleted                            | As expected   | PASS        |        |
+| DeleteAccountUseCase - Self Service Already Scheduled                             | Raises AccountDeletionAlreadyScheduledError when a deletion is already pending                 | As expected   | PASS        |        |
+| DeleteAccountUseCase - Self Service Grace Expired                                 | Raises AccountDeletionGracePeriodExpiredError when the deletion window has already elapsed     | As expected   | PASS        |        |
+| DeleteAccountUseCase - Self Service Wrong Password                                | Raises InvalidCredentialsError when the supplied current password is incorrect                 | As expected   | PASS        |        |
+| DeleteAccountUseCase - Admin Deletion Success                                     | Persists the deletion window without a password check and enqueues the finalization job        | As expected   | PASS        |        |
+| DeleteAccountUseCase - Admin Deletion User Not Found                              | Raises UserNotFoundError when no account exists for the target user ID                         | As expected   | PASS        |        |
+| DeleteAccountUseCase - Admin Deletion Inactive User                               | Raises UserInactiveError when the target account is deactivated                                | As expected   | PASS        |        |
+| DeleteAccountUseCase - Schedule Fails Concurrent Request Raises Already Scheduled | Raises AccountDeletionAlreadyScheduledError when a concurrent request wins the scheduling race | As expected   | PASS        |        |
++-----------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| FinalizeAccountDeletionUseCase - Returns True When Account Finalized              | Returns True when the deletion window matches and the account is transitioned to DELETED       | As expected   | PASS        |        |
+| FinalizeAccountDeletionUseCase - Returns False When Request Was Canceled          | Returns False when the deletion was canceled (login during grace period) or already finalized  | As expected   | PASS        |        |
++===================================================================================+================================================================================================+===============+=============+========+
+  Total: 21  |  Pass: 21  |  Fail: 0
+
+
+  test_audit_log_usecase.py  [functional]
++=========================================================================+================================================================================================+===============+=============+========+
+| SCENARIOS                                                               | EXPECTED RESULT                                                                                | ACTUAL RESULT | TEST RESULT | ACTION |
++=========================================================================+================================================================================================+===============+=============+========+
+| CreateAuditLogUseCase - Enqueues Via Redis When Available               | Enqueues the audit log as an ARQ job when a Redis connection is configured                     | As expected   | PASS        |        |
+| CreateAuditLogUseCase - Falls Back To Sync Write On Redis Failure       | Falls back to synchronous database write when the Redis enqueue raises an exception            | As expected   | PASS        |        |
+| CreateAuditLogUseCase - Writes Synchronously When No Redis              | Writes directly to the database repository when no Redis connection is configured              | As expected   | PASS        |        |
+| CreateAuditLogUseCase - Sync Write Failure Raises Audit Log Write Error | Raises AuditLogWriteError when the synchronous fallback write also fails                       | As expected   | PASS        |        |
++-------------------------------------------------------------------------+------------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| GetAuditLogsUseCase - Returns Paginated Logs                            | Returns the log entries, total count, cursors, and has_next flag from the repository           | As expected   | PASS        |        |
+| GetAuditLogsUseCase - Clamps Limit To Max                               | Caps the effective limit at MAX_LIMIT (1000) regardless of the requested value                 | As expected   | PASS        |        |
+| GetAuditLogsUseCase - Applies Default Limit When None                   | Uses DEFAULT_LIMIT (100) when the caller does not specify a limit                              | As expected   | PASS        |        |
+| GetAuditLogsUseCase - Has Next False When No Cursor                     | Sets has_next to False when the repository returns no next cursor                              | As expected   | PASS        |        |
+| GetAuditLogsUseCase - Passes All Filters To Repo                        | Forwards all filter parameters (user_id, action_type, resource_type, cursor) to the repository | As expected   | PASS        |        |
++=========================================================================+================================================================================================+===============+=============+========+
+  Total: 9  |  Pass: 9  |  Fail: 0
+
+
+  test_auth_usecase.py  [functional]
++======================================================+=========================================================================================+===============+=============+========+
+| SCENARIOS                                            | EXPECTED RESULT                                                                         | ACTUAL RESULT | TEST RESULT | ACTION |
++======================================================+=========================================================================================+===============+=============+========+
+| ParseUserAgent - None Returns All None               | Returns (None, None, None) for missing user agent                                       | As expected   | PASS        |        |
+| ParseUserAgent - Chrome Windows Desktop              | Returns browser=Chrome, os=Windows, device=desktop                                      | As expected   | PASS        |        |
+| ParseUserAgent - Firefox Macos Desktop               | Returns browser=Firefox, os=macOS, device=desktop                                       | As expected   | PASS        |        |
+| ParseUserAgent - Safari Ios Mobile                   | Returns browser=Safari, os=iOS, device=mobile                                           | As expected   | PASS        |        |
+| ParseUserAgent - Edge Windows Desktop                | Returns browser=Microsoft Edge, os=Windows, device=desktop                              | As expected   | PASS        |        |
+| ParseUserAgent - Android Mobile                      | Returns os=Android, device=mobile                                                       | As expected   | PASS        |        |
+| ParseUserAgent - Ipad Tablet                         | Returns device=tablet for iPad user agent                                               | As expected   | PASS        |        |
+| ParseUserAgent - Unknown Agent                       | Returns (None, None, desktop) for unrecognised user agent string                        | As expected   | PASS        |        |
++------------------------------------------------------+-----------------------------------------------------------------------------------------+---------------+-------------+--------+
+| IsDeletionGraceExpired - No Scheduled Deletion       | Returns False when no deletion is scheduled                                             | As expected   | PASS        |        |
+| IsDeletionGraceExpired - Future Deletion Not Expired | Returns False when deletion deadline is still in the future                             | As expected   | PASS        |        |
+| IsDeletionGraceExpired - Past Deletion Is Expired    | Returns True when deletion deadline has already passed                                  | As expected   | PASS        |        |
++------------------------------------------------------+-----------------------------------------------------------------------------------------+---------------+-------------+--------+
+| RegisterUser - Success                               | Creates user and returns RegisteredUserOutput with verification token                   | As expected   | PASS        |        |
+| RegisterUser - Email Already Taken                   | Raises EmailAlreadyTakenError when email is already registered                          | As expected   | PASS        |        |
+| RegisterUser - Integrity Error Race                  | Raises EmailAlreadyTakenError on concurrent duplicate registration (IntegrityError)     | As expected   | PASS        |        |
++------------------------------------------------------+-----------------------------------------------------------------------------------------+---------------+-------------+--------+
+| VerifyEmail - Success                                | Verifies email and returns access_token and refresh_token                               | As expected   | PASS        |        |
+| VerifyEmail - Expired Token                          | Raises TokenExpiredError when verification token is expired                             | As expected   | PASS        |        |
+| VerifyEmail - Invalid Token                          | Raises InvalidTokenError when token has bad signature or is malformed                   | As expected   | PASS        |        |
+| VerifyEmail - User Not Found                         | Raises UserNotFoundError when token subject has no matching account                     | As expected   | PASS        |        |
+| VerifyEmail - Already Verified                       | Raises EmailAlreadyVerifiedError when email was already confirmed                       | As expected   | PASS        |        |
++------------------------------------------------------+-----------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Login - Success                                      | Sends OTP email and returns verification_token for the second step                      | As expected   | PASS        |        |
+| Login - User Not Found                               | Raises InvalidCredentialsError to prevent email enumeration                             | As expected   | PASS        |        |
+| Login - Inactive User                                | Raises UserInactiveError when account is deactivated                                    | As expected   | PASS        |        |
+| Login - Deleted User                                 | Raises UserInactiveError when account is soft-deleted                                   | As expected   | PASS        |        |
+| Login - Deletion Grace Expired                       | Raises AccountDeletionGracePeriodExpiredError when grace window has passed              | As expected   | PASS        |        |
+| Login - Account Locked                               | Raises UserLockedError when account is temporarily locked                               | As expected   | PASS        |        |
+| Login - Wrong Password                               | Raises InvalidCredentialsError and records the failed attempt                           | As expected   | PASS        |        |
+| Login - Email Not Verified                           | Raises EmailNotVerifiedError when account email is unconfirmed                          | As expected   | PASS        |        |
+| Login - No Otp Repo                                  | Raises RuntimeError when OTP repository is not configured                               | As expected   | PASS        |        |
++------------------------------------------------------+-----------------------------------------------------------------------------------------+---------------+-------------+--------+
+| LoginVerify - Success                                | Returns access_token and refresh_token on valid OTP and resets failed-login counter     | As expected   | PASS        |        |
+| LoginVerify - Expired Otp Token                      | Raises TokenExpiredError when the OTP session token is expired                          | As expected   | PASS        |        |
+| LoginVerify - Invalid Otp Token                      | Raises InvalidTokenError when OTP session token has bad signature                       | As expected   | PASS        |        |
+| LoginVerify - Wrong Otp Code                         | Raises InvalidOTPError when submitted code is wrong or already consumed                 | As expected   | PASS        |        |
+| LoginVerify - User Not Found                         | Raises UserNotFoundError when token subject has no matching account                     | As expected   | PASS        |        |
+| LoginVerify - Inactive User                          | Raises UserInactiveError when account is deactivated after OTP issued                   | As expected   | PASS        |        |
+| LoginVerify - Deletion Grace Expired                 | Raises AccountDeletionGracePeriodExpiredError when grace window passed after OTP issued | As expected   | PASS        |        |
++------------------------------------------------------+-----------------------------------------------------------------------------------------+---------------+-------------+--------+
+| ResendOtp - Success                                  | Replaces existing OTP, sends new email, returns fresh verification_token                | As expected   | PASS        |        |
+| ResendOtp - Expired Token                            | Raises TokenExpiredError when the existing OTP session token is expired                 | As expected   | PASS        |        |
+| ResendOtp - Invalid Token                            | Raises InvalidTokenError when OTP session token is malformed                            | As expected   | PASS        |        |
+| ResendOtp - User Not Found                           | Raises UserNotFoundError when token subject has no matching account                     | As expected   | PASS        |        |
++------------------------------------------------------+-----------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Logout - Success                                     | Revokes the submitted refresh token and terminates the session                          | As expected   | PASS        |        |
+| Logout - Expired Token Is Silent                     | Returns None silently when refresh token is expired (already logged out)                | As expected   | PASS        |        |
+| Logout - Invalid Token Raises                        | Raises InvalidTokenError when refresh token has bad signature or wrong type             | As expected   | PASS        |        |
++------------------------------------------------------+-----------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Refresh - Success                                    | Rotates the refresh token and returns a new access_token and refresh_token              | As expected   | PASS        |        |
+| Refresh - Expired Token                              | Raises TokenExpiredError when the refresh token JWT is expired                          | As expected   | PASS        |        |
+| Refresh - Invalid Token                              | Raises InvalidTokenError when token is malformed or has bad signature                   | As expected   | PASS        |        |
+| Refresh - Already Revoked                            | Raises InvalidTokenError when token was already rotated or revoked                      | As expected   | PASS        |        |
+| Refresh - User Not Found                             | Raises UserNotFoundError when token subject has no matching account                     | As expected   | PASS        |        |
+| Refresh - Inactive User                              | Raises UserInactiveError when account is deactivated                                    | As expected   | PASS        |        |
+| Refresh - Deletion Grace Expired                     | Raises AccountDeletionGracePeriodExpiredError when account grace window has passed      | As expected   | PASS        |        |
++------------------------------------------------------+-----------------------------------------------------------------------------------------+---------------+-------------+--------+
+| ResendVerification - Success                         | Sends a fresh verification email to an unverified account                               | As expected   | PASS        |        |
+| ResendVerification - User Not Found Is Silent        | Returns None silently ù prevents email enumeration when address is unknown              | As expected   | PASS        |        |
+| ResendVerification - Inactive User Is Silent         | Returns None silently for inactive or deleted accounts                                  | As expected   | PASS        |        |
+| ResendVerification - Already Verified Is Silent      | Returns None silently when email is already confirmed                                   | As expected   | PASS        |        |
++------------------------------------------------------+-----------------------------------------------------------------------------------------+---------------+-------------+--------+
+| ForgotPassword - Success                             | Stores reset token in Redis and sends password-reset email                              | As expected   | PASS        |        |
+| ForgotPassword - User Not Found Is Silent            | Returns None silently ù prevents email enumeration when address is unknown              | As expected   | PASS        |        |
+| ForgotPassword - Inactive User Is Silent             | Returns None silently for inactive or deleted accounts                                  | As expected   | PASS        |        |
+| ForgotPassword - Unverified Email Is Silent          | Returns None silently when account email is unconfirmed                                 | As expected   | PASS        |        |
+| ForgotPassword - No Reset Repo                       | Raises RuntimeError when password reset repository is not configured                    | As expected   | PASS        |        |
++------------------------------------------------------+-----------------------------------------------------------------------------------------+---------------+-------------+--------+
+| ResetPassword - Success                              | Atomically consumes reset token and updates password hash                               | As expected   | PASS        |        |
+| ResetPassword - Expired Token                        | Raises TokenExpiredError when reset token JWT is expired                                | As expected   | PASS        |        |
+| ResetPassword - Invalid Token                        | Raises InvalidTokenError when reset token is malformed or has bad signature             | As expected   | PASS        |        |
+| ResetPassword - Token Already Consumed               | Raises InvalidTokenError when reset token was already used (GETDEL returned None)       | As expected   | PASS        |        |
+| ResetPassword - User Not Found                       | Raises UserNotFoundError when token subject has no matching account                     | As expected   | PASS        |        |
+| ResetPassword - Update Password Fails                | Raises UserNotFoundError when password update finds no matching row                     | As expected   | PASS        |        |
++======================================================+=========================================================================================+===============+=============+========+
+  Total: 64  |  Pass: 64  |  Fail: 0
+
+
+  test_event_deletion_usecase.py  [functional]
++=====================================================================+==============================================================================================+===============+=============+========+
+| SCENARIOS                                                           | EXPECTED RESULT                                                                              | ACTUAL RESULT | TEST RESULT | ACTION |
++=====================================================================+==============================================================================================+===============+=============+========+
+| Delete Draft Event Returns Snapshot                                 | Deleting a DRAFT event returns a snapshot of the deleted event entity.                       | As expected   | PASS        |        |
++---------------------------------------------------------------------+----------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Delete Cancelled Event Returns Snapshot                             | Deleting a CANCELLED event returns a snapshot of the deleted event entity.                   | As expected   | PASS        |        |
++---------------------------------------------------------------------+----------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Delete Event Acquires Row Lock                                      | get_event_by_id is called with for_update=True to serialise concurrent deletes.              | As expected   | PASS        |        |
++---------------------------------------------------------------------+----------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Delete Event Raises Not Found When Missing                          | EventNotFoundError is raised when the event row does not exist.                              | As expected   | PASS        |        |
++---------------------------------------------------------------------+----------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Delete Event Raises Unauthorized For Non Creator                    | UnauthorizedEventOperationError is raised when caller is not the event creator.              | As expected   | PASS        |        |
++---------------------------------------------------------------------+----------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Delete Posted Event Raises Deletion Not Allowed                     | EventDeletionNotAllowedError is raised when the event status is POSTED.                      | As expected   | PASS        |        |
++---------------------------------------------------------------------+----------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Delete Started Event Raises Deletion Not Allowed                    | EventDeletionNotAllowedError is raised when the event status is STARTED.                     | As expected   | PASS        |        |
++---------------------------------------------------------------------+----------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Delete Ended Event Raises Deletion Not Allowed                      | EventDeletionNotAllowedError is raised when the event status is ENDED.                       | As expected   | PASS        |        |
++---------------------------------------------------------------------+----------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Delete Event Does Not Call Delete When Unauthorized                 | delete_event repository method is never called when the caller is not the creator.           | As expected   | PASS        |        |
++---------------------------------------------------------------------+----------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Delete Draft Session Returns Snapshot                               | Deleting a DRAFT session returns a snapshot of the deleted session entity.                   | As expected   | PASS        |        |
++---------------------------------------------------------------------+----------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Delete Cancelled Session Returns Snapshot                           | Deleting a CANCELLED session returns a snapshot of the deleted session entity.               | As expected   | PASS        |        |
++---------------------------------------------------------------------+----------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Delete Session Acquires Event Row Lock                              | get_event_by_id is called with for_update=True to serialise concurrent session deletes.      | As expected   | PASS        |        |
++---------------------------------------------------------------------+----------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Delete Session With Two Sessions Remaining Succeeds                 | Session can be deleted when exactly two sessions exist (one will remain after).              | As expected   | PASS        |        |
++---------------------------------------------------------------------+----------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Delete Session Raises Not Found When Event Missing                  | EventNotFoundError is raised when the parent event row does not exist.                       | As expected   | PASS        |        |
++---------------------------------------------------------------------+----------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Delete Session Raises Unauthorized For Non Creator                  | UnauthorizedEventOperationError is raised when caller is not the event creator.              | As expected   | PASS        |        |
++---------------------------------------------------------------------+----------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Delete Session Raises Not Found When Session Missing                | EventSessionNotFoundError is raised when the session row does not exist.                     | As expected   | PASS        |        |
++---------------------------------------------------------------------+----------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Delete Session Raises Not Found When Session Belongs To Other Event | EventSessionNotFoundError is raised when session.event_id does not match the route event_id. | As expected   | PASS        |        |
++---------------------------------------------------------------------+----------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Delete Posted Session Raises Deletion Not Allowed                   | EventSessionDeletionNotAllowedError is raised when the session status is POSTED.             | As expected   | PASS        |        |
++---------------------------------------------------------------------+----------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Delete Started Session Raises Deletion Not Allowed                  | EventSessionDeletionNotAllowedError is raised when the session status is STARTED.            | As expected   | PASS        |        |
++---------------------------------------------------------------------+----------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Delete Ended Session Raises Deletion Not Allowed                    | EventSessionDeletionNotAllowedError is raised when the session status is ENDED.              | As expected   | PASS        |        |
++---------------------------------------------------------------------+----------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Delete Only Session Raises Last Session Error                       | EventLastSessionError is raised when the session is the sole remaining session.              | As expected   | PASS        |        |
++---------------------------------------------------------------------+----------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Delete Session Does Not Call Delete When Last Session               | delete_session repository method is never called when it would remove the last session.      | As expected   | PASS        |        |
++=====================================================================+==============================================================================================+===============+=============+========+
+  Total: 22  |  Pass: 22  |  Fail: 0
+
+
+  test_event_feedback_usecase.py  [functional]
++=======================================================+=========================================================================================+===============+=============+========+
+| SCENARIOS                                             | EXPECTED RESULT                                                                         | ACTUAL RESULT | TEST RESULT | ACTION |
++=======================================================+=========================================================================================+===============+=============+========+
+| Create Feedback Locks Event Before Eligibility Checks | Fetches the event with a row lock before feedback eligibility checks.                   | As expected   | PASS        |        |
++-------------------------------------------------------+-----------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Create Feedback Requires Event To Exist               | Raises EventNotFoundError when the event does not exist.                                | As expected   | PASS        |        |
++-------------------------------------------------------+-----------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Create Feedback Requires Event To Be Ended            | Raises EventFeedbackNotOpenError when the event has not ended.                          | As expected   | PASS        |        |
++-------------------------------------------------------+-----------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Create Feedback Requires Checked In Participant       | Raises EventFeedbackEligibilityError when the attendee is not checked in.               | As expected   | PASS        |        |
++-------------------------------------------------------+-----------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Create Feedback Rejects Duplicate Submission          | Raises DuplicateEventFeedbackError when feedback already exists for the user and event. | As expected   | PASS        |        |
++-------------------------------------------------------+-----------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Create Feedback Persists Feedback And Commits         | Creates the feedback record with attendee context and commits.                          | As expected   | PASS        |        |
++=======================================================+=========================================================================================+===============+=============+========+
+  Total: 6  |  Pass: 6  |  Fail: 0
+
+
+  test_event_participant_checkin_withdraw_usecase.py  [functional]
++================================================================+===========================================================================================+===============+=============+========+
+| SCENARIOS                                                      | EXPECTED RESULT                                                                           | ACTUAL RESULT | TEST RESULT | ACTION |
++================================================================+===========================================================================================+===============+=============+========+
+| Withdraw Locks User Session Registration Before Update         | Fetches the user-session registration with a row lock before withdrawal.                  | As expected   | PASS        |        |
++----------------------------------------------------------------+-------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Withdraw Sets Status To Cancelled And Commits                  | Cancels an active registration and commits the transaction.                               | As expected   | PASS        |        |
++----------------------------------------------------------------+-------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Withdraw Fails When Registration Missing                       | Raises EventParticipantNotFoundError when the attendee has no registration.               | As expected   | PASS        |        |
++----------------------------------------------------------------+-------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Withdraw Fails When Participant Already Checked In             | Raises EventParticipantAlreadyCheckedInError when the attendee already checked in.        | As expected   | PASS        |        |
++----------------------------------------------------------------+-------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Check In Locks Participant Before Update                       | Fetches the participant with a row lock before check-in.                                  | As expected   | PASS        |        |
++----------------------------------------------------------------+-------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Check In Records Actor And Commits                             | Marks the participant checked in with the actor ID and commits.                           | As expected   | PASS        |        |
++----------------------------------------------------------------+-------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Check In Fails When Participant Missing                        | Raises EventParticipantNotFoundError when the participant record is absent.               | As expected   | PASS        |        |
++----------------------------------------------------------------+-------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Check In Fails When Session Missing                            | Raises EventSessionNotFoundError when the participant session no longer exists.           | As expected   | PASS        |        |
++----------------------------------------------------------------+-------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Check In Fails When Session Not Open                           | Raises EventParticipantCheckInNotOpenError when session status disallows check-in.        | As expected   | PASS        |        |
++----------------------------------------------------------------+-------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Check In Fails When Participant Status Is Cancelled            | Raises InvalidEventParticipantStatusTransitionError when participant is cancelled.        | As expected   | PASS        |        |
++----------------------------------------------------------------+-------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Qr Check In Verifies Token And Locks Participant Before Update | Verifies QR token and locks the participant before mutating check-in state.               | As expected   | PASS        |        |
++----------------------------------------------------------------+-------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Qr Check In Records Actor And Commits                          | Marks the QR participant checked in with the actor ID and commits.                        | As expected   | PASS        |        |
++----------------------------------------------------------------+-------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Qr Check In Fails When Token Invalid                           | Raises EventParticipantQrTokenInvalidError when QR token verification fails.              | As expected   | PASS        |        |
++----------------------------------------------------------------+-------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Qr Check In Fails When Token User Does Not Match Participant   | Raises EventParticipantQrTokenMismatchError when token attendee differs from participant. | As expected   | PASS        |        |
++================================================================+===========================================================================================+===============+=============+========+
+  Total: 14  |  Pass: 14  |  Fail: 0
+
+
+  test_event_participant_usecase.py  [functional]
++======================================================================+===================================================================================================+===============+=============+========+
+| SCENARIOS                                                            | EXPECTED RESULT                                                                                   | ACTUAL RESULT | TEST RESULT | ACTION |
++======================================================================+===================================================================================================+===============+=============+========+
+| Register Raises Session Not Found When Session Missing               | Raises EventSessionNotFoundError when the target session does not exist.                          | As expected   | PASS        |        |
++----------------------------------------------------------------------+---------------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Register Raises Registration Not Open When Session Is Draft          | Raises RegistrationNotOpenError when session status is DRAFT.                                     | As expected   | PASS        |        |
++----------------------------------------------------------------------+---------------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Register Raises Registration Not Open When Session Is Started        | Raises RegistrationNotOpenError when session status is STARTED.                                   | As expected   | PASS        |        |
++----------------------------------------------------------------------+---------------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Register Raises Registration Not Open When Session Is Cancelled      | Raises RegistrationNotOpenError when session status is CANCELLED.                                 | As expected   | PASS        |        |
++----------------------------------------------------------------------+---------------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Register Raises Duplicate When User Already Registered               | Raises DuplicateEventParticipantError when user is already registered for the session.            | As expected   | PASS        |        |
++----------------------------------------------------------------------+---------------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Register Acquires Session Lock To Serialise Concurrent Registrations | Fetches session with FOR UPDATE lock to prevent concurrent registration races.                    | As expected   | PASS        |        |
++----------------------------------------------------------------------+---------------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Register Creates Participant With Correct User And Session           | Calls create with the authenticated user's ID and the target session ID.                          | As expected   | PASS        |        |
++----------------------------------------------------------------------+---------------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Register Commits Transaction On Success                              | Commits the database transaction after successful registration.                                   | As expected   | PASS        |        |
++----------------------------------------------------------------------+---------------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Register Rolls Back On Repo Failure                                  | Rolls back the transaction when the repository create operation raises.                           | As expected   | PASS        |        |
++----------------------------------------------------------------------+---------------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Register Does Not Commit When Session Not Found                      | Does not commit when the session does not exist.                                                  | As expected   | PASS        |        |
++----------------------------------------------------------------------+---------------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Register Returns Participant With Registered Status                  | Returns the newly created participant record with REGISTERED status.                              | As expected   | PASS        |        |
++----------------------------------------------------------------------+---------------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Get Participants Raises When Event Not Found                         | Raises EventNotFoundError when the target event does not exist.                                   | As expected   | PASS        |        |
++----------------------------------------------------------------------+---------------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Get Participants Allowed For Event Organizer                         | Returns participants without checking volunteer status when caller is organizer.                  | As expected   | PASS        |        |
++----------------------------------------------------------------------+---------------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Get Participants Allowed For Joined Volunteer                        | Returns participants when caller has a JOINED volunteer assignment.                               | As expected   | PASS        |        |
++----------------------------------------------------------------------+---------------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Get Participants Raises For Non Joined Volunteer                     | Raises UnauthorizedEventParticipantOperationError when caller lacks event access.                 | As expected   | PASS        |        |
++----------------------------------------------------------------------+---------------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Get Participants Passes Status Filter To Repo                        | Forwards status, limit, and offset to the participant repository.                                 | As expected   | PASS        |        |
++----------------------------------------------------------------------+---------------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Register Queues Qr Email After Commit When Email Dependencies Exist  | Queues an email containing the signed QR JWT after registration commits.                          | As expected   | PASS        |        |
++----------------------------------------------------------------------+---------------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Register Raises Slots Full When Session Max Slots Exhausted          | Raises SessionSlotsFullError when active participants equal session max_slots.                    | As expected   | PASS        |        |
++----------------------------------------------------------------------+---------------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Register Raises Slots Full When Venue Capacity Exhausted             | Raises SessionSlotsFullError when active participants equal venue capacity (no session override). | As expected   | PASS        |        |
++----------------------------------------------------------------------+---------------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Register Uses Session Max Slots Over Venue Capacity                  | Raises SessionSlotsFullError at session max_slots even when venue has more capacity.              | As expected   | PASS        |        |
++----------------------------------------------------------------------+---------------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Register Succeeds When Slot Count Is Below Max Slots                 | Allows registration when active participant count is below the effective capacity.                | As expected   | PASS        |        |
++----------------------------------------------------------------------+---------------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Register Fetches Venue Capacity When Session Max Slots Is None       | Falls back to venue capacity lookup when session max_slots is not set.                            | As expected   | PASS        |        |
++----------------------------------------------------------------------+---------------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Register Skips Venue Capacity Lookup When Session Max Slots Set      | Does not call get_venue_capacity when session max_slots is explicitly set.                        | As expected   | PASS        |        |
++----------------------------------------------------------------------+---------------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Update Raises Participant Not Found When Record Missing              | Raises EventParticipantNotFoundError when the participant record does not exist.                  | As expected   | PASS        |        |
++----------------------------------------------------------------------+---------------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Update Raises Session Not Found When Session Missing                 | Raises EventSessionNotFoundError when the participant's session no longer exists.                 | As expected   | PASS        |        |
++----------------------------------------------------------------------+---------------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Update Raises Event Not Found When Parent Event Missing              | Raises EventNotFoundError when the parent event no longer exists.                                 | As expected   | PASS        |        |
++----------------------------------------------------------------------+---------------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Update Raises Unauthorized When Caller Is Not Event Creator          | Raises UnauthorizedEventParticipantOperationError when caller is not the event creator.           | As expected   | PASS        |        |
++----------------------------------------------------------------------+---------------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Update Raises Transition Error When Transitioning From Attended      | Raises InvalidEventParticipantStatusTransitionError when participant is already ATTENDED.         | As expected   | PASS        |        |
++----------------------------------------------------------------------+---------------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Update Raises Transition Error When Transitioning From No Show       | Raises InvalidEventParticipantStatusTransitionError when participant status is NO_SHOW.           | As expected   | PASS        |        |
++----------------------------------------------------------------------+---------------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Update Raises Transition Error When Transitioning From Cancelled     | Raises InvalidEventParticipantStatusTransitionError when participant status is CANCELLED.         | As expected   | PASS        |        |
++----------------------------------------------------------------------+---------------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Update Raises Participant Not Found When Concurrent Delete Wins      | Raises EventParticipantNotFoundError when update_status returns None due to a concurrent delete.  | As expected   | PASS        |        |
++----------------------------------------------------------------------+---------------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Update Acquires Participant Row Lock Before Read                     | Fetches participant with FOR UPDATE lock to serialise concurrent status updates.                  | As expected   | PASS        |        |
++----------------------------------------------------------------------+---------------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Update Calls Update Status With Correct Args                         | Calls update_status with the target participant ID and the requested new status.                  | As expected   | PASS        |        |
++----------------------------------------------------------------------+---------------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Update Commits Transaction On Success                                | Commits the database transaction after a successful status update.                                | As expected   | PASS        |        |
++----------------------------------------------------------------------+---------------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Update Rolls Back On Repo Failure                                    | Rolls back the transaction when the repository update operation raises.                           | As expected   | PASS        |        |
++----------------------------------------------------------------------+---------------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| Update Returns Updated Participant And Pre Update Snapshot           | Returns both the updated participant and the original snapshot for audit logging.                 | As expected   | PASS        |        |
++======================================================================+===================================================================================================+===============+=============+========+
+  Total: 36  |  Pass: 36  |  Fail: 0
+
+
+  test_event_query_usecase.py  [functional]
++==============================================================================================+=============================================================================================+===============+=============+========+
+| SCENARIOS                                                                                    | EXPECTED RESULT                                                                             | ACTUAL RESULT | TEST RESULT | ACTION |
++==============================================================================================+=============================================================================================+===============+=============+========+
+| GetAllEventsUseCase - Returns Events And Pagination Metadata                                 | Returns events list with correct total, page, and total_pages metadata.                     | As expected   | PASS        |        |
+| GetAllEventsUseCase - Calls Repository With Correct Offset For Page Three                    | Passes offset=20 to the repository when requesting page 3 with page_size=10.                | As expected   | PASS        |        |
+| GetAllEventsUseCase - Caps Page Size At Max Page Size                                        | Silently reduces an oversized page_size to MAX_PAGE_SIZE to prevent runaway queries.        | As expected   | PASS        |        |
+| GetAllEventsUseCase - Passes None Status When No Filter Is Supplied                          | Passes status=None to both repository calls when no status filter is requested.             | As expected   | PASS        |        |
+| GetAllEventsUseCase - Passes Status Filter To Both Repository Calls                          | Forwards the status filter to both get_all_events and count_all_events.                     | As expected   | PASS        |        |
+| GetAllEventsUseCase - Returns Empty List And Zero Totals When No Events Exist                | Returns an empty events list with total=0 and total_pages=0 when the table is empty.        | As expected   | PASS        |        |
+| GetAllEventsUseCase - Calculates Total Pages As Ceiling Of Total Divided By Page Size        | Returns total_pages=3 when total=25 and page_size=10 (ceiling division).                    | As expected   | PASS        |        |
+| GetAllEventsUseCase - Total Pages Is One When Total Exactly Equals Page Size                 | Returns total_pages=1 when total rows exactly matches page_size.                            | As expected   | PASS        |        |
+| GetAllEventsUseCase - Effective Page Size Is Reflected In Output                             | Reports the effective (possibly capped) page_size in the output DTO.                        | As expected   | PASS        |        |
++----------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------+---------------+-------------+--------+
+| GetEventWithSessionsUseCase - Returns Event And Sessions For Valid Event Id                  | Returns the event entity and its associated session list for a known event ID.              | As expected   | PASS        |        |
+| GetEventWithSessionsUseCase - Raises Event Not Found When No Row Exists For Event Id         | Raises EventNotFoundError when the repository returns None for the given event ID.          | As expected   | PASS        |        |
+| GetEventWithSessionsUseCase - Skips Session Query Entirely When Event Is Not Found           | Never calls get_sessions_by_event_id when the parent event does not exist.                  | As expected   | PASS        |        |
+| GetEventWithSessionsUseCase - Returns Event With Empty Sessions When Event Has No Sessions   | Returns an empty sessions list when the event exists but has no sessions.                   | As expected   | PASS        |        |
+| GetEventWithSessionsUseCase - Fetches Sessions Using The Supplied Event Id                   | Passes the exact event_id from the input DTO to get_sessions_by_event_id.                   | As expected   | PASS        |        |
+| GetEventWithSessionsUseCase - Fetches Event Without Acquiring A Row Lock                     | Calls get_event_by_id without for_update=True since no mutation follows the read.           | As expected   | PASS        |        |
+| GetEventWithSessionsUseCase - Sessions Carry Venue Name And Location Populated By Repository | Sessions in the output include venue_name and venue_location as provided by the repository. | As expected   | PASS        |        |
+| GetEventWithSessionsUseCase - Sessions Have None For Venue Fields When Repository Omits Them | Sessions with no joined venue data report None for venue_name and venue_location.           | As expected   | PASS        |        |
++==============================================================================================+=============================================================================================+===============+=============+========+
+  Total: 17  |  Pass: 17  |  Fail: 0
+
+
+  test_event_status_usecase.py  [functional]
++======================================================================================+==========================================================================================+===============+=============+========+
+| SCENARIOS                                                                            | EXPECTED RESULT                                                                          | ACTUAL RESULT | TEST RESULT | ACTION |
++======================================================================================+==========================================================================================+===============+=============+========+
+| UpdateEventStatus - Raises Not Found When Event Does Not Exist                       | Raises EventNotFoundError when the event ID has no matching row.                         | As expected   | PASS        |        |
+| UpdateEventStatus - Raises Unauthorized When Caller Is Not Creator                   | Raises UnauthorizedEventOperationError when the caller did not create the event.         | As expected   | PASS        |        |
+| UpdateEventStatus - Raises Transition Error For Invalid Transition From Draft        | Raises EventStatusTransitionError when jumping from DRAFT directly to STARTED.           | As expected   | PASS        |        |
+| UpdateEventStatus - Raises Transition Error From Terminal Ended State                | Raises EventStatusTransitionError when attempting any transition from ENDED.             | As expected   | PASS        |        |
+| UpdateEventStatus - Raises Transition Error From Terminal Cancelled State            | Raises EventStatusTransitionError when attempting any transition from CANCELLED.         | As expected   | PASS        |        |
+
+[functional]
+
