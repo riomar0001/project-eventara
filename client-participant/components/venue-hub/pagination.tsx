@@ -2,22 +2,18 @@
  * Pagination Component
  */
 
-"use client"
+'use client';
 
-import { Icon } from "@/components/ui/icon"
+import { Icon } from '@/components/ui/icon';
 
 interface PaginationProps {
-  currentPage: number
-  totalPages: number
-  onPageChange: (page: number) => void
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
 }
 
-export function Pagination({
-  currentPage,
-  totalPages,
-  onPageChange,
-}: PaginationProps) {
-  const pages = Array.from({ length: totalPages }, (_, i) => i + 1)
+export function Pagination({ currentPage, totalPages, onPageChange }: PaginationProps) {
+  const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
 
   return (
     <div className="flex items-center justify-center gap-1.5 py-8">
@@ -37,8 +33,8 @@ export function Pagination({
           onClick={() => onPageChange(page)}
           className={`h-8 min-w-[32px] rounded-lg font-semibold transition-all ${
             currentPage === page
-              ? "bg-[var(--lime)] text-[#0a1005]"
-              : "border border-[var(--line)] text-[var(--text-dim)] hover:border-[var(--text-mute)] hover:text-[var(--text)]"
+              ? 'bg-[var(--lime)] text-[#0a1005]'
+              : 'border border-[var(--line)] text-[var(--text-dim)] hover:border-[var(--text-mute)] hover:text-[var(--text)]'
           }`}
         >
           {page}
@@ -54,5 +50,5 @@ export function Pagination({
         <Icon name="chevronRight" size={16} />
       </button>
     </div>
-  )
+  );
 }

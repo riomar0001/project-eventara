@@ -1,64 +1,62 @@
-"use client"
+'use client';
 
-import { useState, useMemo } from "react"
-import { UPCOMING_EVENTS } from "@/constants/events"
-import { EventCard } from "./event-card"
+import { useState, useMemo } from 'react';
+import { EventCard } from './event-card';
+import { UPCOMING_EVENTS } from '@/constants/events';
 
 interface UpcomingEvent {
-  id: number
-  date: string
-  title: string
-  desc: string
-  venue: string
-  chip: string
-  seats: string
-  orbColor: "lime" | "amber"
-  angle: string
+  id: number;
+  date: string;
+  title: string;
+  desc: string;
+  venue: string;
+  chip: string;
+  seats: string;
+  orbColor: 'lime' | 'amber';
+  angle: string;
 }
 
 const tabs = [
-  { id: "all", label: "All" },
-  { id: "workshops", label: "Workshops" },
-  { id: "panels", label: "Panels" },
-  { id: "hackathons", label: "Hackathons" },
-]
+  { id: 'all', label: 'All' },
+  { id: 'workshops', label: 'Workshops' },
+  { id: 'panels', label: 'Panels' },
+  { id: 'hackathons', label: 'Hackathons' }
+];
 
 interface EventsSectionProps {
-  onEventClick?: (event: UpcomingEvent) => void
+  onEventClick?: (event: UpcomingEvent) => void;
 }
 
 export function EventsSection({ onEventClick }: EventsSectionProps) {
-  const [selectedTab, setSelectedTab] = useState("all")
+  const [selectedTab, setSelectedTab] = useState('all');
 
   const filteredEvents = useMemo(() => {
-    if (selectedTab === "all") return UPCOMING_EVENTS
+    if (selectedTab === 'all') return UPCOMING_EVENTS;
     const chipMap: Record<string, string> = {
-      workshops: "Workshop",
-      panels: "Panel",
-      hackathons: "Hackathon",
-    }
-    return UPCOMING_EVENTS.filter((e) => e.chip === chipMap[selectedTab])
-  }, [selectedTab])
+      workshops: 'Workshop',
+      panels: 'Panel',
+      hackathons: 'Hackathon'
+    };
+    return UPCOMING_EVENTS.filter((e) => e.chip === chipMap[selectedTab]);
+  }, [selectedTab]);
 
   return (
-    <section className="relative pt-10" style={{ padding: "40px 0" }}>
+    <section className="relative pt-10" style={{ padding: '40px 0' }}>
       <div className="container mx-auto max-w-[1240px] px-8">
         {/* Section head */}
         <div className="mb-10 flex flex-wrap items-end justify-between gap-6">
           <div>
-            <div className="mb-2 inline-flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--text-mute)]">
+            <div className="mb-2 inline-flex items-center gap-2.5 font-mono text-[11px] tracking-[0.18em] text-[var(--text-mute)] uppercase">
               <span
                 className="inline-block h-1.5 w-1.5 rounded-full"
                 style={{
-                  background: "var(--lime)",
-                  boxShadow: "0 0 12px var(--lime-glow)",
+                  background: 'var(--lime)',
+                  boxShadow: '0 0 12px var(--lime-glow)'
                 }}
               />
               CALENDAR · Q2 2026
             </div>
-            <h2 className="my-2.5 text-balance text-[clamp(30px,3.4vw,44px)] font-semibold tracking-[-0.03em] text-[var(--text)]">
-              Upcoming Events
-            </h2>
+            <h2 className="my-2.5 text-[clamp(30px,3.4vw,44px)] font-semibold tracking-[-0.03em] text-balance text-[var(--text)]">Upcoming Events</h2>
           </div>
 
           {/* Tabs */}
@@ -67,10 +65,8 @@ export function EventsSection({ onEventClick }: EventsSectionProps) {
               <button
                 key={tab.id}
                 onClick={() => setSelectedTab(tab.id)}
-                className={`duration-160 rounded-full px-4 py-2 text-[13px] font-medium transition-all ${
-                  selectedTab === tab.id
-                    ? "bg-[var(--lime)] font-semibold text-white"
-                    : "text-[var(--text-dim)] hover:text-[var(--text)]"
+                className={`rounded-full px-4 py-2 text-[13px] font-medium transition-all duration-160 ${
+                  selectedTab === tab.id ? 'bg-[var(--lime)] font-semibold text-white' : 'text-[var(--text-dim)] hover:text-[var(--text)]'
                 }`}
               >
                 {tab.label}
@@ -82,11 +78,7 @@ export function EventsSection({ onEventClick }: EventsSectionProps) {
         {/* Events grid */}
         <div className="grid grid-cols-3 gap-[22px]">
           {filteredEvents.map((event) => (
-            <EventCard
-              key={event.id}
-              event={event}
-              onClick={() => onEventClick?.(event)}
-            />
+            <EventCard key={event.id} event={event} onClick={() => onEventClick?.(event)} />
           ))}
         </div>
 
@@ -95,9 +87,9 @@ export function EventsSection({ onEventClick }: EventsSectionProps) {
           <div
             className="text-center text-[var(--text-mute)]"
             style={{
-              padding: "60px 40px",
-              border: "1px dashed var(--line-soft)",
-              borderRadius: "18px",
+              padding: '60px 40px',
+              border: '1px dashed var(--line-soft)',
+              borderRadius: '18px'
             }}
           >
             No {selectedTab} scheduled this quarter. Check back soon.
@@ -106,23 +98,14 @@ export function EventsSection({ onEventClick }: EventsSectionProps) {
 
         {/* View Full Calendar button */}
         <div className="mt-8 text-center">
-          <button className="px-5.5 duration-180 inline-flex items-center justify-center gap-2.5 rounded-full border border-[var(--line)] bg-[oklch(1_0_0_/_0.02)] py-3.5 text-sm font-semibold text-[var(--text)] transition-all hover:border-[var(--text)] hover:bg-[var(--line-soft)] hover:text-[var(--text)]">
+          <button className="inline-flex items-center justify-center gap-2.5 rounded-full border border-[var(--line)] bg-[oklch(1_0_0_/_0.02)] px-5.5 py-3.5 text-sm font-semibold text-[var(--text)] transition-all duration-180 hover:border-[var(--text)] hover:bg-[var(--line-soft)] hover:text-[var(--text)]">
             View Full Calendar
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 16 16"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M6 12l4-4-4-4" />
             </svg>
           </button>
         </div>
       </div>
     </section>
-  )
+  );
 }

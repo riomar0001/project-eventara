@@ -1,37 +1,25 @@
-"use client"
+'use client';
 
-import { EVENT_CATEGORIES } from "@/constants/events"
-import { EventCategory } from "@/types/event"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { EventCategory } from '@/types/event';
+import { EVENT_CATEGORIES } from '@/constants/events';
 
 interface EventTabsProps {
-  selectedCategory: string
-  onCategoryChange: (categoryId: string) => void
-  categories?: EventCategory[]
+  selectedCategory: string;
+  onCategoryChange: (categoryId: string) => void;
+  categories?: EventCategory[];
 }
 
-export function EventTabs({
-  selectedCategory,
-  onCategoryChange,
-  categories = EVENT_CATEGORIES,
-}: EventTabsProps) {
+export function EventTabs({ selectedCategory, onCategoryChange, categories = EVENT_CATEGORIES }: EventTabsProps) {
   return (
-    <Tabs
-      value={selectedCategory}
-      onValueChange={onCategoryChange}
-      className="w-full"
-    >
+    <Tabs value={selectedCategory} onValueChange={onCategoryChange} className="w-full">
       <TabsList className="grid w-full grid-cols-4 lg:w-auto">
         {categories.map((category) => (
-          <TabsTrigger
-            key={category.id}
-            value={category.id}
-            className="text-sm"
-          >
+          <TabsTrigger key={category.id} value={category.id} className="text-sm">
             {category.name}
           </TabsTrigger>
         ))}
       </TabsList>
     </Tabs>
-  )
+  );
 }

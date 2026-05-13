@@ -1,1452 +1,2871 @@
 <!doctype html>
 <html lang="en">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Venue Hub — Eventara</title>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Venue Hub — Eventara</title>
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
 
-<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
-<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
-<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+    <script
+      src="https://unpkg.com/react@18.3.1/umd/react.development.js"
+      integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js"
+      integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"
+      integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y"
+      crossorigin="anonymous"
+    ></script>
 
-<style>
-  :root {
-    --bg: oklch(0.17 0.008 150);
-    --bg-2: oklch(0.21 0.01 150);
-    --surface: oklch(0.23 0.012 150);
-    --surface-2: oklch(0.27 0.014 150);
-    --line: oklch(0.32 0.015 150);
-    --line-soft: oklch(0.28 0.012 150 / 0.6);
-    --text: oklch(0.98 0.005 150);
-    --text-dim: oklch(0.78 0.01 150);
-    --text-mute: oklch(0.58 0.012 150);
-    --lime: oklch(0.9 0.22 128);
-    --lime-dim: oklch(0.78 0.19 128);
-    --lime-glow: oklch(0.9 0.22 128 / 0.35);
-    --amber: oklch(0.82 0.17 75);
-    --amber-dim: oklch(0.72 0.16 75);
-    --amber-glow: oklch(0.82 0.17 75 / 0.4);
-  }
-  * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; }
-  body {
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    -webkit-font-smoothing: antialiased;
-    font-feature-settings: "ss01", "cv11";
-    overflow-x: hidden;
-  }
-  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
-  input, textarea, select { font-family: inherit; }
-  a { color: inherit; text-decoration: none; }
-  .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
-  .container { max-width: 1240px; margin: 0 auto; padding: 0 32px; }
+    <style>
+      :root {
+        --bg: oklch(0.17 0.008 150);
+        --bg-2: oklch(0.21 0.01 150);
+        --surface: oklch(0.23 0.012 150);
+        --surface-2: oklch(0.27 0.014 150);
+        --line: oklch(0.32 0.015 150);
+        --line-soft: oklch(0.28 0.012 150 / 0.6);
+        --text: oklch(0.98 0.005 150);
+        --text-dim: oklch(0.78 0.01 150);
+        --text-mute: oklch(0.58 0.012 150);
+        --lime: oklch(0.9 0.22 128);
+        --lime-dim: oklch(0.78 0.19 128);
+        --lime-glow: oklch(0.9 0.22 128 / 0.35);
+        --amber: oklch(0.82 0.17 75);
+        --amber-dim: oklch(0.72 0.16 75);
+        --amber-glow: oklch(0.82 0.17 75 / 0.4);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        -webkit-font-smoothing: antialiased;
+        font-feature-settings: 'ss01', 'cv11';
+        overflow-x: hidden;
+      }
+      button {
+        font-family: inherit;
+        cursor: pointer;
+        border: none;
+        background: none;
+        color: inherit;
+      }
+      input,
+      textarea,
+      select {
+        font-family: inherit;
+      }
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+      .mono {
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
+      }
+      .container {
+        max-width: 1240px;
+        margin: 0 auto;
+        padding: 0 32px;
+      }
 
-  /* ---- ambient mesh ---- */
-  .page-mesh {
-    position: absolute; inset: 0 0 auto 0; height: 620px;
-    overflow: hidden; pointer-events: none; z-index: 0;
-  }
-  .page-mesh::before, .page-mesh::after {
-    content: ""; position: absolute; border-radius: 50%; filter: blur(90px);
-  }
-  .page-mesh::before {
-    width: 640px; height: 640px; left: -180px; top: -220px;
-    background: radial-gradient(circle, oklch(0.9 0.22 128 / 0.4), transparent 65%);
-  }
-  .page-mesh::after {
-    width: 540px; height: 540px; right: -140px; top: -120px;
-    background: radial-gradient(circle, oklch(0.82 0.17 75 / 0.28), transparent 65%);
-  }
-  .grid-overlay {
-    position: absolute; inset: 0;
-    background-image:
-      linear-gradient(var(--line-soft) 1px, transparent 1px),
-      linear-gradient(90deg, var(--line-soft) 1px, transparent 1px);
-    background-size: 64px 64px;
-    mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 30%, transparent 75%);
-    opacity: 0.35;
-  }
+      /* ---- ambient mesh ---- */
+      .page-mesh {
+        position: absolute;
+        inset: 0 0 auto 0;
+        height: 620px;
+        overflow: hidden;
+        pointer-events: none;
+        z-index: 0;
+      }
+      .page-mesh::before,
+      .page-mesh::after {
+        content: '';
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(90px);
+      }
+      .page-mesh::before {
+        width: 640px;
+        height: 640px;
+        left: -180px;
+        top: -220px;
+        background: radial-gradient(circle, oklch(0.9 0.22 128 / 0.4), transparent 65%);
+      }
+      .page-mesh::after {
+        width: 540px;
+        height: 540px;
+        right: -140px;
+        top: -120px;
+        background: radial-gradient(circle, oklch(0.82 0.17 75 / 0.28), transparent 65%);
+      }
+      .grid-overlay {
+        position: absolute;
+        inset: 0;
+        background-image: linear-gradient(var(--line-soft) 1px, transparent 1px), linear-gradient(90deg, var(--line-soft) 1px, transparent 1px);
+        background-size: 64px 64px;
+        mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 30%, transparent 75%);
+        opacity: 0.35;
+      }
 
-  /* ---- nav ---- */
-  .nav {
-    position: sticky; top: 0; z-index: 40;
-    backdrop-filter: blur(18px) saturate(140%);
-    background: oklch(0.17 0.008 150 / 0.75);
-    border-bottom: 1px solid var(--line-soft);
-  }
-  .nav-inner { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; height: 68px; gap: 24px; }
-  .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: -0.02em; font-size: 18px; }
-  .logo-mark {
-    width: 26px; height: 26px; display: grid; place-items: center;
-    border-radius: 8px;
-    background: linear-gradient(145deg, var(--lime), var(--lime-dim));
-    color: #0a1005;
-    box-shadow: 0 0 18px -4px var(--lime-glow);
-  }
-  .nav-center { display: flex; gap: 4px; justify-content: center; }
-  .nav-link {
-    position: relative;
-    padding: 8px 16px; border-radius: 10px;
-    font-size: 14.5px; color: var(--text-dim);
-    transition: color 150ms;
-  }
-  .nav-link:hover { color: var(--text); }
-  .nav-link.active { color: var(--lime); }
-  .nav-link.active::after {
-    content: "";
-    position: absolute; left: 16px; right: 16px; bottom: -1px; height: 2px;
-    background: var(--lime); box-shadow: 0 0 14px var(--lime-glow); border-radius: 2px;
-  }
-  .nav-right { display: flex; justify-content: flex-end; align-items: center; gap: 10px; }
-  .avatar-btn {
-    display: flex; align-items: center; gap: 10px;
-    padding: 4px 14px 4px 4px;
-    border: 1px solid var(--line-soft); border-radius: 999px;
-    transition: all 180ms;
-  }
-  .avatar-btn:hover { border-color: var(--text-mute); background: oklch(1 0 0 / 0.03); }
-  .avatar {
-    width: 32px; height: 32px; border-radius: 50%;
-    background: linear-gradient(135deg, var(--lime), var(--amber));
-    display: grid; place-items: center; color: #0a1005; font-weight: 700; font-size: 12.5px;
-  }
-  .avatar-btn .name { font-size: 13.5px; color: var(--text); font-weight: 500; }
-  .avatar-btn .tier { font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--lime); font-family: 'JetBrains Mono', monospace; }
+      /* ---- nav ---- */
+      .nav {
+        position: sticky;
+        top: 0;
+        z-index: 40;
+        backdrop-filter: blur(18px) saturate(140%);
+        background: oklch(0.17 0.008 150 / 0.75);
+        border-bottom: 1px solid var(--line-soft);
+      }
+      .nav-inner {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        height: 68px;
+        gap: 24px;
+      }
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        font-size: 18px;
+      }
+      .logo-mark {
+        width: 26px;
+        height: 26px;
+        display: grid;
+        place-items: center;
+        border-radius: 8px;
+        background: linear-gradient(145deg, var(--lime), var(--lime-dim));
+        color: #0a1005;
+        box-shadow: 0 0 18px -4px var(--lime-glow);
+      }
+      .nav-center {
+        display: flex;
+        gap: 4px;
+        justify-content: center;
+      }
+      .nav-link {
+        position: relative;
+        padding: 8px 16px;
+        border-radius: 10px;
+        font-size: 14.5px;
+        color: var(--text-dim);
+        transition: color 150ms;
+      }
+      .nav-link:hover {
+        color: var(--text);
+      }
+      .nav-link.active {
+        color: var(--lime);
+      }
+      .nav-link.active::after {
+        content: '';
+        position: absolute;
+        left: 16px;
+        right: 16px;
+        bottom: -1px;
+        height: 2px;
+        background: var(--lime);
+        box-shadow: 0 0 14px var(--lime-glow);
+        border-radius: 2px;
+      }
+      .nav-right {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 10px;
+      }
+      .avatar-btn {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 4px 14px 4px 4px;
+        border: 1px solid var(--line-soft);
+        border-radius: 999px;
+        transition: all 180ms;
+      }
+      .avatar-btn:hover {
+        border-color: var(--text-mute);
+        background: oklch(1 0 0 / 0.03);
+      }
+      .avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--lime), var(--amber));
+        display: grid;
+        place-items: center;
+        color: #0a1005;
+        font-weight: 700;
+        font-size: 12.5px;
+      }
+      .avatar-btn .name {
+        font-size: 13.5px;
+        color: var(--text);
+        font-weight: 500;
+      }
+      .avatar-btn .tier {
+        font-size: 10.5px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--lime);
+        font-family: 'JetBrains Mono', monospace;
+      }
 
-  /* ---- buttons ---- */
-  .btn {
-    display: inline-flex; align-items: center; justify-content: center; gap: 10px;
-    padding: 13px 20px; border-radius: 999px;
-    font-size: 14px; font-weight: 600; letter-spacing: -0.01em;
-    transition: all 180ms ease;
-    white-space: nowrap;
-  }
-  .btn-primary { background: var(--lime); color: #0a1005; box-shadow: 0 8px 28px -10px var(--lime-glow); }
-  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 14px 40px -10px var(--lime-glow); }
-  .btn-ghost { color: var(--text-dim); border: 1px solid var(--line); background: oklch(1 0 0 / 0.02); }
-  .btn-ghost:hover { color: var(--text); border-color: oklch(1 0 0 / 0.2); }
-  .btn-outline-lime {
-    border: 1px solid var(--lime); color: var(--lime);
-    background: oklch(0.9 0.22 128 / 0.05);
-  }
-  .btn-outline-lime:hover { background: oklch(0.9 0.22 128 / 0.12); box-shadow: 0 0 24px -6px var(--lime-glow); }
+      /* ---- buttons ---- */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 13px 20px;
+        border-radius: 999px;
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        transition: all 180ms ease;
+        white-space: nowrap;
+      }
+      .btn-primary {
+        background: var(--lime);
+        color: #0a1005;
+        box-shadow: 0 8px 28px -10px var(--lime-glow);
+      }
+      .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 14px 40px -10px var(--lime-glow);
+      }
+      .btn-ghost {
+        color: var(--text-dim);
+        border: 1px solid var(--line);
+        background: oklch(1 0 0 / 0.02);
+      }
+      .btn-ghost:hover {
+        color: var(--text);
+        border-color: oklch(1 0 0 / 0.2);
+      }
+      .btn-outline-lime {
+        border: 1px solid var(--lime);
+        color: var(--lime);
+        background: oklch(0.9 0.22 128 / 0.05);
+      }
+      .btn-outline-lime:hover {
+        background: oklch(0.9 0.22 128 / 0.12);
+        box-shadow: 0 0 24px -6px var(--lime-glow);
+      }
 
-  .eyebrow {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
-    color: var(--text-mute);
-    display: inline-flex; align-items: center; gap: 10px;
-  }
-  .eyebrow .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--lime); box-shadow: 0 0 12px var(--lime-glow); }
+      .eyebrow {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--text-mute);
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .eyebrow .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--lime);
+        box-shadow: 0 0 12px var(--lime-glow);
+      }
 
-  /* ---- page header ---- */
-  .page-header { position: relative; padding: 64px 0 28px; }
-  .page-header h1 {
-    font-size: clamp(42px, 5.5vw, 72px);
-    letter-spacing: -0.035em; font-weight: 700;
-    line-height: 1; margin: 18px 0 14px;
-  }
-  .page-header .lead {
-    color: var(--text-dim); font-size: 16px; max-width: 62ch; margin: 0 0 36px;
-    line-height: 1.55;
-  }
-  .header-top { display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 20px; }
-  .header-stats { display: flex; gap: 32px; align-items: center; }
-  .stat-cell { text-align: right; }
-  .stat-cell .num { font-size: 32px; font-weight: 600; letter-spacing: -0.03em; font-family: 'JetBrains Mono', monospace; }
-  .stat-cell .num.lime { color: var(--lime); }
-  .stat-cell .num.amber { color: var(--amber); }
-  .stat-cell .lbl { font-size: 10.5px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-mute); font-family: 'JetBrains Mono', monospace; margin-top: 2px; }
-  .stat-sep { width: 1px; height: 38px; background: var(--line-soft); }
+      /* ---- page header ---- */
+      .page-header {
+        position: relative;
+        padding: 64px 0 28px;
+      }
+      .page-header h1 {
+        font-size: clamp(42px, 5.5vw, 72px);
+        letter-spacing: -0.035em;
+        font-weight: 700;
+        line-height: 1;
+        margin: 18px 0 14px;
+      }
+      .page-header .lead {
+        color: var(--text-dim);
+        font-size: 16px;
+        max-width: 62ch;
+        margin: 0 0 36px;
+        line-height: 1.55;
+      }
+      .header-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        flex-wrap: wrap;
+        gap: 20px;
+      }
+      .header-stats {
+        display: flex;
+        gap: 32px;
+        align-items: center;
+      }
+      .stat-cell {
+        text-align: right;
+      }
+      .stat-cell .num {
+        font-size: 32px;
+        font-weight: 600;
+        letter-spacing: -0.03em;
+        font-family: 'JetBrains Mono', monospace;
+      }
+      .stat-cell .num.lime {
+        color: var(--lime);
+      }
+      .stat-cell .num.amber {
+        color: var(--amber);
+      }
+      .stat-cell .lbl {
+        font-size: 10.5px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--text-mute);
+        font-family: 'JetBrains Mono', monospace;
+        margin-top: 2px;
+      }
+      .stat-sep {
+        width: 1px;
+        height: 38px;
+        background: var(--line-soft);
+      }
 
-  /* ---- action bar ---- */
-  .action-bar {
-    margin-top: 12px;
-    display: grid; grid-template-columns: 1fr auto auto auto;
-    gap: 12px; align-items: stretch;
-  }
-  .search {
-    position: relative;
-    background: var(--surface);
-    border: 1px solid var(--line-soft);
-    border-radius: 14px;
-    transition: all 200ms ease;
-  }
-  .search:focus-within {
-    border-color: var(--lime);
-    box-shadow: 0 0 0 4px oklch(0.9 0.22 128 / 0.1);
-    background: var(--surface-2);
-  }
-  .search .icon { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: var(--text-mute); }
-  .search input {
-    width: 100%; background: transparent; border: none;
-    padding: 18px 18px 18px 52px;
-    color: var(--text); font-size: 15px; letter-spacing: -0.01em;
-  }
-  .search input::placeholder { color: var(--text-mute); }
-  .search input:focus { outline: none; }
+      /* ---- action bar ---- */
+      .action-bar {
+        margin-top: 12px;
+        display: grid;
+        grid-template-columns: 1fr auto auto auto;
+        gap: 12px;
+        align-items: stretch;
+      }
+      .search {
+        position: relative;
+        background: var(--surface);
+        border: 1px solid var(--line-soft);
+        border-radius: 14px;
+        transition: all 200ms ease;
+      }
+      .search:focus-within {
+        border-color: var(--lime);
+        box-shadow: 0 0 0 4px oklch(0.9 0.22 128 / 0.1);
+        background: var(--surface-2);
+      }
+      .search .icon {
+        position: absolute;
+        left: 18px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-mute);
+      }
+      .search input {
+        width: 100%;
+        background: transparent;
+        border: none;
+        padding: 18px 18px 18px 52px;
+        color: var(--text);
+        font-size: 15px;
+        letter-spacing: -0.01em;
+      }
+      .search input::placeholder {
+        color: var(--text-mute);
+      }
+      .search input:focus {
+        outline: none;
+      }
 
-  .select-box {
-    background: var(--surface);
-    border: 1px solid var(--line-soft);
-    color: var(--text);
-    padding: 0 18px; height: 56px;
-    border-radius: 14px;
-    font-size: 14px;
-    display: inline-flex; align-items: center; gap: 10px;
-    transition: border-color 160ms;
-    min-width: 180px;
-    position: relative;
-  }
-  .select-box:hover { border-color: var(--text-mute); }
-  .select-box .label { color: var(--text-mute); font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; }
-  .select-box .val { font-weight: 500; }
+      .select-box {
+        background: var(--surface);
+        border: 1px solid var(--line-soft);
+        color: var(--text);
+        padding: 0 18px;
+        height: 56px;
+        border-radius: 14px;
+        font-size: 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        transition: border-color 160ms;
+        min-width: 180px;
+        position: relative;
+      }
+      .select-box:hover {
+        border-color: var(--text-mute);
+      }
+      .select-box .label {
+        color: var(--text-mute);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 10.5px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+      .select-box .val {
+        font-weight: 500;
+      }
 
-  .dropdown-menu {
-    position: absolute; right: 0; top: calc(100% + 8px);
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: 12px; padding: 6px;
-    min-width: 220px; z-index: 50;
-    box-shadow: 0 20px 60px -20px oklch(0 0 0 / 0.5);
-  }
-  .dropdown-item {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 10px 12px; border-radius: 8px;
-    font-size: 13px; color: var(--text-dim);
-    width: 100%; text-align: left;
-    transition: all 140ms;
-  }
-  .dropdown-item:hover { background: oklch(1 0 0 / 0.04); color: var(--text); }
-  .dropdown-item.selected { color: var(--lime); }
+      .dropdown-menu {
+        position: absolute;
+        right: 0;
+        top: calc(100% + 8px);
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 6px;
+        min-width: 220px;
+        z-index: 50;
+        box-shadow: 0 20px 60px -20px oklch(0 0 0 / 0.5);
+      }
+      .dropdown-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 12px;
+        border-radius: 8px;
+        font-size: 13px;
+        color: var(--text-dim);
+        width: 100%;
+        text-align: left;
+        transition: all 140ms;
+      }
+      .dropdown-item:hover {
+        background: oklch(1 0 0 / 0.04);
+        color: var(--text);
+      }
+      .dropdown-item.selected {
+        color: var(--lime);
+      }
 
-  /* ---- results bar ---- */
-  .results-bar {
-    margin-top: 28px;
-    display: flex; align-items: end; justify-content: space-between; gap: 24px; flex-wrap: wrap;
-  }
-  .results-bar h3 { font-size: 22px; letter-spacing: -0.02em; font-weight: 600; margin: 0; }
-  .results-bar .note { color: var(--text-mute); font-family: 'JetBrains Mono', monospace; font-size: 12px; margin-top: 4px; }
+      /* ---- results bar ---- */
+      .results-bar {
+        margin-top: 28px;
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 24px;
+        flex-wrap: wrap;
+      }
+      .results-bar h3 {
+        font-size: 22px;
+        letter-spacing: -0.02em;
+        font-weight: 600;
+        margin: 0;
+      }
+      .results-bar .note {
+        color: var(--text-mute);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12px;
+        margin-top: 4px;
+      }
 
-  .filter-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
-  .chip {
-    padding: 6px 12px 6px 10px;
-    border-radius: 999px;
-    background: oklch(0.9 0.22 128 / 0.08);
-    border: 1px solid oklch(0.9 0.22 128 / 0.35);
-    color: var(--lime);
-    font-size: 12px; font-weight: 500;
-    display: inline-flex; align-items: center; gap: 6px;
-    font-family: 'JetBrains Mono', monospace; letter-spacing: 0.04em;
-  }
-  .chip button { color: var(--lime); display: grid; place-items: center; opacity: 0.7; }
-  .chip button:hover { opacity: 1; }
+      .filter-chips {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 6px;
+      }
+      .chip {
+        padding: 6px 12px 6px 10px;
+        border-radius: 999px;
+        background: oklch(0.9 0.22 128 / 0.08);
+        border: 1px solid oklch(0.9 0.22 128 / 0.35);
+        color: var(--lime);
+        font-size: 12px;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-family: 'JetBrains Mono', monospace;
+        letter-spacing: 0.04em;
+      }
+      .chip button {
+        color: var(--lime);
+        display: grid;
+        place-items: center;
+        opacity: 0.7;
+      }
+      .chip button:hover {
+        opacity: 1;
+      }
 
-  /* ---- venue grid ---- */
-  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; margin-top: 22px; }
-  .venue-card {
-    background: var(--surface);
-    border: 1px solid var(--line-soft);
-    border-radius: 20px;
-    overflow: hidden;
-    display: flex; flex-direction: column;
-    transition: transform 280ms ease, border-color 280ms ease, box-shadow 280ms ease;
-    position: relative;
-  }
-  .venue-card:hover {
-    transform: translateY(-6px);
-    border-color: oklch(0.9 0.22 128 / 0.45);
-    box-shadow: 0 20px 60px -20px oklch(0.9 0.22 128 / 0.22);
-  }
-  .venue-visual {
-    aspect-ratio: 16/10;
-    position: relative; overflow: hidden;
-    border-bottom: 1px solid var(--line-soft);
-  }
-  .venue-visual .stripes {
-    position: absolute; inset: 0;
-    background-image: repeating-linear-gradient(var(--angle, 115deg), transparent 0 22px, oklch(1 0 0 / 0.035) 22px 24px);
-  }
-  .venue-visual .orb {
-    position: absolute; border-radius: 50%; filter: blur(34px); opacity: 0.5;
-  }
-  .venue-visual::after {
-    content: "";
-    position: absolute; inset: 0;
-    background: linear-gradient(180deg, transparent 55%, oklch(0 0 0 / 0.45));
-  }
-  .venue-visual .ph-label {
-    position: absolute; bottom: 12px; left: 14px; z-index: 2;
-    font-family: 'JetBrains Mono', monospace; font-size: 9.5px;
-    letter-spacing: 0.14em; color: oklch(1 0 0 / 0.45);
-    text-transform: uppercase;
-  }
-  .rating-badge {
-    position: absolute; top: 14px; left: 14px; z-index: 2;
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 6px 10px 6px 9px;
-    border-radius: 999px;
-    background: oklch(0 0 0 / 0.55);
-    backdrop-filter: blur(10px);
-    border: 1px solid oklch(0.82 0.17 75 / 0.4);
-    font-size: 12.5px; font-weight: 600; letter-spacing: -0.01em;
-  }
-  .rating-badge .star { color: var(--amber); display: grid; place-items: center; }
-  .rating-badge .num { color: var(--text); }
-  .rating-badge .count { color: var(--text-mute); font-family: 'JetBrains Mono', monospace; font-size: 10.5px; font-weight: 400; margin-left: 2px; }
-  .capacity-badge {
-    position: absolute; top: 14px; right: 14px; z-index: 2;
-    padding: 5px 10px;
-    border-radius: 8px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10.5px; letter-spacing: 0.12em;
-    background: oklch(0 0 0 / 0.55);
-    backdrop-filter: blur(10px);
-    border: 1px solid var(--line-soft);
-    color: var(--text-dim);
-    text-transform: uppercase;
-  }
+      /* ---- venue grid ---- */
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 22px;
+        margin-top: 22px;
+      }
+      .venue-card {
+        background: var(--surface);
+        border: 1px solid var(--line-soft);
+        border-radius: 20px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        transition:
+          transform 280ms ease,
+          border-color 280ms ease,
+          box-shadow 280ms ease;
+        position: relative;
+      }
+      .venue-card:hover {
+        transform: translateY(-6px);
+        border-color: oklch(0.9 0.22 128 / 0.45);
+        box-shadow: 0 20px 60px -20px oklch(0.9 0.22 128 / 0.22);
+      }
+      .venue-visual {
+        aspect-ratio: 16/10;
+        position: relative;
+        overflow: hidden;
+        border-bottom: 1px solid var(--line-soft);
+      }
+      .venue-visual .stripes {
+        position: absolute;
+        inset: 0;
+        background-image: repeating-linear-gradient(var(--angle, 115deg), transparent 0 22px, oklch(1 0 0 / 0.035) 22px 24px);
+      }
+      .venue-visual .orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(34px);
+        opacity: 0.5;
+      }
+      .venue-visual::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, transparent 55%, oklch(0 0 0 / 0.45));
+      }
+      .venue-visual .ph-label {
+        position: absolute;
+        bottom: 12px;
+        left: 14px;
+        z-index: 2;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 9.5px;
+        letter-spacing: 0.14em;
+        color: oklch(1 0 0 / 0.45);
+        text-transform: uppercase;
+      }
+      .rating-badge {
+        position: absolute;
+        top: 14px;
+        left: 14px;
+        z-index: 2;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 10px 6px 9px;
+        border-radius: 999px;
+        background: oklch(0 0 0 / 0.55);
+        backdrop-filter: blur(10px);
+        border: 1px solid oklch(0.82 0.17 75 / 0.4);
+        font-size: 12.5px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+      }
+      .rating-badge .star {
+        color: var(--amber);
+        display: grid;
+        place-items: center;
+      }
+      .rating-badge .num {
+        color: var(--text);
+      }
+      .rating-badge .count {
+        color: var(--text-mute);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 10.5px;
+        font-weight: 400;
+        margin-left: 2px;
+      }
+      .capacity-badge {
+        position: absolute;
+        top: 14px;
+        right: 14px;
+        z-index: 2;
+        padding: 5px 10px;
+        border-radius: 8px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 10.5px;
+        letter-spacing: 0.12em;
+        background: oklch(0 0 0 / 0.55);
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--line-soft);
+        color: var(--text-dim);
+        text-transform: uppercase;
+      }
 
-  .venue-body { padding: 20px 20px 18px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
-  .venue-title-row { display: flex; align-items: start; justify-content: space-between; gap: 10px; }
-  .venue-title { font-size: 18px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.28; margin: 0; }
-  .contributor {
-    font-size: 12px; color: var(--text-mute); display: flex; align-items: center; gap: 6px;
-    margin-top: 2px;
-  }
-  .contributor .mini-avatar {
-    width: 16px; height: 16px; border-radius: 50%;
-    background: linear-gradient(135deg, var(--lime), var(--amber));
-    color: #0a1005; font-size: 9px; font-weight: 700;
-    display: grid; place-items: center;
-  }
-  .contributor .uname { color: var(--text-dim); }
-  .contributor .date { color: var(--text-mute); }
+      .venue-body {
+        padding: 20px 20px 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        flex: 1;
+      }
+      .venue-title-row {
+        display: flex;
+        align-items: start;
+        justify-content: space-between;
+        gap: 10px;
+      }
+      .venue-title {
+        font-size: 18px;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        line-height: 1.28;
+        margin: 0;
+      }
+      .contributor {
+        font-size: 12px;
+        color: var(--text-mute);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 2px;
+      }
+      .contributor .mini-avatar {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--lime), var(--amber));
+        color: #0a1005;
+        font-size: 9px;
+        font-weight: 700;
+        display: grid;
+        place-items: center;
+      }
+      .contributor .uname {
+        color: var(--text-dim);
+      }
+      .contributor .date {
+        color: var(--text-mute);
+      }
 
-  .spec-row {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
-    padding: 12px 0 4px;
-  }
-  .spec {
-    display: flex; align-items: center; gap: 8px;
-    font-size: 12.5px; color: var(--text-dim);
-  }
-  .spec svg { color: var(--text-mute); flex-shrink: 0; }
-  .spec .v { color: var(--text); font-weight: 500; }
+      .spec-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        padding: 12px 0 4px;
+      }
+      .spec {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12.5px;
+        color: var(--text-dim);
+      }
+      .spec svg {
+        color: var(--text-mute);
+        flex-shrink: 0;
+      }
+      .spec .v {
+        color: var(--text);
+        font-weight: 500;
+      }
 
-  .tag-row { display: flex; gap: 6px; flex-wrap: wrap; }
-  .tag {
-    font-size: 11px; font-weight: 500;
-    padding: 3px 9px; border-radius: 999px;
-    background: oklch(1 0 0 / 0.04);
-    border: 1px solid var(--line-soft);
-    color: var(--text-dim);
-  }
+      .tag-row {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+      .tag {
+        font-size: 11px;
+        font-weight: 500;
+        padding: 3px 9px;
+        border-radius: 999px;
+        background: oklch(1 0 0 / 0.04);
+        border: 1px solid var(--line-soft);
+        color: var(--text-dim);
+      }
 
-  .action-row {
-    margin-top: auto; padding-top: 14px;
-    border-top: 1px dashed var(--line-soft);
-    display: flex; align-items: center; gap: 10px;
-  }
-  .view-btn {
-    flex: 1; padding: 10px;
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    font-size: 13px; font-weight: 500; color: var(--text);
-    background: transparent;
-    transition: all 180ms ease;
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-  }
-  .view-btn:hover { border-color: var(--lime); color: var(--lime); background: oklch(0.9 0.22 128 / 0.05); }
-  .menu-btn {
-    width: 38px; height: 38px; border-radius: 10px;
-    border: 1px solid var(--line);
-    color: var(--text-mute);
-    display: grid; place-items: center;
-    transition: all 180ms;
-    position: relative;
-  }
-  .menu-btn:hover { color: var(--amber); border-color: oklch(0.82 0.17 75 / 0.4); background: oklch(0.82 0.17 75 / 0.06); }
-  .menu-dropdown {
-    position: absolute; right: 0; top: calc(100% + 6px);
-    background: var(--surface); border: 1px solid var(--line);
-    border-radius: 10px; padding: 6px;
-    min-width: 180px; z-index: 5;
-    box-shadow: 0 20px 60px -20px oklch(0 0 0 / 0.5);
-    text-align: left;
-  }
+      .action-row {
+        margin-top: auto;
+        padding-top: 14px;
+        border-top: 1px dashed var(--line-soft);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .view-btn {
+        flex: 1;
+        padding: 10px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text);
+        background: transparent;
+        transition: all 180ms ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+      .view-btn:hover {
+        border-color: var(--lime);
+        color: var(--lime);
+        background: oklch(0.9 0.22 128 / 0.05);
+      }
+      .menu-btn {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        border: 1px solid var(--line);
+        color: var(--text-mute);
+        display: grid;
+        place-items: center;
+        transition: all 180ms;
+        position: relative;
+      }
+      .menu-btn:hover {
+        color: var(--amber);
+        border-color: oklch(0.82 0.17 75 / 0.4);
+        background: oklch(0.82 0.17 75 / 0.06);
+      }
+      .menu-dropdown {
+        position: absolute;
+        right: 0;
+        top: calc(100% + 6px);
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 6px;
+        min-width: 180px;
+        z-index: 5;
+        box-shadow: 0 20px 60px -20px oklch(0 0 0 / 0.5);
+        text-align: left;
+      }
 
-  /* ---- contribution banner ---- */
-  .contrib-wrap { grid-column: 1 / -1; }
-  .contrib-banner {
-    position: relative;
-    border-radius: 22px;
-    padding: 40px 44px;
-    background: linear-gradient(180deg, oklch(0.23 0.012 150), oklch(0.17 0.01 150));
-    overflow: hidden;
-    display: grid; grid-template-columns: 1fr auto;
-    gap: 28px; align-items: center;
-  }
-  .contrib-banner::before {
-    content: "";
-    position: absolute; inset: 0; padding: 1.5px; border-radius: 22px;
-    background: linear-gradient(135deg, var(--lime) 0%, transparent 50%, var(--lime-dim) 100%);
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor; mask-composite: exclude;
-    pointer-events: none;
-  }
-  .contrib-banner::after {
-    content: "";
-    position: absolute; inset: 0;
-    background:
-      radial-gradient(circle at 20% 30%, oklch(0.9 0.22 128 / 0.14), transparent 45%),
-      radial-gradient(circle at 85% 70%, oklch(0.82 0.17 75 / 0.12), transparent 45%);
-    pointer-events: none;
-  }
-  .contrib-text { position: relative; z-index: 1; }
-  .contrib-text h3 {
-    font-size: clamp(22px, 2.4vw, 28px);
-    letter-spacing: -0.025em; font-weight: 600;
-    margin: 6px 0 6px;
-    text-wrap: balance;
-  }
-  .contrib-text p { color: var(--text-dim); font-size: 14.5px; line-height: 1.5; margin: 0; max-width: 56ch; }
-  .contrib-banner .btn { position: relative; z-index: 1; padding: 15px 24px; }
+      /* ---- contribution banner ---- */
+      .contrib-wrap {
+        grid-column: 1 / -1;
+      }
+      .contrib-banner {
+        position: relative;
+        border-radius: 22px;
+        padding: 40px 44px;
+        background: linear-gradient(180deg, oklch(0.23 0.012 150), oklch(0.17 0.01 150));
+        overflow: hidden;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 28px;
+        align-items: center;
+      }
+      .contrib-banner::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        padding: 1.5px;
+        border-radius: 22px;
+        background: linear-gradient(135deg, var(--lime) 0%, transparent 50%, var(--lime-dim) 100%);
+        -webkit-mask:
+          linear-gradient(#fff 0 0) content-box,
+          linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        pointer-events: none;
+      }
+      .contrib-banner::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(circle at 20% 30%, oklch(0.9 0.22 128 / 0.14), transparent 45%),
+          radial-gradient(circle at 85% 70%, oklch(0.82 0.17 75 / 0.12), transparent 45%);
+        pointer-events: none;
+      }
+      .contrib-text {
+        position: relative;
+        z-index: 1;
+      }
+      .contrib-text h3 {
+        font-size: clamp(22px, 2.4vw, 28px);
+        letter-spacing: -0.025em;
+        font-weight: 600;
+        margin: 6px 0 6px;
+        text-wrap: balance;
+      }
+      .contrib-text p {
+        color: var(--text-dim);
+        font-size: 14.5px;
+        line-height: 1.5;
+        margin: 0;
+        max-width: 56ch;
+      }
+      .contrib-banner .btn {
+        position: relative;
+        z-index: 1;
+        padding: 15px 24px;
+      }
 
-  /* ---- pagination ---- */
-  .paginate-wrap { margin: 48px 0 32px; display: flex; justify-content: center; align-items: center; gap: 6px; }
-  .page-btn {
-    min-width: 38px; height: 38px; padding: 0 12px;
-    border-radius: 10px;
-    border: 1px solid var(--line-soft);
-    color: var(--text-dim);
-    font-size: 13.5px; font-weight: 500;
-    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-    transition: all 160ms ease;
-  }
-  .page-btn:hover { color: var(--text); border-color: var(--text-mute); }
-  .page-btn.active {
-    background: var(--lime); color: #0a1005; border-color: var(--lime);
-    box-shadow: 0 0 0 3px oklch(0.9 0.22 128 / 0.15);
-    font-weight: 600;
-  }
-  .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+      /* ---- pagination ---- */
+      .paginate-wrap {
+        margin: 48px 0 32px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 6px;
+      }
+      .page-btn {
+        min-width: 38px;
+        height: 38px;
+        padding: 0 12px;
+        border-radius: 10px;
+        border: 1px solid var(--line-soft);
+        color: var(--text-dim);
+        font-size: 13.5px;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        transition: all 160ms ease;
+      }
+      .page-btn:hover {
+        color: var(--text);
+        border-color: var(--text-mute);
+      }
+      .page-btn.active {
+        background: var(--lime);
+        color: #0a1005;
+        border-color: var(--lime);
+        box-shadow: 0 0 0 3px oklch(0.9 0.22 128 / 0.15);
+        font-weight: 600;
+      }
+      .page-btn:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
 
-  /* ---- empty ---- */
-  .empty {
-    grid-column: 1 / -1;
-    padding: 72px 40px; text-align: center;
-    border: 1px dashed var(--line-soft); border-radius: 20px;
-    background: oklch(1 0 0 / 0.015);
-  }
-  .empty .empty-icon {
-    width: 56px; height: 56px; border-radius: 16px;
-    background: oklch(1 0 0 / 0.04);
-    display: grid; place-items: center;
-    color: var(--text-mute); margin: 0 auto 18px;
-  }
-  .empty h4 { font-size: 20px; margin: 0 0 6px; letter-spacing: -0.02em; }
-  .empty p { color: var(--text-dim); font-size: 14px; margin: 0; }
+      /* ---- empty ---- */
+      .empty {
+        grid-column: 1 / -1;
+        padding: 72px 40px;
+        text-align: center;
+        border: 1px dashed var(--line-soft);
+        border-radius: 20px;
+        background: oklch(1 0 0 / 0.015);
+      }
+      .empty .empty-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        background: oklch(1 0 0 / 0.04);
+        display: grid;
+        place-items: center;
+        color: var(--text-mute);
+        margin: 0 auto 18px;
+      }
+      .empty h4 {
+        font-size: 20px;
+        margin: 0 0 6px;
+        letter-spacing: -0.02em;
+      }
+      .empty p {
+        color: var(--text-dim);
+        font-size: 14px;
+        margin: 0;
+      }
 
-  /* ---- footer ---- */
-  .footer { border-top: 1px solid var(--line-soft); padding: 48px 0 40px; margin-top: 40px; }
-  .footer-inner { display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
-  .footer-links { display: flex; gap: 26px; font-size: 13.5px; color: var(--text-dim); }
-  .footer-links a:hover { color: var(--text); }
-  .socials { display: flex; gap: 10px; }
-  .social-btn {
-    width: 36px; height: 36px; border-radius: 10px;
-    display: grid; place-items: center;
-    border: 1px solid var(--line-soft); color: var(--text-dim);
-    transition: all 180ms ease;
-  }
-  .social-btn:hover { color: var(--amber); border-color: oklch(0.82 0.17 75 / 0.5); background: oklch(0.82 0.17 75 / 0.06); }
-  .copyright { font-size: 12.5px; color: var(--text-mute); font-family: 'JetBrains Mono', monospace; }
+      /* ---- footer ---- */
+      .footer {
+        border-top: 1px solid var(--line-soft);
+        padding: 48px 0 40px;
+        margin-top: 40px;
+      }
+      .footer-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        flex-wrap: wrap;
+      }
+      .footer-links {
+        display: flex;
+        gap: 26px;
+        font-size: 13.5px;
+        color: var(--text-dim);
+      }
+      .footer-links a:hover {
+        color: var(--text);
+      }
+      .socials {
+        display: flex;
+        gap: 10px;
+      }
+      .social-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: grid;
+        place-items: center;
+        border: 1px solid var(--line-soft);
+        color: var(--text-dim);
+        transition: all 180ms ease;
+      }
+      .social-btn:hover {
+        color: var(--amber);
+        border-color: oklch(0.82 0.17 75 / 0.5);
+        background: oklch(0.82 0.17 75 / 0.06);
+      }
+      .copyright {
+        font-size: 12.5px;
+        color: var(--text-mute);
+        font-family: 'JetBrains Mono', monospace;
+      }
 
-  /* ---- modal ---- */
-  .modal-backdrop {
-    position: fixed; inset: 0; z-index: 100;
-    background: oklch(0.1 0.005 150 / 0.7);
-    backdrop-filter: blur(10px);
-    display: grid; place-items: center; padding: 24px;
-    animation: fadein 220ms ease;
-  }
-  @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
-  @keyframes pop { from { opacity: 0; transform: translateY(12px) scale(0.98); } to { opacity: 1; transform: none; } }
-  .modal {
-    width: 100%; max-width: 580px;
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: 22px;
-    position: relative;
-    animation: pop 260ms cubic-bezier(0.22, 1, 0.36, 1);
-    box-shadow: 0 30px 80px -20px oklch(0 0 0 / 0.6);
-    overflow: hidden;
-    max-height: 86vh; display: flex; flex-direction: column;
-  }
-  .modal-close {
-    position: absolute; top: 14px; right: 14px; z-index: 3;
-    width: 32px; height: 32px; border-radius: 10px;
-    color: var(--text-mute);
-    background: oklch(0 0 0 / 0.35); backdrop-filter: blur(10px);
-    transition: all 150ms;
-  }
-  .modal-close:hover { background: oklch(0 0 0 / 0.6); color: var(--text); }
-  .modal-body { padding: 28px 30px; overflow: auto; }
-  .modal h3 { font-size: 22px; margin: 0 0 6px; letter-spacing: -0.025em; font-weight: 600; }
-  .modal p.sub { color: var(--text-dim); font-size: 14px; margin: 0 0 22px; }
-  .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
-  .field label { font-size: 11.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-mute); font-family: 'JetBrains Mono', monospace; }
-  .field input, .field select, .field textarea {
-    background: var(--bg); border: 1px solid var(--line-soft); color: var(--text);
-    padding: 12px 14px; border-radius: 10px; font-size: 14.5px;
-    transition: border-color 150ms, box-shadow 150ms;
-  }
-  .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--lime); box-shadow: 0 0 0 3px oklch(0.9 0.22 128 / 0.12); }
-  .field .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .checkgrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
-  .check {
-    display: flex; align-items: center; gap: 8px;
-    padding: 9px 12px;
-    border: 1px solid var(--line-soft); border-radius: 10px;
-    font-size: 13px; color: var(--text-dim);
-    cursor: pointer; transition: all 150ms;
-    background: var(--bg);
-  }
-  .check:hover { color: var(--text); border-color: var(--text-mute); }
-  .check.on { color: var(--lime); border-color: var(--lime); background: oklch(0.9 0.22 128 / 0.06); }
-  .check-dot { width: 14px; height: 14px; border-radius: 4px; border: 1px solid var(--line); display: grid; place-items: center; transition: all 150ms; }
-  .check.on .check-dot { background: var(--lime); border-color: var(--lime); color: #0a1005; }
+      /* ---- modal ---- */
+      .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 100;
+        background: oklch(0.1 0.005 150 / 0.7);
+        backdrop-filter: blur(10px);
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        animation: fadein 220ms ease;
+      }
+      @keyframes fadein {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+      @keyframes pop {
+        from {
+          opacity: 0;
+          transform: translateY(12px) scale(0.98);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+      .modal {
+        width: 100%;
+        max-width: 580px;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 22px;
+        position: relative;
+        animation: pop 260ms cubic-bezier(0.22, 1, 0.36, 1);
+        box-shadow: 0 30px 80px -20px oklch(0 0 0 / 0.6);
+        overflow: hidden;
+        max-height: 86vh;
+        display: flex;
+        flex-direction: column;
+      }
+      .modal-close {
+        position: absolute;
+        top: 14px;
+        right: 14px;
+        z-index: 3;
+        width: 32px;
+        height: 32px;
+        border-radius: 10px;
+        color: var(--text-mute);
+        background: oklch(0 0 0 / 0.35);
+        backdrop-filter: blur(10px);
+        transition: all 150ms;
+      }
+      .modal-close:hover {
+        background: oklch(0 0 0 / 0.6);
+        color: var(--text);
+      }
+      .modal-body {
+        padding: 28px 30px;
+        overflow: auto;
+      }
+      .modal h3 {
+        font-size: 22px;
+        margin: 0 0 6px;
+        letter-spacing: -0.025em;
+        font-weight: 600;
+      }
+      .modal p.sub {
+        color: var(--text-dim);
+        font-size: 14px;
+        margin: 0 0 22px;
+      }
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-bottom: 14px;
+      }
+      .field label {
+        font-size: 11.5px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--text-mute);
+        font-family: 'JetBrains Mono', monospace;
+      }
+      .field input,
+      .field select,
+      .field textarea {
+        background: var(--bg);
+        border: 1px solid var(--line-soft);
+        color: var(--text);
+        padding: 12px 14px;
+        border-radius: 10px;
+        font-size: 14.5px;
+        transition:
+          border-color 150ms,
+          box-shadow 150ms;
+      }
+      .field input:focus,
+      .field select:focus,
+      .field textarea:focus {
+        outline: none;
+        border-color: var(--lime);
+        box-shadow: 0 0 0 3px oklch(0.9 0.22 128 / 0.12);
+      }
+      .field .row2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+      .checkgrid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+      }
+      .check {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 9px 12px;
+        border: 1px solid var(--line-soft);
+        border-radius: 10px;
+        font-size: 13px;
+        color: var(--text-dim);
+        cursor: pointer;
+        transition: all 150ms;
+        background: var(--bg);
+      }
+      .check:hover {
+        color: var(--text);
+        border-color: var(--text-mute);
+      }
+      .check.on {
+        color: var(--lime);
+        border-color: var(--lime);
+        background: oklch(0.9 0.22 128 / 0.06);
+      }
+      .check-dot {
+        width: 14px;
+        height: 14px;
+        border-radius: 4px;
+        border: 1px solid var(--line);
+        display: grid;
+        place-items: center;
+        transition: all 150ms;
+      }
+      .check.on .check-dot {
+        background: var(--lime);
+        border-color: var(--lime);
+        color: #0a1005;
+      }
 
-  .modal-foot { padding: 16px 30px; border-top: 1px solid var(--line-soft); display: flex; gap: 10px; justify-content: flex-end; background: oklch(0.2 0.01 150); }
+      .modal-foot {
+        padding: 16px 30px;
+        border-top: 1px solid var(--line-soft);
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+        background: oklch(0.2 0.01 150);
+      }
 
-  /* ---- detail modal ---- */
-  .detail-cover { aspect-ratio: 16/7; position: relative; overflow: hidden; }
-  .detail-cover .stripes { position: absolute; inset: 0; background-image: repeating-linear-gradient(115deg, transparent 0 22px, oklch(1 0 0 / 0.04) 22px 24px); }
-  .detail-grid-cells { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 18px 0; }
-  .detail-cell { padding: 12px 14px; background: var(--bg); border: 1px solid var(--line-soft); border-radius: 10px; }
-  .detail-cell .k { font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-mute); font-family: 'JetBrains Mono', monospace; }
-  .detail-cell .v { font-size: 14px; font-weight: 500; margin-top: 3px; }
+      /* ---- detail modal ---- */
+      .detail-cover {
+        aspect-ratio: 16/7;
+        position: relative;
+        overflow: hidden;
+      }
+      .detail-cover .stripes {
+        position: absolute;
+        inset: 0;
+        background-image: repeating-linear-gradient(115deg, transparent 0 22px, oklch(1 0 0 / 0.04) 22px 24px);
+      }
+      .detail-grid-cells {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        margin: 18px 0;
+      }
+      .detail-cell {
+        padding: 12px 14px;
+        background: var(--bg);
+        border: 1px solid var(--line-soft);
+        border-radius: 10px;
+      }
+      .detail-cell .k {
+        font-size: 10.5px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--text-mute);
+        font-family: 'JetBrains Mono', monospace;
+      }
+      .detail-cell .v {
+        font-size: 14px;
+        font-weight: 500;
+        margin-top: 3px;
+      }
 
-  /* ---- toast ---- */
-  .toast {
-    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-    padding: 12px 20px;
-    background: var(--surface);
-    border: 1px solid var(--lime);
-    border-radius: 999px;
-    display: inline-flex; align-items: center; gap: 10px;
-    font-size: 13.5px; font-weight: 500;
-    box-shadow: 0 20px 60px -20px var(--lime-glow);
-    z-index: 200;
-    animation: pop 220ms ease;
-  }
-  .toast .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--lime); box-shadow: 0 0 10px var(--lime-glow); }
+      /* ---- toast ---- */
+      .toast {
+        position: fixed;
+        bottom: 24px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 12px 20px;
+        background: var(--surface);
+        border: 1px solid var(--lime);
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 13.5px;
+        font-weight: 500;
+        box-shadow: 0 20px 60px -20px var(--lime-glow);
+        z-index: 200;
+        animation: pop 220ms ease;
+      }
+      .toast .dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--lime);
+        box-shadow: 0 0 10px var(--lime-glow);
+      }
 
-  /* ---- responsive ---- */
-  @media (max-width: 1024px) {
-    .grid { grid-template-columns: repeat(2, 1fr); }
-    .action-bar { grid-template-columns: 1fr 1fr; }
-    .action-bar .search { grid-column: 1 / -1; }
-    .contrib-banner { grid-template-columns: 1fr; }
-  }
-  @media (max-width: 700px) {
-    .container { padding: 0 18px; }
-    .nav-inner { grid-template-columns: auto auto; }
-    .nav-center { display: none; }
-    .grid { grid-template-columns: 1fr; }
-    .action-bar { grid-template-columns: 1fr; }
-    .page-header { padding: 40px 0 28px; }
-    .header-top { flex-direction: column; align-items: start; }
-    .avatar-btn .tier, .avatar-btn .name { display: none; }
-    .avatar-btn { padding: 4px; }
-    .contrib-banner { padding: 28px 22px; }
-    .header-stats { gap: 18px; }
-  }
-</style>
+      /* ---- responsive ---- */
+      @media (max-width: 1024px) {
+        .grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .action-bar {
+          grid-template-columns: 1fr 1fr;
+        }
+        .action-bar .search {
+          grid-column: 1 / -1;
+        }
+        .contrib-banner {
+          grid-template-columns: 1fr;
+        }
+      }
+      @media (max-width: 700px) {
+        .container {
+          padding: 0 18px;
+        }
+        .nav-inner {
+          grid-template-columns: auto auto;
+        }
+        .nav-center {
+          display: none;
+        }
+        .grid {
+          grid-template-columns: 1fr;
+        }
+        .action-bar {
+          grid-template-columns: 1fr;
+        }
+        .page-header {
+          padding: 40px 0 28px;
+        }
+        .header-top {
+          flex-direction: column;
+          align-items: start;
+        }
+        .avatar-btn .tier,
+        .avatar-btn .name {
+          display: none;
+        }
+        .avatar-btn {
+          padding: 4px;
+        }
+        .contrib-banner {
+          padding: 28px 22px;
+        }
+        .header-stats {
+          gap: 18px;
+        }
+      }
+    </style>
 
-<style id="__light-theme">
-  :root {
-    --bg: oklch(0.985 0.004 150) !important;
-    --bg-2: oklch(0.965 0.005 150) !important;
-    --surface: oklch(1 0 0) !important;
-    --surface-2: oklch(0.975 0.005 150) !important;
-    --line: oklch(0.86 0.01 150) !important;
-    --line-soft: oklch(0.9 0.008 150 / 0.85) !important;
-    --text: oklch(0.2 0.012 150) !important;
-    --text-dim: oklch(0.42 0.012 150) !important;
-    --text-mute: oklch(0.58 0.012 150) !important;
-    --lime: oklch(0.7 0.2 130) !important;
-    --lime-dim: oklch(0.6 0.18 130) !important;
-    --lime-glow: oklch(0.7 0.2 130 / 0.32) !important;
-    --amber: oklch(0.62 0.16 60) !important;
-    --amber-dim: oklch(0.55 0.15 60) !important;
-    --amber-glow: oklch(0.62 0.16 60 / 0.32) !important;
-  }
-  body { color: var(--text) !important; background: var(--bg) !important; }
-  .nav { background: oklch(0.985 0.004 150 / 0.82) !important; border-bottom-color: var(--line-soft) !important; }
-  /* surfaces */
-  .card, .event-card, .venue-card, .live-card, .featured, .modal, .tweaks, .modal-tab.active, .toast, .dropdown-menu, .menu-dropdown {
-    background: var(--surface) !important;
-    border-color: var(--line) !important;
-  }
-  .now-playing, .modal-tabs, .modal-foot, .tabs, .view-toggle, .field input, .field select, .field textarea, .check, .search, .sort-select, .select-box, .detail-cell {
-    background: var(--bg) !important;
-    border-color: var(--line) !important;
-  }
-  .modal-foot { background: var(--bg-2) !important; }
-  /* white-tint overlays on now-light surfaces -> subtle dark tint */
-  .tag, .pill, .chip { background: oklch(0 0 0 / 0.025) !important; }
-  /* primary lime button: white text */
-  .btn-primary { color: #fff !important; }
-  .logo-mark { color: #fff !important; }
-  .logo-mark svg path { stroke: #fff !important; }
-  .logo-mark svg circle { fill: #fff !important; }
-  .avatar, .speaker-avatar, .mini-avatar { color: #fff !important; }
-  .pill.active { color: #fff !important; background: var(--lime) !important; }
-  .pill.active .count { background: oklch(0 0 0 / 0.2) !important; color: #fff !important; }
-  .tab.active { color: #fff !important; }
-  .page-btn.active { color: #fff !important; }
-  .modal-tab.active { background: var(--surface) !important; }
-  .btn-ghost { background: transparent !important; }
-  .btn-ghost:hover { background: oklch(0 0 0 / 0.04) !important; border-color: var(--text-mute) !important; }
-  .btn-white-outline { color: var(--text) !important; border-color: var(--line) !important; }
-  .btn-white-outline:hover { background: oklch(0 0 0 / 0.04) !important; }
-  /* hero hl gradient: keep darker lime so it's readable on white */
-  .hero .hl { background: linear-gradient(100deg, oklch(0.55 0.2 130) 20%, oklch(0.7 0.2 130) 70%) !important; -webkit-background-clip: text !important; background-clip: text !important; color: transparent !important; }
-  /* status badges that previously sat on dark visuals — keep dark/translucent */
-  .date-badge, .status-pill, .rating-badge, .capacity-badge, .ev-chip, .modal-close { background: oklch(0 0 0 / 0.55) !important; }
-  .date-badge .day { color: #fff !important; }
-  /* page mesh & hero mesh — soften so they don't blow out on white */
-  .mesh::before, .page-mesh::before { background: radial-gradient(circle, oklch(0.7 0.2 130 / 0.22), transparent 65%) !important; }
-  .mesh::after, .page-mesh::after { background: radial-gradient(circle, oklch(0.62 0.16 60 / 0.18), transparent 65%) !important; }
-  .grid-overlay { opacity: 0.5 !important; }
-  /* CTA banner background -> light */
-  .cta { background: linear-gradient(180deg, oklch(0.985 0.004 150), oklch(0.95 0.008 150)) !important; }
-  .cta::after { background: radial-gradient(circle at 15% 20%, oklch(0.7 0.2 130 / 0.12), transparent 45%), radial-gradient(circle at 85% 80%, oklch(0.62 0.16 60 / 0.1), transparent 45%) !important; }
-  /* Featured banner */
-  .featured { background: linear-gradient(180deg, oklch(1 0 0), oklch(0.97 0.005 150)) !important; }
-  .featured::before { background: radial-gradient(circle at 85% 20%, oklch(0.62 0.16 60 / 0.1), transparent 45%) !important; }
-  /* Live card */
-  .live-card { background: linear-gradient(180deg, oklch(1 0 0), oklch(0.97 0.005 150)) !important; }
-  .live-card::before { background: radial-gradient(circle at 90% 10%, oklch(0.62 0.16 60 / 0.1), transparent 45%) !important; }
-  /* contribution banner */
-  .contrib-banner { background: linear-gradient(180deg, oklch(1 0 0), oklch(0.97 0.005 150)) !important; }
-  /* card visuals (placeholders) -> keep dark for contrast */
-  .event-visual, .featured-visual, .live-visual, .venue-visual, .detail-cover {
-    background: linear-gradient(135deg, oklch(0.22 0.012 150), oklch(0.16 0.008 150)) !important;
-  }
-  .event-visual .ev-label, .live-visual .label-art, .featured-visual .label, .venue-visual .ph-label {
-    color: oklch(1 1 1 / 0.45) !important;
-  }
-  /* modal backdrop: fog */
-  .modal-backdrop { background: oklch(0.5 0.01 150 / 0.45) !important; }
-  /* footer socials/etc — make sure borders visible */
-  .social-btn, .view-btn, .menu-btn, .page-btn { border-color: var(--line) !important; }
-  /* ghost & outline button text on light */
-  .btn-ghost { color: var(--text) !important; }
-  /* dotted dividers */
-  .event-foot, .action-row { border-top-color: var(--line) !important; }
-  /* hero stats border */
-  .hero-stats { border-color: var(--line) !important; }
-  .hero-stats > div { border-right-color: var(--line) !important; }
-  /* date-badge mo color: keep lime */
-  .date-badge .mo { color: oklch(0.85 0.22 130) !important; }
-  /* modal close on light cover */
-  .modal-close { color: #fff !important; }
-  /* search kbd */
-  .search .kbd { background: oklch(0 0 0 / 0.04) !important; border-color: var(--line) !important; }
-  /* tweak panel inputs */
-  .tweak-row select, .tweak-row input[type="range"] { background: var(--bg) !important; border-color: var(--line) !important; color: var(--text) !important; }
-  /* live now-playing pulse */
-  .pulse, .pulse-dot { box-shadow: 0 0 8px var(--amber-glow); }
-  /* live tag bg */
-  .live-tag, .featured-tag { background: oklch(0.62 0.16 60 / 0.1) !important; }
-  /* contributor color */
-  .contributor .uname { color: var(--text-dim) !important; }
-  /* outlined lime btn */
-  .btn-outline-lime { background: oklch(0.7 0.2 130 / 0.06) !important; }
-  /* CTA gradient border use less bright colors */
-  .cta::before { background: linear-gradient(135deg, var(--lime) 0%, transparent 40%, transparent 60%, var(--amber) 100%) !important; }
-  /* event-card dashed footer border */
-  .event-foot { border-top-style: dashed !important; }
-  /* nav active underline glow softer */
-  .nav-link.active::after { box-shadow: 0 0 10px var(--lime-glow) !important; }
-  /* dropdowns shadow */
-  .dropdown-menu, .menu-dropdown { box-shadow: 0 12px 40px -16px oklch(0 0 0 / 0.18) !important; }
-  /* avatar btn hover */
-  .avatar-btn:hover { background: oklch(0 0 0 / 0.03) !important; }
-  /* event hover shadow tint -> green tint, but lighter */
-  .event-card:hover, .venue-card:hover { box-shadow: 0 18px 50px -22px oklch(0.7 0.2 130 / 0.3) !important; }
-  /* event-card.urgent hover */
-  .event-card.urgent:hover { box-shadow: 0 18px 50px -22px oklch(0.62 0.16 60 / 0.32) !important; }
-  /* tag border visibility */
-  .tag { border-color: var(--line) !important; color: var(--text-dim) !important; }
-  /* seat-bar bg */
-  .seat-bar-wrap { background: oklch(0 0 0 / 0.06) !important; }
-  /* load progress bg */
-  .load-progress { background: oklch(0 0 0 / 0.06) !important; }
-  /* empty state */
-  .empty { background: oklch(0 0 0 / 0.015) !important; }
-  .empty .empty-icon { background: oklch(0 0 0 / 0.04) !important; }
-  /* stat & header counters */
-  .stat-cell .num.lime, .header-meta .count { color: var(--lime) !important; }
-  /* check on (lime) */
-  .check.on { background: oklch(0.7 0.2 130 / 0.08) !important; }
-  .check-dot { border-color: var(--line) !important; }
-  /* event-card hover border */
-  .event-card:hover { border-color: oklch(0.7 0.2 130 / 0.5) !important; }
-  /* modal text inputs focus */
-  .field input:focus, .field select:focus, .field textarea:focus, .search:focus-within { border-color: var(--lime) !important; box-shadow: 0 0 0 3px oklch(0.7 0.2 130 / 0.15) !important; }
-</style>
+    <style id="__light-theme">
+      :root {
+        --bg: oklch(0.985 0.004 150) !important;
+        --bg-2: oklch(0.965 0.005 150) !important;
+        --surface: oklch(1 0 0) !important;
+        --surface-2: oklch(0.975 0.005 150) !important;
+        --line: oklch(0.86 0.01 150) !important;
+        --line-soft: oklch(0.9 0.008 150 / 0.85) !important;
+        --text: oklch(0.2 0.012 150) !important;
+        --text-dim: oklch(0.42 0.012 150) !important;
+        --text-mute: oklch(0.58 0.012 150) !important;
+        --lime: oklch(0.7 0.2 130) !important;
+        --lime-dim: oklch(0.6 0.18 130) !important;
+        --lime-glow: oklch(0.7 0.2 130 / 0.32) !important;
+        --amber: oklch(0.62 0.16 60) !important;
+        --amber-dim: oklch(0.55 0.15 60) !important;
+        --amber-glow: oklch(0.62 0.16 60 / 0.32) !important;
+      }
+      body {
+        color: var(--text) !important;
+        background: var(--bg) !important;
+      }
+      .nav {
+        background: oklch(0.985 0.004 150 / 0.82) !important;
+        border-bottom-color: var(--line-soft) !important;
+      }
+      /* surfaces */
+      .card,
+      .event-card,
+      .venue-card,
+      .live-card,
+      .featured,
+      .modal,
+      .tweaks,
+      .modal-tab.active,
+      .toast,
+      .dropdown-menu,
+      .menu-dropdown {
+        background: var(--surface) !important;
+        border-color: var(--line) !important;
+      }
+      .now-playing,
+      .modal-tabs,
+      .modal-foot,
+      .tabs,
+      .view-toggle,
+      .field input,
+      .field select,
+      .field textarea,
+      .check,
+      .search,
+      .sort-select,
+      .select-box,
+      .detail-cell {
+        background: var(--bg) !important;
+        border-color: var(--line) !important;
+      }
+      .modal-foot {
+        background: var(--bg-2) !important;
+      }
+      /* white-tint overlays on now-light surfaces -> subtle dark tint */
+      .tag,
+      .pill,
+      .chip {
+        background: oklch(0 0 0 / 0.025) !important;
+      }
+      /* primary lime button: white text */
+      .btn-primary {
+        color: #fff !important;
+      }
+      .logo-mark {
+        color: #fff !important;
+      }
+      .logo-mark svg path {
+        stroke: #fff !important;
+      }
+      .logo-mark svg circle {
+        fill: #fff !important;
+      }
+      .avatar,
+      .speaker-avatar,
+      .mini-avatar {
+        color: #fff !important;
+      }
+      .pill.active {
+        color: #fff !important;
+        background: var(--lime) !important;
+      }
+      .pill.active .count {
+        background: oklch(0 0 0 / 0.2) !important;
+        color: #fff !important;
+      }
+      .tab.active {
+        color: #fff !important;
+      }
+      .page-btn.active {
+        color: #fff !important;
+      }
+      .modal-tab.active {
+        background: var(--surface) !important;
+      }
+      .btn-ghost {
+        background: transparent !important;
+      }
+      .btn-ghost:hover {
+        background: oklch(0 0 0 / 0.04) !important;
+        border-color: var(--text-mute) !important;
+      }
+      .btn-white-outline {
+        color: var(--text) !important;
+        border-color: var(--line) !important;
+      }
+      .btn-white-outline:hover {
+        background: oklch(0 0 0 / 0.04) !important;
+      }
+      /* hero hl gradient: keep darker lime so it's readable on white */
+      .hero .hl {
+        background: linear-gradient(100deg, oklch(0.55 0.2 130) 20%, oklch(0.7 0.2 130) 70%) !important;
+        -webkit-background-clip: text !important;
+        background-clip: text !important;
+        color: transparent !important;
+      }
+      /* status badges that previously sat on dark visuals — keep dark/translucent */
+      .date-badge,
+      .status-pill,
+      .rating-badge,
+      .capacity-badge,
+      .ev-chip,
+      .modal-close {
+        background: oklch(0 0 0 / 0.55) !important;
+      }
+      .date-badge .day {
+        color: #fff !important;
+      }
+      /* page mesh & hero mesh — soften so they don't blow out on white */
+      .mesh::before,
+      .page-mesh::before {
+        background: radial-gradient(circle, oklch(0.7 0.2 130 / 0.22), transparent 65%) !important;
+      }
+      .mesh::after,
+      .page-mesh::after {
+        background: radial-gradient(circle, oklch(0.62 0.16 60 / 0.18), transparent 65%) !important;
+      }
+      .grid-overlay {
+        opacity: 0.5 !important;
+      }
+      /* CTA banner background -> light */
+      .cta {
+        background: linear-gradient(180deg, oklch(0.985 0.004 150), oklch(0.95 0.008 150)) !important;
+      }
+      .cta::after {
+        background:
+          radial-gradient(circle at 15% 20%, oklch(0.7 0.2 130 / 0.12), transparent 45%),
+          radial-gradient(circle at 85% 80%, oklch(0.62 0.16 60 / 0.1), transparent 45%) !important;
+      }
+      /* Featured banner */
+      .featured {
+        background: linear-gradient(180deg, oklch(1 0 0), oklch(0.97 0.005 150)) !important;
+      }
+      .featured::before {
+        background: radial-gradient(circle at 85% 20%, oklch(0.62 0.16 60 / 0.1), transparent 45%) !important;
+      }
+      /* Live card */
+      .live-card {
+        background: linear-gradient(180deg, oklch(1 0 0), oklch(0.97 0.005 150)) !important;
+      }
+      .live-card::before {
+        background: radial-gradient(circle at 90% 10%, oklch(0.62 0.16 60 / 0.1), transparent 45%) !important;
+      }
+      /* contribution banner */
+      .contrib-banner {
+        background: linear-gradient(180deg, oklch(1 0 0), oklch(0.97 0.005 150)) !important;
+      }
+      /* card visuals (placeholders) -> keep dark for contrast */
+      .event-visual,
+      .featured-visual,
+      .live-visual,
+      .venue-visual,
+      .detail-cover {
+        background: linear-gradient(135deg, oklch(0.22 0.012 150), oklch(0.16 0.008 150)) !important;
+      }
+      .event-visual .ev-label,
+      .live-visual .label-art,
+      .featured-visual .label,
+      .venue-visual .ph-label {
+        color: oklch(1 1 1 / 0.45) !important;
+      }
+      /* modal backdrop: fog */
+      .modal-backdrop {
+        background: oklch(0.5 0.01 150 / 0.45) !important;
+      }
+      /* footer socials/etc — make sure borders visible */
+      .social-btn,
+      .view-btn,
+      .menu-btn,
+      .page-btn {
+        border-color: var(--line) !important;
+      }
+      /* ghost & outline button text on light */
+      .btn-ghost {
+        color: var(--text) !important;
+      }
+      /* dotted dividers */
+      .event-foot,
+      .action-row {
+        border-top-color: var(--line) !important;
+      }
+      /* hero stats border */
+      .hero-stats {
+        border-color: var(--line) !important;
+      }
+      .hero-stats > div {
+        border-right-color: var(--line) !important;
+      }
+      /* date-badge mo color: keep lime */
+      .date-badge .mo {
+        color: oklch(0.85 0.22 130) !important;
+      }
+      /* modal close on light cover */
+      .modal-close {
+        color: #fff !important;
+      }
+      /* search kbd */
+      .search .kbd {
+        background: oklch(0 0 0 / 0.04) !important;
+        border-color: var(--line) !important;
+      }
+      /* tweak panel inputs */
+      .tweak-row select,
+      .tweak-row input[type='range'] {
+        background: var(--bg) !important;
+        border-color: var(--line) !important;
+        color: var(--text) !important;
+      }
+      /* live now-playing pulse */
+      .pulse,
+      .pulse-dot {
+        box-shadow: 0 0 8px var(--amber-glow);
+      }
+      /* live tag bg */
+      .live-tag,
+      .featured-tag {
+        background: oklch(0.62 0.16 60 / 0.1) !important;
+      }
+      /* contributor color */
+      .contributor .uname {
+        color: var(--text-dim) !important;
+      }
+      /* outlined lime btn */
+      .btn-outline-lime {
+        background: oklch(0.7 0.2 130 / 0.06) !important;
+      }
+      /* CTA gradient border use less bright colors */
+      .cta::before {
+        background: linear-gradient(135deg, var(--lime) 0%, transparent 40%, transparent 60%, var(--amber) 100%) !important;
+      }
+      /* event-card dashed footer border */
+      .event-foot {
+        border-top-style: dashed !important;
+      }
+      /* nav active underline glow softer */
+      .nav-link.active::after {
+        box-shadow: 0 0 10px var(--lime-glow) !important;
+      }
+      /* dropdowns shadow */
+      .dropdown-menu,
+      .menu-dropdown {
+        box-shadow: 0 12px 40px -16px oklch(0 0 0 / 0.18) !important;
+      }
+      /* avatar btn hover */
+      .avatar-btn:hover {
+        background: oklch(0 0 0 / 0.03) !important;
+      }
+      /* event hover shadow tint -> green tint, but lighter */
+      .event-card:hover,
+      .venue-card:hover {
+        box-shadow: 0 18px 50px -22px oklch(0.7 0.2 130 / 0.3) !important;
+      }
+      /* event-card.urgent hover */
+      .event-card.urgent:hover {
+        box-shadow: 0 18px 50px -22px oklch(0.62 0.16 60 / 0.32) !important;
+      }
+      /* tag border visibility */
+      .tag {
+        border-color: var(--line) !important;
+        color: var(--text-dim) !important;
+      }
+      /* seat-bar bg */
+      .seat-bar-wrap {
+        background: oklch(0 0 0 / 0.06) !important;
+      }
+      /* load progress bg */
+      .load-progress {
+        background: oklch(0 0 0 / 0.06) !important;
+      }
+      /* empty state */
+      .empty {
+        background: oklch(0 0 0 / 0.015) !important;
+      }
+      .empty .empty-icon {
+        background: oklch(0 0 0 / 0.04) !important;
+      }
+      /* stat & header counters */
+      .stat-cell .num.lime,
+      .header-meta .count {
+        color: var(--lime) !important;
+      }
+      /* check on (lime) */
+      .check.on {
+        background: oklch(0.7 0.2 130 / 0.08) !important;
+      }
+      .check-dot {
+        border-color: var(--line) !important;
+      }
+      /* event-card hover border */
+      .event-card:hover {
+        border-color: oklch(0.7 0.2 130 / 0.5) !important;
+      }
+      /* modal text inputs focus */
+      .field input:focus,
+      .field select:focus,
+      .field textarea:focus,
+      .search:focus-within {
+        border-color: var(--lime) !important;
+        box-shadow: 0 0 0 3px oklch(0.7 0.2 130 / 0.15) !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
 
-</head>
-<body>
-<div id="root"></div>
+    <script type="text/babel" data-presets="react">
+      const { useState, useEffect, useMemo, useRef } = React;
 
-<script type="text/babel" data-presets="react">
-const { useState, useEffect, useMemo, useRef } = React;
+      const TWEAKS_DEFAULTS = /*EDITMODE-BEGIN*/ {
+        showContribBanner: true,
+        cardImage: 'mesh',
+        density: 'comfortable',
+        bannerVariant: 'featured',
+        badgeStyle: 'floating',
+        accentMix: 'lime-amber',
+        showBgMesh: true,
+        cardDensity: 'compact',
+        heroVariant: 'centered'
+      }; /*EDITMODE-END*/
 
-const TWEAKS_DEFAULTS = /*EDITMODE-BEGIN*/{
-  "showContribBanner": true,
-  "cardImage": "mesh",
-  "density": "comfortable",
-  "bannerVariant": "featured",
-  "badgeStyle": "floating",
-  "accentMix": "lime-amber",
-  "showBgMesh": true,
-  "cardDensity": "compact",
-  "heroVariant": "centered"
-}/*EDITMODE-END*/;
+      /* ---------- Icons ---------- */
+      const Icon = ({ name, size = 16, fill = false }) => {
+        const s = size;
+        const common = {
+          width: s,
+          height: s,
+          viewBox: '0 0 24 24',
+          fill: fill ? 'currentColor' : 'none',
+          stroke: 'currentColor',
+          strokeWidth: 1.75,
+          strokeLinecap: 'round',
+          strokeLinejoin: 'round'
+        };
+        switch (name) {
+          case 'search':
+            return (
+              <svg {...common}>
+                <circle cx="11" cy="11" r="7" />
+                <path d="m21 21-4.3-4.3" />
+              </svg>
+            );
+          case 'arrow-right':
+            return (
+              <svg {...common}>
+                <path d="M5 12h14M13 6l6 6-6 6" />
+              </svg>
+            );
+          case 'arrow-left':
+            return (
+              <svg {...common}>
+                <path d="M19 12H5M11 6l-6 6 6 6" />
+              </svg>
+            );
+          case 'pin':
+            return (
+              <svg {...common}>
+                <path d="M12 21s-7-6.5-7-12a7 7 0 1 1 14 0c0 5.5-7 12-7 12z" />
+                <circle cx="12" cy="9" r="2.5" />
+              </svg>
+            );
+          case 'users':
+            return (
+              <svg {...common}>
+                <path d="M16 20v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M22 20v-2a4 4 0 0 0-3-3.87" />
+                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+              </svg>
+            );
+          case 'star':
+            return (
+              <svg viewBox="0 0 24 24" width={s} height={s} fill="currentColor">
+                <path d="M12 2 15 9l7.5.6-5.7 5 1.7 7.4L12 18l-6.5 4 1.7-7.4L1.5 9.6 9 9z" />
+              </svg>
+            );
+          case 'plus':
+            return (
+              <svg {...common}>
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+            );
+          case 'flag':
+            return (
+              <svg {...common}>
+                <path d="M4 21V4h13l-2 4 2 4H4" />
+              </svg>
+            );
+          case 'edit':
+            return (
+              <svg {...common}>
+                <path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" />
+              </svg>
+            );
+          case 'share':
+            return (
+              <svg {...common}>
+                <circle cx="18" cy="5" r="3" />
+                <circle cx="6" cy="12" r="3" />
+                <circle cx="18" cy="19" r="3" />
+                <path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4" />
+              </svg>
+            );
+          case 'dots':
+            return (
+              <svg {...common}>
+                <circle cx="12" cy="5" r="1" fill="currentColor" />
+                <circle cx="12" cy="12" r="1" fill="currentColor" />
+                <circle cx="12" cy="19" r="1" fill="currentColor" />
+              </svg>
+            );
+          case 'chevron-down':
+            return (
+              <svg {...common}>
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            );
+          case 'x':
+            return (
+              <svg {...common}>
+                <path d="M18 6 6 18M6 6l12 12" />
+              </svg>
+            );
+          case 'check':
+            return (
+              <svg {...common}>
+                <path d="M20 6 9 17l-5-5" />
+              </svg>
+            );
+          case 'wifi':
+            return (
+              <svg {...common}>
+                <path d="M5 12a10 10 0 0 1 14 0M8.5 15.5a5 5 0 0 1 7 0M12 19h.01" />
+              </svg>
+            );
+          case 'parking':
+            return (
+              <svg {...common}>
+                <rect x="4" y="4" width="16" height="16" rx="2" />
+                <path d="M10 16V8h3a2.5 2.5 0 0 1 0 5h-3" />
+              </svg>
+            );
+          case 'coffee':
+            return (
+              <svg {...common}>
+                <path d="M17 8h1a4 4 0 0 1 0 8h-1M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V8z" />
+                <path d="M6 2v3M10 2v3M14 2v3" />
+              </svg>
+            );
+          case 'mic':
+            return (
+              <svg {...common}>
+                <rect x="9" y="2" width="6" height="12" rx="3" />
+                <path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v4" />
+              </svg>
+            );
+          case 'twitter':
+            return (
+              <svg {...common}>
+                <path d="M18 4h3l-7.5 8.5L22 22h-6.5l-5-6.5L5 22H2l8-9L2 4h6.5l4.5 6L18 4z" fill="currentColor" stroke="none" />
+              </svg>
+            );
+          case 'discord':
+            return (
+              <svg viewBox="0 0 24 24" width={s} height={s} fill="currentColor">
+                <path d="M20.3 4.4a16 16 0 0 0-4-1.3l-.2.4a14 14 0 0 0-4.2 0l-.2-.4a16 16 0 0 0-4 1.3 17.7 17.7 0 0 0-3 11.7 16 16 0 0 0 4.9 2.5l1-1.5a11 11 0 0 1-1.7-.8l.4-.3a11.5 11.5 0 0 0 9.6 0l.4.3a11 11 0 0 1-1.7.8l1 1.5a16 16 0 0 0 5-2.5 17.6 17.6 0 0 0-3-11.7zM9 14c-1 0-1.8-.9-1.8-2s.8-2 1.8-2 1.8.9 1.8 2-.8 2-1.8 2zm6 0c-1 0-1.8-.9-1.8-2s.8-2 1.8-2 1.8.9 1.8 2-.8 2-1.8 2z" />
+              </svg>
+            );
+          case 'telegram':
+            return (
+              <svg viewBox="0 0 24 24" width={s} height={s} fill="currentColor">
+                <path d="M21.5 4.3 2.8 11.6c-1 .4-1 1 0 1.3l4.4 1.4 1.7 5.3c.2.6.4.8 1 .6l3-2.5 4.4 3.2c.9.5 1.5.2 1.7-.8l3-14c.3-1.2-.5-1.7-1.5-1.3zm-3.3 3.4-8.6 7.7-.3 3.6-1.7-5.3 10.6-6.7c.5-.3.9-.1.5.7z" />
+              </svg>
+            );
+          default:
+            return null;
+        }
+      };
 
-/* ---------- Icons ---------- */
-const Icon = ({ name, size = 16, fill = false }) => {
-  const s = size;
-  const common = { width: s, height: s, viewBox: "0 0 24 24", fill: fill ? "currentColor" : "none", stroke: "currentColor", strokeWidth: 1.75, strokeLinecap: "round", strokeLinejoin: "round" };
-  switch (name) {
-    case "search": return <svg {...common}><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>;
-    case "arrow-right": return <svg {...common}><path d="M5 12h14M13 6l6 6-6 6"/></svg>;
-    case "arrow-left": return <svg {...common}><path d="M19 12H5M11 6l-6 6 6 6"/></svg>;
-    case "pin": return <svg {...common}><path d="M12 21s-7-6.5-7-12a7 7 0 1 1 14 0c0 5.5-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/></svg>;
-    case "users": return <svg {...common}><path d="M16 20v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 20v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>;
-    case "star": return <svg viewBox="0 0 24 24" width={s} height={s} fill="currentColor"><path d="M12 2 15 9l7.5.6-5.7 5 1.7 7.4L12 18l-6.5 4 1.7-7.4L1.5 9.6 9 9z"/></svg>;
-    case "plus": return <svg {...common}><path d="M12 5v14M5 12h14"/></svg>;
-    case "flag": return <svg {...common}><path d="M4 21V4h13l-2 4 2 4H4"/></svg>;
-    case "edit": return <svg {...common}><path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>;
-    case "share": return <svg {...common}><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>;
-    case "dots": return <svg {...common}><circle cx="12" cy="5" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="12" cy="19" r="1" fill="currentColor"/></svg>;
-    case "chevron-down": return <svg {...common}><path d="m6 9 6 6 6-6"/></svg>;
-    case "x": return <svg {...common}><path d="M18 6 6 18M6 6l12 12"/></svg>;
-    case "check": return <svg {...common}><path d="M20 6 9 17l-5-5"/></svg>;
-    case "wifi": return <svg {...common}><path d="M5 12a10 10 0 0 1 14 0M8.5 15.5a5 5 0 0 1 7 0M12 19h.01"/></svg>;
-    case "parking": return <svg {...common}><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M10 16V8h3a2.5 2.5 0 0 1 0 5h-3"/></svg>;
-    case "coffee": return <svg {...common}><path d="M17 8h1a4 4 0 0 1 0 8h-1M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V8z"/><path d="M6 2v3M10 2v3M14 2v3"/></svg>;
-    case "mic": return <svg {...common}><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v4"/></svg>;
-    case "twitter": return <svg {...common}><path d="M18 4h3l-7.5 8.5L22 22h-6.5l-5-6.5L5 22H2l8-9L2 4h6.5l4.5 6L18 4z" fill="currentColor" stroke="none"/></svg>;
-    case "discord": return <svg viewBox="0 0 24 24" width={s} height={s} fill="currentColor"><path d="M20.3 4.4a16 16 0 0 0-4-1.3l-.2.4a14 14 0 0 0-4.2 0l-.2-.4a16 16 0 0 0-4 1.3 17.7 17.7 0 0 0-3 11.7 16 16 0 0 0 4.9 2.5l1-1.5a11 11 0 0 1-1.7-.8l.4-.3a11.5 11.5 0 0 0 9.6 0l.4.3a11 11 0 0 1-1.7.8l1 1.5a16 16 0 0 0 5-2.5 17.6 17.6 0 0 0-3-11.7zM9 14c-1 0-1.8-.9-1.8-2s.8-2 1.8-2 1.8.9 1.8 2-.8 2-1.8 2zm6 0c-1 0-1.8-.9-1.8-2s.8-2 1.8-2 1.8.9 1.8 2-.8 2-1.8 2z"/></svg>;
-    case "telegram": return <svg viewBox="0 0 24 24" width={s} height={s} fill="currentColor"><path d="M21.5 4.3 2.8 11.6c-1 .4-1 1 0 1.3l4.4 1.4 1.7 5.3c.2.6.4.8 1 .6l3-2.5 4.4 3.2c.9.5 1.5.2 1.7-.8l3-14c.3-1.2-.5-1.7-1.5-1.3zm-3.3 3.4-8.6 7.7-.3 3.6-1.7-5.3 10.6-6.7c.5-.3.9-.1.5.7z"/></svg>;
-    default: return null;
-  }
-};
+      /* ---------- Data ---------- */
+      const VENUES = [
+        {
+          id: 1,
+          name: 'SMX Convention Center',
+          location: 'Lanang, Davao City',
+          capacity: 500,
+          type: 'Convention',
+          rating: 4.9,
+          reviews: 42,
+          contributor: 'camille.eth',
+          added: 'Mar 12, 2026',
+          tags: ['AV Ready', 'Parking'],
+          amenities: ['wifi', 'parking', 'mic'],
+          orb: 'lime',
+          angle: '115deg'
+        },
+        {
+          id: 2,
+          name: 'Marco Polo Grand Ballroom',
+          location: 'Bajada, Davao City',
+          capacity: 350,
+          type: 'Ballroom',
+          rating: 4.8,
+          reviews: 28,
+          contributor: 'nico.builder',
+          added: 'Feb 28, 2026',
+          tags: ['Premium', 'Catering'],
+          amenities: ['wifi', 'parking', 'coffee', 'mic'],
+          orb: 'amber',
+          angle: '105deg'
+        },
+        {
+          id: 3,
+          name: 'Matina Town Square — Pavilion',
+          location: 'Matina, Davao City',
+          capacity: 120,
+          type: 'Open Venue',
+          rating: 4.6,
+          reviews: 36,
+          contributor: 'davao.defi',
+          added: 'Mar 04, 2026',
+          tags: ['Outdoor', 'Casual'],
+          amenities: ['wifi', 'parking', 'coffee'],
+          orb: 'lime',
+          angle: '125deg'
+        },
+        {
+          id: 4,
+          name: 'Ateneo de Davao — Finster Hall',
+          location: 'Roxas Ave, Davao City',
+          capacity: 80,
+          type: 'Auditorium',
+          rating: 4.7,
+          reviews: 19,
+          contributor: 'profs.chain',
+          added: 'Mar 18, 2026',
+          tags: ['Workshop', 'AV Ready'],
+          amenities: ['wifi', 'mic'],
+          orb: 'lime',
+          angle: '110deg'
+        },
+        {
+          id: 5,
+          name: 'Park Inn Davao — Function Room',
+          location: 'JP Laurel Ave',
+          capacity: 150,
+          type: 'Hotel',
+          rating: 4.5,
+          reviews: 23,
+          contributor: 'kate.pm',
+          added: 'Feb 20, 2026',
+          tags: ['Catering', 'A/C'],
+          amenities: ['wifi', 'parking', 'coffee', 'mic'],
+          orb: 'amber',
+          angle: '100deg'
+        },
+        {
+          id: 6,
+          name: 'Abreeza Ayala — Activity Center',
+          location: 'J.P. Laurel Ave',
+          capacity: 200,
+          type: 'Mall Venue',
+          rating: 4.4,
+          reviews: 31,
+          contributor: 'miguel.dev',
+          added: 'Mar 09, 2026',
+          tags: ['Foot Traffic', 'Retail'],
+          amenities: ['wifi', 'parking', 'coffee'],
+          orb: 'lime',
+          angle: '135deg'
+        },
+        {
+          id: 7,
+          name: 'Dusit Thani Davao — Boardroom',
+          location: 'Lanang, Davao City',
+          capacity: 40,
+          type: 'Boardroom',
+          rating: 4.9,
+          reviews: 12,
+          contributor: 'reg.investor',
+          added: 'Mar 22, 2026',
+          tags: ['Executive', 'Premium'],
+          amenities: ['wifi', 'coffee', 'mic'],
+          orb: 'amber',
+          angle: '95deg'
+        },
+        {
+          id: 8,
+          name: 'MAFBEX Grounds — Hall A',
+          location: 'Diversion Rd',
+          capacity: 800,
+          type: 'Convention',
+          rating: 4.3,
+          reviews: 18,
+          contributor: 'hacks.ph',
+          added: 'Mar 01, 2026',
+          tags: ['Hackathon', 'Large Scale'],
+          amenities: ['wifi', 'parking'],
+          orb: 'lime',
+          angle: '120deg'
+        },
+        {
+          id: 9,
+          name: 'Seda Abreeza — Studio Loft',
+          location: 'Abreeza Complex',
+          capacity: 60,
+          type: 'Studio',
+          rating: 4.7,
+          reviews: 15,
+          contributor: 'aria.jpeg',
+          added: 'Feb 14, 2026',
+          tags: ['Intimate', 'Mixer'],
+          amenities: ['wifi', 'coffee', 'mic'],
+          orb: 'amber',
+          angle: '108deg'
+        }
+      ];
 
-/* ---------- Data ---------- */
-const VENUES = [
-  { id: 1, name: "SMX Convention Center", location: "Lanang, Davao City", capacity: 500, type: "Convention", rating: 4.9, reviews: 42, contributor: "camille.eth", added: "Mar 12, 2026", tags: ["AV Ready", "Parking"], amenities: ["wifi","parking","mic"], orb: "lime", angle: "115deg" },
-  { id: 2, name: "Marco Polo Grand Ballroom", location: "Bajada, Davao City", capacity: 350, type: "Ballroom", rating: 4.8, reviews: 28, contributor: "nico.builder", added: "Feb 28, 2026", tags: ["Premium", "Catering"], amenities: ["wifi","parking","coffee","mic"], orb: "amber", angle: "105deg" },
-  { id: 3, name: "Matina Town Square — Pavilion", location: "Matina, Davao City", capacity: 120, type: "Open Venue", rating: 4.6, reviews: 36, contributor: "davao.defi", added: "Mar 04, 2026", tags: ["Outdoor", "Casual"], amenities: ["wifi","parking","coffee"], orb: "lime", angle: "125deg" },
-  { id: 4, name: "Ateneo de Davao — Finster Hall", location: "Roxas Ave, Davao City", capacity: 80, type: "Auditorium", rating: 4.7, reviews: 19, contributor: "profs.chain", added: "Mar 18, 2026", tags: ["Workshop", "AV Ready"], amenities: ["wifi","mic"], orb: "lime", angle: "110deg" },
-  { id: 5, name: "Park Inn Davao — Function Room", location: "JP Laurel Ave", capacity: 150, type: "Hotel", rating: 4.5, reviews: 23, contributor: "kate.pm", added: "Feb 20, 2026", tags: ["Catering", "A/C"], amenities: ["wifi","parking","coffee","mic"], orb: "amber", angle: "100deg" },
-  { id: 6, name: "Abreeza Ayala — Activity Center", location: "J.P. Laurel Ave", capacity: 200, type: "Mall Venue", rating: 4.4, reviews: 31, contributor: "miguel.dev", added: "Mar 09, 2026", tags: ["Foot Traffic", "Retail"], amenities: ["wifi","parking","coffee"], orb: "lime", angle: "135deg" },
-  { id: 7, name: "Dusit Thani Davao — Boardroom", location: "Lanang, Davao City", capacity: 40, type: "Boardroom", rating: 4.9, reviews: 12, contributor: "reg.investor", added: "Mar 22, 2026", tags: ["Executive", "Premium"], amenities: ["wifi","coffee","mic"], orb: "amber", angle: "95deg" },
-  { id: 8, name: "MAFBEX Grounds — Hall A", location: "Diversion Rd", capacity: 800, type: "Convention", rating: 4.3, reviews: 18, contributor: "hacks.ph", added: "Mar 01, 2026", tags: ["Hackathon", "Large Scale"], amenities: ["wifi","parking"], orb: "lime", angle: "120deg" },
-  { id: 9, name: "Seda Abreeza — Studio Loft", location: "Abreeza Complex", capacity: 60, type: "Studio", rating: 4.7, reviews: 15, contributor: "aria.jpeg", added: "Feb 14, 2026", tags: ["Intimate", "Mixer"], amenities: ["wifi","coffee","mic"], orb: "amber", angle: "108deg" },
-];
+      const CAPACITY_FILTERS = [
+        { key: 'any', label: 'Any size', min: 0 },
+        { key: '50', label: '50+ pax', min: 50 },
+        { key: '100', label: '100+ pax', min: 100 },
+        { key: '500', label: '500+ pax', min: 500 }
+      ];
 
-const CAPACITY_FILTERS = [
-  { key: "any", label: "Any size", min: 0 },
-  { key: "50", label: "50+ pax", min: 50 },
-  { key: "100", label: "100+ pax", min: 100 },
-  { key: "500", label: "500+ pax", min: 500 },
-];
+      const SORT_OPTIONS = [
+        { key: 'rating', label: 'Highest rated' },
+        { key: 'newest', label: 'Newest first' },
+        { key: 'capacity', label: 'Largest capacity' },
+        { key: 'name', label: 'A–Z' }
+      ];
 
-const SORT_OPTIONS = [
-  { key: "rating", label: "Highest rated" },
-  { key: "newest", label: "Newest first" },
-  { key: "capacity", label: "Largest capacity" },
-  { key: "name", label: "A–Z" },
-];
+      const AMENITY_OPTS = [
+        { key: 'wifi', label: 'WiFi', icon: 'wifi' },
+        { key: 'parking', label: 'Parking', icon: 'parking' },
+        { key: 'coffee', label: 'Catering', icon: 'coffee' },
+        { key: 'mic', label: 'A/V setup', icon: 'mic' }
+      ];
 
-const AMENITY_OPTS = [
-  { key: "wifi", label: "WiFi", icon: "wifi" },
-  { key: "parking", label: "Parking", icon: "parking" },
-  { key: "coffee", label: "Catering", icon: "coffee" },
-  { key: "mic", label: "A/V setup", icon: "mic" },
-];
+      /* ---------- Nav ---------- */
+      const Nav = () => {
+        const [open, setOpen] = useState(false);
+        const ref = useRef(null);
+        useEffect(() => {
+          const onClick = (e) => {
+            if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+          };
+          document.addEventListener('click', onClick);
+          return () => document.removeEventListener('click', onClick);
+        }, []);
 
-/* ---------- Nav ---------- */
-const Nav = () => {
-  const [open, setOpen] = useState(false);
-  const ref = useRef(null);
-  useEffect(() => {
-    const onClick = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
-    document.addEventListener("click", onClick);
-    return () => document.removeEventListener("click", onClick);
-  }, []);
-
-  return (
-    <nav className="nav">
-      <div className="container nav-inner">
-        <a className="logo" href="Eventara Landing.html">
-          <div className="logo-mark">
-            <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
-              <path d="M2 10 L10 2 L18 10 L10 18 Z" stroke="#0a1005" strokeWidth="2" fill="none" />
-              <circle cx="10" cy="10" r="2.5" fill="#0a1005"/>
-            </svg>
-          </div>
-          <span>Eventara</span>
-        </a>
-        <div className="nav-center">
-          <a className="nav-link" href="Eventara Landing.html">Home</a>
-          <a className="nav-link" href="Eventara Events.html">Events</a>
-          <a className="nav-link active" href="#">Venue Hub</a>
-          <a className="nav-link" href="#">About</a>
-        </div>
-        <div className="nav-right">
-          <div style={{ position: "relative" }} ref={ref}>
-            <button className="avatar-btn" onClick={() => setOpen(o => !o)}>
-              <div className="avatar">JD</div>
-              <div style={{ textAlign: "left" }}>
-                <div className="name">Juan D.</div>
-                <div className="tier">Contributor</div>
-              </div>
-              <Icon name="chevron-down" size={14} />
-            </button>
-            {open && (
-              <div className="dropdown-menu">
-                <button className="dropdown-item">My Dashboard <Icon name="arrow-right" size={12} /></button>
-                <button className="dropdown-item">My Venues</button>
-                <button className="dropdown-item">Wallet</button>
-                <div style={{ height: 1, background: "var(--line-soft)", margin: "6px 0" }} />
-                <button className="dropdown-item" style={{ color: "var(--amber)" }}>Sign out</button>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </nav>
-  );
-};
-
-/* ---------- Venue Card ---------- */
-const VenueCard = ({ v, onOpen, onReport, onEdit, onShare, cardImage }) => {
-  const [menu, setMenu] = useState(false);
-  const menuRef = useRef(null);
-  useEffect(() => {
-    const h = e => { if (menuRef.current && !menuRef.current.contains(e.target)) setMenu(false); };
-    document.addEventListener("click", h);
-    return () => document.removeEventListener("click", h);
-  }, []);
-
-  const fmtCap = (n) => n >= 1000 ? `${(n/1000).toFixed(1)}K` : n;
-
-  return (
-    <article className="venue-card">
-      <div className="venue-visual" style={{ "--angle": v.angle }}>
-        {cardImage === "mesh" ? (
-          <>
-            <div className="stripes" />
-            <div className="orb" style={{ left: "20%", top: "25%", width: 160, height: 160, background: v.orb === "lime" ? "var(--lime)" : "var(--amber)" }} />
-            <div className="orb" style={{ right: "15%", bottom: "12%", width: 120, height: 120, background: v.orb === "lime" ? "var(--amber)" : "var(--lime)", opacity: 0.32 }} />
-          </>
-        ) : (
-          <>
-            {/* schematic "conference room" isometric */}
-            <svg viewBox="0 0 320 200" style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }} preserveAspectRatio="xMidYMid slice">
-              <defs>
-                <linearGradient id={`bg${v.id}`} x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stopColor="oklch(0.23 0.012 150)"/>
-                  <stop offset="100%" stopColor="oklch(0.15 0.008 150)"/>
-                </linearGradient>
-              </defs>
-              <rect width="320" height="200" fill={`url(#bg${v.id})`} />
-              {/* floor grid */}
-              <g opacity="0.12" stroke={v.orb === "lime" ? "oklch(0.9 0.22 128)" : "oklch(0.82 0.17 75)"} strokeWidth="0.6">
-                {Array.from({ length: 7 }).map((_, i) => (
-                  <line key={`h${i}`} x1="0" y1={140 + i * 10} x2="320" y2={140 + i * 10 - i * 6} />
-                ))}
-                {Array.from({ length: 10 }).map((_, i) => (
-                  <line key={`v${i}`} x1={i * 32} y1="140" x2={i * 32 + 20} y2="200" />
-                ))}
-              </g>
-              {/* stage */}
-              <rect x="120" y="60" width="80" height="24" rx="3" fill="oklch(0.26 0.015 150)" stroke={v.orb === "lime" ? "var(--lime)" : "var(--amber)"} strokeWidth="1" opacity="0.85"/>
-              {/* seating */}
-              {Array.from({ length: 3 }).map((_, r) => Array.from({ length: 9 }).map((_, c) => (
-                <circle key={`s${r}${c}`} cx={70 + c * 22} cy={110 + r * 16} r="3" fill="oklch(0.38 0.015 150)" />
-              )))}
-              {/* glow */}
-              <circle cx="160" cy="72" r="60" fill={v.orb === "lime" ? "oklch(0.9 0.22 128)" : "oklch(0.82 0.17 75)"} opacity="0.12" filter="blur(12px)"/>
-            </svg>
-          </>
-        )}
-        <div className="rating-badge" title={`${v.reviews} reviews`}>
-          <span className="star"><Icon name="star" size={11} fill={true} /></span>
-          <span className="num">{v.rating}</span>
-          <span className="count">({v.reviews})</span>
-        </div>
-        <div className="capacity-badge">{v.type}</div>
-        <div className="ph-label">[ venue cover · 16:10 ]</div>
-      </div>
-
-      <div className="venue-body">
-        <div className="venue-title-row">
-          <div style={{ minWidth: 0 }}>
-            <h3 className="venue-title">{v.name}</h3>
-            <div className="contributor">
-              Added by <div className="mini-avatar">{v.contributor[0].toUpperCase()}</div>
-              <span className="uname">@{v.contributor}</span>
-              <span className="date">· {v.added}</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="spec-row">
-          <div className="spec"><Icon name="pin" size={13} /> <span className="v" style={{ fontWeight: 400, color: "var(--text-dim)" }}>{v.location}</span></div>
-          <div className="spec"><Icon name="users" size={13} /> <span className="v">{fmtCap(v.capacity)}</span> <span style={{ color: "var(--text-mute)" }}>pax</span></div>
-        </div>
-
-        <div className="tag-row">
-          {v.tags.map(t => <span key={t} className="tag">{t}</span>)}
-        </div>
-
-        <div className="action-row">
-          <button className="view-btn" onClick={() => onOpen(v)}>
-            View / Edit <Icon name="arrow-right" size={13} />
-          </button>
-          <div style={{ position: "relative" }} ref={menuRef}>
-            <button className="menu-btn" onClick={() => setMenu(m => !m)} title="More">
-              <Icon name="dots" size={16} />
-            </button>
-            {menu && (
-              <div className="menu-dropdown">
-                <button className="dropdown-item" onClick={() => { setMenu(false); onEdit(v); }}>
-                  <span style={{ display: "flex", alignItems: "center", gap: 10 }}><Icon name="edit" size={13} /> Edit details</span>
-                </button>
-                <button className="dropdown-item" onClick={() => { setMenu(false); onShare(v); }}>
-                  <span style={{ display: "flex", alignItems: "center", gap: 10 }}><Icon name="share" size={13} /> Share venue</span>
-                </button>
-                <div style={{ height: 1, background: "var(--line-soft)", margin: "4px 0" }} />
-                <button className="dropdown-item" style={{ color: "var(--amber)" }} onClick={() => { setMenu(false); onReport(v); }}>
-                  <span style={{ display: "flex", alignItems: "center", gap: 10 }}><Icon name="flag" size={13} /> Report venue</span>
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </article>
-  );
-};
-
-/* ---------- Contribution Banner ---------- */
-const ContribBanner = ({ onAdd }) => (
-  <div className="contrib-wrap">
-    <div className="contrib-banner">
-      <div className="contrib-text">
-        <span className="eyebrow"><span className="dot" /> COMMUNITY GROWTH</span>
-        <h3>Know a great spot? Help the community grow.</h3>
-        <p>Add a new venue to the database — reviewed and verified by other contributors within 24 hours.</p>
-      </div>
-      <button className="btn btn-outline-lime" onClick={onAdd}>
-        <Icon name="plus" size={14} /> Contribute Venue
-      </button>
-    </div>
-  </div>
-);
-
-/* ---------- Add Venue Modal ---------- */
-const AddVenueModal = ({ initial, onClose, onSubmit, title = "Add a new venue" }) => {
-  const [form, setForm] = useState(initial || {
-    name: "", location: "", capacity: "", type: "Convention",
-    amenities: [], notes: ""
-  });
-  const toggleAmenity = (k) => setForm(f => ({ ...f, amenities: f.amenities.includes(k) ? f.amenities.filter(x => x !== k) : [...f.amenities, k] }));
-  const valid = form.name.trim() && form.location.trim() && +form.capacity > 0;
-
-  const submit = (e) => { e.preventDefault(); if (valid) onSubmit(form); };
-
-  return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <form className="modal" onClick={e => e.stopPropagation()} onSubmit={submit}>
-        <button type="button" className="modal-close" onClick={onClose}><Icon name="x" size={16} /></button>
-        <div className="modal-body">
-          <span className="eyebrow"><span className="dot" /> NEW VENUE POST</span>
-          <h3 style={{ marginTop: 10 }}>{title}</h3>
-          <p className="sub">All submissions are reviewed by a community moderator before going public.</p>
-
-          <div className="field">
-            <label>Venue name</label>
-            <input placeholder="e.g. Marco Polo Grand Ballroom" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
-          </div>
-
-          <div className="field">
-            <label>Location</label>
-            <input placeholder="Street, District, Davao City" value={form.location} onChange={e => setForm({ ...form, location: e.target.value })} />
-          </div>
-
-          <div className="row2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-            <div className="field">
-              <label>Capacity (pax)</label>
-              <input type="number" placeholder="150" value={form.capacity} onChange={e => setForm({ ...form, capacity: e.target.value })} min="1" />
-            </div>
-            <div className="field">
-              <label>Venue type</label>
-              <select value={form.type} onChange={e => setForm({ ...form, type: e.target.value })}>
-                {["Convention","Ballroom","Auditorium","Boardroom","Hotel","Studio","Mall Venue","Open Venue"].map(o => <option key={o}>{o}</option>)}
-              </select>
-            </div>
-          </div>
-
-          <div className="field">
-            <label>Amenities</label>
-            <div className="checkgrid">
-              {AMENITY_OPTS.map(a => (
-                <div key={a.key} className={`check ${form.amenities.includes(a.key) ? "on" : ""}`} onClick={() => toggleAmenity(a.key)}>
-                  <div className="check-dot">{form.amenities.includes(a.key) && <Icon name="check" size={10} />}</div>
-                  <Icon name={a.icon} size={13} />
-                  <span>{a.label}</span>
+        return (
+          <nav className="nav">
+            <div className="nav-inner container">
+              <a className="logo" href="Eventara Landing.html">
+                <div className="logo-mark">
+                  <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
+                    <path d="M2 10 L10 2 L18 10 L10 18 Z" stroke="#0a1005" strokeWidth="2" fill="none" />
+                    <circle cx="10" cy="10" r="2.5" fill="#0a1005" />
+                  </svg>
                 </div>
-              ))}
+                <span>Eventara</span>
+              </a>
+              <div className="nav-center">
+                <a className="nav-link" href="Eventara Landing.html">
+                  Home
+                </a>
+                <a className="nav-link" href="Eventara Events.html">
+                  Events
+                </a>
+                <a className="nav-link active" href="#">
+                  Venue Hub
+                </a>
+                <a className="nav-link" href="#">
+                  About
+                </a>
+              </div>
+              <div className="nav-right">
+                <div style={{ position: 'relative' }} ref={ref}>
+                  <button className="avatar-btn" onClick={() => setOpen((o) => !o)}>
+                    <div className="avatar">JD</div>
+                    <div style={{ textAlign: 'left' }}>
+                      <div className="name">Juan D.</div>
+                      <div className="tier">Contributor</div>
+                    </div>
+                    <Icon name="chevron-down" size={14} />
+                  </button>
+                  {open && (
+                    <div className="dropdown-menu">
+                      <button className="dropdown-item">
+                        My Dashboard <Icon name="arrow-right" size={12} />
+                      </button>
+                      <button className="dropdown-item">My Venues</button>
+                      <button className="dropdown-item">Wallet</button>
+                      <div style={{ height: 1, background: 'var(--line-soft)', margin: '6px 0' }} />
+                      <button className="dropdown-item" style={{ color: 'var(--amber)' }}>
+                        Sign out
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </nav>
+        );
+      };
+
+      /* ---------- Venue Card ---------- */
+      const VenueCard = ({ v, onOpen, onReport, onEdit, onShare, cardImage }) => {
+        const [menu, setMenu] = useState(false);
+        const menuRef = useRef(null);
+        useEffect(() => {
+          const h = (e) => {
+            if (menuRef.current && !menuRef.current.contains(e.target)) setMenu(false);
+          };
+          document.addEventListener('click', h);
+          return () => document.removeEventListener('click', h);
+        }, []);
+
+        const fmtCap = (n) => (n >= 1000 ? `${(n / 1000).toFixed(1)}K` : n);
+
+        return (
+          <article className="venue-card">
+            <div className="venue-visual" style={{ '--angle': v.angle }}>
+              {cardImage === 'mesh' ? (
+                <>
+                  <div className="stripes" />
+                  <div
+                    className="orb"
+                    style={{ left: '20%', top: '25%', width: 160, height: 160, background: v.orb === 'lime' ? 'var(--lime)' : 'var(--amber)' }}
+                  />
+                  <div
+                    className="orb"
+                    style={{
+                      right: '15%',
+                      bottom: '12%',
+                      width: 120,
+                      height: 120,
+                      background: v.orb === 'lime' ? 'var(--amber)' : 'var(--lime)',
+                      opacity: 0.32
+                    }}
+                  />
+                </>
+              ) : (
+                <>
+                  {/* schematic "conference room" isometric */}
+                  <svg viewBox="0 0 320 200" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} preserveAspectRatio="xMidYMid slice">
+                    <defs>
+                      <linearGradient id={`bg${v.id}`} x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stopColor="oklch(0.23 0.012 150)" />
+                        <stop offset="100%" stopColor="oklch(0.15 0.008 150)" />
+                      </linearGradient>
+                    </defs>
+                    <rect width="320" height="200" fill={`url(#bg${v.id})`} />
+                    {/* floor grid */}
+                    <g opacity="0.12" stroke={v.orb === 'lime' ? 'oklch(0.9 0.22 128)' : 'oklch(0.82 0.17 75)'} strokeWidth="0.6">
+                      {Array.from({ length: 7 }).map((_, i) => (
+                        <line key={`h${i}`} x1="0" y1={140 + i * 10} x2="320" y2={140 + i * 10 - i * 6} />
+                      ))}
+                      {Array.from({ length: 10 }).map((_, i) => (
+                        <line key={`v${i}`} x1={i * 32} y1="140" x2={i * 32 + 20} y2="200" />
+                      ))}
+                    </g>
+                    {/* stage */}
+                    <rect
+                      x="120"
+                      y="60"
+                      width="80"
+                      height="24"
+                      rx="3"
+                      fill="oklch(0.26 0.015 150)"
+                      stroke={v.orb === 'lime' ? 'var(--lime)' : 'var(--amber)'}
+                      strokeWidth="1"
+                      opacity="0.85"
+                    />
+                    {/* seating */}
+                    {Array.from({ length: 3 }).map((_, r) =>
+                      Array.from({ length: 9 }).map((_, c) => (
+                        <circle key={`s${r}${c}`} cx={70 + c * 22} cy={110 + r * 16} r="3" fill="oklch(0.38 0.015 150)" />
+                      ))
+                    )}
+                    {/* glow */}
+                    <circle
+                      cx="160"
+                      cy="72"
+                      r="60"
+                      fill={v.orb === 'lime' ? 'oklch(0.9 0.22 128)' : 'oklch(0.82 0.17 75)'}
+                      opacity="0.12"
+                      filter="blur(12px)"
+                    />
+                  </svg>
+                </>
+              )}
+              <div className="rating-badge" title={`${v.reviews} reviews`}>
+                <span className="star">
+                  <Icon name="star" size={11} fill={true} />
+                </span>
+                <span className="num">{v.rating}</span>
+                <span className="count">({v.reviews})</span>
+              </div>
+              <div className="capacity-badge">{v.type}</div>
+              <div className="ph-label">[ venue cover · 16:10 ]</div>
+            </div>
+
+            <div className="venue-body">
+              <div className="venue-title-row">
+                <div style={{ minWidth: 0 }}>
+                  <h3 className="venue-title">{v.name}</h3>
+                  <div className="contributor">
+                    Added by <div className="mini-avatar">{v.contributor[0].toUpperCase()}</div>
+                    <span className="uname">@{v.contributor}</span>
+                    <span className="date">· {v.added}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="spec-row">
+                <div className="spec">
+                  <Icon name="pin" size={13} />{' '}
+                  <span className="v" style={{ fontWeight: 400, color: 'var(--text-dim)' }}>
+                    {v.location}
+                  </span>
+                </div>
+                <div className="spec">
+                  <Icon name="users" size={13} /> <span className="v">{fmtCap(v.capacity)}</span> <span style={{ color: 'var(--text-mute)' }}>pax</span>
+                </div>
+              </div>
+
+              <div className="tag-row">
+                {v.tags.map((t) => (
+                  <span key={t} className="tag">
+                    {t}
+                  </span>
+                ))}
+              </div>
+
+              <div className="action-row">
+                <button className="view-btn" onClick={() => onOpen(v)}>
+                  View / Edit <Icon name="arrow-right" size={13} />
+                </button>
+                <div style={{ position: 'relative' }} ref={menuRef}>
+                  <button className="menu-btn" onClick={() => setMenu((m) => !m)} title="More">
+                    <Icon name="dots" size={16} />
+                  </button>
+                  {menu && (
+                    <div className="menu-dropdown">
+                      <button
+                        className="dropdown-item"
+                        onClick={() => {
+                          setMenu(false);
+                          onEdit(v);
+                        }}
+                      >
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <Icon name="edit" size={13} /> Edit details
+                        </span>
+                      </button>
+                      <button
+                        className="dropdown-item"
+                        onClick={() => {
+                          setMenu(false);
+                          onShare(v);
+                        }}
+                      >
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <Icon name="share" size={13} /> Share venue
+                        </span>
+                      </button>
+                      <div style={{ height: 1, background: 'var(--line-soft)', margin: '4px 0' }} />
+                      <button
+                        className="dropdown-item"
+                        style={{ color: 'var(--amber)' }}
+                        onClick={() => {
+                          setMenu(false);
+                          onReport(v);
+                        }}
+                      >
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <Icon name="flag" size={13} /> Report venue
+                        </span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </article>
+        );
+      };
+
+      /* ---------- Contribution Banner ---------- */
+      const ContribBanner = ({ onAdd }) => (
+        <div className="contrib-wrap">
+          <div className="contrib-banner">
+            <div className="contrib-text">
+              <span className="eyebrow">
+                <span className="dot" /> COMMUNITY GROWTH
+              </span>
+              <h3>Know a great spot? Help the community grow.</h3>
+              <p>Add a new venue to the database — reviewed and verified by other contributors within 24 hours.</p>
+            </div>
+            <button className="btn btn-outline-lime" onClick={onAdd}>
+              <Icon name="plus" size={14} /> Contribute Venue
+            </button>
+          </div>
+        </div>
+      );
+
+      /* ---------- Add Venue Modal ---------- */
+      const AddVenueModal = ({ initial, onClose, onSubmit, title = 'Add a new venue' }) => {
+        const [form, setForm] = useState(
+          initial || {
+            name: '',
+            location: '',
+            capacity: '',
+            type: 'Convention',
+            amenities: [],
+            notes: ''
+          }
+        );
+        const toggleAmenity = (k) => setForm((f) => ({ ...f, amenities: f.amenities.includes(k) ? f.amenities.filter((x) => x !== k) : [...f.amenities, k] }));
+        const valid = form.name.trim() && form.location.trim() && +form.capacity > 0;
+
+        const submit = (e) => {
+          e.preventDefault();
+          if (valid) onSubmit(form);
+        };
+
+        return (
+          <div className="modal-backdrop" onClick={onClose}>
+            <form className="modal" onClick={(e) => e.stopPropagation()} onSubmit={submit}>
+              <button type="button" className="modal-close" onClick={onClose}>
+                <Icon name="x" size={16} />
+              </button>
+              <div className="modal-body">
+                <span className="eyebrow">
+                  <span className="dot" /> NEW VENUE POST
+                </span>
+                <h3 style={{ marginTop: 10 }}>{title}</h3>
+                <p className="sub">All submissions are reviewed by a community moderator before going public.</p>
+
+                <div className="field">
+                  <label>Venue name</label>
+                  <input placeholder="e.g. Marco Polo Grand Ballroom" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+                </div>
+
+                <div className="field">
+                  <label>Location</label>
+                  <input placeholder="Street, District, Davao City" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} />
+                </div>
+
+                <div className="row2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                  <div className="field">
+                    <label>Capacity (pax)</label>
+                    <input type="number" placeholder="150" value={form.capacity} onChange={(e) => setForm({ ...form, capacity: e.target.value })} min="1" />
+                  </div>
+                  <div className="field">
+                    <label>Venue type</label>
+                    <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}>
+                      {['Convention', 'Ballroom', 'Auditorium', 'Boardroom', 'Hotel', 'Studio', 'Mall Venue', 'Open Venue'].map((o) => (
+                        <option key={o}>{o}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="field">
+                  <label>Amenities</label>
+                  <div className="checkgrid">
+                    {AMENITY_OPTS.map((a) => (
+                      <div key={a.key} className={`check ${form.amenities.includes(a.key) ? 'on' : ''}`} onClick={() => toggleAmenity(a.key)}>
+                        <div className="check-dot">{form.amenities.includes(a.key) && <Icon name="check" size={10} />}</div>
+                        <Icon name={a.icon} size={13} />
+                        <span>{a.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="field">
+                  <label>
+                    Notes <span style={{ textTransform: 'none', color: 'var(--text-mute)' }}>(optional)</span>
+                  </label>
+                  <textarea
+                    rows="3"
+                    placeholder="Booking contact, pricing, accessibility notes…"
+                    value={form.notes}
+                    onChange={(e) => setForm({ ...form, notes: e.target.value })}
+                    style={{ resize: 'vertical' }}
+                  />
+                </div>
+              </div>
+              <div className="modal-foot">
+                <button type="button" className="btn btn-ghost" onClick={onClose}>
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={!valid}
+                  style={{ opacity: valid ? 1 : 0.5, cursor: valid ? 'pointer' : 'not-allowed' }}
+                >
+                  Submit for review <Icon name="arrow-right" size={13} />
+                </button>
+              </div>
+            </form>
+          </div>
+        );
+      };
+
+      /* ---------- Report Modal ---------- */
+      const ReportModal = ({ venue, onClose, onSubmit }) => {
+        const [reason, setReason] = useState('inaccurate');
+        const [detail, setDetail] = useState('');
+        return (
+          <div className="modal-backdrop" onClick={onClose}>
+            <form
+              className="modal"
+              style={{ maxWidth: 460 }}
+              onClick={(e) => e.stopPropagation()}
+              onSubmit={(e) => {
+                e.preventDefault();
+                onSubmit(reason, detail);
+              }}
+            >
+              <button type="button" className="modal-close" onClick={onClose}>
+                <Icon name="x" size={16} />
+              </button>
+              <div className="modal-body">
+                <span className="eyebrow">
+                  <span className="dot" style={{ background: 'var(--amber)', boxShadow: '0 0 12px var(--amber-glow)' }} /> REPORT VENUE
+                </span>
+                <h3 style={{ marginTop: 10 }}>Report “{venue?.name}”</h3>
+                <p className="sub">Flag this listing for a community moderator review. Your submission is anonymous.</p>
+
+                <div className="field">
+                  <label>Reason</label>
+                  <select value={reason} onChange={(e) => setReason(e.target.value)}>
+                    <option value="inaccurate">Inaccurate information</option>
+                    <option value="closed">Venue is closed</option>
+                    <option value="duplicate">Duplicate listing</option>
+                    <option value="inappropriate">Inappropriate content</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                <div className="field">
+                  <label>Details</label>
+                  <textarea
+                    rows="4"
+                    placeholder="Help the moderator verify the issue…"
+                    value={detail}
+                    onChange={(e) => setDetail(e.target.value)}
+                    style={{ resize: 'vertical' }}
+                  />
+                </div>
+              </div>
+              <div className="modal-foot">
+                <button type="button" className="btn btn-ghost" onClick={onClose}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn" style={{ background: 'var(--amber)', color: '#1a1005', boxShadow: '0 8px 28px -10px var(--amber-glow)' }}>
+                  <Icon name="flag" size={13} /> Submit report
+                </button>
+              </div>
+            </form>
+          </div>
+        );
+      };
+
+      /* ---------- Venue Detail Modal ---------- */
+      const VenueDetail = ({ v, onClose }) => (
+        <div className="modal-backdrop" onClick={onClose}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={onClose}>
+              <Icon name="x" size={16} />
+            </button>
+            <div className="detail-cover" style={{ background: 'linear-gradient(135deg, oklch(0.22 0.012 150), oklch(0.15 0.008 150))' }}>
+              <div
+                className="stripes"
+                style={{ backgroundImage: `repeating-linear-gradient(${v.angle}, transparent 0 22px, oklch(1 0 0 / 0.04) 22px 24px)` }}
+              />
+              <div
+                style={{
+                  position: 'absolute',
+                  left: '18%',
+                  top: '15%',
+                  width: 220,
+                  height: 220,
+                  borderRadius: '50%',
+                  filter: 'blur(38px)',
+                  background: v.orb === 'lime' ? 'var(--lime)' : 'var(--amber)',
+                  opacity: 0.5
+                }}
+              />
+              <div
+                style={{
+                  position: 'absolute',
+                  right: '12%',
+                  bottom: '10%',
+                  width: 160,
+                  height: 160,
+                  borderRadius: '50%',
+                  filter: 'blur(32px)',
+                  background: v.orb === 'lime' ? 'var(--amber)' : 'var(--lime)',
+                  opacity: 0.4
+                }}
+              />
+              <div className="rating-badge" style={{ top: 16, left: 20 }}>
+                <span className="star">
+                  <Icon name="star" size={11} fill={true} />
+                </span>
+                <span className="num">{v.rating}</span>
+                <span className="count">({v.reviews})</span>
+              </div>
+            </div>
+            <div className="modal-body" style={{ paddingTop: 24 }}>
+              <div className="tag-row" style={{ marginBottom: 10 }}>
+                {v.tags.map((t) => (
+                  <span key={t} className="tag">
+                    {t}
+                  </span>
+                ))}
+              </div>
+              <h3>{v.name}</h3>
+              <div className="contributor">
+                Added by <div className="mini-avatar">{v.contributor[0].toUpperCase()}</div>
+                <span className="uname">@{v.contributor}</span>
+                <span className="date">· {v.added}</span>
+              </div>
+
+              <div className="detail-grid-cells">
+                <div className="detail-cell">
+                  <div className="k">Location</div>
+                  <div className="v">{v.location}</div>
+                </div>
+                <div className="detail-cell">
+                  <div className="k">Capacity</div>
+                  <div className="v">{v.capacity} pax</div>
+                </div>
+                <div className="detail-cell">
+                  <div className="k">Type</div>
+                  <div className="v">{v.type}</div>
+                </div>
+                <div className="detail-cell">
+                  <div className="k">Rating</div>
+                  <div className="v" style={{ color: 'var(--amber)' }}>
+                    ★ {v.rating} · {v.reviews} reviews
+                  </div>
+                </div>
+              </div>
+
+              <div
+                style={{
+                  padding: '0 0 4px',
+                  fontSize: 11,
+                  letterSpacing: '0.14em',
+                  textTransform: 'uppercase',
+                  color: 'var(--text-mute)',
+                  fontFamily: "'JetBrains Mono', monospace"
+                }}
+              >
+                Amenities
+              </div>
+              <div className="tag-row" style={{ marginTop: 8 }}>
+                {v.amenities.map((a) => {
+                  const meta = AMENITY_OPTS.find((x) => x.key === a);
+                  return (
+                    <span key={a} className="tag" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                      <Icon name={meta.icon} size={11} /> {meta.label}
+                    </span>
+                  );
+                })}
+              </div>
+
+              <div style={{ display: 'flex', gap: 10, marginTop: 22 }}>
+                <button className="btn btn-primary" style={{ flex: 1 }}>
+                  Request Booking Info <Icon name="arrow-right" size={14} />
+                </button>
+                <button className="btn btn-ghost">
+                  <Icon name="edit" size={14} /> Edit
+                </button>
+              </div>
             </div>
           </div>
+        </div>
+      );
 
-          <div className="field">
-            <label>Notes <span style={{ textTransform: "none", color: "var(--text-mute)" }}>(optional)</span></label>
-            <textarea rows="3" placeholder="Booking contact, pricing, accessibility notes…" value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} style={{ resize: "vertical" }} />
+      /* ---------- Tweaks ---------- */
+      const Tweaks = ({ tweaks, setTweaks, onClose }) => (
+        <div
+          style={{
+            position: 'fixed',
+            right: 20,
+            bottom: 20,
+            zIndex: 80,
+            width: 280,
+            background: 'var(--surface)',
+            border: '1px solid var(--line)',
+            borderRadius: 16,
+            padding: 16,
+            boxShadow: '0 20px 60px -20px oklch(0 0 0 / 0.5)',
+            fontSize: 13,
+            animation: 'pop 200ms ease'
+          }}
+        >
+          <h4 style={{ margin: '0 0 12px', fontSize: 13, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--lime)' }} />
+            Tweaks
+            <button style={{ marginLeft: 'auto', color: 'var(--text-mute)' }} onClick={onClose}>
+              <Icon name="x" size={14} />
+            </button>
+          </h4>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 0' }}>
+            <label style={{ color: 'var(--text-dim)', fontSize: 12.5 }}>Contribution banner</label>
+            <input type="checkbox" checked={tweaks.showContribBanner} onChange={(e) => setTweaks({ ...tweaks, showContribBanner: e.target.checked })} />
           </div>
-        </div>
-        <div className="modal-foot">
-          <button type="button" className="btn btn-ghost" onClick={onClose}>Cancel</button>
-          <button type="submit" className="btn btn-primary" disabled={!valid} style={{ opacity: valid ? 1 : 0.5, cursor: valid ? "pointer" : "not-allowed" }}>
-            Submit for review <Icon name="arrow-right" size={13} />
-          </button>
-        </div>
-      </form>
-    </div>
-  );
-};
-
-/* ---------- Report Modal ---------- */
-const ReportModal = ({ venue, onClose, onSubmit }) => {
-  const [reason, setReason] = useState("inaccurate");
-  const [detail, setDetail] = useState("");
-  return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <form className="modal" style={{ maxWidth: 460 }} onClick={e => e.stopPropagation()} onSubmit={e => { e.preventDefault(); onSubmit(reason, detail); }}>
-        <button type="button" className="modal-close" onClick={onClose}><Icon name="x" size={16} /></button>
-        <div className="modal-body">
-          <span className="eyebrow"><span className="dot" style={{ background: "var(--amber)", boxShadow: "0 0 12px var(--amber-glow)" }} /> REPORT VENUE</span>
-          <h3 style={{ marginTop: 10 }}>Report “{venue?.name}”</h3>
-          <p className="sub">Flag this listing for a community moderator review. Your submission is anonymous.</p>
-
-          <div className="field">
-            <label>Reason</label>
-            <select value={reason} onChange={e => setReason(e.target.value)}>
-              <option value="inaccurate">Inaccurate information</option>
-              <option value="closed">Venue is closed</option>
-              <option value="duplicate">Duplicate listing</option>
-              <option value="inappropriate">Inappropriate content</option>
-              <option value="other">Other</option>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 0', borderTop: '1px solid var(--line-soft)' }}>
+            <label style={{ color: 'var(--text-dim)', fontSize: 12.5 }}>Card visual</label>
+            <select
+              value={tweaks.cardImage}
+              onChange={(e) => setTweaks({ ...tweaks, cardImage: e.target.value })}
+              style={{ background: 'var(--bg)', border: '1px solid var(--line-soft)', color: 'var(--text)', borderRadius: 6, padding: '4px 6px', fontSize: 12 }}
+            >
+              <option value="mesh">Gradient mesh</option>
+              <option value="room">Room schematic</option>
             </select>
           </div>
-          <div className="field">
-            <label>Details</label>
-            <textarea rows="4" placeholder="Help the moderator verify the issue…" value={detail} onChange={e => setDetail(e.target.value)} style={{ resize: "vertical" }}/>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 0', borderTop: '1px solid var(--line-soft)' }}>
+            <label style={{ color: 'var(--text-dim)', fontSize: 12.5 }}>Grid density</label>
+            <select
+              value={tweaks.density}
+              onChange={(e) => setTweaks({ ...tweaks, density: e.target.value })}
+              style={{ background: 'var(--bg)', border: '1px solid var(--line-soft)', color: 'var(--text)', borderRadius: 6, padding: '4px 6px', fontSize: 12 }}
+            >
+              <option value="comfortable">Comfortable (3)</option>
+              <option value="compact">Compact (4)</option>
+            </select>
           </div>
         </div>
-        <div className="modal-foot">
-          <button type="button" className="btn btn-ghost" onClick={onClose}>Cancel</button>
-          <button type="submit" className="btn" style={{ background: "var(--amber)", color: "#1a1005", boxShadow: "0 8px 28px -10px var(--amber-glow)" }}>
-            <Icon name="flag" size={13} /> Submit report
-          </button>
-        </div>
-      </form>
-    </div>
-  );
-};
-
-/* ---------- Venue Detail Modal ---------- */
-const VenueDetail = ({ v, onClose }) => (
-  <div className="modal-backdrop" onClick={onClose}>
-    <div className="modal" onClick={e => e.stopPropagation()}>
-      <button className="modal-close" onClick={onClose}><Icon name="x" size={16} /></button>
-      <div className="detail-cover" style={{ background: "linear-gradient(135deg, oklch(0.22 0.012 150), oklch(0.15 0.008 150))" }}>
-        <div className="stripes" style={{ backgroundImage: `repeating-linear-gradient(${v.angle}, transparent 0 22px, oklch(1 0 0 / 0.04) 22px 24px)` }} />
-        <div style={{ position: "absolute", left: "18%", top: "15%", width: 220, height: 220, borderRadius: "50%", filter: "blur(38px)", background: v.orb === "lime" ? "var(--lime)" : "var(--amber)", opacity: 0.5 }} />
-        <div style={{ position: "absolute", right: "12%", bottom: "10%", width: 160, height: 160, borderRadius: "50%", filter: "blur(32px)", background: v.orb === "lime" ? "var(--amber)" : "var(--lime)", opacity: 0.4 }} />
-        <div className="rating-badge" style={{ top: 16, left: 20 }}>
-          <span className="star"><Icon name="star" size={11} fill={true} /></span>
-          <span className="num">{v.rating}</span>
-          <span className="count">({v.reviews})</span>
-        </div>
-      </div>
-      <div className="modal-body" style={{ paddingTop: 24 }}>
-        <div className="tag-row" style={{ marginBottom: 10 }}>
-          {v.tags.map(t => <span key={t} className="tag">{t}</span>)}
-        </div>
-        <h3>{v.name}</h3>
-        <div className="contributor">
-          Added by <div className="mini-avatar">{v.contributor[0].toUpperCase()}</div>
-          <span className="uname">@{v.contributor}</span>
-          <span className="date">· {v.added}</span>
-        </div>
-
-        <div className="detail-grid-cells">
-          <div className="detail-cell"><div className="k">Location</div><div className="v">{v.location}</div></div>
-          <div className="detail-cell"><div className="k">Capacity</div><div className="v">{v.capacity} pax</div></div>
-          <div className="detail-cell"><div className="k">Type</div><div className="v">{v.type}</div></div>
-          <div className="detail-cell"><div className="k">Rating</div><div className="v" style={{ color: "var(--amber)" }}>★ {v.rating} · {v.reviews} reviews</div></div>
-        </div>
-
-        <div style={{ padding: "0 0 4px", fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--text-mute)", fontFamily: "'JetBrains Mono', monospace" }}>Amenities</div>
-        <div className="tag-row" style={{ marginTop: 8 }}>
-          {v.amenities.map(a => {
-            const meta = AMENITY_OPTS.find(x => x.key === a);
-            return <span key={a} className="tag" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}><Icon name={meta.icon} size={11} /> {meta.label}</span>;
-          })}
-        </div>
-
-        <div style={{ display: "flex", gap: 10, marginTop: 22 }}>
-          <button className="btn btn-primary" style={{ flex: 1 }}>Request Booking Info <Icon name="arrow-right" size={14} /></button>
-          <button className="btn btn-ghost"><Icon name="edit" size={14} /> Edit</button>
-        </div>
-      </div>
-    </div>
-  </div>
-);
-
-/* ---------- Tweaks ---------- */
-const Tweaks = ({ tweaks, setTweaks, onClose }) => (
-  <div style={{ position: "fixed", right: 20, bottom: 20, zIndex: 80, width: 280, background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 16, padding: 16, boxShadow: "0 20px 60px -20px oklch(0 0 0 / 0.5)", fontSize: 13, animation: "pop 200ms ease" }}>
-    <h4 style={{ margin: "0 0 12px", fontSize: 13, display: "flex", alignItems: "center", gap: 8 }}>
-      <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--lime)" }} />
-      Tweaks
-      <button style={{ marginLeft: "auto", color: "var(--text-mute)" }} onClick={onClose}><Icon name="x" size={14}/></button>
-    </h4>
-    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 0" }}>
-      <label style={{ color: "var(--text-dim)", fontSize: 12.5 }}>Contribution banner</label>
-      <input type="checkbox" checked={tweaks.showContribBanner} onChange={e => setTweaks({ ...tweaks, showContribBanner: e.target.checked })} />
-    </div>
-    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 0", borderTop: "1px solid var(--line-soft)" }}>
-      <label style={{ color: "var(--text-dim)", fontSize: 12.5 }}>Card visual</label>
-      <select value={tweaks.cardImage} onChange={e => setTweaks({ ...tweaks, cardImage: e.target.value })} style={{ background: "var(--bg)", border: "1px solid var(--line-soft)", color: "var(--text)", borderRadius: 6, padding: "4px 6px", fontSize: 12 }}>
-        <option value="mesh">Gradient mesh</option>
-        <option value="room">Room schematic</option>
-      </select>
-    </div>
-    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 0", borderTop: "1px solid var(--line-soft)" }}>
-      <label style={{ color: "var(--text-dim)", fontSize: 12.5 }}>Grid density</label>
-      <select value={tweaks.density} onChange={e => setTweaks({ ...tweaks, density: e.target.value })} style={{ background: "var(--bg)", border: "1px solid var(--line-soft)", color: "var(--text)", borderRadius: 6, padding: "4px 6px", fontSize: 12 }}>
-        <option value="comfortable">Comfortable (3)</option>
-        <option value="compact">Compact (4)</option>
-      </select>
-    </div>
-  </div>
-);
-
-/* ---------- App ---------- */
-const App = () => {
-  const [tweaks, setTweaks] = useState(TWEAKS_DEFAULTS);
-  const [editMode, setEditMode] = useState(false);
-  const [q, setQ] = useState("");
-  const [capacity, setCapacity] = useState("any");
-  const [sort, setSort] = useState("rating");
-  const [capOpen, setCapOpen] = useState(false);
-  const [sortOpen, setSortOpen] = useState(false);
-  const [page, setPage] = useState(1);
-  const [detail, setDetail] = useState(null);
-  const [addOpen, setAddOpen] = useState(false);
-  const [editVenue, setEditVenue] = useState(null);
-  const [reportVenue, setReportVenue] = useState(null);
-  const [toast, setToast] = useState(null);
-  const [venues, setVenues] = useState(VENUES);
-
-  const PER_PAGE = tweaks.density === "compact" ? 8 : 6;
-
-  // edit mode
-  useEffect(() => {
-    const onMsg = (e) => {
-      const t = e.data?.type;
-      if (t === "__activate_edit_mode") setEditMode(true);
-      if (t === "__deactivate_edit_mode") setEditMode(false);
-    };
-    window.addEventListener("message", onMsg);
-    window.parent.postMessage({ type: "__edit_mode_available" }, "*");
-    return () => window.removeEventListener("message", onMsg);
-  }, []);
-
-  useEffect(() => { window.parent.postMessage({ type: "__edit_mode_set_keys", edits: tweaks }, "*"); }, [tweaks]);
-
-  // click-outside for dropdowns
-  const capRef = useRef(null), sortRef = useRef(null);
-  useEffect(() => {
-    const onClick = (e) => {
-      if (capRef.current && !capRef.current.contains(e.target)) setCapOpen(false);
-      if (sortRef.current && !sortRef.current.contains(e.target)) setSortOpen(false);
-    };
-    document.addEventListener("click", onClick);
-    return () => document.removeEventListener("click", onClick);
-  }, []);
-
-  const filtered = useMemo(() => {
-    let list = venues.slice();
-    const capMin = CAPACITY_FILTERS.find(c => c.key === capacity)?.min || 0;
-    if (capMin) list = list.filter(v => v.capacity >= capMin);
-    if (q.trim()) {
-      const n = q.toLowerCase();
-      list = list.filter(v =>
-        v.name.toLowerCase().includes(n) ||
-        v.location.toLowerCase().includes(n) ||
-        v.type.toLowerCase().includes(n) ||
-        v.tags.some(t => t.toLowerCase().includes(n))
       );
-    }
-    list.sort((a, b) => {
-      if (sort === "rating") return b.rating - a.rating;
-      if (sort === "newest") return new Date(b.added) - new Date(a.added);
-      if (sort === "capacity") return b.capacity - a.capacity;
-      if (sort === "name") return a.name.localeCompare(b.name);
-      return 0;
-    });
-    return list;
-  }, [venues, q, capacity, sort]);
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
-  const currentPage = Math.min(page, totalPages);
-  const paged = filtered.slice((currentPage - 1) * PER_PAGE, currentPage * PER_PAGE);
+      /* ---------- App ---------- */
+      const App = () => {
+        const [tweaks, setTweaks] = useState(TWEAKS_DEFAULTS);
+        const [editMode, setEditMode] = useState(false);
+        const [q, setQ] = useState('');
+        const [capacity, setCapacity] = useState('any');
+        const [sort, setSort] = useState('rating');
+        const [capOpen, setCapOpen] = useState(false);
+        const [sortOpen, setSortOpen] = useState(false);
+        const [page, setPage] = useState(1);
+        const [detail, setDetail] = useState(null);
+        const [addOpen, setAddOpen] = useState(false);
+        const [editVenue, setEditVenue] = useState(null);
+        const [reportVenue, setReportVenue] = useState(null);
+        const [toast, setToast] = useState(null);
+        const [venues, setVenues] = useState(VENUES);
 
-  // insert contribution banner after 6th card (mid-grid) when eligible
-  const withBanner = useMemo(() => {
-    if (!tweaks.showContribBanner || paged.length < 3) return { items: paged, bannerAt: -1 };
-    return { items: paged, bannerAt: 3 };
-  }, [paged, tweaks.showContribBanner]);
+        const PER_PAGE = tweaks.density === 'compact' ? 8 : 6;
 
-  const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(null), 2600); };
+        // edit mode
+        useEffect(() => {
+          const onMsg = (e) => {
+            const t = e.data?.type;
+            if (t === '__activate_edit_mode') setEditMode(true);
+            if (t === '__deactivate_edit_mode') setEditMode(false);
+          };
+          window.addEventListener('message', onMsg);
+          window.parent.postMessage({ type: '__edit_mode_available' }, '*');
+          return () => window.removeEventListener('message', onMsg);
+        }, []);
 
-  const onAddSubmit = (form) => {
-    const newV = {
-      id: Date.now(),
-      name: form.name,
-      location: form.location,
-      capacity: +form.capacity,
-      type: form.type,
-      rating: 5.0,
-      reviews: 0,
-      contributor: "juan.d",
-      added: "Apr 20, 2026",
-      tags: form.amenities.length ? ["New"] : ["New"],
-      amenities: form.amenities,
-      orb: Math.random() > 0.5 ? "lime" : "amber",
-      angle: `${100 + Math.round(Math.random() * 40)}deg`
-    };
-    setVenues(vs => [newV, ...vs]);
-    setAddOpen(false);
-    setEditVenue(null);
-    showToast(editVenue ? "Venue updated — pending review" : "Venue submitted for community review");
-  };
+        useEffect(() => {
+          window.parent.postMessage({ type: '__edit_mode_set_keys', edits: tweaks }, '*');
+        }, [tweaks]);
 
-  const onReportSubmit = () => { setReportVenue(null); showToast("Report submitted to moderators"); };
+        // click-outside for dropdowns
+        const capRef = useRef(null),
+          sortRef = useRef(null);
+        useEffect(() => {
+          const onClick = (e) => {
+            if (capRef.current && !capRef.current.contains(e.target)) setCapOpen(false);
+            if (sortRef.current && !sortRef.current.contains(e.target)) setSortOpen(false);
+          };
+          document.addEventListener('click', onClick);
+          return () => document.removeEventListener('click', onClick);
+        }, []);
 
-  const capLabel = CAPACITY_FILTERS.find(c => c.key === capacity)?.label || "Any size";
-  const sortLabel = SORT_OPTIONS.find(s => s.key === sort)?.label || "Highest rated";
+        const filtered = useMemo(() => {
+          let list = venues.slice();
+          const capMin = CAPACITY_FILTERS.find((c) => c.key === capacity)?.min || 0;
+          if (capMin) list = list.filter((v) => v.capacity >= capMin);
+          if (q.trim()) {
+            const n = q.toLowerCase();
+            list = list.filter(
+              (v) =>
+                v.name.toLowerCase().includes(n) ||
+                v.location.toLowerCase().includes(n) ||
+                v.type.toLowerCase().includes(n) ||
+                v.tags.some((t) => t.toLowerCase().includes(n))
+            );
+          }
+          list.sort((a, b) => {
+            if (sort === 'rating') return b.rating - a.rating;
+            if (sort === 'newest') return new Date(b.added) - new Date(a.added);
+            if (sort === 'capacity') return b.capacity - a.capacity;
+            if (sort === 'name') return a.name.localeCompare(b.name);
+            return 0;
+          });
+          return list;
+        }, [venues, q, capacity, sort]);
 
-  const activeChips = [];
-  if (capacity !== "any") activeChips.push({ k: "cap", label: capLabel, clear: () => setCapacity("any") });
-  if (q.trim()) activeChips.push({ k: "q", label: `"${q}"`, clear: () => setQ("") });
+        const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
+        const currentPage = Math.min(page, totalPages);
+        const paged = filtered.slice((currentPage - 1) * PER_PAGE, currentPage * PER_PAGE);
 
-  return (
-    <>
-      <Nav />
-      <div style={{ position: "relative" }}>
-        <div className="page-mesh"><div className="grid-overlay" /></div>
+        // insert contribution banner after 6th card (mid-grid) when eligible
+        const withBanner = useMemo(() => {
+          if (!tweaks.showContribBanner || paged.length < 3) return { items: paged, bannerAt: -1 };
+          return { items: paged, bannerAt: 3 };
+        }, [paged, tweaks.showContribBanner]);
 
-        <div className="container" style={{ position: "relative", zIndex: 1 }}>
-          <header className="page-header">
-            <div className="header-top">
-              <div>
-                <span className="eyebrow"><span className="dot" /> COMMUNITY DATABASE · DAVAO</span>
-                <h1>Venue Hub</h1>
-                <p className="lead">Discover, rate, and contribute the best spaces for Web3 and DeFi events in Davao.</p>
+        const showToast = (msg) => {
+          setToast(msg);
+          setTimeout(() => setToast(null), 2600);
+        };
+
+        const onAddSubmit = (form) => {
+          const newV = {
+            id: Date.now(),
+            name: form.name,
+            location: form.location,
+            capacity: +form.capacity,
+            type: form.type,
+            rating: 5.0,
+            reviews: 0,
+            contributor: 'juan.d',
+            added: 'Apr 20, 2026',
+            tags: form.amenities.length ? ['New'] : ['New'],
+            amenities: form.amenities,
+            orb: Math.random() > 0.5 ? 'lime' : 'amber',
+            angle: `${100 + Math.round(Math.random() * 40)}deg`
+          };
+          setVenues((vs) => [newV, ...vs]);
+          setAddOpen(false);
+          setEditVenue(null);
+          showToast(editVenue ? 'Venue updated — pending review' : 'Venue submitted for community review');
+        };
+
+        const onReportSubmit = () => {
+          setReportVenue(null);
+          showToast('Report submitted to moderators');
+        };
+
+        const capLabel = CAPACITY_FILTERS.find((c) => c.key === capacity)?.label || 'Any size';
+        const sortLabel = SORT_OPTIONS.find((s) => s.key === sort)?.label || 'Highest rated';
+
+        const activeChips = [];
+        if (capacity !== 'any') activeChips.push({ k: 'cap', label: capLabel, clear: () => setCapacity('any') });
+        if (q.trim()) activeChips.push({ k: 'q', label: `"${q}"`, clear: () => setQ('') });
+
+        return (
+          <>
+            <Nav />
+            <div style={{ position: 'relative' }}>
+              <div className="page-mesh">
+                <div className="grid-overlay" />
               </div>
-              <div className="header-stats">
-                <div className="stat-cell">
-                  <div className="num lime">{String(venues.length).padStart(2, "0")}</div>
-                  <div className="lbl">Listings</div>
-                </div>
-                <div className="stat-sep" />
-                <div className="stat-cell">
-                  <div className="num amber">{(venues.reduce((a, v) => a + v.rating, 0) / venues.length).toFixed(1)}</div>
-                  <div className="lbl">Avg rating</div>
-                </div>
-                <div className="stat-sep" />
-                <div className="stat-cell">
-                  <div className="num">{venues.reduce((a, v) => a + v.reviews, 0)}</div>
-                  <div className="lbl">Reviews</div>
-                </div>
-              </div>
-            </div>
 
-            <div className="action-bar">
-              <div className="search">
-                <span className="icon"><Icon name="search" size={18} /></span>
-                <input placeholder="Search venue names or locations…" value={q} onChange={e => { setQ(e.target.value); setPage(1); }}/>
-              </div>
-              <div ref={capRef} style={{ position: "relative" }}>
-                <button className="select-box" onClick={() => setCapOpen(o => !o)}>
-                  <span className="label">Capacity</span>
-                  <span className="val">{capLabel}</span>
-                  <Icon name="chevron-down" size={14} />
-                </button>
-                {capOpen && (
-                  <div className="dropdown-menu" style={{ right: "auto", left: 0 }}>
-                    {CAPACITY_FILTERS.map(c => (
-                      <button key={c.key} className={`dropdown-item ${capacity === c.key ? "selected" : ""}`} onClick={() => { setCapacity(c.key); setCapOpen(false); setPage(1); }}>
-                        {c.label}
+              <div className="container" style={{ position: 'relative', zIndex: 1 }}>
+                <header className="page-header">
+                  <div className="header-top">
+                    <div>
+                      <span className="eyebrow">
+                        <span className="dot" /> COMMUNITY DATABASE · DAVAO
+                      </span>
+                      <h1>Venue Hub</h1>
+                      <p className="lead">Discover, rate, and contribute the best spaces for Web3 and DeFi events in Davao.</p>
+                    </div>
+                    <div className="header-stats">
+                      <div className="stat-cell">
+                        <div className="num lime">{String(venues.length).padStart(2, '0')}</div>
+                        <div className="lbl">Listings</div>
+                      </div>
+                      <div className="stat-sep" />
+                      <div className="stat-cell">
+                        <div className="num amber">{(venues.reduce((a, v) => a + v.rating, 0) / venues.length).toFixed(1)}</div>
+                        <div className="lbl">Avg rating</div>
+                      </div>
+                      <div className="stat-sep" />
+                      <div className="stat-cell">
+                        <div className="num">{venues.reduce((a, v) => a + v.reviews, 0)}</div>
+                        <div className="lbl">Reviews</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="action-bar">
+                    <div className="search">
+                      <span className="icon">
+                        <Icon name="search" size={18} />
+                      </span>
+                      <input
+                        placeholder="Search venue names or locations…"
+                        value={q}
+                        onChange={(e) => {
+                          setQ(e.target.value);
+                          setPage(1);
+                        }}
+                      />
+                    </div>
+                    <div ref={capRef} style={{ position: 'relative' }}>
+                      <button className="select-box" onClick={() => setCapOpen((o) => !o)}>
+                        <span className="label">Capacity</span>
+                        <span className="val">{capLabel}</span>
+                        <Icon name="chevron-down" size={14} />
+                      </button>
+                      {capOpen && (
+                        <div className="dropdown-menu" style={{ right: 'auto', left: 0 }}>
+                          {CAPACITY_FILTERS.map((c) => (
+                            <button
+                              key={c.key}
+                              className={`dropdown-item ${capacity === c.key ? 'selected' : ''}`}
+                              onClick={() => {
+                                setCapacity(c.key);
+                                setCapOpen(false);
+                                setPage(1);
+                              }}
+                            >
+                              {c.label}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <div ref={sortRef} style={{ position: 'relative' }}>
+                      <button className="select-box" onClick={() => setSortOpen((o) => !o)}>
+                        <span className="label">Sort</span>
+                        <span className="val">{sortLabel}</span>
+                        <Icon name="chevron-down" size={14} />
+                      </button>
+                      {sortOpen && (
+                        <div className="dropdown-menu">
+                          {SORT_OPTIONS.map((o) => (
+                            <button
+                              key={o.key}
+                              className={`dropdown-item ${sort === o.key ? 'selected' : ''}`}
+                              onClick={() => {
+                                setSort(o.key);
+                                setSortOpen(false);
+                              }}
+                            >
+                              {o.label}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <button
+                      className="btn btn-primary"
+                      onClick={() => {
+                        setEditVenue(null);
+                        setAddOpen(true);
+                      }}
+                      style={{ height: 56, padding: '0 22px' }}
+                    >
+                      <Icon name="plus" size={15} /> Add Venue Post
+                    </button>
+                  </div>
+
+                  <div className="results-bar">
+                    <div>
+                      <h3>
+                        {filtered.length} venue{filtered.length !== 1 ? 's' : ''} listed
+                      </h3>
+                      <div className="note">
+                        Sorted by {sortLabel.toLowerCase()}
+                        {capacity !== 'any' && ` · ${capLabel}`}
+                      </div>
+                    </div>
+                    {activeChips.length > 0 && (
+                      <div className="filter-chips">
+                        {activeChips.map((c) => (
+                          <span key={c.k} className="chip">
+                            {c.label}{' '}
+                            <button onClick={c.clear}>
+                              <Icon name="x" size={11} />
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </header>
+
+                <div className="grid" style={{ gridTemplateColumns: tweaks.density === 'compact' ? 'repeat(4, 1fr)' : 'repeat(3, 1fr)' }}>
+                  {withBanner.items.length === 0 ? (
+                    <div className="empty">
+                      <div className="empty-icon">
+                        <Icon name="search" size={22} />
+                      </div>
+                      <h4>No venues match your filters</h4>
+                      <p>Try widening the capacity or clearing your search.</p>
+                    </div>
+                  ) : (
+                    withBanner.items.map((v, i) => (
+                      <React.Fragment key={v.id}>
+                        <VenueCard
+                          v={v}
+                          onOpen={setDetail}
+                          onEdit={(vv) => {
+                            setEditVenue(vv);
+                            setAddOpen(true);
+                          }}
+                          onReport={setReportVenue}
+                          onShare={(vv) => showToast(`Link to ${vv.name} copied`)}
+                          cardImage={tweaks.cardImage}
+                        />
+                        {withBanner.bannerAt === i + 1 && (
+                          <ContribBanner
+                            onAdd={() => {
+                              setEditVenue(null);
+                              setAddOpen(true);
+                            }}
+                          />
+                        )}
+                      </React.Fragment>
+                    ))
+                  )}
+                </div>
+
+                {filtered.length > 0 && totalPages > 1 && (
+                  <div className="paginate-wrap">
+                    <button className="page-btn" disabled={currentPage === 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>
+                      <Icon name="arrow-left" size={13} />
+                    </button>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
+                      <button key={n} className={`page-btn ${n === currentPage ? 'active' : ''}`} onClick={() => setPage(n)}>
+                        {n}
                       </button>
                     ))}
+                    <button className="page-btn" disabled={currentPage === totalPages} onClick={() => setPage((p) => Math.min(totalPages, p + 1))}>
+                      <Icon name="arrow-right" size={13} />
+                    </button>
                   </div>
                 )}
               </div>
-              <div ref={sortRef} style={{ position: "relative" }}>
-                <button className="select-box" onClick={() => setSortOpen(o => !o)}>
-                  <span className="label">Sort</span>
-                  <span className="val">{sortLabel}</span>
-                  <Icon name="chevron-down" size={14} />
-                </button>
-                {sortOpen && (
-                  <div className="dropdown-menu">
-                    {SORT_OPTIONS.map(o => (
-                      <button key={o.key} className={`dropdown-item ${sort === o.key ? "selected" : ""}`} onClick={() => { setSort(o.key); setSortOpen(false); }}>
-                        {o.label}
-                      </button>
-                    ))}
+            </div>
+
+            <footer className="footer">
+              <div className="footer-inner container">
+                <div className="logo">
+                  <div className="logo-mark">
+                    <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
+                      <path d="M2 10 L10 2 L18 10 L10 18 Z" stroke="#0a1005" strokeWidth="2" fill="none" />
+                      <circle cx="10" cy="10" r="2.5" fill="#0a1005" />
+                    </svg>
                   </div>
-                )}
-              </div>
-              <button className="btn btn-primary" onClick={() => { setEditVenue(null); setAddOpen(true); }} style={{ height: 56, padding: "0 22px" }}>
-                <Icon name="plus" size={15} /> Add Venue Post
-              </button>
-            </div>
-
-            <div className="results-bar">
-              <div>
-                <h3>{filtered.length} venue{filtered.length !== 1 ? "s" : ""} listed</h3>
-                <div className="note">Sorted by {sortLabel.toLowerCase()}{capacity !== "any" && ` · ${capLabel}`}</div>
-              </div>
-              {activeChips.length > 0 && (
-                <div className="filter-chips">
-                  {activeChips.map(c => (
-                    <span key={c.k} className="chip">{c.label} <button onClick={c.clear}><Icon name="x" size={11} /></button></span>
-                  ))}
+                  <span>Eventara</span>
                 </div>
-              )}
-            </div>
-          </header>
-
-          <div className="grid" style={{ gridTemplateColumns: tweaks.density === "compact" ? "repeat(4, 1fr)" : "repeat(3, 1fr)" }}>
-            {withBanner.items.length === 0 ? (
-              <div className="empty">
-                <div className="empty-icon"><Icon name="search" size={22} /></div>
-                <h4>No venues match your filters</h4>
-                <p>Try widening the capacity or clearing your search.</p>
+                <div className="footer-links">
+                  <a href="#">Privacy Policy</a>
+                  <a href="#">Terms of Service</a>
+                  <a href="#">Contact</a>
+                </div>
+                <div className="socials">
+                  <a className="social-btn" href="#">
+                    <Icon name="twitter" size={15} />
+                  </a>
+                  <a className="social-btn" href="#">
+                    <Icon name="discord" size={16} />
+                  </a>
+                  <a className="social-btn" href="#">
+                    <Icon name="telegram" size={16} />
+                  </a>
+                </div>
               </div>
-            ) : withBanner.items.map((v, i) => (
-              <React.Fragment key={v.id}>
-                <VenueCard
-                  v={v}
-                  onOpen={setDetail}
-                  onEdit={(vv) => { setEditVenue(vv); setAddOpen(true); }}
-                  onReport={setReportVenue}
-                  onShare={(vv) => showToast(`Link to ${vv.name} copied`)}
-                  cardImage={tweaks.cardImage}
-                />
-                {withBanner.bannerAt === i + 1 && <ContribBanner onAdd={() => { setEditVenue(null); setAddOpen(true); }} />}
-              </React.Fragment>
-            ))}
-          </div>
+              <div className="container" style={{ marginTop: 28, display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+                <div className="copyright">© 2026 EVENTARA — Built for the Davao DeFi Community PH.</div>
+                <div className="copyright" style={{ color: 'var(--text-dim)' }}>
+                  <span style={{ color: 'var(--lime)' }}>●</span> All systems operational
+                </div>
+              </div>
+            </footer>
 
-          {filtered.length > 0 && totalPages > 1 && (
-            <div className="paginate-wrap">
-              <button className="page-btn" disabled={currentPage === 1} onClick={() => setPage(p => Math.max(1, p - 1))}>
-                <Icon name="arrow-left" size={13} />
-              </button>
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(n => (
-                <button key={n} className={`page-btn ${n === currentPage ? "active" : ""}`} onClick={() => setPage(n)}>{n}</button>
-              ))}
-              <button className="page-btn" disabled={currentPage === totalPages} onClick={() => setPage(p => Math.min(totalPages, p + 1))}>
-                <Icon name="arrow-right" size={13} />
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
+            {detail && <VenueDetail v={detail} onClose={() => setDetail(null)} />}
+            {addOpen && (
+              <AddVenueModal
+                initial={
+                  editVenue
+                    ? {
+                        name: editVenue.name,
+                        location: editVenue.location,
+                        capacity: String(editVenue.capacity),
+                        type: editVenue.type,
+                        amenities: editVenue.amenities || [],
+                        notes: ''
+                      }
+                    : null
+                }
+                title={editVenue ? `Edit “${editVenue.name}”` : 'Add a new venue'}
+                onClose={() => {
+                  setAddOpen(false);
+                  setEditVenue(null);
+                }}
+                onSubmit={onAddSubmit}
+              />
+            )}
+            {reportVenue && <ReportModal venue={reportVenue} onClose={() => setReportVenue(null)} onSubmit={onReportSubmit} />}
+            {editMode && <Tweaks tweaks={tweaks} setTweaks={setTweaks} onClose={() => setEditMode(false)} />}
+            {toast && (
+              <div className="toast">
+                <span className="dot" />
+                {toast}
+              </div>
+            )}
+          </>
+        );
+      };
 
-      <footer className="footer">
-        <div className="container footer-inner">
-          <div className="logo">
-            <div className="logo-mark">
-              <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
-                <path d="M2 10 L10 2 L18 10 L10 18 Z" stroke="#0a1005" strokeWidth="2" fill="none" />
-                <circle cx="10" cy="10" r="2.5" fill="#0a1005"/>
-              </svg>
-            </div>
-            <span>Eventara</span>
-          </div>
-          <div className="footer-links">
-            <a href="#">Privacy Policy</a>
-            <a href="#">Terms of Service</a>
-            <a href="#">Contact</a>
-          </div>
-          <div className="socials">
-            <a className="social-btn" href="#"><Icon name="twitter" size={15} /></a>
-            <a className="social-btn" href="#"><Icon name="discord" size={16} /></a>
-            <a className="social-btn" href="#"><Icon name="telegram" size={16} /></a>
-          </div>
-        </div>
-        <div className="container" style={{ marginTop: 28, display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
-          <div className="copyright">© 2026 EVENTARA — Built for the Davao DeFi Community PH.</div>
-          <div className="copyright" style={{ color: "var(--text-dim)" }}>
-            <span style={{ color: "var(--lime)" }}>●</span> All systems operational
-          </div>
-        </div>
-      </footer>
+      ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
 
-      {detail && <VenueDetail v={detail} onClose={() => setDetail(null)} />}
-      {addOpen && <AddVenueModal
-        initial={editVenue ? {
-          name: editVenue.name, location: editVenue.location, capacity: String(editVenue.capacity),
-          type: editVenue.type, amenities: editVenue.amenities || [], notes: ""
-        } : null}
-        title={editVenue ? `Edit “${editVenue.name}”` : "Add a new venue"}
-        onClose={() => { setAddOpen(false); setEditVenue(null); }}
-        onSubmit={onAddSubmit}
-      />}
-      {reportVenue && <ReportModal venue={reportVenue} onClose={() => setReportVenue(null)} onSubmit={onReportSubmit} />}
-      {editMode && <Tweaks tweaks={tweaks} setTweaks={setTweaks} onClose={() => setEditMode(false)} />}
-      {toast && <div className="toast"><span className="dot" />{toast}</div>}
-    </>
-  );
-};
-
-ReactDOM.createRoot(document.getElementById("root")).render(<App />);
-</script>
-
-<noscript><div style="padding:48px;font-family:system-ui;color:#fff">Enable JavaScript to view the Eventara Venue Hub.</div></noscript>
-</body>
+    <noscript><div style="padding: 48px; font-family: system-ui; color: #fff">Enable JavaScript to view the Eventara Venue Hub.</div></noscript>
+  </body>
 </html>

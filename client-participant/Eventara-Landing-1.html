@@ -1,1269 +1,2310 @@
 <!doctype html>
 <html lang="en">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Eventara — Davao DeFi Community</title>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Eventara — Davao DeFi Community</title>
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
 
-<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
-<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
-<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+    <script
+      src="https://unpkg.com/react@18.3.1/umd/react.development.js"
+      integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js"
+      integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"
+      integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y"
+      crossorigin="anonymous"
+    ></script>
 
-<style>
-  :root {
-    --bg: oklch(0.17 0.008 150);
-    --bg-2: oklch(0.21 0.01 150);
-    --surface: oklch(0.23 0.012 150);
-    --surface-2: oklch(0.27 0.014 150);
-    --line: oklch(0.32 0.015 150);
-    --line-soft: oklch(0.28 0.012 150 / 0.6);
-    --text: oklch(0.98 0.005 150);
-    --text-dim: oklch(0.78 0.01 150);
-    --text-mute: oklch(0.58 0.012 150);
-    --lime: oklch(0.9 0.22 128);
-    --lime-dim: oklch(0.78 0.19 128);
-    --lime-glow: oklch(0.9 0.22 128 / 0.35);
-    --amber: oklch(0.82 0.17 75);
-    --amber-dim: oklch(0.72 0.16 75);
-    --amber-glow: oklch(0.82 0.17 75 / 0.4);
-    --red: oklch(0.7 0.2 25);
-  }
-  * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; }
-  body {
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    -webkit-font-smoothing: antialiased;
-    font-feature-settings: "ss01", "cv11";
-    overflow-x: hidden;
-  }
-  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
-  input, textarea { font-family: inherit; }
-  a { color: inherit; text-decoration: none; }
-  .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+    <style>
+      :root {
+        --bg: oklch(0.17 0.008 150);
+        --bg-2: oklch(0.21 0.01 150);
+        --surface: oklch(0.23 0.012 150);
+        --surface-2: oklch(0.27 0.014 150);
+        --line: oklch(0.32 0.015 150);
+        --line-soft: oklch(0.28 0.012 150 / 0.6);
+        --text: oklch(0.98 0.005 150);
+        --text-dim: oklch(0.78 0.01 150);
+        --text-mute: oklch(0.58 0.012 150);
+        --lime: oklch(0.9 0.22 128);
+        --lime-dim: oklch(0.78 0.19 128);
+        --lime-glow: oklch(0.9 0.22 128 / 0.35);
+        --amber: oklch(0.82 0.17 75);
+        --amber-dim: oklch(0.72 0.16 75);
+        --amber-glow: oklch(0.82 0.17 75 / 0.4);
+        --red: oklch(0.7 0.2 25);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        -webkit-font-smoothing: antialiased;
+        font-feature-settings: 'ss01', 'cv11';
+        overflow-x: hidden;
+      }
+      button {
+        font-family: inherit;
+        cursor: pointer;
+        border: none;
+        background: none;
+        color: inherit;
+      }
+      input,
+      textarea {
+        font-family: inherit;
+      }
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+      .mono {
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
+      }
 
-  /* --- glow/mesh background ------------------------------------------ */
-  .mesh {
-    position: absolute; inset: 0; overflow: hidden; pointer-events: none;
-    z-index: 0;
-  }
-  .mesh::before, .mesh::after {
-    content: ""; position: absolute; border-radius: 50%;
-    filter: blur(80px); opacity: 0.55;
-  }
-  .mesh::before {
-    width: 720px; height: 720px;
-    left: -140px; top: -180px;
-    background: radial-gradient(circle, oklch(0.9 0.22 128 / 0.55), transparent 65%);
-  }
-  .mesh::after {
-    width: 620px; height: 620px;
-    right: -160px; top: 40px;
-    background: radial-gradient(circle, oklch(0.82 0.17 75 / 0.4), transparent 65%);
-  }
-  .grid-overlay {
-    position: absolute; inset: 0;
-    background-image:
-      linear-gradient(var(--line-soft) 1px, transparent 1px),
-      linear-gradient(90deg, var(--line-soft) 1px, transparent 1px);
-    background-size: 64px 64px;
-    mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, black 30%, transparent 75%);
-    opacity: 0.35;
-    pointer-events: none;
-  }
+      /* --- glow/mesh background ------------------------------------------ */
+      .mesh {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        pointer-events: none;
+        z-index: 0;
+      }
+      .mesh::before,
+      .mesh::after {
+        content: '';
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(80px);
+        opacity: 0.55;
+      }
+      .mesh::before {
+        width: 720px;
+        height: 720px;
+        left: -140px;
+        top: -180px;
+        background: radial-gradient(circle, oklch(0.9 0.22 128 / 0.55), transparent 65%);
+      }
+      .mesh::after {
+        width: 620px;
+        height: 620px;
+        right: -160px;
+        top: 40px;
+        background: radial-gradient(circle, oklch(0.82 0.17 75 / 0.4), transparent 65%);
+      }
+      .grid-overlay {
+        position: absolute;
+        inset: 0;
+        background-image: linear-gradient(var(--line-soft) 1px, transparent 1px), linear-gradient(90deg, var(--line-soft) 1px, transparent 1px);
+        background-size: 64px 64px;
+        mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, black 30%, transparent 75%);
+        opacity: 0.35;
+        pointer-events: none;
+      }
 
-  /* --- reusable --------------------------------------------------- */
-  .container { max-width: 1240px; margin: 0 auto; padding: 0 32px; }
-  .eyebrow {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--text-mute);
-    display: inline-flex; align-items: center; gap: 10px;
-  }
-  .eyebrow .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--lime); box-shadow: 0 0 12px var(--lime-glow); }
-  .btn {
-    display: inline-flex; align-items: center; justify-content: center; gap: 10px;
-    padding: 14px 22px; border-radius: 999px;
-    font-size: 14.5px; font-weight: 600; letter-spacing: -0.01em;
-    transition: all 180ms ease;
-    white-space: nowrap;
-  }
-  .btn-primary {
-    background: var(--lime); color: #0a1005;
-    box-shadow: 0 8px 28px -10px var(--lime-glow), inset 0 -1px 0 oklch(0.7 0.2 128);
-  }
-  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 14px 40px -10px var(--lime-glow); }
-  .btn-amber-outline {
-    border: 1px solid var(--amber); color: var(--amber);
-    background: oklch(0.82 0.17 75 / 0.05);
-  }
-  .btn-amber-outline:hover { background: oklch(0.82 0.17 75 / 0.12); box-shadow: 0 0 24px -6px var(--amber-glow); }
-  .btn-ghost {
-    color: var(--text-dim);
-    border: 1px solid var(--line);
-    background: oklch(1 0 0 / 0.02);
-  }
-  .btn-ghost:hover { color: var(--text); border-color: oklch(1 0 0 / 0.2); }
-  .btn-white-outline {
-    border: 1px solid oklch(1 0 0 / 0.25);
-    color: var(--text);
-    background: transparent;
-  }
-  .btn-white-outline:hover { border-color: var(--text); background: oklch(1 0 0 / 0.04); }
+      /* --- reusable --------------------------------------------------- */
+      .container {
+        max-width: 1240px;
+        margin: 0 auto;
+        padding: 0 32px;
+      }
+      .eyebrow {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--text-mute);
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .eyebrow .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--lime);
+        box-shadow: 0 0 12px var(--lime-glow);
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 14px 22px;
+        border-radius: 999px;
+        font-size: 14.5px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        transition: all 180ms ease;
+        white-space: nowrap;
+      }
+      .btn-primary {
+        background: var(--lime);
+        color: #0a1005;
+        box-shadow:
+          0 8px 28px -10px var(--lime-glow),
+          inset 0 -1px 0 oklch(0.7 0.2 128);
+      }
+      .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 14px 40px -10px var(--lime-glow);
+      }
+      .btn-amber-outline {
+        border: 1px solid var(--amber);
+        color: var(--amber);
+        background: oklch(0.82 0.17 75 / 0.05);
+      }
+      .btn-amber-outline:hover {
+        background: oklch(0.82 0.17 75 / 0.12);
+        box-shadow: 0 0 24px -6px var(--amber-glow);
+      }
+      .btn-ghost {
+        color: var(--text-dim);
+        border: 1px solid var(--line);
+        background: oklch(1 0 0 / 0.02);
+      }
+      .btn-ghost:hover {
+        color: var(--text);
+        border-color: oklch(1 0 0 / 0.2);
+      }
+      .btn-white-outline {
+        border: 1px solid oklch(1 0 0 / 0.25);
+        color: var(--text);
+        background: transparent;
+      }
+      .btn-white-outline:hover {
+        border-color: var(--text);
+        background: oklch(1 0 0 / 0.04);
+      }
 
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--line-soft);
-    border-radius: 18px;
-    position: relative;
-    transition: transform 260ms ease, border-color 260ms ease, box-shadow 260ms ease;
-  }
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--line-soft);
+        border-radius: 18px;
+        position: relative;
+        transition:
+          transform 260ms ease,
+          border-color 260ms ease,
+          box-shadow 260ms ease;
+      }
 
-  /* --- hero ------------------------------------------------------- */
-  .hero {
-    position: relative;
-    padding: 96px 0 120px;
-    text-align: center;
-  }
-  .hero h1 {
-    font-size: clamp(44px, 6.4vw, 88px);
-    font-weight: 700;
-    letter-spacing: -0.035em;
-    line-height: 0.98;
-    margin: 22px auto 24px;
-    max-width: 14ch;
-    text-wrap: balance;
-  }
-  .hero .hl {
-    background: linear-gradient(100deg, var(--lime) 20%, oklch(0.95 0.2 140) 70%);
-    -webkit-background-clip: text; background-clip: text; color: transparent;
-    font-style: italic;
-    font-weight: 500;
-    font-family: 'Plus Jakarta Sans', serif;
-  }
-  .hero p.sub {
-    font-size: clamp(16px, 1.35vw, 19px);
-    line-height: 1.55;
-    color: var(--text-dim);
-    max-width: 58ch;
-    margin: 0 auto 40px;
-    text-wrap: pretty;
-  }
-  .hero-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+      /* --- hero ------------------------------------------------------- */
+      .hero {
+        position: relative;
+        padding: 96px 0 120px;
+        text-align: center;
+      }
+      .hero h1 {
+        font-size: clamp(44px, 6.4vw, 88px);
+        font-weight: 700;
+        letter-spacing: -0.035em;
+        line-height: 0.98;
+        margin: 22px auto 24px;
+        max-width: 14ch;
+        text-wrap: balance;
+      }
+      .hero .hl {
+        background: linear-gradient(100deg, var(--lime) 20%, oklch(0.95 0.2 140) 70%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        font-style: italic;
+        font-weight: 500;
+        font-family: 'Plus Jakarta Sans', serif;
+      }
+      .hero p.sub {
+        font-size: clamp(16px, 1.35vw, 19px);
+        line-height: 1.55;
+        color: var(--text-dim);
+        max-width: 58ch;
+        margin: 0 auto 40px;
+        text-wrap: pretty;
+      }
+      .hero-actions {
+        display: flex;
+        gap: 14px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
 
-  .hero-stats {
-    margin-top: 72px;
-    display: grid; grid-template-columns: repeat(4, 1fr);
-    border-top: 1px solid var(--line-soft);
-    border-bottom: 1px solid var(--line-soft);
-  }
-  .hero-stats > div { padding: 22px 18px; border-right: 1px solid var(--line-soft); text-align: left; }
-  .hero-stats > div:last-child { border-right: none; }
-  .hero-stats .num { font-size: 28px; font-weight: 600; letter-spacing: -0.03em; }
-  .hero-stats .lbl { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-mute); font-family: 'JetBrains Mono', monospace; margin-top: 4px; }
-  .hero-stats .num.lime { color: var(--lime); }
-  .hero-stats .num.amber { color: var(--amber); }
+      .hero-stats {
+        margin-top: 72px;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        border-top: 1px solid var(--line-soft);
+        border-bottom: 1px solid var(--line-soft);
+      }
+      .hero-stats > div {
+        padding: 22px 18px;
+        border-right: 1px solid var(--line-soft);
+        text-align: left;
+      }
+      .hero-stats > div:last-child {
+        border-right: none;
+      }
+      .hero-stats .num {
+        font-size: 28px;
+        font-weight: 600;
+        letter-spacing: -0.03em;
+      }
+      .hero-stats .lbl {
+        font-size: 11px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--text-mute);
+        font-family: 'JetBrains Mono', monospace;
+        margin-top: 4px;
+      }
+      .hero-stats .num.lime {
+        color: var(--lime);
+      }
+      .hero-stats .num.amber {
+        color: var(--amber);
+      }
 
-  /* --- nav -------------------------------------------------------- */
-  .nav {
-    position: sticky; top: 0; z-index: 40;
-    backdrop-filter: blur(18px) saturate(140%);
-    background: oklch(0.17 0.008 150 / 0.75);
-    border-bottom: 1px solid var(--line-soft);
-  }
-  .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 68px; }
-  .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: -0.02em; font-size: 18px; }
-  .logo-mark {
-    width: 26px; height: 26px; display: grid; place-items: center;
-    border-radius: 8px;
-    background: linear-gradient(145deg, var(--lime), var(--lime-dim));
-    color: #0a1005;
-    box-shadow: 0 0 18px -4px var(--lime-glow);
-  }
-  .nav-links { display: flex; gap: 6px; align-items: center; }
-  .nav-links a.link { padding: 8px 14px; border-radius: 10px; font-size: 14.5px; color: var(--text-dim); transition: color 150ms; }
-  .nav-links a.link:hover { color: var(--text); }
-  .nav-links a.link.active { color: var(--text); }
+      /* --- nav -------------------------------------------------------- */
+      .nav {
+        position: sticky;
+        top: 0;
+        z-index: 40;
+        backdrop-filter: blur(18px) saturate(140%);
+        background: oklch(0.17 0.008 150 / 0.75);
+        border-bottom: 1px solid var(--line-soft);
+      }
+      .nav-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 68px;
+      }
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        font-size: 18px;
+      }
+      .logo-mark {
+        width: 26px;
+        height: 26px;
+        display: grid;
+        place-items: center;
+        border-radius: 8px;
+        background: linear-gradient(145deg, var(--lime), var(--lime-dim));
+        color: #0a1005;
+        box-shadow: 0 0 18px -4px var(--lime-glow);
+      }
+      .nav-links {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+      }
+      .nav-links a.link {
+        padding: 8px 14px;
+        border-radius: 10px;
+        font-size: 14.5px;
+        color: var(--text-dim);
+        transition: color 150ms;
+      }
+      .nav-links a.link:hover {
+        color: var(--text);
+      }
+      .nav-links a.link.active {
+        color: var(--text);
+      }
 
-  /* --- section heading ------------------------------------------- */
-  .section { position: relative; padding: 96px 0; }
-  .section-head { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 40px; flex-wrap: wrap; }
-  .section-head h2 {
-    font-size: clamp(30px, 3.4vw, 44px);
-    letter-spacing: -0.03em; font-weight: 600;
-    margin: 10px 0 0;
-    text-wrap: balance;
-  }
-  .section-head .lead { color: var(--text-dim); max-width: 46ch; font-size: 15px; margin: 10px 0 0; }
+      /* --- section heading ------------------------------------------- */
+      .section {
+        position: relative;
+        padding: 96px 0;
+      }
+      .section-head {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 24px;
+        margin-bottom: 40px;
+        flex-wrap: wrap;
+      }
+      .section-head h2 {
+        font-size: clamp(30px, 3.4vw, 44px);
+        letter-spacing: -0.03em;
+        font-weight: 600;
+        margin: 10px 0 0;
+        text-wrap: balance;
+      }
+      .section-head .lead {
+        color: var(--text-dim);
+        max-width: 46ch;
+        font-size: 15px;
+        margin: 10px 0 0;
+      }
 
-  /* --- live card ------------------------------------------------- */
-  .live-card {
-    position: relative;
-    background: linear-gradient(180deg, oklch(0.23 0.012 150) 0%, oklch(0.2 0.01 150) 100%);
-    border: 1px solid var(--line);
-    border-radius: 24px;
-    overflow: hidden;
-    display: grid; grid-template-columns: 1.1fr 1fr;
-    min-height: 420px;
-  }
-  .live-card::before {
-    content: ""; position: absolute; inset: 0;
-    background: radial-gradient(circle at 90% 10%, oklch(0.82 0.17 75 / 0.18), transparent 40%);
-    pointer-events: none;
-  }
-  .live-visual {
-    position: relative; overflow: hidden;
-    background:
-      radial-gradient(circle at 30% 70%, oklch(0.9 0.22 128 / 0.25), transparent 55%),
-      radial-gradient(circle at 75% 25%, oklch(0.82 0.17 75 / 0.3), transparent 55%),
-      linear-gradient(135deg, oklch(0.2 0.01 150), oklch(0.15 0.008 150));
-    border-left: 1px solid var(--line-soft);
-  }
-  .live-visual .stripe-art {
-    position: absolute; inset: 0;
-    background-image: repeating-linear-gradient(
-      110deg,
-      transparent 0 22px,
-      oklch(1 0 0 / 0.025) 22px 24px
-    );
-  }
-  .live-visual .label-art {
-    position: absolute; bottom: 16px; left: 16px;
-    font-family: 'JetBrains Mono', monospace; font-size: 10px;
-    letter-spacing: 0.16em; text-transform: uppercase;
-    color: oklch(1 0 0 / 0.35);
-  }
-  .live-visual .orb {
-    position: absolute; border-radius: 50%; filter: blur(26px);
-  }
-  .live-visual .orb-a { width: 220px; height: 220px; left: 18%; top: 22%; background: var(--lime); opacity: 0.3; }
-  .live-visual .orb-b { width: 180px; height: 180px; right: 14%; bottom: 18%; background: var(--amber); opacity: 0.4; }
+      /* --- live card ------------------------------------------------- */
+      .live-card {
+        position: relative;
+        background: linear-gradient(180deg, oklch(0.23 0.012 150) 0%, oklch(0.2 0.01 150) 100%);
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        overflow: hidden;
+        display: grid;
+        grid-template-columns: 1.1fr 1fr;
+        min-height: 420px;
+      }
+      .live-card::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 90% 10%, oklch(0.82 0.17 75 / 0.18), transparent 40%);
+        pointer-events: none;
+      }
+      .live-visual {
+        position: relative;
+        overflow: hidden;
+        background:
+          radial-gradient(circle at 30% 70%, oklch(0.9 0.22 128 / 0.25), transparent 55%),
+          radial-gradient(circle at 75% 25%, oklch(0.82 0.17 75 / 0.3), transparent 55%), linear-gradient(135deg, oklch(0.2 0.01 150), oklch(0.15 0.008 150));
+        border-left: 1px solid var(--line-soft);
+      }
+      .live-visual .stripe-art {
+        position: absolute;
+        inset: 0;
+        background-image: repeating-linear-gradient(110deg, transparent 0 22px, oklch(1 0 0 / 0.025) 22px 24px);
+      }
+      .live-visual .label-art {
+        position: absolute;
+        bottom: 16px;
+        left: 16px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: oklch(1 0 0 / 0.35);
+      }
+      .live-visual .orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(26px);
+      }
+      .live-visual .orb-a {
+        width: 220px;
+        height: 220px;
+        left: 18%;
+        top: 22%;
+        background: var(--lime);
+        opacity: 0.3;
+      }
+      .live-visual .orb-b {
+        width: 180px;
+        height: 180px;
+        right: 14%;
+        bottom: 18%;
+        background: var(--amber);
+        opacity: 0.4;
+      }
 
-  .live-body { padding: 36px 40px; display: flex; flex-direction: column; gap: 18px; position: relative; }
-  .live-tag {
-    display: inline-flex; align-items: center; gap: 8px;
-    padding: 6px 12px 6px 10px;
-    background: oklch(0.82 0.17 75 / 0.12);
-    border: 1px solid oklch(0.82 0.17 75 / 0.35);
-    border-radius: 999px;
-    font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.14em;
-    color: var(--amber);
-    width: fit-content;
-  }
-  .pulse {
-    width: 8px; height: 8px; border-radius: 50%; background: var(--amber);
-    position: relative;
-  }
-  .pulse::after {
-    content: ""; position: absolute; inset: -4px; border-radius: 50%;
-    background: var(--amber); opacity: 0.5;
-    animation: ping 1.6s cubic-bezier(0,0,0.2,1) infinite;
-  }
-  @keyframes ping {
-    0% { transform: scale(0.6); opacity: 0.6; }
-    80%, 100% { transform: scale(1.8); opacity: 0; }
-  }
-  .live-body h3 {
-    font-size: clamp(26px, 2.6vw, 34px);
-    letter-spacing: -0.025em; font-weight: 600;
-    margin: 0; line-height: 1.1;
-  }
-  .live-meta { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px 28px; margin-top: 6px; }
-  .live-meta .k { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-mute); }
-  .live-meta .v { font-size: 14.5px; color: var(--text); margin-top: 4px; font-weight: 500; }
-  .now-playing {
-    background: oklch(1 0 0 / 0.03);
-    border: 1px solid var(--line-soft);
-    border-radius: 14px; padding: 14px 16px;
-    display: flex; align-items: center; gap: 14px;
-    margin-top: auto;
-  }
-  .speaker-avatar {
-    width: 42px; height: 42px; border-radius: 50%;
-    background: linear-gradient(135deg, var(--amber), oklch(0.72 0.16 75));
-    display: grid; place-items: center;
-    color: #1a1005; font-weight: 700; font-size: 14px;
-    flex-shrink: 0;
-  }
-  .now-playing .sp-name { font-size: 14.5px; font-weight: 600; }
-  .now-playing .sp-topic { font-size: 12.5px; color: var(--text-dim); margin-top: 2px; }
-  .now-playing .wave { display: flex; align-items: end; gap: 3px; margin-left: auto; }
-  .wave span {
-    display: block; width: 3px; background: var(--lime); border-radius: 2px;
-    animation: wave 1.1s ease-in-out infinite;
-  }
-  .wave span:nth-child(1) { height: 10px; animation-delay: 0.0s; }
-  .wave span:nth-child(2) { height: 16px; animation-delay: 0.15s; }
-  .wave span:nth-child(3) { height: 22px; animation-delay: 0.3s; }
-  .wave span:nth-child(4) { height: 14px; animation-delay: 0.45s; }
-  .wave span:nth-child(5) { height: 18px; animation-delay: 0.2s; }
-  @keyframes wave {
-    0%, 100% { transform: scaleY(0.5); opacity: 0.6; }
-    50% { transform: scaleY(1); opacity: 1; }
-  }
+      .live-body {
+        padding: 36px 40px;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        position: relative;
+      }
+      .live-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 12px 6px 10px;
+        background: oklch(0.82 0.17 75 / 0.12);
+        border: 1px solid oklch(0.82 0.17 75 / 0.35);
+        border-radius: 999px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        color: var(--amber);
+        width: fit-content;
+      }
+      .pulse {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--amber);
+        position: relative;
+      }
+      .pulse::after {
+        content: '';
+        position: absolute;
+        inset: -4px;
+        border-radius: 50%;
+        background: var(--amber);
+        opacity: 0.5;
+        animation: ping 1.6s cubic-bezier(0, 0, 0.2, 1) infinite;
+      }
+      @keyframes ping {
+        0% {
+          transform: scale(0.6);
+          opacity: 0.6;
+        }
+        80%,
+        100% {
+          transform: scale(1.8);
+          opacity: 0;
+        }
+      }
+      .live-body h3 {
+        font-size: clamp(26px, 2.6vw, 34px);
+        letter-spacing: -0.025em;
+        font-weight: 600;
+        margin: 0;
+        line-height: 1.1;
+      }
+      .live-meta {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 18px 28px;
+        margin-top: 6px;
+      }
+      .live-meta .k {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 10.5px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--text-mute);
+      }
+      .live-meta .v {
+        font-size: 14.5px;
+        color: var(--text);
+        margin-top: 4px;
+        font-weight: 500;
+      }
+      .now-playing {
+        background: oklch(1 0 0 / 0.03);
+        border: 1px solid var(--line-soft);
+        border-radius: 14px;
+        padding: 14px 16px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-top: auto;
+      }
+      .speaker-avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--amber), oklch(0.72 0.16 75));
+        display: grid;
+        place-items: center;
+        color: #1a1005;
+        font-weight: 700;
+        font-size: 14px;
+        flex-shrink: 0;
+      }
+      .now-playing .sp-name {
+        font-size: 14.5px;
+        font-weight: 600;
+      }
+      .now-playing .sp-topic {
+        font-size: 12.5px;
+        color: var(--text-dim);
+        margin-top: 2px;
+      }
+      .now-playing .wave {
+        display: flex;
+        align-items: end;
+        gap: 3px;
+        margin-left: auto;
+      }
+      .wave span {
+        display: block;
+        width: 3px;
+        background: var(--lime);
+        border-radius: 2px;
+        animation: wave 1.1s ease-in-out infinite;
+      }
+      .wave span:nth-child(1) {
+        height: 10px;
+        animation-delay: 0s;
+      }
+      .wave span:nth-child(2) {
+        height: 16px;
+        animation-delay: 0.15s;
+      }
+      .wave span:nth-child(3) {
+        height: 22px;
+        animation-delay: 0.3s;
+      }
+      .wave span:nth-child(4) {
+        height: 14px;
+        animation-delay: 0.45s;
+      }
+      .wave span:nth-child(5) {
+        height: 18px;
+        animation-delay: 0.2s;
+      }
+      @keyframes wave {
+        0%,
+        100% {
+          transform: scaleY(0.5);
+          opacity: 0.6;
+        }
+        50% {
+          transform: scaleY(1);
+          opacity: 1;
+        }
+      }
 
-  /* --- upcoming grid --------------------------------------------- */
-  .tabs { display: inline-flex; gap: 4px; padding: 4px; background: var(--surface); border: 1px solid var(--line-soft); border-radius: 999px; }
-  .tab {
-    padding: 8px 16px; border-radius: 999px; font-size: 13px; color: var(--text-dim);
-    transition: all 160ms ease;
-  }
-  .tab:hover { color: var(--text); }
-  .tab.active { background: var(--lime); color: #0a1005; font-weight: 600; }
+      /* --- upcoming grid --------------------------------------------- */
+      .tabs {
+        display: inline-flex;
+        gap: 4px;
+        padding: 4px;
+        background: var(--surface);
+        border: 1px solid var(--line-soft);
+        border-radius: 999px;
+      }
+      .tab {
+        padding: 8px 16px;
+        border-radius: 999px;
+        font-size: 13px;
+        color: var(--text-dim);
+        transition: all 160ms ease;
+      }
+      .tab:hover {
+        color: var(--text);
+      }
+      .tab.active {
+        background: var(--lime);
+        color: #0a1005;
+        font-weight: 600;
+      }
 
-  .events-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
-  .event-card {
-    background: var(--surface);
-    border: 1px solid var(--line-soft);
-    border-radius: 20px;
-    overflow: hidden;
-    display: flex; flex-direction: column;
-    transition: transform 280ms ease, border-color 280ms ease, box-shadow 280ms ease;
-    cursor: pointer;
-  }
-  .event-card:hover {
-    transform: translateY(-6px);
-    border-color: oklch(0.9 0.22 128 / 0.45);
-    box-shadow: 0 20px 60px -20px oklch(0.9 0.22 128 / 0.25), 0 0 0 1px oklch(0.9 0.22 128 / 0.1);
-  }
-  .event-visual {
-    aspect-ratio: 16/9;
-    position: relative;
-    overflow: hidden;
-    border-bottom: 1px solid var(--line-soft);
-  }
-  .event-visual .stripes {
-    position: absolute; inset: 0;
-    background-image: repeating-linear-gradient(
-      var(--angle, 115deg),
-      transparent 0 18px,
-      oklch(1 0 0 / 0.035) 18px 20px
-    );
-  }
-  .event-visual .ev-chip {
-    position: absolute; top: 12px; left: 12px;
-    font-family: 'JetBrains Mono', monospace; font-size: 10.5px;
-    letter-spacing: 0.12em; text-transform: uppercase;
-    padding: 5px 9px; border-radius: 6px;
-    background: oklch(0 0 0 / 0.4); backdrop-filter: blur(8px);
-    color: var(--text-dim);
-    border: 1px solid oklch(1 0 0 / 0.1);
-  }
-  .event-visual .ev-label {
-    position: absolute; bottom: 12px; left: 12px;
-    font-family: 'JetBrains Mono', monospace; font-size: 9.5px;
-    color: oklch(1 0 0 / 0.3); letter-spacing: 0.15em; text-transform: uppercase;
-  }
-  .event-visual .orb-s {
-    position: absolute; border-radius: 50%; filter: blur(34px); opacity: 0.55;
-  }
-  .event-body { padding: 22px 22px 24px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
-  .event-date {
-    color: var(--lime);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11.5px; letter-spacing: 0.1em;
-    display: flex; align-items: center; gap: 10px;
-  }
-  .event-date .sep { width: 14px; height: 1px; background: oklch(0.9 0.22 128 / 0.4); }
-  .event-title {
-    font-size: 19px; font-weight: 600; letter-spacing: -0.02em;
-    line-height: 1.25; margin: 2px 0 2px;
-  }
-  .event-desc { font-size: 13.5px; color: var(--text-dim); line-height: 1.55; }
-  .event-foot {
-    margin-top: auto; padding-top: 14px;
-    border-top: 1px dashed var(--line-soft);
-    display: flex; align-items: center; justify-content: space-between;
-    font-size: 12.5px; color: var(--text-mute);
-  }
-  .event-foot .venue { display: flex; align-items: center; gap: 6px; }
-  .event-foot .seats { color: var(--text-dim); font-family: 'JetBrains Mono', monospace; font-size: 11px; }
-  .event-foot .seats b { color: var(--lime); font-weight: 500; }
+      .events-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 22px;
+      }
+      .event-card {
+        background: var(--surface);
+        border: 1px solid var(--line-soft);
+        border-radius: 20px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        transition:
+          transform 280ms ease,
+          border-color 280ms ease,
+          box-shadow 280ms ease;
+        cursor: pointer;
+      }
+      .event-card:hover {
+        transform: translateY(-6px);
+        border-color: oklch(0.9 0.22 128 / 0.45);
+        box-shadow:
+          0 20px 60px -20px oklch(0.9 0.22 128 / 0.25),
+          0 0 0 1px oklch(0.9 0.22 128 / 0.1);
+      }
+      .event-visual {
+        aspect-ratio: 16/9;
+        position: relative;
+        overflow: hidden;
+        border-bottom: 1px solid var(--line-soft);
+      }
+      .event-visual .stripes {
+        position: absolute;
+        inset: 0;
+        background-image: repeating-linear-gradient(var(--angle, 115deg), transparent 0 18px, oklch(1 0 0 / 0.035) 18px 20px);
+      }
+      .event-visual .ev-chip {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 10.5px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        padding: 5px 9px;
+        border-radius: 6px;
+        background: oklch(0 0 0 / 0.4);
+        backdrop-filter: blur(8px);
+        color: var(--text-dim);
+        border: 1px solid oklch(1 0 0 / 0.1);
+      }
+      .event-visual .ev-label {
+        position: absolute;
+        bottom: 12px;
+        left: 12px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 9.5px;
+        color: oklch(1 0 0 / 0.3);
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+      }
+      .event-visual .orb-s {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(34px);
+        opacity: 0.55;
+      }
+      .event-body {
+        padding: 22px 22px 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        flex: 1;
+      }
+      .event-date {
+        color: var(--lime);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11.5px;
+        letter-spacing: 0.1em;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .event-date .sep {
+        width: 14px;
+        height: 1px;
+        background: oklch(0.9 0.22 128 / 0.4);
+      }
+      .event-title {
+        font-size: 19px;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        line-height: 1.25;
+        margin: 2px 0 2px;
+      }
+      .event-desc {
+        font-size: 13.5px;
+        color: var(--text-dim);
+        line-height: 1.55;
+      }
+      .event-foot {
+        margin-top: auto;
+        padding-top: 14px;
+        border-top: 1px dashed var(--line-soft);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 12.5px;
+        color: var(--text-mute);
+      }
+      .event-foot .venue {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .event-foot .seats {
+        color: var(--text-dim);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px;
+      }
+      .event-foot .seats b {
+        color: var(--lime);
+        font-weight: 500;
+      }
 
-  /* --- cta banner ------------------------------------------------ */
-  .cta-wrap { position: relative; padding: 10px 0 120px; }
-  .cta {
-    position: relative;
-    border-radius: 28px;
-    padding: 72px 56px;
-    overflow: hidden;
-    text-align: center;
-    background: linear-gradient(180deg, oklch(0.2 0.012 150), oklch(0.14 0.008 150));
-  }
-  .cta::before {
-    content: ""; position: absolute; inset: 0; border-radius: 28px; padding: 1.5px;
-    background: linear-gradient(135deg, var(--lime) 0%, transparent 40%, transparent 60%, var(--amber) 100%);
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor; mask-composite: exclude;
-    pointer-events: none;
-  }
-  .cta::after {
-    content: ""; position: absolute; inset: 0;
-    background:
-      radial-gradient(circle at 15% 20%, oklch(0.9 0.22 128 / 0.18), transparent 45%),
-      radial-gradient(circle at 85% 80%, oklch(0.82 0.17 75 / 0.16), transparent 45%);
-    pointer-events: none;
-  }
-  .cta h2 { font-size: clamp(32px, 4vw, 52px); letter-spacing: -0.035em; font-weight: 600; margin: 8px 0 16px; text-wrap: balance; line-height: 1.05; }
-  .cta p { color: var(--text-dim); font-size: 16.5px; max-width: 54ch; margin: 0 auto 36px; text-wrap: pretty; }
-  .cta-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; position: relative; z-index: 1; }
-  .cta-actions .btn { padding: 16px 28px; font-size: 15px; }
+      /* --- cta banner ------------------------------------------------ */
+      .cta-wrap {
+        position: relative;
+        padding: 10px 0 120px;
+      }
+      .cta {
+        position: relative;
+        border-radius: 28px;
+        padding: 72px 56px;
+        overflow: hidden;
+        text-align: center;
+        background: linear-gradient(180deg, oklch(0.2 0.012 150), oklch(0.14 0.008 150));
+      }
+      .cta::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: 28px;
+        padding: 1.5px;
+        background: linear-gradient(135deg, var(--lime) 0%, transparent 40%, transparent 60%, var(--amber) 100%);
+        -webkit-mask:
+          linear-gradient(#fff 0 0) content-box,
+          linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        pointer-events: none;
+      }
+      .cta::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(circle at 15% 20%, oklch(0.9 0.22 128 / 0.18), transparent 45%),
+          radial-gradient(circle at 85% 80%, oklch(0.82 0.17 75 / 0.16), transparent 45%);
+        pointer-events: none;
+      }
+      .cta h2 {
+        font-size: clamp(32px, 4vw, 52px);
+        letter-spacing: -0.035em;
+        font-weight: 600;
+        margin: 8px 0 16px;
+        text-wrap: balance;
+        line-height: 1.05;
+      }
+      .cta p {
+        color: var(--text-dim);
+        font-size: 16.5px;
+        max-width: 54ch;
+        margin: 0 auto 36px;
+        text-wrap: pretty;
+      }
+      .cta-actions {
+        display: flex;
+        gap: 14px;
+        justify-content: center;
+        flex-wrap: wrap;
+        position: relative;
+        z-index: 1;
+      }
+      .cta-actions .btn {
+        padding: 16px 28px;
+        font-size: 15px;
+      }
 
-  /* --- footer ---------------------------------------------------- */
-  .footer {
-    border-top: 1px solid var(--line-soft);
-    padding: 48px 0 40px;
-  }
-  .footer-inner { display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
-  .footer-links { display: flex; gap: 26px; font-size: 13.5px; color: var(--text-dim); }
-  .footer-links a:hover { color: var(--text); }
-  .socials { display: flex; gap: 10px; }
-  .social-btn {
-    width: 36px; height: 36px; border-radius: 10px;
-    display: grid; place-items: center;
-    border: 1px solid var(--line-soft);
-    color: var(--text-dim);
-    transition: all 180ms ease;
-  }
-  .social-btn:hover { color: var(--amber); border-color: oklch(0.82 0.17 75 / 0.5); background: oklch(0.82 0.17 75 / 0.06); }
-  .copyright { font-size: 12.5px; color: var(--text-mute); font-family: 'JetBrains Mono', monospace; }
+      /* --- footer ---------------------------------------------------- */
+      .footer {
+        border-top: 1px solid var(--line-soft);
+        padding: 48px 0 40px;
+      }
+      .footer-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        flex-wrap: wrap;
+      }
+      .footer-links {
+        display: flex;
+        gap: 26px;
+        font-size: 13.5px;
+        color: var(--text-dim);
+      }
+      .footer-links a:hover {
+        color: var(--text);
+      }
+      .socials {
+        display: flex;
+        gap: 10px;
+      }
+      .social-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: grid;
+        place-items: center;
+        border: 1px solid var(--line-soft);
+        color: var(--text-dim);
+        transition: all 180ms ease;
+      }
+      .social-btn:hover {
+        color: var(--amber);
+        border-color: oklch(0.82 0.17 75 / 0.5);
+        background: oklch(0.82 0.17 75 / 0.06);
+      }
+      .copyright {
+        font-size: 12.5px;
+        color: var(--text-mute);
+        font-family: 'JetBrains Mono', monospace;
+      }
 
-  /* --- modal ----------------------------------------------------- */
-  .modal-backdrop {
-    position: fixed; inset: 0; z-index: 100;
-    background: oklch(0.1 0.005 150 / 0.7);
-    backdrop-filter: blur(10px);
-    display: grid; place-items: center; padding: 24px;
-    animation: fadein 220ms ease;
-  }
-  @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
-  @keyframes pop { from { opacity: 0; transform: translateY(12px) scale(0.98); } to { opacity: 1; transform: none; } }
-  .modal {
-    width: 100%; max-width: 440px;
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: 22px;
-    padding: 32px;
-    position: relative;
-    animation: pop 260ms cubic-bezier(0.22, 1, 0.36, 1);
-    box-shadow: 0 30px 80px -20px oklch(0 0 0 / 0.6), 0 0 0 1px oklch(0.9 0.22 128 / 0.12);
-  }
-  .modal-close {
-    position: absolute; top: 18px; right: 18px;
-    width: 32px; height: 32px; border-radius: 10px;
-    color: var(--text-mute);
-    transition: all 150ms;
-  }
-  .modal-close:hover { background: oklch(1 0 0 / 0.06); color: var(--text); }
-  .modal-tabs { display: flex; gap: 4px; padding: 4px; background: var(--bg); border: 1px solid var(--line-soft); border-radius: 12px; margin-bottom: 24px; }
-  .modal-tab { flex: 1; padding: 9px; font-size: 13.5px; font-weight: 500; color: var(--text-dim); border-radius: 8px; transition: all 160ms; }
-  .modal-tab.active { background: var(--surface-2); color: var(--text); box-shadow: 0 0 0 1px var(--line-soft); }
-  .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
-  .field label { font-size: 11.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-mute); font-family: 'JetBrains Mono', monospace; }
-  .field input {
-    background: var(--bg); border: 1px solid var(--line-soft); color: var(--text);
-    padding: 12px 14px; border-radius: 10px; font-size: 14.5px;
-    transition: border-color 150ms, box-shadow 150ms;
-  }
-  .field input:focus { outline: none; border-color: var(--lime); box-shadow: 0 0 0 3px oklch(0.9 0.22 128 / 0.12); }
-  .modal .btn { width: 100%; padding: 14px; margin-top: 8px; }
-  .modal h3 { font-size: 22px; font-weight: 600; letter-spacing: -0.02em; margin: 0 0 6px; }
-  .modal .sub { font-size: 14px; color: var(--text-dim); margin: 0 0 24px; }
-  .oauth { display: flex; gap: 8px; margin-top: 16px; }
-  .oauth button { flex: 1; padding: 10px; font-size: 12.5px; border: 1px solid var(--line-soft); border-radius: 10px; color: var(--text-dim); transition: all 160ms; }
-  .oauth button:hover { color: var(--text); border-color: var(--text-mute); }
-  .divider { display: flex; align-items: center; gap: 14px; margin: 20px 0 4px; color: var(--text-mute); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; font-family: 'JetBrains Mono', monospace; }
-  .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: var(--line-soft); }
+      /* --- modal ----------------------------------------------------- */
+      .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 100;
+        background: oklch(0.1 0.005 150 / 0.7);
+        backdrop-filter: blur(10px);
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        animation: fadein 220ms ease;
+      }
+      @keyframes fadein {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+      @keyframes pop {
+        from {
+          opacity: 0;
+          transform: translateY(12px) scale(0.98);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+      .modal {
+        width: 100%;
+        max-width: 440px;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 22px;
+        padding: 32px;
+        position: relative;
+        animation: pop 260ms cubic-bezier(0.22, 1, 0.36, 1);
+        box-shadow:
+          0 30px 80px -20px oklch(0 0 0 / 0.6),
+          0 0 0 1px oklch(0.9 0.22 128 / 0.12);
+      }
+      .modal-close {
+        position: absolute;
+        top: 18px;
+        right: 18px;
+        width: 32px;
+        height: 32px;
+        border-radius: 10px;
+        color: var(--text-mute);
+        transition: all 150ms;
+      }
+      .modal-close:hover {
+        background: oklch(1 0 0 / 0.06);
+        color: var(--text);
+      }
+      .modal-tabs {
+        display: flex;
+        gap: 4px;
+        padding: 4px;
+        background: var(--bg);
+        border: 1px solid var(--line-soft);
+        border-radius: 12px;
+        margin-bottom: 24px;
+      }
+      .modal-tab {
+        flex: 1;
+        padding: 9px;
+        font-size: 13.5px;
+        font-weight: 500;
+        color: var(--text-dim);
+        border-radius: 8px;
+        transition: all 160ms;
+      }
+      .modal-tab.active {
+        background: var(--surface-2);
+        color: var(--text);
+        box-shadow: 0 0 0 1px var(--line-soft);
+      }
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-bottom: 14px;
+      }
+      .field label {
+        font-size: 11.5px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--text-mute);
+        font-family: 'JetBrains Mono', monospace;
+      }
+      .field input {
+        background: var(--bg);
+        border: 1px solid var(--line-soft);
+        color: var(--text);
+        padding: 12px 14px;
+        border-radius: 10px;
+        font-size: 14.5px;
+        transition:
+          border-color 150ms,
+          box-shadow 150ms;
+      }
+      .field input:focus {
+        outline: none;
+        border-color: var(--lime);
+        box-shadow: 0 0 0 3px oklch(0.9 0.22 128 / 0.12);
+      }
+      .modal .btn {
+        width: 100%;
+        padding: 14px;
+        margin-top: 8px;
+      }
+      .modal h3 {
+        font-size: 22px;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        margin: 0 0 6px;
+      }
+      .modal .sub {
+        font-size: 14px;
+        color: var(--text-dim);
+        margin: 0 0 24px;
+      }
+      .oauth {
+        display: flex;
+        gap: 8px;
+        margin-top: 16px;
+      }
+      .oauth button {
+        flex: 1;
+        padding: 10px;
+        font-size: 12.5px;
+        border: 1px solid var(--line-soft);
+        border-radius: 10px;
+        color: var(--text-dim);
+        transition: all 160ms;
+      }
+      .oauth button:hover {
+        color: var(--text);
+        border-color: var(--text-mute);
+      }
+      .divider {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin: 20px 0 4px;
+        color: var(--text-mute);
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        font-family: 'JetBrains Mono', monospace;
+      }
+      .divider::before,
+      .divider::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: var(--line-soft);
+      }
 
-  /* --- event detail modal ---------------------------------------- */
-  .detail-modal {
-    max-width: 580px; padding: 0;
-  }
-  .detail-cover {
-    aspect-ratio: 16/7;
-    position: relative; overflow: hidden;
-    border-radius: 22px 22px 0 0;
-    background: linear-gradient(135deg, oklch(0.22 0.012 150), oklch(0.17 0.01 150));
-  }
-  .detail-body { padding: 26px 30px 30px; }
-  .detail-body h3 { font-size: 24px; margin: 0 0 6px; letter-spacing: -0.025em; }
-  .detail-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin: 20px 0; }
-  .detail-cell { padding: 12px 14px; background: var(--bg); border: 1px solid var(--line-soft); border-radius: 10px; }
-  .detail-cell .k { font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-mute); font-family: 'JetBrains Mono', monospace; }
-  .detail-cell .v { font-size: 14px; font-weight: 500; margin-top: 3px; }
+      /* --- event detail modal ---------------------------------------- */
+      .detail-modal {
+        max-width: 580px;
+        padding: 0;
+      }
+      .detail-cover {
+        aspect-ratio: 16/7;
+        position: relative;
+        overflow: hidden;
+        border-radius: 22px 22px 0 0;
+        background: linear-gradient(135deg, oklch(0.22 0.012 150), oklch(0.17 0.01 150));
+      }
+      .detail-body {
+        padding: 26px 30px 30px;
+      }
+      .detail-body h3 {
+        font-size: 24px;
+        margin: 0 0 6px;
+        letter-spacing: -0.025em;
+      }
+      .detail-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 14px;
+        margin: 20px 0;
+      }
+      .detail-cell {
+        padding: 12px 14px;
+        background: var(--bg);
+        border: 1px solid var(--line-soft);
+        border-radius: 10px;
+      }
+      .detail-cell .k {
+        font-size: 10.5px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--text-mute);
+        font-family: 'JetBrains Mono', monospace;
+      }
+      .detail-cell .v {
+        font-size: 14px;
+        font-weight: 500;
+        margin-top: 3px;
+      }
 
-  /* --- Tweaks panel ---------------------------------------------- */
-  .tweaks {
-    position: fixed; right: 20px; bottom: 20px; z-index: 80;
-    width: 280px;
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: 16px;
-    padding: 16px;
-    box-shadow: 0 20px 60px -20px oklch(0 0 0 / 0.5);
-    font-size: 13px;
-    animation: pop 200ms ease;
-  }
-  .tweaks h4 { margin: 0 0 12px; font-size: 13px; display: flex; align-items: center; gap: 8px; }
-  .tweaks h4::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--lime); }
-  .tweak-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-top: 1px solid var(--line-soft); }
-  .tweak-row:first-of-type { border-top: none; }
-  .tweak-row label { color: var(--text-dim); font-size: 12.5px; }
-  .tweak-row select, .tweak-row input[type="range"] { background: var(--bg); border: 1px solid var(--line-soft); color: var(--text); border-radius: 6px; padding: 4px 6px; font-size: 12px; }
+      /* --- Tweaks panel ---------------------------------------------- */
+      .tweaks {
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+        z-index: 80;
+        width: 280px;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 16px;
+        box-shadow: 0 20px 60px -20px oklch(0 0 0 / 0.5);
+        font-size: 13px;
+        animation: pop 200ms ease;
+      }
+      .tweaks h4 {
+        margin: 0 0 12px;
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .tweaks h4::before {
+        content: '';
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--lime);
+      }
+      .tweak-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-top: 1px solid var(--line-soft);
+      }
+      .tweak-row:first-of-type {
+        border-top: none;
+      }
+      .tweak-row label {
+        color: var(--text-dim);
+        font-size: 12.5px;
+      }
+      .tweak-row select,
+      .tweak-row input[type='range'] {
+        background: var(--bg);
+        border: 1px solid var(--line-soft);
+        color: var(--text);
+        border-radius: 6px;
+        padding: 4px 6px;
+        font-size: 12px;
+      }
 
-  /* --- responsive ------------------------------------------------ */
-  @media (max-width: 900px) {
-    .container { padding: 0 20px; }
-    .hero { padding: 56px 0 80px; }
-    .hero-stats { grid-template-columns: repeat(2, 1fr); }
-    .hero-stats > div:nth-child(2) { border-right: none; }
-    .live-card { grid-template-columns: 1fr; }
-    .live-visual { min-height: 180px; border-left: none; border-top: 1px solid var(--line-soft); order: -1; }
-    .events-grid { grid-template-columns: 1fr; }
-    .section { padding: 64px 0; }
-    .cta { padding: 48px 28px; }
-    .nav-links a.link { display: none; }
-    .nav-links a.link.cta-link { display: inline-flex; }
-  }
-</style>
+      /* --- responsive ------------------------------------------------ */
+      @media (max-width: 900px) {
+        .container {
+          padding: 0 20px;
+        }
+        .hero {
+          padding: 56px 0 80px;
+        }
+        .hero-stats {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .hero-stats > div:nth-child(2) {
+          border-right: none;
+        }
+        .live-card {
+          grid-template-columns: 1fr;
+        }
+        .live-visual {
+          min-height: 180px;
+          border-left: none;
+          border-top: 1px solid var(--line-soft);
+          order: -1;
+        }
+        .events-grid {
+          grid-template-columns: 1fr;
+        }
+        .section {
+          padding: 64px 0;
+        }
+        .cta {
+          padding: 48px 28px;
+        }
+        .nav-links a.link {
+          display: none;
+        }
+        .nav-links a.link.cta-link {
+          display: inline-flex;
+        }
+      }
+    </style>
 
-<style id="__light-theme">
-  :root {
-    --bg: oklch(0.985 0.004 150) !important;
-    --bg-2: oklch(0.965 0.005 150) !important;
-    --surface: oklch(1 0 0) !important;
-    --surface-2: oklch(0.975 0.005 150) !important;
-    --line: oklch(0.86 0.01 150) !important;
-    --line-soft: oklch(0.9 0.008 150 / 0.85) !important;
-    --text: oklch(0.2 0.012 150) !important;
-    --text-dim: oklch(0.42 0.012 150) !important;
-    --text-mute: oklch(0.58 0.012 150) !important;
-    --lime: oklch(0.7 0.2 130) !important;
-    --lime-dim: oklch(0.6 0.18 130) !important;
-    --lime-glow: oklch(0.7 0.2 130 / 0.32) !important;
-    --amber: oklch(0.62 0.16 60) !important;
-    --amber-dim: oklch(0.55 0.15 60) !important;
-    --amber-glow: oklch(0.62 0.16 60 / 0.32) !important;
-  }
-  body { color: var(--text) !important; background: var(--bg) !important; }
-  .nav { background: oklch(0.985 0.004 150 / 0.82) !important; border-bottom-color: var(--line-soft) !important; }
-  /* surfaces */
-  .card, .event-card, .venue-card, .live-card, .featured, .modal, .tweaks, .modal-tab.active, .toast, .dropdown-menu, .menu-dropdown {
-    background: var(--surface) !important;
-    border-color: var(--line) !important;
-  }
-  .now-playing, .modal-tabs, .modal-foot, .tabs, .view-toggle, .field input, .field select, .field textarea, .check, .search, .sort-select, .select-box, .detail-cell {
-    background: var(--bg) !important;
-    border-color: var(--line) !important;
-  }
-  .modal-foot { background: var(--bg-2) !important; }
-  /* white-tint overlays on now-light surfaces -> subtle dark tint */
-  .tag, .pill, .chip { background: oklch(0 0 0 / 0.025) !important; }
-  /* primary lime button: white text */
-  .btn-primary { color: #fff !important; }
-  .logo-mark { color: #fff !important; }
-  .logo-mark svg path { stroke: #fff !important; }
-  .logo-mark svg circle { fill: #fff !important; }
-  .avatar, .speaker-avatar, .mini-avatar { color: #fff !important; }
-  .pill.active { color: #fff !important; background: var(--lime) !important; }
-  .pill.active .count { background: oklch(0 0 0 / 0.2) !important; color: #fff !important; }
-  .tab.active { color: #fff !important; }
-  .page-btn.active { color: #fff !important; }
-  .modal-tab.active { background: var(--surface) !important; }
-  .btn-ghost { background: transparent !important; }
-  .btn-ghost:hover { background: oklch(0 0 0 / 0.04) !important; border-color: var(--text-mute) !important; }
-  .btn-white-outline { color: var(--text) !important; border-color: var(--line) !important; }
-  .btn-white-outline:hover { background: oklch(0 0 0 / 0.04) !important; }
-  /* hero hl gradient: keep darker lime so it's readable on white */
-  .hero .hl { background: linear-gradient(100deg, oklch(0.55 0.2 130) 20%, oklch(0.7 0.2 130) 70%) !important; -webkit-background-clip: text !important; background-clip: text !important; color: transparent !important; }
-  /* status badges that previously sat on dark visuals — keep dark/translucent */
-  .date-badge, .status-pill, .rating-badge, .capacity-badge, .ev-chip, .modal-close { background: oklch(0 0 0 / 0.55) !important; }
-  .date-badge .day { color: #fff !important; }
-  /* page mesh & hero mesh — soften so they don't blow out on white */
-  .mesh::before, .page-mesh::before { background: radial-gradient(circle, oklch(0.7 0.2 130 / 0.22), transparent 65%) !important; }
-  .mesh::after, .page-mesh::after { background: radial-gradient(circle, oklch(0.62 0.16 60 / 0.18), transparent 65%) !important; }
-  .grid-overlay { opacity: 0.5 !important; }
-  /* CTA banner background -> light */
-  .cta { background: linear-gradient(180deg, oklch(0.985 0.004 150), oklch(0.95 0.008 150)) !important; }
-  .cta::after { background: radial-gradient(circle at 15% 20%, oklch(0.7 0.2 130 / 0.12), transparent 45%), radial-gradient(circle at 85% 80%, oklch(0.62 0.16 60 / 0.1), transparent 45%) !important; }
-  /* Featured banner */
-  .featured { background: linear-gradient(180deg, oklch(1 0 0), oklch(0.97 0.005 150)) !important; }
-  .featured::before { background: radial-gradient(circle at 85% 20%, oklch(0.62 0.16 60 / 0.1), transparent 45%) !important; }
-  /* Live card */
-  .live-card { background: linear-gradient(180deg, oklch(1 0 0), oklch(0.97 0.005 150)) !important; }
-  .live-card::before { background: radial-gradient(circle at 90% 10%, oklch(0.62 0.16 60 / 0.1), transparent 45%) !important; }
-  /* contribution banner */
-  .contrib-banner { background: linear-gradient(180deg, oklch(1 0 0), oklch(0.97 0.005 150)) !important; }
-  /* card visuals (placeholders) -> keep dark for contrast */
-  .event-visual, .featured-visual, .live-visual, .venue-visual, .detail-cover {
-    background: linear-gradient(135deg, oklch(0.22 0.012 150), oklch(0.16 0.008 150)) !important;
-  }
-  .event-visual .ev-label, .live-visual .label-art, .featured-visual .label, .venue-visual .ph-label {
-    color: oklch(1 1 1 / 0.45) !important;
-  }
-  /* modal backdrop: fog */
-  .modal-backdrop { background: oklch(0.5 0.01 150 / 0.45) !important; }
-  /* footer socials/etc — make sure borders visible */
-  .social-btn, .view-btn, .menu-btn, .page-btn { border-color: var(--line) !important; }
-  /* ghost & outline button text on light */
-  .btn-ghost { color: var(--text) !important; }
-  /* dotted dividers */
-  .event-foot, .action-row { border-top-color: var(--line) !important; }
-  /* hero stats border */
-  .hero-stats { border-color: var(--line) !important; }
-  .hero-stats > div { border-right-color: var(--line) !important; }
-  /* date-badge mo color: keep lime */
-  .date-badge .mo { color: oklch(0.85 0.22 130) !important; }
-  /* modal close on light cover */
-  .modal-close { color: #fff !important; }
-  /* search kbd */
-  .search .kbd { background: oklch(0 0 0 / 0.04) !important; border-color: var(--line) !important; }
-  /* tweak panel inputs */
-  .tweak-row select, .tweak-row input[type="range"] { background: var(--bg) !important; border-color: var(--line) !important; color: var(--text) !important; }
-  /* live now-playing pulse */
-  .pulse, .pulse-dot { box-shadow: 0 0 8px var(--amber-glow); }
-  /* live tag bg */
-  .live-tag, .featured-tag { background: oklch(0.62 0.16 60 / 0.1) !important; }
-  /* contributor color */
-  .contributor .uname { color: var(--text-dim) !important; }
-  /* outlined lime btn */
-  .btn-outline-lime { background: oklch(0.7 0.2 130 / 0.06) !important; }
-  /* CTA gradient border use less bright colors */
-  .cta::before { background: linear-gradient(135deg, var(--lime) 0%, transparent 40%, transparent 60%, var(--amber) 100%) !important; }
-  /* event-card dashed footer border */
-  .event-foot { border-top-style: dashed !important; }
-  /* nav active underline glow softer */
-  .nav-link.active::after { box-shadow: 0 0 10px var(--lime-glow) !important; }
-  /* dropdowns shadow */
-  .dropdown-menu, .menu-dropdown { box-shadow: 0 12px 40px -16px oklch(0 0 0 / 0.18) !important; }
-  /* avatar btn hover */
-  .avatar-btn:hover { background: oklch(0 0 0 / 0.03) !important; }
-  /* event hover shadow tint -> green tint, but lighter */
-  .event-card:hover, .venue-card:hover { box-shadow: 0 18px 50px -22px oklch(0.7 0.2 130 / 0.3) !important; }
-  /* event-card.urgent hover */
-  .event-card.urgent:hover { box-shadow: 0 18px 50px -22px oklch(0.62 0.16 60 / 0.32) !important; }
-  /* tag border visibility */
-  .tag { border-color: var(--line) !important; color: var(--text-dim) !important; }
-  /* seat-bar bg */
-  .seat-bar-wrap { background: oklch(0 0 0 / 0.06) !important; }
-  /* load progress bg */
-  .load-progress { background: oklch(0 0 0 / 0.06) !important; }
-  /* empty state */
-  .empty { background: oklch(0 0 0 / 0.015) !important; }
-  .empty .empty-icon { background: oklch(0 0 0 / 0.04) !important; }
-  /* stat & header counters */
-  .stat-cell .num.lime, .header-meta .count { color: var(--lime) !important; }
-  /* check on (lime) */
-  .check.on { background: oklch(0.7 0.2 130 / 0.08) !important; }
-  .check-dot { border-color: var(--line) !important; }
-  /* event-card hover border */
-  .event-card:hover { border-color: oklch(0.7 0.2 130 / 0.5) !important; }
-  /* modal text inputs focus */
-  .field input:focus, .field select:focus, .field textarea:focus, .search:focus-within { border-color: var(--lime) !important; box-shadow: 0 0 0 3px oklch(0.7 0.2 130 / 0.15) !important; }
-</style>
+    <style id="__light-theme">
+      :root {
+        --bg: oklch(0.985 0.004 150) !important;
+        --bg-2: oklch(0.965 0.005 150) !important;
+        --surface: oklch(1 0 0) !important;
+        --surface-2: oklch(0.975 0.005 150) !important;
+        --line: oklch(0.86 0.01 150) !important;
+        --line-soft: oklch(0.9 0.008 150 / 0.85) !important;
+        --text: oklch(0.2 0.012 150) !important;
+        --text-dim: oklch(0.42 0.012 150) !important;
+        --text-mute: oklch(0.58 0.012 150) !important;
+        --lime: oklch(0.7 0.2 130) !important;
+        --lime-dim: oklch(0.6 0.18 130) !important;
+        --lime-glow: oklch(0.7 0.2 130 / 0.32) !important;
+        --amber: oklch(0.62 0.16 60) !important;
+        --amber-dim: oklch(0.55 0.15 60) !important;
+        --amber-glow: oklch(0.62 0.16 60 / 0.32) !important;
+      }
+      body {
+        color: var(--text) !important;
+        background: var(--bg) !important;
+      }
+      .nav {
+        background: oklch(0.985 0.004 150 / 0.82) !important;
+        border-bottom-color: var(--line-soft) !important;
+      }
+      /* surfaces */
+      .card,
+      .event-card,
+      .venue-card,
+      .live-card,
+      .featured,
+      .modal,
+      .tweaks,
+      .modal-tab.active,
+      .toast,
+      .dropdown-menu,
+      .menu-dropdown {
+        background: var(--surface) !important;
+        border-color: var(--line) !important;
+      }
+      .now-playing,
+      .modal-tabs,
+      .modal-foot,
+      .tabs,
+      .view-toggle,
+      .field input,
+      .field select,
+      .field textarea,
+      .check,
+      .search,
+      .sort-select,
+      .select-box,
+      .detail-cell {
+        background: var(--bg) !important;
+        border-color: var(--line) !important;
+      }
+      .modal-foot {
+        background: var(--bg-2) !important;
+      }
+      /* white-tint overlays on now-light surfaces -> subtle dark tint */
+      .tag,
+      .pill,
+      .chip {
+        background: oklch(0 0 0 / 0.025) !important;
+      }
+      /* primary lime button: white text */
+      .btn-primary {
+        color: #fff !important;
+      }
+      .logo-mark {
+        color: #fff !important;
+      }
+      .logo-mark svg path {
+        stroke: #fff !important;
+      }
+      .logo-mark svg circle {
+        fill: #fff !important;
+      }
+      .avatar,
+      .speaker-avatar,
+      .mini-avatar {
+        color: #fff !important;
+      }
+      .pill.active {
+        color: #fff !important;
+        background: var(--lime) !important;
+      }
+      .pill.active .count {
+        background: oklch(0 0 0 / 0.2) !important;
+        color: #fff !important;
+      }
+      .tab.active {
+        color: #fff !important;
+      }
+      .page-btn.active {
+        color: #fff !important;
+      }
+      .modal-tab.active {
+        background: var(--surface) !important;
+      }
+      .btn-ghost {
+        background: transparent !important;
+      }
+      .btn-ghost:hover {
+        background: oklch(0 0 0 / 0.04) !important;
+        border-color: var(--text-mute) !important;
+      }
+      .btn-white-outline {
+        color: var(--text) !important;
+        border-color: var(--line) !important;
+      }
+      .btn-white-outline:hover {
+        background: oklch(0 0 0 / 0.04) !important;
+      }
+      /* hero hl gradient: keep darker lime so it's readable on white */
+      .hero .hl {
+        background: linear-gradient(100deg, oklch(0.55 0.2 130) 20%, oklch(0.7 0.2 130) 70%) !important;
+        -webkit-background-clip: text !important;
+        background-clip: text !important;
+        color: transparent !important;
+      }
+      /* status badges that previously sat on dark visuals — keep dark/translucent */
+      .date-badge,
+      .status-pill,
+      .rating-badge,
+      .capacity-badge,
+      .ev-chip,
+      .modal-close {
+        background: oklch(0 0 0 / 0.55) !important;
+      }
+      .date-badge .day {
+        color: #fff !important;
+      }
+      /* page mesh & hero mesh — soften so they don't blow out on white */
+      .mesh::before,
+      .page-mesh::before {
+        background: radial-gradient(circle, oklch(0.7 0.2 130 / 0.22), transparent 65%) !important;
+      }
+      .mesh::after,
+      .page-mesh::after {
+        background: radial-gradient(circle, oklch(0.62 0.16 60 / 0.18), transparent 65%) !important;
+      }
+      .grid-overlay {
+        opacity: 0.5 !important;
+      }
+      /* CTA banner background -> light */
+      .cta {
+        background: linear-gradient(180deg, oklch(0.985 0.004 150), oklch(0.95 0.008 150)) !important;
+      }
+      .cta::after {
+        background:
+          radial-gradient(circle at 15% 20%, oklch(0.7 0.2 130 / 0.12), transparent 45%),
+          radial-gradient(circle at 85% 80%, oklch(0.62 0.16 60 / 0.1), transparent 45%) !important;
+      }
+      /* Featured banner */
+      .featured {
+        background: linear-gradient(180deg, oklch(1 0 0), oklch(0.97 0.005 150)) !important;
+      }
+      .featured::before {
+        background: radial-gradient(circle at 85% 20%, oklch(0.62 0.16 60 / 0.1), transparent 45%) !important;
+      }
+      /* Live card */
+      .live-card {
+        background: linear-gradient(180deg, oklch(1 0 0), oklch(0.97 0.005 150)) !important;
+      }
+      .live-card::before {
+        background: radial-gradient(circle at 90% 10%, oklch(0.62 0.16 60 / 0.1), transparent 45%) !important;
+      }
+      /* contribution banner */
+      .contrib-banner {
+        background: linear-gradient(180deg, oklch(1 0 0), oklch(0.97 0.005 150)) !important;
+      }
+      /* card visuals (placeholders) -> keep dark for contrast */
+      .event-visual,
+      .featured-visual,
+      .live-visual,
+      .venue-visual,
+      .detail-cover {
+        background: linear-gradient(135deg, oklch(0.22 0.012 150), oklch(0.16 0.008 150)) !important;
+      }
+      .event-visual .ev-label,
+      .live-visual .label-art,
+      .featured-visual .label,
+      .venue-visual .ph-label {
+        color: oklch(1 1 1 / 0.45) !important;
+      }
+      /* modal backdrop: fog */
+      .modal-backdrop {
+        background: oklch(0.5 0.01 150 / 0.45) !important;
+      }
+      /* footer socials/etc — make sure borders visible */
+      .social-btn,
+      .view-btn,
+      .menu-btn,
+      .page-btn {
+        border-color: var(--line) !important;
+      }
+      /* ghost & outline button text on light */
+      .btn-ghost {
+        color: var(--text) !important;
+      }
+      /* dotted dividers */
+      .event-foot,
+      .action-row {
+        border-top-color: var(--line) !important;
+      }
+      /* hero stats border */
+      .hero-stats {
+        border-color: var(--line) !important;
+      }
+      .hero-stats > div {
+        border-right-color: var(--line) !important;
+      }
+      /* date-badge mo color: keep lime */
+      .date-badge .mo {
+        color: oklch(0.85 0.22 130) !important;
+      }
+      /* modal close on light cover */
+      .modal-close {
+        color: #fff !important;
+      }
+      /* search kbd */
+      .search .kbd {
+        background: oklch(0 0 0 / 0.04) !important;
+        border-color: var(--line) !important;
+      }
+      /* tweak panel inputs */
+      .tweak-row select,
+      .tweak-row input[type='range'] {
+        background: var(--bg) !important;
+        border-color: var(--line) !important;
+        color: var(--text) !important;
+      }
+      /* live now-playing pulse */
+      .pulse,
+      .pulse-dot {
+        box-shadow: 0 0 8px var(--amber-glow);
+      }
+      /* live tag bg */
+      .live-tag,
+      .featured-tag {
+        background: oklch(0.62 0.16 60 / 0.1) !important;
+      }
+      /* contributor color */
+      .contributor .uname {
+        color: var(--text-dim) !important;
+      }
+      /* outlined lime btn */
+      .btn-outline-lime {
+        background: oklch(0.7 0.2 130 / 0.06) !important;
+      }
+      /* CTA gradient border use less bright colors */
+      .cta::before {
+        background: linear-gradient(135deg, var(--lime) 0%, transparent 40%, transparent 60%, var(--amber) 100%) !important;
+      }
+      /* event-card dashed footer border */
+      .event-foot {
+        border-top-style: dashed !important;
+      }
+      /* nav active underline glow softer */
+      .nav-link.active::after {
+        box-shadow: 0 0 10px var(--lime-glow) !important;
+      }
+      /* dropdowns shadow */
+      .dropdown-menu,
+      .menu-dropdown {
+        box-shadow: 0 12px 40px -16px oklch(0 0 0 / 0.18) !important;
+      }
+      /* avatar btn hover */
+      .avatar-btn:hover {
+        background: oklch(0 0 0 / 0.03) !important;
+      }
+      /* event hover shadow tint -> green tint, but lighter */
+      .event-card:hover,
+      .venue-card:hover {
+        box-shadow: 0 18px 50px -22px oklch(0.7 0.2 130 / 0.3) !important;
+      }
+      /* event-card.urgent hover */
+      .event-card.urgent:hover {
+        box-shadow: 0 18px 50px -22px oklch(0.62 0.16 60 / 0.32) !important;
+      }
+      /* tag border visibility */
+      .tag {
+        border-color: var(--line) !important;
+        color: var(--text-dim) !important;
+      }
+      /* seat-bar bg */
+      .seat-bar-wrap {
+        background: oklch(0 0 0 / 0.06) !important;
+      }
+      /* load progress bg */
+      .load-progress {
+        background: oklch(0 0 0 / 0.06) !important;
+      }
+      /* empty state */
+      .empty {
+        background: oklch(0 0 0 / 0.015) !important;
+      }
+      .empty .empty-icon {
+        background: oklch(0 0 0 / 0.04) !important;
+      }
+      /* stat & header counters */
+      .stat-cell .num.lime,
+      .header-meta .count {
+        color: var(--lime) !important;
+      }
+      /* check on (lime) */
+      .check.on {
+        background: oklch(0.7 0.2 130 / 0.08) !important;
+      }
+      .check-dot {
+        border-color: var(--line) !important;
+      }
+      /* event-card hover border */
+      .event-card:hover {
+        border-color: oklch(0.7 0.2 130 / 0.5) !important;
+      }
+      /* modal text inputs focus */
+      .field input:focus,
+      .field select:focus,
+      .field textarea:focus,
+      .search:focus-within {
+        border-color: var(--lime) !important;
+        box-shadow: 0 0 0 3px oklch(0.7 0.2 130 / 0.15) !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
 
-</head>
-<body>
-  <div id="root"></div>
+    <script type="text/babel" data-presets="react">
+      const { useState, useEffect, useMemo, useRef } = React;
 
-  <script type="text/babel" data-presets="react">
-  const { useState, useEffect, useMemo, useRef } = React;
+      const TWEAKS_DEFAULTS = /*EDITMODE-BEGIN*/ {
+        accentMix: 'lime-amber',
+        showBgMesh: true,
+        cardDensity: 'compact',
+        heroVariant: 'centered'
+      }; /*EDITMODE-END*/
 
-  const TWEAKS_DEFAULTS = /*EDITMODE-BEGIN*/{
-    "accentMix": "lime-amber",
-    "showBgMesh": true,
-    "cardDensity": "compact",
-    "heroVariant": "centered"
-  }/*EDITMODE-END*/;
+      /* ---------- icons (inline, simple) ---------- */
+      const Icon = ({ name, size = 18 }) => {
+        const s = size;
+        const common = {
+          width: s,
+          height: s,
+          viewBox: '0 0 24 24',
+          fill: 'none',
+          stroke: 'currentColor',
+          strokeWidth: 1.75,
+          strokeLinecap: 'round',
+          strokeLinejoin: 'round'
+        };
+        switch (name) {
+          case 'arrow-right':
+            return (
+              <svg {...common}>
+                <path d="M5 12h14M13 6l6 6-6 6" />
+              </svg>
+            );
+          case 'pin':
+            return (
+              <svg {...common}>
+                <path d="M12 21s-7-6.5-7-12a7 7 0 1 1 14 0c0 5.5-7 12-7 12z" />
+                <circle cx="12" cy="9" r="2.5" />
+              </svg>
+            );
+          case 'clock':
+            return (
+              <svg {...common}>
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 7v5l3 2" />
+              </svg>
+            );
+          case 'users':
+            return (
+              <svg {...common}>
+                <path d="M16 20v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M22 20v-2a4 4 0 0 0-3-3.87" />
+                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+              </svg>
+            );
+          case 'calendar':
+            return (
+              <svg {...common}>
+                <rect x="3" y="5" width="18" height="16" rx="2" />
+                <path d="M16 3v4M8 3v4M3 10h18" />
+              </svg>
+            );
+          case 'sparkle':
+            return (
+              <svg {...common}>
+                <path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6" />
+              </svg>
+            );
+          case 'x':
+            return (
+              <svg {...common}>
+                <path d="M18 6 6 18M6 6l12 12" />
+              </svg>
+            );
+          case 'play':
+            return (
+              <svg {...common}>
+                <path d="M6 4v16l14-8z" fill="currentColor" />
+              </svg>
+            );
+          case 'twitter':
+            return (
+              <svg {...common}>
+                <path d="M18 4h3l-7.5 8.5L22 22h-6.5l-5-6.5L5 22H2l8-9L2 4h6.5l4.5 6L18 4z" fill="currentColor" stroke="none" />
+              </svg>
+            );
+          case 'discord':
+            return (
+              <svg viewBox="0 0 24 24" width={s} height={s} fill="currentColor">
+                <path d="M20.3 4.4a16 16 0 0 0-4-1.3l-.2.4a14 14 0 0 0-4.2 0l-.2-.4a16 16 0 0 0-4 1.3 17.7 17.7 0 0 0-3 11.7 16 16 0 0 0 4.9 2.5l1-1.5a11 11 0 0 1-1.7-.8l.4-.3a11.5 11.5 0 0 0 9.6 0l.4.3a11 11 0 0 1-1.7.8l1 1.5a16 16 0 0 0 5-2.5 17.6 17.6 0 0 0-3-11.7zM9 14c-1 0-1.8-.9-1.8-2s.8-2 1.8-2 1.8.9 1.8 2-.8 2-1.8 2zm6 0c-1 0-1.8-.9-1.8-2s.8-2 1.8-2 1.8.9 1.8 2-.8 2-1.8 2z" />
+              </svg>
+            );
+          case 'telegram':
+            return (
+              <svg viewBox="0 0 24 24" width={s} height={s} fill="currentColor">
+                <path d="M21.5 4.3 2.8 11.6c-1 .4-1 1 0 1.3l4.4 1.4 1.7 5.3c.2.6.4.8 1 .6l3-2.5 4.4 3.2c.9.5 1.5.2 1.7-.8l3-14c.3-1.2-.5-1.7-1.5-1.3zm-3.3 3.4-8.6 7.7-.3 3.6-1.7-5.3 10.6-6.7c.5-.3.9-.1.5.7z" />
+              </svg>
+            );
+          case 'check':
+            return (
+              <svg {...common}>
+                <path d="M20 6 9 17l-5-5" />
+              </svg>
+            );
+          default:
+            return null;
+        }
+      };
 
-  /* ---------- icons (inline, simple) ---------- */
-  const Icon = ({ name, size = 18 }) => {
-    const s = size;
-    const common = { width: s, height: s, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.75, strokeLinecap: "round", strokeLinejoin: "round" };
-    switch (name) {
-      case "arrow-right": return <svg {...common}><path d="M5 12h14M13 6l6 6-6 6"/></svg>;
-      case "pin": return <svg {...common}><path d="M12 21s-7-6.5-7-12a7 7 0 1 1 14 0c0 5.5-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/></svg>;
-      case "clock": return <svg {...common}><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>;
-      case "users": return <svg {...common}><path d="M16 20v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 20v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>;
-      case "calendar": return <svg {...common}><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>;
-      case "sparkle": return <svg {...common}><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/></svg>;
-      case "x": return <svg {...common}><path d="M18 6 6 18M6 6l12 12"/></svg>;
-      case "play": return <svg {...common}><path d="M6 4v16l14-8z" fill="currentColor"/></svg>;
-      case "twitter": return <svg {...common}><path d="M18 4h3l-7.5 8.5L22 22h-6.5l-5-6.5L5 22H2l8-9L2 4h6.5l4.5 6L18 4z" fill="currentColor" stroke="none"/></svg>;
-      case "discord": return <svg viewBox="0 0 24 24" width={s} height={s} fill="currentColor"><path d="M20.3 4.4a16 16 0 0 0-4-1.3l-.2.4a14 14 0 0 0-4.2 0l-.2-.4a16 16 0 0 0-4 1.3 17.7 17.7 0 0 0-3 11.7 16 16 0 0 0 4.9 2.5l1-1.5a11 11 0 0 1-1.7-.8l.4-.3a11.5 11.5 0 0 0 9.6 0l.4.3a11 11 0 0 1-1.7.8l1 1.5a16 16 0 0 0 5-2.5 17.6 17.6 0 0 0-3-11.7zM9 14c-1 0-1.8-.9-1.8-2s.8-2 1.8-2 1.8.9 1.8 2-.8 2-1.8 2zm6 0c-1 0-1.8-.9-1.8-2s.8-2 1.8-2 1.8.9 1.8 2-.8 2-1.8 2z"/></svg>;
-      case "telegram": return <svg viewBox="0 0 24 24" width={s} height={s} fill="currentColor"><path d="M21.5 4.3 2.8 11.6c-1 .4-1 1 0 1.3l4.4 1.4 1.7 5.3c.2.6.4.8 1 .6l3-2.5 4.4 3.2c.9.5 1.5.2 1.7-.8l3-14c.3-1.2-.5-1.7-1.5-1.3zm-3.3 3.4-8.6 7.7-.3 3.6-1.7-5.3 10.6-6.7c.5-.3.9-.1.5.7z"/></svg>;
-      case "check": return <svg {...common}><path d="M20 6 9 17l-5-5"/></svg>;
-      default: return null;
-    }
-  };
+      /* ---------- data ---------- */
+      const LIVE_EVENT = {
+        title: 'Davao Web3 Summit 2026',
+        venue: 'SMX Convention Center, Davao',
+        room: 'Main Hall · Level 3',
+        attendees: '412 / 500',
+        session: 'Keynote · Stage A',
+        speaker: 'Alia Mendoza',
+        topic: 'The State of DeFi in SEA',
+        endsIn: '01:24:06'
+      };
 
-  /* ---------- data ---------- */
-  const LIVE_EVENT = {
-    title: "Davao Web3 Summit 2026",
-    venue: "SMX Convention Center, Davao",
-    room: "Main Hall · Level 3",
-    attendees: "412 / 500",
-    session: "Keynote · Stage A",
-    speaker: "Alia Mendoza",
-    topic: "The State of DeFi in SEA",
-    endsIn: "01:24:06"
-  };
+      const UPCOMING = [
+        {
+          id: 1,
+          date: 'MAY 04 · 6:00 PM',
+          title: 'Liquidity Provision 101',
+          desc: 'A hands-on workshop for first-time LPs — walk through adding, rebalancing, and exiting positions on native Davao pools.',
+          venue: 'Matina Town Square',
+          chip: 'Workshop',
+          seats: '48 left',
+          orbColor: 'lime',
+          angle: '115deg'
+        },
+        {
+          id: 2,
+          date: 'MAY 17 · 2:00 PM',
+          title: 'Cross-Chain Roundtable',
+          desc: "Panel with founders from three L2 ecosystems discussing bridge safety, shared sequencers, and what's next for DeFi composability.",
+          venue: 'Abreeza Ayala Mall',
+          chip: 'Panel',
+          seats: '22 left',
+          orbColor: 'amber',
+          angle: '95deg'
+        },
+        {
+          id: 3,
+          date: 'JUN 01 · 10:00 AM',
+          title: "DeFi Builder's Weekend",
+          desc: 'A two-day hackathon for Mindanao-based developers. Ship a prototype, win grants, and meet the VCs investing in SEA Web3.',
+          venue: 'MAFBEX Grounds',
+          chip: 'Hackathon',
+          seats: 'Full — waitlist',
+          orbColor: 'lime',
+          angle: '135deg'
+        }
+      ];
 
-  const UPCOMING = [
-    {
-      id: 1,
-      date: "MAY 04 · 6:00 PM",
-      title: "Liquidity Provision 101",
-      desc: "A hands-on workshop for first-time LPs — walk through adding, rebalancing, and exiting positions on native Davao pools.",
-      venue: "Matina Town Square",
-      chip: "Workshop",
-      seats: "48 left",
-      orbColor: "lime",
-      angle: "115deg"
-    },
-    {
-      id: 2,
-      date: "MAY 17 · 2:00 PM",
-      title: "Cross-Chain Roundtable",
-      desc: "Panel with founders from three L2 ecosystems discussing bridge safety, shared sequencers, and what's next for DeFi composability.",
-      venue: "Abreeza Ayala Mall",
-      chip: "Panel",
-      seats: "22 left",
-      orbColor: "amber",
-      angle: "95deg"
-    },
-    {
-      id: 3,
-      date: "JUN 01 · 10:00 AM",
-      title: "DeFi Builder's Weekend",
-      desc: "A two-day hackathon for Mindanao-based developers. Ship a prototype, win grants, and meet the VCs investing in SEA Web3.",
-      venue: "MAFBEX Grounds",
-      chip: "Hackathon",
-      seats: "Full — waitlist",
-      orbColor: "lime",
-      angle: "135deg"
-    }
-  ];
+      /* ---------- components ---------- */
 
-  /* ---------- components ---------- */
-
-  const Nav = ({ onLogin }) => (
-    <nav className="nav">
-      <div className="container nav-inner">
-        <div className="logo">
-          <div className="logo-mark">
-            <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
-              <path d="M2 10 L10 2 L18 10 L10 18 Z" stroke="#0a1005" strokeWidth="2" fill="none" />
-              <circle cx="10" cy="10" r="2.5" fill="#0a1005"/>
-            </svg>
-          </div>
-          <span>Eventara</span>
-        </div>
-        <div className="nav-links">
-          <a className="link active" href="#events">Events</a>
-          <a className="link" href="#about">About</a>
-          <a className="link" href="#community">Community</a>
-          <button className="btn btn-primary cta-link" onClick={onLogin} style={{ padding: "10px 18px", fontSize: 13.5 }}>
-            Login / Register
-          </button>
-        </div>
-      </div>
-    </nav>
-  );
-
-  const Hero = ({ onExplore, onJoin, showMesh }) => (
-    <section className="hero">
-      {showMesh && <div className="mesh"><div className="grid-overlay" /></div>}
-      <div className="container" style={{ position: "relative", zIndex: 1 }}>
-        <span className="eyebrow"><span className="dot" /> DAVAO · DEFI · PH</span>
-        <h1>
-          Empowering the <span className="hl">Davao&nbsp;DeFi</span> Community.
-        </h1>
-        <p className="sub">
-          Your centralized hub to discover, join, and engage with the premier Web3 and DeFi events in the region — built by participants, for participants.
-        </p>
-        <div className="hero-actions">
-          <button className="btn btn-primary" onClick={onExplore}>
-            Explore Events <Icon name="arrow-right" size={16} />
-          </button>
-          <button className="btn btn-amber-outline" onClick={onJoin}>
-            Join the Community
-          </button>
-        </div>
-
-        <div className="hero-stats">
-          <div>
-            <div className="num lime">42</div>
-            <div className="lbl">Events this quarter</div>
-          </div>
-          <div>
-            <div className="num">2,184</div>
-            <div className="lbl">Community members</div>
-          </div>
-          <div>
-            <div className="num amber">1 LIVE</div>
-            <div className="lbl">Happening now</div>
-          </div>
-          <div>
-            <div className="num">Davao</div>
-            <div className="lbl">Home base · PH</div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-
-  const LiveCard = ({ onOpen }) => {
-    const [countdown, setCountdown] = useState({ h: 1, m: 24, s: 6 });
-    useEffect(() => {
-      const t = setInterval(() => {
-        setCountdown(c => {
-          let { h, m, s } = c;
-          s -= 1;
-          if (s < 0) { s = 59; m -= 1; }
-          if (m < 0) { m = 59; h -= 1; }
-          if (h < 0) return { h: 0, m: 0, s: 0 };
-          return { h, m, s };
-        });
-      }, 1000);
-      return () => clearInterval(t);
-    }, []);
-    const pad = n => String(n).padStart(2, "0");
-
-    return (
-      <section className="section" style={{ paddingTop: 40 }} id="events">
-        <div className="container">
-          <div className="section-head">
-            <div>
-              <span className="eyebrow"><span className="dot" style={{ background: "var(--amber)", boxShadow: "0 0 12px var(--amber-glow)" }} /> ON NOW</span>
-              <h2>Happening Now</h2>
+      const Nav = ({ onLogin }) => (
+        <nav className="nav">
+          <div className="nav-inner container">
+            <div className="logo">
+              <div className="logo-mark">
+                <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
+                  <path d="M2 10 L10 2 L18 10 L10 18 Z" stroke="#0a1005" strokeWidth="2" fill="none" />
+                  <circle cx="10" cy="10" r="2.5" fill="#0a1005" />
+                </svg>
+              </div>
+              <span>Eventara</span>
             </div>
-            <p className="lead">One session is live on the Eventara network. Jump in, or catch up later — sessions are archived within 24 hours.</p>
+            <div className="nav-links">
+              <a className="link active" href="#events">
+                Events
+              </a>
+              <a className="link" href="#about">
+                About
+              </a>
+              <a className="link" href="#community">
+                Community
+              </a>
+              <button className="btn btn-primary cta-link" onClick={onLogin} style={{ padding: '10px 18px', fontSize: 13.5 }}>
+                Login / Register
+              </button>
+            </div>
           </div>
+        </nav>
+      );
 
-          <div className="live-card">
-            <div className="live-body">
-              <div className="live-tag"><span className="pulse" /> LIVE · DAY 02 OF 03</div>
-              <h3>{LIVE_EVENT.title}</h3>
-              <div className="live-meta">
+      const Hero = ({ onExplore, onJoin, showMesh }) => (
+        <section className="hero">
+          {showMesh && (
+            <div className="mesh">
+              <div className="grid-overlay" />
+            </div>
+          )}
+          <div className="container" style={{ position: 'relative', zIndex: 1 }}>
+            <span className="eyebrow">
+              <span className="dot" /> DAVAO · DEFI · PH
+            </span>
+            <h1>
+              Empowering the <span className="hl">Davao&nbsp;DeFi</span> Community.
+            </h1>
+            <p className="sub">
+              Your centralized hub to discover, join, and engage with the premier Web3 and DeFi events in the region — built by participants, for participants.
+            </p>
+            <div className="hero-actions">
+              <button className="btn btn-primary" onClick={onExplore}>
+                Explore Events <Icon name="arrow-right" size={16} />
+              </button>
+              <button className="btn btn-amber-outline" onClick={onJoin}>
+                Join the Community
+              </button>
+            </div>
+
+            <div className="hero-stats">
+              <div>
+                <div className="num lime">42</div>
+                <div className="lbl">Events this quarter</div>
+              </div>
+              <div>
+                <div className="num">2,184</div>
+                <div className="lbl">Community members</div>
+              </div>
+              <div>
+                <div className="num amber">1 LIVE</div>
+                <div className="lbl">Happening now</div>
+              </div>
+              <div>
+                <div className="num">Davao</div>
+                <div className="lbl">Home base · PH</div>
+              </div>
+            </div>
+          </div>
+        </section>
+      );
+
+      const LiveCard = ({ onOpen }) => {
+        const [countdown, setCountdown] = useState({ h: 1, m: 24, s: 6 });
+        useEffect(() => {
+          const t = setInterval(() => {
+            setCountdown((c) => {
+              let { h, m, s } = c;
+              s -= 1;
+              if (s < 0) {
+                s = 59;
+                m -= 1;
+              }
+              if (m < 0) {
+                m = 59;
+                h -= 1;
+              }
+              if (h < 0) return { h: 0, m: 0, s: 0 };
+              return { h, m, s };
+            });
+          }, 1000);
+          return () => clearInterval(t);
+        }, []);
+        const pad = (n) => String(n).padStart(2, '0');
+
+        return (
+          <section className="section" style={{ paddingTop: 40 }} id="events">
+            <div className="container">
+              <div className="section-head">
                 <div>
-                  <div className="k">Venue</div>
-                  <div className="v">{LIVE_EVENT.venue}</div>
+                  <span className="eyebrow">
+                    <span className="dot" style={{ background: 'var(--amber)', boxShadow: '0 0 12px var(--amber-glow)' }} /> ON NOW
+                  </span>
+                  <h2>Happening Now</h2>
                 </div>
-                <div>
-                  <div className="k">Session</div>
-                  <div className="v">{LIVE_EVENT.session}</div>
-                </div>
-                <div>
-                  <div className="k">Attendance</div>
-                  <div className="v">{LIVE_EVENT.attendees}</div>
-                </div>
-                <div>
-                  <div className="k">Ends in</div>
-                  <div className="v mono" style={{ color: "var(--amber)" }}>
-                    {pad(countdown.h)}:{pad(countdown.m)}:{pad(countdown.s)}
+                <p className="lead">One session is live on the Eventara network. Jump in, or catch up later — sessions are archived within 24 hours.</p>
+              </div>
+
+              <div className="live-card">
+                <div className="live-body">
+                  <div className="live-tag">
+                    <span className="pulse" /> LIVE · DAY 02 OF 03
+                  </div>
+                  <h3>{LIVE_EVENT.title}</h3>
+                  <div className="live-meta">
+                    <div>
+                      <div className="k">Venue</div>
+                      <div className="v">{LIVE_EVENT.venue}</div>
+                    </div>
+                    <div>
+                      <div className="k">Session</div>
+                      <div className="v">{LIVE_EVENT.session}</div>
+                    </div>
+                    <div>
+                      <div className="k">Attendance</div>
+                      <div className="v">{LIVE_EVENT.attendees}</div>
+                    </div>
+                    <div>
+                      <div className="k">Ends in</div>
+                      <div className="v mono" style={{ color: 'var(--amber)' }}>
+                        {pad(countdown.h)}:{pad(countdown.m)}:{pad(countdown.s)}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="now-playing">
+                    <div className="speaker-avatar">AM</div>
+                    <div style={{ minWidth: 0 }}>
+                      <div className="sp-name">{LIVE_EVENT.speaker}</div>
+                      <div className="sp-topic">Now: “{LIVE_EVENT.topic}”</div>
+                    </div>
+                    <div className="wave">
+                      <span />
+                      <span />
+                      <span />
+                      <span />
+                      <span />
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: 10, marginTop: 6 }}>
+                    <button className="btn btn-primary" onClick={onOpen} style={{ flex: 1 }}>
+                      <Icon name="play" size={12} /> Join Session
+                    </button>
+                    <button className="btn btn-ghost" onClick={onOpen}>
+                      View Agenda
+                    </button>
                   </div>
                 </div>
-              </div>
 
-              <div className="now-playing">
-                <div className="speaker-avatar">AM</div>
-                <div style={{ minWidth: 0 }}>
-                  <div className="sp-name">{LIVE_EVENT.speaker}</div>
-                  <div className="sp-topic">Now: “{LIVE_EVENT.topic}”</div>
+                <div className="live-visual">
+                  <div className="stripe-art" />
+                  <div className="orb orb-a" />
+                  <div className="orb orb-b" />
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: 20,
+                      right: 20,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      padding: '6px 10px',
+                      borderRadius: 999,
+                      background: 'oklch(0 0 0 / 0.4)',
+                      backdropFilter: 'blur(8px)',
+                      border: '1px solid oklch(1 0 0 / 0.1)',
+                      fontSize: 11,
+                      fontFamily: "'JetBrains Mono', monospace",
+                      letterSpacing: '0.12em',
+                      color: 'var(--text-dim)'
+                    }}
+                  >
+                    <span className="pulse" style={{ width: 6, height: 6 }} /> STREAM · 1080p
+                  </div>
+                  <div className="label-art">[ event cover · 16:9 placeholder ]</div>
                 </div>
-                <div className="wave">
-                  <span /><span /><span /><span /><span />
-                </div>
-              </div>
-
-              <div style={{ display: "flex", gap: 10, marginTop: 6 }}>
-                <button className="btn btn-primary" onClick={onOpen} style={{ flex: 1 }}>
-                  <Icon name="play" size={12} /> Join Session
-                </button>
-                <button className="btn btn-ghost" onClick={onOpen}>
-                  View Agenda
-                </button>
               </div>
             </div>
+          </section>
+        );
+      };
 
-            <div className="live-visual">
-              <div className="stripe-art" />
-              <div className="orb orb-a" />
-              <div className="orb orb-b" />
-              <div style={{
-                position: "absolute", top: 20, right: 20,
-                display: "flex", alignItems: "center", gap: 8,
-                padding: "6px 10px", borderRadius: 999,
-                background: "oklch(0 0 0 / 0.4)", backdropFilter: "blur(8px)",
-                border: "1px solid oklch(1 0 0 / 0.1)",
-                fontSize: 11, fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.12em",
-                color: "var(--text-dim)"
-              }}>
-                <span className="pulse" style={{ width: 6, height: 6 }} /> STREAM · 1080p
-              </div>
-              <div className="label-art">[ event cover · 16:9 placeholder ]</div>
+      const EventCard = ({ ev, onOpen }) => (
+        <article className="event-card" onClick={() => onOpen(ev)}>
+          <div className="event-visual" style={{ '--angle': ev.angle }}>
+            <div className="stripes" />
+            <div
+              className="orb-s"
+              style={{
+                left: '20%',
+                top: '30%',
+                width: 160,
+                height: 160,
+                background: ev.orbColor === 'lime' ? 'var(--lime)' : 'var(--amber)'
+              }}
+            />
+            <div
+              className="orb-s"
+              style={{
+                right: '15%',
+                bottom: '15%',
+                width: 120,
+                height: 120,
+                background: ev.orbColor === 'lime' ? 'var(--amber)' : 'var(--lime)',
+                opacity: 0.35
+              }}
+            />
+            <span className="ev-chip">{ev.chip}</span>
+            <span className="ev-label">[ event cover · 16:9 ]</span>
+          </div>
+          <div className="event-body">
+            <div className="event-date">
+              <span className="sep" /> {ev.date}
+            </div>
+            <h3 className="event-title">{ev.title}</h3>
+            <p className="event-desc">{ev.desc}</p>
+            <div className="event-foot">
+              <span className="venue">
+                <Icon name="pin" size={13} /> {ev.venue}
+              </span>
+              <span className="seats">
+                <b>{ev.seats.split(' ')[0]}</b> {ev.seats.split(' ').slice(1).join(' ')}
+              </span>
             </div>
           </div>
-        </div>
-      </section>
-    );
-  };
+        </article>
+      );
 
-  const EventCard = ({ ev, onOpen }) => (
-    <article className="event-card" onClick={() => onOpen(ev)}>
-      <div className="event-visual" style={{ "--angle": ev.angle }}>
-        <div className="stripes" />
-        <div className="orb-s" style={{
-          left: "20%", top: "30%", width: 160, height: 160,
-          background: ev.orbColor === "lime" ? "var(--lime)" : "var(--amber)"
-        }} />
-        <div className="orb-s" style={{
-          right: "15%", bottom: "15%", width: 120, height: 120,
-          background: ev.orbColor === "lime" ? "var(--amber)" : "var(--lime)", opacity: 0.35
-        }} />
-        <span className="ev-chip">{ev.chip}</span>
-        <span className="ev-label">[ event cover · 16:9 ]</span>
-      </div>
-      <div className="event-body">
-        <div className="event-date">
-          <span className="sep" /> {ev.date}
-        </div>
-        <h3 className="event-title">{ev.title}</h3>
-        <p className="event-desc">{ev.desc}</p>
-        <div className="event-foot">
-          <span className="venue"><Icon name="pin" size={13} /> {ev.venue}</span>
-          <span className="seats"><b>{ev.seats.split(" ")[0]}</b> {ev.seats.split(" ").slice(1).join(" ")}</span>
-        </div>
-      </div>
-    </article>
-  );
+      const Upcoming = ({ onOpen }) => {
+        const [tab, setTab] = useState('all');
+        const filtered = useMemo(() => {
+          if (tab === 'all') return UPCOMING;
+          const map = { workshops: 'Workshop', panels: 'Panel', hackathons: 'Hackathon' };
+          return UPCOMING.filter((e) => e.chip === map[tab]);
+        }, [tab]);
 
-  const Upcoming = ({ onOpen }) => {
-    const [tab, setTab] = useState("all");
-    const filtered = useMemo(() => {
-      if (tab === "all") return UPCOMING;
-      const map = { workshops: "Workshop", panels: "Panel", hackathons: "Hackathon" };
-      return UPCOMING.filter(e => e.chip === map[tab]);
-    }, [tab]);
+        return (
+          <section className="section" style={{ paddingTop: 40 }}>
+            <div className="container">
+              <div className="section-head">
+                <div>
+                  <span className="eyebrow">
+                    <span className="dot" /> CALENDAR · Q2 2026
+                  </span>
+                  <h2>Upcoming Events</h2>
+                </div>
+                <div className="tabs">
+                  {[
+                    ['all', 'All'],
+                    ['workshops', 'Workshops'],
+                    ['panels', 'Panels'],
+                    ['hackathons', 'Hackathons']
+                  ].map(([k, lbl]) => (
+                    <button key={k} className={`tab ${tab === k ? 'active' : ''}`} onClick={() => setTab(k)}>
+                      {lbl}
+                    </button>
+                  ))}
+                </div>
+              </div>
 
-    return (
-      <section className="section" style={{ paddingTop: 40 }}>
-        <div className="container">
-          <div className="section-head">
-            <div>
-              <span className="eyebrow"><span className="dot" /> CALENDAR · Q2 2026</span>
-              <h2>Upcoming Events</h2>
+              <div className="events-grid">
+                {filtered.map((ev) => (
+                  <EventCard key={ev.id} ev={ev} onOpen={onOpen} />
+                ))}
+              </div>
+
+              {filtered.length === 0 && (
+                <div style={{ padding: 60, textAlign: 'center', color: 'var(--text-mute)', border: '1px dashed var(--line-soft)', borderRadius: 18 }}>
+                  No {tab} scheduled this quarter. Check back soon.
+                </div>
+              )}
+
+              <div style={{ marginTop: 32, textAlign: 'center' }}>
+                <button className="btn btn-ghost">
+                  View Full Calendar <Icon name="arrow-right" size={14} />
+                </button>
+              </div>
             </div>
-            <div className="tabs">
-              {[["all","All"],["workshops","Workshops"],["panels","Panels"],["hackathons","Hackathons"]].map(([k, lbl]) =>
-                <button key={k} className={`tab ${tab === k ? "active" : ""}`} onClick={() => setTab(k)}>{lbl}</button>
+          </section>
+        );
+      };
+
+      const CtaBanner = ({ onCreate, onLogin }) => (
+        <section className="cta-wrap" id="community">
+          <div className="container">
+            <div className="cta">
+              <span className="eyebrow" style={{ position: 'relative', zIndex: 1 }}>
+                <span className="dot" /> JOIN THE COMMUNITY
+              </span>
+              <h2>Ready to dive into the future of finance?</h2>
+              <p>Create your participant account today to seamlessly track your events, venues, and connect with the Davao DeFi community.</p>
+              <div className="cta-actions">
+                <button className="btn btn-primary" onClick={onCreate}>
+                  Create Account
+                </button>
+                <button className="btn btn-white-outline" onClick={onLogin}>
+                  Login to Dashboard
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+      );
+
+      const Footer = () => (
+        <footer className="footer">
+          <div className="footer-inner container">
+            <div className="logo">
+              <div className="logo-mark">
+                <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
+                  <path d="M2 10 L10 2 L18 10 L10 18 Z" stroke="#0a1005" strokeWidth="2" fill="none" />
+                  <circle cx="10" cy="10" r="2.5" fill="#0a1005" />
+                </svg>
+              </div>
+              <span>Eventara</span>
+            </div>
+            <div className="footer-links">
+              <a href="#">Privacy Policy</a>
+              <a href="#">Terms of Service</a>
+              <a href="#">Contact</a>
+            </div>
+            <div className="socials">
+              <a className="social-btn" href="#" aria-label="Twitter">
+                <Icon name="twitter" size={15} />
+              </a>
+              <a className="social-btn" href="#" aria-label="Discord">
+                <Icon name="discord" size={16} />
+              </a>
+              <a className="social-btn" href="#" aria-label="Telegram">
+                <Icon name="telegram" size={16} />
+              </a>
+            </div>
+          </div>
+          <div className="container" style={{ marginTop: 28, display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+            <div className="copyright">© 2026 EVENTARA — Built for the Davao DeFi Community PH.</div>
+            <div className="copyright" style={{ color: 'var(--text-dim)' }}>
+              <span style={{ color: 'var(--lime)' }}>●</span> All systems operational
+            </div>
+          </div>
+        </footer>
+      );
+
+      /* ---------- Auth modal ---------- */
+      const AuthModal = ({ mode, onClose, onSwitch }) => {
+        const [form, setForm] = useState({ name: '', email: '', password: '' });
+        const [submitted, setSubmitted] = useState(false);
+        const isRegister = mode === 'register';
+
+        const emailValid = /^\S+@\S+\.\S+$/.test(form.email);
+        const pwValid = form.password.length >= 6;
+        const nameValid = !isRegister || form.name.trim().length > 1;
+        const valid = emailValid && pwValid && nameValid;
+
+        const submit = (e) => {
+          e.preventDefault();
+          if (!valid) return;
+          setSubmitted(true);
+          setTimeout(onClose, 1400);
+        };
+
+        return (
+          <div className="modal-backdrop" onClick={onClose}>
+            <div className="modal" onClick={(e) => e.stopPropagation()}>
+              <button className="modal-close" onClick={onClose}>
+                <Icon name="x" size={16} />
+              </button>
+              <div className="modal-tabs">
+                <button className={`modal-tab ${!isRegister ? 'active' : ''}`} onClick={() => onSwitch('login')}>
+                  Login
+                </button>
+                <button className={`modal-tab ${isRegister ? 'active' : ''}`} onClick={() => onSwitch('register')}>
+                  Create account
+                </button>
+              </div>
+              {submitted ? (
+                <div style={{ padding: '24px 0', textAlign: 'center' }}>
+                  <div
+                    style={{
+                      width: 52,
+                      height: 52,
+                      borderRadius: '50%',
+                      background: 'oklch(0.9 0.22 128 / 0.15)',
+                      display: 'grid',
+                      placeItems: 'center',
+                      margin: '0 auto 14px',
+                      color: 'var(--lime)'
+                    }}
+                  >
+                    <Icon name="check" size={26} />
+                  </div>
+                  <h3 style={{ margin: '0 0 6px' }}>You're in.</h3>
+                  <p className="sub" style={{ margin: 0 }}>
+                    Redirecting to your Eventara dashboard…
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <h3>{isRegister ? 'Create your account' : 'Welcome back'}</h3>
+                  <p className="sub">{isRegister ? "Join 2,000+ participants across Davao's DeFi events." : 'Log in to manage your events and sessions.'}</p>
+                  <form onSubmit={submit}>
+                    {isRegister && (
+                      <div className="field">
+                        <label>Full name</label>
+                        <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Juan Dela Cruz" />
+                      </div>
+                    )}
+                    <div className="field">
+                      <label>Email</label>
+                      <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="you@example.com" />
+                    </div>
+                    <div className="field">
+                      <label>Password</label>
+                      <input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} placeholder="••••••••" />
+                    </div>
+                    <button
+                      className="btn btn-primary"
+                      type="submit"
+                      disabled={!valid}
+                      style={{ opacity: valid ? 1 : 0.5, cursor: valid ? 'pointer' : 'not-allowed' }}
+                    >
+                      {isRegister ? 'Create account' : 'Login'} <Icon name="arrow-right" size={14} />
+                    </button>
+                  </form>
+                  <div className="divider">OR</div>
+                  <div className="oauth">
+                    <button>Wallet Connect</button>
+                    <button>Google</button>
+                    <button>Discord</button>
+                  </div>
+                </>
               )}
             </div>
           </div>
-
-          <div className="events-grid">
-            {filtered.map(ev => <EventCard key={ev.id} ev={ev} onOpen={onOpen} />)}
-          </div>
-
-          {filtered.length === 0 && (
-            <div style={{ padding: 60, textAlign: "center", color: "var(--text-mute)", border: "1px dashed var(--line-soft)", borderRadius: 18 }}>
-              No {tab} scheduled this quarter. Check back soon.
-            </div>
-          )}
-
-          <div style={{ marginTop: 32, textAlign: "center" }}>
-            <button className="btn btn-ghost">
-              View Full Calendar <Icon name="arrow-right" size={14} />
-            </button>
-          </div>
-        </div>
-      </section>
-    );
-  };
-
-  const CtaBanner = ({ onCreate, onLogin }) => (
-    <section className="cta-wrap" id="community">
-      <div className="container">
-        <div className="cta">
-          <span className="eyebrow" style={{ position: "relative", zIndex: 1 }}>
-            <span className="dot" /> JOIN THE COMMUNITY
-          </span>
-          <h2>Ready to dive into the future of finance?</h2>
-          <p>Create your participant account today to seamlessly track your events, venues, and connect with the Davao DeFi community.</p>
-          <div className="cta-actions">
-            <button className="btn btn-primary" onClick={onCreate}>Create Account</button>
-            <button className="btn btn-white-outline" onClick={onLogin}>Login to Dashboard</button>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-
-  const Footer = () => (
-    <footer className="footer">
-      <div className="container footer-inner">
-        <div className="logo">
-          <div className="logo-mark">
-            <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
-              <path d="M2 10 L10 2 L18 10 L10 18 Z" stroke="#0a1005" strokeWidth="2" fill="none" />
-              <circle cx="10" cy="10" r="2.5" fill="#0a1005"/>
-            </svg>
-          </div>
-          <span>Eventara</span>
-        </div>
-        <div className="footer-links">
-          <a href="#">Privacy Policy</a>
-          <a href="#">Terms of Service</a>
-          <a href="#">Contact</a>
-        </div>
-        <div className="socials">
-          <a className="social-btn" href="#" aria-label="Twitter"><Icon name="twitter" size={15} /></a>
-          <a className="social-btn" href="#" aria-label="Discord"><Icon name="discord" size={16} /></a>
-          <a className="social-btn" href="#" aria-label="Telegram"><Icon name="telegram" size={16} /></a>
-        </div>
-      </div>
-      <div className="container" style={{ marginTop: 28, display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
-        <div className="copyright">© 2026 EVENTARA — Built for the Davao DeFi Community PH.</div>
-        <div className="copyright" style={{ color: "var(--text-dim)" }}>
-          <span style={{ color: "var(--lime)" }}>●</span> All systems operational
-        </div>
-      </div>
-    </footer>
-  );
-
-  /* ---------- Auth modal ---------- */
-  const AuthModal = ({ mode, onClose, onSwitch }) => {
-    const [form, setForm] = useState({ name: "", email: "", password: "" });
-    const [submitted, setSubmitted] = useState(false);
-    const isRegister = mode === "register";
-
-    const emailValid = /^\S+@\S+\.\S+$/.test(form.email);
-    const pwValid = form.password.length >= 6;
-    const nameValid = !isRegister || form.name.trim().length > 1;
-    const valid = emailValid && pwValid && nameValid;
-
-    const submit = (e) => {
-      e.preventDefault();
-      if (!valid) return;
-      setSubmitted(true);
-      setTimeout(onClose, 1400);
-    };
-
-    return (
-      <div className="modal-backdrop" onClick={onClose}>
-        <div className="modal" onClick={e => e.stopPropagation()}>
-          <button className="modal-close" onClick={onClose}><Icon name="x" size={16} /></button>
-          <div className="modal-tabs">
-            <button className={`modal-tab ${!isRegister ? "active" : ""}`} onClick={() => onSwitch("login")}>Login</button>
-            <button className={`modal-tab ${isRegister ? "active" : ""}`} onClick={() => onSwitch("register")}>Create account</button>
-          </div>
-          {submitted ? (
-            <div style={{ padding: "24px 0", textAlign: "center" }}>
-              <div style={{ width: 52, height: 52, borderRadius: "50%", background: "oklch(0.9 0.22 128 / 0.15)", display: "grid", placeItems: "center", margin: "0 auto 14px", color: "var(--lime)" }}>
-                <Icon name="check" size={26} />
-              </div>
-              <h3 style={{ margin: "0 0 6px" }}>You're in.</h3>
-              <p className="sub" style={{ margin: 0 }}>Redirecting to your Eventara dashboard…</p>
-            </div>
-          ) : (
-            <>
-              <h3>{isRegister ? "Create your account" : "Welcome back"}</h3>
-              <p className="sub">{isRegister ? "Join 2,000+ participants across Davao's DeFi events." : "Log in to manage your events and sessions."}</p>
-              <form onSubmit={submit}>
-                {isRegister && (
-                  <div className="field">
-                    <label>Full name</label>
-                    <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Juan Dela Cruz" />
-                  </div>
-                )}
-                <div className="field">
-                  <label>Email</label>
-                  <input type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder="you@example.com" />
-                </div>
-                <div className="field">
-                  <label>Password</label>
-                  <input type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} placeholder="••••••••" />
-                </div>
-                <button className="btn btn-primary" type="submit" disabled={!valid} style={{ opacity: valid ? 1 : 0.5, cursor: valid ? "pointer" : "not-allowed" }}>
-                  {isRegister ? "Create account" : "Login"} <Icon name="arrow-right" size={14} />
-                </button>
-              </form>
-              <div className="divider">OR</div>
-              <div className="oauth">
-                <button>Wallet Connect</button>
-                <button>Google</button>
-                <button>Discord</button>
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-    );
-  };
-
-  /* ---------- Event detail modal ---------- */
-  const EventDetail = ({ ev, onClose, onRegister }) => (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal detail-modal" onClick={e => e.stopPropagation()}>
-        <button className="modal-close" onClick={onClose} style={{ background: "oklch(0 0 0 / 0.3)" }}><Icon name="x" size={16} /></button>
-        <div className="detail-cover" style={{ "--angle": ev.angle }}>
-          <div style={{
-            position: "absolute", inset: 0,
-            backgroundImage: `repeating-linear-gradient(${ev.angle}, transparent 0 22px, oklch(1 0 0 / 0.04) 22px 24px)`
-          }} />
-          <div style={{ position: "absolute", left: "20%", top: "10%", width: 220, height: 220, borderRadius: "50%", filter: "blur(40px)", background: ev.orbColor === "lime" ? "var(--lime)" : "var(--amber)", opacity: 0.5 }} />
-          <div style={{ position: "absolute", right: "15%", bottom: "10%", width: 160, height: 160, borderRadius: "50%", filter: "blur(34px)", background: ev.orbColor === "lime" ? "var(--amber)" : "var(--lime)", opacity: 0.35 }} />
-          <div style={{ position: "absolute", bottom: 16, left: 20, fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: "0.15em", textTransform: "uppercase", color: "oklch(1 0 0 / 0.35)" }}>[ event cover ]</div>
-          <span style={{ position: "absolute", top: 16, left: 20, padding: "5px 10px", borderRadius: 6, background: "oklch(0 0 0 / 0.4)", backdropFilter: "blur(8px)", border: "1px solid oklch(1 0 0 / 0.12)", fontFamily: "'JetBrains Mono', monospace", fontSize: 10.5, letterSpacing: "0.12em", color: "var(--text-dim)", textTransform: "uppercase" }}>{ev.chip}</span>
-        </div>
-        <div className="detail-body">
-          <div className="event-date" style={{ marginBottom: 8 }}><span className="sep" /> {ev.date}</div>
-          <h3>{ev.title}</h3>
-          <p style={{ color: "var(--text-dim)", fontSize: 14.5, lineHeight: 1.6, margin: "6px 0 0" }}>{ev.desc}</p>
-
-          <div className="detail-grid">
-            <div className="detail-cell">
-              <div className="k">Venue</div>
-              <div className="v">{ev.venue}</div>
-            </div>
-            <div className="detail-cell">
-              <div className="k">Availability</div>
-              <div className="v" style={{ color: ev.seats.startsWith("Full") ? "var(--amber)" : "var(--lime)" }}>{ev.seats}</div>
-            </div>
-            <div className="detail-cell">
-              <div className="k">Format</div>
-              <div className="v">{ev.chip}</div>
-            </div>
-            <div className="detail-cell">
-              <div className="k">Cost</div>
-              <div className="v">Free · Members only</div>
-            </div>
-          </div>
-
-          <div style={{ display: "flex", gap: 10 }}>
-            <button className="btn btn-primary" onClick={onRegister} style={{ flex: 1 }}>
-              {ev.seats.startsWith("Full") ? "Join Waitlist" : "Reserve Seat"} <Icon name="arrow-right" size={14} />
-            </button>
-            <button className="btn btn-ghost">
-              <Icon name="calendar" size={14} /> Add to Calendar
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  /* ---------- Tweaks ---------- */
-  const Tweaks = ({ tweaks, setTweaks, onClose }) => (
-    <div className="tweaks">
-      <h4>Tweaks <button style={{ marginLeft: "auto", color: "var(--text-mute)" }} onClick={onClose}><Icon name="x" size={14}/></button></h4>
-      <div className="tweak-row">
-        <label>Hero background</label>
-        <input type="checkbox" checked={tweaks.showBgMesh} onChange={e => setTweaks({ ...tweaks, showBgMesh: e.target.checked })} />
-      </div>
-      <div className="tweak-row">
-        <label>Accent mix</label>
-        <select value={tweaks.accentMix} onChange={e => setTweaks({ ...tweaks, accentMix: e.target.value })}>
-          <option value="lime-amber">Lime + Amber</option>
-          <option value="lime-only">Lime only</option>
-          <option value="amber-only">Amber only</option>
-        </select>
-      </div>
-      <div className="tweak-row">
-        <label>Card density</label>
-        <select value={tweaks.cardDensity} onChange={e => setTweaks({ ...tweaks, cardDensity: e.target.value })}>
-          <option value="comfortable">Comfortable</option>
-          <option value="compact">Compact</option>
-        </select>
-      </div>
-    </div>
-  );
-
-  /* ---------- App ---------- */
-  const App = () => {
-    const [tweaks, setTweaks] = useState(TWEAKS_DEFAULTS);
-    const [editMode, setEditMode] = useState(false);
-    const [modal, setModal] = useState(null); // "login" | "register" | null
-    const [detail, setDetail] = useState(null);
-
-    // Edit mode wiring
-    useEffect(() => {
-      const onMsg = (e) => {
-        const t = e.data?.type;
-        if (t === "__activate_edit_mode") setEditMode(true);
-        if (t === "__deactivate_edit_mode") setEditMode(false);
+        );
       };
-      window.addEventListener("message", onMsg);
-      window.parent.postMessage({ type: "__edit_mode_available" }, "*");
-      return () => window.removeEventListener("message", onMsg);
-    }, []);
 
-    useEffect(() => {
-      window.parent.postMessage({ type: "__edit_mode_set_keys", edits: tweaks }, "*");
-    }, [tweaks]);
+      /* ---------- Event detail modal ---------- */
+      const EventDetail = ({ ev, onClose, onRegister }) => (
+        <div className="modal-backdrop" onClick={onClose}>
+          <div className="modal detail-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={onClose} style={{ background: 'oklch(0 0 0 / 0.3)' }}>
+              <Icon name="x" size={16} />
+            </button>
+            <div className="detail-cover" style={{ '--angle': ev.angle }}>
+              <div
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  backgroundImage: `repeating-linear-gradient(${ev.angle}, transparent 0 22px, oklch(1 0 0 / 0.04) 22px 24px)`
+                }}
+              />
+              <div
+                style={{
+                  position: 'absolute',
+                  left: '20%',
+                  top: '10%',
+                  width: 220,
+                  height: 220,
+                  borderRadius: '50%',
+                  filter: 'blur(40px)',
+                  background: ev.orbColor === 'lime' ? 'var(--lime)' : 'var(--amber)',
+                  opacity: 0.5
+                }}
+              />
+              <div
+                style={{
+                  position: 'absolute',
+                  right: '15%',
+                  bottom: '10%',
+                  width: 160,
+                  height: 160,
+                  borderRadius: '50%',
+                  filter: 'blur(34px)',
+                  background: ev.orbColor === 'lime' ? 'var(--amber)' : 'var(--lime)',
+                  opacity: 0.35
+                }}
+              />
+              <div
+                style={{
+                  position: 'absolute',
+                  bottom: 16,
+                  left: 20,
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: 10,
+                  letterSpacing: '0.15em',
+                  textTransform: 'uppercase',
+                  color: 'oklch(1 0 0 / 0.35)'
+                }}
+              >
+                [ event cover ]
+              </div>
+              <span
+                style={{
+                  position: 'absolute',
+                  top: 16,
+                  left: 20,
+                  padding: '5px 10px',
+                  borderRadius: 6,
+                  background: 'oklch(0 0 0 / 0.4)',
+                  backdropFilter: 'blur(8px)',
+                  border: '1px solid oklch(1 0 0 / 0.12)',
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: 10.5,
+                  letterSpacing: '0.12em',
+                  color: 'var(--text-dim)',
+                  textTransform: 'uppercase'
+                }}
+              >
+                {ev.chip}
+              </span>
+            </div>
+            <div className="detail-body">
+              <div className="event-date" style={{ marginBottom: 8 }}>
+                <span className="sep" /> {ev.date}
+              </div>
+              <h3>{ev.title}</h3>
+              <p style={{ color: 'var(--text-dim)', fontSize: 14.5, lineHeight: 1.6, margin: '6px 0 0' }}>{ev.desc}</p>
 
-    // Apply accent-mix on root
-    useEffect(() => {
-      const r = document.documentElement;
-      if (tweaks.accentMix === "lime-only") {
-        r.style.setProperty("--amber", "oklch(0.88 0.22 128)");
-        r.style.setProperty("--amber-dim", "oklch(0.78 0.19 128)");
-        r.style.setProperty("--amber-glow", "oklch(0.88 0.22 128 / 0.35)");
-      } else if (tweaks.accentMix === "amber-only") {
-        r.style.setProperty("--lime", "oklch(0.82 0.17 75)");
-        r.style.setProperty("--lime-dim", "oklch(0.72 0.16 75)");
-        r.style.setProperty("--lime-glow", "oklch(0.82 0.17 75 / 0.35)");
-      } else {
-        r.style.setProperty("--lime", "oklch(0.9 0.22 128)");
-        r.style.setProperty("--lime-dim", "oklch(0.78 0.19 128)");
-        r.style.setProperty("--lime-glow", "oklch(0.9 0.22 128 / 0.35)");
-        r.style.setProperty("--amber", "oklch(0.82 0.17 75)");
-        r.style.setProperty("--amber-dim", "oklch(0.72 0.16 75)");
-        r.style.setProperty("--amber-glow", "oklch(0.82 0.17 75 / 0.4)");
-      }
-    }, [tweaks.accentMix]);
+              <div className="detail-grid">
+                <div className="detail-cell">
+                  <div className="k">Venue</div>
+                  <div className="v">{ev.venue}</div>
+                </div>
+                <div className="detail-cell">
+                  <div className="k">Availability</div>
+                  <div className="v" style={{ color: ev.seats.startsWith('Full') ? 'var(--amber)' : 'var(--lime)' }}>
+                    {ev.seats}
+                  </div>
+                </div>
+                <div className="detail-cell">
+                  <div className="k">Format</div>
+                  <div className="v">{ev.chip}</div>
+                </div>
+                <div className="detail-cell">
+                  <div className="k">Cost</div>
+                  <div className="v">Free · Members only</div>
+                </div>
+              </div>
 
-    const onExplore = () => {
-      const el = document.getElementById("events");
-      if (el) {
-        const y = el.getBoundingClientRect().top + window.pageYOffset - 68;
-        window.scrollTo({ top: y, behavior: "smooth" });
-      }
-    };
+              <div style={{ display: 'flex', gap: 10 }}>
+                <button className="btn btn-primary" onClick={onRegister} style={{ flex: 1 }}>
+                  {ev.seats.startsWith('Full') ? 'Join Waitlist' : 'Reserve Seat'} <Icon name="arrow-right" size={14} />
+                </button>
+                <button className="btn btn-ghost">
+                  <Icon name="calendar" size={14} /> Add to Calendar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
 
-    return (
-      <>
-        <Nav onLogin={() => setModal("login")} />
-        <Hero
-          onExplore={onExplore}
-          onJoin={() => setModal("register")}
-          showMesh={tweaks.showBgMesh}
-        />
-        <LiveCard onOpen={() => setModal("login")} />
-        <Upcoming onOpen={(ev) => setDetail(ev)} />
-        <CtaBanner onCreate={() => setModal("register")} onLogin={() => setModal("login")} />
-        <Footer />
+      /* ---------- Tweaks ---------- */
+      const Tweaks = ({ tweaks, setTweaks, onClose }) => (
+        <div className="tweaks">
+          <h4>
+            Tweaks{' '}
+            <button style={{ marginLeft: 'auto', color: 'var(--text-mute)' }} onClick={onClose}>
+              <Icon name="x" size={14} />
+            </button>
+          </h4>
+          <div className="tweak-row">
+            <label>Hero background</label>
+            <input type="checkbox" checked={tweaks.showBgMesh} onChange={(e) => setTweaks({ ...tweaks, showBgMesh: e.target.checked })} />
+          </div>
+          <div className="tweak-row">
+            <label>Accent mix</label>
+            <select value={tweaks.accentMix} onChange={(e) => setTweaks({ ...tweaks, accentMix: e.target.value })}>
+              <option value="lime-amber">Lime + Amber</option>
+              <option value="lime-only">Lime only</option>
+              <option value="amber-only">Amber only</option>
+            </select>
+          </div>
+          <div className="tweak-row">
+            <label>Card density</label>
+            <select value={tweaks.cardDensity} onChange={(e) => setTweaks({ ...tweaks, cardDensity: e.target.value })}>
+              <option value="comfortable">Comfortable</option>
+              <option value="compact">Compact</option>
+            </select>
+          </div>
+        </div>
+      );
 
-        {modal && <AuthModal mode={modal} onClose={() => setModal(null)} onSwitch={setModal} />}
-        {detail && <EventDetail ev={detail} onClose={() => setDetail(null)} onRegister={() => { setDetail(null); setModal("register"); }} />}
-        {editMode && <Tweaks tweaks={tweaks} setTweaks={setTweaks} onClose={() => setEditMode(false)} />}
-      </>
-    );
-  };
+      /* ---------- App ---------- */
+      const App = () => {
+        const [tweaks, setTweaks] = useState(TWEAKS_DEFAULTS);
+        const [editMode, setEditMode] = useState(false);
+        const [modal, setModal] = useState(null); // "login" | "register" | null
+        const [detail, setDetail] = useState(null);
 
-  ReactDOM.createRoot(document.getElementById("root")).render(<App />);
-  </script>
+        // Edit mode wiring
+        useEffect(() => {
+          const onMsg = (e) => {
+            const t = e.data?.type;
+            if (t === '__activate_edit_mode') setEditMode(true);
+            if (t === '__deactivate_edit_mode') setEditMode(false);
+          };
+          window.addEventListener('message', onMsg);
+          window.parent.postMessage({ type: '__edit_mode_available' }, '*');
+          return () => window.removeEventListener('message', onMsg);
+        }, []);
 
-  <noscript>
-    <div style="padding:48px;font-family:system-ui;color:#fff">Enable JavaScript to view the Eventara landing page.</div>
-  </noscript>
-</body>
+        useEffect(() => {
+          window.parent.postMessage({ type: '__edit_mode_set_keys', edits: tweaks }, '*');
+        }, [tweaks]);
+
+        // Apply accent-mix on root
+        useEffect(() => {
+          const r = document.documentElement;
+          if (tweaks.accentMix === 'lime-only') {
+            r.style.setProperty('--amber', 'oklch(0.88 0.22 128)');
+            r.style.setProperty('--amber-dim', 'oklch(0.78 0.19 128)');
+            r.style.setProperty('--amber-glow', 'oklch(0.88 0.22 128 / 0.35)');
+          } else if (tweaks.accentMix === 'amber-only') {
+            r.style.setProperty('--lime', 'oklch(0.82 0.17 75)');
+            r.style.setProperty('--lime-dim', 'oklch(0.72 0.16 75)');
+            r.style.setProperty('--lime-glow', 'oklch(0.82 0.17 75 / 0.35)');
+          } else {
+            r.style.setProperty('--lime', 'oklch(0.9 0.22 128)');
+            r.style.setProperty('--lime-dim', 'oklch(0.78 0.19 128)');
+            r.style.setProperty('--lime-glow', 'oklch(0.9 0.22 128 / 0.35)');
+            r.style.setProperty('--amber', 'oklch(0.82 0.17 75)');
+            r.style.setProperty('--amber-dim', 'oklch(0.72 0.16 75)');
+            r.style.setProperty('--amber-glow', 'oklch(0.82 0.17 75 / 0.4)');
+          }
+        }, [tweaks.accentMix]);
+
+        const onExplore = () => {
+          const el = document.getElementById('events');
+          if (el) {
+            const y = el.getBoundingClientRect().top + window.pageYOffset - 68;
+            window.scrollTo({ top: y, behavior: 'smooth' });
+          }
+        };
+
+        return (
+          <>
+            <Nav onLogin={() => setModal('login')} />
+            <Hero onExplore={onExplore} onJoin={() => setModal('register')} showMesh={tweaks.showBgMesh} />
+            <LiveCard onOpen={() => setModal('login')} />
+            <Upcoming onOpen={(ev) => setDetail(ev)} />
+            <CtaBanner onCreate={() => setModal('register')} onLogin={() => setModal('login')} />
+            <Footer />
+
+            {modal && <AuthModal mode={modal} onClose={() => setModal(null)} onSwitch={setModal} />}
+            {detail && (
+              <EventDetail
+                ev={detail}
+                onClose={() => setDetail(null)}
+                onRegister={() => {
+                  setDetail(null);
+                  setModal('register');
+                }}
+              />
+            )}
+            {editMode && <Tweaks tweaks={tweaks} setTweaks={setTweaks} onClose={() => setEditMode(false)} />}
+          </>
+        );
+      };
+
+      ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+
+    <noscript>
+      <div style="padding: 48px; font-family: system-ui; color: #fff">Enable JavaScript to view the Eventara landing page.</div>
+    </noscript>
+  </body>
 </html>

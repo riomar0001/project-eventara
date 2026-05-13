@@ -1,3 +1,10 @@
+node_modules
+*.py
+*.yml
+*.md
+*.lock
+*.config.js
+api
 dist/
 node_modules/
 .next/

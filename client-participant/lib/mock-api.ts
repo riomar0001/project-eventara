@@ -25,4 +25,4 @@
 // Expected endpoint: GET /api/event-categories
 // Expected response: { success: true, data: EventCategory[] }
 
-export {}
+export {};

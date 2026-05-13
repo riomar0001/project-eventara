@@ -1,4 +1,16 @@
 /** @type {import('next').NextConfig} */
+
+function storageImagePattern() {
+  const publicUrl = process.env.NEXT_PUBLIC_STORAGE_PUBLIC_URL ?? '';
+  if (!publicUrl) return [];
+  try {
+    const { hostname, protocol } = new URL(publicUrl);
+    return [{ protocol: protocol.replace(':', ''), hostname }];
+  } catch {
+    return [];
+  }
+}
+
 const nextConfig = {
   output: 'standalone',
   async rewrites() {
@@ -6,19 +18,13 @@ const nextConfig = {
     return [
       {
         source: '/api/:path*',
-        destination: `${backendOrigin}/:path*`,
-      },
+        destination: `${backendOrigin}/:path*`
+      }
     ];
   },
   images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'api.dicebear.com',
-        pathname: '/**',
-      },
-    ],
-  },
+    remotePatterns: storageImagePattern()
+  }
 };
 
 export default nextConfig;

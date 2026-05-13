@@ -1,12 +1,11 @@
 /**
  * Rating badge component
  */
-
-import { Icon } from "@/components/ui/icon"
+import { Icon } from '@/components/ui/icon';
 
 interface RatingBadgeProps {
-  rating: number
-  reviews: number
+  rating: number;
+  reviews: number;
 }
 
 export function RatingBadge({ rating, reviews }: RatingBadgeProps) {
@@ -15,12 +14,8 @@ export function RatingBadge({ rating, reviews }: RatingBadgeProps) {
       <div className="text-[var(--amber)]">
         <Icon name="star" size={14} />
       </div>
-      <span className="text-xs font-medium text-[var(--text)]">
-        {rating.toFixed(1)}
-      </span>
-      <span className="font-mono text-xs font-medium text-[var(--text-mute)]">
-        ({reviews})
-      </span>
+      <span className="text-xs font-medium text-[var(--text)]">{rating.toFixed(1)}</span>
+      <span className="font-mono text-xs font-medium text-[var(--text-mute)]">({reviews})</span>
     </div>
-  )
+  );
 }

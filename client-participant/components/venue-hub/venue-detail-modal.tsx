@@ -2,26 +2,22 @@
  * Venue Detail Modal - Read-only view
  */
 
-"use client"
+'use client';
 
-import type { Venue } from "@/types/venue"
-import { ModalBackdrop } from "./modal-backdrop"
-import { Icon } from "@/components/ui/icon"
-import { RatingBadge } from "./rating-badge"
-import { formatDate } from "@/lib/formatters"
+import { Icon } from '@/components/ui/icon';
+import type { Venue } from '@/types/venue';
+import { ModalBackdrop } from './modal-backdrop';
+import { RatingBadge } from './rating-badge';
+import { formatDate } from '@/lib/formatters';
 
 interface VenueDetailModalProps {
-  venue: Venue | null
-  isOpen: boolean
-  onClose: () => void
+  venue: Venue | null;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
-export function VenueDetailModal({
-  venue,
-  isOpen,
-  onClose,
-}: VenueDetailModalProps) {
-  if (!venue) return null
+export function VenueDetailModal({ venue, isOpen, onClose }: VenueDetailModalProps) {
+  if (!venue) return null;
 
   return (
     <ModalBackdrop isOpen={isOpen} onClose={onClose}>
@@ -31,18 +27,18 @@ export function VenueDetailModal({
           <div
             className="absolute inset-0"
             style={{
-              backgroundImage: `repeating-linear-gradient(${venue.angle}, transparent 0 22px, oklch(1 0 0 / 0.035) 22px 24px)`,
+              backgroundImage: `repeating-linear-gradient(${venue.angle}, transparent 0 22px, oklch(1 0 0 / 0.035) 22px 24px)`
             }}
           />
           <div
             className="absolute rounded-full blur-[34px]"
             style={{
-              width: "220px",
-              height: "220px",
-              left: "18%",
-              top: "22%",
-              background: venue.orb === "lime" ? "var(--lime)" : "var(--amber)",
-              opacity: venue.orb === "lime" ? 0.3 : 0.4,
+              width: '220px',
+              height: '220px',
+              left: '18%',
+              top: '22%',
+              background: venue.orb === 'lime' ? 'var(--lime)' : 'var(--amber)',
+              opacity: venue.orb === 'lime' ? 0.3 : 0.4
             }}
           />
         </div>
@@ -50,7 +46,7 @@ export function VenueDetailModal({
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute right-6 top-6 z-10 rounded-lg bg-[oklch(0_0_0_/_0.6)] p-2 text-white transition-all hover:bg-[oklch(0_0_0_/_0.8)]"
+          className="absolute top-6 right-6 z-10 rounded-lg bg-[oklch(0_0_0_/_0.6)] p-2 text-white transition-all hover:bg-[oklch(0_0_0_/_0.8)]"
         >
           <Icon name="x" size={20} />
         </button>
@@ -59,14 +55,10 @@ export function VenueDetailModal({
         <div className="p-8">
           <div className="mb-4 flex items-start justify-between">
             <div>
-              <h3 className="m-0 mb-2 text-2xl font-semibold tracking-[-0.02em] text-[var(--text)]">
-                {venue.name}
-              </h3>
+              <h3 className="m-0 mb-2 text-2xl font-semibold tracking-[-0.02em] text-[var(--text)]">{venue.name}</h3>
               <div className="flex items-center gap-4">
                 <RatingBadge rating={venue.rating} reviews={venue.reviews} />
-                <span className="font-mono text-sm text-[var(--text-mute)]">
-                  {venue.type}
-                </span>
+                <span className="font-mono text-sm text-[var(--text-mute)]">{venue.type}</span>
               </div>
             </div>
           </div>
@@ -74,9 +66,7 @@ export function VenueDetailModal({
           {/* Details Grid */}
           <div className="grid grid-cols-2 gap-4 py-6">
             <div className="rounded-lg border border-[var(--line-soft)] bg-[var(--bg)] p-3.5">
-              <div className="font-mono text-xs uppercase tracking-[0.14em] text-[var(--text-mute)]">
-                Location
-              </div>
+              <div className="font-mono text-xs tracking-[0.14em] text-[var(--text-mute)] uppercase">Location</div>
               <div className="mt-2 flex items-center gap-2 text-sm font-medium text-[var(--text)]">
                 <Icon name="mapPin" size={16} />
                 {venue.location}
@@ -84,9 +74,7 @@ export function VenueDetailModal({
             </div>
 
             <div className="rounded-lg border border-[var(--line-soft)] bg-[var(--bg)] p-3.5">
-              <div className="font-mono text-xs uppercase tracking-[0.14em] text-[var(--text-mute)]">
-                Capacity
-              </div>
+              <div className="font-mono text-xs tracking-[0.14em] text-[var(--text-mute)] uppercase">Capacity</div>
               <div className="mt-2 flex items-center gap-2 text-sm font-medium text-[var(--text)]">
                 <Icon name="users" size={16} />
                 {venue.capacity}
@@ -94,36 +82,23 @@ export function VenueDetailModal({
             </div>
 
             <div className="rounded-lg border border-[var(--line-soft)] bg-[var(--bg)] p-3.5">
-              <div className="font-mono text-xs uppercase tracking-[0.14em] text-[var(--text-mute)]">
-                Contributed by
-              </div>
-              <div className="mt-2 text-sm font-medium text-[var(--text)]">
-                {venue.contributor.username}
-              </div>
+              <div className="font-mono text-xs tracking-[0.14em] text-[var(--text-mute)] uppercase">Contributed by</div>
+              <div className="mt-2 text-sm font-medium text-[var(--text)]">{venue.contributor.username}</div>
             </div>
 
             <div className="rounded-lg border border-[var(--line-soft)] bg-[var(--bg)] p-3.5">
-              <div className="font-mono text-xs uppercase tracking-[0.14em] text-[var(--text-mute)]">
-                Added
-              </div>
-              <div className="mt-2 text-sm font-medium text-[var(--text)]">
-                {formatDate(venue.contributor.date)}
-              </div>
+              <div className="font-mono text-xs tracking-[0.14em] text-[var(--text-mute)] uppercase">Added</div>
+              <div className="mt-2 text-sm font-medium text-[var(--text)]">{formatDate(venue.contributor.date)}</div>
             </div>
           </div>
 
           {/* Tags */}
           {venue.tags.length > 0 && (
             <div className="py-4">
-              <div className="mb-2 font-mono text-xs uppercase tracking-[0.14em] text-[var(--text-mute)]">
-                Tags
-              </div>
+              <div className="mb-2 font-mono text-xs tracking-[0.14em] text-[var(--text-mute)] uppercase">Tags</div>
               <div className="flex flex-wrap gap-2">
                 {venue.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="rounded-full bg-[oklch(0.9_0.22_128_/_0.06)] px-3 py-1.5 text-sm font-medium text-[var(--lime)]"
-                  >
+                  <span key={tag} className="rounded-full bg-[oklch(0.9_0.22_128_/_0.06)] px-3 py-1.5 text-sm font-medium text-[var(--lime)]">
                     {tag}
                   </span>
                 ))}
@@ -134,22 +109,11 @@ export function VenueDetailModal({
           {/* Amenities */}
           {venue.amenities.length > 0 && (
             <div className="py-4">
-              <div className="mb-2 font-mono text-xs uppercase tracking-[0.14em] text-[var(--text-mute)]">
-                Amenities
-              </div>
+              <div className="mb-2 font-mono text-xs tracking-[0.14em] text-[var(--text-mute)] uppercase">Amenities</div>
               <div className="flex flex-wrap gap-2">
                 {venue.amenities.map((amenity) => (
-                  <span
-                    key={amenity}
-                    className="rounded-full bg-[oklch(0_0_0_/_0.1)] px-3 py-1.5 text-sm font-medium text-[var(--text-dim)]"
-                  >
-                    {amenity === "wifi"
-                      ? "WiFi"
-                      : amenity === "parking"
-                        ? "Parking"
-                        : amenity === "coffee"
-                          ? "Coffee"
-                          : "Sound System"}
+                  <span key={amenity} className="rounded-full bg-[oklch(0_0_0_/_0.1)] px-3 py-1.5 text-sm font-medium text-[var(--text-dim)]">
+                    {amenity === 'wifi' ? 'WiFi' : amenity === 'parking' ? 'Parking' : amenity === 'coffee' ? 'Coffee' : 'Sound System'}
                   </span>
                 ))}
               </div>
@@ -168,5 +132,5 @@ export function VenueDetailModal({
         </div>
       </div>
     </ModalBackdrop>
-  )
+  );
 }
