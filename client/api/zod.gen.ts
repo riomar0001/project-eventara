@@ -1679,6 +1679,27 @@ export const zPublicVenueResponse = z.object({
 });
 
 /**
+ * SuggestedVenueUpdateRequest
+ */
+export const zSuggestedVenueUpdateRequest = z.object({
+    name: z.string().min(1).max(255),
+    description: z.string().nullish(),
+    image_url: z.string().max(512).nullish(),
+    address_line: z.string().min(1).max(255),
+    city: z.string().min(1).max(100),
+    province: z.string().min(1).max(100),
+    postal_code: z.string().min(1).max(20),
+    region: z.string().min(1).max(100),
+    country: z.string().min(1).max(100),
+    capacity: z.int().gt(0),
+    venue_type: zVenueType,
+    amenities: z.array(z.string()).nullish(),
+    contact_name: z.string().max(255).nullish(),
+    contact_phone: z.string().max(20).nullish(),
+    contact_email: z.email().nullish()
+});
+
+/**
  * VenueRecordResponse
  */
 export const zVenueRecordResponse = z.object({
@@ -2389,6 +2410,26 @@ export const zCreateCommunityVenueVenuesCommunityPostBody = zCommunityVenueCreat
  * Successful Response
  */
 export const zCreateCommunityVenueVenuesCommunityPostResponse = zVenueResponse;
+
+export const zDeleteSuggestedVenueVenuesCommunityVenueIdDeletePath = z.object({
+    venue_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zDeleteSuggestedVenueVenuesCommunityVenueIdDeleteResponse = z.void();
+
+export const zUpdateSuggestedVenueVenuesCommunityVenueIdPatchBody = zSuggestedVenueUpdateRequest;
+
+export const zUpdateSuggestedVenueVenuesCommunityVenueIdPatchPath = z.object({
+    venue_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zUpdateSuggestedVenueVenuesCommunityVenueIdPatchResponse = zVenueResponse;
 
 export const zCreateOfficialVenueVenuesOfficialPostBody = zOfficialVenueCreateRequest;
 

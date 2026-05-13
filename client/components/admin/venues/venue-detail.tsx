@@ -10,6 +10,7 @@ import { DeleteVenueButton } from './venue-delete-button';
 import { BackLink, PhotoPanel } from './venues-shared';
 import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
 import { resolveStorageImageUrl } from '@/lib/storage/image-url';
+import { useAuthStore } from '@/store/auth-store';
 
 const VENUE_PHOTO: Record<string, string> = {
   indoor: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=1400&q=80',
@@ -61,6 +62,7 @@ function VenueFact({ accent, label, value }: { accent?: boolean; label: string; 
 export function VenueDetail({ venueId }: { venueId: string }) {
   const { venue, isLoading, error } = useVenue(venueId);
   const { can } = usePermissions();
+  const currentUserId = useAuthStore((state) => state.user?.id ?? null);
 
   if (isLoading) {
     return (
@@ -93,13 +95,16 @@ export function VenueDetail({ venueId }: { venueId: string }) {
   const amenities = venue.amenities ?? [];
   const canUpdateVenue = can('venues', 'update');
   const canDeleteVenue = can('venues', 'delete');
+  const canManageOwnSuggestion = !venue.is_partner && venue.creator_id === currentUserId;
+  const showEditVenue = canUpdateVenue || canManageOwnSuggestion;
+  const showDeleteVenue = canDeleteVenue || canManageOwnSuggestion;
 
   return (
     <div className="space-y-6">
       {/* ── Action bar ──────────────────────────────────────────────────────── */}
       <div className="flex flex-wrap items-center gap-2">
         <BackLink href={ADMIN_OPERATIONS_PATHS.venues} label="Back to venues" />
-        {canUpdateVenue ? (
+        {showEditVenue ? (
           <Button asChild variant="outline" size="sm">
             <Link href={ADMIN_OPERATIONS_PATHS.venueEdit(venue.id)}>
               <PencilLine className="size-4" />
@@ -107,7 +112,7 @@ export function VenueDetail({ venueId }: { venueId: string }) {
             </Link>
           </Button>
         ) : null}
-        {canDeleteVenue ? <DeleteVenueButton venueId={venue.id} venueName={venue.name} /> : null}
+        {showDeleteVenue ? <DeleteVenueButton suggestedVenue={!canDeleteVenue && canManageOwnSuggestion} venueId={venue.id} venueName={venue.name} /> : null}
       </div>
 
       {/* ── Hero photo panel ─────────────────────────────────────────────────── */}

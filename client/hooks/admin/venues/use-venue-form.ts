@@ -109,23 +109,35 @@ export function useVenueForm() {
     }
   }
 
-  async function submitEdit(venueId: string, form: VenueFormValues) {
+  async function submitEdit(venueId: string, form: VenueFormValues, options?: { suggestedVenue?: boolean }) {
     if (isSubmitting) return;
     setIsSubmitting(true);
 
     try {
-      const result = await Venues.updateVenueVenuesVenueIdPatch({
-        path: { venue_id: venueId },
-        body: {
-          ...buildVenueBody(form),
-          is_partner: form.venue_category === 'official',
-          contact_name: form.contact_name || '',
-          contact_phone: form.contact_phone || '',
-          contact_email: form.contact_email || ''
-        },
-        headers: { Authorization: `Bearer ${getAccessToken()}` },
-        throwOnError: false
-      });
+      const result = options?.suggestedVenue
+        ? await Venues.updateSuggestedVenueVenuesCommunityVenueIdPatch({
+            path: { venue_id: venueId },
+            body: {
+              ...buildVenueBody(form),
+              contact_name: form.contact_name || null,
+              contact_phone: form.contact_phone || null,
+              contact_email: form.contact_email || null
+            },
+            headers: { Authorization: `Bearer ${getAccessToken()}` },
+            throwOnError: false
+          })
+        : await Venues.updateVenueVenuesVenueIdPatch({
+            path: { venue_id: venueId },
+            body: {
+              ...buildVenueBody(form),
+              is_partner: form.venue_category === 'official',
+              contact_name: form.contact_name || '',
+              contact_phone: form.contact_phone || '',
+              contact_email: form.contact_email || ''
+            },
+            headers: { Authorization: `Bearer ${getAccessToken()}` },
+            throwOnError: false
+          });
 
       if (!result.data) throw result.error ?? new Error('Unable to update venue.');
 

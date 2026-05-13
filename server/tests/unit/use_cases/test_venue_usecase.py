@@ -4,12 +4,20 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from app.application.dto.venue_dto import CreateVenueInput, ListVenuesInput, UpdateVenueInput
+from app.application.dto.venue_dto import (
+    CreateVenueInput,
+    DeleteSuggestedVenueInput,
+    ListVenuesInput,
+    UpdateSuggestedVenueInput,
+    UpdateVenueInput,
+)
 from app.application.use_cases.venue_usecase import VenueManagementUseCase, _normalise_amenities
 from app.domain.entities.venue_entities import Venue, VenueType
 from app.domain.exceptions.venue_exceptions import (
+    UnauthorizedVenueOperationError,
     VenueAlreadyExistsError,
     VenueInUseError,
+    VenueNotCommunitySuggestionError,
     VenueNotFoundError,
 )
 
@@ -107,6 +115,35 @@ def _update_input(**overrides: Any) -> UpdateVenueInput:
     )
     defaults.update(overrides)
     return UpdateVenueInput(**defaults)
+
+
+def _update_suggested_input(**overrides: Any) -> UpdateSuggestedVenueInput:
+    defaults: dict[str, Any] = dict(
+        venue_id=VENUE_ID,
+        updated_by=CREATOR_ID,
+        name="Updated Community Hall",
+        address_line="456 Side St",
+        city="Davao City",
+        province="Davao del Sur",
+        postal_code="8000",
+        region="Region XI",
+        country="Philippines",
+        capacity=300,
+        venue_type=VenueType.HYBRID,
+        image_url="venue-image/community-hall.jpg",
+        amenities=["parking", "wifi"],
+        contact_name="Juan Dela Cruz",
+        contact_phone="09171234567",
+        contact_email="juan@example.com",
+    )
+    defaults.update(overrides)
+    return UpdateSuggestedVenueInput(**defaults)
+
+
+def _delete_suggested_input(**overrides: Any) -> DeleteSuggestedVenueInput:
+    defaults: dict[str, Any] = dict(venue_id=VENUE_ID, deleted_by=CREATOR_ID)
+    defaults.update(overrides)
+    return DeleteSuggestedVenueInput(**defaults)
 
 
 class TestNormaliseAmenities:
@@ -363,6 +400,102 @@ class TestCreateCommunityVenue:
         db = AsyncMock()
         with pytest.raises(VenueAlreadyExistsError):
             await VenueManagementUseCase(repo=repo, db=db).create_venue(_create_input(is_partner=False))
+        db.rollback.assert_awaited_once()
+
+
+class TestUpdateSuggestedVenue:
+    @pytest.mark.asyncio
+    async def test_success_updates_owner_suggestion_and_returns_old_state(self):
+        old_venue = _make_venue(is_partner=False)
+        updated_venue = _make_venue(name="Updated Community Hall", is_partner=False)
+        repo = _make_repo(venue=old_venue, updated=updated_venue)
+        db = AsyncMock()
+        result = await VenueManagementUseCase(repo=repo, db=db).update_suggested_venue(_update_suggested_input())
+        repo.get_venue_by_id.assert_awaited_once_with(VENUE_ID, for_update=True)
+        repo.update_venue.assert_awaited_once()
+        call_kwargs = repo.update_venue.call_args.kwargs
+        assert call_kwargs["is_partner"] is False
+        assert call_kwargs["amenities"] == ["Parking", "Wifi"]
+        assert result.venue is updated_venue
+        assert result.old_venue is old_venue
+        db.commit.assert_awaited_once()
+
+    @pytest.mark.asyncio
+    async def test_raises_not_found_when_venue_missing(self):
+        repo = _make_repo(venue=None)
+        db = AsyncMock()
+        with pytest.raises(VenueNotFoundError):
+            await VenueManagementUseCase(repo=repo, db=db).update_suggested_venue(_update_suggested_input())
+        db.rollback.assert_awaited_once()
+
+    @pytest.mark.asyncio
+    async def test_raises_when_venue_is_partner(self):
+        repo = _make_repo(venue=_make_venue(is_partner=True))
+        db = AsyncMock()
+        with pytest.raises(VenueNotCommunitySuggestionError):
+            await VenueManagementUseCase(repo=repo, db=db).update_suggested_venue(_update_suggested_input())
+        db.rollback.assert_awaited_once()
+
+    @pytest.mark.asyncio
+    async def test_raises_when_actor_is_not_creator(self):
+        repo = _make_repo(venue=_make_venue(creator_id=uuid.uuid4()))
+        db = AsyncMock()
+        with pytest.raises(UnauthorizedVenueOperationError):
+            await VenueManagementUseCase(repo=repo, db=db).update_suggested_venue(_update_suggested_input())
+        db.rollback.assert_awaited_once()
+
+    @pytest.mark.asyncio
+    async def test_duplicate_name_raises_already_exists(self):
+        repo = _make_repo(venue=_make_venue(name="Old Name"), name_exists=True)
+        db = AsyncMock()
+        with pytest.raises(VenueAlreadyExistsError):
+            await VenueManagementUseCase(repo=repo, db=db).update_suggested_venue(_update_suggested_input(name="New Name"))
+        db.rollback.assert_awaited_once()
+
+
+class TestDeleteSuggestedVenue:
+    @pytest.mark.asyncio
+    async def test_success_deletes_owner_suggestion_and_returns_old_state(self):
+        venue = _make_venue(is_partner=False)
+        repo = _make_repo(venue=venue, event_count=0, deleted=True)
+        db = AsyncMock()
+        result = await VenueManagementUseCase(repo=repo, db=db).delete_suggested_venue(_delete_suggested_input())
+        repo.get_venue_by_id.assert_awaited_once_with(VENUE_ID, for_update=True)
+        repo.get_event_session_count.assert_awaited_once_with(VENUE_ID)
+        repo.delete_venue.assert_awaited_once_with(VENUE_ID)
+        assert result.venue is venue
+        db.commit.assert_awaited_once()
+
+    @pytest.mark.asyncio
+    async def test_raises_not_found_when_venue_missing(self):
+        repo = _make_repo(venue=None)
+        db = AsyncMock()
+        with pytest.raises(VenueNotFoundError):
+            await VenueManagementUseCase(repo=repo, db=db).delete_suggested_venue(_delete_suggested_input())
+        db.rollback.assert_awaited_once()
+
+    @pytest.mark.asyncio
+    async def test_raises_when_venue_is_partner(self):
+        repo = _make_repo(venue=_make_venue(is_partner=True))
+        db = AsyncMock()
+        with pytest.raises(VenueNotCommunitySuggestionError):
+            await VenueManagementUseCase(repo=repo, db=db).delete_suggested_venue(_delete_suggested_input())
+        db.rollback.assert_awaited_once()
+
+    @pytest.mark.asyncio
+    async def test_raises_when_actor_is_not_creator(self):
+        repo = _make_repo(venue=_make_venue(creator_id=uuid.uuid4()))
+        db = AsyncMock()
+        with pytest.raises(UnauthorizedVenueOperationError):
+            await VenueManagementUseCase(repo=repo, db=db).delete_suggested_venue(_delete_suggested_input())
+        db.rollback.assert_awaited_once()
+
+    @pytest.mark.asyncio
+    async def test_raises_when_venue_has_event_sessions(self):
+        repo = _make_repo(venue=_make_venue(is_partner=False), event_count=1)
+        db = AsyncMock()
+        with pytest.raises(VenueInUseError):
+            await VenueManagementUseCase(repo=repo, db=db).delete_suggested_venue(_delete_suggested_input())
         db.rollback.assert_awaited_once()
 
 

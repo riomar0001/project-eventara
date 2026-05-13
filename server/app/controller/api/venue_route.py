@@ -16,7 +16,15 @@ import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 
-from app.application.dto.venue_dto import CreateVenueInput, GetVenueCapacityInput, ListVenuesInput, UpdateVenueImageInput, UpdateVenueInput
+from app.application.dto.venue_dto import (
+    CreateVenueInput,
+    DeleteSuggestedVenueInput,
+    GetVenueCapacityInput,
+    ListVenuesInput,
+    UpdateSuggestedVenueInput,
+    UpdateVenueImageInput,
+    UpdateVenueInput,
+)
 from app.application.dto.venue_rating_dto import (
     CreateVenueRatingInput,
     ListVenueRatingsInput,
@@ -40,6 +48,7 @@ from app.controller.docs.venue_management_docs import (
     VENUE_IMAGE_STORAGE_UNAVAILABLE,
     VENUE_IMAGE_UPLOAD_OPENAPI_EXTRA,
     VENUE_IN_USE,
+    VENUE_NOT_COMMUNITY,
     VENUE_NOT_FOUND,
     VENUE_UPDATE_OPENAPI_EXTRA,
 )
@@ -57,6 +66,7 @@ from app.controller.schemas.venue_management_schema import (
     PublicVenueListResponse,
     PublicVenueRecordResponse,
     PublicVenueResponse,
+    SuggestedVenueUpdateRequest,
     VenueCapacityData,
     VenueCapacityResponse,
     VenueImageUploadData,
@@ -86,6 +96,7 @@ from app.domain.exceptions.venue_exceptions import (
     UnauthorizedVenueOperationError,
     VenueAlreadyExistsError,
     VenueInUseError,
+    VenueNotCommunitySuggestionError,
     VenueNotFoundError,
 )
 from app.domain.exceptions.venue_rating_exceptions import (
@@ -393,7 +404,7 @@ async def get_venue_capacity(
     "/community",
     response_model=VenueResponse,
     status_code=status.HTTP_201_CREATED,
-    responses={**UNAUTHORIZED, **FORBIDDEN, **VENUE_CONFLICT, **VALIDATION_ERROR},
+    responses={**UNAUTHORIZED, **VENUE_CONFLICT, **VALIDATION_ERROR},
     summary="Add a community venue suggestion",
     description=(
         "Add a venue suggested by the community. Contact information is optional. "
@@ -406,7 +417,7 @@ async def get_venue_capacity(
 async def create_community_venue(
     request: Request,
     body: CommunityVenueCreateRequest,
-    caller_id: uuid.UUID = Depends(require_permission("venues", RoleAction.READ)),
+    caller_id: uuid.UUID = Depends(get_current_user_id),
     use_case: VenueManagementUseCase = Depends(get_venue_management_use_case),
     audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> VenueResponse:
@@ -414,7 +425,6 @@ async def create_community_venue(
 
     # Error mapping
     - **401 Unauthorized** — missing, expired, or invalid Bearer token.
-    - **403 Forbidden** — caller lacks ``create`` permission on ``venues``.
     - **409 Conflict** — a venue with the same name already exists in the same city.
     - **422 Unprocessable Entity** — the request body failed schema validation.
     """
@@ -454,6 +464,129 @@ async def create_community_venue(
         new_values=serialize_venue(result.venue),
     )
     return VenueResponse(data=_to_venue_response(result.venue), message="Community venue suggestion added successfully.")
+
+
+@venue_router.patch(
+    "/community/{venue_id}",
+    response_model=VenueResponse,
+    status_code=status.HTTP_200_OK,
+    responses={**UNAUTHORIZED, **FORBIDDEN, **VENUE_NOT_COMMUNITY, **VENUE_NOT_FOUND, **VENUE_CONFLICT, **VALIDATION_ERROR},
+    summary="Update a community venue suggestion",
+    description=(
+        "Update a community-suggested venue owned by the authenticated caller. The venue remains non-partner "
+        "(``is_partner=false``), amenity names are normalised to Title Case, and venue names must remain unique within the same city."
+    ),
+    openapi_extra=COMMUNITY_VENUE_CREATE_OPENAPI_EXTRA,
+)
+async def update_suggested_venue(
+    request: Request,
+    venue_id: uuid.UUID,
+    body: SuggestedVenueUpdateRequest,
+    caller_id: uuid.UUID = Depends(get_current_user_id),
+    use_case: VenueManagementUseCase = Depends(get_venue_management_use_case),
+    audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
+) -> VenueResponse:
+    """Update a caller-owned community venue suggestion.
+
+    # Error mapping
+    - **400 Bad Request** — the venue is an official partner venue.
+    - **401 Unauthorized** — missing, expired, or invalid Bearer token.
+    - **403 Forbidden** — caller did not create this community suggestion.
+    - **404 Not Found** — no venue exists for the supplied UUID.
+    - **409 Conflict** — the new name conflicts with an existing venue in the same city.
+    - **422 Unprocessable Entity** — the path or request body is invalid.
+    """
+    try:
+        result = await use_case.update_suggested_venue(
+            UpdateSuggestedVenueInput(
+                venue_id=venue_id,
+                updated_by=caller_id,
+                name=body.name,
+                description=body.description,
+                address_line=body.address_line,
+                city=body.city,
+                province=body.province,
+                postal_code=body.postal_code,
+                region=body.region,
+                country=body.country,
+                capacity=body.capacity,
+                venue_type=body.venue_type,
+                image_url=StorageService.object_key_from_public_url(body.image_url),
+                amenities=body.amenities,
+                contact_name=body.contact_name,
+                contact_phone=body.contact_phone,
+                contact_email=body.contact_email,
+            )
+        )
+    except VenueNotCommunitySuggestionError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
+    except UnauthorizedVenueOperationError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
+    except VenueNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except VenueAlreadyExistsError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+
+    await safe_audit_log(
+        audit_use_case,
+        request,
+        user_id=caller_id,
+        action_type=ActionType.UPDATE,
+        resource_type="venues",
+        resource_id=str(result.venue.id),
+        status=AuditLogStatus.SUCCESS,
+        old_values=serialize_venue(result.old_venue),
+        new_values=serialize_venue(result.venue),
+        additional_context={"venue_scope": "community_suggestion"},
+    )
+    return VenueResponse(data=_to_venue_response(result.venue), message="Community venue suggestion updated successfully.")
+
+
+@venue_router.delete(
+    "/community/{venue_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    responses={**UNAUTHORIZED, **FORBIDDEN, **VENUE_NOT_COMMUNITY, **VENUE_NOT_FOUND, **VENUE_IN_USE},
+    summary="Delete a community venue suggestion",
+    description="Delete a caller-owned community venue suggestion when no event sessions reference it.",
+)
+async def delete_suggested_venue(
+    request: Request,
+    venue_id: uuid.UUID,
+    caller_id: uuid.UUID = Depends(get_current_user_id),
+    use_case: VenueManagementUseCase = Depends(get_venue_management_use_case),
+    audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
+) -> None:
+    """Delete a caller-owned community venue suggestion.
+
+    # Error mapping
+    - **400 Bad Request** — the venue is an official partner venue.
+    - **401 Unauthorized** — missing, expired, or invalid Bearer token.
+    - **403 Forbidden** — caller did not create this community suggestion.
+    - **404 Not Found** — no venue exists for the supplied UUID.
+    - **409 Conflict** — one or more event sessions still reference this venue.
+    """
+    try:
+        result = await use_case.delete_suggested_venue(DeleteSuggestedVenueInput(venue_id=venue_id, deleted_by=caller_id))
+    except VenueNotCommunitySuggestionError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
+    except UnauthorizedVenueOperationError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
+    except VenueNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except VenueInUseError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+
+    await safe_audit_log(
+        audit_use_case,
+        request,
+        user_id=caller_id,
+        action_type=ActionType.DELETE,
+        resource_type="venues",
+        resource_id=str(venue_id),
+        status=AuditLogStatus.SUCCESS,
+        old_values=serialize_venue(result.venue),
+        additional_context={"venue_scope": "community_suggestion"},
+    )
 
 
 @venue_router.post(
@@ -661,7 +794,7 @@ async def upload_venue_image(
     request: Request,
     venue_id: uuid.UUID,
     body: VenueImageUploadRequest,
-    caller_id: uuid.UUID = Depends(require_permission("venues", RoleAction.UPDATE)),
+    caller_id: uuid.UUID = Depends(get_current_user_id),
     use_case: VenueManagementUseCase = Depends(get_venue_management_use_case),
     audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
     storage: StorageService = Depends(get_storage_service),

@@ -37,6 +37,12 @@ class CommunityVenueCreateRequest(_VenueBaseRequest):
     contact_email: EmailStr | None = None
 
 
+class SuggestedVenueUpdateRequest(_VenueBaseRequest):
+    contact_name: str | None = Field(default=None, max_length=255)
+    contact_phone: str | None = Field(default=None, max_length=20)
+    contact_email: EmailStr | None = None
+
+
 class OfficialVenueCreateRequest(_VenueBaseRequest):
     """Officially managed venue — contact information is required."""
 

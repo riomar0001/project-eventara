@@ -175,9 +175,9 @@ class VenueRepository:
         image_url: str | None,
         is_partner: bool,
         amenities: list[str] | None,
-        contact_name: str,
-        contact_phone: str,
-        contact_email: str,
+        contact_name: str | None,
+        contact_phone: str | None,
+        contact_email: str | None,
     ) -> VenueEntity:
         """Insert a new venue row and return the persisted entity.
 
@@ -228,9 +228,9 @@ class VenueRepository:
         image_url: str | None,
         is_partner: bool,
         amenities: list[str] | None,
-        contact_name: str,
-        contact_phone: str,
-        contact_email: str,
+        contact_name: str | None,
+        contact_phone: str | None,
+        contact_email: str | None,
     ) -> VenueEntity | None:
         """Apply field updates to an existing venue row.
 

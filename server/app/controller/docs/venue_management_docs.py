@@ -140,6 +140,21 @@ VENUE_NOT_FOUND = {
     }
 }
 
+VENUE_NOT_COMMUNITY = {
+    400: {
+        "description": "Venue is not a community suggestion",
+        "model": ErrorResponse,
+        "content": {
+            "application/json": {
+                "example": {
+                    "success": False,
+                    "message": "Only community suggested venues can be managed through this endpoint.",
+                }
+            }
+        },
+    }
+}
+
 VENUE_CONFLICT = {
     409: {
         "description": "A venue with that name already exists in the same city",

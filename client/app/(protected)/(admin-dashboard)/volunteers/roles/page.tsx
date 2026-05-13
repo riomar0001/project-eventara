@@ -1,15 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { Layers3, Plus, RefreshCw, Tags } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { VolunteerRolesTable } from '@/components/admin/volunteers/table/volunteer-roles-table';
 import { VolunteerRoleForm } from '@/components/admin/volunteers/volunteer-role-form';
 import { BackLink, OperationsPageIntro } from '@/components/admin/volunteers/volunteers-shared';
 import { PermissionGate } from '@/components/auth/permission-gate';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { usePermissions } from '@/context/permissions-context';
 import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
+import { usePermissions } from '@/context/permissions-context';
 
 export default function AdminVolunteerRolesPage() {
   const [refreshSignal, setRefreshSignal] = useState(0);
@@ -61,38 +61,6 @@ export default function AdminVolunteerRolesPage() {
             ) : null
           }
         />
-
-        <div className="grid gap-3 md:grid-cols-3">
-          {[
-            {
-              icon: Tags,
-              label: 'Role hygiene',
-              text: 'Keep names short, distinct, and assignment-ready.'
-            },
-            {
-              icon: Layers3,
-              label: 'Reuse first',
-              text: 'Prefer updating roles before creating near-duplicates.'
-            },
-            {
-              icon: RefreshCw,
-              label: 'Live catalog',
-              text: 'Refresh pulls the latest backend role state.'
-            }
-          ].map((item) => (
-            <div key={item.label} className="rounded-2xl border border-neutral-200 bg-white px-4 py-3 shadow-[0_18px_45px_-38px_rgba(15,23,42,0.45)]">
-              <div className="flex items-start gap-3">
-                <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
-                  <item.icon className="size-4" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-neutral-950">{item.label}</p>
-                  <p className="mt-1 text-xs leading-5 text-neutral-500">{item.text}</p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
 
         <Card className="overflow-hidden border-0 bg-white shadow-none ring-1 ring-neutral-200">
           <CardContent className="p-0">

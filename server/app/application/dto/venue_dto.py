@@ -58,7 +58,45 @@ class UpdateVenueInput:
 
 
 @dataclass
+class UpdateSuggestedVenueInput:
+    venue_id: uuid.UUID
+    updated_by: uuid.UUID
+    name: str
+    address_line: str
+    city: str
+    province: str
+    postal_code: str
+    region: str
+    country: str
+    capacity: int
+    venue_type: VenueType
+    image_url: str | None = None
+    description: str | None = None
+    amenities: list[str] | None = None
+    contact_name: str | None = None
+    contact_phone: str | None = None
+    contact_email: str | None = None
+
+
+@dataclass
+class DeleteSuggestedVenueInput:
+    venue_id: uuid.UUID
+    deleted_by: uuid.UUID
+
+
+@dataclass
 class VenueOutput:
+    venue: VenueEntity
+
+
+@dataclass
+class UpdateSuggestedVenueOutput:
+    venue: VenueEntity
+    old_venue: VenueEntity
+
+
+@dataclass
+class DeleteSuggestedVenueOutput:
     venue: VenueEntity
 
 

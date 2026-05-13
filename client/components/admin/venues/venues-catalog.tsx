@@ -13,6 +13,7 @@ import { CatalogCard, OperationsPageIntro } from './venues-shared';
 import type { VenueRecordResponse } from '@/api/types.gen';
 import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
 import { resolveStorageImageUrl } from '@/lib/storage/image-url';
+import { useAuthStore } from '@/store/auth-store';
 
 const VENUE_PHOTO: Record<string, string> = {
   indoor: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=1400&q=80',
@@ -149,27 +150,31 @@ function SectionEmpty({ hasFilters, label }: { hasFilters: boolean; label: strin
 
 // ── Venue card grid ────────────────────────────────────────────────────────────
 
-function VenueGrid({ canUpdateVenue, venues }: { canUpdateVenue: boolean; venues: VenueRecordResponse[] }) {
+function VenueGrid({ canUpdateVenue, currentUserId, venues }: { canUpdateVenue: boolean; currentUserId: string | null; venues: VenueRecordResponse[] }) {
   return (
     <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
-      {venues.map((venue) => (
-        <CatalogCard
-          key={venue.id}
-          title={venue.name}
-          subtitle={[venue.city, venue.province].filter(Boolean).join(', ')}
-          photo={venuePhoto(venue)}
-          description={venue.description ?? 'No description provided.'}
-          href={ADMIN_OPERATIONS_PATHS.venueDetail(venue.id)}
-          editHref={canUpdateVenue ? ADMIN_OPERATIONS_PATHS.venueEdit(venue.id) : undefined}
-          badges={[venue.venue_type]}
-          specs={[
-            { label: 'Location', value: [venue.city, venue.province].filter(Boolean).join(', '), icon: <MapPin className="size-3.5" /> },
-            { label: 'Venue type', value: venue.venue_type.charAt(0).toUpperCase() + venue.venue_type.slice(1), icon: <Building2 className="size-3.5" /> },
-            { label: 'Capacity', value: `${venue.capacity.toLocaleString()} guests`, icon: <Users className="size-3.5" /> }
-          ]}
-          tags={venue.amenities ?? []}
-        />
-      ))}
+      {venues.map((venue) => {
+        const canEditVenue = canUpdateVenue || (!venue.is_partner && venue.creator_id === currentUserId);
+
+        return (
+          <CatalogCard
+            key={venue.id}
+            title={venue.name}
+            subtitle={[venue.city, venue.province].filter(Boolean).join(', ')}
+            photo={venuePhoto(venue)}
+            description={venue.description ?? 'No description provided.'}
+            href={ADMIN_OPERATIONS_PATHS.venueDetail(venue.id)}
+            editHref={canEditVenue ? ADMIN_OPERATIONS_PATHS.venueEdit(venue.id) : undefined}
+            badges={[venue.venue_type]}
+            specs={[
+              { label: 'Location', value: [venue.city, venue.province].filter(Boolean).join(', '), icon: <MapPin className="size-3.5" /> },
+              { label: 'Venue type', value: venue.venue_type.charAt(0).toUpperCase() + venue.venue_type.slice(1), icon: <Building2 className="size-3.5" /> },
+              { label: 'Capacity', value: `${venue.capacity.toLocaleString()} guests`, icon: <Users className="size-3.5" /> }
+            ]}
+            tags={venue.amenities ?? []}
+          />
+        );
+      })}
     </div>
   );
 }
@@ -179,6 +184,7 @@ function VenueGrid({ canUpdateVenue, venues }: { canUpdateVenue: boolean; venues
 export function VenuesCatalog() {
   const { venues, isLoading, error } = useVenues();
   const { can } = usePermissions();
+  const currentUserId = useAuthStore((state) => state.user?.id ?? null);
   const [query, setQuery] = useState('');
   const [capacityKey, setCapacityKey] = useState('any');
   const [sortKey, setSortKey] = useState('name');
@@ -393,7 +399,7 @@ export function VenuesCatalog() {
             {pagedPartners.length === 0 ? (
               <SectionEmpty hasFilters={hasActiveFilters} label="official partner venues" />
             ) : (
-              <VenueGrid venues={pagedPartners} canUpdateVenue={canUpdateVenue} />
+              <VenueGrid venues={pagedPartners} canUpdateVenue={canUpdateVenue} currentUserId={currentUserId} />
             )}
 
             <SectionPagination
@@ -419,7 +425,7 @@ export function VenuesCatalog() {
               <SectionEmpty hasFilters={hasActiveFilters} label="community venues" />
             ) : (
               <>
-                <VenueGrid venues={pagedCommunity} canUpdateVenue={canUpdateVenue} />
+                <VenueGrid venues={pagedCommunity} canUpdateVenue={canUpdateVenue} currentUserId={currentUserId} />
                 {!hasActiveFilters && communityCurrentPage === 1 && filteredCommunity.length > 0 && (
                   <div className="overflow-hidden rounded-2xl border border-sky-100 bg-sky-50 px-5 py-4">
                     <div className="flex flex-wrap items-center justify-between gap-3">

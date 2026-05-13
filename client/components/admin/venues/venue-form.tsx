@@ -92,7 +92,7 @@ function CategoryTile({
 }
 
 // ── Component ──────────────────────────────────────────────────────────────────
-export function VenueForm({ mode, venue }: { mode: 'create' | 'edit'; venue?: VenueRecordResponse }) {
+export function VenueForm({ mode, suggestedVenue = false, venue }: { mode: 'create' | 'edit'; suggestedVenue?: boolean; venue?: VenueRecordResponse }) {
   const [form, setForm] = useState<VenueFormValues>(() => defaultValues(venue));
   const { submitCreate, submitEdit, isSubmitting } = useVenueForm();
   const { can } = usePermissions();
@@ -140,7 +140,7 @@ export function VenueForm({ mode, venue }: { mode: 'create' | 'edit'; venue?: Ve
     if (mode === 'create') {
       await submitCreate({ ...form, venue_category: venueCategory }, pendingImageFile);
     } else if (venue?.id) {
-      await submitEdit(venue.id, form);
+      await submitEdit(venue.id, form, { suggestedVenue });
     }
   }
 

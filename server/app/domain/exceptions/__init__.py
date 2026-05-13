@@ -86,6 +86,7 @@ from app.domain.exceptions.venue_exceptions import (
     UnauthorizedVenueOperationError,
     VenueAlreadyExistsError,
     VenueInvalidTypeError,
+    VenueNotCommunitySuggestionError,
     VenueNotFoundError,
     VenueValidationError,
 )
@@ -183,6 +184,7 @@ __all__ = [
     "UserNotFoundError",
     "VenueAlreadyExistsError",
     "VenueInvalidTypeError",
+    "VenueNotCommunitySuggestionError",
     "VenueNotFoundError",
     "VenueRatingAlreadyExistsError",
     "VenueRatingNotFoundError",

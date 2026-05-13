@@ -7,7 +7,6 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Venues } from '@/api/sdk.gen';
-import type { DeleteVenueVenuesVenueIdDeleteData } from '@/api/types.gen';
 import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
 import { getAccessToken } from '@/store/auth-store';
 
@@ -39,7 +38,7 @@ function getDeleteErrorMessage(error: unknown): string {
   return 'Unable to delete the venue right now.';
 }
 
-export function DeleteVenueButton({ venueId, venueName }: { venueId: string; venueName: string }) {
+export function DeleteVenueButton({ suggestedVenue = false, venueId, venueName }: { suggestedVenue?: boolean; venueId: string; venueName: string }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -48,21 +47,22 @@ export function DeleteVenueButton({ venueId, venueName }: { venueId: string; ven
     if (isDeleting) return;
     setIsDeleting(true);
 
-    const request: DeleteVenueVenuesVenueIdDeleteData = {
-      path: { venue_id: venueId },
-      url: '/venues/{venue_id}'
-    };
-
     try {
-      const result = await Venues.deleteVenueVenuesVenueIdDelete({
-        ...request,
-        headers: { Authorization: `Bearer ${getAccessToken()}` },
-        throwOnError: false
-      });
+      const result = suggestedVenue
+        ? await Venues.deleteSuggestedVenueVenuesCommunityVenueIdDelete({
+            path: { venue_id: venueId },
+            headers: { Authorization: `Bearer ${getAccessToken()}` },
+            throwOnError: false
+          })
+        : await Venues.deleteVenueVenuesVenueIdDelete({
+            path: { venue_id: venueId },
+            headers: { Authorization: `Bearer ${getAccessToken()}` },
+            throwOnError: false
+          });
 
       if (result.error) throw result.error;
 
-      toast.success('Venue deleted successfully.');
+      toast.success(suggestedVenue ? 'Venue suggestion deleted successfully.' : 'Venue deleted successfully.');
       setOpen(false);
       router.push(ADMIN_OPERATIONS_PATHS.venues);
       router.refresh();

@@ -1,14 +1,18 @@
 'use client';
 
 import { use } from 'react';
+import { notFound } from 'next/navigation';
 import { VenueForm } from '@/components/admin/venues/venue-form';
 import { BackLink } from '@/components/admin/venues/venues-shared';
-import { PermissionGate } from '@/components/auth/permission-gate';
+import { usePermissions } from '@/context/permissions-context';
 import { useVenue } from '@/hooks/admin/venues/use-venue';
 import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
+import { useAuthStore } from '@/store/auth-store';
 
 function VenueEditContent({ venueId }: { venueId: string }) {
   const { venue, isLoading, error } = useVenue(venueId);
+  const { can } = usePermissions();
+  const currentUserId = useAuthStore((state) => state.user?.id ?? null);
 
   if (isLoading) {
     return (
@@ -30,14 +34,15 @@ function VenueEditContent({ venueId }: { venueId: string }) {
     );
   }
 
-  return <VenueForm mode="edit" venue={venue} />;
+  const canUpdateVenue = can('venues', 'update');
+  const canUpdateOwnSuggestion = !venue.is_partner && venue.creator_id === currentUserId;
+
+  if (!canUpdateVenue && !canUpdateOwnSuggestion) notFound();
+
+  return <VenueForm mode="edit" venue={venue} suggestedVenue={!canUpdateVenue && canUpdateOwnSuggestion} />;
 }
 
 export default function AdminVenueEditPage({ params }: { params: Promise<{ venueId: string }> }) {
   const { venueId } = use(params);
-  return (
-    <PermissionGate feature="venues" action="update">
-      <VenueEditContent venueId={venueId} />
-    </PermissionGate>
-  );
+  return <VenueEditContent venueId={venueId} />;
 }
