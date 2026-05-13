@@ -11,10 +11,11 @@ interface VolunteersTableContentProps {
   isLoading?: boolean;
   error?: string | null;
   onEditVolunteer?: (volunteer: VolunteerTableRecord) => void;
+  onViewVolunteer?: (volunteer: VolunteerTableRecord) => void;
 }
 
-export function VolunteersTableContent({ volunteers, isLoading, error, onEditVolunteer }: VolunteersTableContentProps) {
-  const columns = createVolunteerColumns(onEditVolunteer);
+export function VolunteersTableContent({ volunteers, isLoading, error, onEditVolunteer, onViewVolunteer }: VolunteersTableContentProps) {
+  const columns = createVolunteerColumns(onEditVolunteer, onViewVolunteer);
 
   // TanStack Table is intentionally used here for the shadcn data table pattern.
   // eslint-disable-next-line react-hooks/incompatible-library

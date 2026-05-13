@@ -122,3 +122,4 @@ desktop.ini
 .ruff_cache/
 skills-lock.json
 .agents/
+eventara_key.pem

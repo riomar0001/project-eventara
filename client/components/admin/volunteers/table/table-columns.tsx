@@ -1,12 +1,10 @@
 import { Eye, MoreHorizontal, PencilLine } from 'lucide-react';
-import Link from 'next/link';
 import type { ColumnDef } from '@tanstack/react-table';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import type { VolunteerRecord } from '@/hooks/admin/volunteers/use-volunteers';
-import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
 
 export type VolunteerTableRecord = VolunteerRecord;
 
@@ -35,7 +33,10 @@ const STATUS_STYLES: Record<string, string> = {
   suspended: 'bg-red-100 text-red-700'
 };
 
-export function createVolunteerColumns(onEdit?: (volunteer: VolunteerTableRecord) => void): ColumnDef<VolunteerTableRecord>[] {
+export function createVolunteerColumns(
+  onEdit?: (volunteer: VolunteerTableRecord) => void,
+  onView?: (volunteer: VolunteerTableRecord) => void
+): ColumnDef<VolunteerTableRecord>[] {
   return [
     {
       id: 'profile',
@@ -99,12 +100,12 @@ export function createVolunteerColumns(onEdit?: (volunteer: VolunteerTableRecord
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem asChild>
-                <Link href={ADMIN_OPERATIONS_PATHS.volunteerDetail(row.original.id)}>
+              {onView ? (
+                <DropdownMenuItem onClick={() => onView(row.original)}>
                   <Eye className="size-4" />
                   View profile
-                </Link>
-              </DropdownMenuItem>
+                </DropdownMenuItem>
+              ) : null}
               {onEdit ? (
                 <DropdownMenuItem onClick={() => onEdit(row.original)}>
                   <PencilLine className="size-4" />
@@ -123,4 +124,4 @@ export function createVolunteerColumns(onEdit?: (volunteer: VolunteerTableRecord
   ];
 }
 
-export const volunteerColumns = createVolunteerColumns(() => {});
+export const volunteerColumns = createVolunteerColumns(() => {}, () => {});

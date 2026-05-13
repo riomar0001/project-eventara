@@ -112,6 +112,7 @@ class VolunteerRepository:
         )
         self.db.add(orm)
         await self.db.flush()
+        await self.db.refresh(orm)
         return self._to_volunteer_entity(orm)
 
     async def get_volunteer_role_by_id(
@@ -406,6 +407,7 @@ class VolunteerRepository:
             orm.status = status
 
         await self.db.flush()
+        await self.db.refresh(orm)
         return self._to_volunteer_entity(orm)
 
     @staticmethod

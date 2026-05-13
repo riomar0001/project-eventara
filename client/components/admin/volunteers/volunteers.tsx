@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight, Plus, UserPlus } from 'lucide-react';
 import { AddVolunteerDialog, EditVolunteerDialog } from '@/components/admin/volunteers/volunteer-form';
+import { VolunteerProfileModal } from '@/components/admin/volunteers/volunteer-profile-modal';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { usePermissions } from '@/context/permissions-context';
@@ -16,6 +17,7 @@ import type { VolunteerStatus } from '@/api/types.gen';
 export function VolunteersPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [editingVolunteer, setEditingVolunteer] = useState<VolunteerRecord | null>(null);
+  const [viewingVolunteer, setViewingVolunteer] = useState<VolunteerRecord | null>(null);
   const [search, setSearch] = useState('');
   const { can } = usePermissions();
 
@@ -121,6 +123,7 @@ export function VolunteersPage() {
             volunteers={filteredVolunteers}
             isLoading={isLoading}
             error={error}
+            onViewVolunteer={(volunteer) => setViewingVolunteer(volunteer)}
             onEditVolunteer={canUpdateVolunteer ? (volunteer) => setEditingVolunteer(volunteer) : undefined}
           />
         </CardContent>
@@ -143,6 +146,12 @@ export function VolunteersPage() {
           </CardFooter>
         )}
       </Card>
+
+      <VolunteerProfileModal
+        volunteer={viewingVolunteer}
+        open={!!viewingVolunteer}
+        onOpenChange={(open) => { if (!open) setViewingVolunteer(null); }}
+      />
 
       {canCreateVolunteer ? <AddVolunteerDialog open={createOpen} onOpenChange={setCreateOpen} onCreated={handleVolunteerAdded} /> : null}
 
