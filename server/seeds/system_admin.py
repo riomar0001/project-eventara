@@ -27,11 +27,12 @@ ensure_server_on_path()
 
 from app.core.config import settings
 from app.core.security.hashing import hash_string
-from app.domain.entities.user_entity import UserStatus
+from app.domain.entities.user_entity import AgeGroup, EducationLevel, Gender, UserStatus
 from app.infrastructure.database.models.user_models import (
     Role,
     User,
     UserActivity,
+    UserProfile,
     UserRole,
     UserSecurity,
 )
@@ -109,6 +110,25 @@ async def _ensure_activity(session, user_id: UUID) -> None:
     _log("UserActivity: row ensured")
 
 
+async def _ensure_profile(session, user_id: UUID) -> None:
+    """Upsert a minimal UserProfile row for the admin."""
+    stmt = (
+        insert(UserProfile)
+        .values(
+            user_id=user_id,
+            alias="system_admin",
+            first_name="System",
+            last_name="Administrator",
+            age_group=AgeGroup.ADULT.value,
+            gender=Gender.MALE.value,
+            education_level=EducationLevel.BACHELORS_DEGREE.value,
+        )
+        .on_conflict_do_nothing(index_elements=["user_id"])
+    )
+    await session.execute(stmt)
+    _log("UserProfile: row ensured")
+
+
 async def _assign_admin_role(session, user_id: UUID) -> None:
     """Assign system_administrator role to the admin user."""
     role_row = await session.execute(select(Role).where(Role.name == "system_administrator"))
@@ -147,6 +167,7 @@ async def run() -> None:
         user_id = await _get_or_create_admin(session)
         await _ensure_security(session, user_id)
         await _ensure_activity(session, user_id)
+        await _ensure_profile(session, user_id)
         await _assign_admin_role(session, user_id)
 
     print("-" * 40)

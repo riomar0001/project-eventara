@@ -565,7 +565,7 @@ async def review_application(
     request: Request,
     application_id: uuid.UUID,
     body: ReviewApplicationRequest,
-    caller_id: uuid.UUID = Depends(require_permission("volunteer_applications", RoleAction.UPDATE)),
+    caller_id: uuid.UUID = Depends(require_permission("volunteer-applications", RoleAction.UPDATE)),
     use_case: VolunteerApplicationUseCase = Depends(get_volunteer_application_use_case),
     audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> dict:

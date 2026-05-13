@@ -88,6 +88,48 @@ FEATURES: list[dict] = [
         "description": "Manage RBAC role definitions and their feature permission matrix.",
         "is_enabled": True,
     },
+    {
+        "slug": "events",
+        "name": "Events",
+        "description": "Create, read, update, and delete events and their sessions.",
+        "is_enabled": True,
+    },
+    {
+        "slug": "event-participants",
+        "name": "Event Participants",
+        "description": "Register, withdraw, check in, and manage event session participants.",
+        "is_enabled": True,
+    },
+    {
+        "slug": "event-feedback",
+        "name": "Event Feedback",
+        "description": "Submit and view post-event feedback from checked-in attendees.",
+        "is_enabled": True,
+    },
+    {
+        "slug": "event-volunteers",
+        "name": "Event Volunteers",
+        "description": "Apply for, assign, and manage volunteer rosters for events.",
+        "is_enabled": True,
+    },
+    {
+        "slug": "volunteers",
+        "name": "Volunteers",
+        "description": "Register and manage volunteer profiles and information.",
+        "is_enabled": True,
+    },
+    {
+        "slug": "volunteer-roles",
+        "name": "Volunteer Roles",
+        "description": "Create, read, update, and delete volunteer role definitions.",
+        "is_enabled": True,
+    },
+    {
+        "slug": "volunteer-applications",
+        "name": "Volunteer Applications",
+        "description": "Review and process volunteer applications.",
+        "is_enabled": True,
+    },
 ]
 
 ROLES: list[dict] = [
@@ -127,10 +169,26 @@ ROLES: list[dict] = [
 # Effect is ALLOW for all entries below; DENY grants are added as user-level
 # overrides and are not seeded at the role level.
 ROLE_PERMISSIONS: dict[str, dict[str, list[RoleAction]]] = {
-    "participant": {},
-    "volunteer": {},
+    "participant": {
+        "events": [RoleAction.READ],
+        "event-participants": [RoleAction.CREATE, RoleAction.DELETE],
+        "event-feedback": [RoleAction.CREATE],
+    },
+    "volunteer": {
+        "events": [RoleAction.READ],
+        "event-participants": [RoleAction.CREATE, RoleAction.DELETE],
+        "event-feedback": [RoleAction.CREATE],
+        "event-volunteers": [RoleAction.CREATE],
+    },
     "event_organizer": {
         "venues": [RoleAction.CREATE, RoleAction.READ, RoleAction.UPDATE],
+        "events": ALL_ACTIONS,
+        "event-participants": [RoleAction.READ, RoleAction.UPDATE],
+        "event-feedback": [RoleAction.READ],
+        "event-volunteers": ALL_ACTIONS,
+        "volunteers": [RoleAction.READ],
+        "volunteer-roles": ALL_ACTIONS,
+        "volunteer-applications": [RoleAction.UPDATE],
     },
     "community_leader": {
         "venues": [RoleAction.READ],
@@ -140,6 +198,12 @@ ROLE_PERMISSIONS: dict[str, dict[str, list[RoleAction]]] = {
         "roles": [RoleAction.READ],
         "queues": [RoleAction.READ],
         "audit-logs": [RoleAction.READ],
+        "events": [RoleAction.READ],
+        "event-participants": [RoleAction.READ],
+        "event-feedback": [RoleAction.READ],
+        "event-volunteers": [RoleAction.READ],
+        "volunteers": [RoleAction.READ],
+        "volunteer-roles": [RoleAction.READ],
     },
     "system_administrator": {
         "venues": ALL_ACTIONS,
@@ -150,6 +214,13 @@ ROLE_PERMISSIONS: dict[str, dict[str, list[RoleAction]]] = {
         "roles": ALL_ACTIONS,
         "queues": [RoleAction.READ, RoleAction.DELETE],
         "audit-logs": [RoleAction.READ],
+        "events": ALL_ACTIONS,
+        "event-participants": ALL_ACTIONS,
+        "event-feedback": [RoleAction.READ],
+        "event-volunteers": ALL_ACTIONS,
+        "volunteers": [RoleAction.CREATE, RoleAction.READ, RoleAction.UPDATE],
+        "volunteer-roles": ALL_ACTIONS,
+        "volunteer-applications": [RoleAction.UPDATE],
     },
 }
 

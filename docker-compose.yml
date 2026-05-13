@@ -67,17 +67,29 @@ services:
       dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_STORAGE_PUBLIC_URL: ${NEXT_PUBLIC_STORAGE_PUBLIC_URL:-}
+        API_URL: http://api:8000
     restart: unless-stopped
-    environment:
-      # Runtime: points to the api service inside the Docker network.
-      # The Next.js rewrite rule proxies /api/* to this URL server-side.
-      API_URL: http://api:8000
     depends_on:
       - api
     networks:
       - eventara
     ports:
-      - "3001:3000"
+      - "3000:3000"
+
+  client-participant:
+    build:
+      context: ./client-participant
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_STORAGE_PUBLIC_URL: ${NEXT_PUBLIC_STORAGE_PUBLIC_URL:-}
+        API_URL: http://api:8000
+    restart: unless-stopped
+    depends_on:
+      - api
+    networks:
+      - eventara
+    ports:
+      - "4000:3000"
 
 # ─────────────────────────────────────────────────────────
 # Persistent volumes
