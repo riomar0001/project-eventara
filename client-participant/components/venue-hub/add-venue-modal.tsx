@@ -90,10 +90,10 @@ export function AddVenueModal({ isOpen, onClose, onSubmit, initialVenue, isEditi
               name="name"
               value={formData.name}
               onChange={handleChange}
-              className="mt-1.5 w-full rounded-lg border border-line-soft bg-page px-3 py-2.5 text-text placeholder-text-mute transition-all focus:border--lime focus:ring-2 focus:ring-[oklch(0.9_0.22_128_/_0.1)] focus:outline-none"
+              className="mt-1.5 w-full rounded-lg border border-line-soft bg-page px-3 py-2.5 text-text placeholder-text-mute transition-all focus:border-lime focus:ring-2 focus:ring-[oklch(0.9_0.22_128_/_0.1)] focus:outline-none"
               placeholder="e.g., SMX Convention Center"
             />
-            {errors.name && <p className="mt-1 text-xs text--red">{errors.name}</p>}
+            {errors.name && <p className="mt-1 text-xs text-red">{errors.name}</p>}
           </div>
 
           {/* Location */}
@@ -104,10 +104,10 @@ export function AddVenueModal({ isOpen, onClose, onSubmit, initialVenue, isEditi
               name="location"
               value={formData.location}
               onChange={handleChange}
-              className="mt-1.5 w-full rounded-lg border border-line-soft bg-page px-3 py-2.5 text-text placeholder-text-mute transition-all focus:border--lime focus:ring-2 focus:ring-[oklch(0.9_0.22_128_/_0.1)] focus:outline-none"
+              className="mt-1.5 w-full rounded-lg border border-line-soft bg-page px-3 py-2.5 text-text placeholder-text-mute transition-all focus:border-lime focus:ring-2 focus:ring-[oklch(0.9_0.22_128_/_0.1)] focus:outline-none"
               placeholder="e.g., Lanang, Davao City"
             />
-            {errors.location && <p className="mt-1 text-xs text--red">{errors.location}</p>}
+            {errors.location && <p className="mt-1 text-xs text-red">{errors.location}</p>}
           </div>
 
           {/* Capacity & Type (2-col) */}
@@ -119,10 +119,10 @@ export function AddVenueModal({ isOpen, onClose, onSubmit, initialVenue, isEditi
                 name="capacity"
                 value={formData.capacity}
                 onChange={handleChange}
-                className="mt-1.5 w-full rounded-lg border border-line-soft bg-page px-3 py-2.5 text-text placeholder-text-mute transition-all focus:border--lime focus:ring-2 focus:ring-[oklch(0.9_0.22_128_/_0.1)] focus:outline-none"
+                className="mt-1.5 w-full rounded-lg border border-line-soft bg-page px-3 py-2.5 text-text placeholder-text-mute transition-all focus:border-lime focus:ring-2 focus:ring-[oklch(0.9_0.22_128_/_0.1)] focus:outline-none"
                 placeholder="500"
               />
-              {errors.capacity && <p className="mt-1 text-xs text--red">{errors.capacity}</p>}
+              {errors.capacity && <p className="mt-1 text-xs text-red">{errors.capacity}</p>}
             </div>
 
             <div>
@@ -131,7 +131,7 @@ export function AddVenueModal({ isOpen, onClose, onSubmit, initialVenue, isEditi
                 name="type"
                 value={formData.type}
                 onChange={handleChange}
-                className="mt-1.5 w-full rounded-lg border border-line-soft bg-page px-3 py-2.5 text-text transition-all focus:border--lime focus:ring-2 focus:ring-[oklch(0.9_0.22_128_/_0.1)] focus:outline-none"
+                className="mt-1.5 w-full rounded-lg border border-line-soft bg-page px-3 py-2.5 text-text transition-all focus:border-lime focus:ring-2 focus:ring-[oklch(0.9_0.22_128_/_0.1)] focus:outline-none"
               >
                 {VENUE_TYPES.map((type) => (
                   <option key={type} value={type}>
@@ -139,7 +139,7 @@ export function AddVenueModal({ isOpen, onClose, onSubmit, initialVenue, isEditi
                   </option>
                 ))}
               </select>
-              {errors.type && <p className="mt-1 text-xs text--red">{errors.type}</p>}
+              {errors.type && <p className="mt-1 text-xs text-red">{errors.type}</p>}
             </div>
           </div>
 
@@ -154,8 +154,8 @@ export function AddVenueModal({ isOpen, onClose, onSubmit, initialVenue, isEditi
                   onClick={() => handleAmenityToggle(option.key)}
                   className={`rounded-lg border px-3 py-2 text-sm font-medium transition-all ${
                     formData.amenities.includes(option.key as Amenity)
-                      ? 'border--lime bg-[oklch(0.9_0.22_128_/_0.06)] text-lime'
-                      : 'border-line-soft bg-transparent text-text-dim hover:border--text-mute hover:text-text'
+                      ? 'border-lime bg-[oklch(0.9_0.22_128_/_0.06)] text-lime'
+                      : 'border-line-soft bg-transparent text-text-dim hover:border-text-mute hover:text-text'
                   }`}
                 >
                   {option.label}
@@ -172,7 +172,7 @@ export function AddVenueModal({ isOpen, onClose, onSubmit, initialVenue, isEditi
               value={formData.notes}
               onChange={handleChange}
               rows={3}
-              className="mt-1.5 w-full rounded-lg border border-line-soft bg-page px-3 py-2.5 text-text placeholder-text-mute transition-all focus:border--lime focus:ring-2 focus:ring-[oklch(0.9_0.22_128_/_0.1)] focus:outline-none"
+              className="mt-1.5 w-full rounded-lg border border-line-soft bg-page px-3 py-2.5 text-text placeholder-text-mute transition-all focus:border-lime focus:ring-2 focus:ring-[oklch(0.9_0.22_128_/_0.1)] focus:outline-none"
               placeholder="Any other details about this venue..."
             />
           </div>
@@ -182,16 +182,13 @@ export function AddVenueModal({ isOpen, onClose, onSubmit, initialVenue, isEditi
         <div className="flex gap-2.5 border-t border-line-soft px-8 py-4">
           <button
             onClick={onClose}
-            className="flex-1 rounded-full border border-line bg-transparent px-4 py-2.5 font-semibold text-text-dim transition-all hover:border--text-mute hover:bg-[oklch(1_0_0_/_0.04)] hover:text-text"
+            className="flex-1 rounded-full border border-line bg-transparent px-4 py-2.5 font-semibold text-text-dim transition-all hover:border-text-mute hover:bg-[oklch(1_0_0_/_0.04)] hover:text-text"
           >
             Cancel
           </button>
           <button
             onClick={(e) => handleSubmit(e as React.MouseEvent<HTMLButtonElement>)}
-            className="flex-1 rounded-full bg-lime px-4 py-2.5 font-semibold text-[#0a1005] transition-all hover:-translate-y-0.5 hover:shadow-lime-glow hover:shadow-lg"
-            style={{
-              boxShadow: '0 8px 28px -10px var(--lime-glow), inset 0 -1px 0 oklch(0.7 0.2 128)'
-            }}
+            className="flex-1 rounded-full bg-lime px-4 py-2.5 font-semibold text-white shadow-[0_8px_28px_-10px_var(--lime-glow),inset_0_-1px_0_oklch(0.7_0.2_128)] transition-all hover:-translate-y-0.5 hover:shadow-[0_14px_40px_-10px_var(--lime-glow)]"
           >
             {isEditing ? 'Update venue' : 'Add venue'}
           </button>

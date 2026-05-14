@@ -10,12 +10,12 @@ export function SessionCard({ session }: { session: EventSession }) {
         <div className="mt-0.5 font-mono text-[10px] text-muted-foreground">{session.duration}</div>
       </div>
 
-      <div className="h-full w-px shrink-0 bg-border" style={{ minHeight: '36px' }} />
+      <div className="h-full min-h-[36px] w-px shrink-0 bg-border" />
 
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-3">
           <p className="text-[15px] font-semibold tracking-[-0.01em] text-foreground">{session.title}</p>
-          <span className="shrink-0 rounded-full px-2.5 py-1 font-mono text-[10px] tracking-[0.1em] uppercase" style={{ background: meta.bg, color: meta.color }}>
+          <span className={`shrink-0 rounded-full px-2.5 py-1 font-mono text-[10px] tracking-[0.1em] uppercase ${meta.bg} ${meta.color}`}>
             {meta.label}
           </span>
         </div>

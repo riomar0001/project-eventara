@@ -87,7 +87,7 @@ export default function EventsPage() {
         <div className="pointer-events-none absolute inset-x-0 top-0 z-0 h-[620px] overflow-hidden" aria-hidden="true">
           <div className="absolute top-[-220px] left-[-180px] h-[640px] w-[640px] rounded-full blur-[90px] bg-[radial-gradient(circle,oklch(0.7_0.2_130_/_0.22),transparent_65%)]" />
           <div className="absolute top-[-120px] right-[-140px] h-[540px] w-[540px] rounded-full blur-[90px] bg-[radial-gradient(circle,oklch(0.62_0.16_60_/_0.18),transparent_65%)]" />
-          <div className="absolute inset-0 opacity-35" style={{ backgroundImage: 'linear-gradient(var(--line-soft) 1px, transparent 1px), linear-gradient(90deg, var(--line-soft) 1px, transparent 1px)', backgroundSize: '64px 64px', maskImage: 'radial-gradient(ellipse 80% 60% at 50% 0%, black 30%, transparent 75%)', WebkitMaskImage: 'radial-gradient(ellipse 80% 60% at 50% 0%, black 30%, transparent 75%)' }} />
+          <div className="absolute inset-0 opacity-35 bg-[length:64px_64px] bg-[linear-gradient(var(--line-soft)_1px,transparent_1px),linear-gradient(90deg,var(--line-soft)_1px,transparent_1px)] [mask-image:radial-gradient(ellipse_80%_60%_at_50%_0%,black_30%,transparent_75%)] [-webkit-mask-image:radial-gradient(ellipse_80%_60%_at_50%_0%,black_30%,transparent_75%)]" />
         </div>
 
         <div className="events-dir-container relative z-[1] mx-auto max-w-[1240px] px-8">
@@ -98,7 +98,7 @@ export default function EventsPage() {
                   <span className="h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_12px_var(--lime-glow)]" />
                   EVENT DIRECTORY · APR–JUL 2026
                 </span>
-                <h1 className="mx-0 my-[18px] leading-none font-bold tracking-[-0.035em] text-foreground" style={{ fontSize: 'clamp(42px, 5.5vw, 72px)' }}>Discover Events</h1>
+                <h1 className="mx-0 my-[18px] text-[clamp(42px,5.5vw,72px)] leading-none font-bold tracking-[-0.035em] text-foreground">Discover Events</h1>
                 <p className="m-0 mb-9 max-w-[58ch] text-[16px] leading-[1.55] text-muted-foreground">Browse {ALL_EVENTS.length} upcoming workshops, meetups and hackathons across the Davao DeFi community.</p>
               </div>
               <div className="text-right max-sm:text-left">
@@ -135,7 +135,9 @@ export default function EventsPage() {
               </div>
             </div>
 
-            <div className="events-dir-grid grid gap-[22px]" style={{ gridTemplateColumns: view === 'list' ? '1fr' : tweaks.density === 'compact' ? 'repeat(4, 1fr)' : 'repeat(3, 1fr)' }}>
+            <div
+              className={`events-dir-grid grid gap-[22px] ${view === 'list' ? 'grid-cols-1' : tweaks.density === 'compact' ? 'grid-cols-4' : 'grid-cols-3'}`}
+            >
               {paged.length === 0 ? (
                 <div className="col-span-full rounded-[20px] border border-dashed border-border bg-muted/10 px-10 py-20 text-center">
                   <div className="mx-auto mb-[18px] grid h-14 w-14 place-items-center rounded-[16px] bg-muted text-muted-foreground">
@@ -159,7 +161,7 @@ export default function EventsPage() {
       {detail && <EventsDirectoryModal ev={detail} onClose={() => setDetail(null)} />}
 
       {editMode && (
-        <div className="fixed right-5 bottom-5 z-80 w-[280px] rounded-[16px] border border-border bg-card p-4 text-[13px] shadow-lg" style={{ boxShadow: '0 20px 60px -20px oklch(0 0 0 / 0.5)', animation: 'modal-pop 200ms ease' }}>
+        <div className="fixed right-5 bottom-5 z-80 w-[280px] animate-[modal-pop_200ms_ease] rounded-[16px] border border-border bg-card p-4 text-[13px] shadow-[0_20px_60px_-20px_oklch(0_0_0_/_0.5)]">
           <h4 className="m-0 mb-3 flex items-center gap-2 text-[13px] font-semibold">
             <span className="h-[6px] w-[6px] rounded-full bg-primary" />
             Tweaks

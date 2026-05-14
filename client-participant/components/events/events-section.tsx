@@ -41,19 +41,13 @@ export function EventsSection({ onEventClick }: EventsSectionProps) {
   }, [selectedTab]);
 
   return (
-    <section className="relative pt-10" style={{ padding: '40px 0' }}>
+    <section className="relative py-10">
       <div className="container mx-auto max-w-[1240px] px-8">
         {/* Section head */}
         <div className="mb-10 flex flex-wrap items-end justify-between gap-6">
           <div>
             <div className="mb-2 inline-flex items-center gap-2.5 font-mono text-[11px] tracking-[0.18em] text-text-mute uppercase">
-              <span
-                className="inline-block h-1.5 w-1.5 rounded-full"
-                style={{
-                  background: 'var(--lime)',
-                  boxShadow: '0 0 12px var(--lime-glow)'
-                }}
-              />
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-lime shadow-[0_0_12px_var(--lime-glow)]" />
               CALENDAR · Q2 2026
             </div>
             <h2 className="my-2.5 text-[clamp(30px,3.4vw,44px)] font-semibold tracking-[-0.03em] text-balance text-text">Upcoming Events</h2>
@@ -84,14 +78,7 @@ export function EventsSection({ onEventClick }: EventsSectionProps) {
 
         {/* Empty state */}
         {filteredEvents.length === 0 && (
-          <div
-            className="text-center text-text-mute"
-            style={{
-              padding: '60px 40px',
-              border: '1px dashed var(--line-soft)',
-              borderRadius: '18px'
-            }}
-          >
+          <div className="rounded-[18px] border border-dashed border-line-soft px-10 py-[60px] text-center text-text-mute">
             No {selectedTab} scheduled this quarter. Check back soon.
           </div>
         )}

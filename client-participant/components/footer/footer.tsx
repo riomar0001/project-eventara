@@ -38,13 +38,7 @@ export function Footer() {
       <div className="mx-auto flex max-w-[1240px] flex-wrap items-center justify-between gap-6 px-8 max-[900px]:px-5">
         {/* Logo */}
         <a href="#" className="flex items-center gap-2.5 text-lg font-bold tracking-[-0.02em]" aria-label="Eventara home">
-          <div
-            className="grid h-[26px] w-[26px] place-items-center rounded-lg text-[#0a1005]"
-            style={{
-              background: 'linear-gradient(145deg, var(--lime), var(--lime-dim))',
-              boxShadow: '0 0 18px -4px var(--lime-glow)'
-            }}
-          >
+          <div className="grid h-[26px] w-[26px] place-items-center rounded-lg bg-linear-[145deg] from-lime to-lime-dim text-[#0a1005] shadow-[0_0_18px_-4px_var(--lime-glow)]">
             <svg width="14" height="14" viewBox="0 0 20 20" fill="none" aria-hidden="true">
               <path d="M2 10 L10 2 L18 10 L10 18 Z" stroke="#0a1005" strokeWidth="2" fill="none" />
               <circle cx="10" cy="10" r="2.5" fill="#0a1005" />

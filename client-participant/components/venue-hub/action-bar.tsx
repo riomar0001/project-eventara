@@ -4,7 +4,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Icon } from '@/components/ui/icon';
 import { CAPACITY_FILTERS } from '@/constants/capacity-filters';
 import { SORT_OPTIONS } from '@/constants/sort-options';
@@ -22,6 +22,18 @@ interface ActionBarProps {
 export function ActionBar({ query, onQueryChange, capacityKey, onCapacityChange, sortKey, onSortChange, onAddVenue }: ActionBarProps) {
   const [capacityOpen, setCapacityOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
+  const capacityRef = useRef<HTMLDivElement>(null);
+  const sortRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!capacityOpen && !sortOpen) return;
+    const handleOutside = (e: MouseEvent) => {
+      if (capacityRef.current && !capacityRef.current.contains(e.target as Node)) setCapacityOpen(false);
+      if (sortRef.current && !sortRef.current.contains(e.target as Node)) setSortOpen(false);
+    };
+    document.addEventListener('mousedown', handleOutside);
+    return () => document.removeEventListener('mousedown', handleOutside);
+  }, [capacityOpen, sortOpen]);
 
   const handleCapacitySelect = (key: string) => {
     onCapacityChange(key);
@@ -36,7 +48,7 @@ export function ActionBar({ query, onQueryChange, capacityKey, onCapacityChange,
   return (
     <div className="px-8 py-6">
       <div className="mx-auto max-w-[1240px]">
-        <div className="grid grid-cols-[1fr_auto_auto_auto] items-stretch gap-3">
+        <div className="grid grid-cols-[1fr_auto_auto_auto] items-center gap-3">
           {/* Search Input */}
           <div className="relative">
             <Icon name="search" size={16} className="absolute top-1/2 left-[18px] -translate-y-1/2 text-text-mute" />
@@ -45,15 +57,15 @@ export function ActionBar({ query, onQueryChange, capacityKey, onCapacityChange,
               placeholder="Search venues, locations..."
               value={query}
               onChange={(e) => onQueryChange(e.target.value)}
-              className="h-14 w-full rounded-[14px] border border-line-soft bg-surface py-4 pr-[18px] pl-[52px] text-[15px] text-text placeholder-text-mute transition-all focus:border--lime focus:bg-surface-2 focus:ring-4 focus:ring-[oklch(0.9_0.22_128_/_0.1)] focus:outline-none"
+              className="h-14 w-full rounded-[14px] border border-line-soft bg-surface py-4 pr-[18px] pl-[52px] text-[15px] text-text placeholder-text-mute transition-all focus:border-lime focus:bg-surface-2 focus:ring-4 focus:ring-[oklch(0.9_0.22_128_/_0.1)] focus:outline-none"
             />
           </div>
 
           {/* Capacity Filter Dropdown */}
-          <div className="relative">
+          <div ref={capacityRef} className="relative">
             <button
               onClick={() => setCapacityOpen(!capacityOpen)}
-              className="flex h-14 min-w-[180px] items-center justify-between gap-2 rounded-[14px] border border-line-soft bg-surface px-[18px] py-4 text-sm transition-all hover:border--text-mute"
+              className="flex h-14 min-w-[180px] items-center justify-between gap-2 rounded-[14px] border border-line-soft bg-surface px-[18px] py-4 text-sm transition-all hover:border-text-mute"
             >
               <div className="flex flex-row items-center gap-1.5">
                 <span className="font-mono text-[10.5px] tracking-[0.14em] text-text-mute uppercase">Capacity</span>
@@ -83,10 +95,10 @@ export function ActionBar({ query, onQueryChange, capacityKey, onCapacityChange,
           </div>
 
           {/* Sort Dropdown */}
-          <div className="relative">
+          <div ref={sortRef} className="relative">
             <button
               onClick={() => setSortOpen(!sortOpen)}
-              className="flex h-14 min-w-[180px] items-center justify-between gap-2 rounded-[14px] border border-line-soft bg-surface px-[18px] py-4 text-sm transition-all hover:border--text-mute"
+              className="flex h-14 min-w-[180px] items-center justify-between gap-2 rounded-[14px] border border-line-soft bg-surface px-[18px] py-4 text-sm transition-all hover:border-text-mute"
             >
               <div className="flex flex-row items-center gap-1.5">
                 <span className="font-mono text-[10.5px] tracking-[0.14em] text-text-mute uppercase">Sort</span>
@@ -118,13 +130,10 @@ export function ActionBar({ query, onQueryChange, capacityKey, onCapacityChange,
           {/* Add Venue Button */}
           <button
             onClick={onAddVenue}
-            className="flex items-center justify-center gap-[10px] rounded-full bg-lime px-5 py-[13px] text-sm font-semibold tracking-[-0.01em] text-[#0a1005] transition-all hover:-translate-y-px hover:shadow-[0_14px_40px_-10px_var(--lime-glow)]"
-            style={{
-              boxShadow: '0 8px 28px -10px var(--lime-glow)'
-            }}
+            className="flex h-11 items-center justify-center gap-2 rounded-full bg-lime px-5 text-sm font-semibold tracking-[-0.01em] text-white shadow-[0_8px_28px_-10px_var(--lime-glow)] transition-all hover:-translate-y-px hover:shadow-[0_14px_40px_-10px_var(--lime-glow)]"
           >
-            <Icon name="plus" size={16} className="text-white" />
-            <span className="hidden text-white sm:inline">Add Venue Post</span>
+            <Icon name="plus" size={16} />
+            <span className="hidden sm:inline">Add Venue Post</span>
           </button>
         </div>
       </div>

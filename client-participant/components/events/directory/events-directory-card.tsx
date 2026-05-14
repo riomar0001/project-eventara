@@ -20,35 +20,11 @@ export function EventsDirectoryCard({ ev, onOpen }: EventsDirectoryCardProps) {
 
   return (
     <article
-      className="group flex cursor-pointer flex-col overflow-hidden rounded-[20px] border border-line-soft bg-surface transition-all"
-      style={{ transition: 'transform 280ms ease, border-color 280ms ease, box-shadow 280ms ease' }}
+      className={`group flex cursor-pointer flex-col overflow-hidden rounded-[20px] border border-line-soft bg-surface transition-[transform_280ms_ease,border-color_280ms_ease,box-shadow_280ms_ease] hover:-translate-y-[6px] ${urgent ? 'hover:border-[oklch(0.62_0.16_60_/_0.55)] hover:shadow-[0_20px_60px_-20px_oklch(0.62_0.16_60_/_0.28)]' : 'hover:border-[oklch(0.7_0.2_130_/_0.5)] hover:shadow-[0_20px_60px_-20px_oklch(0.7_0.2_130_/_0.3)]'}`}
       onClick={() => onOpen(ev)}
-      onMouseEnter={(e) => {
-        const el = e.currentTarget;
-        el.style.transform = 'translateY(-6px)';
-        if (urgent) {
-          el.style.borderColor = 'oklch(0.62 0.16 60 / 0.55)';
-          el.style.boxShadow = '0 20px 60px -20px oklch(0.62 0.16 60 / 0.28)';
-        } else {
-          el.style.borderColor = 'oklch(0.7 0.2 130 / 0.5)';
-          el.style.boxShadow = '0 20px 60px -20px oklch(0.7 0.2 130 / 0.3)';
-        }
-      }}
-      onMouseLeave={(e) => {
-        const el = e.currentTarget;
-        el.style.transform = '';
-        el.style.borderColor = '';
-        el.style.boxShadow = '';
-      }}
     >
       {/* Event visual */}
-      <div
-        className="relative overflow-hidden border-b border-line-soft"
-        style={{
-          aspectRatio: '16/9',
-          background: 'linear-gradient(135deg, oklch(0.22 0.012 150), oklch(0.16 0.008 150))'
-        }}
-      >
+      <div className="relative aspect-[16/9] overflow-hidden border-b border-line-soft bg-linear-[135deg] from-[oklch(0.22_0.012_150)] to-[oklch(0.16_0.008_150)]">
         {/* Stripes */}
         <div
           className="absolute inset-0"
@@ -63,26 +39,17 @@ export function EventsDirectoryCard({ ev, onOpen }: EventsDirectoryCardProps) {
         />
 
         {/* Date badge */}
-        <div
-          className="absolute top-[14px] left-[14px] z-[2] min-w-[54px] rounded-[10px] border border-line-soft px-[10px] py-2 text-center"
-          style={{ background: 'oklch(0 0 0 / 0.55)', backdropFilter: 'blur(10px)' }}
-        >
+        <div className="absolute top-[14px] left-[14px] z-[2] min-w-[54px] rounded-[10px] border border-line-soft/20 bg-black/55 px-[10px] py-2 text-center backdrop-blur-[10px]">
           <div className="font-mono text-[10px] font-medium tracking-[0.14em] text-lime">{ev.mo}</div>
-          <div className="mt-px text-[20px] leading-none font-bold tracking-[-0.03em] text-text">{ev.day}</div>
+          <div className="mt-px text-[20px] leading-none font-bold tracking-[-0.03em] text-white/60">{ev.day}</div>
         </div>
 
         {/* Status pill */}
         {ev.status && (
-          <div
-            className={`absolute top-[14px] right-[14px] z-[2] inline-flex items-center gap-[6px] rounded-full border px-[9px] py-[5px] font-mono text-[10px] tracking-[0.14em] uppercase ${statusPillBg}`}
-            style={{ backdropFilter: 'blur(8px)' }}
-          >
+          <div className={`absolute top-[14px] right-[14px] z-[2] inline-flex items-center gap-[6px] rounded-full border px-[9px] py-[5px] font-mono text-[10px] tracking-[0.14em] uppercase backdrop-blur-md ${statusPillBg}`}>
             {(ev.status === 'closing' || ev.status === 'live') && (
               <span className="relative flex h-[6px] w-[6px]">
-                <span
-                  className="absolute inset-0 rounded-full"
-                  style={{ background: 'currentColor', animation: 'pulse-scale 1.6s cubic-bezier(0,0,0.2,1) infinite' }}
-                />
+                <span className="absolute inset-0 animate-[pulse-scale_1.6s_cubic-bezier(0,0,0.2,1)_infinite] rounded-full bg-current" />
               </span>
             )}
             {ev.status === 'closing' ? 'Closing Soon' : ev.status === 'live' ? 'Live' : 'New'}
@@ -140,28 +107,10 @@ export function EventsDirectoryCard({ ev, onOpen }: EventsDirectoryCardProps) {
             </span>
           </div>
           <button
-            className="flex w-full items-center justify-center gap-2 rounded-[10px] border border-line bg-transparent px-[11px] py-[11px] text-[13px] font-medium text-text transition-all"
+            className={`flex w-full items-center justify-center gap-2 rounded-[10px] border border-line bg-transparent px-[11px] py-[11px] text-[13px] font-medium text-text transition-all ${urgent ? 'hover:border-[oklch(0.62_0.16_60)] hover:text-[oklch(0.62_0.16_60)] hover:bg-[oklch(0.62_0.16_60_/_0.05)]' : 'hover:border-[oklch(0.7_0.2_130)] hover:text-[oklch(0.7_0.2_130)] hover:bg-[oklch(0.7_0.2_130_/_0.05)]'}`}
             onClick={(e) => {
               e.stopPropagation();
               onOpen(ev);
-            }}
-            onMouseEnter={(e) => {
-              const el = e.currentTarget;
-              if (urgent) {
-                el.style.borderColor = 'var(--amber)';
-                el.style.color = 'var(--amber)';
-                el.style.background = 'oklch(0.62 0.16 60 / 0.05)';
-              } else {
-                el.style.borderColor = 'var(--lime)';
-                el.style.color = 'var(--lime)';
-                el.style.background = 'oklch(0.7 0.2 130 / 0.05)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              const el = e.currentTarget;
-              el.style.borderColor = '';
-              el.style.color = '';
-              el.style.background = '';
             }}
           >
             View Details <Icon name="arrow-right" size={13} />

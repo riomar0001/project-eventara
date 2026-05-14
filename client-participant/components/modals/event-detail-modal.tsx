@@ -18,7 +18,7 @@ export function EventDetailModal({ event, isOpen, onClose }: EventDetailModalPro
           </svg>
         </button>
 
-        <div className="relative" style={{ aspectRatio: '16/7', background: 'linear-gradient(135deg, oklch(0.22 0.012 150), oklch(0.17 0.01 150))' }}>
+        <div className="relative aspect-[16/7] bg-linear-[135deg] from-[oklch(0.22_0.012_150)] to-[oklch(0.17_0.01_150)]">
           <div className="absolute inset-0" style={{ backgroundImage: `repeating-linear-gradient(${event.angle}, transparent 0 22px, oklch(1 0 0 / 0.04) 22px 24px)` }} />
           <div className={`absolute top-[10%] left-[20%] h-[220px] w-[220px] rounded-full opacity-50 blur-[40px] ${event.orbColor === 'lime' ? 'bg-primary' : 'bg-orange-400'}`} />
           <div className={`absolute right-[15%] bottom-[10%] h-[160px] w-[160px] rounded-full opacity-35 blur-[34px] ${event.orbColor === 'lime' ? 'bg-orange-400' : 'bg-primary'}`} />

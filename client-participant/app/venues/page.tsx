@@ -47,40 +47,11 @@ export default function VenuesPage() {
       {/* Page Mesh - Ambient orbs */}
       <div className="pointer-events-none absolute inset-0 top-0 z-0 h-[620px] overflow-hidden">
         {/* Lime orb (top-left) */}
-        <div
-          className="absolute rounded-full blur-[90px]"
-          style={{
-            width: '640px',
-            height: '640px',
-            left: '-180px',
-            top: '-220px',
-            background: 'radial-gradient(circle, oklch(0.9 0.22 128 / 0.4), transparent 65%)'
-          }}
-        />
+        <div className="absolute left-[-180px] top-[-220px] h-[640px] w-[640px] rounded-full blur-[90px] bg-[radial-gradient(circle,oklch(0.9_0.22_128_/_0.4),transparent_65%)]" />
         {/* Amber orb (top-right) */}
-        <div
-          className="absolute rounded-full blur-[90px]"
-          style={{
-            width: '540px',
-            height: '540px',
-            right: '-140px',
-            top: '-120px',
-            background: 'radial-gradient(circle, oklch(0.82 0.17 75 / 0.28), transparent 65%)'
-          }}
-        />
+        <div className="absolute right-[-140px] top-[-120px] h-[540px] w-[540px] rounded-full blur-[90px] bg-[radial-gradient(circle,oklch(0.82_0.17_75_/_0.28),transparent_65%)]" />
         {/* Grid overlay */}
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: `
-              linear-gradient(var(--line-soft) 1px, transparent 1px),
-              linear-gradient(90deg, var(--line-soft) 1px, transparent 1px)
-            `,
-            backgroundSize: '64px 64px',
-            maskImage: 'radial-gradient(ellipse 80% 60% at 50% 0%, black 30%, transparent 75%)',
-            opacity: 0.35
-          }}
-        />
+        <div className="absolute inset-0 opacity-35 bg-[length:64px_64px] bg-[linear-gradient(var(--line-soft)_1px,transparent_1px),linear-gradient(90deg,var(--line-soft)_1px,transparent_1px)] [mask-image:radial-gradient(ellipse_80%_60%_at_50%_0%,black_30%,transparent_75%)]" />
       </div>
 
       {/* Content */}

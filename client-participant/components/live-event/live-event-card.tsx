@@ -35,16 +35,16 @@ export function LiveEventCard() {
           <p className="max-w-[46ch] text-[15px] text-muted-foreground">One session is live on the Eventara network. Jump in, or catch up later — sessions are archived within 24 hours.</p>
         </div>
 
-        <div className="relative grid overflow-hidden rounded-[24px] border border-border bg-linear-[180deg] from-card to-[oklch(0.97_0.005_150)] p-0" style={{ gridTemplateColumns: '1.1fr 1fr', minHeight: '420px' }}>
+        <div className="relative grid min-h-[420px] grid-cols-[1.1fr_1fr] overflow-hidden rounded-[24px] border border-border bg-linear-[180deg] from-card to-[oklch(0.97_0.005_150)] p-0">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_90%_10%,oklch(0.62_0.16_60_/_0.1),transparent_40%)]" />
 
           <div className="relative flex flex-col gap-[18px] py-10 pl-9 pr-10">
             <div className="inline-flex w-fit items-center gap-2 rounded-full bg-orange-400/10 border border-orange-400/35 px-3 py-1.5 font-mono text-[11px] tracking-[0.14em] uppercase text-orange-400">
-              <span className="relative inline-block h-2 w-2 rounded-full bg-orange-400" style={{ animation: 'ping 1.6s cubic-bezier(0,0,0.2,1) infinite' }} />
+              <span className="relative inline-block h-2 w-2 animate-[ping_1.6s_cubic-bezier(0,0,0.2,1)_infinite] rounded-full bg-orange-400" />
               LIVE · DAY 02 OF 03
             </div>
 
-            <h3 className="m-0 font-semibold text-foreground" style={{ fontSize: 'clamp(26px, 2.6vw, 34px)', letterSpacing: '-0.025em', lineHeight: '1.1' }}>{LIVE_EVENT.title}</h3>
+            <h3 className="m-0 text-[clamp(26px,2.6vw,34px)] leading-[1.1] font-semibold tracking-[-0.025em] text-foreground">{LIVE_EVENT.title}</h3>
 
             <div className="grid grid-cols-2 gap-x-[28px] gap-y-[18px]">
               {[
@@ -71,7 +71,15 @@ export function LiveEventCard() {
               </div>
               <div className="ml-auto flex items-end gap-[3px]">
                 {[10, 16, 22, 14, 18].map((h, i) => (
-                  <span key={i} className="block w-[3px] rounded-[2px] bg-primary" style={{ height: `${h}px`, animation: `wave 1.1s ease-in-out infinite`, animationDelay: `${[0, 0.15, 0.3, 0.45, 0.2][i]}s` }} />
+                  <span
+                    key={i}
+                    className="block w-[3px] rounded-[2px] bg-primary"
+                    style={{
+                      height: `${h}px`,
+                      animation: 'wave 1.1s ease-in-out infinite',
+                      animationDelay: `${[0, 0.15, 0.3, 0.45, 0.2][i]}s`
+                    }}
+                  />
                 ))}
               </div>
             </div>
@@ -87,11 +95,11 @@ export function LiveEventCard() {
           </div>
 
           <div className="relative overflow-hidden border-l border-border bg-linear-[135deg] from-[oklch(0.2_0.01_150)] to-[oklch(0.15_0.008_150)]">
-            <div className="absolute inset-0" style={{ backgroundImage: 'repeating-linear-gradient(110deg, transparent 0 22px, oklch(1 0 0 / 0.025) 22px 24px)' }} />
+            <div className="absolute inset-0 bg-[repeating-linear-gradient(110deg,transparent_0_22px,oklch(1_0_0_/_0.025)_22px_24px)]" />
             <div className="absolute left-[18%] top-[22%] h-[220px] w-[220px] rounded-full bg-primary opacity-30 blur-[26px]" />
             <div className="absolute right-[14%] bottom-[18%] h-[180px] w-[180px] rounded-full bg-orange-400 opacity-40 blur-[26px]" />
             <div className="absolute top-5 right-5 inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/40 px-[6px_10px] font-mono text-[11px] tracking-[0.12em] uppercase text-muted-foreground backdrop-blur-md">
-              <span className="relative inline-block h-1.5 w-1.5 rounded-full bg-orange-400" style={{ animation: 'ping 1.6s cubic-bezier(0,0,0.2,1) infinite' }} />
+              <span className="relative inline-block h-1.5 w-1.5 animate-[ping_1.6s_cubic-bezier(0,0,0.2,1)_infinite] rounded-full bg-orange-400" />
               STREAM · 1080p
             </div>
             <div className="absolute bottom-4 left-4 font-mono text-[9.5px] tracking-[0.15em] uppercase text-white/30">[ event cover · 16:9 placeholder ]</div>

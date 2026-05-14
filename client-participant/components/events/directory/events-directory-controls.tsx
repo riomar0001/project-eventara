@@ -35,14 +35,14 @@ export function EventsDirectoryControls({ q, onQChange, cat, onCatChange, sort, 
   return (
     <>
       {/* Search row */}
-      <div className="events-dir-search-row mt-2 grid items-center gap-[14px]" style={{ gridTemplateColumns: '1fr auto' }}>
+      <div className="events-dir-search-row mt-2 grid grid-cols-[1fr_auto] items-center gap-[14px]">
         <div
           className="relative rounded-[14px] border border-line-soft bg-surface transition-all"
           onFocus={(e) => {
             const el = e.currentTarget;
-            el.style.borderColor = 'var(--lime)';
+            el.style.borderColor = 'oklch(0.7 0.2 130)';
             el.style.boxShadow = '0 0 0 4px oklch(0.7 0.2 130 / 0.15)';
-            el.style.background = 'var(--surface-2)';
+            el.style.background = 'oklch(0.975 0.005 150)';
           }}
           onBlur={(e) => {
             const el = e.currentTarget;
@@ -78,8 +78,7 @@ export function EventsDirectoryControls({ q, onQChange, cat, onCatChange, sort, 
 
           {sortOpen && (
             <div
-              className="absolute right-0 z-50 min-w-[200px] rounded-[12px] border border-line bg-surface p-[6px]"
-              style={{ top: 'calc(100% + 6px)', boxShadow: '0 20px 60px -20px oklch(0 0 0 / 0.5)' }}
+              className="absolute right-0 z-50 mt-[6px] min-w-[200px] rounded-[12px] border border-line bg-surface p-[6px] shadow-[0_20px_60px_-20px_oklch(0_0_0_/_0.5)]"
             >
               {(
                 [
@@ -94,11 +93,11 @@ export function EventsDirectoryControls({ q, onQChange, cat, onCatChange, sort, 
                   onClick={() => { onSortChange(k); setSortOpen(false); }}
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLElement).style.background = 'oklch(1 0 0 / 0.04)';
-                    (e.currentTarget as HTMLElement).style.color = 'var(--text)';
+                    (e.currentTarget as HTMLElement).style.color = 'oklch(0.2 0.012 150)';
                   }}
                   onMouseLeave={(e) => {
                     (e.currentTarget as HTMLElement).style.background = '';
-                    (e.currentTarget as HTMLElement).style.color = sort === k ? 'var(--lime)' : '';
+                    (e.currentTarget as HTMLElement).style.color = sort === k ? 'oklch(0.7 0.2 130)' : '';
                   }}
                 >
                   {lbl}
@@ -118,8 +117,8 @@ export function EventsDirectoryControls({ q, onQChange, cat, onCatChange, sort, 
             onClick={() => onCatChange(c.key)}
             onMouseEnter={(e) => {
               if (cat !== c.key) {
-                (e.currentTarget as HTMLElement).style.color = 'var(--text)';
-                (e.currentTarget as HTMLElement).style.borderColor = 'var(--text-mute)';
+                (e.currentTarget as HTMLElement).style.color = 'oklch(0.2 0.012 150)';
+                (e.currentTarget as HTMLElement).style.borderColor = 'oklch(0.58 0.012 150)';
               }
             }}
             onMouseLeave={(e) => {
@@ -143,8 +142,8 @@ export function EventsDirectoryControls({ q, onQChange, cat, onCatChange, sort, 
             key={label}
             className={`inline-flex items-center gap-2 rounded-full border px-[18px] py-[9px] text-[13px] font-medium transition-all ${pillInactive}`}
             onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.color = 'var(--text)';
-              (e.currentTarget as HTMLElement).style.borderColor = 'var(--text-mute)';
+              (e.currentTarget as HTMLElement).style.color = 'oklch(0.2 0.012 150)';
+              (e.currentTarget as HTMLElement).style.borderColor = 'oklch(0.58 0.012 150)';
             }}
             onMouseLeave={(e) => {
               (e.currentTarget as HTMLElement).style.color = '';

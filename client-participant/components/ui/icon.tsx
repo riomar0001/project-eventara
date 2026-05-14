@@ -12,7 +12,6 @@ interface IconProps {
 export function Icon({ name, size = 20, className = '' }: IconProps) {
   const iconSize = size;
   const strokeWidth = 2;
-  const baseClass = `w-${size} h-${size} ${className}`;
 
   // Simple SVG icons - expand as needed
   const icons: { [key: string]: React.ReactNode } = {
@@ -91,7 +90,7 @@ export function Icon({ name, size = 20, className = '' }: IconProps) {
   };
 
   return (
-    <span className={baseClass}>
+    <span className={`inline-flex shrink-0 items-center justify-center ${className}`} style={{ width: iconSize, height: iconSize }}>
       {icons[name] || (
         <svg width={iconSize} height={iconSize} viewBox="0 0 24 24">
           <circle cx="12" cy="12" r="1" fill="currentColor" />

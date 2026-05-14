@@ -11,10 +11,10 @@ export type EventSession = {
 };
 
 export const SESSION_TYPE_META: Record<SessionType, { bg: string; color: string; label: string }> = {
-  talk: { bg: 'oklch(0.9 0.22 128 / 0.08)', color: 'var(--lime)', label: 'Talk' },
-  workshop: { bg: 'oklch(0.82 0.17 75 / 0.1)', color: 'var(--amber)', label: 'Workshop' },
-  panel: { bg: 'oklch(0.65 0.15 290 / 0.08)', color: 'oklch(0.65 0.15 290)', label: 'Panel' },
-  break: { bg: 'oklch(0 0 0 / 0.04)', color: 'var(--text-mute)', label: 'Break' }
+  talk: { bg: 'bg-lime/10', color: 'text-lime', label: 'Talk' },
+  workshop: { bg: 'bg-amber/10', color: 'text-amber', label: 'Workshop' },
+  panel: { bg: 'bg-[oklch(0.65_0.15_290_/_0.08)]', color: 'text-[oklch(0.65_0.15_290)]', label: 'Panel' },
+  break: { bg: 'bg-black/5', color: 'text-text-mute', label: 'Break' }
 };
 
 const DEFAULT_SESSIONS: EventSession[] = [

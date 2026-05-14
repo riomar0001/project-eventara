@@ -31,15 +31,7 @@ export function VenueDetailModal({ venue, isOpen, onClose }: VenueDetailModalPro
             }}
           />
           <div
-            className="absolute rounded-full blur-[34px]"
-            style={{
-              width: '220px',
-              height: '220px',
-              left: '18%',
-              top: '22%',
-              background: venue.orb === 'lime' ? 'var(--lime)' : 'var(--amber)',
-              opacity: venue.orb === 'lime' ? 0.3 : 0.4
-            }}
+            className={`absolute left-[18%] top-[22%] h-[220px] w-[220px] rounded-full blur-[34px] ${venue.orb === 'lime' ? 'bg-lime opacity-30' : 'bg-amber opacity-40'}`}
           />
         </div>
 

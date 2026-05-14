@@ -14,7 +14,7 @@ export function RatingBadge({ rating, reviews }: RatingBadgeProps) {
       <div className="text-amber">
         <Icon name="star" size={14} />
       </div>
-      <span className="text-xs font-medium text-text">{rating.toFixed(1)}</span>
+      <span className="text-xs font-medium text-white">{rating.toFixed(1)}</span>
       <span className="font-mono text-xs font-medium text-text-mute">({reviews})</span>
     </div>
   );

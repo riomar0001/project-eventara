@@ -10,12 +10,12 @@ export function EventsDirectoryModal({ ev, onClose }: EventsDirectoryModalProps)
 
   return (
     <div className="fixed inset-0 z-[100] grid place-items-center p-6 bg-black/50 backdrop-blur-md" onClick={onClose}>
-      <div className="relative w-full max-w-[580px] overflow-hidden rounded-[22px] border border-border bg-card shadow-2xl" style={{ animation: 'modal-pop 260ms cubic-bezier(0.22, 1, 0.36, 1)' }} onClick={(e) => e.stopPropagation()}>
+      <div className="relative w-full max-w-[580px] animate-[modal-pop_260ms_cubic-bezier(0.22,1,0.36,1)] overflow-hidden rounded-[22px] border border-border bg-card shadow-2xl" onClick={(e) => e.stopPropagation()}>
         <button className="absolute top-[14px] right-[14px] z-[3] grid h-8 w-8 place-items-center rounded-[10px] text-muted-foreground bg-black/35 backdrop-blur-md transition-all hover:bg-black/60 hover:text-foreground" onClick={onClose}>
           <Icon name="x" size={16} />
         </button>
 
-        <div className="relative" style={{ aspectRatio: '16/7', background: 'linear-gradient(135deg, oklch(0.22 0.012 150), oklch(0.15 0.008 150))' }}>
+        <div className="relative aspect-[16/7] bg-linear-[135deg] from-[oklch(0.22_0.012_150)] to-[oklch(0.15_0.008_150)]">
           <div className="absolute inset-0" style={{ backgroundImage: `repeating-linear-gradient(${ev.angle}, transparent 0 22px, oklch(1 0 0 / 0.04) 22px 24px)` }} />
           <div className={`absolute top-[20%] left-[18%] h-[220px] w-[220px] rounded-full opacity-50 blur-[38px] ${ev.orb === 'lime' ? 'bg-primary' : 'bg-orange-400'}`} />
           <div className={`absolute right-[15%] bottom-[10%] h-[160px] w-[160px] rounded-full opacity-40 blur-[32px] ${ev.orb === 'lime' ? 'bg-orange-400' : 'bg-primary'}`} />

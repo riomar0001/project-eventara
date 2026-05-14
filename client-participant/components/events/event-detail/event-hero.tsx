@@ -5,13 +5,10 @@ import type { DirectoryEvent } from '@/types/event-directory';
 type Props = { event: DirectoryEvent; seatsFilled: number; capacityPct: number; isFull: boolean };
 
 export function EventHero({ event, seatsFilled, capacityPct, isFull }: Props) {
-  const orbColor = event.orb === 'lime' ? 'oklch(0.7 0.2 130 / 0.22)' : 'oklch(0.62 0.16 60 / 0.18)';
-
   return (
     <div className="relative overflow-hidden bg-card">
       <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
-        <div className="absolute top-[-120px] right-[-120px] h-[500px] w-[500px] rounded-full blur-[90px]"
-          style={{ background: `radial-gradient(circle, ${orbColor}, transparent 65%)` }} />
+        <div className={`absolute top-[-120px] right-[-120px] h-[500px] w-[500px] rounded-full blur-[90px] ${event.orb === 'lime' ? 'bg-[radial-gradient(circle,oklch(0.7_0.2_130_/_0.22),transparent_65%)]' : 'bg-[radial-gradient(circle,oklch(0.62_0.16_60_/_0.18),transparent_65%)]'}`} />
       </div>
 
       <div className="container relative z-10 py-10">
@@ -29,7 +26,7 @@ export function EventHero({ event, seatsFilled, capacityPct, isFull }: Props) {
           )}
         </div>
 
-        <h1 className="max-w-[24ch] font-bold leading-tight tracking-[-0.03em] text-foreground" style={{ fontSize: 'clamp(26px, 4vw, 46px)' }}>{event.title}</h1>
+        <h1 className="max-w-[24ch] text-[clamp(26px,4vw,46px)] font-bold leading-tight tracking-[-0.03em] text-foreground">{event.title}</h1>
         <p className="mt-3 max-w-[60ch] text-[15px] leading-relaxed text-muted-foreground">{event.desc}</p>
 
         <div className="mt-6 flex flex-wrap items-center gap-5">

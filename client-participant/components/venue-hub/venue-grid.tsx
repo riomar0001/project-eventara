@@ -40,7 +40,7 @@ export function VenueGrid({ venues, onViewDetail, onEditVenue, onShareVenue, onR
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
       {/* Partnered venues (top 3 on page 1) */}
       {partneredVenues.map((venue) => (
-        <div key={venue.id}>
+        <div key={venue.id} className="h-full">
           <VenueCard venue={venue} onView={onViewDetail} onEdit={onEditVenue} onShare={onShareVenue} onReport={onReportVenue} />
         </div>
       ))}
@@ -54,7 +54,7 @@ export function VenueGrid({ venues, onViewDetail, onEditVenue, onShareVenue, onR
 
       {/* Community venues (rest on page 1, all on other pages) */}
       {communityVenues.map((venue) => (
-        <div key={venue.id}>
+        <div key={venue.id} className="h-full">
           <VenueCard venue={venue} onView={onViewDetail} onEdit={onEditVenue} onShare={onShareVenue} onReport={onReportVenue} />
         </div>
       ))}

@@ -15,15 +15,10 @@ export function PageHeader({ totalVenues, avgRating = 4.7, totalReviews = 187 }:
         <div className="mb-8 flex flex-wrap items-start justify-between gap-5">
           <div>
             <div className="mb-3 inline-flex items-center gap-2.5 font-mono text-[11px] tracking-[0.18em] text-text-mute uppercase">
-              <span
-                className="inline-block h-1.5 w-1.5 rounded-full bg-lime"
-                style={{
-                  boxShadow: '0 0 12px var(--lime-glow)'
-                }}
-              />
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-lime shadow-[0_0_12px_var(--lime-glow)]" />
               COMMUNITY DATABASE · DAVAO
             </div>
-            <h1 className="m-0 text-[clamp(42px,5.5vw,72px)] font-bold tracking-[-0.035em] text-text" style={{ lineHeight: 1 }}>
+            <h1 className="m-0 text-[clamp(42px,5.5vw,72px)] leading-none font-bold tracking-[-0.035em] text-text">
               Venue Hub
             </h1>
             <p className="mt-3.5 mb-0 max-w-[62ch] text-[16px] leading-[1.55] text-text-dim">
@@ -37,12 +32,12 @@ export function PageHeader({ totalVenues, avgRating = 4.7, totalReviews = 187 }:
               <div className="font-mono text-[32px] font-semibold tracking-[-0.03em] text-lime">{totalVenues}</div>
               <div className="mt-0.5 font-mono text-[10.5px] tracking-[0.18em] text-text-mute uppercase">Listings</div>
             </div>
-            <div className="h-[38px] w-px bg--line-soft" />
+            <div className="h-[38px] w-px bg-line-soft" />
             <div className="text-right">
               <div className="font-mono text-[32px] font-semibold tracking-[-0.03em] text-text">{avgRating}</div>
               <div className="mt-0.5 font-mono text-[10.5px] tracking-[0.18em] text-text-mute uppercase">Avg rating</div>
             </div>
-            <div className="h-[38px] w-px bg--line-soft" />
+            <div className="h-[38px] w-px bg-line-soft" />
             <div className="text-right">
               <div className="font-mono text-[32px] font-semibold tracking-[-0.03em] text-text">{totalReviews}</div>
               <div className="mt-0.5 font-mono text-[10.5px] tracking-[0.18em] text-text-mute uppercase">Reviews</div>

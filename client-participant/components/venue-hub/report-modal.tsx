@@ -83,7 +83,7 @@ export function ReportModal({ venue, isOpen, onClose, onSubmit }: ReportModalPro
               name="reason"
               value={formData.reason}
               onChange={handleChange}
-              className="mt-1.5 w-full rounded-lg border border-line-soft bg-page px-3 py-2.5 text-text transition-all focus:border--lime focus:ring-2 focus:ring-[oklch(0.9_0.22_128_/_0.1)] focus:outline-none"
+              className="mt-1.5 w-full rounded-lg border border-line-soft bg-page px-3 py-2.5 text-text transition-all focus:border-lime focus:ring-2 focus:ring-[oklch(0.9_0.22_128_/_0.1)] focus:outline-none"
             >
               {REPORT_REASONS.map((reason) => (
                 <option key={reason.value} value={reason.value}>
@@ -91,7 +91,7 @@ export function ReportModal({ venue, isOpen, onClose, onSubmit }: ReportModalPro
                 </option>
               ))}
             </select>
-            {errors.reason && <p className="mt-1 text-xs text--red">{errors.reason}</p>}
+            {errors.reason && <p className="mt-1 text-xs text-red">{errors.reason}</p>}
           </div>
 
           {/* Details */}
@@ -102,10 +102,10 @@ export function ReportModal({ venue, isOpen, onClose, onSubmit }: ReportModalPro
               value={formData.detail}
               onChange={handleChange}
               rows={4}
-              className="mt-1.5 w-full rounded-lg border border-line-soft bg-page px-3 py-2.5 text-text placeholder-text-mute transition-all focus:border--lime focus:ring-2 focus:ring-[oklch(0.9_0.22_128_/_0.1)] focus:outline-none"
+              className="mt-1.5 w-full rounded-lg border border-line-soft bg-page px-3 py-2.5 text-text placeholder-text-mute transition-all focus:border-lime focus:ring-2 focus:ring-[oklch(0.9_0.22_128_/_0.1)] focus:outline-none"
               placeholder="Please provide details about your report..."
             />
-            {errors.detail && <p className="mt-1 text-xs text--red">{errors.detail}</p>}
+            {errors.detail && <p className="mt-1 text-xs text-red">{errors.detail}</p>}
           </div>
         </form>
 
@@ -119,7 +119,7 @@ export function ReportModal({ venue, isOpen, onClose, onSubmit }: ReportModalPro
           </button>
           <button
             onClick={(e) => handleSubmit(e as React.MouseEvent<HTMLButtonElement>)}
-            className="flex-1 rounded-full border border--amber bg-[oklch(0.82_0.17_75_/_0.12)] px-4 py-2.5 font-semibold text-amber transition-all hover:bg-[oklch(0.82_0.17_75_/_0.2)]"
+            className="flex-1 rounded-full border border-amber bg-[oklch(0.82_0.17_75_/_0.12)] px-4 py-2.5 font-semibold text-amber transition-all hover:bg-[oklch(0.82_0.17_75_/_0.2)]"
           >
             Submit report
           </button>
