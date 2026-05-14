@@ -130,6 +130,24 @@ FEATURES: list[dict] = [
         "description": "Review and process volunteer applications.",
         "is_enabled": True,
     },
+    {
+        "slug": "dashboard",
+        "name": "Dashboard",
+        "description": "View aggregated platform metrics on the admin dashboard.",
+        "is_enabled": True,
+    },
+    {
+        "slug": "app-feedback",
+        "name": "App Feedback",
+        "description": "Submit anonymous app feedback and view feedback analytics.",
+        "is_enabled": True,
+    },
+    {
+        "slug": "analytics",
+        "name": "Analytics",
+        "description": "View logistics, performance, demographic, on-going, and historical analytics.",
+        "is_enabled": True,
+    },
 ]
 
 ROLES: list[dict] = [
@@ -189,6 +207,8 @@ ROLE_PERMISSIONS: dict[str, dict[str, list[RoleAction]]] = {
         "volunteers": [RoleAction.READ],
         "volunteer-roles": ALL_ACTIONS,
         "volunteer-applications": [RoleAction.UPDATE],
+        "dashboard": [RoleAction.READ],
+        "analytics": [RoleAction.READ],
     },
     "community_leader": {
         "venues": [RoleAction.READ],
@@ -204,6 +224,9 @@ ROLE_PERMISSIONS: dict[str, dict[str, list[RoleAction]]] = {
         "event-volunteers": [RoleAction.READ],
         "volunteers": [RoleAction.READ],
         "volunteer-roles": [RoleAction.READ],
+        "dashboard": [RoleAction.READ],
+        "app-feedback": [RoleAction.READ],
+        "analytics": [RoleAction.READ],
     },
     "system_administrator": {
         "venues": ALL_ACTIONS,
@@ -221,6 +244,9 @@ ROLE_PERMISSIONS: dict[str, dict[str, list[RoleAction]]] = {
         "volunteers": [RoleAction.CREATE, RoleAction.READ, RoleAction.UPDATE],
         "volunteer-roles": ALL_ACTIONS,
         "volunteer-applications": [RoleAction.UPDATE],
+        "dashboard": [RoleAction.READ],
+        "app-feedback": [RoleAction.READ],
+        "analytics": [RoleAction.READ],
     },
 }
 
