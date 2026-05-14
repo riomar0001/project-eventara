@@ -43,16 +43,16 @@ export function TweaksPanel() {
       {/* Toggle button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="rounded-full border border-[var(--line-soft)] bg-[var(--surface)] p-3 shadow-lg transition-all hover:border-[var(--lime)] hover:shadow-[0_0_24px_-6px_var(--lime-glow)]"
+        className="rounded-full border border-line-soft bg-surface p-3 shadow-lg transition-all hover:border--lime hover:shadow-[0_0_24px_-6px_var(--lime-glow)]"
       >
-        <Settings className="h-5 w-5 text-[var(--lime)]" />
+        <Settings className="h-5 w-5 text-lime" />
       </button>
 
       {/* Panel */}
       {isOpen && (
-        <div className="absolute right-0 bottom-16 w-56 space-y-4 rounded-2xl border border-[var(--line-soft)] bg-[var(--surface)] p-4 shadow-lg">
-          <h4 className="flex items-center gap-2 text-sm font-semibold text-[var(--text)]">
-            <span className="h-1.5 w-1.5 rounded-full bg-[var(--lime)]" />
+        <div className="absolute right-0 bottom-16 w-56 space-y-4 rounded-2xl border border-line-soft bg-surface p-4 shadow-lg">
+          <h4 className="flex items-center gap-2 text-sm font-semibold text-text">
+            <span className="h-1.5 w-1.5 rounded-full bg-lime" />
             Theme Presets
           </h4>
 
@@ -63,7 +63,7 @@ export function TweaksPanel() {
                 onClick={() => applyTheme(index)}
                 className={cn(
                   'w-full rounded-lg px-3 py-2 text-left text-sm font-medium transition-all',
-                  currentTheme === index ? 'bg-[var(--lime)] text-[#0a1005]' : 'border border-[var(--line-soft)] text-[var(--text)] hover:border-[var(--lime)]'
+                  currentTheme === index ? 'bg-lime text-[#0a1005]' : 'border border-line-soft text-text hover:border--lime'
                 )}
               >
                 {preset.name}
@@ -71,7 +71,7 @@ export function TweaksPanel() {
             ))}
           </div>
 
-          <div className="border-t border-[var(--line-soft)] pt-3 text-xs text-[var(--text-mute)]">Click to change theme colors. Refresh to reset.</div>
+          <div className="border-t border-line-soft pt-3 text-xs text-text-mute">Click to change theme colors. Refresh to reset.</div>
         </div>
       )}
     </div>

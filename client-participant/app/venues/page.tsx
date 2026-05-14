@@ -5,7 +5,7 @@
 'use client';
 
 import { Footer } from '@/components/footer/footer';
-import { AuthenticatedNav } from '@/components/navigation';
+import { Navbar } from '@/components/navigation/navbar';
 import { PageHeader, ActionBar, ResultsBar, VenueGrid, Pagination, AddVenueModal, VenueDetailModal, ReportModal } from '@/components/venue-hub';
 import { useVenueFilters } from '@/hooks/use-venue-filters';
 import { useVenueModals } from '@/hooks/use-venue-modals';
@@ -43,7 +43,7 @@ export default function VenuesPage() {
   }
 
   return (
-    <div className="relative min-h-screen bg-[var(--bg)]">
+    <div className="relative min-h-screen bg-page">
       {/* Page Mesh - Ambient orbs */}
       <div className="pointer-events-none absolute inset-0 top-0 z-0 h-[620px] overflow-hidden">
         {/* Lime orb (top-left) */}
@@ -86,7 +86,7 @@ export default function VenuesPage() {
       {/* Content */}
       <div className="relative z-10">
         {/* Navigation */}
-        <AuthenticatedNav userName="Camille" userTier="Participant" activeLink="Venue Hub" />
+        <Navbar />
 
         {/* Page Header */}
         <PageHeader totalVenues={MOCK_VENUES.length} />
@@ -151,9 +151,9 @@ export default function VenuesPage() {
 
       {/* Toast Notification */}
       {modals.toast && (
-        <div className="fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-lg border border-[var(--line)] bg-[var(--surface)] px-4 py-3 shadow-lg">
-          <div className="h-1.5 w-1.5 rounded-full bg-[var(--lime)] shadow-[var(--lime-glow)] shadow-lg" />
-          <span className="text-sm text-[var(--text)]">{modals.toast}</span>
+        <div className="fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-lg border border-line bg-surface px-4 py-3 shadow-lg">
+          <div className="h-1.5 w-1.5 rounded-full bg-lime shadow-lime-glow shadow-lg" />
+          <span className="text-sm text-text">{modals.toast}</span>
         </div>
       )}
     </div>

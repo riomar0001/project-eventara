@@ -34,7 +34,7 @@ export function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-[var(--line-soft)] pt-12 pb-10">
+    <footer className="border-t border-line-soft pt-12 pb-10">
       <div className="mx-auto flex max-w-[1240px] flex-wrap items-center justify-between gap-6 px-8 max-[900px]:px-5">
         {/* Logo */}
         <a href="#" className="flex items-center gap-2.5 text-lg font-bold tracking-[-0.02em]" aria-label="Eventara home">
@@ -54,9 +54,9 @@ export function Footer() {
         </a>
 
         {/* Footer Links */}
-        <div className="flex gap-[26px] text-[13.5px] text-[var(--text-dim)]">
+        <div className="flex gap-[26px] text-[13.5px] text-text-dim">
           {FOOTER_LINKS.map((link) => (
-            <a key={link.label} href={link.href} className="hover:text-[var(--text)]">
+            <a key={link.label} href={link.href} className="hover:text-text">
               {link.label}
             </a>
           ))}
@@ -65,7 +65,7 @@ export function Footer() {
         {/* Socials */}
         <div className="flex gap-2.5">
           <a
-            className="ease grid h-9 w-9 place-items-center rounded-[10px] border border-[var(--line-soft)] text-[var(--text-dim)] transition-all duration-[180ms] hover:border-[oklch(0.82_0.17_75_/_0.5)] hover:bg-[oklch(0.82_0.17_75_/_0.06)] hover:text-[var(--amber)]"
+            className="ease grid h-9 w-9 place-items-center rounded-[10px] border border-line-soft text-text-dim transition-all duration-[180ms] hover:border-[oklch(0.82_0.17_75_/_0.5)] hover:bg-[oklch(0.82_0.17_75_/_0.06)] hover:text-amber"
             href="#"
             aria-label="Twitter"
             target="_blank"
@@ -74,7 +74,7 @@ export function Footer() {
             <TwitterIcon size={15} />
           </a>
           <a
-            className="ease grid h-9 w-9 place-items-center rounded-[10px] border border-[var(--line-soft)] text-[var(--text-dim)] transition-all duration-[180ms] hover:border-[oklch(0.82_0.17_75_/_0.5)] hover:bg-[oklch(0.82_0.17_75_/_0.06)] hover:text-[var(--amber)]"
+            className="ease grid h-9 w-9 place-items-center rounded-[10px] border border-line-soft text-text-dim transition-all duration-[180ms] hover:border-[oklch(0.82_0.17_75_/_0.5)] hover:bg-[oklch(0.82_0.17_75_/_0.06)] hover:text-amber"
             href="#"
             aria-label="Discord"
             target="_blank"
@@ -83,7 +83,7 @@ export function Footer() {
             <DiscordIcon size={16} />
           </a>
           <a
-            className="ease grid h-9 w-9 place-items-center rounded-[10px] border border-[var(--line-soft)] text-[var(--text-dim)] transition-all duration-[180ms] hover:border-[oklch(0.82_0.17_75_/_0.5)] hover:bg-[oklch(0.82_0.17_75_/_0.06)] hover:text-[var(--amber)]"
+            className="ease grid h-9 w-9 place-items-center rounded-[10px] border border-line-soft text-text-dim transition-all duration-[180ms] hover:border-[oklch(0.82_0.17_75_/_0.5)] hover:bg-[oklch(0.82_0.17_75_/_0.06)] hover:text-amber"
             href="#"
             aria-label="Telegram"
             target="_blank"
@@ -96,9 +96,9 @@ export function Footer() {
 
       {/* Bottom bar */}
       <div className="mx-auto mt-7 flex max-w-[1240px] flex-wrap justify-between gap-3 px-8 max-[900px]:px-5">
-        <div className="font-mono text-[12.5px] text-[var(--text-mute)]">&copy; {year} EVENTARA &mdash; Built for the Davao DeFi Community PH.</div>
-        <div className="font-mono text-[12.5px] text-[var(--text-dim)]">
-          <span className="text-[var(--lime)]">&#9679;</span> All systems operational
+        <div className="font-mono text-[12.5px] text-text-mute">&copy; {year} EVENTARA &mdash; Built for the Davao DeFi Community PH.</div>
+        <div className="font-mono text-[12.5px] text-text-dim">
+          <span className="text-lime">&#9679;</span> All systems operational
         </div>
       </div>
     </footer>

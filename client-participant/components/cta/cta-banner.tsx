@@ -33,7 +33,7 @@ export function CTABanner() {
 
           {/* Content */}
           <div className="relative z-10">
-            <div className="mb-4 inline-flex items-center gap-2.5 font-mono text-[11px] tracking-[0.18em] text-[var(--text-mute)] uppercase">
+            <div className="mb-4 inline-flex items-center gap-2.5 font-mono text-[11px] tracking-[0.18em] text-text-mute uppercase">
               <span
                 className="inline-block h-1.5 w-1.5 rounded-full"
                 style={{
@@ -45,7 +45,7 @@ export function CTABanner() {
             </div>
 
             <h2
-              className="mx-auto mb-4 max-w-none font-semibold text-balance text-[var(--text)]"
+              className="mx-auto mb-4 max-w-none font-semibold text-balance text-text"
               style={{
                 fontSize: 'clamp(32px, 4vw, 52px)',
                 letterSpacing: '-0.035em',
@@ -55,21 +55,21 @@ export function CTABanner() {
               Ready to dive into the future of finance?
             </h2>
 
-            <p className="mx-auto mb-9 max-w-[54ch] text-[16.5px] leading-[1.65] text-[var(--text-dim)]" style={{ textWrap: 'pretty' }}>
+            <p className="mx-auto mb-9 max-w-[54ch] text-[16.5px] leading-[1.65] text-text-dim" style={{ textWrap: 'pretty' }}>
               Create your participant account today to seamlessly track your events, venues, and connect with the Davao DeFi community.
             </p>
 
             {/* CTA Buttons */}
             <div className="flex flex-wrap justify-center gap-3.5">
               <button
-                className="inline-flex items-center justify-center gap-2.5 rounded-full bg-[var(--lime)] px-7 py-4 text-[15px] font-semibold text-[#0a1005] text-white transition-all duration-180 hover:-translate-y-0.5"
+                className="inline-flex items-center justify-center gap-2.5 rounded-full bg-lime px-7 py-4 text-[15px] font-semibold text-white transition-all duration-180 hover:-translate-y-0.5"
                 style={{
                   boxShadow: '0 8px 28px -10px var(--lime-glow), inset 0 -1px 0 oklch(0.7 0.2 128)'
                 }}
               >
                 Create Account
               </button>
-              <button className="inline-flex items-center justify-center gap-2.5 rounded-full border border-[var(--line)] px-7 py-4 text-[15px] font-semibold text-[var(--text)] transition-all duration-180 hover:bg-[var(--line-soft)]">
+              <button className="inline-flex items-center justify-center gap-2.5 rounded-full border border-line px-7 py-4 text-[15px] font-semibold text-text transition-all duration-180 hover:bg--line-soft">
                 Login to Dashboard
               </button>
             </div>

@@ -11,32 +11,17 @@ import { TweaksPanel } from '@/components/theme/tweaks-panel';
 import { useModalState } from '@/hooks/use-modal-state';
 
 export default function Page() {
-  const { isOpen, selectedEventId, openModal, closeModal } = useModalState();
+  const { isOpen, event, openModal, closeModal } = useModalState();
 
   return (
-    <main className="min-h-screen bg-[var(--bg)]">
-      {/* Navigation */}
+    <main className="min-h-screen bg-page">
       <Navbar />
-
-      {/* Hero Section */}
       <HeroSection />
-
-      {/* Live Event Card */}
       <LiveEventCard />
-
-      {/* Events Section */}
-      <EventsSection onEventClick={(event) => openModal(String(event.id))} />
-
-      {/* CTA Banner */}
+      <EventsSection onEventClick={openModal} />
       <CTABanner />
-
-      {/* Footer */}
       <Footer />
-
-      {/* Event Detail Modal */}
-      <EventDetailModal eventId={selectedEventId} isOpen={isOpen} onClose={closeModal} />
-
-      {/* Theme Tweaks Panel */}
+      <EventDetailModal event={event} isOpen={isOpen} onClose={closeModal} />
       <TweaksPanel />
     </main>
   );

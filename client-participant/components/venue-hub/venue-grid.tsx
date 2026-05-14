@@ -23,8 +23,8 @@ export function VenueGrid({ venues, onViewDetail, onEditVenue, onShareVenue, onR
     return (
       <div className="py-16 text-center">
         <div className="mb-4 text-6xl">🏢</div>
-        <h4 className="m-0 mb-2 text-xl font-semibold text-[var(--text)]">No venues found</h4>
-        <p className="text-base text-[var(--text-dim)]">Try adjusting your filters or search terms</p>
+        <h4 className="m-0 mb-2 text-xl font-semibold text-text">No venues found</h4>
+        <p className="text-base text-text-dim">Try adjusting your filters or search terms</p>
       </div>
     );
   }

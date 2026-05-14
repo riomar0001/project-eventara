@@ -14,7 +14,7 @@ export function EventsDirectoryFeatured({ featured, onOpen }: EventsDirectoryFea
       className="relative mt-10 grid min-h-[340px] overflow-hidden rounded-[24px] border"
       style={{
         gridTemplateColumns: '1.25fr 1fr',
-        background: 'linear-gradient(180deg, var(--surface), oklch(0.18 0.01 150))',
+        background: 'linear-gradient(180deg, oklch(1 0 0), oklch(0.97 0.005 150))',
         borderColor: 'var(--line)'
       }}
     >
@@ -22,7 +22,7 @@ export function EventsDirectoryFeatured({ featured, onOpen }: EventsDirectoryFea
       <div
         className="pointer-events-none absolute inset-0"
         style={{
-          background: 'radial-gradient(circle at 85% 20%, oklch(0.82 0.17 75 / 0.18), transparent 45%)'
+          background: 'radial-gradient(circle at 85% 20%, oklch(0.62 0.16 60 / 0.1), transparent 45%)'
         }}
       />
 
@@ -32,8 +32,8 @@ export function EventsDirectoryFeatured({ featured, onOpen }: EventsDirectoryFea
         <div
           className="inline-flex w-fit items-center gap-2 rounded-full border px-3 py-[6px] font-mono text-[11px] tracking-[0.16em]"
           style={{
-            background: 'oklch(0.82 0.17 75 / 0.12)',
-            borderColor: 'oklch(0.82 0.17 75 / 0.4)',
+            background: 'oklch(0.62 0.16 60 / 0.1)',
+            borderColor: 'oklch(0.62 0.16 60 / 0.35)',
             color: 'var(--amber)'
           }}
         >
@@ -57,35 +57,23 @@ export function EventsDirectoryFeatured({ featured, onOpen }: EventsDirectoryFea
           {featured.title}
         </h2>
 
-        <p className="m-0 max-w-[48ch] text-[14.5px] leading-[1.55]" style={{ color: 'var(--text-dim)' }}>
+        <p className="m-0 max-w-[48ch] text-[14.5px] leading-[1.55] text-muted-foreground">
           {featured.desc}
         </p>
 
         {/* Meta */}
-        <div className="mt-2 grid grid-cols-3 gap-5 border-y py-[18px]" style={{ borderColor: 'var(--line-soft)' }}>
+        <div className="mt-2 grid grid-cols-3 gap-5 border-y border-border py-[18px]">
           <div>
-            <div className="font-mono text-[10px] tracking-[0.16em] uppercase" style={{ color: 'var(--text-mute)' }}>
-              Date
-            </div>
-            <div className="mt-[3px] text-[14px] font-medium" style={{ color: 'var(--text)' }}>
-              {featured.date}
-            </div>
+            <div className="font-mono text-[10px] tracking-[0.16em] uppercase text-muted-foreground">Date</div>
+            <div className="mt-[3px] text-[14px] font-medium text-foreground">{featured.date}</div>
           </div>
           <div>
-            <div className="font-mono text-[10px] tracking-[0.16em] uppercase" style={{ color: 'var(--text-mute)' }}>
-              Time
-            </div>
-            <div className="mt-[3px] text-[14px] font-medium" style={{ color: 'var(--text)' }}>
-              {featured.time}
-            </div>
+            <div className="font-mono text-[10px] tracking-[0.16em] uppercase text-muted-foreground">Time</div>
+            <div className="mt-[3px] text-[14px] font-medium text-foreground">{featured.time}</div>
           </div>
           <div>
-            <div className="font-mono text-[10px] tracking-[0.16em] uppercase" style={{ color: 'var(--text-mute)' }}>
-              Venue
-            </div>
-            <div className="mt-[3px] text-[14px] font-medium" style={{ color: 'var(--text)' }}>
-              {featured.venue}
-            </div>
+            <div className="font-mono text-[10px] tracking-[0.16em] uppercase text-muted-foreground">Venue</div>
+            <div className="mt-[3px] text-[14px] font-medium text-foreground">{featured.venue}</div>
           </div>
         </div>
 
@@ -95,7 +83,7 @@ export function EventsDirectoryFeatured({ featured, onOpen }: EventsDirectoryFea
             className="inline-flex items-center justify-center gap-[10px] rounded-full px-5 py-[13px] text-[14px] font-semibold tracking-[-0.01em] transition-all hover:-translate-y-px"
             style={{
               background: 'var(--lime)',
-              color: '#0a1005',
+              color: '#fff',
               boxShadow: '0 8px 28px -10px var(--lime-glow)'
             }}
             onClick={onOpen}
@@ -145,8 +133,8 @@ export function EventsDirectoryFeatured({ featured, onOpen }: EventsDirectoryFea
           }}
         />
         {/* Orbs */}
-        <div className="absolute top-[30%] left-[20%] h-[220px] w-[220px] rounded-full opacity-30 blur-[34px]" style={{ background: 'var(--lime)' }} />
-        <div className="absolute right-[12%] bottom-[18%] h-[180px] w-[180px] rounded-full opacity-45 blur-[30px]" style={{ background: 'var(--amber)' }} />
+        <div className="absolute top-[30%] left-[20%] h-[220px] w-[220px] rounded-full opacity-30 blur-[34px] bg-primary" />
+        <div className="absolute right-[12%] bottom-[18%] h-[180px] w-[180px] rounded-full opacity-45 blur-[30px] bg-orange-400" />
         {/* Year */}
         <div
           className="absolute top-8 right-10 leading-[0.8] font-bold tracking-[-0.05em]"

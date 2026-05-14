@@ -1,27 +1,30 @@
 import { useState, useCallback } from 'react';
 
-interface ModalState {
-  isOpen: boolean;
-  selectedEventId: string | null;
+export interface UpcomingEvent {
+  id: number;
+  date: string;
+  title: string;
+  desc: string;
+  venue: string;
+  chip: string;
+  seats: string;
+  orbColor: 'lime' | 'amber';
+  angle: string;
 }
 
-export function useModalState(initialOpen = false) {
-  const [state, setState] = useState<ModalState>({
-    isOpen: initialOpen,
-    selectedEventId: null
-  });
+export function useModalState() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [event, setEvent] = useState<UpcomingEvent | null>(null);
 
-  const openModal = useCallback((eventId: string) => {
-    setState({ isOpen: true, selectedEventId: eventId });
+  const openModal = useCallback((ev: UpcomingEvent) => {
+    setEvent(ev);
+    setIsOpen(true);
   }, []);
 
   const closeModal = useCallback(() => {
-    setState({ isOpen: false, selectedEventId: null });
+    setIsOpen(false);
+    setEvent(null);
   }, []);
 
-  return {
-    ...state,
-    openModal,
-    closeModal
-  };
+  return { isOpen, event, openModal, closeModal };
 }

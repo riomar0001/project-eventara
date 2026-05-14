@@ -2,226 +2,146 @@
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
 
-/* Eventara Theme Colors */
-:root {
-  --bg: oklch(0.985 0.004 150) !important;
-  --bg-2: oklch(0.965 0.005 150) !important;
-  --surface: oklch(1 0 0) !important;
-  --surface-2: oklch(0.975 0.005 150) !important;
-  --line: oklch(0.86 0.01 150) !important;
-  --line-soft: oklch(0.9 0.008 150 / 0.85) !important;
-  --text: oklch(0.2 0.012 150) !important;
-  --text-dim: oklch(0.42 0.012 150) !important;
-  --text-mute: oklch(0.58 0.012 150) !important;
-  --lime: oklch(0.7 0.2 130) !important;
-  --lime-dim: oklch(0.78 0.19 128) !important;
-  --lime-glow: oklch(0.9 0.22 128 / 0.35) !important;
-  --amber: oklch(0.82 0.17 75) !important;
-  --amber-dim: oklch(0.72 0.16 75) !important;
-  --amber-glow: oklch(0.82 0.17 75 / 0.4) !important;
-  --red: oklch(0.7 0.2 25) !important;
+@theme inline {
+  --color-background: var(--bg);
+  --color-foreground: var(--text);
+  --color-card: var(--surface);
+  --color-card-foreground: var(--text);
+  --color-popover: var(--surface);
+  --color-popover-foreground: var(--text);
+  --color-primary: var(--lime);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--text-dim);
+  --color-accent: var(--amber);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--red);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--line);
+  --color-input: var(--line-soft);
+  --color-ring: var(--lime);
+  --color-chart-1: var(--lime);
+  --color-chart-2: var(--amber);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--bg);
+  --color-sidebar-foreground: var(--text);
+  --color-sidebar-primary: var(--lime);
+  --color-sidebar-primary-foreground: var(--primary-foreground);
+  --color-sidebar-accent: var(--bg-2);
+  --color-sidebar-accent-foreground: var(--text);
+  --color-sidebar-border: var(--line-soft);
+  --color-sidebar-ring: var(--lime);
+  --radius: var(--radius);
+
+  /* Eventara surface */
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-page: var(--bg);
+  --color-page-2: var(--bg-2);
+  --color-line: var(--line);
+  --color-line-soft: var(--line-soft);
+
+  /* Eventara text */
+  --color-text: var(--text);
+  --color-text-dim: var(--text-dim);
+  --color-text-mute: var(--text-mute);
+
+  /* Eventara accents – overrides Tailwind's built-in lime/amber */
+  --color-lime: var(--lime);
+  --color-lime-dim: var(--lime-dim);
+  --color-lime-glow: var(--lime-glow);
+  --color-amber: var(--amber);
+  --color-amber-dim: var(--amber-dim);
+  --color-amber-glow: var(--amber-glow);
+  --color-red: var(--red);
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.841 0.238 128.85);
-  --primary-foreground: oklch(0.405 0.101 131.063);
+  /* Eventara surface colors */
+  --bg: oklch(0.985 0.004 150);
+  --bg-2: oklch(0.965 0.005 150);
+  --surface: oklch(1 0 0);
+  --surface-2: oklch(0.975 0.005 150);
+  --line: oklch(0.86 0.01 150);
+  --line-soft: oklch(0.9 0.008 150 / 0.85);
+  --text: oklch(0.2 0.012 150);
+  --text-dim: oklch(0.42 0.012 150);
+  --text-mute: oklch(0.58 0.012 150);
+
+  /* Eventara accent colors */
+  --lime: oklch(0.7 0.2 130);
+  --lime-dim: oklch(0.6 0.18 130);
+  --lime-glow: oklch(0.7 0.2 130 / 0.32);
+  --amber: oklch(0.62 0.16 60);
+  --amber-dim: oklch(0.55 0.15 60);
+  --amber-glow: oklch(0.62 0.16 60 / 0.32);
+  --red: oklch(0.7 0.2 25);
+
+  /* shadcn tokens — aliased to Eventara palette */
+  --background: var(--bg);
+  --foreground: var(--text);
+  --card: var(--surface);
+  --card-foreground: var(--text);
+  --popover: var(--surface);
+  --popover-foreground: var(--text);
+  --primary: var(--lime);
+  --primary-foreground: oklch(1 0 0);
   --secondary: oklch(0.967 0.001 286.375);
   --secondary-foreground: oklch(0.21 0.006 285.885);
   --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.879 0.169 91.605);
-  --chart-2: oklch(0.769 0.188 70.08);
+  --muted-foreground: var(--text-dim);
+  --accent: var(--amber);
+  --accent-foreground: oklch(1 0 0);
+  --destructive: var(--red);
+  --destructive-foreground: oklch(1 0 0);
+  --border: var(--line);
+  --input: var(--line-soft);
+  --ring: var(--lime);
+  --chart-1: var(--lime);
+  --chart-2: var(--amber);
   --chart-3: oklch(0.666 0.179 58.318);
   --chart-4: oklch(0.555 0.163 48.998);
   --chart-5: oklch(0.473 0.137 46.201);
   --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.648 0.2 131.684);
-  --sidebar-primary-foreground: oklch(0.986 0.031 120.757);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-}
-
-.dark {
-  /* Eventara dark theme variables (matching Eventara-Events-1.html) */
-  --bg: oklch(0.17 0.008 150);
-  --bg-2: oklch(0.21 0.01 150);
-  --surface: oklch(0.23 0.012 150);
-  --surface-2: oklch(0.27 0.014 150);
-  --line: oklch(0.32 0.015 150);
-  --line-soft: oklch(0.28 0.012 150 / 0.6);
-  --text: oklch(0.98 0.005 150);
-  --text-dim: oklch(0.78 0.01 150);
-  --text-mute: oklch(0.58 0.012 150);
-  --lime: oklch(0.9 0.22 128);
-  --lime-dim: oklch(0.78 0.19 128);
-  --lime-glow: oklch(0.9 0.22 128 / 0.35);
-  --amber: oklch(0.82 0.17 75);
-  --amber-dim: oklch(0.72 0.16 75);
-  --amber-glow: oklch(0.82 0.17 75 / 0.4);
-  --red: oklch(0.7 0.2 25);
-
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.768 0.233 130.85);
-  --primary-foreground: oklch(0.405 0.101 131.063);
-  --secondary: oklch(0.274 0.006 286.033);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.879 0.169 91.605);
-  --chart-2: oklch(0.769 0.188 70.08);
-  --chart-3: oklch(0.666 0.179 58.318);
-  --chart-4: oklch(0.555 0.163 48.998);
-  --chart-5: oklch(0.473 0.137 46.201);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.768 0.233 130.85);
-  --sidebar-primary-foreground: oklch(0.274 0.072 132.109);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --sidebar: var(--bg);
+  --sidebar-foreground: var(--text);
+  --sidebar-primary: var(--lime);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: var(--bg-2);
+  --sidebar-accent-foreground: var(--text);
+  --sidebar-border: var(--line-soft);
+  --sidebar-ring: var(--lime);
 }
 
 @layer base {
-  * {
-    border-color: var(--line-soft);
-  }
+  * { border-color: var(--line-soft); }
   body {
     background: var(--bg);
     color: var(--text);
     -webkit-font-smoothing: antialiased;
     font-feature-settings: 'ss01', 'cv11';
   }
-  html {
-    @apply font-sans;
-  }
+  html { @apply font-sans; }
 }
 
-/* Eventara Component Styles */
-@layer components {
-  .mono {
-    @apply font-mono;
-  }
-
-  .eyebrow {
-    @apply inline-flex items-center gap-2.5 font-mono text-xs tracking-widest text-[var(--text-mute)] uppercase;
-  }
-
-  .eyebrow-dot {
-    @apply h-1.5 w-1.5 rounded-full bg-[var(--lime)] shadow-[0_0_12px_var(--lime-glow)];
-  }
-
-  .btn-primary {
-    @apply inline-flex items-center justify-center gap-2.5 rounded-full bg-[var(--lime)] px-5.5 py-3.5 text-sm font-semibold text-[#0a1005] shadow-[0_8px_28px_-10px_var(--lime-glow),inset_0_-1px_0_oklch(0.7_0.2_128)] transition-all duration-180 hover:-translate-y-0.5;
-  }
-
-  .btn-amber-outline {
-    @apply inline-flex items-center justify-center gap-2.5 rounded-full border border-[var(--amber)] px-5.5 py-3.5 text-sm font-semibold text-[var(--amber)] transition-all duration-180 hover:bg-[oklch(0.82_0.17_75_/_0.12)] hover:shadow-[0_0_24px_-6px_var(--amber-glow)];
-  }
-
-  .btn-ghost {
-    @apply inline-flex items-center justify-center gap-2.5 rounded-full border border-transparent px-5.5 py-3.5 text-sm font-semibold text-[var(--text)] transition-all duration-180 hover:border-[oklch(1_0_0_/_0.2)];
-  }
-
-  .btn-white-outline {
-    @apply inline-flex items-center justify-center gap-2.5 rounded-full border border-[oklch(1_0_0_/_0.3)] px-5.5 py-3.5 text-sm font-semibold text-[var(--text)] transition-all duration-180 hover:border-[var(--text)] hover:bg-[oklch(1_0_0_/_0.04)];
-  }
-
-  .card {
-    @apply rounded-2xl border border-[var(--line-soft)] bg-[var(--surface)] p-6;
-  }
-
-  .container {
-    @apply mx-auto max-w-[1240px] px-8;
-  }
-
-  .mesh-bg {
-    @apply pointer-events-none absolute inset-0 overflow-hidden;
-  }
-
-  .mesh-orb {
-    @apply absolute rounded-full opacity-55 blur-[80px];
-  }
-}
-
-/* Animations */
 @keyframes wave {
-  0%,
-  100% {
-    transform: scaleY(1);
-  }
-  50% {
-    transform: scaleY(1.4);
-  }
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(1.4); }
 }
-
 @keyframes ping {
-  0% {
-    opacity: 1;
-  }
-  75% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 0;
-  }
+  0% { opacity: 1; }
+  75%, 100% { opacity: 0; }
 }
-
 @keyframes pulse-scale {
-  0% {
-    transform: scale(0.6);
-    opacity: 0.6;
-  }
-  80%,
-  100% {
-    transform: scale(2);
-    opacity: 0;
-  }
+  0% { transform: scale(0.6); opacity: 0.6; }
+  80%, 100% { transform: scale(2); opacity: 0; }
 }
-
-@keyframes fadein {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
+@keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
 @keyframes modal-pop {
-  from {
-    opacity: 0;
-    transform: translateY(12px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
+  from { opacity: 0; transform: translateY(12px) scale(0.98); }
+  to { opacity: 1; transform: none; }
 }

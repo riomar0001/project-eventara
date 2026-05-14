@@ -46,7 +46,7 @@ export function HeroSection() {
       {/* Content */}
       <div className="relative z-10 container mx-auto max-w-[1240px] px-8">
         {/* Eyebrow */}
-        <div className="inline-flex items-center gap-2.5 font-mono text-[11px] tracking-[0.18em] text-[var(--text-mute)] uppercase">
+        <div className="inline-flex items-center gap-2.5 font-mono text-[11px] tracking-[0.18em] text-text-mute uppercase">
           <span
             className="inline-block h-1.5 w-1.5 rounded-full"
             style={{
@@ -82,7 +82,7 @@ export function HeroSection() {
 
         {/* Subheadline */}
         <p
-          className="mx-auto mb-10 max-w-[58ch] text-[clamp(16px,1.35vw,19px)] leading-[1.55] text-[var(--text-dim)]"
+          className="mx-auto mb-10 max-w-[58ch] text-[clamp(16px,1.35vw,19px)] leading-[1.55] text-text-dim"
           style={{
             textWrap: 'pretty'
           }}
@@ -92,8 +92,8 @@ export function HeroSection() {
 
         {/* CTA Buttons */}
         <div className="flex flex-wrap justify-center gap-3.5">
-          <button className="btn btn-primary px-6 py-3.5 text-base text-white">Explore Events →</button>
-          <button className="btn btn-amber-outline px-6 py-3.5 text-base">Join the Community</button>
+          <button className="inline-flex items-center justify-center gap-2.5 rounded-full bg-lime px-6 py-3.5 text-base font-semibold text-white shadow-[0_8px_28px_-10px_var(--lime-glow),inset_0_-1px_0_oklch(0.7_0.2_128)] transition-all duration-180 hover:-translate-y-0.5">Explore Events →</button>
+          <button className="inline-flex items-center justify-center gap-2.5 rounded-full border border--amber px-6 py-3.5 text-base font-semibold text-amber transition-all duration-180 hover:bg-[oklch(0.62_0.16_60_/_0.12)] hover:shadow-[0_0_24px_-6px_var(--amber-glow)]">Join the Community</button>
         </div>
 
         {/* Stats Grid */}

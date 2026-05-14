@@ -35,7 +35,7 @@ export function ContributionBanner({ onAddVenue }: ContributionBannerProps) {
       {/* Content - Grid layout */}
       <div className="relative z-10 grid grid-cols-[1fr_auto] items-center gap-7">
         <div>
-          <div className="mb-1.5 inline-flex items-center gap-2.5 font-mono text-[11px] tracking-[0.18em] text-[var(--text-mute)] uppercase">
+          <div className="mb-1.5 inline-flex items-center gap-2.5 font-mono text-[11px] tracking-[0.18em] text-text-mute uppercase">
             <span
               className="inline-block h-1.5 w-1.5 rounded-full"
               style={{
@@ -43,27 +43,22 @@ export function ContributionBanner({ onAddVenue }: ContributionBannerProps) {
                 boxShadow: '0 0 12px var(--amber-glow)'
               }}
             />
-            CONTRIBUTE
+            COMMUNITY GROWTH
           </div>
 
-          <h3 className="m-0 mb-1.5 text-[clamp(22px,2.4vw,28px)] font-semibold tracking-[-0.025em] text-[var(--text)]" style={{ lineHeight: 1.2 }}>
+          <h3 className="m-0 mb-1.5 text-[clamp(22px,2.4vw,28px)] font-semibold tracking-[-0.025em] text-text" style={{ lineHeight: 1.2 }}>
             Know a great spot? Help the community grow.
           </h3>
 
-          <p className="m-0 max-w-[56ch] text-[14.5px] text-[var(--text-dim)]" style={{ lineHeight: 1.5 }}>
+          <p className="m-0 max-w-[56ch] text-[14.5px] text-text-dim" style={{ lineHeight: 1.5 }}>
             Add a new venue to the database — reviewed and verified by other contributors within 24 hours.
           </p>
         </div>
 
         <button
           onClick={onAddVenue}
-          className="relative z-10 flex items-center justify-center gap-2.5 rounded-full bg-[var(--lime)] px-6 py-3 font-semibold tracking-[-0.01em] text-[#0a1005] text-white transition-all hover:-translate-y-px hover:shadow-[0_14px_40px_-10px_var(--lime-glow)]"
-          style={{
-            boxShadow: '0 8px 28px -10px var(--lime-glow)',
-            padding: '15px 24px',
-            fontSize: '14px',
-            whiteSpace: 'nowrap'
-          }}
+          className="relative z-10 flex items-center justify-center gap-2.5 rounded-full border border--lime px-6 py-[15px] text-[14px] font-semibold tracking-[-0.01em] text-lime transition-all hover:bg-[oklch(0.7_0.2_130_/_0.12)] hover:shadow-[0_0_24px_-6px_var(--lime-glow)]"
+          style={{ whiteSpace: 'nowrap', background: 'oklch(0.7 0.2 130 / 0.06)' }}
         >
           <Icon name="plus" size={16} />
           Contribute Venue

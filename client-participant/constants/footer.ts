@@ -16,8 +16,7 @@ export const FOOTER_LINKS_SECTION_2: NavLink[] = [
 export const SOCIAL_LINKS: SocialLink[] = [
   { label: 'Twitter', href: 'https://twitter.com', icon: 'twitter' },
   { label: 'Discord', href: 'https://discord.com', icon: 'discord' },
-  { label: 'GitHub', href: 'https://github.com', icon: 'github' },
-  { label: 'LinkedIn', href: 'https://linkedin.com', icon: 'linkedin' }
+  { label: 'Telegram', href: 'https://telegram.org', icon: 'telegram' }
 ];
 
 export const FOOTER_COPYRIGHT = `© ${new Date().getFullYear()} Eventara. All rights reserved.`;

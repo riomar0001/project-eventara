@@ -10,6 +10,8 @@ interface EventsDirectoryPaginationProps {
   onPageChange: (page: number) => void;
 }
 
+const pageBtnBase = 'inline-flex h-[38px] min-w-[38px] items-center justify-center gap-[6px] rounded-[10px] border border-border px-3 text-[13.5px] font-medium text-muted-foreground transition-all disabled:cursor-not-allowed disabled:opacity-40';
+
 export function EventsDirectoryPagination({ currentPage, totalPages, filteredLength, perPage, onPageChange }: EventsDirectoryPaginationProps) {
   const loadedPct = Math.round(((currentPage * perPage) / filteredLength) * 100);
   const start = (currentPage - 1) * perPage + 1;
@@ -19,16 +21,13 @@ export function EventsDirectoryPagination({ currentPage, totalPages, filteredLen
     <div className="mt-14 mb-8 flex flex-col items-center gap-7">
       {/* Progress */}
       <div className="flex flex-col items-center gap-[10px]">
-        <div className="relative h-1 w-[220px] overflow-hidden rounded-[3px]" style={{ background: 'oklch(1 0 0 / 0.05)' }}>
+        <div className="relative h-1 w-[220px] overflow-hidden rounded-[3px] bg-muted">
           <div
-            className="h-full rounded-[3px] transition-[width] duration-400"
-            style={{
-              width: `${Math.min(100, loadedPct)}%`,
-              background: 'linear-gradient(90deg, var(--lime), var(--amber))'
-            }}
+            className="h-full rounded-[3px] transition-[width] duration-400 bg-linear-to-r from-primary to-[oklch(0.62_0.16_60)]"
+            style={{ width: `${Math.min(100, loadedPct)}%` }}
           />
         </div>
-        <div className="font-mono text-[11px] tracking-[0.14em] uppercase" style={{ color: 'var(--text-mute)' }}>
+        <div className="font-mono text-[11px] tracking-[0.14em] uppercase text-muted-foreground">
           Showing {start}–{end} of {filteredLength}
         </div>
       </div>
@@ -36,30 +35,13 @@ export function EventsDirectoryPagination({ currentPage, totalPages, filteredLen
       {/* Load more / End of list */}
       {currentPage < totalPages ? (
         <button
-          className="inline-flex items-center justify-center gap-[10px] rounded-full border px-5 py-[13px] text-[14px] font-semibold tracking-[-0.01em] transition-all"
-          style={{
-            borderColor: 'var(--line)',
-            background: 'transparent',
-            color: 'var(--text)'
-          }}
+          className="inline-flex items-center justify-center gap-[10px] rounded-full border border-border bg-transparent px-5 py-[13px] text-[14px] font-semibold tracking-[-0.01em] text-foreground transition-all hover:border-primary hover:text-primary hover:shadow-[0_0_24px_-8px_var(--lime-glow)]"
           onClick={() => onPageChange(currentPage + 1)}
-          onMouseEnter={(e) => {
-            const el = e.currentTarget;
-            el.style.borderColor = 'var(--lime)';
-            el.style.color = 'var(--lime)';
-            el.style.boxShadow = '0 0 24px -8px var(--lime-glow)';
-          }}
-          onMouseLeave={(e) => {
-            const el = e.currentTarget;
-            el.style.borderColor = '';
-            el.style.color = '';
-            el.style.boxShadow = '';
-          }}
         >
           Load more events <Icon name="arrow-right" size={14} />
         </button>
       ) : (
-        <div className="font-mono text-[11px] tracking-[0.14em]" style={{ color: 'var(--text-mute)' }}>
+        <div className="font-mono text-[11px] tracking-[0.14em] text-muted-foreground">
           — END OF LIST —
         </div>
       )}
@@ -67,23 +49,9 @@ export function EventsDirectoryPagination({ currentPage, totalPages, filteredLen
       {/* Page buttons */}
       <div className="flex items-center gap-[6px]">
         <button
-          className="inline-flex h-[38px] min-w-[38px] items-center justify-center gap-[6px] rounded-[10px] border px-3 text-[13.5px] font-medium transition-all disabled:cursor-not-allowed disabled:opacity-40"
-          style={{
-            borderColor: 'var(--line-soft)',
-            color: 'var(--text-dim)'
-          }}
+          className={pageBtnBase}
           disabled={currentPage === 1}
           onClick={() => onPageChange(Math.max(1, currentPage - 1))}
-          onMouseEnter={(e) => {
-            if (currentPage !== 1) {
-              (e.currentTarget as HTMLElement).style.color = 'var(--text)';
-              (e.currentTarget as HTMLElement).style.borderColor = 'var(--text-mute)';
-            }
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLElement).style.color = '';
-            (e.currentTarget as HTMLElement).style.borderColor = '';
-          }}
         >
           <Icon name="arrow-left" size={13} />
         </button>
@@ -91,25 +59,16 @@ export function EventsDirectoryPagination({ currentPage, totalPages, filteredLen
         {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
           <button
             key={n}
-            className="inline-flex h-[38px] min-w-[38px] items-center justify-center rounded-[10px] border px-3 text-[13.5px] font-medium transition-all"
-            style={
+            className={`inline-flex h-[38px] min-w-[38px] items-center justify-center rounded-[10px] border px-3 text-[13.5px] font-medium transition-all ${
               n === currentPage
-                ? {
-                    background: 'var(--lime)',
-                    color: '#0a1005',
-                    borderColor: 'var(--lime)',
-                    boxShadow: '0 0 0 3px oklch(0.9 0.22 128 / 0.15)'
-                  }
-                : {
-                    borderColor: 'var(--line-soft)',
-                    color: 'var(--text-dim)'
-                  }
-            }
+                ? 'border-primary bg-primary text-white shadow-[0_0_0_3px_oklch(0.7_0.2_130_/_0.15)]'
+                : 'border-border text-muted-foreground'
+            }`}
             onClick={() => onPageChange(n)}
             onMouseEnter={(e) => {
               if (n !== currentPage) {
-                (e.currentTarget as HTMLElement).style.color = 'var(--text)';
-                (e.currentTarget as HTMLElement).style.borderColor = 'var(--text-mute)';
+                (e.currentTarget as HTMLElement).style.color = 'oklch(0.2 0.012 150)';
+                (e.currentTarget as HTMLElement).style.borderColor = 'oklch(0.58 0.012 150)';
               }
             }}
             onMouseLeave={(e) => {
@@ -124,23 +83,9 @@ export function EventsDirectoryPagination({ currentPage, totalPages, filteredLen
         ))}
 
         <button
-          className="inline-flex h-[38px] min-w-[38px] items-center justify-center gap-[6px] rounded-[10px] border px-3 text-[13.5px] font-medium transition-all disabled:cursor-not-allowed disabled:opacity-40"
-          style={{
-            borderColor: 'var(--line-soft)',
-            color: 'var(--text-dim)'
-          }}
+          className={pageBtnBase}
           disabled={currentPage === totalPages}
           onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
-          onMouseEnter={(e) => {
-            if (currentPage !== totalPages) {
-              (e.currentTarget as HTMLElement).style.color = 'var(--text)';
-              (e.currentTarget as HTMLElement).style.borderColor = 'var(--text-mute)';
-            }
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLElement).style.color = '';
-            (e.currentTarget as HTMLElement).style.borderColor = '';
-          }}
         >
           <Icon name="arrow-right" size={13} />
         </button>
