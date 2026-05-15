@@ -126,7 +126,7 @@ export function useEventPerformance(eventId?: string | null) {
       try {
         const params = new URLSearchParams();
         if (eventId) params.set('event_id', eventId);
-        const url = `/api/analytics/performance/event?${params}`;
+        const url = `/api/analytics/performance/event${params.toString() ? `?${params}` : ''}`;
         const res = await fetch(url, { headers: getAuthHeaders() });
         if (!res.ok) {
           const body = await res.json().catch(() => ({}));
