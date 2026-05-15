@@ -6,10 +6,14 @@ export function MeshBg({ limePosition = 'top-left', amberPosition = 'bottom-righ
 
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
-      <div className={`absolute h-[600px] w-[600px] rounded-full blur-[100px] ${lime} bg-[radial-gradient(circle,oklch(0.7_0.2_130_/_0.22),transparent_65%)]`} />
-      <div className={`absolute h-[500px] w-[500px] rounded-full blur-[100px] ${amber} bg-[radial-gradient(circle,oklch(0.62_0.16_60_/_0.18),transparent_65%)]`} />
+      <div
+        className={`absolute h-[600px] w-[600px] rounded-full blur-[100px] ${lime} bg-[radial-gradient(circle,oklch(0.7_0.2_130_/_0.22),transparent_65%)]`}
+      />
+      <div
+        className={`absolute h-[500px] w-[500px] rounded-full blur-[100px] ${amber} bg-[radial-gradient(circle,oklch(0.62_0.16_60_/_0.18),transparent_65%)]`}
+      />
       {withGrid && (
-        <div className="absolute inset-0 opacity-25 bg-[length:64px_64px] bg-[linear-gradient(var(--line-soft)_1px,transparent_1px),linear-gradient(90deg,var(--line-soft)_1px,transparent_1px)] [mask-image:radial-gradient(ellipse_70%_70%_at_50%_50%,black_30%,transparent_80%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(var(--line-soft)_1px,transparent_1px),linear-gradient(90deg,var(--line-soft)_1px,transparent_1px)] [mask-image:radial-gradient(ellipse_70%_70%_at_50%_50%,black_30%,transparent_80%)] bg-[length:64px_64px] opacity-25" />
       )}
     </div>
   );

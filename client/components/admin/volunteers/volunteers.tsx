@@ -6,13 +6,13 @@ import { AddVolunteerDialog, EditVolunteerDialog } from '@/components/admin/volu
 import { VolunteerProfileModal } from '@/components/admin/volunteers/volunteer-profile-modal';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { usePermissions } from '@/context/permissions-context';
 import type { VolunteerRecord } from '@/hooks/admin/volunteers/use-volunteers';
 import { useVolunteers } from '@/hooks/admin/volunteers/use-volunteers';
 import { VolunteersTableToolbar } from './table/table-toolbar';
 import { VolunteersTableContent } from './table/volunteers-table';
 import { OperationsPageIntro } from './volunteers-shared';
 import type { VolunteerStatus } from '@/api/types.gen';
+import { usePermissions } from '@/context/permissions-context';
 
 export function VolunteersPage() {
   const [createOpen, setCreateOpen] = useState(false);
@@ -150,7 +150,9 @@ export function VolunteersPage() {
       <VolunteerProfileModal
         volunteer={viewingVolunteer}
         open={!!viewingVolunteer}
-        onOpenChange={(open) => { if (!open) setViewingVolunteer(null); }}
+        onOpenChange={(open) => {
+          if (!open) setViewingVolunteer(null);
+        }}
       />
 
       {canCreateVolunteer ? <AddVolunteerDialog open={createOpen} onOpenChange={setCreateOpen} onCreated={handleVolunteerAdded} /> : null}

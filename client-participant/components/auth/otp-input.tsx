@@ -24,7 +24,7 @@ export function OtpInput({ digits, inputRefs, onChange, onKeyDown, onPaste }: Pr
           onChange={(e) => onChange(i, e.target.value)}
           onKeyDown={(e) => onKeyDown(i, e)}
           onPaste={onPaste}
-          className="h-14 w-12 rounded-xl border border-line-soft bg-page text-center text-xl font-bold text-text transition-all focus:border--lime focus:ring-2 focus:ring-[oklch(0.9_0.22_128_/_0.1)] focus:outline-none"
+          className="border-line-soft bg-page text-text focus:border--lime h-14 w-12 rounded-xl border text-center text-xl font-bold transition-all focus:ring-2 focus:ring-[oklch(0.9_0.22_128_/_0.1)] focus:outline-none"
         />
       ))}
     </div>

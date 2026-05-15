@@ -71,40 +71,40 @@ export function buildVolunteerRoleColumns(actions: RoleActions): ColumnDef<Volun
   if (!actions.onEdit && !actions.onDelete) return columns;
 
   columns.push({
-      id: 'actions',
-      header: () => <div className="text-right">Actions</div>,
-      cell: ({ row }) => (
-        <div className="text-right">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon-sm">
-                <MoreHorizontal className="size-4" />
-                <span className="sr-only">Open role actions</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {actions.onEdit ? (
-                <DropdownMenuItem onClick={() => actions.onEdit?.(row.original)}>
-                  <Pencil className="size-4" />
-                  Edit role
-                </DropdownMenuItem>
-              ) : null}
-              {actions.onEdit && actions.onDelete ? <DropdownMenuSeparator /> : null}
-              {actions.onDelete ? (
-                <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={() => actions.onDelete?.(row.original)}>
-                  <Trash2 className="size-4" />
-                  Delete role
-                </DropdownMenuItem>
-              ) : null}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      ),
-      meta: {
-        headerClassName: 'px-6 text-right',
-        cellClassName: 'px-6 text-right'
-      } satisfies VolunteerRoleColumnMeta
-    });
+    id: 'actions',
+    header: () => <div className="text-right">Actions</div>,
+    cell: ({ row }) => (
+      <div className="text-right">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon-sm">
+              <MoreHorizontal className="size-4" />
+              <span className="sr-only">Open role actions</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {actions.onEdit ? (
+              <DropdownMenuItem onClick={() => actions.onEdit?.(row.original)}>
+                <Pencil className="size-4" />
+                Edit role
+              </DropdownMenuItem>
+            ) : null}
+            {actions.onEdit && actions.onDelete ? <DropdownMenuSeparator /> : null}
+            {actions.onDelete ? (
+              <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={() => actions.onDelete?.(row.original)}>
+                <Trash2 className="size-4" />
+                Delete role
+              </DropdownMenuItem>
+            ) : null}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    ),
+    meta: {
+      headerClassName: 'px-6 text-right',
+      cellClassName: 'px-6 text-right'
+    } satisfies VolunteerRoleColumnMeta
+  });
 
   return columns;
 }

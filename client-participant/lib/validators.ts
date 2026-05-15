@@ -49,13 +49,7 @@ export const isFormValid = (errors: FormErrors): boolean => {
 
 export type RegisterErrors = Partial<Record<'firstName' | 'lastName' | 'email' | 'password' | 'confirm', string>>;
 
-export const validateRegisterForm = (data: {
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-  confirm: string;
-}): RegisterErrors => {
+export const validateRegisterForm = (data: { firstName: string; lastName: string; email: string; password: string; confirm: string }): RegisterErrors => {
   const errors: RegisterErrors = {};
   if (!data.firstName.trim()) errors.firstName = 'First name is required.';
   if (!data.lastName.trim()) errors.lastName = 'Last name is required.';

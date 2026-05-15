@@ -139,7 +139,9 @@ export function DetailPanel({
   title: string;
 }) {
   return (
-    <Card className={cn('flex flex-col overflow-hidden border-0 bg-white shadow-[0_24px_70px_-54px_rgba(15,23,42,0.32)] ring-1 ring-neutral-200/80', className)}>
+    <Card
+      className={cn('flex flex-col overflow-hidden border-0 bg-white shadow-[0_24px_70px_-54px_rgba(15,23,42,0.32)] ring-1 ring-neutral-200/80', className)}
+    >
       <CardHeader className="border-b border-red-100/80 bg-linear-to-r from-neutral-50/80 via-white to-white">
         <div className={cn('flex flex-wrap items-start gap-3', actions ? 'justify-between' : '')}>
           <div className="min-w-0">

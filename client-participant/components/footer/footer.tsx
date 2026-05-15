@@ -34,11 +34,11 @@ export function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-line-soft pt-12 pb-10">
+    <footer className="border-line-soft border-t pt-12 pb-10">
       <div className="mx-auto flex max-w-[1240px] flex-wrap items-center justify-between gap-6 px-8 max-[900px]:px-5">
         {/* Logo */}
         <a href="#" className="flex items-center gap-2.5 text-lg font-bold tracking-[-0.02em]" aria-label="Eventara home">
-          <div className="grid h-[26px] w-[26px] place-items-center rounded-lg bg-linear-[145deg] from-lime to-lime-dim text-[#0a1005] shadow-[0_0_18px_-4px_var(--lime-glow)]">
+          <div className="from-lime to-lime-dim grid h-[26px] w-[26px] place-items-center rounded-lg bg-linear-[145deg] text-[#0a1005] shadow-[0_0_18px_-4px_var(--lime-glow)]">
             <svg width="14" height="14" viewBox="0 0 20 20" fill="none" aria-hidden="true">
               <path d="M2 10 L10 2 L18 10 L10 18 Z" stroke="#0a1005" strokeWidth="2" fill="none" />
               <circle cx="10" cy="10" r="2.5" fill="#0a1005" />
@@ -48,7 +48,7 @@ export function Footer() {
         </a>
 
         {/* Footer Links */}
-        <div className="flex gap-[26px] text-[13.5px] text-text-dim">
+        <div className="text-text-dim flex gap-[26px] text-[13.5px]">
           {FOOTER_LINKS.map((link) => (
             <a key={link.label} href={link.href} className="hover:text-text">
               {link.label}
@@ -59,7 +59,7 @@ export function Footer() {
         {/* Socials */}
         <div className="flex gap-2.5">
           <a
-            className="ease grid h-9 w-9 place-items-center rounded-[10px] border border-line-soft text-text-dim transition-all duration-[180ms] hover:border-[oklch(0.82_0.17_75_/_0.5)] hover:bg-[oklch(0.82_0.17_75_/_0.06)] hover:text-amber"
+            className="ease border-line-soft text-text-dim hover:text-amber grid h-9 w-9 place-items-center rounded-[10px] border transition-all duration-[180ms] hover:border-[oklch(0.82_0.17_75_/_0.5)] hover:bg-[oklch(0.82_0.17_75_/_0.06)]"
             href="#"
             aria-label="Twitter"
             target="_blank"
@@ -68,7 +68,7 @@ export function Footer() {
             <TwitterIcon size={15} />
           </a>
           <a
-            className="ease grid h-9 w-9 place-items-center rounded-[10px] border border-line-soft text-text-dim transition-all duration-[180ms] hover:border-[oklch(0.82_0.17_75_/_0.5)] hover:bg-[oklch(0.82_0.17_75_/_0.06)] hover:text-amber"
+            className="ease border-line-soft text-text-dim hover:text-amber grid h-9 w-9 place-items-center rounded-[10px] border transition-all duration-[180ms] hover:border-[oklch(0.82_0.17_75_/_0.5)] hover:bg-[oklch(0.82_0.17_75_/_0.06)]"
             href="#"
             aria-label="Discord"
             target="_blank"
@@ -77,7 +77,7 @@ export function Footer() {
             <DiscordIcon size={16} />
           </a>
           <a
-            className="ease grid h-9 w-9 place-items-center rounded-[10px] border border-line-soft text-text-dim transition-all duration-[180ms] hover:border-[oklch(0.82_0.17_75_/_0.5)] hover:bg-[oklch(0.82_0.17_75_/_0.06)] hover:text-amber"
+            className="ease border-line-soft text-text-dim hover:text-amber grid h-9 w-9 place-items-center rounded-[10px] border transition-all duration-[180ms] hover:border-[oklch(0.82_0.17_75_/_0.5)] hover:bg-[oklch(0.82_0.17_75_/_0.06)]"
             href="#"
             aria-label="Telegram"
             target="_blank"
@@ -90,8 +90,8 @@ export function Footer() {
 
       {/* Bottom bar */}
       <div className="mx-auto mt-7 flex max-w-[1240px] flex-wrap justify-between gap-3 px-8 max-[900px]:px-5">
-        <div className="font-mono text-[12.5px] text-text-mute">&copy; {year} EVENTARA &mdash; Built for the Davao DeFi Community PH.</div>
-        <div className="font-mono text-[12.5px] text-text-dim">
+        <div className="text-text-mute font-mono text-[12.5px]">&copy; {year} EVENTARA &mdash; Built for the Davao DeFi Community PH.</div>
+        <div className="text-text-dim font-mono text-[12.5px]">
           <span className="text-lime">&#9679;</span> All systems operational
         </div>
       </div>
