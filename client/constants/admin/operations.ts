@@ -1,4 +1,5 @@
 export const ADMIN_OPERATIONS_PATHS = {
+  analytics: '/analytics',
   venues: '/venues',
   venueCreate: '/venues/new',
   venueDetail: (venueId: string) => `/venues/${venueId}`,

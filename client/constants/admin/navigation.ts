@@ -1,4 +1,4 @@
-import { Blocks, Calendar, Headphones, LayoutDashboard, Logs, MapPin, MessageSquare, Server, Settings, ShieldCheck, User, Users } from 'lucide-react';
+import { BarChart3, Blocks, Calendar, Headphones, LayoutDashboard, Logs, MapPin, MessageSquare, Server, Settings, ShieldCheck, User, Users } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
 
@@ -51,6 +51,7 @@ export const dashboardNavGroups: DashboardNavGroup[] = [
   {
     label: 'Administration',
     items: [
+      { label: 'Analytics', icon: BarChart3, href: ADMIN_OPERATIONS_PATHS.analytics, permission: { feature: 'analytics', action: 'read' } },
       { label: 'Features', icon: Blocks, href: '/features', permission: { feature: 'features', action: 'read' } },
       { label: 'Roles', icon: ShieldCheck, href: '/roles', permission: { feature: 'roles', action: 'read' } },
       { label: 'Users', icon: Users, href: '/users', permission: { feature: 'user-accounts', action: 'read' } },
