@@ -2,6 +2,11 @@ from fastapi import Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application.use_cases.account_settings_usecase import AccountSettingsUseCase
+from app.application.use_cases.analytics_demographic_usecase import DemographicAnalyticsUseCase
+from app.application.use_cases.analytics_historical_usecase import HistoricalEventDataUseCase
+from app.application.use_cases.analytics_logistics_usecase import LogisticsAnalyticsUseCase
+from app.application.use_cases.analytics_ongoing_usecase import OngoingEventDataUseCase
+from app.application.use_cases.analytics_performance_usecase import PerformanceAnalyticsUseCase
 from app.application.use_cases.app_feedback_usecase import AppFeedbackUseCase
 from app.application.use_cases.audit_log_usecase import AuditLogUseCase
 from app.application.use_cases.auth_usecase import AuthUseCase
@@ -38,6 +43,7 @@ from app.application.use_cases.volunteer_usecase import (
 )
 from app.infrastructure.cache.repositories.otp_repository import OTPRepository
 from app.infrastructure.cache.repositories.password_reset_repository import PasswordResetRepository
+from app.infrastructure.database.repositories.analytics_repository import AnalyticsRepository
 from app.infrastructure.database.repositories.app_feedback_repository import AppFeedbackRepository
 from app.infrastructure.database.repositories.audit_log_repository import (
     AuditLogRepository,
@@ -262,3 +268,28 @@ def get_app_feedback_use_case(db: AsyncSession = Depends(get_db)) -> AppFeedback
 def get_dashboard_use_case(db: AsyncSession = Depends(get_db)) -> DashboardUseCase:
     """Construct a ``DashboardUseCase`` backed by a read-only aggregate repository."""
     return DashboardUseCase(DashboardRepository(db))
+
+
+def get_logistics_analytics_use_case(db: AsyncSession = Depends(get_db)) -> LogisticsAnalyticsUseCase:
+    """Construct a ``LogisticsAnalyticsUseCase`` for event logistics analytics queries."""
+    return LogisticsAnalyticsUseCase(AnalyticsRepository(db))
+
+
+def get_performance_analytics_use_case(db: AsyncSession = Depends(get_db)) -> PerformanceAnalyticsUseCase:
+    """Construct a ``PerformanceAnalyticsUseCase`` for event performance analytics queries."""
+    return PerformanceAnalyticsUseCase(AnalyticsRepository(db))
+
+
+def get_demographic_analytics_use_case(db: AsyncSession = Depends(get_db)) -> DemographicAnalyticsUseCase:
+    """Construct a ``DemographicAnalyticsUseCase`` for demographic analytics queries."""
+    return DemographicAnalyticsUseCase(AnalyticsRepository(db))
+
+
+def get_ongoing_event_data_use_case(db: AsyncSession = Depends(get_db)) -> OngoingEventDataUseCase:
+    """Construct an ``OngoingEventDataUseCase`` for on-going event data queries."""
+    return OngoingEventDataUseCase(AnalyticsRepository(db))
+
+
+def get_historical_event_data_use_case(db: AsyncSession = Depends(get_db)) -> HistoricalEventDataUseCase:
+    """Construct a ``HistoricalEventDataUseCase`` for historical event data queries."""
+    return HistoricalEventDataUseCase(AnalyticsRepository(db))
