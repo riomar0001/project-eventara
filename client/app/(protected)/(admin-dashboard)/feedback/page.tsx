@@ -1,12 +1,12 @@
 'use client';
 
+import { FeedbackStatsRow } from '@/components/admin/feedback/feedback-stats-row';
+import { FeedbackTable } from '@/components/admin/feedback/feedback-table';
+import { RatingDistributionChart } from '@/components/admin/feedback/rating-distribution-chart';
+import { UsersPerWeekChart } from '@/components/admin/feedback/users-per-week-chart';
 import { useAppFeedback } from '@/hooks/admin/feedback/use-app-feedback';
 import { useFeedbackAnalytics } from '@/hooks/admin/feedback/use-feedback-analytics';
 import { useUsersPerWeek } from '@/hooks/admin/feedback/use-users-per-week';
-import { FeedbackStatsRow } from '@/components/admin/feedback/feedback-stats-row';
-import { RatingDistributionChart } from '@/components/admin/feedback/rating-distribution-chart';
-import { UsersPerWeekChart } from '@/components/admin/feedback/users-per-week-chart';
-import { FeedbackTable } from '@/components/admin/feedback/feedback-table';
 
 export default function FeedbackPage() {
   const { analytics, isLoading: analyticsLoading } = useFeedbackAnalytics();

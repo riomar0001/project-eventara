@@ -120,7 +120,9 @@ export function useEventLogisticsOverview(eventId: string | null) {
     }
 
     void load();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [eventId]);
 
   return { data, isLoading, error };
@@ -153,7 +155,9 @@ export function useSessionTimeline() {
     }
 
     void load();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   return { data, isLoading, error };
@@ -190,7 +194,9 @@ export function useVolunteerLogistics(eventId: string | null) {
     }
 
     void load();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [eventId]);
 
   return { data, isLoading, error };
@@ -227,7 +233,9 @@ export function useRegistrationLogistics(eventId: string | null) {
     }
 
     void load();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [eventId]);
 
   return { data, isLoading, error };

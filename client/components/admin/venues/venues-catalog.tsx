@@ -7,11 +7,11 @@ import { MobileFloatingAction, PrimaryPageAction } from '@/components/admin/shar
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { usePermissions } from '@/context/permissions-context';
 import { useVenues } from '@/hooks/admin/venues/use-venues';
 import { CatalogCard, OperationsPageIntro } from './venues-shared';
 import type { VenueRecordResponse } from '@/api/types.gen';
 import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
+import { usePermissions } from '@/context/permissions-context';
 import { resolveStorageImageUrl } from '@/lib/storage/image-url';
 import { useAuthStore } from '@/store/auth-store';
 

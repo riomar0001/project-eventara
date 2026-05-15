@@ -98,11 +98,10 @@ export function useHistoricalEventData(filters?: HistoricalFilters) {
     }
 
     void load();
-    return () => { cancelled = true; };
-  }, [
-    filters?.from_date, filters?.to_date, filters?.organizer_id,
-    filters?.venue_id, filters?.compare_from_date, filters?.compare_to_date
-  ]);
+    return () => {
+      cancelled = true;
+    };
+  }, [filters?.from_date, filters?.to_date, filters?.organizer_id, filters?.venue_id, filters?.compare_from_date, filters?.compare_to_date]);
 
   return { data, isLoading, error };
 }
@@ -134,7 +133,9 @@ export function useCancelledEventsReport() {
     }
 
     void load();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   return { data, isLoading, error };

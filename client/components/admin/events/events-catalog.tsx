@@ -4,11 +4,11 @@ import { AlertCircle, CalendarCheck, CalendarPlus, ChevronLeft, ChevronRight, Im
 import Link from 'next/link';
 import { MobileFloatingAction, PrimaryPageAction } from '@/components/admin/shared/primary-page-action';
 import { Button } from '@/components/ui/button';
-import { usePermissions } from '@/context/permissions-context';
 import { useEvents } from '@/hooks/admin/events/use-events';
 import { CatalogCard, OperationsPageIntro } from './events-shared';
 import type { EventStatus } from '@/api/types.gen';
 import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
+import { usePermissions } from '@/context/permissions-context';
 
 const STATUS_FILTERS: { label: string; value: EventStatus | null }[] = [
   { label: 'All', value: null },

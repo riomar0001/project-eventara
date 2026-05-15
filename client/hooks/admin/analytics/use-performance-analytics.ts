@@ -142,7 +142,9 @@ export function useEventPerformance(eventId?: string | null) {
     }
 
     void load();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [eventId]);
 
   return { data, isLoading, error };
@@ -177,7 +179,9 @@ export function useOngoingPerformance() {
     }
 
     void load();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [refreshKey]);
 
   return { data, isLoading, error, refetch: () => setRefreshKey((k) => k + 1) };
@@ -210,7 +214,9 @@ export function useHistoricalPerformance() {
     }
 
     void load();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   return { data, isLoading, error };
