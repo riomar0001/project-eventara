@@ -27,47 +27,67 @@ EVENT_ID = uuid.uuid4()
 
 def _make_repo(**overrides):
     repo = MagicMock()
-    repo.get_device_breakdown = AsyncMock(return_value=[
-        DeviceBreakdown(device_type="mobile", count=60, percentage=60.0),
-        DeviceBreakdown(device_type="desktop", count=40, percentage=40.0),
-    ])
-    repo.get_os_breakdown = AsyncMock(return_value=[
-        OsBreakdown(os="Android", count=50, percentage=50.0),
-        OsBreakdown(os="iOS", count=30, percentage=30.0),
-        OsBreakdown(os="Windows", count=20, percentage=20.0),
-    ])
-    repo.get_browser_breakdown = AsyncMock(return_value=[
-        BrowserBreakdown(browser="Chrome", count=70, percentage=70.0),
-        BrowserBreakdown(browser="Firefox", count=30, percentage=30.0),
-    ])
-    repo.get_top_participating_cities = AsyncMock(return_value=[
-        CityParticipation(city="Davao", country="PH", participant_count=100),
-        CityParticipation(city="Manila", country="PH", participant_count=50),
-    ])
-    repo.get_account_age_distribution = AsyncMock(return_value=[
-        AccountAgeDistribution(bucket="<30 days", count=10, percentage=10.0),
-        AccountAgeDistribution(bucket="1-6 months", count=30, percentage=30.0),
-        AccountAgeDistribution(bucket="6-12 months", count=25, percentage=25.0),
-        AccountAgeDistribution(bucket="1-2 years", count=20, percentage=20.0),
-        AccountAgeDistribution(bucket="2+ years", count=15, percentage=15.0),
-    ])
-    repo.get_volunteer_role_breakdown = AsyncMock(return_value=[
-        VolunteerRoleBreakdown(role_name="Usher", count=15),
-        VolunteerRoleBreakdown(role_name="Registration", count=10),
-    ])
-    repo.get_event_interest_categories = AsyncMock(return_value=[
-        EventInterestCategory(category="DeFi Summit", event_count=1, registration_count=200),
-    ])
-    repo.get_first_time_vs_returning = AsyncMock(return_value=[
-        FirstTimeVsReturning(event_id=EVENT_ID, event_title="Test Event", first_time_count=30, returning_count=70),
-    ])
-    repo.get_gender_distribution = AsyncMock(return_value=[
-        GenderDistribution(gender="male", count=55, percentage=55.0),
-        GenderDistribution(gender="female", count=45, percentage=45.0),
-    ])
-    repo.get_geographic_spread = AsyncMock(return_value=[
-        GeographicSpread(city="Davao", latitude=None, longitude=None, participant_count=100),
-    ])
+    repo.get_device_breakdown = AsyncMock(
+        return_value=[
+            DeviceBreakdown(device_type="mobile", count=60, percentage=60.0),
+            DeviceBreakdown(device_type="desktop", count=40, percentage=40.0),
+        ]
+    )
+    repo.get_os_breakdown = AsyncMock(
+        return_value=[
+            OsBreakdown(os="Android", count=50, percentage=50.0),
+            OsBreakdown(os="iOS", count=30, percentage=30.0),
+            OsBreakdown(os="Windows", count=20, percentage=20.0),
+        ]
+    )
+    repo.get_browser_breakdown = AsyncMock(
+        return_value=[
+            BrowserBreakdown(browser="Chrome", count=70, percentage=70.0),
+            BrowserBreakdown(browser="Firefox", count=30, percentage=30.0),
+        ]
+    )
+    repo.get_top_participating_cities = AsyncMock(
+        return_value=[
+            CityParticipation(city="Davao", country="PH", participant_count=100),
+            CityParticipation(city="Manila", country="PH", participant_count=50),
+        ]
+    )
+    repo.get_account_age_distribution = AsyncMock(
+        return_value=[
+            AccountAgeDistribution(bucket="<30 days", count=10, percentage=10.0),
+            AccountAgeDistribution(bucket="1-6 months", count=30, percentage=30.0),
+            AccountAgeDistribution(bucket="6-12 months", count=25, percentage=25.0),
+            AccountAgeDistribution(bucket="1-2 years", count=20, percentage=20.0),
+            AccountAgeDistribution(bucket="2+ years", count=15, percentage=15.0),
+        ]
+    )
+    repo.get_volunteer_role_breakdown = AsyncMock(
+        return_value=[
+            VolunteerRoleBreakdown(role_name="Usher", count=15),
+            VolunteerRoleBreakdown(role_name="Registration", count=10),
+        ]
+    )
+    repo.get_event_interest_categories = AsyncMock(
+        return_value=[
+            EventInterestCategory(category="DeFi Summit", event_count=1, registration_count=200),
+        ]
+    )
+    repo.get_first_time_vs_returning = AsyncMock(
+        return_value=[
+            FirstTimeVsReturning(event_id=EVENT_ID, event_title="Test Event", first_time_count=30, returning_count=70),
+        ]
+    )
+    repo.get_gender_distribution = AsyncMock(
+        return_value=[
+            GenderDistribution(gender="male", count=55, percentage=55.0),
+            GenderDistribution(gender="female", count=45, percentage=45.0),
+        ]
+    )
+    repo.get_geographic_spread = AsyncMock(
+        return_value=[
+            GeographicSpread(city="Davao", latitude=None, longitude=None, participant_count=100),
+        ]
+    )
     for key, value in overrides.items():
         setattr(repo, key, value)
     return repo
@@ -116,9 +136,7 @@ class TestGetDemographics:
     @pytest.mark.asyncio
     async def test_passes_top_cities_limit(self):
         repo = _make_repo()
-        await _make_uc(repo).get_demographics(
-            GetDemographicAnalyticsInput(top_cities_limit=5)
-        )
+        await _make_uc(repo).get_demographics(GetDemographicAnalyticsInput(top_cities_limit=5))
         repo.get_top_participating_cities.assert_awaited_once_with(5)
 
     @pytest.mark.asyncio
@@ -148,9 +166,7 @@ class TestGetDemographics:
 
     @pytest.mark.asyncio
     async def test_raises_analytics_data_fetch_error_on_failure(self):
-        repo = _make_repo(
-            get_device_breakdown=AsyncMock(side_effect=RuntimeError("db down"))
-        )
+        repo = _make_repo(get_device_breakdown=AsyncMock(side_effect=RuntimeError("db down")))
         with patch("app.core.config.settings") as s:
             s.DEBUG = False
             with pytest.raises(AnalyticsDataFetchError):

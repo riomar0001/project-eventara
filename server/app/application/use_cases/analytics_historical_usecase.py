@@ -13,9 +13,7 @@ class HistoricalEventDataUseCase:
     def __init__(self, repository: IAnalyticsRepository) -> None:
         self.repository = repository
 
-    async def get_historical_data(
-        self, input_dto: GetHistoricalEventDataInput
-    ) -> GetHistoricalEventDataOutput:
+    async def get_historical_data(self, input_dto: GetHistoricalEventDataInput) -> GetHistoricalEventDataOutput:
         if input_dto.from_date and input_dto.to_date and input_dto.from_date > input_dto.to_date:
             raise InvalidDateRangeError("from_date must be before or equal to to_date")
 

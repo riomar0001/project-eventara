@@ -81,8 +81,6 @@ _OPENAPI_TAGS = [
     {
         "name": "Analytics",
         "description": "Platform analytics — logistics, performance, demographic, on-going, and historical event data with filtering and export.",
-        "description": "Admin dashboard metrics — aggregated event status, participant and"
-        " volunteer leaderboards, top venues, and weekly user growth trends.",
     },
     {
         "name": "App Feedback",

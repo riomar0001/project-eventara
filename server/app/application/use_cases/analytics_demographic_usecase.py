@@ -13,9 +13,7 @@ class DemographicAnalyticsUseCase:
     def __init__(self, repository: IAnalyticsRepository) -> None:
         self.repository = repository
 
-    async def get_demographics(
-        self, input_dto: GetDemographicAnalyticsInput
-    ) -> GetDemographicAnalyticsOutput:
+    async def get_demographics(self, input_dto: GetDemographicAnalyticsInput) -> GetDemographicAnalyticsOutput:
         try:
             device_breakdown = await self.repository.get_device_breakdown()
             os_breakdown = await self.repository.get_os_breakdown()

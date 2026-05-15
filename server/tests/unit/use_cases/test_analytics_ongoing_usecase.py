@@ -29,46 +29,73 @@ NOW = datetime.now(UTC)
 
 def _make_repo(**overrides):
     repo = MagicMock()
-    repo.get_started_events = AsyncMock(return_value=[
-        StartedEventSummary(event_id=EVENT_ID, event_title="Active Event", session_count=3, checked_in_count=75, remaining_slots=25)
-    ])
-    repo.get_live_checkin_feed = AsyncMock(return_value=[
-        LiveCheckinEntry(
-            participant_id=PARTICIPANT_ID, user_id=USER_ID,
-            first_name="John", last_name="Doe", alias="johnd",
-            session_id=SESSION_ID, session_title="Session 1",
-            event_id=EVENT_ID, event_title="Active Event",
-            checked_in_time=NOW, checkin_method="qr",
-        )
-    ])
-    repo.get_volunteer_on_duty = AsyncMock(return_value=[
-        VolunteerOnDuty(
-            volunteer_id=VOLUNTEER_ID, user_id=USER_ID,
-            first_name="Jane", last_name="Doe", alias="janed",
-            contact_phone="1234567890", role_name="Usher",
-            event_id=EVENT_ID, event_title="Active Event",
-        )
-    ])
-    repo.get_session_progress = AsyncMock(return_value=[
-        SessionProgress(
-            session_id=SESSION_ID, session_title="Session 1",
-            event_id=EVENT_ID, event_title="Active Event",
-            start_datetime=NOW, end_datetime=NOW,
-            elapsed_pct=50.0,
-        )
-    ])
-    repo.get_pending_withdrawals = AsyncMock(return_value=[
-        PendingWithdrawalAlert(session_id=SESSION_ID, session_title="Session 1", event_id=EVENT_ID, withdrawal_count=3)
-    ])
-    repo.get_late_registrations = AsyncMock(return_value=[
-        LateRegistration(
-            participant_id=PARTICIPANT_ID, user_id=USER_ID,
-            first_name="Late", last_name="Registrant", alias="later",
-            session_id=SESSION_ID, session_title="Session 1",
-            event_id=EVENT_ID,
-            registered_at=NOW, session_started_at=NOW,
-        )
-    ])
+    repo.get_started_events = AsyncMock(
+        return_value=[StartedEventSummary(event_id=EVENT_ID, event_title="Active Event", session_count=3, checked_in_count=75, remaining_slots=25)]
+    )
+    repo.get_live_checkin_feed = AsyncMock(
+        return_value=[
+            LiveCheckinEntry(
+                participant_id=PARTICIPANT_ID,
+                user_id=USER_ID,
+                first_name="John",
+                last_name="Doe",
+                alias="johnd",
+                session_id=SESSION_ID,
+                session_title="Session 1",
+                event_id=EVENT_ID,
+                event_title="Active Event",
+                checked_in_time=NOW,
+                checkin_method="qr",
+            )
+        ]
+    )
+    repo.get_volunteer_on_duty = AsyncMock(
+        return_value=[
+            VolunteerOnDuty(
+                volunteer_id=VOLUNTEER_ID,
+                user_id=USER_ID,
+                first_name="Jane",
+                last_name="Doe",
+                alias="janed",
+                contact_phone="1234567890",
+                role_name="Usher",
+                event_id=EVENT_ID,
+                event_title="Active Event",
+            )
+        ]
+    )
+    repo.get_session_progress = AsyncMock(
+        return_value=[
+            SessionProgress(
+                session_id=SESSION_ID,
+                session_title="Session 1",
+                event_id=EVENT_ID,
+                event_title="Active Event",
+                start_datetime=NOW,
+                end_datetime=NOW,
+                elapsed_pct=50.0,
+            )
+        ]
+    )
+    repo.get_pending_withdrawals = AsyncMock(
+        return_value=[PendingWithdrawalAlert(session_id=SESSION_ID, session_title="Session 1", event_id=EVENT_ID, withdrawal_count=3)]
+    )
+    repo.get_late_registrations = AsyncMock(
+        return_value=[
+            LateRegistration(
+                participant_id=PARTICIPANT_ID,
+                user_id=USER_ID,
+                first_name="Late",
+                last_name="Registrant",
+                alias="later",
+                session_id=SESSION_ID,
+                session_title="Session 1",
+                event_id=EVENT_ID,
+                registered_at=NOW,
+                session_started_at=NOW,
+            )
+        ]
+    )
     for key, value in overrides.items():
         setattr(repo, key, value)
     return repo
@@ -107,36 +134,52 @@ class TestGetOngoingData:
 
     @pytest.mark.asyncio
     async def test_checkin_method_is_qr_when_checked_in_by_set(self):
-        repo = _make_repo(get_live_checkin_feed=AsyncMock(return_value=[
-            LiveCheckinEntry(
-                participant_id=PARTICIPANT_ID, user_id=USER_ID,
-                first_name="John", session_id=SESSION_ID, session_title="S1",
-                event_id=EVENT_ID, event_title="E1",
-                checked_in_time=NOW, checkin_method="qr",
+        repo = _make_repo(
+            get_live_checkin_feed=AsyncMock(
+                return_value=[
+                    LiveCheckinEntry(
+                        participant_id=PARTICIPANT_ID,
+                        user_id=USER_ID,
+                        first_name="John",
+                        session_id=SESSION_ID,
+                        session_title="S1",
+                        event_id=EVENT_ID,
+                        event_title="E1",
+                        checked_in_time=NOW,
+                        checkin_method="qr",
+                    )
+                ]
             )
-        ]))
+        )
         result = await _make_uc(repo).get_ongoing_data(GetOngoingEventDataInput())
         assert result.data.live_checkin_feed[0].checkin_method == "qr"
 
     @pytest.mark.asyncio
     async def test_checkin_method_is_manual_when_checked_in_by_none(self):
-        repo = _make_repo(get_live_checkin_feed=AsyncMock(return_value=[
-            LiveCheckinEntry(
-                participant_id=PARTICIPANT_ID, user_id=USER_ID,
-                first_name="John", session_id=SESSION_ID, session_title="S1",
-                event_id=EVENT_ID, event_title="E1",
-                checked_in_time=NOW, checkin_method="manual",
+        repo = _make_repo(
+            get_live_checkin_feed=AsyncMock(
+                return_value=[
+                    LiveCheckinEntry(
+                        participant_id=PARTICIPANT_ID,
+                        user_id=USER_ID,
+                        first_name="John",
+                        session_id=SESSION_ID,
+                        session_title="S1",
+                        event_id=EVENT_ID,
+                        event_title="E1",
+                        checked_in_time=NOW,
+                        checkin_method="manual",
+                    )
+                ]
             )
-        ]))
+        )
         result = await _make_uc(repo).get_ongoing_data(GetOngoingEventDataInput())
         assert result.data.live_checkin_feed[0].checkin_method == "manual"
 
     @pytest.mark.asyncio
     async def test_passes_checkin_feed_limit(self):
         repo = _make_repo()
-        await _make_uc(repo).get_ongoing_data(
-            GetOngoingEventDataInput(checkin_feed_limit=25)
-        )
+        await _make_uc(repo).get_ongoing_data(GetOngoingEventDataInput(checkin_feed_limit=25))
         repo.get_live_checkin_feed.assert_awaited_once_with(25)
 
     @pytest.mark.asyncio
@@ -157,9 +200,7 @@ class TestGetOngoingData:
 
     @pytest.mark.asyncio
     async def test_raises_analytics_data_fetch_error_on_failure(self):
-        repo = _make_repo(
-            get_started_events=AsyncMock(side_effect=RuntimeError("db down"))
-        )
+        repo = _make_repo(get_started_events=AsyncMock(side_effect=RuntimeError("db down")))
         with patch("app.core.config.settings") as s:
             s.DEBUG = False
             with pytest.raises(AnalyticsDataFetchError):
@@ -178,8 +219,10 @@ class TestGetOngoingData:
 
     @pytest.mark.asyncio
     async def test_remaining_slots_can_be_none(self):
-        repo = _make_repo(get_started_events=AsyncMock(return_value=[
-            StartedEventSummary(event_id=EVENT_ID, event_title="E1", session_count=1, checked_in_count=50, remaining_slots=None)
-        ]))
+        repo = _make_repo(
+            get_started_events=AsyncMock(
+                return_value=[StartedEventSummary(event_id=EVENT_ID, event_title="E1", session_count=1, checked_in_count=50, remaining_slots=None)]
+            )
+        )
         result = await _make_uc(repo).get_ongoing_data(GetOngoingEventDataInput())
         assert result.data.started_events[0].remaining_slots is None

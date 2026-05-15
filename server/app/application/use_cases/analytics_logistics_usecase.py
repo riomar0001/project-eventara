@@ -18,9 +18,7 @@ class LogisticsAnalyticsUseCase:
     def __init__(self, repository: IAnalyticsRepository) -> None:
         self.repository = repository
 
-    async def get_event_logistics_overview(
-        self, input_dto: GetEventLogisticsInput
-    ) -> GetEventLogisticsOutput:
+    async def get_event_logistics_overview(self, input_dto: GetEventLogisticsInput) -> GetEventLogisticsOutput:
         try:
             overview = await self.repository.get_event_logistics_overview(input_dto.event_id)
         except AnalyticsError:
@@ -35,9 +33,7 @@ class LogisticsAnalyticsUseCase:
 
         return GetEventLogisticsOutput(overview=overview)
 
-    async def get_session_timeline(
-        self, input_dto: GetSessionTimelineInput
-    ) -> GetSessionTimelineOutput:
+    async def get_session_timeline(self, input_dto: GetSessionTimelineInput) -> GetSessionTimelineOutput:
         try:
             timeline = await self.repository.get_session_timeline()
         except AnalyticsError:
@@ -52,9 +48,7 @@ class LogisticsAnalyticsUseCase:
 
         return GetSessionTimelineOutput(timeline=timeline)
 
-    async def get_volunteer_logistics(
-        self, input_dto: GetVolunteerLogisticsInput
-    ) -> GetVolunteerLogisticsOutput:
+    async def get_volunteer_logistics(self, input_dto: GetVolunteerLogisticsInput) -> GetVolunteerLogisticsOutput:
         try:
             logistics = await self.repository.get_volunteer_logistics(input_dto.event_id)
         except AnalyticsError:
@@ -69,9 +63,7 @@ class LogisticsAnalyticsUseCase:
 
         return GetVolunteerLogisticsOutput(logistics=logistics)
 
-    async def get_registration_logistics(
-        self, input_dto: GetRegistrationLogisticsInput
-    ) -> GetRegistrationLogisticsOutput:
+    async def get_registration_logistics(self, input_dto: GetRegistrationLogisticsInput) -> GetRegistrationLogisticsOutput:
         try:
             registrations = await self.repository.get_registration_logistics(input_dto.event_id)
         except AnalyticsError:

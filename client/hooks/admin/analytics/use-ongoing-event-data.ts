@@ -105,7 +105,9 @@ export function useOngoingEventData() {
     }
 
     void load();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [refreshKey]);
 
   return { data, isLoading, error, refetch: () => setRefreshKey((k) => k + 1) };

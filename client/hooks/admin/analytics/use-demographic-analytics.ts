@@ -104,7 +104,9 @@ export function useDemographicAnalytics() {
     }
 
     void load();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   return { data, isLoading, error };
