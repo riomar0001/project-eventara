@@ -63,13 +63,35 @@ def _make_repo(**overrides):
     repo.get_attendance_rates = AsyncMock(return_value=[_make_attendance_rate()])
     repo.get_event_attendance_rates = AsyncMock(return_value=[_make_event_attendance_rate()])
     repo.get_feedback_summaries = AsyncMock(
-        return_value=[FeedbackScoreSummary(event_id=EVENT_ID, event_title="Test Event", average_rating=4.5, total_feedback_count=10)]
+        return_value=[
+            FeedbackScoreSummary(
+                event_id=EVENT_ID,
+                event_title="Test Event",
+                average_rating=4.5,
+                total_feedback_count=10,
+            )
+        ]
     )
     repo.get_feedback_trend = AsyncMock(
-        return_value=[FeedbackTrendPoint(event_id=EVENT_ID, event_title="Test Event", end_date=None, average_rating=4.5, feedback_count=10)]
+        return_value=[
+            FeedbackTrendPoint(
+                event_id=EVENT_ID,
+                event_title="Test Event",
+                end_date=None,
+                average_rating=4.5,
+                feedback_count=10,
+            )
+        ]
     )
     repo.get_top_rated_events = AsyncMock(
-        return_value=[TopRatedEvent(event_id=EVENT_ID, event_title="Test Event", average_rating=4.8, feedback_count=15)]
+        return_value=[
+            TopRatedEvent(
+                event_id=EVENT_ID,
+                event_title="Test Event",
+                average_rating=4.8,
+                feedback_count=15,
+            )
+        ]
     )
     repo.get_volunteer_performance = AsyncMock(
         return_value=[
@@ -82,7 +104,7 @@ def _make_repo(**overrides):
                 role_name="Usher",
                 joined_count=5,
                 left_count=1,
-            )
+            ),
         ]
     )
     repo.get_organizer_output = AsyncMock(
@@ -206,7 +228,15 @@ class TestGetEventPerformance:
     @pytest.mark.asyncio
     async def test_attendance_rate_is_none_when_zero_registered(self):
         repo = _make_repo(
-            get_attendance_rates=AsyncMock(return_value=[_make_attendance_rate(registered_count=0, attended_count=0, attendance_rate_pct=None)])
+            get_attendance_rates=AsyncMock(
+                return_value=[
+                    _make_attendance_rate(
+                        registered_count=0,
+                        attended_count=0,
+                        attendance_rate_pct=None,
+                    )
+                ]
+            )
         )
         result = await _make_uc(repo).get_event_performance(GetEventPerformanceInput())
         assert result.performance.attendance_rates[0].attendance_rate_pct is None

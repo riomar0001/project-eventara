@@ -82,6 +82,11 @@ _OPENAPI_TAGS = [
         "name": "Analytics",
         "description": "Platform analytics — logistics, performance, demographic, on-going, and historical event data with filtering and export.",
     },
+    {
+        "name": "App Feedback",
+        "description": "Anonymous app feedback — submit 1–5 star ratings with optional comments,"
+        " and retrieve paginated feedback with weekly user registration analytics for admins.",
+    },
 ]
 
 app = FastAPI(
