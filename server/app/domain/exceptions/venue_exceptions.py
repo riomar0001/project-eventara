@@ -6,9 +6,7 @@ class VenueNotFoundError(Exception):
 class VenueNotPartnerError(Exception):
     def __init__(self, venue_id: str = "") -> None:
         super().__init__(
-            f"Only partner venues can be used for event sessions: {venue_id}"
-            if venue_id
-            else "Only partner venues can be used for event sessions"
+            f"Only partner venues can be used for event sessions: {venue_id}" if venue_id else "Only partner venues can be used for event sessions"
         )
 
 

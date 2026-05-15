@@ -4,8 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.application.use_cases.account_settings_usecase import AccountSettingsUseCase
 from app.application.use_cases.app_feedback_usecase import AppFeedbackUseCase
 from app.application.use_cases.audit_log_usecase import AuditLogUseCase
-from app.application.use_cases.dashboard_usecase import DashboardUseCase
 from app.application.use_cases.auth_usecase import AuthUseCase
+from app.application.use_cases.dashboard_usecase import DashboardUseCase
 from app.application.use_cases.event_deletion_usecase import EventDeletionUseCase
 from app.application.use_cases.event_feedback_usecase import EventFeedbackUseCase
 from app.application.use_cases.event_participant_usecase import EventParticipantUseCase
@@ -36,13 +36,13 @@ from app.application.use_cases.volunteer_usecase import (
     VolunteerRoleUseCase,
     VolunteerUseCase,
 )
-from app.infrastructure.database.repositories.app_feedback_repository import AppFeedbackRepository
-from app.infrastructure.database.repositories.dashboard_repository import DashboardRepository
 from app.infrastructure.cache.repositories.otp_repository import OTPRepository
 from app.infrastructure.cache.repositories.password_reset_repository import PasswordResetRepository
+from app.infrastructure.database.repositories.app_feedback_repository import AppFeedbackRepository
 from app.infrastructure.database.repositories.audit_log_repository import (
     AuditLogRepository,
 )
+from app.infrastructure.database.repositories.dashboard_repository import DashboardRepository
 from app.infrastructure.database.repositories.event_feedback_repository import EventFeedbackRepository
 from app.infrastructure.database.repositories.event_participant_repository import EventParticipantRepository
 from app.infrastructure.database.repositories.event_repository import EventRepository

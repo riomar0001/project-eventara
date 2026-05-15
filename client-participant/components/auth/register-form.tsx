@@ -1,7 +1,7 @@
 'use client';
 
-import Link from 'next/link';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import Link from 'next/link';
 import { useRegisterForm } from '@/hooks/auth/use-register-form';
 
 const INPUT =
@@ -14,10 +14,10 @@ export function RegisterForm() {
   const { form, errors, showPassword, showConfirm, setShowPassword, setShowConfirm, loading, setField, handleSubmit } = useRegisterForm();
 
   return (
-    <div className="rounded-3xl border border-border bg-card px-8 py-8 shadow-2xl">
+    <div className="border-border bg-card rounded-3xl border px-8 py-8 shadow-2xl">
       <div className="mb-6">
-        <h2 className="text-[22px] font-bold tracking-[-0.025em] text-foreground">Create an account</h2>
-        <p className="mt-1 text-sm text-muted-foreground">Join the Davao DeFi community.</p>
+        <h2 className="text-foreground text-[22px] font-bold tracking-[-0.025em]">Create an account</h2>
+        <p className="text-muted-foreground mt-1 text-sm">Join the Davao DeFi community.</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -43,8 +43,18 @@ export function RegisterForm() {
         <div>
           <label className={labelCls}>Password</label>
           <div className="relative">
-            <input type={showPassword ? 'text' : 'password'} className={`${INPUT} pr-11`} value={form.password} onChange={(e) => setField('password', e.target.value)} placeholder="Min. 8 characters" />
-            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2 rounded-lg p-1 text-muted-foreground transition-colors hover:bg-muted">
+            <input
+              type={showPassword ? 'text' : 'password'}
+              className={`${INPUT} pr-11`}
+              value={form.password}
+              onChange={(e) => setField('password', e.target.value)}
+              placeholder="Min. 8 characters"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="text-muted-foreground hover:bg-muted absolute top-1/2 right-3.5 -translate-y-1/2 rounded-lg p-1 transition-colors"
+            >
               {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
             </button>
           </div>
@@ -54,32 +64,45 @@ export function RegisterForm() {
         <div>
           <label className={labelCls}>Confirm password</label>
           <div className="relative">
-            <input type={showConfirm ? 'text' : 'password'} className={`${INPUT} pr-11`} value={form.confirm} onChange={(e) => setField('confirm', e.target.value)} placeholder="Repeat your password" />
-            <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-3.5 top-1/2 -translate-y-1/2 rounded-lg p-1 text-muted-foreground transition-colors hover:bg-muted">
+            <input
+              type={showConfirm ? 'text' : 'password'}
+              className={`${INPUT} pr-11`}
+              value={form.confirm}
+              onChange={(e) => setField('confirm', e.target.value)}
+              placeholder="Repeat your password"
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirm(!showConfirm)}
+              className="text-muted-foreground hover:bg-muted absolute top-1/2 right-3.5 -translate-y-1/2 rounded-lg p-1 transition-colors"
+            >
               {showConfirm ? <EyeOff size={15} /> : <Eye size={15} />}
             </button>
           </div>
           {errors.confirm && <p className={errorCls}>{errors.confirm}</p>}
         </div>
 
-        <p className="text-[12px] leading-relaxed text-muted-foreground">
-          By creating an account you agree to our{' '}
-          <span className="cursor-pointer text-primary transition-colors hover:underline">Terms of Service</span>
-          {' '}and{' '}
-          <span className="cursor-pointer text-primary transition-colors hover:underline">Privacy Policy</span>.
+        <p className="text-muted-foreground text-[12px] leading-relaxed">
+          By creating an account you agree to our <span className="text-primary cursor-pointer transition-colors hover:underline">Terms of Service</span> and{' '}
+          <span className="text-primary cursor-pointer transition-colors hover:underline">Privacy Policy</span>.
         </p>
 
-        <button type="submit" disabled={loading}
-          className="mt-1 flex w-full items-center justify-center gap-2 rounded-full bg-primary py-3 font-semibold text-primary-foreground shadow-[0_8px_28px_-10px_var(--lime-glow),inset_0_-1px_0_oklch(0.7_0.2_128)] transition-all hover:-translate-y-0.5 disabled:pointer-events-none disabled:opacity-60">
+        <button
+          type="submit"
+          disabled={loading}
+          className="bg-primary text-primary-foreground mt-1 flex w-full items-center justify-center gap-2 rounded-full py-3 font-semibold shadow-[0_8px_28px_-10px_var(--lime-glow),inset_0_-1px_0_oklch(0.7_0.2_128)] transition-all hover:-translate-y-0.5 disabled:pointer-events-none disabled:opacity-60"
+        >
           {loading && <Loader2 size={15} className="animate-spin" />}
           {loading ? 'Creating account…' : 'Create account'}
         </button>
       </form>
 
-      <div className="mt-6 border-t border-border pt-5 text-center">
-        <p className="text-[13.5px] text-muted-foreground">
+      <div className="border-border mt-6 border-t pt-5 text-center">
+        <p className="text-muted-foreground text-[13.5px]">
           Already have an account?{' '}
-          <Link href="/login" className="font-semibold text-primary transition-colors hover:underline">Sign in</Link>
+          <Link href="/login" className="text-primary font-semibold transition-colors hover:underline">
+            Sign in
+          </Link>
         </p>
       </div>
     </div>

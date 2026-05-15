@@ -14,7 +14,7 @@ import { ALL_EVENTS, CATEGORIES, FEATURED } from '@/constants/events-directory';
 
 const TWEAKS_DEFAULTS: TweaksConfig = { density: 'comfortable', bannerVariant: 'featured', badgeStyle: 'floating' };
 
-const MONTH_IDX: Record<string, number> = { JAN:0, FEB:1, MAR:2, APR:3, MAY:4, JUN:5, JUL:6, AUG:7, SEP:8, OCT:9, NOV:10, DEC:11 };
+const MONTH_IDX: Record<string, number> = { JAN: 0, FEB: 1, MAR: 2, APR: 3, MAY: 4, JUN: 5, JUL: 6, AUG: 7, SEP: 8, OCT: 9, NOV: 10, DEC: 11 };
 
 export default function EventsPage() {
   const [tweaks, setTweaks] = useState<TweaksConfig>(TWEAKS_DEFAULTS);
@@ -29,21 +29,32 @@ export default function EventsPage() {
   const PER_PAGE = tweaks.density === 'compact' ? 8 : 6;
 
   useEffect(() => {
-    const onMsg = (e: MessageEvent) => { const t = e.data?.type; if (t === '__activate_edit_mode') setEditMode(true); if (t === '__deactivate_edit_mode') setEditMode(false); };
+    const onMsg = (e: MessageEvent) => {
+      const t = e.data?.type;
+      if (t === '__activate_edit_mode') setEditMode(true);
+      if (t === '__deactivate_edit_mode') setEditMode(false);
+    };
     window.addEventListener('message', onMsg);
     window.parent.postMessage({ type: '__edit_mode_available' }, '*');
     return () => window.removeEventListener('message', onMsg);
   }, []);
 
-  useEffect(() => { window.parent.postMessage({ type: '__edit_mode_set_keys', edits: tweaks }, '*'); }, [tweaks]);
+  useEffect(() => {
+    window.parent.postMessage({ type: '__edit_mode_set_keys', edits: tweaks }, '*');
+  }, [tweaks]);
 
   useEffect(() => {
     const id = 'badge-style';
     let sheet = document.getElementById(id) as HTMLStyleElement | null;
-    if (!sheet) { sheet = document.createElement('style'); sheet.id = id; document.head.appendChild(sheet); }
-    sheet.textContent = tweaks.badgeStyle === 'lime'
-      ? '.date-badge{background:var(--lime)!important;border-color:var(--lime)!important}.date-badge .mo,.date-badge .day{color:#0a1005!important}'
-      : '';
+    if (!sheet) {
+      sheet = document.createElement('style');
+      sheet.id = id;
+      document.head.appendChild(sheet);
+    }
+    sheet.textContent =
+      tweaks.badgeStyle === 'lime'
+        ? '.date-badge{background:var(--lime)!important;border-color:var(--lime)!important}.date-badge .mo,.date-badge .day{color:#0a1005!important}'
+        : '';
   }, [tweaks.badgeStyle]);
 
   const filtered = useMemo(() => {
@@ -51,7 +62,13 @@ export default function EventsPage() {
     if (cat !== 'All') list = list.filter((e) => e.cat === cat);
     if (q.trim()) {
       const needle = q.toLowerCase();
-      list = list.filter((e) => e.title.toLowerCase().includes(needle) || e.venue.toLowerCase().includes(needle) || e.tags.some((t) => t.toLowerCase().includes(needle)) || e.cat.toLowerCase().includes(needle));
+      list = list.filter(
+        (e) =>
+          e.title.toLowerCase().includes(needle) ||
+          e.venue.toLowerCase().includes(needle) ||
+          e.tags.some((t) => t.toLowerCase().includes(needle)) ||
+          e.cat.toLowerCase().includes(needle)
+      );
     }
     list.sort((a, b) => {
       if (sort === 'date') return new Date(a.year, MONTH_IDX[a.mo], +a.day).getTime() - new Date(b.year, MONTH_IDX[b.mo], +b.day).getTime();
@@ -68,15 +85,40 @@ export default function EventsPage() {
 
   const counts = useMemo(() => {
     const obj: Record<string, number> = { All: ALL_EVENTS.length };
-    for (const c of CATEGORIES) { if (c.key !== 'All') obj[c.key] = ALL_EVENTS.filter((e) => e.cat === c.key).length; }
+    for (const c of CATEGORIES) {
+      if (c.key !== 'All') obj[c.key] = ALL_EVENTS.filter((e) => e.cat === c.key).length;
+    }
     return obj;
   }, []);
 
-  const changeCat = useCallback((c: string) => { setCat(c); setPage(1); }, []);
-  const changeQ = useCallback((v: string) => { setQ(v); setPage(1); }, []);
+  const changeCat = useCallback((c: string) => {
+    setCat(c);
+    setPage(1);
+  }, []);
+  const changeQ = useCallback((v: string) => {
+    setQ(v);
+    setPage(1);
+  }, []);
 
   const openFeatured = useCallback(() => {
-    setDetail({ id: 0, day: '12', mo: 'DEC', year: 2026, date: FEATURED.date, time: FEATURED.time, title: FEATURED.title, desc: FEATURED.desc, venue: FEATURED.venue, cat: 'Meetups', tags: ['Gala', 'Featured'], seats: 80, total: 300, status: null, orb: 'amber', angle: '115deg' });
+    setDetail({
+      id: 0,
+      day: '12',
+      mo: 'DEC',
+      year: 2026,
+      date: FEATURED.date,
+      time: FEATURED.time,
+      title: FEATURED.title,
+      desc: FEATURED.desc,
+      venue: FEATURED.venue,
+      cat: 'Meetups',
+      tags: ['Gala', 'Featured'],
+      seats: 80,
+      total: 300,
+      status: null,
+      orb: 'amber',
+      angle: '115deg'
+    });
   }, []);
 
   return (
@@ -85,29 +127,42 @@ export default function EventsPage() {
       <div className="relative">
         {/* Page mesh background */}
         <div className="pointer-events-none absolute inset-x-0 top-0 z-0 h-[620px] overflow-hidden" aria-hidden="true">
-          <div className="absolute top-[-220px] left-[-180px] h-[640px] w-[640px] rounded-full blur-[90px] bg-[radial-gradient(circle,oklch(0.7_0.2_130_/_0.22),transparent_65%)]" />
-          <div className="absolute top-[-120px] right-[-140px] h-[540px] w-[540px] rounded-full blur-[90px] bg-[radial-gradient(circle,oklch(0.62_0.16_60_/_0.18),transparent_65%)]" />
-          <div className="absolute inset-0 opacity-35 bg-[length:64px_64px] bg-[linear-gradient(var(--line-soft)_1px,transparent_1px),linear-gradient(90deg,var(--line-soft)_1px,transparent_1px)] [mask-image:radial-gradient(ellipse_80%_60%_at_50%_0%,black_30%,transparent_75%)] [-webkit-mask-image:radial-gradient(ellipse_80%_60%_at_50%_0%,black_30%,transparent_75%)]" />
+          <div className="absolute top-[-220px] left-[-180px] h-[640px] w-[640px] rounded-full bg-[radial-gradient(circle,oklch(0.7_0.2_130_/_0.22),transparent_65%)] blur-[90px]" />
+          <div className="absolute top-[-120px] right-[-140px] h-[540px] w-[540px] rounded-full bg-[radial-gradient(circle,oklch(0.62_0.16_60_/_0.18),transparent_65%)] blur-[90px]" />
+          <div className="absolute inset-0 bg-[linear-gradient(var(--line-soft)_1px,transparent_1px),linear-gradient(90deg,var(--line-soft)_1px,transparent_1px)] [mask-image:radial-gradient(ellipse_80%_60%_at_50%_0%,black_30%,transparent_75%)] bg-[length:64px_64px] opacity-35 [-webkit-mask-image:radial-gradient(ellipse_80%_60%_at_50%_0%,black_30%,transparent_75%)]" />
         </div>
 
         <div className="events-dir-container relative z-[1] mx-auto max-w-[1240px] px-8">
           <header className="relative pt-16 pb-9">
             <div className="flex flex-wrap items-start justify-between gap-5">
               <div>
-                <span className="inline-flex items-center gap-2.5 font-mono text-xs tracking-widest text-muted-foreground uppercase">
-                  <span className="h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_12px_var(--lime-glow)]" />
+                <span className="text-muted-foreground inline-flex items-center gap-2.5 font-mono text-xs tracking-widest uppercase">
+                  <span className="bg-primary h-1.5 w-1.5 rounded-full shadow-[0_0_12px_var(--lime-glow)]" />
                   EVENT DIRECTORY · APR–JUL 2026
                 </span>
-                <h1 className="mx-0 my-[18px] text-[clamp(42px,5.5vw,72px)] leading-none font-bold tracking-[-0.035em] text-foreground">Discover Events</h1>
-                <p className="m-0 mb-9 max-w-[58ch] text-[16px] leading-[1.55] text-muted-foreground">Browse {ALL_EVENTS.length} upcoming workshops, meetups and hackathons across the Davao DeFi community.</p>
+                <h1 className="text-foreground mx-0 my-[18px] text-[clamp(42px,5.5vw,72px)] leading-none font-bold tracking-[-0.035em]">Discover Events</h1>
+                <p className="text-muted-foreground m-0 mb-9 max-w-[58ch] text-[16px] leading-[1.55]">
+                  Browse {ALL_EVENTS.length} upcoming workshops, meetups and hackathons across the Davao DeFi community.
+                </p>
               </div>
               <div className="text-right max-sm:text-left">
-                <div className="font-mono text-[40px] leading-none font-semibold tracking-[-0.03em] text-primary">{String(ALL_EVENTS.length).padStart(2, '0')}</div>
-                <div className="mt-[2px] font-mono text-[11px] tracking-[0.18em] uppercase text-muted-foreground">Active listings</div>
+                <div className="text-primary font-mono text-[40px] leading-none font-semibold tracking-[-0.03em]">
+                  {String(ALL_EVENTS.length).padStart(2, '0')}
+                </div>
+                <div className="text-muted-foreground mt-[2px] font-mono text-[11px] tracking-[0.18em] uppercase">Active listings</div>
               </div>
             </div>
 
-            <EventsDirectoryControls q={q} onQChange={changeQ} cat={cat} onCatChange={changeCat} sort={sort} onSortChange={(s) => setSort(s)} categories={CATEGORIES} counts={counts} />
+            <EventsDirectoryControls
+              q={q}
+              onQChange={changeQ}
+              cat={cat}
+              onCatChange={changeCat}
+              sort={sort}
+              onSortChange={(s) => setSort(s)}
+              categories={CATEGORIES}
+              counts={counts}
+            />
 
             {tweaks.bannerVariant === 'featured' && <EventsDirectoryFeatured featured={FEATURED} onOpen={openFeatured} />}
           </header>
@@ -115,21 +170,28 @@ export default function EventsPage() {
           <section>
             <div className="mt-14 mb-[22px] flex flex-wrap items-end justify-between gap-6">
               <div>
-                <h3 className="m-0 text-[24px] font-semibold tracking-[-0.02em] text-foreground">{cat === 'All' ? 'All events' : cat}</h3>
-                <div className="mt-1 font-mono text-[12px] text-muted-foreground">
+                <h3 className="text-foreground m-0 text-[24px] font-semibold tracking-[-0.02em]">{cat === 'All' ? 'All events' : cat}</h3>
+                <div className="text-muted-foreground mt-1 font-mono text-[12px]">
                   {filtered.length} result{filtered.length !== 1 ? 's' : ''}
-                  {q && <><span> · query </span><span className="text-primary">&quot;{q}&quot;</span></>}
+                  {q && (
+                    <>
+                      <span> · query </span>
+                      <span className="text-primary">&quot;{q}&quot;</span>
+                    </>
+                  )}
                 </div>
               </div>
-              <div className="flex gap-[2px] rounded-[10px] border border-border p-[3px]">
+              <div className="border-border flex gap-[2px] rounded-[10px] border p-[3px]">
                 <button
                   className={`flex items-center gap-[6px] rounded-[7px] px-[10px] py-[7px] text-[12px] transition-all ${view === 'grid' ? 'bg-card text-foreground shadow-[0_0_0_1px_var(--line-soft)]' : 'text-muted-foreground'}`}
-                  onClick={() => setView('grid')}>
+                  onClick={() => setView('grid')}
+                >
                   <Icon name="grid" size={13} /> Grid
                 </button>
                 <button
                   className={`flex items-center gap-[6px] rounded-[7px] px-[10px] py-[7px] text-[12px] transition-all ${view === 'list' ? 'bg-card text-foreground shadow-[0_0_0_1px_var(--line-soft)]' : 'text-muted-foreground'}`}
-                  onClick={() => setView('list')}>
+                  onClick={() => setView('list')}
+                >
                   <Icon name="list" size={13} /> List
                 </button>
               </div>
@@ -139,12 +201,12 @@ export default function EventsPage() {
               className={`events-dir-grid grid gap-[22px] ${view === 'list' ? 'grid-cols-1' : tweaks.density === 'compact' ? 'grid-cols-4' : 'grid-cols-3'}`}
             >
               {paged.length === 0 ? (
-                <div className="col-span-full rounded-[20px] border border-dashed border-border bg-muted/10 px-10 py-20 text-center">
-                  <div className="mx-auto mb-[18px] grid h-14 w-14 place-items-center rounded-[16px] bg-muted text-muted-foreground">
+                <div className="border-border bg-muted/10 col-span-full rounded-[20px] border border-dashed px-10 py-20 text-center">
+                  <div className="bg-muted text-muted-foreground mx-auto mb-[18px] grid h-14 w-14 place-items-center rounded-[16px]">
                     <Icon name="search" size={22} />
                   </div>
-                  <h4 className="m-0 mb-[6px] text-[20px] font-semibold tracking-[-0.02em] text-foreground">No events match your filters</h4>
-                  <p className="m-0 text-[14px] text-muted-foreground">Try a broader search or reset your category selection.</p>
+                  <h4 className="text-foreground m-0 mb-[6px] text-[20px] font-semibold tracking-[-0.02em]">No events match your filters</h4>
+                  <p className="text-muted-foreground m-0 text-[14px]">Try a broader search or reset your category selection.</p>
                 </div>
               ) : (
                 paged.map((ev) => <EventsDirectoryCard key={ev.id} ev={ev} onOpen={setDetail} />)
@@ -152,7 +214,15 @@ export default function EventsPage() {
             </div>
           </section>
 
-          {filtered.length > 0 && <EventsDirectoryPagination currentPage={currentPage} totalPages={totalPages} filteredLength={filtered.length} perPage={PER_PAGE} onPageChange={setPage} />}
+          {filtered.length > 0 && (
+            <EventsDirectoryPagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              filteredLength={filtered.length}
+              perPage={PER_PAGE}
+              onPageChange={setPage}
+            />
+          )}
         </div>
       </div>
 
@@ -161,21 +231,55 @@ export default function EventsPage() {
       {detail && <EventsDirectoryModal ev={detail} onClose={() => setDetail(null)} />}
 
       {editMode && (
-        <div className="fixed right-5 bottom-5 z-80 w-[280px] animate-[modal-pop_200ms_ease] rounded-[16px] border border-border bg-card p-4 text-[13px] shadow-[0_20px_60px_-20px_oklch(0_0_0_/_0.5)]">
+        <div className="border-border bg-card fixed right-5 bottom-5 z-80 w-[280px] animate-[modal-pop_200ms_ease] rounded-[16px] border p-4 text-[13px] shadow-[0_20px_60px_-20px_oklch(0_0_0_/_0.5)]">
           <h4 className="m-0 mb-3 flex items-center gap-2 text-[13px] font-semibold">
-            <span className="h-[6px] w-[6px] rounded-full bg-primary" />
+            <span className="bg-primary h-[6px] w-[6px] rounded-full" />
             Tweaks
-            <button className="ml-auto text-muted-foreground" onClick={() => setEditMode(false)}><Icon name="x" size={14} /></button>
+            <button className="text-muted-foreground ml-auto" onClick={() => setEditMode(false)}>
+              <Icon name="x" size={14} />
+            </button>
           </h4>
           {[
-            { label: 'Grid density', value: tweaks.density, onChange: (v: string) => setTweaks({ ...tweaks, density: v as TweaksConfig['density'] }), options: [{ v: 'comfortable', l: 'Comfortable (3)' }, { v: 'compact', l: 'Compact (4)' }] },
-            { label: 'Featured banner', value: tweaks.bannerVariant, onChange: (v: string) => setTweaks({ ...tweaks, bannerVariant: v as TweaksConfig['bannerVariant'] }), options: [{ v: 'featured', l: 'Show banner' }, { v: 'hidden', l: 'Hide banner' }] },
-            { label: 'Date badge', value: tweaks.badgeStyle, onChange: (v: string) => setTweaks({ ...tweaks, badgeStyle: v as TweaksConfig['badgeStyle'] }), options: [{ v: 'floating', l: 'Floating (dark)' }, { v: 'lime', l: 'Solid lime' }] }
+            {
+              label: 'Grid density',
+              value: tweaks.density,
+              onChange: (v: string) => setTweaks({ ...tweaks, density: v as TweaksConfig['density'] }),
+              options: [
+                { v: 'comfortable', l: 'Comfortable (3)' },
+                { v: 'compact', l: 'Compact (4)' }
+              ]
+            },
+            {
+              label: 'Featured banner',
+              value: tweaks.bannerVariant,
+              onChange: (v: string) => setTweaks({ ...tweaks, bannerVariant: v as TweaksConfig['bannerVariant'] }),
+              options: [
+                { v: 'featured', l: 'Show banner' },
+                { v: 'hidden', l: 'Hide banner' }
+              ]
+            },
+            {
+              label: 'Date badge',
+              value: tweaks.badgeStyle,
+              onChange: (v: string) => setTweaks({ ...tweaks, badgeStyle: v as TweaksConfig['badgeStyle'] }),
+              options: [
+                { v: 'floating', l: 'Floating (dark)' },
+                { v: 'lime', l: 'Solid lime' }
+              ]
+            }
           ].map(({ label, value, onChange, options }) => (
-            <div key={label} className="flex items-center justify-between gap-[10px] border-t border-border py-2">
-              <label className="text-[12.5px] text-muted-foreground">{label}</label>
-              <select className="rounded-[6px] border border-border bg-background px-[6px] py-1 text-[12px] text-foreground" value={value} onChange={(e) => onChange(e.target.value)}>
-                {options.map((o) => <option key={o.v} value={o.v}>{o.l}</option>)}
+            <div key={label} className="border-border flex items-center justify-between gap-[10px] border-t py-2">
+              <label className="text-muted-foreground text-[12.5px]">{label}</label>
+              <select
+                className="border-border bg-background text-foreground rounded-[6px] border px-[6px] py-1 text-[12px]"
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+              >
+                {options.map((o) => (
+                  <option key={o.v} value={o.v}>
+                    {o.l}
+                  </option>
+                ))}
               </select>
             </div>
           ))}

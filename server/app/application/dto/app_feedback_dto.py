@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from app.domain.entities.app_feedback_entity import AppFeedback
 from app.domain.entities.dashboard_entity import UserRegistrationWeek

@@ -4,9 +4,9 @@ import { Users } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { usePermissions } from '@/context/permissions-context';
 import { BackLink } from './volunteers-shared';
 import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
+import { usePermissions } from '@/context/permissions-context';
 
 export function VolunteerProfile({ volunteerId }: { volunteerId: string }) {
   const { can } = usePermissions();

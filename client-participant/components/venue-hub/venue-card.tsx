@@ -19,7 +19,7 @@ interface VenueCardProps {
   onReport: (v: Venue) => void;
 }
 
-export function VenueCard({ venue, onView, onEdit, onShare, onReport }: VenueCardProps) {
+export function VenueCard({ venue, onView }: VenueCardProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 

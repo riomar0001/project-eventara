@@ -1,11 +1,11 @@
 'use client';
 
-import { useDashboard } from '@/hooks/admin/dashboard/use-dashboard';
-import { DashboardStatsRow } from '@/components/admin/dashboard/stats-row';
-import { UserGrowthChart } from '@/components/admin/dashboard/user-growth-chart';
-import { TopVenuesCard } from '@/components/admin/dashboard/top-venues-card';
-import { LeaderboardCard } from '@/components/admin/dashboard/leaderboard-card';
 import { EventsTableCard } from '@/components/admin/dashboard/events-table-card';
+import { LeaderboardCard } from '@/components/admin/dashboard/leaderboard-card';
+import { DashboardStatsRow } from '@/components/admin/dashboard/stats-row';
+import { TopVenuesCard } from '@/components/admin/dashboard/top-venues-card';
+import { UserGrowthChart } from '@/components/admin/dashboard/user-growth-chart';
+import { useDashboard } from '@/hooks/admin/dashboard/use-dashboard';
 import type { ParticipantLeaderboardResponse, VolunteerLeaderboardResponse } from '@/api/types.gen';
 
 function toParticipantEntries(items: ParticipantLeaderboardResponse[]) {
@@ -76,26 +76,11 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <EventsTableCard
-          title="Ongoing Events"
-          subtitle="Events currently in progress"
-          events={metrics?.ongoing_events ?? []}
-          isLoading={isLoading}
-        />
-        <EventsTableCard
-          title="Upcoming Events"
-          subtitle="Next posted events"
-          events={metrics?.upcoming_events ?? []}
-          isLoading={isLoading}
-        />
+        <EventsTableCard title="Ongoing Events" subtitle="Events currently in progress" events={metrics?.ongoing_events ?? []} isLoading={isLoading} />
+        <EventsTableCard title="Upcoming Events" subtitle="Next posted events" events={metrics?.upcoming_events ?? []} isLoading={isLoading} />
       </div>
 
-      <EventsTableCard
-        title="Recent Events"
-        subtitle="Last 10 created events"
-        events={metrics?.recent_events ?? []}
-        isLoading={isLoading}
-      />
+      <EventsTableCard title="Recent Events" subtitle="Last 10 created events" events={metrics?.recent_events ?? []} isLoading={isLoading} />
     </div>
   );
 }

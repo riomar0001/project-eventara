@@ -42,7 +42,7 @@ export function LeaderboardCard({ title, subtitle, entries, countLabel, isLoadin
         <CardContent className="space-y-3">
           {Array.from({ length: 5 }).map((_, i) => (
             <div key={i} className="flex items-center gap-3">
-              <Skeleton className="size-8 rounded-full shrink-0" />
+              <Skeleton className="size-8 shrink-0 rounded-full" />
               <div className="flex-1 space-y-1">
                 <Skeleton className="h-3 w-28" />
                 <Skeleton className="h-3 w-16" />

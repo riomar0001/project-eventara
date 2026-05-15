@@ -4,9 +4,9 @@ import { use } from 'react';
 import { notFound } from 'next/navigation';
 import { VenueForm } from '@/components/admin/venues/venue-form';
 import { BackLink } from '@/components/admin/venues/venues-shared';
-import { usePermissions } from '@/context/permissions-context';
 import { useVenue } from '@/hooks/admin/venues/use-venue';
 import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
+import { usePermissions } from '@/context/permissions-context';
 import { useAuthStore } from '@/store/auth-store';
 
 function VenueEditContent({ venueId }: { venueId: string }) {

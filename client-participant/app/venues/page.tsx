@@ -43,15 +43,15 @@ export default function VenuesPage() {
   }
 
   return (
-    <div className="relative min-h-screen bg-page">
+    <div className="bg-page relative min-h-screen">
       {/* Page Mesh - Ambient orbs */}
       <div className="pointer-events-none absolute inset-0 top-0 z-0 h-[620px] overflow-hidden">
         {/* Lime orb (top-left) */}
-        <div className="absolute left-[-180px] top-[-220px] h-[640px] w-[640px] rounded-full blur-[90px] bg-[radial-gradient(circle,oklch(0.9_0.22_128_/_0.4),transparent_65%)]" />
+        <div className="absolute top-[-220px] left-[-180px] h-[640px] w-[640px] rounded-full bg-[radial-gradient(circle,oklch(0.9_0.22_128_/_0.4),transparent_65%)] blur-[90px]" />
         {/* Amber orb (top-right) */}
-        <div className="absolute right-[-140px] top-[-120px] h-[540px] w-[540px] rounded-full blur-[90px] bg-[radial-gradient(circle,oklch(0.82_0.17_75_/_0.28),transparent_65%)]" />
+        <div className="absolute top-[-120px] right-[-140px] h-[540px] w-[540px] rounded-full bg-[radial-gradient(circle,oklch(0.82_0.17_75_/_0.28),transparent_65%)] blur-[90px]" />
         {/* Grid overlay */}
-        <div className="absolute inset-0 opacity-35 bg-[length:64px_64px] bg-[linear-gradient(var(--line-soft)_1px,transparent_1px),linear-gradient(90deg,var(--line-soft)_1px,transparent_1px)] [mask-image:radial-gradient(ellipse_80%_60%_at_50%_0%,black_30%,transparent_75%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(var(--line-soft)_1px,transparent_1px),linear-gradient(90deg,var(--line-soft)_1px,transparent_1px)] [mask-image:radial-gradient(ellipse_80%_60%_at_50%_0%,black_30%,transparent_75%)] bg-[length:64px_64px] opacity-35" />
       </div>
 
       {/* Content */}
@@ -122,9 +122,9 @@ export default function VenuesPage() {
 
       {/* Toast Notification */}
       {modals.toast && (
-        <div className="fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-lg border border-line bg-surface px-4 py-3 shadow-lg">
-          <div className="h-1.5 w-1.5 rounded-full bg-lime shadow-lime-glow shadow-lg" />
-          <span className="text-sm text-text">{modals.toast}</span>
+        <div className="border-line bg-surface fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-lg border px-4 py-3 shadow-lg">
+          <div className="bg-lime shadow-lime-glow h-1.5 w-1.5 rounded-full shadow-lg" />
+          <span className="text-text text-sm">{modals.toast}</span>
         </div>
       )}
     </div>

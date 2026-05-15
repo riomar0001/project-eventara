@@ -11,27 +11,29 @@ const CHECKLIST = ['50+ seat capacity', 'Stable power + WiFi', 'Accessible by pu
 export function SuggestSidebar() {
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-border bg-card p-5">
-        <p className="mb-4 font-mono text-[11px] tracking-[0.14em] uppercase text-muted-foreground">What happens next?</p>
+      <div className="border-border bg-card rounded-2xl border p-5">
+        <p className="text-muted-foreground mb-4 font-mono text-[11px] tracking-[0.14em] uppercase">What happens next?</p>
         <div className="space-y-4">
           {STEPS.map((s) => (
             <div key={s.n} className="flex gap-3">
-              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 font-mono text-[10px] font-bold text-primary">{s.n}</div>
+              <div className="bg-primary/10 text-primary flex h-6 w-6 shrink-0 items-center justify-center rounded-full font-mono text-[10px] font-bold">
+                {s.n}
+              </div>
               <div>
-                <p className="text-[13px] font-semibold text-foreground">{s.title}</p>
-                <p className="text-[12px] text-muted-foreground">{s.desc}</p>
+                <p className="text-foreground text-[13px] font-semibold">{s.title}</p>
+                <p className="text-muted-foreground text-[12px]">{s.desc}</p>
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      <div className="rounded-2xl border border-border bg-card p-5">
-        <p className="mb-3 text-[13px] font-semibold text-foreground">Good venues typically have:</p>
+      <div className="border-border bg-card rounded-2xl border p-5">
+        <p className="text-foreground mb-3 text-[13px] font-semibold">Good venues typically have:</p>
         <ul className="space-y-2">
           {CHECKLIST.map((item) => (
-            <li key={item} className="flex items-center gap-2 text-[13px] text-muted-foreground">
-              <CheckCircle2 size={13} className="shrink-0 text-primary" />
+            <li key={item} className="text-muted-foreground flex items-center gap-2 text-[13px]">
+              <CheckCircle2 size={13} className="text-primary shrink-0" />
               {item}
             </li>
           ))}

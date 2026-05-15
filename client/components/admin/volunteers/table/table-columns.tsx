@@ -124,4 +124,7 @@ export function createVolunteerColumns(
   ];
 }
 
-export const volunteerColumns = createVolunteerColumns(() => {}, () => {});
+export const volunteerColumns = createVolunteerColumns(
+  () => {},
+  () => {}
+);

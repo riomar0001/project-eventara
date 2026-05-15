@@ -236,7 +236,7 @@ export function EventQrScannerPanel({ onCheckedIn }: { onCheckedIn: () => void }
         )}
 
         <div className="flex flex-wrap justify-center gap-2">
-          <Button type="button" onClick={() => void startCamera()} disabled={isCameraActive || isSubmitting || !!result} className="rounded-xl w-full">
+          <Button type="button" onClick={() => void startCamera()} disabled={isCameraActive || isSubmitting || !!result} className="w-full rounded-xl">
             {isSubmitting ? <Loader2 className="size-4 animate-spin" /> : <Camera className="size-4" />}
             Start scanner
           </Button>
