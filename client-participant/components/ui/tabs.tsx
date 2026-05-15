@@ -8,7 +8,7 @@ const TabsList = React.forwardRef<React.ElementRef<typeof TabsPrimitive.List>, R
   ({ className, ...props }, ref) => (
     <TabsPrimitive.List
       ref={ref}
-      className={cn('inline-flex items-center justify-center rounded-2xl border border-line-soft bg-surface p-1', className)}
+      className={cn('border-line-soft bg-surface inline-flex items-center justify-center rounded-2xl border p-1', className)}
       {...props}
     />
   )
@@ -20,7 +20,7 @@ const TabsTrigger = React.forwardRef<React.ElementRef<typeof TabsPrimitive.Trigg
     <TabsPrimitive.Trigger
       ref={ref}
       className={cn(
-        'inline-flex items-center justify-center rounded-lg px-3 py-1.5 text-sm font-medium whitespace-nowrap ring-offset--page transition-all hover:text-text focus-visible:ring-2 focus-visible:ring--lime focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-lime data-[state=active]:text-[#0a1005] data-[state=active]:shadow-md data-[state=inactive]:text-text-dim',
+        'ring-offset--page hover:text-text focus-visible:ring--lime data-[state=active]:bg-lime data-[state=inactive]:text-text-dim inline-flex items-center justify-center rounded-lg px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 data-[state=active]:text-[#0a1005] data-[state=active]:shadow-md',
         className
       )}
       {...props}
@@ -33,10 +33,7 @@ const TabsContent = React.forwardRef<React.ElementRef<typeof TabsPrimitive.Conte
   ({ className, ...props }, ref) => (
     <TabsPrimitive.Content
       ref={ref}
-      className={cn(
-        'mt-2 ring-offset--page focus-visible:ring-2 focus-visible:ring--lime focus-visible:ring-offset-2 focus-visible:outline-none',
-        className
-      )}
+      className={cn('ring-offset--page focus-visible:ring--lime mt-2 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none', className)}
       {...props}
     />
   )

@@ -1,18 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import {
-  DELETE_ACCOUNT_REASON_OPTIONS,
-  DELETE_ACCOUNT_OTHER_REASON,
-  DELETE_CONFIRMATION_WORD,
-  type DeleteAccountReason
-} from '@/constants/delete-account';
+import { DELETE_ACCOUNT_REASON_OPTIONS, DELETE_ACCOUNT_OTHER_REASON, DELETE_CONFIRMATION_WORD, type DeleteAccountReason } from '@/constants/delete-account';
 
 export { DELETE_ACCOUNT_REASON_OPTIONS, DELETE_ACCOUNT_OTHER_REASON, DELETE_CONFIRMATION_WORD };
 
 export function useDeleteAccount() {
-  const router = useRouter();
   const [reasonOption, setReasonOption] = useState<DeleteAccountReason | ''>('');
   const [otherReason, setOtherReason] = useState('');
   const [confirmation, setConfirmation] = useState('');
@@ -26,9 +19,18 @@ export function useDeleteAccount() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
-    if (!reasonOption) { setError('Please select a reason.'); return; }
-    if (isOther && !otherReason.trim()) { setError('Please describe your reason.'); return; }
-    if (!isConfirmed) { setError(`Type "${DELETE_CONFIRMATION_WORD}" to confirm.`); return; }
+    if (!reasonOption) {
+      setError('Please select a reason.');
+      return;
+    }
+    if (isOther && !otherReason.trim()) {
+      setError('Please describe your reason.');
+      return;
+    }
+    if (!isConfirmed) {
+      setError(`Type "${DELETE_CONFIRMATION_WORD}" to confirm.`);
+      return;
+    }
 
     setSubmitting(true);
     // TODO: call delete-account API
@@ -50,9 +52,18 @@ export function useDeleteAccount() {
   }
 
   return {
-    reasonOption, otherReason, confirmation, submitting, error, scheduledDate,
-    isOther, isConfirmed,
-    setReasonOption, setOtherReason, setConfirmation,
-    handleSubmit, cancelDeletion
+    reasonOption,
+    otherReason,
+    confirmation,
+    submitting,
+    error,
+    scheduledDate,
+    isOther,
+    isConfirmed,
+    setReasonOption,
+    setOtherReason,
+    setConfirmation,
+    handleSubmit,
+    cancelDeletion
   };
 }

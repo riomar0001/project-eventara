@@ -11,7 +11,7 @@ export function CapacityBadge({ type, capacity }: CapacityBadgeProps) {
   return (
     <div className="inline-flex items-center gap-2 rounded-lg bg-[oklch(0_0_0_/_0.4)] px-2 py-1 backdrop-blur-sm">
       <span className="font-mono text-xs font-medium text-white">{type}</span>
-      <span className="text-white/50 text-xs">· {capacity} capacity</span>
+      <span className="text-xs text-white/50">· {capacity} capacity</span>
     </div>
   );
 }

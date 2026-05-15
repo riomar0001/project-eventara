@@ -1,10 +1,10 @@
 export const DELETE_ACCOUNT_REASON_OPTIONS = [
-  "I no longer need the platform",
-  "I have a duplicate account",
-  "Privacy concerns",
-  "Too many emails / notifications",
+  'I no longer need the platform',
+  'I have a duplicate account',
+  'Privacy concerns',
+  'Too many emails / notifications',
   "I didn't find any useful events",
-  "Other"
+  'Other'
 ] as const;
 
 export type DeleteAccountReason = (typeof DELETE_ACCOUNT_REASON_OPTIONS)[number];

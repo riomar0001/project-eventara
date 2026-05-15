@@ -37,7 +37,7 @@ export function EventsDirectoryControls({ q, onQChange, cat, onCatChange, sort, 
       {/* Search row */}
       <div className="events-dir-search-row mt-2 grid grid-cols-[1fr_auto] items-center gap-[14px]">
         <div
-          className="relative rounded-[14px] border border-line-soft bg-surface transition-all"
+          className="border-line-soft bg-surface relative rounded-[14px] border transition-all"
           onFocus={(e) => {
             const el = e.currentTarget;
             el.style.borderColor = 'oklch(0.7 0.2 130)';
@@ -51,16 +51,16 @@ export function EventsDirectoryControls({ q, onQChange, cat, onCatChange, sort, 
             el.style.background = '';
           }}
         >
-          <span className="absolute top-1/2 left-[18px] -translate-y-1/2 text-text-mute">
+          <span className="text-text-mute absolute top-1/2 left-[18px] -translate-y-1/2">
             <Icon name="search" size={18} />
           </span>
           <input
-            className="w-full border-none bg-transparent py-[18px] pr-[18px] pl-[52px] text-[15.5px] tracking-[-0.01em] text-text outline-none"
+            className="text-text w-full border-none bg-transparent py-[18px] pr-[18px] pl-[52px] text-[15.5px] tracking-[-0.01em] outline-none"
             placeholder="Search events, venues, tags…"
             value={q}
             onChange={(e) => onQChange(e.target.value)}
           />
-          <span className="absolute top-1/2 right-[14px] -translate-y-1/2 rounded-[6px] border border-line-soft bg-page px-2 py-1 font-mono text-[10.5px] text-text-mute">
+          <span className="border-line-soft bg-page text-text-mute absolute top-1/2 right-[14px] -translate-y-1/2 rounded-[6px] border px-2 py-1 font-mono text-[10.5px]">
             ⌘ K
           </span>
         </div>
@@ -68,18 +68,16 @@ export function EventsDirectoryControls({ q, onQChange, cat, onCatChange, sort, 
         {/* Sort */}
         <div className="relative" ref={sortRef}>
           <button
-            className="flex h-[56px] min-w-[180px] items-center gap-[10px] rounded-[14px] border border-line-soft bg-surface px-[18px] text-[14px] text-text transition-colors"
+            className="border-line-soft bg-surface text-text flex h-[56px] min-w-[180px] items-center gap-[10px] rounded-[14px] border px-[18px] text-[14px] transition-colors"
             onClick={() => setSortOpen((o) => !o)}
           >
-            <span className="font-mono text-[10.5px] tracking-[0.14em] uppercase text-text-mute">Sort</span>
+            <span className="text-text-mute font-mono text-[10.5px] tracking-[0.14em] uppercase">Sort</span>
             <span className="font-medium">{sortLabel}</span>
             <Icon name="chevron-down" size={14} />
           </button>
 
           {sortOpen && (
-            <div
-              className="absolute right-0 z-50 mt-[6px] min-w-[200px] rounded-[12px] border border-line bg-surface p-[6px] shadow-[0_20px_60px_-20px_oklch(0_0_0_/_0.5)]"
-            >
+            <div className="border-line bg-surface absolute right-0 z-50 mt-[6px] min-w-[200px] rounded-[12px] border p-[6px] shadow-[0_20px_60px_-20px_oklch(0_0_0_/_0.5)]">
               {(
                 [
                   ['date', 'By date'],
@@ -90,7 +88,10 @@ export function EventsDirectoryControls({ q, onQChange, cat, onCatChange, sort, 
                 <button
                   key={k}
                   className={`flex w-full items-center justify-between rounded-[8px] px-3 py-[10px] text-left text-[13px] transition-colors ${sort === k ? 'text-lime' : 'text-text-dim'}`}
-                  onClick={() => { onSortChange(k); setSortOpen(false); }}
+                  onClick={() => {
+                    onSortChange(k);
+                    setSortOpen(false);
+                  }}
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLElement).style.background = 'oklch(1 0 0 / 0.04)';
                     (e.currentTarget as HTMLElement).style.color = 'oklch(0.2 0.012 150)';
@@ -129,13 +130,15 @@ export function EventsDirectoryControls({ q, onQChange, cat, onCatChange, sort, 
             }}
           >
             {c.label}
-            <span className={`rounded-[4px] px-[6px] py-[2px] font-mono text-[10.5px] ${cat === c.key ? 'bg-[oklch(0_0_0_/_0.15)] text-white' : 'bg-[oklch(1_0_0_/_0.06)]'}`}>
+            <span
+              className={`rounded-[4px] px-[6px] py-[2px] font-mono text-[10.5px] ${cat === c.key ? 'bg-[oklch(0_0_0_/_0.15)] text-white' : 'bg-[oklch(1_0_0_/_0.06)]'}`}
+            >
               {counts[c.key] ?? 0}
             </span>
           </button>
         ))}
 
-        <div className="mx-1 h-6 w-px bg--line-soft" />
+        <div className="bg--line-soft mx-1 h-6 w-px" />
 
         {['This month', 'Free', 'Members only'].map((label) => (
           <button

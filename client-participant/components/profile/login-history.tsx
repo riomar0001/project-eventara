@@ -24,26 +24,34 @@ const DEVICE_ICONS = { desktop: Monitor, mobile: Smartphone, web: Globe };
 export function LoginHistory() {
   return (
     <div className="space-y-4">
-      <p className="text-[13px] text-muted-foreground">Showing recent sign-ins to your account. If you see activity you don't recognize, change your password immediately.</p>
+      <p className="text-muted-foreground text-[13px]">
+        Showing recent sign-ins to your account. If you see activity you don&apos;t recognize, change your password immediately.
+      </p>
       <div className="space-y-2">
         {MOCK_SESSIONS.map((session) => {
           const Icon = DEVICE_ICONS[session.deviceType];
           return (
-            <div key={session.id}
-              className={`flex items-center gap-4 rounded-2xl border p-4 ${session.isCurrent ? 'border-primary/40 bg-primary/5' : 'border-border bg-background'}`}>
+            <div
+              key={session.id}
+              className={`flex items-center gap-4 rounded-2xl border p-4 ${session.isCurrent ? 'border-primary/40 bg-primary/5' : 'border-border bg-background'}`}
+            >
               <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${session.isCurrent ? 'bg-primary/10' : 'bg-muted'}`}>
                 <Icon size={16} className={session.isCurrent ? 'text-primary' : 'text-muted-foreground'} />
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <p className="text-[13.5px] font-semibold text-foreground">{session.device}</p>
+                  <p className="text-foreground text-[13.5px] font-semibold">{session.device}</p>
                   {session.isCurrent && (
-                    <span className="rounded-full bg-primary/10 px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-primary">Current</span>
+                    <span className="bg-primary/10 text-primary rounded-full px-2 py-0.5 font-mono text-[10px] font-semibold tracking-wider uppercase">
+                      Current
+                    </span>
                   )}
                 </div>
-                <p className="mt-0.5 text-[12px] text-muted-foreground">{session.location} · {session.ip}</p>
+                <p className="text-muted-foreground mt-0.5 text-[12px]">
+                  {session.location} · {session.ip}
+                </p>
               </div>
-              <p className="shrink-0 text-[12px] font-medium text-muted-foreground">{session.time}</p>
+              <p className="text-muted-foreground shrink-0 text-[12px] font-medium">{session.time}</p>
             </div>
           );
         })}

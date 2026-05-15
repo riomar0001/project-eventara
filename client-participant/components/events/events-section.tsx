@@ -46,15 +46,15 @@ export function EventsSection({ onEventClick }: EventsSectionProps) {
         {/* Section head */}
         <div className="mb-10 flex flex-wrap items-end justify-between gap-6">
           <div>
-            <div className="mb-2 inline-flex items-center gap-2.5 font-mono text-[11px] tracking-[0.18em] text-text-mute uppercase">
-              <span className="inline-block h-1.5 w-1.5 rounded-full bg-lime shadow-[0_0_12px_var(--lime-glow)]" />
+            <div className="text-text-mute mb-2 inline-flex items-center gap-2.5 font-mono text-[11px] tracking-[0.18em] uppercase">
+              <span className="bg-lime inline-block h-1.5 w-1.5 rounded-full shadow-[0_0_12px_var(--lime-glow)]" />
               CALENDAR · Q2 2026
             </div>
-            <h2 className="my-2.5 text-[clamp(30px,3.4vw,44px)] font-semibold tracking-[-0.03em] text-balance text-text">Upcoming Events</h2>
+            <h2 className="text-text my-2.5 text-[clamp(30px,3.4vw,44px)] font-semibold tracking-[-0.03em] text-balance">Upcoming Events</h2>
           </div>
 
           {/* Tabs */}
-          <div className="inline-flex gap-1 rounded-full border border-line-soft bg-surface p-1">
+          <div className="border-line-soft bg-surface inline-flex gap-1 rounded-full border p-1">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
@@ -78,14 +78,14 @@ export function EventsSection({ onEventClick }: EventsSectionProps) {
 
         {/* Empty state */}
         {filteredEvents.length === 0 && (
-          <div className="rounded-[18px] border border-dashed border-line-soft px-10 py-[60px] text-center text-text-mute">
+          <div className="border-line-soft text-text-mute rounded-[18px] border border-dashed px-10 py-[60px] text-center">
             No {selectedTab} scheduled this quarter. Check back soon.
           </div>
         )}
 
         {/* View Full Calendar button */}
         <div className="mt-8 text-center">
-          <button className="inline-flex items-center justify-center gap-2.5 rounded-full border border-line bg-[oklch(1_0_0_/_0.02)] px-5.5 py-3.5 text-sm font-semibold text-text transition-all duration-180 hover:border--text hover:bg--line-soft hover:text-text">
+          <button className="border-line text-text hover:border--text hover:bg--line-soft hover:text-text inline-flex items-center justify-center gap-2.5 rounded-full border bg-[oklch(1_0_0_/_0.02)] px-5.5 py-3.5 text-sm font-semibold transition-all duration-180">
             View Full Calendar
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M6 12l4-4-4-4" />
