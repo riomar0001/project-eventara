@@ -165,7 +165,13 @@ class TestGetEventLogisticsOverview:
     @pytest.mark.asyncio
     async def test_empty_event_returns_zero_sessions(self):
         repo = _make_repo(get_event_logistics_overview=AsyncMock(
-            return_value=_make_overview(total_sessions=0, scheduled_dates=[], venue_assignments=[], session_utilisation=[], venue_capacity_vs_registrations=[])
+            return_value=_make_overview(
+                total_sessions=0, 
+                scheduled_dates=[], 
+                venue_assignments=[], 
+                session_utilisation=[], 
+                venue_capacity_vs_registrations=[]
+            )
         ))
         result = await _make_uc(repo).get_event_logistics_overview(
             GetEventLogisticsInput(event_id=EVENT_ID)

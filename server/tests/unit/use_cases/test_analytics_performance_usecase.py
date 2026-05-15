@@ -67,10 +67,23 @@ def _make_repo(**overrides):
         TopRatedEvent(event_id=EVENT_ID, event_title="Test Event", average_rating=4.8, feedback_count=15)
     ])
     repo.get_volunteer_performance = AsyncMock(return_value=[
-        VolunteerPerformance(volunteer_id=VOLUNTEER_ID, user_id=USER_ID, first_name="John", last_name="Doe", alias="johnd", role_name="Usher", joined_count=5, left_count=1)
+        VolunteerPerformance(
+            volunteer_id=VOLUNTEER_ID, 
+            user_id=USER_ID, first_name="John", 
+            last_name="Doe", alias="johnd", 
+            role_name="Usher", 
+            joined_count=5, 
+            left_count=1)
     ])
     repo.get_organizer_output = AsyncMock(return_value=[
-        OrganizerOutput(organizer_id=USER_ID, first_name="Jane", last_name="Doe", alias="janed", total_events_created=10, average_sessions_per_event=2.5, average_attendance_rate_pct=75.0)
+        OrganizerOutput(
+            organizer_id=USER_ID, 
+            first_name="Jane", 
+            last_name="Doe", 
+            alias="janed", 
+            total_events_created=10, 
+            average_sessions_per_event=2.5, 
+            average_attendance_rate_pct=75.0)
     ])
     repo.get_session_status_distribution = AsyncMock(return_value=[
         SessionStatusDistribution(status="started", count=3),
@@ -79,7 +92,13 @@ def _make_repo(**overrides):
     repo.get_repeat_attendee_rate = AsyncMock(return_value=25.0)
     repo.get_average_registration_to_checkin_lead_time = AsyncMock(return_value=48.5)
     repo.get_live_attendance = AsyncMock(return_value=[
-        LiveAttendance(session_id=SESSION_ID, session_title="Test", event_id=EVENT_ID, event_title="Test Event", checked_in_count=50, max_slots=100, remaining_slots=50)
+        LiveAttendance(
+            session_id=SESSION_ID, 
+            session_title="Test", 
+            event_id=EVENT_ID, event_title="Test Event", 
+            checked_in_count=50, 
+            max_slots=100, 
+            remaining_slots=50)
     ])
     repo.get_year_over_year_attendance = AsyncMock(return_value=[
         YearOverYearAttendance(year=2025, attended_count=100, growth_pct=None),
@@ -203,7 +222,14 @@ class TestGetOngoingPerformance:
     @pytest.mark.asyncio
     async def test_remaining_slots_none_when_max_slots_none(self):
         repo = _make_repo(get_live_attendance=AsyncMock(return_value=[
-            LiveAttendance(session_id=SESSION_ID, session_title="Test", event_id=EVENT_ID, event_title="Test Event", checked_in_count=10, max_slots=None, remaining_slots=None)
+            LiveAttendance(
+                session_id=SESSION_ID, 
+                session_title="Test", 
+                event_id=EVENT_ID, 
+                event_title="Test Event", 
+                checked_in_count=10, 
+                max_slots=None, 
+                remaining_slots=None)
         ]))
         result = await _make_uc(repo).get_ongoing_performance(GetOngoingPerformanceInput())
         assert result.performance.live_attendance[0].remaining_slots is None

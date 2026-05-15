@@ -39,7 +39,7 @@ class AppFeedbackListData(BaseModel):
         total: int,
         page: int,
         page_size: int,
-    ) -> "AppFeedbackListData":
+    ) -> AppFeedbackListData:
         return cls(
             feedback=feedback,
             total=total,

@@ -1,6 +1,6 @@
 """Dashboard repository: read-only aggregate SQL queries for platform metrics."""
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -54,7 +54,7 @@ class DashboardRepository:
 
     async def get_upcoming_events(self, limit: int) -> list[EventSummary]:
         """Return posted events with a future start date, soonest first."""
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         stmt = (
             select(Event)
             .where(Event.status == "posted", Event.start_date > now)
@@ -250,7 +250,7 @@ class DashboardRepository:
         of each ISO week.  The returned week_end is the Sunday of that same week
         (6 days and 23:59:59 after week_start).
         """
-        earliest = datetime.now(timezone.utc) - timedelta(weeks=weeks)
+        earliest = datetime.now(UTC) - timedelta(weeks=weeks)
         stmt = (
             select(
                 func.date_trunc("week", User.created_at).label("week_start"),
@@ -286,5 +286,5 @@ class DashboardRepository:
         return f"{first_name or ''} {last_name or ''}".strip()
 
     def _current_week_start(self) -> datetime:
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         return (now - timedelta(days=now.weekday())).replace(hour=0, minute=0, second=0, microsecond=0)
