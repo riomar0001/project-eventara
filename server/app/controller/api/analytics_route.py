@@ -69,6 +69,7 @@ analytics_router = APIRouter(prefix="/analytics", tags=["Analytics"])
 
 # ── Logistics routes ────────────────────────────────────────────────────
 
+
 @analytics_router.get(
     "/logistics/overview/{event_id}",
     response_model=EventLogisticsOverviewResponse,
@@ -88,15 +89,17 @@ async def get_event_logistics_overview(
     audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> EventLogisticsOverviewResponse:
     try:
-        output = await use_case.get_event_logistics_overview(
-            GetEventLogisticsInput(event_id=event_id)
-        )
+        output = await use_case.get_event_logistics_overview(GetEventLogisticsInput(event_id=event_id))
         overview = output.overview
 
         await safe_audit_log(
-            audit_use_case, request, user_id=current_user_id,
-            action_type=ActionType.READ, resource_type="analytics_logistics",
-            resource_id=event_id, status=AuditLogStatus.SUCCESS,
+            audit_use_case,
+            request,
+            user_id=current_user_id,
+            action_type=ActionType.READ,
+            resource_type="analytics_logistics",
+            resource_id=event_id,
+            status=AuditLogStatus.SUCCESS,
         )
 
         return EventLogisticsOverviewResponse(
@@ -120,10 +123,7 @@ async def get_event_logistics_overview(
     response_model=SessionTimelineResponse,
     status_code=status.HTTP_200_OK,
     summary="Session timeline view",
-    description=(
-        "Returns sessions grouped into ongoing, upcoming (sorted ascending), "
-        "and completed (sorted descending)."
-    ),
+    description=("Returns sessions grouped into ongoing, upcoming (sorted ascending), and completed (sorted descending)."),
 )
 async def get_session_timeline(
     request: Request,
@@ -152,10 +152,7 @@ async def get_session_timeline(
     response_model=VolunteerLogisticsResponse,
     status_code=status.HTTP_200_OK,
     summary="Volunteer logistics per event",
-    description=(
-        "Returns count and roster of JOINED volunteers, volunteer-to-participant "
-        "ratio, and pending volunteer count for an event."
-    ),
+    description=("Returns count and roster of JOINED volunteers, volunteer-to-participant ratio, and pending volunteer count for an event."),
 )
 async def get_volunteer_logistics(
     event_id: uuid.UUID,
@@ -165,9 +162,7 @@ async def get_volunteer_logistics(
     audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> VolunteerLogisticsResponse:
     try:
-        output = await use_case.get_volunteer_logistics(
-            GetVolunteerLogisticsInput(event_id=event_id)
-        )
+        output = await use_case.get_volunteer_logistics(GetVolunteerLogisticsInput(event_id=event_id))
         return VolunteerLogisticsResponse(
             data=VolunteerLogisticsData(**output.logistics.model_dump()),
         )
@@ -189,10 +184,7 @@ async def get_volunteer_logistics(
     response_model=RegistrationLogisticsResponse,
     status_code=status.HTTP_200_OK,
     summary="Registration logistics per event",
-    description=(
-        "Returns cancellation rate, no-show rate, and QR vs. manual "
-        "check-in breakdown per session."
-    ),
+    description=("Returns cancellation rate, no-show rate, and QR vs. manual check-in breakdown per session."),
 )
 async def get_registration_logistics(
     event_id: uuid.UUID,
@@ -202,16 +194,9 @@ async def get_registration_logistics(
     audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> RegistrationLogisticsResponse:
     try:
-        output = await use_case.get_registration_logistics(
-            GetRegistrationLogisticsInput(event_id=event_id)
-        )
+        output = await use_case.get_registration_logistics(GetRegistrationLogisticsInput(event_id=event_id))
         return RegistrationLogisticsResponse(
-            data=RegistrationLogisticsData(
-                sessions=[
-                    RegistrationLogisticsEntryResponse(**r.model_dump())
-                    for r in output.registrations
-                ]
-            ),
+            data=RegistrationLogisticsData(sessions=[RegistrationLogisticsEntryResponse(**r.model_dump()) for r in output.registrations]),
         )
     except AnalyticsDataFetchError as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
@@ -225,6 +210,7 @@ async def get_registration_logistics(
 
 
 # ── Performance routes ──────────────────────────────────────────────────
+
 
 @analytics_router.get(
     "/performance/event",
@@ -273,10 +259,7 @@ async def get_event_performance(
     response_model=OngoingPerformanceResponse,
     status_code=status.HTTP_200_OK,
     summary="On-going event performance",
-    description=(
-        "Returns live attendance tracking and real-time slot availability "
-        "for all STARTED sessions."
-    ),
+    description=("Returns live attendance tracking and real-time slot availability for all STARTED sessions."),
 )
 async def get_ongoing_performance(
     request: Request,
@@ -305,10 +288,7 @@ async def get_ongoing_performance(
     response_model=HistoricalPerformanceResponse,
     status_code=status.HTTP_200_OK,
     summary="Historical event performance",
-    description=(
-        "Returns year-over-year attendance growth and events by terminal "
-        "status over time."
-    ),
+    description=("Returns year-over-year attendance growth and events by terminal status over time."),
 )
 async def get_historical_performance(
     request: Request,
@@ -334,6 +314,7 @@ async def get_historical_performance(
 
 # ── Demographic routes ──────────────────────────────────────────────────
 
+
 @analytics_router.get(
     "/demographics",
     response_model=DemographicAnalyticsResponse,
@@ -353,9 +334,7 @@ async def get_demographic_analytics(
     audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> DemographicAnalyticsResponse:
     try:
-        output = await use_case.get_demographics(
-            GetDemographicAnalyticsInput(top_cities_limit=top_cities_limit)
-        )
+        output = await use_case.get_demographics(GetDemographicAnalyticsInput(top_cities_limit=top_cities_limit))
         return DemographicAnalyticsResponse(
             data=DemographicAnalyticsData(**output.demographics.model_dump()),
         )
@@ -371,6 +350,7 @@ async def get_demographic_analytics(
 
 
 # ── On-going routes ─────────────────────────────────────────────────────
+
 
 @analytics_router.get(
     "/ongoing",
@@ -391,9 +371,7 @@ async def get_ongoing_event_data(
     audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> OngoingEventDataResponse:
     try:
-        output = await use_case.get_ongoing_data(
-            GetOngoingEventDataInput(checkin_feed_limit=checkin_feed_limit)
-        )
+        output = await use_case.get_ongoing_data(GetOngoingEventDataInput(checkin_feed_limit=checkin_feed_limit))
         return OngoingEventDataResponse(
             data=OngoingEventDataData(**output.data.model_dump()),
         )
@@ -409,6 +387,7 @@ async def get_ongoing_event_data(
 
 
 # ── Historical routes ───────────────────────────────────────────────────
+
 
 @analytics_router.get(
     "/historical",

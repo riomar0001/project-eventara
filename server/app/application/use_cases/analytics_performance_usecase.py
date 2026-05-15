@@ -21,9 +21,7 @@ class PerformanceAnalyticsUseCase:
     def __init__(self, repository: IAnalyticsRepository) -> None:
         self.repository = repository
 
-    async def get_event_performance(
-        self, input_dto: GetEventPerformanceInput
-    ) -> GetEventPerformanceOutput:
+    async def get_event_performance(self, input_dto: GetEventPerformanceInput) -> GetEventPerformanceOutput:
         try:
             attendance_rates = await self.repository.get_attendance_rates(input_dto.event_id)
             event_attendance_rates = await self.repository.get_event_attendance_rates()
@@ -60,9 +58,7 @@ class PerformanceAnalyticsUseCase:
             )
         )
 
-    async def get_ongoing_performance(
-        self, input_dto: GetOngoingPerformanceInput
-    ) -> GetOngoingPerformanceOutput:
+    async def get_ongoing_performance(self, input_dto: GetOngoingPerformanceInput) -> GetOngoingPerformanceOutput:
         try:
             live_attendance = await self.repository.get_live_attendance()
         except AnalyticsError:
@@ -82,9 +78,7 @@ class PerformanceAnalyticsUseCase:
             )
         )
 
-    async def get_historical_performance(
-        self, input_dto: GetHistoricalPerformanceInput
-    ) -> GetHistoricalPerformanceOutput:
+    async def get_historical_performance(self, input_dto: GetHistoricalPerformanceInput) -> GetHistoricalPerformanceOutput:
         try:
             yoy = await self.repository.get_year_over_year_attendance()
             status_over_time = await self.repository.get_events_by_status_over_time()

@@ -84,8 +84,8 @@ def _make_session_status_repo(session=_UNSET, event=_UNSET, updated_session=_UNS
     repo.get_session_by_id = AsyncMock(return_value=_sample_session() if session is _UNSET else session)
     repo.get_event_by_id = AsyncMock(return_value=_sample_event() if event is _UNSET else event)
     repo.update_session_status = AsyncMock(
-        return_value=_sample_session(status=EventSessionStatus.POSTED
-                                     ) if updated_session is _UNSET else updated_session)
+        return_value=_sample_session(status=EventSessionStatus.POSTED) if updated_session is _UNSET else updated_session
+    )
     return repo
 
 

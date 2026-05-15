@@ -83,11 +83,7 @@ class AnalyticsRepository:
 
             raise EventNotFoundError(f"Event {event_id} not found")
 
-        sessions_stmt = (
-            select(EventSession)
-            .where(EventSession.event_id == event_id)
-            .order_by(EventSession.start_datetime.asc())
-        )
+        sessions_stmt = select(EventSession).where(EventSession.event_id == event_id).order_by(EventSession.start_datetime.asc())
         sessions_result = await self.db.execute(sessions_stmt)
         sessions = list(sessions_result.scalars().all())
 
@@ -99,18 +95,12 @@ class AnalyticsRepository:
         for session in sessions:
             venue = await self.db.get(Venue, session.venue_id)
 
-            registered_count_stmt = (
-                select(func.count(EventParticipant.id))
-                .where(EventParticipant.event_session_id == session.id)
-            )
+            registered_count_stmt = select(func.count(EventParticipant.id)).where(EventParticipant.event_session_id == session.id)
             registered_count = (await self.db.execute(registered_count_stmt)).scalar() or 0
 
-            checked_in_count_stmt = (
-                select(func.count(EventParticipant.id))
-                .where(
-                    EventParticipant.event_session_id == session.id,
-                    EventParticipant.is_checked_in.is_(True),
-                )
+            checked_in_count_stmt = select(func.count(EventParticipant.id)).where(
+                EventParticipant.event_session_id == session.id,
+                EventParticipant.is_checked_in.is_(True),
             )
             checked_in_count = (await self.db.execute(checked_in_count_stmt)).scalar() or 0
 
@@ -285,17 +275,13 @@ class AnalyticsRepository:
         )
 
     async def get_registration_logistics(self, event_id: uuid.UUID) -> list[RegistrationLogistics]:
-        sessions_stmt = (
-            select(EventSession).where(EventSession.event_id == event_id)
-        )
+        sessions_stmt = select(EventSession).where(EventSession.event_id == event_id)
         result = await self.db.execute(sessions_stmt)
         sessions = list(result.scalars().all())
 
         output: list[RegistrationLogistics] = []
         for session in sessions:
-            total_stmt = select(func.count(EventParticipant.id)).where(
-                EventParticipant.event_session_id == session.id
-            )
+            total_stmt = select(func.count(EventParticipant.id)).where(EventParticipant.event_session_id == session.id)
             total = (await self.db.execute(total_stmt)).scalar() or 0
 
             cancelled_stmt = select(func.count(EventParticipant.id)).where(
@@ -354,18 +340,13 @@ class AnalyticsRepository:
     # ── Performance ────────────────────────────────────────────────────
 
     async def get_attendance_rates(self, event_id: uuid.UUID | None = None) -> list[AttendanceRate]:
-        stmt = (
-            select(
-                EventSession.id.label("session_id"),
-                EventSession.title.label("session_title"),
-                EventSession.event_id,
-                func.count(EventParticipant.id).label("registered_count"),
-                func.sum(
-                    case((EventParticipant.status == "attended", 1), else_=0)
-                ).label("attended_count"),
-            )
-            .join(EventParticipant, EventParticipant.event_session_id == EventSession.id, isouter=True)
-        )
+        stmt = select(
+            EventSession.id.label("session_id"),
+            EventSession.title.label("session_title"),
+            EventSession.event_id,
+            func.count(EventParticipant.id).label("registered_count"),
+            func.sum(case((EventParticipant.status == "attended", 1), else_=0)).label("attended_count"),
+        ).join(EventParticipant, EventParticipant.event_session_id == EventSession.id, isouter=True)
         if event_id:
             stmt = stmt.where(EventSession.event_id == event_id)
         stmt = stmt.group_by(EventSession.id, EventSession.title, EventSession.event_id)
@@ -395,9 +376,7 @@ class AnalyticsRepository:
                 Event.id.label("event_id"),
                 Event.title.label("event_title"),
                 func.count(func.distinct(EventParticipant.id)).label("registered_count"),
-                func.sum(
-                    case((EventParticipant.status == "attended", 1), else_=0)
-                ).label("attended_count"),
+                func.sum(case((EventParticipant.status == "attended", 1), else_=0)).label("attended_count"),
             )
             .join(EventSession, EventSession.event_id == Event.id)
             .join(EventParticipant, EventParticipant.event_session_id == EventSession.id, isouter=True)
@@ -554,12 +533,9 @@ class AnalyticsRepository:
                 UserProfile.last_name,
                 UserProfile.alias,
                 func.count(Event.id).label("total_events"),
-                func.avg(
-                    select(func.count(EventSession.id))
-                    .where(EventSession.event_id == Event.id)
-                    .correlate(Event)
-                    .scalar_subquery()
-                ).label("avg_sessions"),
+                func.avg(select(func.count(EventSession.id)).where(EventSession.event_id == Event.id).correlate(Event).scalar_subquery()).label(
+                    "avg_sessions"
+                ),
             )
             .join(UserProfile, UserProfile.user_id == Event.created_by, isouter=True)
             .group_by(Event.created_by, UserProfile.first_name, UserProfile.last_name, UserProfile.alias)
@@ -591,12 +567,7 @@ class AnalyticsRepository:
                 .scalar_subquery()
             )
 
-            avg_attendance_stmt = (
-                select(
-                    func.avg(attendance_sub)
-                )
-                .where(Event.created_by == row.organizer_id)
-            )
+            avg_attendance_stmt = select(func.avg(attendance_sub)).where(Event.created_by == row.organizer_id)
             avg_attendance_result = await self.db.execute(avg_attendance_stmt)
             avg_attendance = avg_attendance_result.scalar()
 
@@ -614,13 +585,10 @@ class AnalyticsRepository:
         return output
 
     async def get_session_status_distribution(self) -> list[SessionStatusDistribution]:
-        stmt = (
-            select(
-                EventSession.status,
-                func.count(EventSession.id).label("count"),
-            )
-            .group_by(EventSession.status)
-        )
+        stmt = select(
+            EventSession.status,
+            func.count(EventSession.id).label("count"),
+        ).group_by(EventSession.status)
         result = await self.db.execute(stmt)
         rows = result.all()
 
@@ -649,11 +617,7 @@ class AnalyticsRepository:
         return round(repeat / total * 100, 2)
 
     async def get_average_registration_to_checkin_lead_time(self) -> float | None:
-        stmt = select(
-            func.avg(
-                func.extract("epoch", EventParticipant.checked_in_time - EventParticipant.created_at) / 3600
-            )
-        ).where(
+        stmt = select(func.avg(func.extract("epoch", EventParticipant.checked_in_time - EventParticipant.created_at) / 3600)).where(
             EventParticipant.is_checked_in.is_(True),
             EventParticipant.checked_in_time.isnot(None),
             EventParticipant.created_at.isnot(None),
@@ -744,17 +708,12 @@ class AnalyticsRepository:
         result = await self.db.execute(stmt)
         rows = result.all()
 
-        return [
-            EventStatusTransition(period=row.period, status=row.status, count=row.count)
-            for row in rows
-        ]
+        return [EventStatusTransition(period=row.period, status=row.status, count=row.count) for row in rows]
 
     # ── Demographics ───────────────────────────────────────────────────
 
     async def get_device_breakdown(self) -> list[DeviceBreakdown]:
-        total_stmt = select(func.count(UserLoginHistory.id)).where(
-            UserLoginHistory.device_type.isnot(None)
-        )
+        total_stmt = select(func.count(UserLoginHistory.id)).where(UserLoginHistory.device_type.isnot(None))
         total = (await self.db.execute(total_stmt)).scalar() or 1
 
         stmt = (
@@ -779,9 +738,7 @@ class AnalyticsRepository:
         ]
 
     async def get_os_breakdown(self) -> list[OsBreakdown]:
-        total_stmt = select(func.count(UserLoginHistory.id)).where(
-            UserLoginHistory.os.isnot(None)
-        )
+        total_stmt = select(func.count(UserLoginHistory.id)).where(UserLoginHistory.os.isnot(None))
         total = (await self.db.execute(total_stmt)).scalar() or 1
 
         stmt = (
@@ -806,9 +763,7 @@ class AnalyticsRepository:
         ]
 
     async def get_browser_breakdown(self) -> list[BrowserBreakdown]:
-        total_stmt = select(func.count(UserLoginHistory.id)).where(
-            UserLoginHistory.browser.isnot(None)
-        )
+        total_stmt = select(func.count(UserLoginHistory.id)).where(UserLoginHistory.browser.isnot(None))
         total = (await self.db.execute(total_stmt)).scalar() or 1
 
         stmt = (
@@ -865,10 +820,7 @@ class AnalyticsRepository:
     async def get_account_age_distribution(self) -> list[AccountAgeDistribution]:
         now = _now()
 
-        users_stmt = (
-            select(User.created_at)
-            .where(User.deleted_at.is_(None))
-        )
+        users_stmt = select(User.created_at).where(User.deleted_at.is_(None))
         result = await self.db.execute(users_stmt)
         created_ats = [row[0] for row in result.all()]
 
@@ -946,10 +898,7 @@ class AnalyticsRepository:
     async def get_first_time_vs_returning(self) -> list[FirstTimeVsReturning]:
         # For each ended/started event, count first-time vs returning attendees
         # A "first-time attendee" is someone whose first attended event is this one
-        events_stmt = (
-            select(Event.id, Event.title)
-            .where(Event.status.in_(["ended", "started"]))
-        )
+        events_stmt = select(Event.id, Event.title).where(Event.status.in_(["ended", "started"]))
         events_result = await self.db.execute(events_stmt)
         events = events_result.all()
 
@@ -1056,18 +1005,14 @@ class AnalyticsRepository:
     # ── On-going ───────────────────────────────────────────────────────
 
     async def get_started_events(self) -> list[StartedEventSummary]:
-        stmt = (
-            select(Event.id, Event.title)
-            .where(Event.status == "started")
-        )
+        stmt = select(Event.id, Event.title).where(Event.status == "started")
         result = await self.db.execute(stmt)
         events = result.all()
 
         output: list[StartedEventSummary] = []
         for event_row in events:
-            sessions_stmt = (
-                select(EventSession.id, EventSession.max_slots)
-                .where(EventSession.event_id == event_row.id, EventSession.status == "started")
+            sessions_stmt = select(EventSession.id, EventSession.max_slots).where(
+                EventSession.event_id == event_row.id, EventSession.status == "started"
             )
             sessions_result = await self.db.execute(sessions_stmt)
             sessions = sessions_result.all()
@@ -1312,10 +1257,7 @@ class AnalyticsRepository:
             stmt = stmt.where(Event.created_by == organizer_id)
 
         if venue_id:
-            venue_event_ids = (
-                select(func.distinct(EventSession.event_id))
-                .where(EventSession.venue_id == venue_id)
-            )
+            venue_event_ids = select(func.distinct(EventSession.event_id)).where(EventSession.venue_id == venue_id)
             stmt = stmt.where(Event.id.in_(venue_event_ids))
 
         stmt = stmt.order_by(Event.end_date.desc())
@@ -1331,9 +1273,7 @@ class AnalyticsRepository:
             if not session_ids:
                 registered = attended = no_show = cancelled = 0
             else:
-                registered_stmt = select(func.count(EventParticipant.id)).where(
-                    EventParticipant.event_session_id.in_(session_ids)
-                )
+                registered_stmt = select(func.count(EventParticipant.id)).where(EventParticipant.event_session_id.in_(session_ids))
                 registered = (await self.db.execute(registered_stmt)).scalar() or 0
 
                 attended_stmt = select(func.count(EventParticipant.id)).where(
@@ -1354,9 +1294,7 @@ class AnalyticsRepository:
                 )
                 cancelled = (await self.db.execute(cancelled_stmt)).scalar() or 0
 
-            avg_feedback_stmt = select(func.avg(EventFeedback.rating)).where(
-                EventFeedback.event_id == event.id
-            )
+            avg_feedback_stmt = select(func.avg(EventFeedback.rating)).where(EventFeedback.event_id == event.id)
             avg_feedback = (await self.db.execute(avg_feedback_stmt)).scalar()
 
             output.append(
@@ -1395,9 +1333,7 @@ class AnalyticsRepository:
 
         output: list[CancelledEventReport] = []
         for row in rows:
-            session_count_stmt = select(func.count(EventSession.id)).where(
-                EventSession.event_id == row.event_id
-            )
+            session_count_stmt = select(func.count(EventSession.id)).where(EventSession.event_id == row.event_id)
             session_count = (await self.db.execute(session_count_stmt)).scalar() or 0
 
             output.append(
@@ -1416,10 +1352,7 @@ class AnalyticsRepository:
         return output
 
     async def get_feedback_completeness(self) -> list[FeedbackCompleteness]:
-        stmt = (
-            select(Event.id, Event.title)
-            .where(Event.status == "ended")
-        )
+        stmt = select(Event.id, Event.title).where(Event.status == "ended")
         result = await self.db.execute(stmt)
         events = result.all()
 
@@ -1435,9 +1368,7 @@ class AnalyticsRepository:
             )
             attended = (await self.db.execute(attended_stmt)).scalar() or 0
 
-            feedback_stmt = select(func.count(EventFeedback.id)).where(
-                EventFeedback.event_id == event_row.id
-            )
+            feedback_stmt = select(func.count(EventFeedback.id)).where(EventFeedback.event_id == event_row.id)
             feedback_count = (await self.db.execute(feedback_stmt)).scalar() or 0
 
             completeness = None

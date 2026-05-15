@@ -13,9 +13,7 @@ class OngoingEventDataUseCase:
     def __init__(self, repository: IAnalyticsRepository) -> None:
         self.repository = repository
 
-    async def get_ongoing_data(
-        self, input_dto: GetOngoingEventDataInput
-    ) -> GetOngoingEventDataOutput:
+    async def get_ongoing_data(self, input_dto: GetOngoingEventDataInput) -> GetOngoingEventDataOutput:
         try:
             started_events = await self.repository.get_started_events()
             checkin_feed = await self.repository.get_live_checkin_feed(input_dto.checkin_feed_limit)

@@ -19,6 +19,7 @@ from app.domain.entities.analytics_entities import (
 
 # ── Logistics ──────────────────────────────────────────────────────────
 
+
 @dataclass
 class GetEventLogisticsInput:
     event_id: uuid.UUID
@@ -61,6 +62,7 @@ class GetRegistrationLogisticsOutput:
 
 # ── Performance ────────────────────────────────────────────────────────
 
+
 @dataclass
 class GetEventPerformanceInput:
     event_id: uuid.UUID | None = None
@@ -95,6 +97,7 @@ class GetHistoricalPerformanceOutput:
 
 # ── Demographics ───────────────────────────────────────────────────────
 
+
 @dataclass
 class GetDemographicAnalyticsInput:
     top_cities_limit: int = 10
@@ -107,6 +110,7 @@ class GetDemographicAnalyticsOutput:
 
 # ── On-going ───────────────────────────────────────────────────────────
 
+
 @dataclass
 class GetOngoingEventDataInput:
     checkin_feed_limit: int = 50
@@ -118,6 +122,7 @@ class GetOngoingEventDataOutput:
 
 
 # ── Historical ─────────────────────────────────────────────────────────
+
 
 @dataclass
 class GetHistoricalEventDataInput:

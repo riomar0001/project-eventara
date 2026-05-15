@@ -24,11 +24,14 @@ NOW = datetime.now(UTC)
 
 def _make_ended_event(**overrides):
     defaults = {
-        "event_id": EVENT_ID, "event_title": "Ended Event",
+        "event_id": EVENT_ID,
+        "event_title": "Ended Event",
         "start_date": NOW - timedelta(days=30),
         "end_date": NOW - timedelta(days=1),
-        "total_registered": 100, "total_attended": 80,
-        "total_no_show": 5, "total_cancelled": 15,
+        "total_registered": 100,
+        "total_attended": 80,
+        "total_no_show": 5,
+        "total_cancelled": 15,
         "average_feedback": 4.2,
     }
     return EndedEventSummary(**(defaults | overrides))
@@ -36,19 +39,24 @@ def _make_ended_event(**overrides):
 
 def _make_cancelled_event(**overrides):
     defaults = {
-        "event_id": EVENT_ID, "event_title": "Cancelled Event",
+        "event_id": EVENT_ID,
+        "event_title": "Cancelled Event",
         "cancelled_at": NOW - timedelta(days=7),
         "created_by": ORGANIZER_ID,
-        "creator_first_name": "Jane", "creator_last_name": "Doe",
-        "creator_alias": "janed", "session_count": 2,
+        "creator_first_name": "Jane",
+        "creator_last_name": "Doe",
+        "creator_alias": "janed",
+        "session_count": 2,
     }
     return CancelledEventReport(**(defaults | overrides))
 
 
 def _make_feedback_completeness(**overrides):
     defaults = {
-        "event_id": EVENT_ID, "event_title": "Ended Event",
-        "attended_count": 80, "feedback_count": 60,
+        "event_id": EVENT_ID,
+        "event_title": "Ended Event",
+        "attended_count": 80,
+        "feedback_count": 60,
         "completeness_rate_pct": 75.0,
     }
     return FeedbackCompleteness(**(defaults | overrides))
@@ -105,34 +113,22 @@ class TestGetHistoricalData:
         repo = _make_repo()
         from_dt = NOW - timedelta(days=90)
         to_dt = NOW
-        await _make_uc(repo).get_historical_data(
-            GetHistoricalEventDataInput(from_date=from_dt, to_date=to_dt)
-        )
-        repo.get_ended_events.assert_awaited_once_with(
-            from_date=from_dt, to_date=to_dt, organizer_id=None, venue_id=None
-        )
+        await _make_uc(repo).get_historical_data(GetHistoricalEventDataInput(from_date=from_dt, to_date=to_dt))
+        repo.get_ended_events.assert_awaited_once_with(from_date=from_dt, to_date=to_dt, organizer_id=None, venue_id=None)
 
     @pytest.mark.asyncio
     async def test_filters_by_organizer(self):
         repo = _make_repo()
         org_id = uuid.uuid4()
-        await _make_uc(repo).get_historical_data(
-            GetHistoricalEventDataInput(organizer_id=org_id)
-        )
-        repo.get_ended_events.assert_awaited_once_with(
-            from_date=None, to_date=None, organizer_id=org_id, venue_id=None
-        )
+        await _make_uc(repo).get_historical_data(GetHistoricalEventDataInput(organizer_id=org_id))
+        repo.get_ended_events.assert_awaited_once_with(from_date=None, to_date=None, organizer_id=org_id, venue_id=None)
 
     @pytest.mark.asyncio
     async def test_filters_by_venue(self):
         repo = _make_repo()
         venue_id = uuid.uuid4()
-        await _make_uc(repo).get_historical_data(
-            GetHistoricalEventDataInput(venue_id=venue_id)
-        )
-        repo.get_ended_events.assert_awaited_once_with(
-            from_date=None, to_date=None, organizer_id=None, venue_id=venue_id
-        )
+        await _make_uc(repo).get_historical_data(GetHistoricalEventDataInput(venue_id=venue_id))
+        repo.get_ended_events.assert_awaited_once_with(from_date=None, to_date=None, organizer_id=None, venue_id=venue_id)
 
     @pytest.mark.asyncio
     async def test_combined_filters(self):
@@ -143,28 +139,22 @@ class TestGetHistoricalData:
         venue_id = uuid.uuid4()
         await _make_uc(repo).get_historical_data(
             GetHistoricalEventDataInput(
-                from_date=from_dt, to_date=to_dt,
-                organizer_id=org_id, venue_id=venue_id,
+                from_date=from_dt,
+                to_date=to_dt,
+                organizer_id=org_id,
+                venue_id=venue_id,
             )
         )
-        repo.get_ended_events.assert_awaited_once_with(
-            from_date=from_dt, to_date=to_dt, organizer_id=org_id, venue_id=venue_id
-        )
+        repo.get_ended_events.assert_awaited_once_with(from_date=from_dt, to_date=to_dt, organizer_id=org_id, venue_id=venue_id)
 
     @pytest.mark.asyncio
     async def test_raises_invalid_date_range_when_from_after_to(self):
         with pytest.raises(InvalidDateRangeError):
-            await _make_uc().get_historical_data(
-                GetHistoricalEventDataInput(
-                    from_date=NOW, to_date=NOW - timedelta(days=1)
-                )
-            )
+            await _make_uc().get_historical_data(GetHistoricalEventDataInput(from_date=NOW, to_date=NOW - timedelta(days=1)))
 
     @pytest.mark.asyncio
     async def test_raises_analytics_data_fetch_error_on_failure(self):
-        repo = _make_repo(
-            get_ended_events=AsyncMock(side_effect=RuntimeError("db down"))
-        )
+        repo = _make_repo(get_ended_events=AsyncMock(side_effect=RuntimeError("db down")))
         with patch("app.core.config.settings") as s:
             s.DEBUG = False
             with pytest.raises(AnalyticsDataFetchError):
@@ -179,8 +169,10 @@ class TestGetHistoricalData:
         compare_to = NOW - timedelta(days=120)
         result = await _make_uc(repo).get_historical_data(
             GetHistoricalEventDataInput(
-                from_date=from_dt, to_date=to_dt,
-                compare_from_date=compare_from, compare_to_date=compare_to,
+                from_date=from_dt,
+                to_date=to_dt,
+                compare_from_date=compare_from,
+                compare_to_date=compare_to,
             )
         )
         assert result.data.period_comparisons is not None
@@ -206,17 +198,17 @@ class TestGetHistoricalData:
 
     @pytest.mark.asyncio
     async def test_feedback_completeness_none_when_zero_attended(self):
-        repo = _make_repo(get_feedback_completeness=AsyncMock(return_value=[
-            _make_feedback_completeness(attended_count=0, feedback_count=0, completeness_rate_pct=None)
-        ]))
+        repo = _make_repo(
+            get_feedback_completeness=AsyncMock(
+                return_value=[_make_feedback_completeness(attended_count=0, feedback_count=0, completeness_rate_pct=None)]
+            )
+        )
         result = await _make_uc(repo).get_historical_data(GetHistoricalEventDataInput())
         assert result.data.feedback_completeness[0].completeness_rate_pct is None
 
     @pytest.mark.asyncio
     async def test_average_feedback_none_when_no_feedback(self):
-        repo = _make_repo(get_ended_events=AsyncMock(return_value=[
-            _make_ended_event(average_feedback=None)
-        ]))
+        repo = _make_repo(get_ended_events=AsyncMock(return_value=[_make_ended_event(average_feedback=None)]))
         result = await _make_uc(repo).get_historical_data(GetHistoricalEventDataInput())
         assert result.data.ended_events[0].average_feedback is None
 

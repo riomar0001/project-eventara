@@ -7,6 +7,7 @@ from pydantic import BaseModel
 
 # ── Logistics ──────────────────────────────────────────────────────────
 
+
 class SessionVenueAssignment(BaseModel):
     session_id: uuid.UUID
     session_title: str
@@ -94,6 +95,7 @@ class RegistrationLogistics(BaseModel):
 
 
 # ── Performance ────────────────────────────────────────────────────────
+
 
 class AttendanceRate(BaseModel):
     session_id: uuid.UUID
@@ -207,6 +209,7 @@ class HistoricalPerformance(BaseModel):
 
 # ── Demographics ───────────────────────────────────────────────────────
 
+
 class DeviceBreakdown(BaseModel):
     device_type: str
     count: int
@@ -283,6 +286,7 @@ class DemographicAnalytics(BaseModel):
 
 # ── On-going Event Data ────────────────────────────────────────────────
 
+
 class StartedEventSummary(BaseModel):
     event_id: uuid.UUID
     event_title: str
@@ -357,6 +361,7 @@ class OngoingEventData(BaseModel):
 
 
 # ── Historical Event Data ──────────────────────────────────────────────
+
 
 class EndedEventSummary(BaseModel):
     event_id: uuid.UUID
