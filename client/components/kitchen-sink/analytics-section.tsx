@@ -1,7 +1,7 @@
 'use client';
 
-import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { TrendingUp, Users, Calendar, Activity } from 'lucide-react';
+import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Section } from './shared';
 
@@ -74,7 +74,7 @@ export function AnalyticsSection() {
                 <CardContent className="pt-6">
                   <div className="flex items-start justify-between">
                     <div className="space-y-2">
-                      <p className="text-sm text-muted-foreground">{stat.label}</p>
+                      <p className="text-muted-foreground text-sm">{stat.label}</p>
                       <p className="text-2xl font-bold">{stat.value}</p>
                       <p className="text-xs text-green-600">{stat.change}</p>
                     </div>
@@ -129,7 +129,16 @@ export function AnalyticsSection() {
             <CardContent className="pt-6">
               <ResponsiveContainer width="100%" height={250}>
                 <PieChart>
-                  <Pie data={pieChartData} cx="50%" cy="50%" labelLine={false} label={({ name, value }) => `${name}: ${value}%`} outerRadius={80} fill="#8884d8" dataKey="value">
+                  <Pie
+                    data={pieChartData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, value }) => `${name}: ${value}%`}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
                     {pieChartData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
@@ -154,10 +163,12 @@ export function AnalyticsSection() {
               ].map((venue, idx) => (
                 <div key={venue.name} className="space-y-1">
                   <div className="flex items-center justify-between">
-                    <p className="text-sm font-medium">{idx + 1}. {venue.name}</p>
-                    <span className="text-xs text-muted-foreground">{venue.participants} participants</span>
+                    <p className="text-sm font-medium">
+                      {idx + 1}. {venue.name}
+                    </p>
+                    <span className="text-muted-foreground text-xs">{venue.participants} participants</span>
                   </div>
-                  <div className="h-2 w-full rounded-full bg-muted">
+                  <div className="bg-muted h-2 w-full rounded-full">
                     <div className="h-full rounded-full bg-lime-400" style={{ width: `${(venue.participants / 2850) * 100}%` }} />
                   </div>
                 </div>

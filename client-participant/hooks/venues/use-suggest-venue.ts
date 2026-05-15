@@ -34,7 +34,11 @@ export function useSuggestVenue() {
 
   function setField<K extends keyof SuggestVenueForm>(key: K, value: SuggestVenueForm[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
-    setErrors((prev) => { const n = { ...prev }; delete n[key]; return n; });
+    setErrors((prev) => {
+      const n = { ...prev };
+      delete n[key];
+      return n;
+    });
   }
 
   function toggleAmenity(amenity: Amenity) {

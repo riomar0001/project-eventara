@@ -59,13 +59,7 @@ export function UserGrowthChart({ data, isLoading }: Props) {
               </linearGradient>
             </defs>
             <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="oklch(0.922 0 0)" />
-            <XAxis
-              dataKey="week"
-              tickLine={false}
-              axisLine={false}
-              tick={{ fontSize: 11, fill: 'oklch(0.556 0 0)' }}
-              interval="preserveStartEnd"
-            />
+            <XAxis dataKey="week" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: 'oklch(0.556 0 0)' }} interval="preserveStartEnd" />
             <ChartTooltip content={<ChartTooltipContent />} />
             <Area dataKey="count" type="monotone" stroke={CHART_COLOR} strokeWidth={2} fill="url(#user-growth-gradient)" dot={false} />
           </AreaChart>

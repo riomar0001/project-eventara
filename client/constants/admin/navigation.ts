@@ -1,4 +1,18 @@
-import { BarChart3, Blocks, Calendar, Headphones, LayoutDashboard, Logs, MapPin, MessageSquare, Server, Settings, ShieldCheck, User, Users } from 'lucide-react';
+import {
+  BarChart3,
+  Blocks,
+  Calendar,
+  Headphones,
+  LayoutDashboard,
+  Logs,
+  MapPin,
+  MessageSquare,
+  Server,
+  Settings,
+  ShieldCheck,
+  User,
+  Users
+} from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
 

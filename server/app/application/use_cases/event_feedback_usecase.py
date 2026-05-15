@@ -13,8 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application.dto.event_feedback_dto import CreateEventFeedbackInput, EventFeedbackListOutput, EventFeedbackOutput
 from app.domain.entities.event_entity import EventStatus
-from app.domain.exceptions.event_exceptions import EventNotFoundError
-from app.domain.exceptions.event_exceptions import UnauthorizedEventOperationError
+from app.domain.exceptions.event_exceptions import EventNotFoundError, UnauthorizedEventOperationError
 from app.domain.exceptions.event_feedback_exceptions import (
     DuplicateEventFeedbackError,
     EventFeedbackEligibilityError,

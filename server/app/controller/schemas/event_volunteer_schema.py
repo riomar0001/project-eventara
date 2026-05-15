@@ -43,4 +43,3 @@ class EventVolunteerListResponse(BaseModel):
     success: bool
     message: str
     data: list[EventVolunteerRecordResponse]
-

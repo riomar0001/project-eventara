@@ -38,9 +38,7 @@ export function FeedbackTable({ feedback, total, page, totalPages, pageSize, isL
     <Card>
       <CardHeader className="pb-2">
         <p className="text-sm font-semibold">All Feedback</p>
-        <p className="text-muted-foreground text-xs">
-          {isLoading ? 'Loading…' : `Showing ${from}–${to} of ${total}`}
-        </p>
+        <p className="text-muted-foreground text-xs">{isLoading ? 'Loading…' : `Showing ${from}–${to} of ${total}`}</p>
       </CardHeader>
       <CardContent>
         {isLoading ? (
@@ -59,9 +57,7 @@ export function FeedbackTable({ feedback, total, page, totalPages, pageSize, isL
             {feedback.map((item) => (
               <div key={item.id} className="flex items-start gap-4 py-3">
                 <StarRating rating={item.rating} />
-                <p className="text-muted-foreground min-w-0 flex-1 truncate text-sm">
-                  {item.comment ?? <span className="italic">No comment</span>}
-                </p>
+                <p className="text-muted-foreground min-w-0 flex-1 truncate text-sm">{item.comment ?? <span className="italic">No comment</span>}</p>
                 <span className="text-muted-foreground shrink-0 text-xs">{formatDate(item.created_at)}</span>
               </div>
             ))}

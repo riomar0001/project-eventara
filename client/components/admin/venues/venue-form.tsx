@@ -9,11 +9,11 @@ import { ImageUpload } from '@/components/ui/image-upload';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { usePermissions } from '@/context/permissions-context';
 import { useVenueForm } from '@/hooks/admin/venues/use-venue-form';
 import { BackLink, FieldLabel, PhotoPanel } from './venues-shared';
 import type { VenueRecordResponse } from '@/api/types.gen';
 import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
+import { usePermissions } from '@/context/permissions-context';
 import { resolveStorageImageUrl } from '@/lib/storage/image-url';
 
 // ── Form shape ─────────────────────────────────────────────────────────────────

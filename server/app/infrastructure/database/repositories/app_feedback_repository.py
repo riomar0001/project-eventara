@@ -1,6 +1,6 @@
 """SQL implementation of the app feedback repository."""
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -51,7 +51,7 @@ class AppFeedbackRepository:
 
     async def get_users_per_week(self, weeks: int) -> list[UserRegistrationWeek]:
         """Return weekly non-deleted user registration counts for the last N ISO weeks."""
-        earliest = datetime.now(timezone.utc) - timedelta(weeks=weeks)
+        earliest = datetime.now(UTC) - timedelta(weeks=weeks)
         stmt = (
             select(
                 func.date_trunc("week", User.created_at).label("week_start"),

@@ -1,6 +1,6 @@
 'use client';
 
-import { Calendar, Mail, Phone, Shield, User } from 'lucide-react';
+import { Calendar, Mail, Phone, Shield } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -40,8 +40,8 @@ function DetailRow({ icon, label, value }: DetailRowProps) {
     <div className="flex items-start gap-3">
       <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-neutral-100 text-neutral-500">{icon}</div>
       <div className="min-w-0">
-        <p className="text-xs font-medium text-neutral-400 uppercase tracking-wide">{label}</p>
-        <p className="mt-0.5 text-sm text-neutral-800 break-all">{value}</p>
+        <p className="text-xs font-medium tracking-wide text-neutral-400 uppercase">{label}</p>
+        <p className="mt-0.5 text-sm break-all text-neutral-800">{value}</p>
       </div>
     </div>
   );
@@ -61,20 +61,18 @@ export function VolunteerProfileModal({ volunteer, open, onOpenChange }: Volunte
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md gap-0 p-0 overflow-hidden">
-        <div className="bg-gradient-to-br from-emerald-50 to-white px-6 pt-6 pb-5 border-b border-neutral-100">
+      <DialogContent className="max-w-md gap-0 overflow-hidden p-0">
+        <div className="border-b border-neutral-100 bg-gradient-to-br from-emerald-50 to-white px-6 pt-6 pb-5">
           <DialogHeader>
             <DialogTitle className="sr-only">Volunteer Profile</DialogTitle>
           </DialogHeader>
           <div className="flex items-center gap-4">
             <Avatar size="lg" className="size-14">
-              <AvatarFallback className="bg-emerald-100 text-emerald-700 font-semibold text-lg">{initials}</AvatarFallback>
+              <AvatarFallback className="bg-emerald-100 text-lg font-semibold text-emerald-700">{initials}</AvatarFallback>
             </Avatar>
             <div className="min-w-0">
-              <p className="text-lg font-semibold text-neutral-950 truncate">{displayName}</p>
-              {volunteer.alias ? (
-                <p className="text-sm text-neutral-500">@{volunteer.alias}</p>
-              ) : null}
+              <p className="truncate text-lg font-semibold text-neutral-950">{displayName}</p>
+              {volunteer.alias ? <p className="text-sm text-neutral-500">@{volunteer.alias}</p> : null}
               <div className="mt-1.5">
                 <Badge variant="secondary" className={STATUS_STYLES[volunteer.status] ?? 'bg-neutral-100 text-neutral-600'}>
                   {volunteer.status.charAt(0).toUpperCase() + volunteer.status.slice(1)}
@@ -84,10 +82,8 @@ export function VolunteerProfileModal({ volunteer, open, onOpenChange }: Volunte
           </div>
         </div>
 
-        <div className="px-6 py-5 space-y-4">
-          {volunteer.email ? (
-            <DetailRow icon={<Mail className="size-4" />} label="Email" value={volunteer.email} />
-          ) : null}
+        <div className="space-y-4 px-6 py-5">
+          {volunteer.email ? <DetailRow icon={<Mail className="size-4" />} label="Email" value={volunteer.email} /> : null}
           <DetailRow icon={<Phone className="size-4" />} label="Phone" value={volunteer.contact_phone} />
           <DetailRow icon={<Shield className="size-4" />} label="Volunteer Role" value={volunteer.role_name ?? '—'} />
           <DetailRow icon={<Calendar className="size-4" />} label="Member since" value={formatDate(volunteer.created_at)} />

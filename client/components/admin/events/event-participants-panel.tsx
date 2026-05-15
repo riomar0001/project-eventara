@@ -98,7 +98,11 @@ export interface EventParticipantsPanelProps {
 export function EventParticipantsPanel({ eventId, refreshKey = 0 }: EventParticipantsPanelProps) {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
 
-  const { participants, total, page, totalPages, isLoading, error, setPage } = useEventParticipants(eventId, statusFilter === 'all' ? null : statusFilter, refreshKey);
+  const { participants, total, page, totalPages, isLoading, error, setPage } = useEventParticipants(
+    eventId,
+    statusFilter === 'all' ? null : statusFilter,
+    refreshKey
+  );
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({

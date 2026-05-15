@@ -232,7 +232,9 @@ function EventDetailsSummary({
         <section className="space-y-3">
           <div className="flex flex-wrap items-center gap-2">
             <StatusBadge status={event.status} />
-            <span className="text-xs font-medium text-neutral-400">{event.created_at ? `Created ${fmtDate(event.created_at)}` : 'Created date unavailable'}</span>
+            <span className="text-xs font-medium text-neutral-400">
+              {event.created_at ? `Created ${fmtDate(event.created_at)}` : 'Created date unavailable'}
+            </span>
           </div>
           <div>
             <h2 className="text-3xl font-semibold tracking-tight text-neutral-950">{event.title}</h2>
@@ -636,10 +638,16 @@ export function EventDetail({ eventId }: { eventId: string }) {
                                     )}
                                     <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1.5 text-xs text-neutral-500">
                                       <span>
-                                        <strong className="text-neutral-950">{(participantStats.sessionStats[session.id]?.registered ?? 0).toLocaleString()}</strong> registered
+                                        <strong className="text-neutral-950">
+                                          {(participantStats.sessionStats[session.id]?.registered ?? 0).toLocaleString()}
+                                        </strong>{' '}
+                                        registered
                                       </span>
                                       <span>
-                                        <strong className="text-emerald-700">{(participantStats.sessionStats[session.id]?.checkedIn ?? 0).toLocaleString()}</strong> checked in
+                                        <strong className="text-emerald-700">
+                                          {(participantStats.sessionStats[session.id]?.checkedIn ?? 0).toLocaleString()}
+                                        </strong>{' '}
+                                        checked in
                                       </span>
                                     </div>
                                   </div>

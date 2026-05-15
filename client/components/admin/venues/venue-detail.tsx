@@ -4,11 +4,11 @@ import { Building2, Globe, Mail, MapPin, PencilLine, Phone, User } from 'lucide-
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { usePermissions } from '@/context/permissions-context';
 import { useVenue } from '@/hooks/admin/venues/use-venue';
 import { DeleteVenueButton } from './venue-delete-button';
 import { BackLink, PhotoPanel } from './venues-shared';
 import { ADMIN_OPERATIONS_PATHS } from '@/constants/admin/operations';
+import { usePermissions } from '@/context/permissions-context';
 import { resolveStorageImageUrl } from '@/lib/storage/image-url';
 import { useAuthStore } from '@/store/auth-store';
 
@@ -52,7 +52,7 @@ function StatCell({ label, value, accent }: { label: string; value: string; acce
 
 function VenueFact({ accent, label, value }: { accent?: boolean; label: string; value: React.ReactNode }) {
   return (
-    <div className="min-w-[8.5rem] max-w-[18rem]">
+    <div className="max-w-[18rem] min-w-[8.5rem]">
       <dt className="text-[10px] font-semibold tracking-[0.16em] text-neutral-400 uppercase">{label}</dt>
       <dd className={`mt-1.5 text-sm leading-6 font-semibold ${accent ? 'text-amber-700' : 'text-neutral-950'}`}>{value}</dd>
     </div>
@@ -197,10 +197,7 @@ export function VenueDetail({ venueId }: { venueId: string }) {
               <VenueFact label="Popularity" value={`${venue.popularity_count} interactions`} />
               <VenueFact label="Partner status" value={venue.is_partner ? 'Eventara partner venue' : 'Community suggestion'} />
               {venue.created_at && (
-                <VenueFact
-                  label="Created"
-                  value={new Date(venue.created_at).toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' })}
-                />
+                <VenueFact label="Created" value={new Date(venue.created_at).toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' })} />
               )}
               {venue.updated_at && (
                 <VenueFact

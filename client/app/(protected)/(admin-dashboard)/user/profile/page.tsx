@@ -1,15 +1,15 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { CalendarDays, Loader2, MapPin, PencilLine } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
-import { AccountSettings } from '@/api/sdk.gen';
-import type { AttendedEventResponse, UserDetailsData } from '@/api/types.gen';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { AccountSettings } from '@/api/sdk.gen';
+import type { AttendedEventResponse, UserDetailsData } from '@/api/types.gen';
 import { resolveStorageImageUrl } from '@/lib/storage/image-url';
 import { getDisplayName, getInitials, getProfileHandle, getRoleLabel, humanizeProfileValue } from '@/lib/user/profile';
 import { type AuthUser, useAuthStore } from '@/store/auth-store';
@@ -238,7 +238,11 @@ export default function UserProfilePage() {
               ) : profileError ? (
                 <div className="rounded-xl border border-dashed bg-neutral-50 px-5 py-8 text-sm text-neutral-500">{profileError}</div>
               ) : attendedEvents.length > 0 ? (
-                <div className="divide-y">{attendedEvents.map((event) => <EventHistoryItem key={event.participant_id} event={event} />)}</div>
+                <div className="divide-y">
+                  {attendedEvents.map((event) => (
+                    <EventHistoryItem key={event.participant_id} event={event} />
+                  ))}
+                </div>
               ) : (
                 <div className="rounded-xl border border-dashed bg-neutral-50 px-5 py-8 text-sm text-neutral-500">No attended events yet.</div>
               )}

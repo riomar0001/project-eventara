@@ -14,7 +14,7 @@ export default function Page() {
   const { isOpen, event, openModal, closeModal } = useModalState();
 
   return (
-    <main className="min-h-screen bg-page">
+    <main className="bg-page min-h-screen">
       <Navbar />
       <HeroSection />
       <LiveEventCard />
