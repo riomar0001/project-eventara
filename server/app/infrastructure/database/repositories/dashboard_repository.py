@@ -248,8 +248,8 @@ class DashboardRepository:
                 func.count(User.id).label("count"),
             )
             .where(User.created_at >= earliest, User.deleted_at.is_(None))
-            .group_by(func.date_trunc("week", User.created_at))
-            .order_by(func.date_trunc("week", User.created_at).asc())
+            .group_by("week_start")
+            .order_by("week_start")
         )
         result = await self.db.execute(stmt)
         return [
