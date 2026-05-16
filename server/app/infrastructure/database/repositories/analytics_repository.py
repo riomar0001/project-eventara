@@ -493,8 +493,8 @@ class AnalyticsRepository:
                 UserProfile.last_name,
                 UserProfile.alias,
                 VolunteerRole.name.label("role_name"),
-                func.sum(case((EventVolunteer.status == "joined", 1), else_=0)).label("joined_count"),
-                func.sum(case((EventVolunteer.status == "left", 1), else_=0)).label("left_count"),
+                func.coalesce(func.sum(case((EventVolunteer.status == "joined", 1), else_=0)), 0).label("joined_count"),
+                func.coalesce(func.sum(case((EventVolunteer.status == "left", 1), else_=0)), 0).label("left_count"),
             )
             .join(Volunteer, Volunteer.id == EventVolunteer.volunteer_id)
             .join(UserProfile, UserProfile.user_id == Volunteer.user_id, isouter=True)
@@ -789,7 +789,7 @@ class AnalyticsRepository:
 
     async def get_top_participating_cities(self, limit: int) -> list[CityParticipation]:
         sub = (
-            select(func.distinct(EventParticipant.user_id), Venue.city, Venue.country)
+            select(func.distinct(EventParticipant.user_id).label("user_id"), Venue.city, Venue.country)
             .join(EventSession, EventSession.id == EventParticipant.event_session_id)
             .join(Venue, Venue.id == EventSession.venue_id)
             .where(EventParticipant.status.in_(["attended", "registered"]))
@@ -949,7 +949,7 @@ class AnalyticsRepository:
 
     async def get_gender_distribution(self) -> list[GenderDistribution]:
         sub = (
-            select(func.distinct(EventParticipant.user_id))
+            select(func.distinct(EventParticipant.user_id).label("user_id"))
             .join(EventSession, EventSession.id == EventParticipant.event_session_id)
             .where(EventParticipant.status.in_(["attended", "registered"]))
         ).subquery()
@@ -1177,7 +1177,6 @@ class AnalyticsRepository:
             .join(EventParticipant, EventParticipant.event_session_id == EventSession.id)
             .where(
                 EventSession.status == "started",
-                EventParticipant.status == "cancelled",
                 EventParticipant.status == "cancelled",
             )
             .group_by(EventSession.id, EventSession.title, EventSession.event_id)
