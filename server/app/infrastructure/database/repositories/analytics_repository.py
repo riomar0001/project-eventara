@@ -3,7 +3,7 @@
 import uuid
 from datetime import UTC, datetime, timedelta
 
-from sqlalchemy import case, func, select
+from sqlalchemy import Float, case, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.entities.analytics_entities import (
@@ -545,19 +545,17 @@ class AnalyticsRepository:
 
         output: list[OrganizerOutput] = []
         for row in rows:
-            # Calculate average attendance rate per organizer
-            attendance_sub = (
+            # Per-event attendance rate scalar subquery
+            per_event_rate = (
                 select(
-                    func.avg(
-                        case(
-                            (
-                                func.count(EventParticipant.id) > 0,
-                                func.sum(case((EventParticipant.status == "attended", 1), else_=0)).cast(float)
-                                / func.count(EventParticipant.id).cast(float)
-                                * 100,
-                            ),
-                            else_=None,
-                        )
+                    case(
+                        (
+                            func.count(EventParticipant.id) > 0,
+                            func.sum(case((EventParticipant.status == "attended", 1), else_=0)).cast(Float)
+                            / func.count(EventParticipant.id).cast(Float)
+                            * 100,
+                        ),
+                        else_=None,
                     )
                 )
                 .select_from(EventSession)
@@ -567,7 +565,7 @@ class AnalyticsRepository:
                 .scalar_subquery()
             )
 
-            avg_attendance_stmt = select(func.avg(attendance_sub)).where(Event.created_by == row.organizer_id)
+            avg_attendance_stmt = select(func.avg(per_event_rate)).where(Event.created_by == row.organizer_id)
             avg_attendance_result = await self.db.execute(avg_attendance_stmt)
             avg_attendance = avg_attendance_result.scalar()
 

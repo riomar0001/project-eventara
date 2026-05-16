@@ -1,15 +1,19 @@
 'use client';
 
-import { useState } from 'react';
-import { Search } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Search, X } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { Input } from '@/components/ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useSessionTimeline, useEventLogisticsOverview, useVolunteerLogistics, useRegistrationLogistics } from '@/hooks/admin/analytics';
 import { LoadingSkeleton, LoadingSpinner, ErrorAlert, EmptyState } from './analytics-shared';
+import { Events } from '@/api/sdk.gen';
+import type { EventRecordResponse } from '@/api/types.gen';
 
 const LIME = 'oklch(0.648 0.2 131.684)';
 const LIME_LIGHT = 'oklch(0.879 0.169 91.605)';
@@ -20,14 +24,169 @@ function statusColor(status: string) {
   return 'text-muted-foreground bg-muted';
 }
 
-function EventIdInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+function eventStatusBadge(status: string) {
+  switch (status) {
+    case 'started':
+      return { variant: 'default' as const, label: 'Live' };
+    case 'posted':
+      return { variant: 'secondary' as const, label: 'Upcoming' };
+    case 'ended':
+      return { variant: 'outline' as const, label: 'Ended' };
+    case 'cancelled':
+      return { variant: 'destructive' as const, label: 'Cancelled' };
+    case 'draft':
+      return { variant: 'ghost' as const, label: 'Draft' };
+    default:
+      return { variant: 'outline' as const, label: status };
+  }
+}
+
+function formatEventDate(iso: string) {
+  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function matchesDate(query: string, event: EventRecordResponse) {
+  const trimmed = query.trim();
+  // Match YYYY-MM-DD or partial
+  if (!/^\d{1,4}(-\d{1,2}(-\d{1,2})?)?$/.test(trimmed)) return false;
+  const start = event.start_date.substring(0, 10);
+  const end = event.end_date.substring(0, 10);
+  return start.includes(trimmed) || end.includes(trimmed);
+}
+
+function EventSearchCombobox({ value, onChange }: { value: string; onChange: (id: string) => void }) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const [events, setEvents] = useState<EventRecordResponse[]>([]);
+  const [highlightedIdx, setHighlightedIdx] = useState(0);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    Events.getAllEventsEventsGet({ query: { page_size: 100 } })
+      .then((r) => r.data)
+      .then((data) => {
+        if (data?.data) setEvents(data.data);
+      })
+      .catch(() => setEvents([]));
+  }, []);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return events;
+    return events.filter((e) => {
+      if (e.title.toLowerCase().includes(q)) return true;
+      if (matchesDate(query, e)) return true;
+      return false;
+    });
+  }, [events, query]);
+
+  const selectedEvent = events.find((e) => e.id === value);
+
+  function handleSelect(id: string) {
+    onChange(id);
+    const ev = events.find((e) => e.id === id);
+    setQuery(ev?.title ?? '');
+    setOpen(false);
+    setHighlightedIdx(0);
+  }
+
+  function handleClear() {
+    onChange('');
+    setQuery('');
+    setOpen(false);
+    setHighlightedIdx(0);
+    inputRef.current?.focus();
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (!open) {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') setOpen(true);
+      return;
+    }
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        setHighlightedIdx((i) => Math.min(i + 1, filtered.length - 1));
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        setHighlightedIdx((i) => Math.max(i - 1, 0));
+        break;
+      case 'Enter':
+        e.preventDefault();
+        if (filtered[highlightedIdx]) handleSelect(filtered[highlightedIdx].id);
+        break;
+      case 'Escape':
+        setOpen(false);
+        setHighlightedIdx(0);
+        break;
+    }
+  }
+
   return (
     <Card>
       <CardContent className="pt-6">
-        <div className="flex items-center gap-3">
-          <Search className="text-muted-foreground size-4" />
-          <Input placeholder="Enter event ID to load logistics data..." value={value} onChange={(e) => onChange(e.target.value)} className="max-w-md" />
-        </div>
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger asChild>
+            <div className="relative flex w-full max-w-lg items-center">
+              <Search className="text-muted-foreground absolute left-3 size-4" />
+              <Input
+                ref={inputRef}
+                placeholder={selectedEvent ? selectedEvent.title : 'Search events by title or date...'}
+                value={query}
+                onChange={(e) => {
+                  setQuery(e.target.value);
+                  setOpen(true);
+                  setHighlightedIdx(0);
+                }}
+                onFocus={() => setOpen(true)}
+                onKeyDown={handleKeyDown}
+                className="pr-9 pl-9"
+              />
+              {value && (
+                <button
+                  type="button"
+                  onClick={handleClear}
+                  className="text-muted-foreground hover:text-foreground absolute right-3"
+                  aria-label="Clear selection"
+                >
+                  <X className="size-4" />
+                </button>
+              )}
+            </div>
+          </PopoverTrigger>
+          <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start" onOpenAutoFocus={(e) => e.preventDefault()}>
+            <ScrollArea className="max-h-72">
+              {filtered.length === 0 ? (
+                <p className="text-muted-foreground p-4 text-center text-sm">{events.length === 0 ? 'Loading events...' : 'No events found'}</p>
+              ) : (
+                <div className="py-1">
+                  {query.trim() === '' && <p className="text-muted-foreground px-3 py-2 text-xs">Type to search events by title or date (e.g. 2025-01-15)</p>}
+                  {filtered.map((event, idx) => {
+                    const badge = eventStatusBadge(event.status);
+                    return (
+                      <button
+                        key={event.id}
+                        type="button"
+                        className={`hover:bg-muted flex w-full items-center gap-3 px-3 py-2 text-left ${idx === highlightedIdx ? 'bg-muted' : ''}`}
+                        onClick={() => handleSelect(event.id)}
+                        onMouseEnter={() => setHighlightedIdx(idx)}
+                      >
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-medium">{event.title}</p>
+                          <p className="text-muted-foreground text-xs">{formatEventDate(event.start_date)}</p>
+                        </div>
+                        <Badge variant={badge.variant} className="shrink-0 text-xs">
+                          {badge.label}
+                        </Badge>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </ScrollArea>
+          </PopoverContent>
+        </Popover>
       </CardContent>
     </Card>
   );
@@ -88,10 +247,10 @@ export function LogisticsTab() {
         </div>
       ) : null}
 
-      {/* Event ID input */}
-      <EventIdInput value={eventId} onChange={setEventId} />
+      {/* Event search */}
+      <EventSearchCombobox value={eventId} onChange={setEventId} />
 
-      {!eventId && <EmptyState message="Enter an event ID above to load detailed logistics" />}
+      {!eventId && <EmptyState message="Search and select an event above to load detailed logistics" />}
 
       {eventId && overviewLoading && <LoadingSpinner />}
       {eventId && overviewError && <ErrorAlert message={overviewError} />}
