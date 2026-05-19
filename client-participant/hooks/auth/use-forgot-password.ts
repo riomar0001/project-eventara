@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Auth } from '@/api/sdk.gen';
 
 export function useForgotPassword() {
   const [email, setEmail] = useState('');
@@ -20,8 +21,7 @@ export function useForgotPassword() {
       return;
     }
     setLoading(true);
-    // TODO: call forgot-password API
-    await new Promise((r) => setTimeout(r, 800));
+    await Auth.forgotPasswordAuthForgotPasswordPost({ body: { email } });
     setLoading(false);
     setSubmitted(true);
   }

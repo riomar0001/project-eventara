@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import uuid
 from datetime import datetime
 
@@ -189,3 +191,52 @@ class EventDetailResponse(BaseModel):
     message: str = "Event retrieved successfully."
     data: EventRecordResponse
     sessions: list[EventSessionRecordResponse]
+
+
+class HomeEventWithSessions(BaseModel):
+    id: uuid.UUID
+    title: str
+    description: str
+    start_date: datetime
+    end_date: datetime
+    status: str
+    banner_url: str | None = None
+    sessions: list[EventSessionRecordResponse]
+
+
+class LiveEventData(BaseModel):
+    event: EventRecordResponse
+    sessions: list[EventSessionRecordResponse]
+
+
+class HomeEventsData(BaseModel):
+    live_event: LiveEventData | None
+    events: list[HomeEventWithSessions]
+    events_type: str
+
+
+class HomeEventsResponse(BaseModel):
+    success: bool = True
+    message: str = "Home events retrieved successfully."
+    data: HomeEventsData
+
+
+class PublicEventsListData(BaseModel):
+    events: list[HomeEventWithSessions]
+    total: int
+    page: int
+    page_size: int
+    total_pages: int
+    events_type: str
+
+
+class PublicEventsListResponse(BaseModel):
+    success: bool = True
+    message: str = "Events retrieved successfully."
+    data: PublicEventsListData
+
+
+class PublicEventDetailResponse(BaseModel):
+    success: bool = True
+    message: str = "Event retrieved successfully."
+    data: HomeEventWithSessions

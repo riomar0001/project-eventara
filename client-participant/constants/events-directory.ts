@@ -2,7 +2,7 @@ import type { DirectoryEvent, EventCategory, FeaturedEvent } from '@/types/event
 
 export const ALL_EVENTS: DirectoryEvent[] = [
   {
-    id: 1,
+    id: '1',
     day: '04',
     mo: 'MAY',
     year: 2026,
@@ -17,10 +17,11 @@ export const ALL_EVENTS: DirectoryEvent[] = [
     total: 80,
     status: null,
     orb: 'lime',
-    angle: '115deg'
+    angle: '115deg',
+    banner_url: null
   },
   {
-    id: 2,
+    id: '2',
     day: '17',
     mo: 'MAY',
     year: 2026,
@@ -35,10 +36,11 @@ export const ALL_EVENTS: DirectoryEvent[] = [
     total: 60,
     status: 'closing',
     orb: 'amber',
-    angle: '95deg'
+    angle: '95deg',
+    banner_url: null
   },
   {
-    id: 3,
+    id: '3',
     day: '01',
     mo: 'JUN',
     year: 2026,
@@ -53,10 +55,11 @@ export const ALL_EVENTS: DirectoryEvent[] = [
     total: 120,
     status: null,
     orb: 'lime',
-    angle: '135deg'
+    angle: '135deg',
+    banner_url: null
   },
   {
-    id: 4,
+    id: '4',
     day: '22',
     mo: 'APR',
     year: 2026,
@@ -71,10 +74,11 @@ export const ALL_EVENTS: DirectoryEvent[] = [
     total: 50,
     status: 'closing',
     orb: 'amber',
-    angle: '105deg'
+    angle: '105deg',
+    banner_url: null
   },
   {
-    id: 5,
+    id: '5',
     day: '08',
     mo: 'MAY',
     year: 2026,
@@ -89,10 +93,11 @@ export const ALL_EVENTS: DirectoryEvent[] = [
     total: 40,
     status: 'new',
     orb: 'lime',
-    angle: '125deg'
+    angle: '125deg',
+    banner_url: null
   },
   {
-    id: 6,
+    id: '6',
     day: '29',
     mo: 'APR',
     year: 2026,
@@ -107,10 +112,11 @@ export const ALL_EVENTS: DirectoryEvent[] = [
     total: 90,
     status: null,
     orb: 'amber',
-    angle: '100deg'
+    angle: '100deg',
+    banner_url: null
   },
   {
-    id: 7,
+    id: '7',
     day: '15',
     mo: 'JUN',
     year: 2026,
@@ -125,10 +131,11 @@ export const ALL_EVENTS: DirectoryEvent[] = [
     total: 70,
     status: null,
     orb: 'lime',
-    angle: '110deg'
+    angle: '110deg',
+    banner_url: null
   },
   {
-    id: 8,
+    id: '8',
     day: '24',
     mo: 'JUN',
     year: 2026,
@@ -143,10 +150,11 @@ export const ALL_EVENTS: DirectoryEvent[] = [
     total: 80,
     status: null,
     orb: 'lime',
-    angle: '130deg'
+    angle: '130deg',
+    banner_url: null
   },
   {
-    id: 9,
+    id: '9',
     day: '05',
     mo: 'JUL',
     year: 2026,
@@ -161,7 +169,8 @@ export const ALL_EVENTS: DirectoryEvent[] = [
     total: 250,
     status: 'new',
     orb: 'amber',
-    angle: '115deg'
+    angle: '115deg',
+    banner_url: null
   }
 ];
 
@@ -178,5 +187,6 @@ export const FEATURED: FeaturedEvent = {
   desc: "A black-tie celebration closing a landmark year for the Davao DeFi community — keynote, awards, live panel, and an after-hours builder's mixer.",
   date: 'December 12, 2026',
   time: '6:00 PM – 12:00 AM',
-  venue: 'Marco Polo Davao, Grand Ballroom'
+  venue: 'Marco Polo Davao, Grand Ballroom',
+  banner_url: null
 };

@@ -1,5 +1,5 @@
 export interface DirectoryEvent {
-  id: number;
+  id: string;
   day: string;
   mo: string;
   year: number;
@@ -15,6 +15,7 @@ export interface DirectoryEvent {
   status: 'closing' | 'live' | 'new' | null;
   orb: 'lime' | 'amber';
   angle: string;
+  banner_url: string | null;
 }
 
 export interface EventCategory {
@@ -29,6 +30,7 @@ export interface FeaturedEvent {
   date: string;
   time: string;
   venue: string;
+  banner_url: string | null;
 }
 
 export type SortOption = 'date' | 'popularity' | 'availability';

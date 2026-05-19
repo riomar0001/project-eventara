@@ -139,3 +139,34 @@ class GetAllEventsOutput:
 @dataclass
 class GetEventWithSessionsInput:
     event_id: uuid.UUID
+
+
+@dataclass
+class GetPublicEventsInput:
+    q: str | None = None
+    page: int = 1
+    page_size: int = 9
+
+
+@dataclass
+class PublicEventsOutput:
+    events: list["HomeEventRecord"]
+    total: int
+    page: int
+    page_size: int
+    total_pages: int
+    events_type: str
+
+
+@dataclass
+class HomeEventRecord:
+    event: Event
+    sessions: list[EventSession]
+
+
+@dataclass
+class HomeEventsOutput:
+    live_event: Event | None
+    live_event_sessions: list[EventSession]
+    events: list[HomeEventRecord]
+    events_type: str

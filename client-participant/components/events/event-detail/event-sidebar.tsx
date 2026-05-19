@@ -1,44 +1,72 @@
-import { Calendar, ChevronRight, Clock, MapPin, Users } from 'lucide-react';
-import Link from 'next/link';
-import type { DirectoryEvent } from '@/types/event-directory';
+'use client';
 
-type Props = { event: DirectoryEvent; isFull: boolean };
+import { Calendar, Clock, MapPin, MessageSquare, Users } from 'lucide-react';
+import type { HomeEventRecord } from '@/hooks/events/use-home-events';
 
-export function EventSidebar({ event, isFull }: Props) {
+const DONE_STATUSES = new Set(['ended', 'cancelled']);
+
+type Props = { event: HomeEventRecord; totalSlots: number; isFull: boolean; onFeedbackClick: () => void };
+
+export function EventSidebar({ event, totalSlots, isFull, onFeedbackClick }: Props) {
+  const start = new Date(event.start_date);
+  const dateStr = start.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  const session = event.sessions[0];
+  const timeStr = session
+    ? new Date(session.start_datetime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+    : '—';
+  const venue = session
+    ? [session.venue_name, session.venue_location].filter(Boolean).join(', ')
+    : '—';
+
+  const isDone = DONE_STATUSES.has(event.status);
+
   return (
     <div className="space-y-4">
       <div className="border-border bg-card rounded-2xl border p-5">
-        <p className="text-foreground mb-1 text-sm font-semibold">Ready to join?</p>
-        <p className="text-muted-foreground mb-4 text-[13px]">
-          {isFull ? 'This event is fully booked.' : `${event.seats} spot${event.seats !== 1 ? 's' : ''} left — secure yours now.`}
-        </p>
-
-        {!isFull ? (
-          <button className="bg-primary text-primary-foreground inline-flex w-full items-center justify-center gap-2.5 rounded-full px-5.5 py-3.5 text-sm font-semibold shadow-[0_8px_28px_-10px_var(--lime-glow),inset_0_-1px_0_oklch(0.7_0.2_128)] transition-all duration-180 hover:-translate-y-0.5">
-            Register for this event
-          </button>
+        {isDone ? (
+          <>
+            <p className="text-foreground mb-1 text-sm font-semibold">This event has ended</p>
+            <p className="text-muted-foreground mb-4 text-[13px]">Share your experience to help improve future events.</p>
+            <button
+              onClick={onFeedbackClick}
+              className="bg-primary text-primary-foreground inline-flex w-full items-center justify-center gap-2.5 rounded-full px-5 py-3.5 text-sm font-semibold shadow-[0_8px_28px_-10px_var(--lime-glow),inset_0_-1px_0_oklch(0.7_0.2_128)] transition-all duration-180 hover:-translate-y-0.5"
+            >
+              <MessageSquare size={15} />
+              Leave feedback
+            </button>
+          </>
         ) : (
-          <button className="border-border text-muted-foreground hover:border-muted-foreground w-full rounded-full border py-3 text-sm font-semibold transition-all">
-            Join waitlist
-          </button>
-        )}
+          <>
+            <p className="text-foreground mb-1 text-sm font-semibold">Ready to join?</p>
+            <p className="text-muted-foreground mb-4 text-[13px]">
+              {isFull
+                ? 'This event is fully booked.'
+                : totalSlots > 0
+                ? `${totalSlots} spot${totalSlots !== 1 ? 's' : ''} — secure yours now.`
+                : 'Open attendance — register to confirm your spot.'}
+            </p>
 
-        <Link
-          href={`/events/${event.id}/feedback`}
-          className="border-border text-muted-foreground hover:border-muted-foreground mt-3 flex w-full items-center justify-center gap-1.5 rounded-full border py-2.5 text-[13px] font-medium transition-all"
-        >
-          Leave feedback <ChevronRight size={13} />
-        </Link>
+            {!isFull ? (
+              <button className="bg-primary text-primary-foreground inline-flex w-full items-center justify-center gap-2.5 rounded-full px-5.5 py-3.5 text-sm font-semibold shadow-[0_8px_28px_-10px_var(--lime-glow),inset_0_-1px_0_oklch(0.7_0.2_128)] transition-all duration-180 hover:-translate-y-0.5">
+                Register for this event
+              </button>
+            ) : (
+              <button className="border-border text-muted-foreground hover:border-muted-foreground w-full rounded-full border py-3 text-sm font-semibold transition-all">
+                Join waitlist
+              </button>
+            )}
+          </>
+        )}
       </div>
 
       <div className="border-border bg-card rounded-2xl border p-5">
         <p className="text-muted-foreground mb-3 font-mono text-[11px] tracking-[0.14em] uppercase">Event info</p>
         <div className="space-y-2.5">
           {[
-            { icon: Calendar, label: event.date },
-            { icon: Clock, label: event.time },
-            { icon: MapPin, label: event.venue },
-            { icon: Users, label: `${event.total} capacity` }
+            { icon: Calendar, label: dateStr },
+            { icon: Clock, label: timeStr },
+            { icon: MapPin, label: venue },
+            { icon: Users, label: totalSlots > 0 ? `${totalSlots} capacity` : 'Open attendance' },
           ].map(({ icon: Icon, label }) => (
             <div key={label} className="text-muted-foreground flex items-center gap-2.5 text-[13px]">
               <Icon size={14} className="text-muted-foreground" />
@@ -46,6 +74,7 @@ export function EventSidebar({ event, isFull }: Props) {
             </div>
           ))}
         </div>
+
       </div>
     </div>
   );

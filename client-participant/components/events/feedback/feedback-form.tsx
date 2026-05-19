@@ -5,9 +5,9 @@ import Link from 'next/link';
 import { useEventFeedback } from '@/hooks/events/use-event-feedback';
 import { StarRating } from './star-rating';
 
-type Props = { eventId: number; eventTitle: string };
+type Props = { eventId: string; eventTitle: string; onClose?: () => void };
 
-export function FeedbackForm({ eventId, eventTitle }: Props) {
+export function FeedbackForm({ eventId, eventTitle, onClose }: Props) {
   const { rating, hovered, comment, submitting, submitted, setRating, setHovered, setComment, handleSubmit } = useEventFeedback();
 
   if (submitted) {
@@ -19,12 +19,21 @@ export function FeedbackForm({ eventId, eventTitle }: Props) {
         <h2 className="text-foreground text-2xl font-bold tracking-[-0.025em]">Thank you!</h2>
         <p className="text-muted-foreground mx-auto mt-2 max-w-[30ch] text-[13.5px]">Your feedback helps us improve every event.</p>
         <div className="mt-6 flex justify-center gap-3">
-          <Link
-            href={`/events/${eventId}`}
-            className="border-border text-muted-foreground hover:border-muted-foreground rounded-full border px-5 py-2.5 text-sm font-semibold transition-all"
-          >
-            Back to event
-          </Link>
+          {onClose ? (
+            <button
+              onClick={onClose}
+              className="border-border text-muted-foreground hover:border-muted-foreground rounded-full border px-5 py-2.5 text-sm font-semibold transition-all"
+            >
+              Close
+            </button>
+          ) : (
+            <Link
+              href={`/events/${eventId}`}
+              className="border-border text-muted-foreground hover:border-muted-foreground rounded-full border px-5 py-2.5 text-sm font-semibold transition-all"
+            >
+              Back to event
+            </Link>
+          )}
           <Link
             href="/events"
             className="bg-primary text-primary-foreground rounded-full px-5 py-2.5 text-sm font-semibold shadow-[0_8px_28px_-10px_var(--lime-glow)] transition-all hover:-translate-y-0.5"

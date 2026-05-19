@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { AccountSettings } from '@/api/sdk.gen';
 
 type PasswordForm = { current: string; next: string; confirm: string };
 type ShowState = { current: boolean; next: boolean; confirm: boolean };
@@ -35,9 +36,19 @@ export function usePasswordForm() {
       return;
     }
     setSaving(true);
-    // TODO: call change-password API
-    await new Promise((r) => setTimeout(r, 800));
+
+    const { error: apiError } = await AccountSettings.changePasswordUserChangePasswordPost({
+      body: { current_password: form.current, new_password: form.next },
+    });
+
     setSaving(false);
+
+    if (apiError) {
+      const msg = (apiError as { message?: string } | null)?.message;
+      setError(msg ?? 'Failed to change password. Check your current password and try again.');
+      return;
+    }
+
     setSuccess(true);
     setForm({ current: '', next: '', confirm: '' });
   }

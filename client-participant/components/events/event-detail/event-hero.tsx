@@ -1,49 +1,80 @@
-import { ArrowLeft, Calendar, Clock, MapPin, Users } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, MapPin } from 'lucide-react';
 import Link from 'next/link';
-import type { DirectoryEvent } from '@/types/event-directory';
+import type { HomeEventRecord } from '@/hooks/events/use-home-events';
 
-type Props = { event: DirectoryEvent; seatsFilled: number; capacityPct: number; isFull: boolean };
+function stripHtml(html: string): string {
+  return html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+}
 
-export function EventHero({ event, seatsFilled, capacityPct, isFull }: Props) {
+type Props = { event: HomeEventRecord };
+
+export function EventHero({ event }: Props) {
+  const start = new Date(event.start_date);
+  const dateStr = start.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+  const session = event.sessions[0];
+  const timeStr = session
+    ? new Date(session.start_datetime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+    : '—';
+  const venue = session
+    ? [session.venue_name, session.venue_location].filter(Boolean).join(', ')
+    : '—';
+
+  const orbIsLime = event.id.charCodeAt(0) % 2 === 0;
+
   return (
-    <div className="bg-card relative overflow-hidden">
+    <div className="bg-card relative overflow-hidden rounded-2xl border border-border">
+      {event.banner_url ? (
+        <div className="relative w-full" style={{ aspectRatio: '16/9' }}>
+          <img src={event.banner_url} alt={event.title} className="absolute inset-0 h-full w-full object-cover" loading="eager" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/10 to-black/50" />
+          <Link
+            href="/events"
+            className="absolute top-4 left-4 z-10 inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-black/40 px-3 py-1.5 text-[13px] font-medium text-white/80 backdrop-blur-sm transition-colors hover:bg-black/60 hover:text-white"
+          >
+            <ArrowLeft size={14} /> Back to events
+          </Link>
+        </div>
+      ) : null}
+
       <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
         <div
-          className={`absolute top-[-120px] right-[-120px] h-[500px] w-[500px] rounded-full blur-[90px] ${event.orb === 'lime' ? 'bg-[radial-gradient(circle,oklch(0.7_0.2_130_/_0.22),transparent_65%)]' : 'bg-[radial-gradient(circle,oklch(0.62_0.16_60_/_0.18),transparent_65%)]'}`}
+          className={`absolute top-[-120px] right-[-120px] h-[500px] w-[500px] rounded-full blur-[90px] ${orbIsLime ? 'bg-[radial-gradient(circle,oklch(0.7_0.2_130_/_0.22),transparent_65%)]' : 'bg-[radial-gradient(circle,oklch(0.62_0.16_60_/_0.18),transparent_65%)]'}`}
         />
       </div>
 
-      <div className="relative z-10 container py-10">
-        <Link
-          href="/events"
-          className="text-muted-foreground hover:text-foreground mb-6 inline-flex items-center gap-1.5 text-[13px] font-medium transition-colors"
-        >
-          <ArrowLeft size={14} /> Back to events
-        </Link>
+      <div className="relative z-10 px-8 py-8">
+        {!event.banner_url && (
+          <Link
+            href="/events"
+            className="text-muted-foreground hover:text-foreground mb-6 inline-flex items-center gap-1.5 text-[13px] font-medium transition-colors"
+          >
+            <ArrowLeft size={14} /> Back to events
+          </Link>
+        )}
 
         <div className="mb-3 flex flex-wrap items-center gap-2">
-          <span className="border-border text-muted-foreground rounded-full border px-3 py-1 font-mono text-[11px] tracking-[0.12em] uppercase">
-            {event.cat}
+          <span
+            className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 font-mono text-[11px] tracking-[0.12em] uppercase ${
+              event.status === 'started'
+                ? 'border-orange-400/40 bg-orange-400/10 text-orange-400'
+                : 'border-border text-muted-foreground'
+            }`}
+          >
+            {event.status === 'started' && (
+              <span className="relative inline-block h-1.5 w-1.5 animate-[ping_1.6s_cubic-bezier(0,0,0.2,1)_infinite] rounded-full bg-orange-400" />
+            )}
+            {event.status}
           </span>
-          {event.tags.map((tag) => (
-            <span key={tag} className="bg-primary/10 text-primary rounded-full px-3 py-1 font-mono text-[11px] tracking-[0.12em] uppercase">
-              {tag}
-            </span>
-          ))}
-          {event.status && (
-            <span className="rounded-full bg-orange-400/10 px-3 py-1 font-mono text-[11px] tracking-[0.12em] text-orange-400 uppercase">{event.status}</span>
-          )}
         </div>
 
         <h1 className="text-foreground max-w-[24ch] text-[clamp(26px,4vw,46px)] leading-tight font-bold tracking-[-0.03em]">{event.title}</h1>
-        <p className="text-muted-foreground mt-3 max-w-[60ch] text-[15px] leading-relaxed">{event.desc}</p>
+        <p className="text-muted-foreground mt-3 max-w-[60ch] text-[15px] leading-relaxed">{stripHtml(event.description)}</p>
 
         <div className="mt-6 flex flex-wrap items-center gap-5">
           {[
-            { icon: Calendar, label: event.date },
-            { icon: Clock, label: event.time },
-            { icon: MapPin, label: event.venue },
-            { icon: Users, label: `${seatsFilled}/${event.total} registered` }
+            { icon: Calendar, label: dateStr },
+            { icon: Clock, label: timeStr },
+            { icon: MapPin, label: venue },
           ].map(({ icon: Icon, label }) => (
             <div key={label} className="text-muted-foreground flex items-center gap-2 text-[13.5px]">
               <Icon size={14} className="text-primary" />
@@ -52,14 +83,6 @@ export function EventHero({ event, seatsFilled, capacityPct, isFull }: Props) {
           ))}
         </div>
 
-        <div className="mt-4 max-w-[260px]">
-          <div className="bg-border h-1.5 w-full overflow-hidden rounded-full">
-            <div className={`h-full rounded-full transition-all ${isFull ? 'bg-destructive' : 'bg-primary'}`} style={{ width: `${capacityPct}%` }} />
-          </div>
-          <p className={`mt-1.5 font-mono text-[11px] ${isFull ? 'text-destructive' : 'text-muted-foreground'}`}>
-            {isFull ? 'Fully booked' : `${event.seats} seats remaining`}
-          </p>
-        </div>
       </div>
     </div>
   );

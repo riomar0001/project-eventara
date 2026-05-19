@@ -1,6 +1,6 @@
 import { CheckCircle2 } from 'lucide-react';
 import type { OnboardingForm } from '@/hooks/onboarding/use-onboarding';
-import { AGE_GROUPS, GENDERS } from '@/constants/profile';
+import { AGE_GROUP_OPTIONS, GENDER_OPTIONS, EDUCATION_LEVEL_OPTIONS } from '@/constants/profile';
 
 const INPUT =
   'w-full rounded-xl border border-border bg-background px-4 py-3 text-foreground placeholder-muted-foreground transition-all focus:border-primary focus:ring-2 focus:ring-primary/10 focus:outline-none';
@@ -59,9 +59,9 @@ export function StepAboutYou({ form, setField }: StepProps) {
           <label className={labelCls}>Age group</label>
           <select className={INPUT} value={form.ageGroup} onChange={(e) => setField('ageGroup', e.target.value)}>
             <option value="">Select…</option>
-            {AGE_GROUPS.map((g) => (
-              <option key={g} value={g}>
-                {g}
+            {AGE_GROUP_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
               </option>
             ))}
           </select>
@@ -70,13 +70,24 @@ export function StepAboutYou({ form, setField }: StepProps) {
           <label className={labelCls}>Gender</label>
           <select className={INPUT} value={form.gender} onChange={(e) => setField('gender', e.target.value)}>
             <option value="">Select…</option>
-            {GENDERS.map((g) => (
-              <option key={g} value={g}>
-                {g}
+            {GENDER_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
               </option>
             ))}
           </select>
         </div>
+      </div>
+      <div>
+        <label className={labelCls}>Education level</label>
+        <select className={INPUT} value={form.educationLevel} onChange={(e) => setField('educationLevel', e.target.value)}>
+          <option value="">Select…</option>
+          {EDUCATION_LEVEL_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
+        </select>
       </div>
       <div>
         <label className={labelCls}>
@@ -142,11 +153,12 @@ export function StepReview({ form, goToStep }: ReviewProps) {
           {[
             { label: 'Occupation', value: form.occupation },
             { label: 'Age group', value: form.ageGroup },
-            { label: 'Gender', value: form.gender }
+            { label: 'Gender', value: form.gender },
+            { label: 'Education', value: form.educationLevel }
           ].map(({ label, value }) => (
             <div key={label} className="flex items-center gap-2 text-[13px]">
               <span className="text-muted-foreground w-24 shrink-0">{label}</span>
-              <span className={value ? 'text-foreground' : 'text-muted-foreground'}>{value || <em className="not-italic opacity-50">Not set</em>}</span>
+              <span className={value ? 'text-foreground capitalize' : 'text-muted-foreground'}>{value ? value.replace(/_/g, ' ') : <em className="not-italic opacity-50">Not set</em>}</span>
             </div>
           ))}
           {form.bio && (

@@ -1,16 +1,40 @@
 'use client';
 
-import { useMemo } from 'react';
-import { ALL_EVENTS } from '@/constants/events-directory';
-import { getSessionsForEvent } from '@/constants/sessions';
+import { useEffect, useState } from 'react';
+import type { HomeEventRecord } from './use-home-events';
 
-export function useEventDetail(id: number) {
-  const event = useMemo(() => ALL_EVENTS.find((e) => e.id === id) ?? null, [id]);
-  const sessions = useMemo(() => getSessionsForEvent(id), [id]);
+interface State {
+  event: HomeEventRecord | null;
+  loading: boolean;
+  error: string | null;
+}
 
-  const seatsFilled = event ? event.total - event.seats : 0;
-  const capacityPct = event ? Math.round((seatsFilled / event.total) * 100) : 0;
-  const isFull = event?.seats === 0;
+export function useEventDetail(id: string) {
+  const [state, setState] = useState<State>({ event: null, loading: true, error: null });
 
-  return { event, sessions, seatsFilled, capacityPct, isFull };
+  useEffect(() => {
+    if (!id) return;
+    setState({ event: null, loading: true, error: null });
+
+    fetch(`/api/events/public/${id}`)
+      .then((r) => r.json())
+      .then((json) => {
+        if (json.success) {
+          setState({ event: json.data, loading: false, error: null });
+        } else {
+          setState({ event: null, loading: false, error: json.message ?? 'Event not found' });
+        }
+      })
+      .catch(() => setState({ event: null, loading: false, error: 'Failed to load event' }));
+  }, [id]);
+
+  const totalSlots = state.event?.sessions.reduce((sum, s) => sum + (s.max_slots ?? 0), 0) ?? 0;
+
+  return {
+    ...state,
+    totalSlots,
+    seatsFilled: 0,
+    capacityPct: 0,
+    isFull: false,
+  };
 }

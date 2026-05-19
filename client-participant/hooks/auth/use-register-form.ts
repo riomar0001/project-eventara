@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Auth } from '@/api/sdk.gen';
 import { validateRegisterForm } from '@/lib/validators';
 import type { RegisterErrors } from '@/lib/validators';
 
@@ -36,9 +37,23 @@ export function useRegisterForm() {
       return;
     }
     setLoading(true);
-    // TODO: call register API
-    await new Promise((r) => setTimeout(r, 800));
+
+    const { error: apiError } = await Auth.registerUserAuthRegisterPost({
+      body: {
+        email: form.email,
+        password: form.password,
+        accepted_terms_and_privacy_policy: true,
+      },
+    });
+
     setLoading(false);
+
+    if (apiError) {
+      const msg = (apiError as { message?: string } | null)?.message;
+      setErrors({ email: msg ?? 'Registration failed. This email may already be in use.' });
+      return;
+    }
+
     router.push(`/verify-otp?purpose=register&email=${encodeURIComponent(form.email)}`);
   }
 

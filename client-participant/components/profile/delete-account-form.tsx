@@ -1,6 +1,7 @@
 'use client';
 
-import { AlertTriangle, Loader2, ShieldAlert } from 'lucide-react';
+import { AlertTriangle, Eye, EyeOff, Loader2, ShieldAlert } from 'lucide-react';
+import { useState } from 'react';
 import { useDeleteAccount, DELETE_ACCOUNT_REASON_OPTIONS, DELETE_CONFIRMATION_WORD } from '@/hooks/profile/use-delete-account';
 
 const INPUT =
@@ -12,6 +13,7 @@ export function DeleteAccountForm() {
   const {
     reasonOption,
     otherReason,
+    currentPassword,
     confirmation,
     submitting,
     error,
@@ -20,10 +22,13 @@ export function DeleteAccountForm() {
     isConfirmed,
     setReasonOption,
     setOtherReason,
+    setCurrentPassword,
     setConfirmation,
     handleSubmit,
     cancelDeletion
   } = useDeleteAccount();
+
+  const [showPassword, setShowPassword] = useState(false);
 
   if (scheduledDate) {
     return (
@@ -80,6 +85,27 @@ export function DeleteAccountForm() {
           />
         </div>
       )}
+
+      <div>
+        <label className={labelCls}>Current password</label>
+        <div className="relative">
+          <input
+            className={`${INPUT} pr-11`}
+            type={showPassword ? 'text' : 'password'}
+            placeholder="Enter your current password"
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
+            autoComplete="current-password"
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword((s) => !s)}
+            className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3.5 -translate-y-1/2 transition-colors"
+          >
+            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+          </button>
+        </div>
+      </div>
 
       <div>
         <label className={labelCls}>

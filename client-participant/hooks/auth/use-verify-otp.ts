@@ -2,9 +2,13 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { Auth } from '@/api/sdk.gen';
+import { decodeTokenUser } from '@/lib/auth/token';
+import { useAuthStore } from '@/store/auth-store';
 
 const OTP_LENGTH = 6;
 const RESEND_SECONDS = 60;
+const VERIFICATION_TOKEN_KEY = 'eventara-login-verification-token';
 
 export function useVerifyOtp() {
   const router = useRouter();
@@ -15,6 +19,7 @@ export function useVerifyOtp() {
   const [digits, setDigits] = useState<string[]>(Array(OTP_LENGTH).fill(''));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [resendSuccess, setResendSuccess] = useState(false);
   const [countdown, setCountdown] = useState(RESEND_SECONDS);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -68,20 +73,65 @@ export function useVerifyOtp() {
       return;
     }
     setLoading(true);
-    // TODO: call verify-otp API
-    await new Promise((r) => setTimeout(r, 800));
+    setError('');
+
+    const verificationToken = sessionStorage.getItem(VERIFICATION_TOKEN_KEY);
+    if (!verificationToken) {
+      setError('Session expired. Please log in again.');
+      setLoading(false);
+      router.replace('/login');
+      return;
+    }
+
+    const { data, error: apiError } = await Auth.loginVerifyAuthLoginVerifyPost({
+      body: { token: verificationToken, code },
+    });
+
     setLoading(false);
-    router.push(purpose === 'reset' ? '/reset-password' : '/onboarding');
+
+    if (apiError || !data) {
+      const msg = (apiError as { message?: string } | null)?.message;
+      setError(msg ?? 'Invalid or expired code. Please try again.');
+      return;
+    }
+
+    sessionStorage.removeItem(VERIFICATION_TOKEN_KEY);
+    const user = decodeTokenUser(data.access_token);
+    if (!user) {
+      setError('Login failed. Please try again.');
+      return;
+    }
+
+    useAuthStore.getState().setAuth(data.access_token, data.refresh_token, user);
+    router.replace(user.doneOnboarding ? '/events' : '/onboarding');
   }
 
   async function resend() {
     if (countdown > 0) return;
-    // TODO: call resend-otp API
+    setResendSuccess(false);
+
+    if (purpose === 'register') {
+      await Auth.resendVerificationAuthResendVerificationPost({ body: { email } });
+      setCountdown(RESEND_SECONDS);
+      setResendSuccess(true);
+      return;
+    }
+
+    const verificationToken = sessionStorage.getItem(VERIFICATION_TOKEN_KEY);
+    if (!verificationToken) {
+      router.replace('/login');
+      return;
+    }
+
+    const { data } = await Auth.resendOtpAuthLoginResendOtpPost({ body: { token: verificationToken } });
+    if (data?.verification_token) {
+      sessionStorage.setItem(VERIFICATION_TOKEN_KEY, data.verification_token);
+    }
     setCountdown(RESEND_SECONDS);
     setDigits(Array(OTP_LENGTH).fill(''));
     setError('');
     inputRefs.current[0]?.focus();
   }
 
-  return { digits, loading, error, countdown, inputRefs, purpose, email, setDigit, handleKeyDown, handlePaste, handleSubmit, resend };
+  return { digits, loading, error, countdown, inputRefs, purpose, email, resendSuccess, setDigit, handleKeyDown, handlePaste, handleSubmit, resend };
 }

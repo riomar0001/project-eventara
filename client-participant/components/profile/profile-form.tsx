@@ -2,7 +2,7 @@
 
 import { Loader2, RotateCcw, Save } from 'lucide-react';
 import { useProfileForm } from '@/hooks/profile/use-profile-form';
-import { AGE_GROUPS, GENDERS, EDUCATION_LEVELS } from '@/constants/profile';
+import { AGE_GROUP_OPTIONS, GENDER_OPTIONS, EDUCATION_LEVEL_OPTIONS } from '@/constants/profile';
 
 const INPUT =
   'w-full rounded-xl border border-border bg-background px-4 py-3 text-foreground placeholder-muted-foreground transition-all focus:border-primary focus:ring-2 focus:ring-primary/10 focus:outline-none';
@@ -10,7 +10,7 @@ const INPUT =
 const labelCls = 'mb-1.5 block font-mono text-[11px] tracking-[0.14em] uppercase text-muted-foreground';
 
 export function ProfileForm() {
-  const { form, saving, saved, setField, reset, handleSubmit } = useProfileForm();
+  const { form, saving, saved, error, setField, reset, handleSubmit } = useProfileForm();
 
   return (
     <form onSubmit={handleSubmit} className="max-w-2xl space-y-6">
@@ -66,23 +66,39 @@ export function ProfileForm() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
-        {[
-          { label: 'Age group', value: form.ageGroup, field: 'ageGroup', options: AGE_GROUPS },
-          { label: 'Gender', value: form.gender, field: 'gender', options: GENDERS },
-          { label: 'Education', value: form.education, field: 'education', options: EDUCATION_LEVELS }
-        ].map(({ label, value, field, options }) => (
-          <div key={field}>
-            <label className={labelCls}>{label}</label>
-            <select className={INPUT} value={value} onChange={(e) => setField(field as 'ageGroup' | 'gender' | 'education', e.target.value)}>
-              <option value="">Select…</option>
-              {options.map((o: string) => (
-                <option key={o} value={o}>
-                  {o}
-                </option>
-              ))}
-            </select>
-          </div>
-        ))}
+        <div>
+          <label className={labelCls}>Age group</label>
+          <select className={INPUT} value={form.ageGroup} onChange={(e) => setField('ageGroup', e.target.value)}>
+            <option value="">Select…</option>
+            {AGE_GROUP_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className={labelCls}>Gender</label>
+          <select className={INPUT} value={form.gender} onChange={(e) => setField('gender', e.target.value)}>
+            <option value="">Select…</option>
+            {GENDER_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className={labelCls}>Education</label>
+          <select className={INPUT} value={form.education} onChange={(e) => setField('education', e.target.value)}>
+            <option value="">Select…</option>
+            {EDUCATION_LEVEL_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       <div>
@@ -99,6 +115,8 @@ export function ProfileForm() {
         />
         <p className="text-muted-foreground mt-1.5 flex justify-end font-mono text-[11px]">{form.bio.length}/500</p>
       </div>
+
+      {error && <p className="text-destructive text-[13px] font-medium">{error}</p>}
 
       <div className="border-border flex gap-3 border-t pt-4">
         <button

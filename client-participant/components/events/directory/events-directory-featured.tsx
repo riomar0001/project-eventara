@@ -19,7 +19,7 @@ export function EventsDirectoryFeatured({ featured, onOpen }: EventsDirectoryFea
         {/* Tag */}
         <div className="text-amber inline-flex w-fit items-center gap-2 rounded-full border border-[oklch(0.62_0.16_60_/_0.35)] bg-[oklch(0.62_0.16_60_/_0.1)] px-3 py-[6px] font-mono text-[11px] tracking-[0.16em]">
           <span className="bg-amber h-1 w-1 rounded-full shadow-[0_0_10px_var(--amber-glow)]" />
-          FEATURED · END OF YEAR
+          {featured.tag}
         </div>
 
         <h2 className="text-text my-1 max-w-[18ch] text-[clamp(28px,3.2vw,40px)] leading-[1.08] font-semibold tracking-[-0.03em] text-balance">
@@ -60,15 +60,24 @@ export function EventsDirectoryFeatured({ featured, onOpen }: EventsDirectoryFea
 
       {/* Visual */}
       <div className="border-line-soft relative overflow-hidden border-l bg-[radial-gradient(circle_at_30%_70%,oklch(0.9_0.22_128_/_0.28),transparent_55%),radial-gradient(circle_at_80%_25%,oklch(0.82_0.17_75_/_0.35),transparent_55%),linear-gradient(135deg,oklch(0.2_0.01_150),oklch(0.14_0.008_150))]">
-        {/* Stripes */}
-        <div className="absolute inset-0 bg-[repeating-linear-gradient(105deg,transparent_0_24px,oklch(1_0_0_/_0.028)_24px_26px)]" />
-        {/* Orbs */}
-        <div className="bg-primary absolute top-[30%] left-[20%] h-[220px] w-[220px] rounded-full opacity-30 blur-[34px]" />
-        <div className="absolute right-[12%] bottom-[18%] h-[180px] w-[180px] rounded-full bg-orange-400 opacity-45 blur-[30px]" />
-        {/* Year */}
-        <div className="absolute top-8 right-10 text-[clamp(80px,12vw,160px)] leading-[0.8] font-bold tracking-[-0.05em] text-transparent [-webkit-text-stroke:1.5px_oklch(1_0_0_/_0.12)]">
-          &apos;26
-        </div>
+        {featured.banner_url ? (
+          <>
+            <img src={featured.banner_url} alt={featured.title} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/30 to-transparent" />
+          </>
+        ) : (
+          <>
+            {/* Stripes */}
+            <div className="absolute inset-0 bg-[repeating-linear-gradient(105deg,transparent_0_24px,oklch(1_0_0_/_0.028)_24px_26px)]" />
+            {/* Orbs */}
+            <div className="bg-primary absolute top-[30%] left-[20%] h-[220px] w-[220px] rounded-full opacity-30 blur-[34px]" />
+            <div className="absolute right-[12%] bottom-[18%] h-[180px] w-[180px] rounded-full bg-orange-400 opacity-45 blur-[30px]" />
+            {/* Year */}
+            <div className="absolute top-8 right-10 text-[clamp(80px,12vw,160px)] leading-[0.8] font-bold tracking-[-0.05em] text-transparent [-webkit-text-stroke:1.5px_oklch(1_0_0_/_0.12)]">
+              &apos;26
+            </div>
+          </>
+        )}
         {/* Label */}
         <div className="absolute bottom-4 left-5 font-mono text-[10px] tracking-[0.16em] text-white/30 uppercase">[ event cover · 16:9 ]</div>
       </div>

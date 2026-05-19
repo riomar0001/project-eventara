@@ -1,32 +1,131 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { EventsDirectoryCard } from '@/components/events/directory/events-directory-card';
 import { EventsDirectoryControls } from '@/components/events/directory/events-directory-controls';
 import { EventsDirectoryFeatured } from '@/components/events/directory/events-directory-featured';
 import { EventsDirectoryPagination } from '@/components/events/directory/events-directory-pagination';
 import { Icon } from '@/components/events/directory/icon';
 import { Footer } from '@/components/footer/footer';
-import { EventsDirectoryModal } from '@/components/modals/events-directory-modal';
 import { Navbar } from '@/components/navigation/navbar';
-import type { DirectoryEvent, SortOption, ViewMode, TweaksConfig } from '@/types/event-directory';
-import { ALL_EVENTS, CATEGORIES, FEATURED } from '@/constants/events-directory';
+import type { DirectoryEvent, SortOption, ViewMode, TweaksConfig, FeaturedEvent } from '@/types/event-directory';
+import { useEventsDirectory } from '@/hooks/events/use-events-directory';
+import { useHomeEvents } from '@/hooks/events/use-home-events';
+import type { HomeEventRecord } from '@/hooks/events/use-home-events';
 
 const TWEAKS_DEFAULTS: TweaksConfig = { density: 'comfortable', bannerVariant: 'featured', badgeStyle: 'floating' };
+const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+const ORBS: Array<'lime' | 'amber'> = ['lime', 'amber'];
+const ANGLES = ['115deg', '130deg', '145deg', '160deg', '175deg', '190deg'];
 
-const MONTH_IDX: Record<string, number> = { JAN: 0, FEB: 1, MAR: 2, APR: 3, MAY: 4, JUN: 5, JUL: 6, AUG: 7, SEP: 8, OCT: 9, NOV: 10, DEC: 11 };
+function stripHtml(html: string): string {
+  return html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+function toDirectoryEvent(record: HomeEventRecord, index: number): DirectoryEvent {
+  const start = new Date(record.start_date);
+  const session = record.sessions[0];
+  const venue = session
+    ? [session.venue_name, session.venue_location].filter(Boolean).join(', ')
+    : 'TBD';
+  const time = session
+    ? new Date(session.start_datetime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+    : 'TBD';
+  const maxSlots = session?.max_slots ?? 0;
+  const statusMap: Record<string, DirectoryEvent['status']> = {
+    started: 'live',
+    posted: 'new',
+  };
+
+  return {
+    id: record.id,
+    day: String(start.getDate()).padStart(2, '0'),
+    mo: MONTHS[start.getMonth()],
+    year: start.getFullYear(),
+    date: start.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+    time,
+    title: record.title,
+    desc: stripHtml(record.description),
+    venue,
+    cat: 'Event',
+    tags: [],
+    seats: maxSlots,
+    total: maxSlots || 1,
+    status: statusMap[record.status] ?? null,
+    orb: ORBS[index % ORBS.length],
+    angle: ANGLES[index % ANGLES.length],
+    banner_url: record.banner_url ?? null,
+  };
+}
+
+function toLiveEventFeatured(record: HomeEventRecord): FeaturedEvent {
+  const session = record.sessions[0];
+  const start = new Date(record.start_date);
+  const venue = session
+    ? [session.venue_name, session.venue_location].filter(Boolean).join(', ')
+    : 'TBD';
+  const time = session
+    ? new Date(session.start_datetime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+    : 'TBD';
+
+  return {
+    tag: 'LIVE NOW',
+    title: record.title,
+    desc: stripHtml(record.description).slice(0, 200),
+    date: start.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+    time,
+    venue,
+    banner_url: record.banner_url ?? null,
+  };
+}
+
+const SINGLE_CAT = [{ key: 'All', label: 'All Events' }];
 
 export default function EventsPage() {
+  const router = useRouter();
   const [tweaks, setTweaks] = useState<TweaksConfig>(TWEAKS_DEFAULTS);
   const [editMode, setEditMode] = useState(false);
   const [q, setQ] = useState('');
-  const [cat, setCat] = useState('All');
+  const [debouncedQ, setDebouncedQ] = useState('');
   const [sort, setSort] = useState<SortOption>('date');
   const [view, setView] = useState<ViewMode>('grid');
   const [page, setPage] = useState(1);
-  const [detail, setDetail] = useState<DirectoryEvent | null>(null);
 
   const PER_PAGE = tweaks.density === 'compact' ? 8 : 6;
+
+  // Debounce search query by 300ms
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedQ(q), 300);
+    return () => clearTimeout(t);
+  }, [q]);
+
+  // Reset to page 1 when search changes
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedQ]);
+
+  const { events, total, totalPages, loading, error } = useEventsDirectory({ q: debouncedQ, page, pageSize: PER_PAGE });
+  const { data: homeData } = useHomeEvents();
+
+  const liveEvent: HomeEventRecord | null = homeData?.live_event
+    ? { ...homeData.live_event.event, sessions: homeData.live_event.sessions }
+    : null;
+
+  const directoryEvents = useMemo<DirectoryEvent[]>(
+    () => events.map((ev, i) => toDirectoryEvent(ev, i)),
+    [events]
+  );
+
+  const counts = useMemo(() => ({ All: total }), [total]);
+
+  const handleOpen = useCallback((id: string) => {
+    router.push(`/events/${id}`);
+  }, [router]);
+
+  const handleOpenFeatured = useCallback(() => {
+    if (liveEvent) router.push(`/events/${liveEvent.id}`);
+  }, [liveEvent, router]);
 
   useEffect(() => {
     const onMsg = (e: MessageEvent) => {
@@ -57,69 +156,8 @@ export default function EventsPage() {
         : '';
   }, [tweaks.badgeStyle]);
 
-  const filtered = useMemo(() => {
-    let list = ALL_EVENTS.slice();
-    if (cat !== 'All') list = list.filter((e) => e.cat === cat);
-    if (q.trim()) {
-      const needle = q.toLowerCase();
-      list = list.filter(
-        (e) =>
-          e.title.toLowerCase().includes(needle) ||
-          e.venue.toLowerCase().includes(needle) ||
-          e.tags.some((t) => t.toLowerCase().includes(needle)) ||
-          e.cat.toLowerCase().includes(needle)
-      );
-    }
-    list.sort((a, b) => {
-      if (sort === 'date') return new Date(a.year, MONTH_IDX[a.mo], +a.day).getTime() - new Date(b.year, MONTH_IDX[b.mo], +b.day).getTime();
-      if (sort === 'popularity') return b.total - b.seats - (a.total - a.seats);
-      if (sort === 'availability') return b.seats - a.seats;
-      return 0;
-    });
-    return list;
-  }, [q, cat, sort]);
-
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
-  const currentPage = Math.min(page, totalPages);
-  const paged = filtered.slice((currentPage - 1) * PER_PAGE, currentPage * PER_PAGE);
-
-  const counts = useMemo(() => {
-    const obj: Record<string, number> = { All: ALL_EVENTS.length };
-    for (const c of CATEGORIES) {
-      if (c.key !== 'All') obj[c.key] = ALL_EVENTS.filter((e) => e.cat === c.key).length;
-    }
-    return obj;
-  }, []);
-
-  const changeCat = useCallback((c: string) => {
-    setCat(c);
-    setPage(1);
-  }, []);
-  const changeQ = useCallback((v: string) => {
-    setQ(v);
-    setPage(1);
-  }, []);
-
-  const openFeatured = useCallback(() => {
-    setDetail({
-      id: 0,
-      day: '12',
-      mo: 'DEC',
-      year: 2026,
-      date: FEATURED.date,
-      time: FEATURED.time,
-      title: FEATURED.title,
-      desc: FEATURED.desc,
-      venue: FEATURED.venue,
-      cat: 'Meetups',
-      tags: ['Gala', 'Featured'],
-      seats: 80,
-      total: 300,
-      status: null,
-      orb: 'amber',
-      angle: '115deg'
-    });
-  }, []);
+  const showFeatured = tweaks.bannerVariant === 'featured' && liveEvent;
+  const featuredData = liveEvent ? toLiveEventFeatured(liveEvent) : null;
 
   return (
     <main className="bg-background text-foreground">
@@ -138,16 +176,16 @@ export default function EventsPage() {
               <div>
                 <span className="text-muted-foreground inline-flex items-center gap-2.5 font-mono text-xs tracking-widest uppercase">
                   <span className="bg-primary h-1.5 w-1.5 rounded-full shadow-[0_0_12px_var(--lime-glow)]" />
-                  EVENT DIRECTORY · APR–JUL 2026
+                  EVENT DIRECTORY
                 </span>
                 <h1 className="text-foreground mx-0 my-[18px] text-[clamp(42px,5.5vw,72px)] leading-none font-bold tracking-[-0.035em]">Discover Events</h1>
                 <p className="text-muted-foreground m-0 mb-9 max-w-[58ch] text-[16px] leading-[1.55]">
-                  Browse {ALL_EVENTS.length} upcoming workshops, meetups and hackathons across the Davao DeFi community.
+                  Browse upcoming workshops, meetups and hackathons across the community.
                 </p>
               </div>
               <div className="text-right max-sm:text-left">
                 <div className="text-primary font-mono text-[40px] leading-none font-semibold tracking-[-0.03em]">
-                  {String(ALL_EVENTS.length).padStart(2, '0')}
+                  {loading ? '--' : String(total).padStart(2, '0')}
                 </div>
                 <div className="text-muted-foreground mt-[2px] font-mono text-[11px] tracking-[0.18em] uppercase">Active listings</div>
               </div>
@@ -155,28 +193,34 @@ export default function EventsPage() {
 
             <EventsDirectoryControls
               q={q}
-              onQChange={changeQ}
-              cat={cat}
-              onCatChange={changeCat}
+              onQChange={(v) => setQ(v)}
+              cat="All"
+              onCatChange={() => {}}
               sort={sort}
               onSortChange={(s) => setSort(s)}
-              categories={CATEGORIES}
+              categories={SINGLE_CAT}
               counts={counts}
             />
 
-            {tweaks.bannerVariant === 'featured' && <EventsDirectoryFeatured featured={FEATURED} onOpen={openFeatured} />}
+            {showFeatured && featuredData && (
+              <EventsDirectoryFeatured featured={featuredData} onOpen={handleOpenFeatured} />
+            )}
           </header>
 
           <section>
             <div className="mt-14 mb-[22px] flex flex-wrap items-end justify-between gap-6">
               <div>
-                <h3 className="text-foreground m-0 text-[24px] font-semibold tracking-[-0.02em]">{cat === 'All' ? 'All events' : cat}</h3>
+                <h3 className="text-foreground m-0 text-[24px] font-semibold tracking-[-0.02em]">All events</h3>
                 <div className="text-muted-foreground mt-1 font-mono text-[12px]">
-                  {filtered.length} result{filtered.length !== 1 ? 's' : ''}
-                  {q && (
+                  {loading ? 'Loading…' : (
                     <>
-                      <span> · query </span>
-                      <span className="text-primary">&quot;{q}&quot;</span>
+                      {total} result{total !== 1 ? 's' : ''}
+                      {debouncedQ && (
+                        <>
+                          <span> · query </span>
+                          <span className="text-primary">&quot;{debouncedQ}&quot;</span>
+                        </>
+                      )}
                     </>
                   )}
                 </div>
@@ -200,25 +244,33 @@ export default function EventsPage() {
             <div
               className={`events-dir-grid grid gap-[22px] ${view === 'list' ? 'grid-cols-1' : tweaks.density === 'compact' ? 'grid-cols-4' : 'grid-cols-3'}`}
             >
-              {paged.length === 0 ? (
+              {loading ? (
+                Array.from({ length: PER_PAGE }).map((_, i) => (
+                  <div key={i} className="border-border bg-card animate-pulse rounded-[20px] border" style={{ minHeight: 340 }} />
+                ))
+              ) : error ? (
+                <div className="border-border bg-muted/10 col-span-full rounded-[20px] border border-dashed px-10 py-20 text-center">
+                  <p className="text-muted-foreground m-0 text-[14px]">{error}</p>
+                </div>
+              ) : directoryEvents.length === 0 ? (
                 <div className="border-border bg-muted/10 col-span-full rounded-[20px] border border-dashed px-10 py-20 text-center">
                   <div className="bg-muted text-muted-foreground mx-auto mb-[18px] grid h-14 w-14 place-items-center rounded-[16px]">
                     <Icon name="search" size={22} />
                   </div>
-                  <h4 className="text-foreground m-0 mb-[6px] text-[20px] font-semibold tracking-[-0.02em]">No events match your filters</h4>
-                  <p className="text-muted-foreground m-0 text-[14px]">Try a broader search or reset your category selection.</p>
+                  <h4 className="text-foreground m-0 mb-[6px] text-[20px] font-semibold tracking-[-0.02em]">No events match your search</h4>
+                  <p className="text-muted-foreground m-0 text-[14px]">Try a broader search term.</p>
                 </div>
               ) : (
-                paged.map((ev) => <EventsDirectoryCard key={ev.id} ev={ev} onOpen={setDetail} />)
+                directoryEvents.map((ev) => <EventsDirectoryCard key={ev.id} ev={ev} onOpen={handleOpen} />)
               )}
             </div>
           </section>
 
-          {filtered.length > 0 && (
+          {!loading && total > 0 && (
             <EventsDirectoryPagination
-              currentPage={currentPage}
+              currentPage={page}
               totalPages={totalPages}
-              filteredLength={filtered.length}
+              filteredLength={total}
               perPage={PER_PAGE}
               onPageChange={setPage}
             />
@@ -227,8 +279,6 @@ export default function EventsPage() {
       </div>
 
       <Footer />
-
-      {detail && <EventsDirectoryModal ev={detail} onClose={() => setDetail(null)} />}
 
       {editMode && (
         <div className="border-border bg-card fixed right-5 bottom-5 z-80 w-[280px] animate-[modal-pop_200ms_ease] rounded-[16px] border p-4 text-[13px] shadow-[0_20px_60px_-20px_oklch(0_0_0_/_0.5)]">

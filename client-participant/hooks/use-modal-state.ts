@@ -1,22 +1,14 @@
-import { useState, useCallback } from 'react';
+import { useCallback, useState } from 'react';
 
-export interface UpcomingEvent {
-  id: number;
-  date: string;
-  title: string;
-  desc: string;
-  venue: string;
-  chip: string;
-  seats: string;
-  orbColor: 'lime' | 'amber';
-  angle: string;
-}
+import type { HomeEventRecord } from './events/use-home-events';
+
+export type { HomeEventRecord as UpcomingEvent };
 
 export function useModalState() {
   const [isOpen, setIsOpen] = useState(false);
-  const [event, setEvent] = useState<UpcomingEvent | null>(null);
+  const [event, setEvent] = useState<HomeEventRecord | null>(null);
 
-  const openModal = useCallback((ev: UpcomingEvent) => {
+  const openModal = useCallback((ev: HomeEventRecord) => {
     setEvent(ev);
     setIsOpen(true);
   }, []);

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { AccountSettings } from '@/api/sdk.gen';
 import { DELETE_ACCOUNT_REASON_OPTIONS, DELETE_ACCOUNT_OTHER_REASON, DELETE_CONFIRMATION_WORD, type DeleteAccountReason } from '@/constants/delete-account';
 
 export { DELETE_ACCOUNT_REASON_OPTIONS, DELETE_ACCOUNT_OTHER_REASON, DELETE_CONFIRMATION_WORD };
@@ -8,6 +9,7 @@ export { DELETE_ACCOUNT_REASON_OPTIONS, DELETE_ACCOUNT_OTHER_REASON, DELETE_CONF
 export function useDeleteAccount() {
   const [reasonOption, setReasonOption] = useState<DeleteAccountReason | ''>('');
   const [otherReason, setOtherReason] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
   const [confirmation, setConfirmation] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -27,33 +29,47 @@ export function useDeleteAccount() {
       setError('Please describe your reason.');
       return;
     }
+    if (!currentPassword) {
+      setError('Please enter your current password to confirm.');
+      return;
+    }
     if (!isConfirmed) {
       setError(`Type "${DELETE_CONFIRMATION_WORD}" to confirm.`);
       return;
     }
 
     setSubmitting(true);
-    // TODO: call delete-account API
-    await new Promise((r) => setTimeout(r, 1000));
+
+    const reason = isOther ? otherReason.trim() : (reasonOption as string);
+
+    const { data, error: apiError } = await AccountSettings.scheduleOwnAccountDeletionUserAccountDeletionPost({
+      body: { current_password: currentPassword, reason },
+    });
+
     setSubmitting(false);
 
-    // Mock scheduled deletion 30 days from now
-    const date = new Date();
-    date.setDate(date.getDate() + 30);
-    setScheduledDate(date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }));
+    if (apiError || !data) {
+      const msg = (apiError as { message?: string } | null)?.message;
+      setError(msg ?? 'Failed to schedule deletion. Check your password and try again.');
+      return;
+    }
+
+    const scheduledFor = new Date(data.deletion_scheduled_for);
+    setScheduledDate(scheduledFor.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }));
   }
 
   function cancelDeletion() {
     setScheduledDate(null);
     setReasonOption('');
     setOtherReason('');
+    setCurrentPassword('');
     setConfirmation('');
-    // TODO: call cancel-deletion API
   }
 
   return {
     reasonOption,
     otherReason,
+    currentPassword,
     confirmation,
     submitting,
     error,
@@ -62,6 +78,7 @@ export function useDeleteAccount() {
     isConfirmed,
     setReasonOption,
     setOtherReason,
+    setCurrentPassword,
     setConfirmation,
     handleSubmit,
     cancelDeletion

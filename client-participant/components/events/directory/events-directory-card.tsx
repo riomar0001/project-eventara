@@ -5,7 +5,7 @@ import { Icon } from './icon';
 
 interface EventsDirectoryCardProps {
   ev: DirectoryEvent;
-  onOpen: (ev: DirectoryEvent) => void;
+  onOpen: (id: string) => void;
 }
 
 export function EventsDirectoryCard({ ev, onOpen }: EventsDirectoryCardProps) {
@@ -22,22 +22,28 @@ export function EventsDirectoryCard({ ev, onOpen }: EventsDirectoryCardProps) {
   return (
     <article
       className={`group border-line-soft bg-surface flex cursor-pointer flex-col overflow-hidden rounded-[20px] border transition-[transform_280ms_ease,border-color_280ms_ease,box-shadow_280ms_ease] hover:-translate-y-[6px] ${urgent ? 'hover:border-[oklch(0.62_0.16_60_/_0.55)] hover:shadow-[0_20px_60px_-20px_oklch(0.62_0.16_60_/_0.28)]' : 'hover:border-[oklch(0.7_0.2_130_/_0.5)] hover:shadow-[0_20px_60px_-20px_oklch(0.7_0.2_130_/_0.3)]'}`}
-      onClick={() => onOpen(ev)}
+      onClick={() => onOpen(ev.id)}
     >
       {/* Event visual */}
       <div className="border-line-soft relative aspect-[16/9] overflow-hidden border-b bg-linear-[135deg] from-[oklch(0.22_0.012_150)] to-[oklch(0.16_0.008_150)]">
-        {/* Stripes */}
-        <div
-          className="absolute inset-0"
-          style={{ backgroundImage: `repeating-linear-gradient(${ev.angle}, transparent 0 20px, oklch(1 0 0 / 0.035) 20px 22px)` }}
-        />
-        {/* Orbs */}
-        <div
-          className={`absolute top-[25%] left-[20%] h-[150px] w-[150px] rounded-full opacity-50 blur-[32px] ${ev.orb === 'lime' ? 'bg-primary' : 'bg-orange-400'}`}
-        />
-        <div
-          className={`absolute right-[15%] bottom-[12%] h-[110px] w-[110px] rounded-full opacity-32 blur-[32px] ${ev.orb === 'lime' ? 'bg-orange-400' : 'bg-primary'}`}
-        />
+        {ev.banner_url ? (
+          <img src={ev.banner_url} alt={ev.title} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
+        ) : (
+          <>
+            {/* Stripes */}
+            <div
+              className="absolute inset-0"
+              style={{ backgroundImage: `repeating-linear-gradient(${ev.angle}, transparent 0 20px, oklch(1 0 0 / 0.035) 20px 22px)` }}
+            />
+            {/* Orbs */}
+            <div
+              className={`absolute top-[25%] left-[20%] h-[150px] w-[150px] rounded-full opacity-50 blur-[32px] ${ev.orb === 'lime' ? 'bg-primary' : 'bg-orange-400'}`}
+            />
+            <div
+              className={`absolute right-[15%] bottom-[12%] h-[110px] w-[110px] rounded-full opacity-32 blur-[32px] ${ev.orb === 'lime' ? 'bg-orange-400' : 'bg-primary'}`}
+            />
+          </>
+        )}
 
         {/* Date badge */}
         <div className="border-line-soft/20 absolute top-[14px] left-[14px] z-[2] min-w-[54px] rounded-[10px] border bg-black/55 px-[10px] py-2 text-center backdrop-blur-[10px]">
@@ -108,7 +114,7 @@ export function EventsDirectoryCard({ ev, onOpen }: EventsDirectoryCardProps) {
             className={`border-line text-text flex w-full items-center justify-center gap-2 rounded-[10px] border bg-transparent px-[11px] py-[11px] text-[13px] font-medium transition-all ${urgent ? 'hover:border-[oklch(0.62_0.16_60)] hover:bg-[oklch(0.62_0.16_60_/_0.05)] hover:text-[oklch(0.62_0.16_60)]' : 'hover:border-[oklch(0.7_0.2_130)] hover:bg-[oklch(0.7_0.2_130_/_0.05)] hover:text-[oklch(0.7_0.2_130)]'}`}
             onClick={(e) => {
               e.stopPropagation();
-              onOpen(ev);
+              onOpen(ev.id);
             }}
           >
             View Details <Icon name="arrow-right" size={13} />

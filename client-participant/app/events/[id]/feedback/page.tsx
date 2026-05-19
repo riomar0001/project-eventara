@@ -7,13 +7,13 @@ import { ALL_EVENTS } from '@/constants/events-directory';
 
 export default function EventFeedbackPage() {
   const { id } = useParams<{ id: string }>();
-  const event = ALL_EVENTS.find((e) => e.id === Number(id));
+  const event = ALL_EVENTS.find((e) => e.id === id);
 
   return (
     <div className="bg-background min-h-screen">
       <Navbar />
       <div className="mx-auto max-w-[560px] px-5 py-12">
-        <FeedbackForm eventId={Number(id)} eventTitle={event?.title ?? 'Event'} />
+        <FeedbackForm eventId={id} eventTitle={event?.title ?? 'Event'} />
       </div>
     </div>
   );

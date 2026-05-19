@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+
 export function CTABanner() {
   return (
     <section className="relative py-[10px_0_120px]">
@@ -28,12 +30,12 @@ export function CTABanner() {
 
             {/* CTA Buttons */}
             <div className="flex flex-wrap justify-center gap-3.5">
-              <button className="bg-lime inline-flex items-center justify-center gap-2.5 rounded-full px-7 py-4 text-[15px] font-semibold text-white shadow-[0_8px_28px_-10px_var(--lime-glow),inset_0_-1px_0_oklch(0.7_0.2_128)] transition-all duration-180 hover:-translate-y-0.5">
+              <Link href="/register" className="bg-lime inline-flex items-center justify-center gap-2.5 rounded-full px-7 py-4 text-[15px] font-semibold text-white shadow-[0_8px_28px_-10px_var(--lime-glow),inset_0_-1px_0_oklch(0.7_0.2_128)] transition-all duration-180 hover:-translate-y-0.5">
                 Create Account
-              </button>
-              <button className="border-line text-text hover:bg--line-soft inline-flex items-center justify-center gap-2.5 rounded-full border px-7 py-4 text-[15px] font-semibold transition-all duration-180">
+              </Link>
+              <Link href="/login" className="border-line text-text inline-flex items-center justify-center gap-2.5 rounded-full border bg-[oklch(1_0_0_/_0.6)] px-7 py-4 text-[15px] font-semibold backdrop-blur-sm transition-all duration-180 hover:bg-[oklch(1_0_0_/_0.8)]">
                 Login to Dashboard
-              </button>
+              </Link>
             </div>
           </div>
         </div>

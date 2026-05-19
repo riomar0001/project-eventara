@@ -32,6 +32,7 @@ from app.application.dto.event_dto import (
 )
 from app.application.dto.event_status_dto import UpdateEventSessionStatusInput, UpdateEventStatusInput
 from app.application.use_cases.audit_log_usecase import AuditLogUseCase
+from app.application.dto.event_dto import GetPublicEventsInput
 from app.application.use_cases.event_deletion_usecase import EventDeletionUseCase
 from app.application.use_cases.event_query_usecase import GetEventUseCase
 from app.application.use_cases.event_status_usecase import EventStatusUseCase
@@ -90,6 +91,13 @@ from app.controller.schemas.event_schema import (
     EventStatusUpdateRequest,
     EventUpdateRequest,
     EventWithSessionsResponse,
+    HomeEventsData,
+    HomeEventsResponse,
+    HomeEventWithSessions,
+    LiveEventData,
+    PublicEventDetailResponse,
+    PublicEventsListData,
+    PublicEventsListResponse,
 )
 from app.domain.entities.audit_log import ActionType, AuditLogStatus
 from app.domain.entities.authorization_entities import RoleAction
@@ -148,6 +156,131 @@ def _to_session_response(session: EventSessionEntity) -> EventSessionRecordRespo
         max_slots=session.max_slots,
         created_at=session.created_at,
         updated_at=session.updated_at,
+    )
+
+
+@event_router.get(
+    "/public",
+    response_model=PublicEventsListResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Public events directory listing",
+    description=(
+        "Returns a paginated list of upcoming events (status=posted) for the public events directory. "
+        "Falls back to past events (status=ended) when no upcoming events exist. "
+        "Supports optional title search via the ``q`` parameter. "
+        "No authentication required."
+    ),
+)
+async def get_public_events(
+    q: str | None = Query(default=None, description="Case-insensitive title search"),
+    page: int = Query(default=1, ge=1, description="Page number (1-based)"),
+    page_size: int = Query(default=9, ge=1, le=50, description="Items per page (max 50)"),
+    use_case: GetEventUseCase = Depends(get_event_query_use_case),
+) -> PublicEventsListResponse:
+    """Return paginated upcoming or past events for the public events directory."""
+    result = await use_case.get_public_events(GetPublicEventsInput(q=q, page=page, page_size=page_size))
+
+    return PublicEventsListResponse(
+        data=PublicEventsListData(
+            events=[
+                HomeEventWithSessions(
+                    id=record.event.id,
+                    title=record.event.title,
+                    description=record.event.description,
+                    start_date=record.event.start_date,
+                    end_date=record.event.end_date,
+                    status=record.event.status.value if hasattr(record.event.status, "value") else record.event.status,
+                    banner_url=StorageService.public_url_for_object_key(record.event.banner_url),
+                    sessions=[_to_session_response(s) for s in record.sessions],
+                )
+                for record in result.events
+            ],
+            total=result.total,
+            page=result.page,
+            page_size=result.page_size,
+            total_pages=result.total_pages,
+            events_type=result.events_type,
+        )
+    )
+
+
+@event_router.get(
+    "/public/home",
+    response_model=HomeEventsResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Public home page events",
+    description=(
+        "Returns the currently live event (status=started) with its sessions, "
+        "plus a list of upcoming events (status=posted). "
+        "When no upcoming events exist, falls back to the most-recent past events (status=ended). "
+        "No authentication required."
+    ),
+)
+async def get_home_events(
+    use_case: GetEventUseCase = Depends(get_event_query_use_case),
+) -> HomeEventsResponse:
+    """Return live event and upcoming (or fallback past) events for the public home page."""
+    result = await use_case.get_home_events()
+
+    live_event_data: LiveEventData | None = None
+    if result.live_event:
+        live_event_data = LiveEventData(
+            event=_to_event_response(result.live_event),
+            sessions=[_to_session_response(s) for s in result.live_event_sessions],
+        )
+
+    return HomeEventsResponse(
+        data=HomeEventsData(
+            live_event=live_event_data,
+            events=[
+                HomeEventWithSessions(
+                    id=record.event.id,
+                    title=record.event.title,
+                    description=record.event.description,
+                    start_date=record.event.start_date,
+                    end_date=record.event.end_date,
+                    status=record.event.status.value if hasattr(record.event.status, "value") else record.event.status,
+                    banner_url=StorageService.public_url_for_object_key(record.event.banner_url),
+                    sessions=[_to_session_response(s) for s in record.sessions],
+                )
+                for record in result.events
+            ],
+            events_type=result.events_type,
+        )
+    )
+
+
+@event_router.get(
+    "/public/{event_id}",
+    response_model=PublicEventDetailResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Public event detail",
+    description=(
+        "Returns a single event with all its sessions. "
+        "No authentication required."
+    ),
+)
+async def get_public_event_detail(
+    event_id: uuid.UUID,
+    use_case: GetEventUseCase = Depends(get_event_query_use_case),
+) -> PublicEventDetailResponse:
+    """Return a single public event with its sessions."""
+    try:
+        result = await use_case.get_event_with_sessions(GetEventWithSessionsInput(event_id=event_id))
+    except EventNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+
+    return PublicEventDetailResponse(
+        data=HomeEventWithSessions(
+            id=result.event.id,
+            title=result.event.title,
+            description=result.event.description,
+            start_date=result.event.start_date,
+            end_date=result.event.end_date,
+            status=result.event.status.value if hasattr(result.event.status, "value") else result.event.status,
+            banner_url=StorageService.public_url_for_object_key(result.event.banner_url),
+            sessions=[_to_session_response(s) for s in result.sessions],
+        )
     )
 
 

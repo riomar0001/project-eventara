@@ -5,23 +5,25 @@ import { EventsSection } from '@/components/events/events-section';
 import { Footer } from '@/components/footer/footer';
 import { HeroSection } from '@/components/hero/hero-section';
 import { LiveEventCard } from '@/components/live-event/live-event-card';
-import { EventDetailModal } from '@/components/modals/event-detail-modal';
 import { Navbar } from '@/components/navigation/navbar';
 import { TweaksPanel } from '@/components/theme/tweaks-panel';
-import { useModalState } from '@/hooks/use-modal-state';
+import { useHomeEvents } from '@/hooks/events/use-home-events';
 
 export default function Page() {
-  const { isOpen, event, openModal, closeModal } = useModalState();
+  const { data, loading } = useHomeEvents();
 
   return (
     <main className="bg-page min-h-screen">
       <Navbar />
       <HeroSection />
-      <LiveEventCard />
-      <EventsSection onEventClick={openModal} />
+      <LiveEventCard liveEvent={data?.live_event ?? null} loading={loading} />
+      <EventsSection
+        events={data?.events ?? []}
+        eventsType={data?.events_type ?? 'upcoming'}
+        loading={loading}
+      />
       <CTABanner />
       <Footer />
-      <EventDetailModal event={event} isOpen={isOpen} onClose={closeModal} />
       <TweaksPanel />
     </main>
   );

@@ -1,6 +1,6 @@
 'use client';
 
-import { StatsGrid } from './stats-grid';
+import Link from 'next/link';
 
 export function HeroSection() {
   return (
@@ -39,18 +39,14 @@ export function HeroSection() {
 
         {/* CTA Buttons */}
         <div className="flex flex-wrap justify-center gap-3.5">
-          <button className="bg-lime inline-flex items-center justify-center gap-2.5 rounded-full px-6 py-3.5 text-base font-semibold text-white shadow-[0_8px_28px_-10px_var(--lime-glow),inset_0_-1px_0_oklch(0.7_0.2_128)] transition-all duration-180 hover:-translate-y-0.5">
+          <Link href="/events" className="bg-lime inline-flex items-center justify-center gap-2.5 rounded-full px-6 py-3.5 text-base font-semibold text-white shadow-[0_8px_28px_-10px_var(--lime-glow),inset_0_-1px_0_oklch(0.7_0.2_128)] transition-all duration-180 hover:-translate-y-0.5">
             Explore Events →
-          </button>
-          <button className="border--amber text-amber inline-flex items-center justify-center gap-2.5 rounded-full border px-6 py-3.5 text-base font-semibold transition-all duration-180 hover:bg-[oklch(0.62_0.16_60_/_0.12)] hover:shadow-[0_0_24px_-6px_var(--amber-glow)]">
+          </Link>
+          <Link href="/register" className="border--amber text-amber inline-flex items-center justify-center gap-2.5 rounded-full border px-6 py-3.5 text-base font-semibold transition-all duration-180 hover:bg-[oklch(0.62_0.16_60_/_0.12)] hover:shadow-[0_0_24px_-6px_var(--amber-glow)]">
             Join the Community
-          </button>
+          </Link>
         </div>
 
-        {/* Stats Grid */}
-        <div className="mt-[72px]">
-          <StatsGrid />
-        </div>
       </div>
     </section>
   );
