@@ -62,6 +62,7 @@ class EventSession(BaseModel):
     end_datetime: datetime
     status: EventSessionStatus = EventSessionStatus.POSTED
     max_slots: int | None = Field(default=None, gt=0)
+    registered_count: int = 0
     session_metadata: dict | None = None
     venue_name: str | None = None
     venue_location: str | None = None

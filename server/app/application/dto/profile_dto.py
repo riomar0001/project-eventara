@@ -67,6 +67,7 @@ class AttendedEventRecord:
     session_start_datetime: datetime
     session_end_datetime: datetime
     attended_at: datetime | None
+    status: str = "attended"
 
 
 @dataclass
@@ -77,6 +78,17 @@ class GetEventsAttendedInput:
 
 @dataclass
 class GetEventsAttendedOutput:
+    events: list[AttendedEventRecord]
+
+
+@dataclass
+class GetMyEventsInput:
+    user_id: uuid.UUID
+    limit: int = 50
+
+
+@dataclass
+class GetMyEventsOutput:
     events: list[AttendedEventRecord]
 
 

@@ -1,10 +1,10 @@
 import { SessionCard } from './session-card';
 import type { ApiEventSession } from '@/hooks/events/use-home-events';
 
-export function SessionsList({ sessions, eventId }: { sessions: ApiEventSession[]; eventId: string }) {
+export function SessionsList({ sessions, eventId, onRegistrationChange }: { sessions: ApiEventSession[]; eventId: string; onRegistrationChange?: () => void }) {
   if (sessions.length === 0) {
     return (
-      <div>
+      <div id="programme">
         <h2 className="text-foreground mb-5 text-xl font-bold tracking-[-0.02em]">Programme</h2>
         <p className="text-muted-foreground text-[14px]">No sessions scheduled yet.</p>
       </div>
@@ -12,11 +12,11 @@ export function SessionsList({ sessions, eventId }: { sessions: ApiEventSession[
   }
 
   return (
-    <div>
+    <div id="programme">
       <h2 className="text-foreground mb-5 text-xl font-bold tracking-[-0.02em]">Programme</h2>
       <div className="space-y-3">
         {sessions.map((session) => (
-          <SessionCard key={session.id} session={session} eventId={eventId} />
+          <SessionCard key={session.id} session={session} eventId={eventId} onRegistrationChange={onRegistrationChange} />
         ))}
       </div>
     </div>

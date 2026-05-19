@@ -74,3 +74,27 @@ class GetEventParticipantsInput:
 class GetEventParticipantsOutput:
     participants: list[EventParticipant]
     total: int
+
+
+@dataclass
+class GetSessionRegistrationStatusInput:
+    user_id: uuid.UUID
+    session_id: uuid.UUID
+
+
+@dataclass
+class GetSessionRegistrationStatusOutput:
+    is_registered: bool
+    status: str | None
+
+
+@dataclass
+class GetMyQrTokenInput:
+    user_id: uuid.UUID
+    event_id: uuid.UUID
+    session_id: uuid.UUID
+
+
+@dataclass
+class GetMyQrTokenOutput:
+    qr_token: str

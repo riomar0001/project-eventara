@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { AccountSettings } from '@/api/sdk.gen';
+import { humanizeApiError } from '@/lib/api-error';
 
 type PasswordForm = { current: string; next: string; confirm: string };
 type ShowState = { current: boolean; next: boolean; confirm: boolean };
@@ -28,11 +29,11 @@ export function usePasswordForm() {
     setError('');
     setSuccess(false);
     if (form.next.length < 8) {
-      setError('New password must be at least 8 characters.');
+      setError('Your new password needs to be at least 8 characters long.');
       return;
     }
     if (form.next !== form.confirm) {
-      setError('New passwords do not match.');
+      setError("Those passwords don't match. Please double-check and try again.");
       return;
     }
     setSaving(true);
@@ -44,8 +45,7 @@ export function usePasswordForm() {
     setSaving(false);
 
     if (apiError) {
-      const msg = (apiError as { message?: string } | null)?.message;
-      setError(msg ?? 'Failed to change password. Check your current password and try again.');
+      setError(humanizeApiError((apiError as { message?: string } | null)?.message, "Couldn't update your password. Make sure your current password is correct and try again."));
       return;
     }
 

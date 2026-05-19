@@ -13,11 +13,11 @@ export function useForgotPassword() {
     e.preventDefault();
     setError('');
     if (!email.trim()) {
-      setError('Please enter your email address.');
+      setError('Please enter your email address to continue.');
       return;
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError('Enter a valid email address.');
+      setError("That doesn't look like a valid email address.");
       return;
     }
     setLoading(true);

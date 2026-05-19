@@ -14,7 +14,7 @@ import { useEventDetail } from '@/hooks/events/use-event-detail';
 
 export default function EventDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const { event, loading, error, totalSlots, seatsFilled, capacityPct, isFull } = useEventDetail(id);
+  const { event, loading, error, totalSlots, seatsFilled, capacityPct, isFull, refetch } = useEventDetail(id);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
 
   if (loading) {
@@ -58,7 +58,7 @@ export default function EventDetailPage() {
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_340px]">
           <div className="space-y-6">
             <EventHero event={event} />
-            <SessionsList sessions={event.sessions} eventId={event.id} />
+            <SessionsList sessions={event.sessions} eventId={event.id} onRegistrationChange={refetch} />
           </div>
           <EventSidebar
             event={event}

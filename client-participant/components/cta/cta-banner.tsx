@@ -4,9 +4,9 @@ import Link from 'next/link';
 
 export function CTABanner() {
   return (
-    <section className="relative py-[10px_0_120px]">
-      <div className="container mx-auto max-w-[1240px] px-8">
-        <div className="relative overflow-hidden rounded-[28px] bg-linear-[180deg] from-[oklch(0.985_0.004_150)] to-[oklch(0.95_0.008_150)] px-14 py-[72px] text-center">
+    <section className="relative pb-20 md:pb-[120px]">
+      <div className="container mx-auto max-w-[1240px] px-4 md:px-8">
+        <div className="relative overflow-hidden rounded-[20px] bg-linear-[180deg] from-[oklch(0.985_0.004_150)] to-[oklch(0.95_0.008_150)] px-6 py-14 text-center md:rounded-[28px] md:px-14 md:py-[72px]">
           {/* Border gradient */}
           <div className="pointer-events-none absolute inset-0 rounded-[28px] bg-[linear-gradient(135deg,var(--lime)_0%,transparent_40%,transparent_60%,var(--amber)_100%)] [mask-composite:exclude] p-[1.5px] [-webkit-mask-composite:xor] [-webkit-mask:linear-gradient(#fff_0_0)_content-box,linear-gradient(#fff_0_0)] [mask:linear-gradient(#fff_0_0)_content-box,linear-gradient(#fff_0_0)]" />
 

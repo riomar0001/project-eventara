@@ -80,3 +80,24 @@ class CheckInParticipantResponse(BaseModel):
 
 class CheckInParticipantQrCodeRequest(BaseModel):
     token: str
+
+
+class MySessionRegistrationData(BaseModel):
+    is_registered: bool
+    status: str | None = None
+
+
+class MySessionRegistrationResponse(BaseModel):
+    success: bool = True
+    message: str = "Session registration status retrieved."
+    data: MySessionRegistrationData
+
+
+class MyQrTokenData(BaseModel):
+    qr_token: str
+
+
+class MyQrTokenResponse(BaseModel):
+    success: bool = True
+    message: str = "QR token retrieved."
+    data: MyQrTokenData

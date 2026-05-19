@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Auth } from '@/api/sdk.gen';
+import { humanizeApiError } from '@/lib/api-error';
 
 const VERIFICATION_TOKEN_KEY = 'eventara-login-verification-token';
 
@@ -21,7 +22,7 @@ export function useLoginForm() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.email || !form.password) {
-      setError('Please fill in all fields.');
+      setError('Please enter both your email and password.');
       return;
     }
     setLoading(true);
@@ -34,8 +35,7 @@ export function useLoginForm() {
     setLoading(false);
 
     if (apiError || !data) {
-      const msg = (apiError as { message?: string } | null)?.message;
-      setError(msg ?? 'Invalid email or password.');
+      setError(humanizeApiError((apiError as { message?: string } | null)?.message, 'Incorrect email or password. Please try again.'));
       return;
     }
 

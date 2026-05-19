@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Auth } from '@/api/sdk.gen';
+import { humanizeApiError } from '@/lib/api-error';
 import { decodeTokenUser } from '@/lib/auth/token';
 import { useAuthStore } from '@/store/auth-store';
 
@@ -69,7 +70,7 @@ export function useVerifyOtp() {
     e.preventDefault();
     const code = digits.join('');
     if (code.length < OTP_LENGTH) {
-      setError('Enter the full 6-digit code.');
+      setError('Please enter all 6 digits of your verification code.');
       return;
     }
     setLoading(true);
@@ -77,7 +78,7 @@ export function useVerifyOtp() {
 
     const verificationToken = sessionStorage.getItem(VERIFICATION_TOKEN_KEY);
     if (!verificationToken) {
-      setError('Session expired. Please log in again.');
+      setError('Your session has expired. Please sign in again.');
       setLoading(false);
       router.replace('/login');
       return;
@@ -90,15 +91,14 @@ export function useVerifyOtp() {
     setLoading(false);
 
     if (apiError || !data) {
-      const msg = (apiError as { message?: string } | null)?.message;
-      setError(msg ?? 'Invalid or expired code. Please try again.');
+      setError(humanizeApiError((apiError as { message?: string } | null)?.message, 'That code is incorrect or has expired. Please try again.'));
       return;
     }
 
     sessionStorage.removeItem(VERIFICATION_TOKEN_KEY);
     const user = decodeTokenUser(data.access_token);
     if (!user) {
-      setError('Login failed. Please try again.');
+      setError('Something went wrong signing you in. Please try again.');
       return;
     }
 

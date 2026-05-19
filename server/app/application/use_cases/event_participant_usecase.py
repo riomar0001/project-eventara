@@ -12,6 +12,10 @@ from app.application.dto.event_participant_dto import (
     CheckInParticipantQrCodeInput,
     GetEventParticipantsInput,
     GetEventParticipantsOutput,
+    GetMyQrTokenInput,
+    GetMyQrTokenOutput,
+    GetSessionRegistrationStatusInput,
+    GetSessionRegistrationStatusOutput,
     RegisterForSessionInput,
     RegisterForSessionOutput,
     UpdateParticipantStatusInput,
@@ -164,7 +168,7 @@ class EventParticipantUseCase:
             raise RegistrationNotOpenError(str(data.session_id), session.status.value)
 
         existing = await self.participant_repo.get_by_user_and_session(data.user_id, data.session_id)
-        if existing is not None:
+        if existing is not None and existing.status in (EventParticipantStatus.REGISTERED, EventParticipantStatus.ATTENDED):
             raise DuplicateEventParticipantError(str(data.user_id), str(data.session_id))
 
         effective_slots = session.max_slots
@@ -177,10 +181,19 @@ class EventParticipantUseCase:
                 raise SessionSlotsFullError(str(data.session_id), active_count, effective_slots)
 
         try:
-            participant = await self.participant_repo.create(
-                user_id=data.user_id,
-                session_id=data.session_id,
-            )
+            if existing is not None:
+                # Re-registration after cancellation: reset the existing row to REGISTERED
+                participant = await self.participant_repo.update_status(
+                    participant_id=existing.id,
+                    new_status=EventParticipantStatus.REGISTERED,
+                )
+                if participant is None:
+                    raise EventParticipantNotFoundError(str(existing.id))
+            else:
+                participant = await self.participant_repo.create(
+                    user_id=data.user_id,
+                    session_id=data.session_id,
+                )
             await self._assign_rbac_participant_role(data.user_id)
         except Exception:
             await self.db.rollback()
@@ -451,6 +464,64 @@ class EventParticipantUseCase:
         await self.db.commit()
         await self._send_check_in_receipt(updated, event.title, session.title)
         return CheckInParticipantOutput(participant=updated, old_participant=old_participant)
+
+    async def get_session_registration_status(self, data: GetSessionRegistrationStatusInput) -> GetSessionRegistrationStatusOutput:
+        """Check whether the authenticated user is registered for a specific session.
+
+        Args:
+            data: ``GetSessionRegistrationStatusInput`` with the user ID and session ID.
+
+        Returns:
+            ``GetSessionRegistrationStatusOutput`` with ``is_registered`` bool and current status string,
+            or ``None`` for status when the user is not registered.
+        """
+        participant = await self.participant_repo.get_by_user_and_session(data.user_id, data.session_id)
+        if participant is None:
+            return GetSessionRegistrationStatusOutput(is_registered=False, status=None)
+        status_val = participant.status.value if hasattr(participant.status, "value") else str(participant.status)
+        is_active = participant.status in (EventParticipantStatus.REGISTERED, EventParticipantStatus.ATTENDED)
+        return GetSessionRegistrationStatusOutput(is_registered=is_active, status=status_val)
+
+    async def get_my_qr_token(self, data: GetMyQrTokenInput) -> GetMyQrTokenOutput:
+        """Generate a fresh QR admission token for the authenticated user's session registration.
+
+        Args:
+            data: ``GetMyQrTokenInput`` with the user ID, event ID, and session ID.
+
+        Returns:
+            ``GetMyQrTokenOutput`` with the signed QR JWT.
+
+        Raises:
+            EventParticipantNotFoundError: User has no active registration for this session.
+            EventSessionNotFoundError: Session does not exist or belongs to a different event.
+        """
+        participant = await self.participant_repo.get_by_user_and_session(data.user_id, data.session_id)
+        if participant is None or participant.status not in (EventParticipantStatus.REGISTERED, EventParticipantStatus.ATTENDED):
+            raise EventParticipantNotFoundError()
+
+        session = await self.event_repo.get_session_by_id(data.session_id)
+        if session is None or session.event_id != data.event_id:
+            raise EventSessionNotFoundError(str(data.session_id))
+
+        event = await self.event_repo.get_event_by_id(data.event_id)
+        if event is None:
+            raise EventNotFoundError(str(data.event_id))
+
+        qr_token_factory = self.qr_token_factory
+        if qr_token_factory is None:
+            from app.core.security.token_service import create_event_qr_token
+            qr_token_factory = create_event_qr_token
+
+        qr_token = qr_token_factory(
+            user_id=participant.user_id,
+            participant_id=participant.id,
+            event_id=event.id,
+            event_name=event.title,
+            event_session_id=session.id,
+            event_session_name=session.title,
+            expires_at=session.end_datetime,
+        )
+        return GetMyQrTokenOutput(qr_token=qr_token)
 
     async def get_participants(self, data: GetEventParticipantsInput) -> GetEventParticipantsOutput:
         """Retrieve all participants for an event through the event-participants feature.

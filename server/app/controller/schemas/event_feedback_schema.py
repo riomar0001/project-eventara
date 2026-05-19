@@ -34,6 +34,17 @@ class EventFeedbackResponse(BaseModel):
     data: EventFeedbackRecordResponse
 
 
+class MyEventFeedbackStatusData(BaseModel):
+    is_checked_in: bool
+    has_submitted_feedback: bool
+
+
+class MyEventFeedbackStatusResponse(BaseModel):
+    success: bool = True
+    message: str = "Feedback status retrieved successfully."
+    data: MyEventFeedbackStatusData
+
+
 class EventFeedbackPaginationMeta(BaseModel):
     total: int
     limit: int

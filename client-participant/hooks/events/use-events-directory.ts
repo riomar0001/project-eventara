@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import type { HomeEventRecord } from './use-home-events';
+import { humanizeApiError } from '@/lib/api-error';
 
 export interface EventsDirectoryPage {
   events: HomeEventRecord[];
@@ -62,12 +63,12 @@ export function useEventsDirectory({ q, page, pageSize }: UseEventsDirectoryPara
             error: null,
           });
         } else {
-          setState((prev) => ({ ...prev, loading: false, error: json.message ?? 'Failed to load events' }));
+          setState((prev) => ({ ...prev, loading: false, error: humanizeApiError(json.message, 'Unable to load events. Please try refreshing the page.') }));
         }
       })
       .catch((err) => {
         if (err.name !== 'AbortError') {
-          setState((prev) => ({ ...prev, loading: false, error: 'Failed to load events' }));
+          setState((prev) => ({ ...prev, loading: false, error: 'Unable to load events. Please try refreshing the page.' }));
         }
       });
 

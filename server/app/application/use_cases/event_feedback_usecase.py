@@ -11,7 +11,7 @@ requests.
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.application.dto.event_feedback_dto import CreateEventFeedbackInput, EventFeedbackListOutput, EventFeedbackOutput
+from app.application.dto.event_feedback_dto import CreateEventFeedbackInput, EventFeedbackListOutput, EventFeedbackOutput, MyEventFeedbackStatusOutput
 from app.domain.entities.event_entity import EventStatus
 from app.domain.exceptions.event_exceptions import EventNotFoundError, UnauthorizedEventOperationError
 from app.domain.exceptions.event_feedback_exceptions import (
@@ -95,6 +95,27 @@ class EventFeedbackUseCase:
 
         await self.db.commit()
         return EventFeedbackOutput(feedback=feedback)
+
+    async def get_my_status(self, *, user_id, event_id) -> MyEventFeedbackStatusOutput:
+        """Return the current user's check-in and feedback status for an event.
+
+        Raises:
+            EventNotFoundError: No event exists for the given ID.
+        """
+        event = await self.event_repo.get_event_by_id(event_id)
+        if event is None:
+            raise EventNotFoundError(str(event_id))
+
+        participant = await self.participant_repo.get_by_user_and_event(user_id, event_id)
+        is_checked_in = participant is not None and participant.is_checked_in
+
+        existing = await self.feedback_repo.get_by_user_and_event(user_id, event_id)
+        has_submitted_feedback = existing is not None
+
+        return MyEventFeedbackStatusOutput(
+            is_checked_in=is_checked_in,
+            has_submitted_feedback=has_submitted_feedback,
+        )
 
     async def list_feedback_for_event(self, *, event_id, requested_by, limit: int, offset: int) -> EventFeedbackListOutput:
         """Return feedback for an event to its creator."""

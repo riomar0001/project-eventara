@@ -18,7 +18,7 @@ export default function VerifyEmailPage({ params }: { params: { token: string } 
     Auth.verifyEmailAuthVerifyTokenGet({ path: { token: params.token } }).then(({ error: apiError }) => {
       if (apiError) {
         const msg = (apiError as { message?: string } | null)?.message;
-        setMessage(msg ?? 'This verification link is invalid or has expired.');
+        setMessage(msg ?? 'This verification link has expired or has already been used.');
         setStatus('error');
       } else {
         setStatus('success');

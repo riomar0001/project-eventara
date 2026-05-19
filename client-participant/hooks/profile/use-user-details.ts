@@ -14,7 +14,7 @@ export function useUserDetails() {
   useEffect(() => {
     AccountSettings.getUserDetailsUserProfileGet().then(({ data, error: apiError }) => {
       if (apiError || !data) {
-        setError('Failed to load profile details.');
+        setError('Unable to load your profile. Please try refreshing.');
       } else {
         setUserDetails(data.data);
       }

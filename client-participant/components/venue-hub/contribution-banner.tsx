@@ -11,12 +11,12 @@ interface ContributionBannerProps {
 export function ContributionBanner({ onAddVenue }: ContributionBannerProps) {
   return (
     <div className="rounded-[22px] bg-linear-[135deg,var(--lime)_0%,oklch(0.9_0.22_128_/_0.25)_50%,var(--lime-dim)_100%] p-px">
-      <div className="relative overflow-hidden rounded-[21px] bg-linear-[180deg] from-[oklch(1_0_0)] to-[oklch(0.97_0.005_150)] px-[44px] py-10">
+      <div className="relative overflow-hidden rounded-[21px] bg-linear-[180deg] from-[oklch(1_0_0)] to-[oklch(0.97_0.005_150)] px-6 py-8 md:px-[44px] md:py-10">
         {/* Glow effects */}
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,oklch(0.9_0.22_128_/_0.14),transparent_45%),radial-gradient(circle_at_85%_70%,oklch(0.82_0.17_75_/_0.12),transparent_45%)]" />
 
         {/* Content */}
-        <div className="relative z-10 grid grid-cols-[1fr_auto] items-center gap-7">
+        <div className="relative z-10 grid grid-cols-1 items-center gap-5 md:grid-cols-[1fr_auto] md:gap-7">
           <div>
             <div className="text-text-mute mb-1.5 inline-flex items-center gap-2.5 font-mono text-[11px] tracking-[0.18em] uppercase">
               <span className="bg-amber inline-block h-1.5 w-1.5 rounded-full shadow-[0_0_12px_var(--amber-glow)]" />

@@ -13,22 +13,49 @@ export enum VenueType {
   Garden = 'Garden'
 }
 
-export interface VenueContributor {
-  username: string;
-  date: string;
+export type ApiVenueType = 'indoor' | 'outdoor' | 'hybrid';
+
+export interface ApiVenue {
+  id: string;
+  image_url: string | null;
+  name: string;
+  description: string | null;
+  address_line: string;
+  city: string;
+  province: string;
+  capacity: number;
+  venue_type: ApiVenueType;
+  popularity_count: number;
+  usage_count: number;
+  is_partner: boolean;
+  amenities: string[] | null;
+  created_at: string | null;
+  updated_at: string | null;
+  orb: 'lime' | 'amber';
+  angle: string;
 }
 
+export interface VenuePagination {
+  page: number;
+  page_size: number;
+  total_count: number;
+  total_pages: number;
+  has_next: boolean;
+  has_previous: boolean;
+}
+
+// Legacy type kept for AddVenueModal/ReportModal forms
 export interface Venue {
   id: number;
   name: string;
   location: string;
   capacity: number;
-  type: VenueType;
+  type: string;
   rating: number;
   reviews: number;
-  contributor: VenueContributor;
+  contributor: { username: string; date: string };
   tags: string[];
-  amenities: Amenity[];
+  amenities: string[];
   orb: 'lime' | 'amber';
   angle: string;
 }

@@ -37,6 +37,8 @@ from app.controller.schemas.event_feedback_schema import (
     EventFeedbackPaginationMeta,
     EventFeedbackRecordResponse,
     EventFeedbackResponse,
+    MyEventFeedbackStatusResponse,
+    MyEventFeedbackStatusData,
 )
 from app.domain.entities.audit_log import ActionType, AuditLogStatus
 from app.domain.entities.authorization_entities import RoleAction
@@ -85,6 +87,34 @@ async def _audit_feedback_failure(
         status=AuditLogStatus.FAILURE,
         additional_context={"event_id": str(event_id), "error": message},
     )
+
+
+@event_feedback_router.get(
+    "/{event_id}/feedback/my-status",
+    response_model=MyEventFeedbackStatusResponse,
+    status_code=status.HTTP_200_OK,
+    responses={**EVENT_FEEDBACK_UNAUTHORIZED, **EVENT_FEEDBACK_EVENT_NOT_FOUND},
+    summary="Get my feedback status for an event",
+    description=(
+        "Returns whether the authenticated user is checked in and whether they have already "
+        "submitted feedback for the specified event."
+    ),
+)
+async def get_my_feedback_status(
+    event_id: uuid.UUID,
+    user_id: uuid.UUID = Depends(require_permission("event-feedback", RoleAction.READ)),
+    use_case: EventFeedbackUseCase = Depends(get_event_feedback_use_case),
+) -> MyEventFeedbackStatusResponse:
+    """Return the caller's check-in and feedback status for an event."""
+    try:
+        result = await use_case.get_my_status(user_id=user_id, event_id=event_id)
+    except EventNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+
+    return MyEventFeedbackStatusResponse(data=MyEventFeedbackStatusData(
+        is_checked_in=result.is_checked_in,
+        has_submitted_feedback=result.has_submitted_feedback,
+    ))
 
 
 @event_feedback_router.get(

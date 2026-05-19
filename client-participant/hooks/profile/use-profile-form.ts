@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { AccountSettings } from '@/api/sdk.gen';
+import { humanizeApiError } from '@/lib/api-error';
 import type { AgeGroup, Gender, EducationLevel } from '@/api/types.gen';
 import { decodeTokenUser } from '@/lib/auth/token';
 import { useAuthStore } from '@/store/auth-store';
@@ -74,8 +75,7 @@ export function useProfileForm() {
     setSaving(false);
 
     if (apiError || !data) {
-      const msg = (apiError as { message?: string } | null)?.message;
-      setError(msg ?? 'Failed to save profile. Please try again.');
+      setError(humanizeApiError((apiError as { message?: string } | null)?.message, "Couldn't save your profile. Please try again."));
       return;
     }
 

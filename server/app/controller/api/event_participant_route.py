@@ -21,6 +21,8 @@ from app.application.dto.event_participant_dto import (
     CheckInParticipantInput,
     CheckInParticipantQrCodeInput,
     GetEventParticipantsInput,
+    GetMyQrTokenInput,
+    GetSessionRegistrationStatusInput,
     RegisterForSessionInput,
     UpdateParticipantStatusInput,
     WithdrawRegistrationInput,
@@ -51,6 +53,10 @@ from app.controller.schemas.event_participant_schema import (
     EventParticipantRecord,
     EventParticipantRecordResponse,
     EventParticipantsResponse,
+    MyQrTokenData,
+    MyQrTokenResponse,
+    MySessionRegistrationData,
+    MySessionRegistrationResponse,
     PaginationMeta,
     RegisterForSessionResponse,
     UpdateParticipantStatusRequest,
@@ -74,6 +80,7 @@ from app.domain.exceptions.event_participant_exceptions import (
     UnauthorizedEventParticipantOperationError,
 )
 from app.domain.exceptions.event_session_exceptions import EventSessionNotFoundError
+from app.infrastructure.storage.storage_service import StorageService
 
 participant_router = APIRouter(prefix="/events", tags=["Event Participants"])
 
@@ -104,7 +111,7 @@ def _to_participant_record(participant: EventParticipantEntity) -> EventParticip
         user_first_name=participant.user_first_name,
         user_last_name=participant.user_last_name,
         user_alias=participant.user_alias,
-        user_profile_picture_url=participant.user_profile_picture_url,
+        user_profile_picture_url=StorageService.public_url_for_object_key(participant.user_profile_picture_url),
         event_session_title=participant.event_session_title,
         created_at=participant.created_at,
         updated_at=participant.updated_at,
@@ -215,6 +222,62 @@ async def get_event_participants(
     )
 
 
+@participant_router.get(
+    "/{event_id}/session/{session_id}/register",
+    response_model=MySessionRegistrationResponse,
+    status_code=status.HTTP_200_OK,
+    responses={**PARTICIPANT_UNAUTHORIZED},
+    summary="Get my registration status for a session",
+    description=(
+        "Returns whether the authenticated user is currently registered or attended for "
+        "the specified event session, along with the participant status string."
+    ),
+)
+async def get_my_session_registration_status(
+    event_id: uuid.UUID,
+    session_id: uuid.UUID,
+    user_id: uuid.UUID = Depends(require_permission("event-participants", RoleAction.READ)),
+    use_case: EventParticipantUseCase = Depends(get_event_participant_use_case),
+) -> MySessionRegistrationResponse:
+    """Return registration status for the calling user on a given session."""
+    result = await use_case.get_session_registration_status(
+        GetSessionRegistrationStatusInput(user_id=user_id, session_id=session_id)
+    )
+    return MySessionRegistrationResponse(data=MySessionRegistrationData(is_registered=result.is_registered, status=result.status))
+
+
+@participant_router.get(
+    "/{event_id}/session/{session_id}/my-qr",
+    response_model=MyQrTokenResponse,
+    status_code=status.HTTP_200_OK,
+    responses={
+        **PARTICIPANT_UNAUTHORIZED,
+        **PARTICIPANT_NOT_FOUND,
+        **PARTICIPANT_SESSION_NOT_FOUND,
+    },
+    summary="Get my QR admission token for a session",
+    description=(
+        "Returns a signed QR JWT for the authenticated user's active registration on the given session. "
+        "The token is valid until the session end time. "
+        "Only available when the user has REGISTERED or ATTENDED status for the session."
+    ),
+)
+async def get_my_qr_token(
+    event_id: uuid.UUID,
+    session_id: uuid.UUID,
+    user_id: uuid.UUID = Depends(require_permission("event-participants", RoleAction.READ)),
+    use_case: EventParticipantUseCase = Depends(get_event_participant_use_case),
+) -> MyQrTokenResponse:
+    """Generate and return a QR admission token for the calling user's session registration."""
+    try:
+        result = await use_case.get_my_qr_token(GetMyQrTokenInput(user_id=user_id, event_id=event_id, session_id=session_id))
+    except EventParticipantNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except EventSessionNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    return MyQrTokenResponse(data=MyQrTokenData(qr_token=result.qr_token))
+
+
 @participant_router.post(
     "/{event_id}/session/{session_id}/register",
     response_model=RegisterForSessionResponse,
@@ -239,7 +302,7 @@ async def register_for_session(
     request: Request,
     event_id: uuid.UUID,
     session_id: uuid.UUID,
-    user_id: uuid.UUID = Depends(require_permission("event-participants", RoleAction.CREATE)),
+    user_id: uuid.UUID = Depends(require_permission("event-participants", RoleAction.READ)),
     use_case: EventParticipantUseCase = Depends(get_event_participant_use_case),
     audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> RegisterForSessionResponse:
@@ -291,7 +354,7 @@ async def withdraw_registration(
     request: Request,
     event_id: uuid.UUID,
     session_id: uuid.UUID,
-    user_id: uuid.UUID = Depends(require_permission("event-participants", RoleAction.DELETE)),
+    user_id: uuid.UUID = Depends(require_permission("event-participants", RoleAction.READ)),
     use_case: EventParticipantUseCase = Depends(get_event_participant_use_case),
     audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> WithdrawRegistrationResponse:

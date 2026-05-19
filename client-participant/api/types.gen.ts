@@ -5,6 +5,24 @@ export type ClientOptions = {
 };
 
 /**
+ * AccountAgeDistributionResponse
+ */
+export type AccountAgeDistributionResponse = {
+    /**
+     * Bucket
+     */
+    bucket: string;
+    /**
+     * Count
+     */
+    count: number;
+    /**
+     * Percentage
+     */
+    percentage?: number | null;
+};
+
+/**
  * ActionType
  */
 export type ActionType = 'create' | 'read' | 'update' | 'delete' | 'login' | 'logout' | 'verify' | 'export' | 'import';
@@ -399,6 +417,36 @@ export type AssignableRoleResponse = {
 };
 
 /**
+ * AttendanceRateResponse
+ */
+export type AttendanceRateResponse = {
+    /**
+     * Session Id
+     */
+    session_id: string;
+    /**
+     * Session Title
+     */
+    session_title: string;
+    /**
+     * Event Id
+     */
+    event_id: string;
+    /**
+     * Registered Count
+     */
+    registered_count: number;
+    /**
+     * Attended Count
+     */
+    attended_count: number;
+    /**
+     * Attendance Rate Pct
+     */
+    attendance_rate_pct?: number | null;
+};
+
+/**
  * AttendedEventResponse
  */
 export type AttendedEventResponse = {
@@ -446,6 +494,10 @@ export type AttendedEventResponse = {
      * Attended At
      */
     attended_at?: string | null;
+    /**
+     * Status
+     */
+    status?: string;
 };
 
 /**
@@ -506,6 +558,62 @@ export type AuditLogResponse = {
  * AuditLogStatus
  */
 export type AuditLogStatus = 'success' | 'failure';
+
+/**
+ * BrowserBreakdownResponse
+ */
+export type BrowserBreakdownResponse = {
+    /**
+     * Browser
+     */
+    browser: string;
+    /**
+     * Count
+     */
+    count: number;
+    /**
+     * Percentage
+     */
+    percentage?: number | null;
+};
+
+/**
+ * CancelledEventReportResponse
+ */
+export type CancelledEventReportResponse = {
+    /**
+     * Event Id
+     */
+    event_id: string;
+    /**
+     * Event Title
+     */
+    event_title: string;
+    /**
+     * Cancelled At
+     */
+    cancelled_at?: string | null;
+    /**
+     * Created By
+     */
+    created_by: string;
+    /**
+     * Creator First Name
+     */
+    creator_first_name?: string | null;
+    /**
+     * Creator Last Name
+     */
+    creator_last_name?: string | null;
+    /**
+     * Creator Alias
+     */
+    creator_alias?: string | null;
+    /**
+     * Session Count
+     */
+    session_count: number;
+};
 
 /**
  * ChangePasswordRequest
@@ -648,6 +756,24 @@ export type CheckInParticipantResponse = {
      */
     message?: string;
     data: EventParticipantRecordResponse;
+};
+
+/**
+ * CityParticipationResponse
+ */
+export type CityParticipationResponse = {
+    /**
+     * City
+     */
+    city: string;
+    /**
+     * Country
+     */
+    country?: string | null;
+    /**
+     * Participant Count
+     */
+    participant_count: number;
 };
 
 /**
@@ -966,9 +1092,130 @@ export type DeleteJobResponse = {
 };
 
 /**
+ * DemographicAnalyticsData
+ */
+export type DemographicAnalyticsData = {
+    /**
+     * Device Breakdown
+     */
+    device_breakdown: Array<DeviceBreakdownResponse>;
+    /**
+     * Os Breakdown
+     */
+    os_breakdown: Array<OsBreakdownResponse>;
+    /**
+     * Browser Breakdown
+     */
+    browser_breakdown: Array<BrowserBreakdownResponse>;
+    /**
+     * Top Cities
+     */
+    top_cities: Array<CityParticipationResponse>;
+    /**
+     * Account Age Distribution
+     */
+    account_age_distribution: Array<AccountAgeDistributionResponse>;
+    /**
+     * Volunteer Role Breakdown
+     */
+    volunteer_role_breakdown: Array<VolunteerRoleBreakdownResponse>;
+    /**
+     * Event Interest Categories
+     */
+    event_interest_categories: Array<EventInterestCategoryResponse>;
+    /**
+     * First Time Vs Returning
+     */
+    first_time_vs_returning: Array<FirstTimeVsReturningResponse>;
+    /**
+     * Gender Distribution
+     */
+    gender_distribution: Array<GenderDistributionResponse>;
+    /**
+     * Geographic Spread
+     */
+    geographic_spread: Array<GeographicSpreadResponse>;
+};
+
+/**
+ * DemographicAnalyticsResponse
+ */
+export type DemographicAnalyticsResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Message
+     */
+    message?: string;
+    data: DemographicAnalyticsData;
+};
+
+/**
+ * DeviceBreakdownResponse
+ */
+export type DeviceBreakdownResponse = {
+    /**
+     * Device Type
+     */
+    device_type: string;
+    /**
+     * Count
+     */
+    count: number;
+    /**
+     * Percentage
+     */
+    percentage?: number | null;
+};
+
+/**
  * EducationLevel
  */
 export type EducationLevel = 'no_formal_education' | 'elementary_level' | 'elementary_graduate' | 'junior_high_school_level' | 'junior_high_school_graduate' | 'senior_high_school_level' | 'senior_high_school_graduate' | 'vocational_trade_certificate' | 'college_level_undergraduate' | 'associate_degree' | 'bachelors_degree' | 'masters_degree' | 'doctorate_degree';
+
+/**
+ * EndedEventSummaryResponse
+ */
+export type EndedEventSummaryResponse = {
+    /**
+     * Event Id
+     */
+    event_id: string;
+    /**
+     * Event Title
+     */
+    event_title: string;
+    /**
+     * Start Date
+     */
+    start_date: string;
+    /**
+     * End Date
+     */
+    end_date: string;
+    /**
+     * Total Registered
+     */
+    total_registered: number;
+    /**
+     * Total Attended
+     */
+    total_attended: number;
+    /**
+     * Total No Show
+     */
+    total_no_show: number;
+    /**
+     * Total Cancelled
+     */
+    total_cancelled: number;
+    /**
+     * Average Feedback
+     */
+    average_feedback?: number | null;
+};
 
 /**
  * ErrorResponse
@@ -982,6 +1229,32 @@ export type ErrorResponse = {
      * Message
      */
     message: string;
+};
+
+/**
+ * EventAttendanceRateResponse
+ */
+export type EventAttendanceRateResponse = {
+    /**
+     * Event Id
+     */
+    event_id: string;
+    /**
+     * Event Title
+     */
+    event_title: string;
+    /**
+     * Registered Count
+     */
+    registered_count: number;
+    /**
+     * Attended Count
+     */
+    attended_count: number;
+    /**
+     * Attendance Rate Pct
+     */
+    attendance_rate_pct?: number | null;
 };
 
 /**
@@ -1191,6 +1464,24 @@ export type EventFeedbackResponse = {
 };
 
 /**
+ * EventInterestCategoryResponse
+ */
+export type EventInterestCategoryResponse = {
+    /**
+     * Category
+     */
+    category?: string | null;
+    /**
+     * Event Count
+     */
+    event_count: number;
+    /**
+     * Registration Count
+     */
+    registration_count: number;
+};
+
+/**
  * EventListResponse
  */
 export type EventListResponse = {
@@ -1222,6 +1513,59 @@ export type EventListResponse = {
      * Total Pages
      */
     total_pages: number;
+};
+
+/**
+ * EventLogisticsOverviewData
+ */
+export type EventLogisticsOverviewData = {
+    /**
+     * Event Id
+     */
+    event_id: string;
+    /**
+     * Event Title
+     */
+    event_title: string;
+    /**
+     * Total Sessions
+     */
+    total_sessions: number;
+    /**
+     * Scheduled Dates
+     */
+    scheduled_dates: Array<string>;
+    /**
+     * Venue Assignments
+     */
+    venue_assignments: Array<SessionVenueAssignmentResponse>;
+    /**
+     * Session Utilisation
+     */
+    session_utilisation: Array<SessionUtilisationResponse>;
+    /**
+     * Over Capacity Sessions
+     */
+    over_capacity_sessions: Array<SessionUtilisationResponse>;
+    /**
+     * Venue Capacity Vs Registrations
+     */
+    venue_capacity_vs_registrations: Array<VenueCapacityVsRegistrationResponse>;
+};
+
+/**
+ * EventLogisticsOverviewResponse
+ */
+export type EventLogisticsOverviewResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Message
+     */
+    message?: string;
+    data: EventLogisticsOverviewData;
 };
 
 /**
@@ -1365,6 +1709,67 @@ export type EventParticipantsResponse = {
      */
     data: Array<EventParticipantRecord>;
     meta: AppControllerSchemasEventParticipantSchemaPaginationMeta;
+};
+
+/**
+ * EventPerformanceData
+ */
+export type EventPerformanceData = {
+    /**
+     * Attendance Rates
+     */
+    attendance_rates: Array<AttendanceRateResponse>;
+    /**
+     * Event Attendance Rates
+     */
+    event_attendance_rates: Array<EventAttendanceRateResponse>;
+    /**
+     * Feedback Summaries
+     */
+    feedback_summaries: Array<FeedbackScoreSummaryResponse>;
+    /**
+     * Feedback Trend
+     */
+    feedback_trend: Array<FeedbackTrendPointResponse>;
+    /**
+     * Top Rated Events
+     */
+    top_rated_events: Array<TopRatedEventResponse>;
+    /**
+     * Volunteer Performance
+     */
+    volunteer_performance: Array<VolunteerPerformanceResponse>;
+    /**
+     * Organizer Output
+     */
+    organizer_output: Array<OrganizerOutputResponse>;
+    /**
+     * Session Status Distribution
+     */
+    session_status_distribution: Array<SessionStatusDistributionResponse>;
+    /**
+     * Repeat Attendee Rate Pct
+     */
+    repeat_attendee_rate_pct?: number | null;
+    /**
+     * Average Registration To Checkin Lead Time Hours
+     */
+    average_registration_to_checkin_lead_time_hours?: number | null;
+};
+
+/**
+ * EventPerformanceResponse
+ */
+export type EventPerformanceResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Message
+     */
+    message?: string;
+    data: EventPerformanceData;
 };
 
 /**
@@ -1607,6 +2012,24 @@ export type EventSessionUpdatedResponse = {
  * EventStatus
  */
 export type EventStatus = 'draft' | 'posted' | 'started' | 'cancelled' | 'ended' | 'postponed';
+
+/**
+ * EventStatusTransitionResponse
+ */
+export type EventStatusTransitionResponse = {
+    /**
+     * Period
+     */
+    period: string;
+    /**
+     * Status
+     */
+    status: string;
+    /**
+     * Count
+     */
+    count: number;
+};
 
 /**
  * EventStatusUpdateRequest
@@ -1915,6 +2338,102 @@ export type FeatureUpdateRequest = {
 };
 
 /**
+ * FeedbackCompletenessResponse
+ */
+export type FeedbackCompletenessResponse = {
+    /**
+     * Event Id
+     */
+    event_id: string;
+    /**
+     * Event Title
+     */
+    event_title: string;
+    /**
+     * Attended Count
+     */
+    attended_count: number;
+    /**
+     * Feedback Count
+     */
+    feedback_count: number;
+    /**
+     * Completeness Rate Pct
+     */
+    completeness_rate_pct?: number | null;
+};
+
+/**
+ * FeedbackScoreSummaryResponse
+ */
+export type FeedbackScoreSummaryResponse = {
+    /**
+     * Event Id
+     */
+    event_id: string;
+    /**
+     * Event Title
+     */
+    event_title: string;
+    /**
+     * Average Rating
+     */
+    average_rating?: number | null;
+    /**
+     * Total Feedback Count
+     */
+    total_feedback_count: number;
+};
+
+/**
+ * FeedbackTrendPointResponse
+ */
+export type FeedbackTrendPointResponse = {
+    /**
+     * Event Id
+     */
+    event_id: string;
+    /**
+     * Event Title
+     */
+    event_title: string;
+    /**
+     * End Date
+     */
+    end_date: string;
+    /**
+     * Average Rating
+     */
+    average_rating?: number | null;
+    /**
+     * Feedback Count
+     */
+    feedback_count: number;
+};
+
+/**
+ * FirstTimeVsReturningResponse
+ */
+export type FirstTimeVsReturningResponse = {
+    /**
+     * Event Id
+     */
+    event_id: string;
+    /**
+     * Event Title
+     */
+    event_title: string;
+    /**
+     * First Time Count
+     */
+    first_time_count: number;
+    /**
+     * Returning Count
+     */
+    returning_count: number;
+};
+
+/**
  * ForgotPasswordRequest
  */
 export type ForgotPasswordRequest = {
@@ -1942,6 +2461,46 @@ export type ForgotPasswordResponse = {
  * Gender
  */
 export type Gender = 'male' | 'female';
+
+/**
+ * GenderDistributionResponse
+ */
+export type GenderDistributionResponse = {
+    /**
+     * Gender
+     */
+    gender: string;
+    /**
+     * Count
+     */
+    count: number;
+    /**
+     * Percentage
+     */
+    percentage?: number | null;
+};
+
+/**
+ * GeographicSpreadResponse
+ */
+export type GeographicSpreadResponse = {
+    /**
+     * City
+     */
+    city: string;
+    /**
+     * Latitude
+     */
+    latitude?: number | null;
+    /**
+     * Longitude
+     */
+    longitude?: number | null;
+    /**
+     * Participant Count
+     */
+    participant_count: number;
+};
 
 /**
  * GetAuditLogsResponse
@@ -2014,6 +2573,190 @@ export type HttpValidationError = {
 };
 
 /**
+ * HistoricalEventDataData
+ */
+export type HistoricalEventDataData = {
+    /**
+     * Ended Events
+     */
+    ended_events: Array<EndedEventSummaryResponse>;
+    /**
+     * Cancelled Events
+     */
+    cancelled_events: Array<CancelledEventReportResponse>;
+    /**
+     * Feedback Completeness
+     */
+    feedback_completeness: Array<FeedbackCompletenessResponse>;
+    /**
+     * Period Comparisons
+     */
+    period_comparisons?: Array<PeriodComparisonResponse> | null;
+    /**
+     * Total Count
+     */
+    total_count: number;
+};
+
+/**
+ * HistoricalEventDataResponse
+ */
+export type HistoricalEventDataResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Message
+     */
+    message?: string;
+    data: HistoricalEventDataData;
+};
+
+/**
+ * HistoricalPerformanceData
+ */
+export type HistoricalPerformanceData = {
+    /**
+     * Year Over Year Attendance
+     */
+    year_over_year_attendance: Array<YearOverYearAttendanceResponse>;
+    /**
+     * Events By Status Over Time
+     */
+    events_by_status_over_time: Array<EventStatusTransitionResponse>;
+};
+
+/**
+ * HistoricalPerformanceResponse
+ */
+export type HistoricalPerformanceResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Message
+     */
+    message?: string;
+    data: HistoricalPerformanceData;
+};
+
+/**
+ * HomeEventWithSessions
+ */
+export type HomeEventWithSessions = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Title
+     */
+    title: string;
+    /**
+     * Description
+     */
+    description: string;
+    /**
+     * Start Date
+     */
+    start_date: string;
+    /**
+     * End Date
+     */
+    end_date: string;
+    /**
+     * Status
+     */
+    status: string;
+    /**
+     * Banner Url
+     */
+    banner_url?: string | null;
+    /**
+     * Sessions
+     */
+    sessions: Array<EventSessionRecordResponse>;
+};
+
+/**
+ * HomeEventsData
+ */
+export type HomeEventsData = {
+    live_event: LiveEventData | null;
+    /**
+     * Events
+     */
+    events: Array<HomeEventWithSessions>;
+    /**
+     * Events Type
+     */
+    events_type: string;
+};
+
+/**
+ * HomeEventsResponse
+ */
+export type HomeEventsResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Message
+     */
+    message?: string;
+    data: HomeEventsData;
+};
+
+/**
+ * LateRegistrationResponse
+ */
+export type LateRegistrationResponse = {
+    /**
+     * Participant Id
+     */
+    participant_id: string;
+    /**
+     * User Id
+     */
+    user_id: string;
+    /**
+     * First Name
+     */
+    first_name?: string | null;
+    /**
+     * Last Name
+     */
+    last_name?: string | null;
+    /**
+     * Alias
+     */
+    alias?: string | null;
+    /**
+     * Session Id
+     */
+    session_id: string;
+    /**
+     * Session Title
+     */
+    session_title: string;
+    /**
+     * Event Id
+     */
+    event_id: string;
+    /**
+     * Registered At
+     */
+    registered_at: string;
+    /**
+     * Session Started At
+     */
+    session_started_at: string;
+};
+
+/**
  * ListDeadJobsResponse
  */
 export type ListDeadJobsResponse = {
@@ -2041,6 +2784,101 @@ export type ListDeadJobsResponse = {
      * Total Pages
      */
     total_pages: number;
+};
+
+/**
+ * LiveAttendanceResponse
+ */
+export type LiveAttendanceResponse = {
+    /**
+     * Session Id
+     */
+    session_id: string;
+    /**
+     * Session Title
+     */
+    session_title: string;
+    /**
+     * Event Id
+     */
+    event_id: string;
+    /**
+     * Event Title
+     */
+    event_title: string;
+    /**
+     * Checked In Count
+     */
+    checked_in_count: number;
+    /**
+     * Max Slots
+     */
+    max_slots?: number | null;
+    /**
+     * Remaining Slots
+     */
+    remaining_slots?: number | null;
+};
+
+/**
+ * LiveCheckinEntryResponse
+ */
+export type LiveCheckinEntryResponse = {
+    /**
+     * Participant Id
+     */
+    participant_id: string;
+    /**
+     * User Id
+     */
+    user_id: string;
+    /**
+     * First Name
+     */
+    first_name?: string | null;
+    /**
+     * Last Name
+     */
+    last_name?: string | null;
+    /**
+     * Alias
+     */
+    alias?: string | null;
+    /**
+     * Session Id
+     */
+    session_id: string;
+    /**
+     * Session Title
+     */
+    session_title: string;
+    /**
+     * Event Id
+     */
+    event_id: string;
+    /**
+     * Event Title
+     */
+    event_title: string;
+    /**
+     * Checked In Time
+     */
+    checked_in_time?: string | null;
+    /**
+     * Checkin Method
+     */
+    checkin_method: string;
+};
+
+/**
+ * LiveEventData
+ */
+export type LiveEventData = {
+    event: EventRecordResponse;
+    /**
+     * Sessions
+     */
+    sessions: Array<EventSessionRecordResponse>;
 };
 
 /**
@@ -2210,6 +3048,82 @@ export type LogoutResponse = {
 };
 
 /**
+ * MyEventFeedbackStatusData
+ */
+export type MyEventFeedbackStatusData = {
+    /**
+     * Is Checked In
+     */
+    is_checked_in: boolean;
+    /**
+     * Has Submitted Feedback
+     */
+    has_submitted_feedback: boolean;
+};
+
+/**
+ * MyEventFeedbackStatusResponse
+ */
+export type MyEventFeedbackStatusResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Message
+     */
+    message?: string;
+    data: MyEventFeedbackStatusData;
+};
+
+/**
+ * MyEventsResponse
+ */
+export type MyEventsResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Message
+     */
+    message?: string;
+    /**
+     * Data
+     */
+    data: Array<AttendedEventResponse>;
+};
+
+/**
+ * MySessionRegistrationData
+ */
+export type MySessionRegistrationData = {
+    /**
+     * Is Registered
+     */
+    is_registered: boolean;
+    /**
+     * Status
+     */
+    status?: string | null;
+};
+
+/**
+ * MySessionRegistrationResponse
+ */
+export type MySessionRegistrationResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Message
+     */
+    message?: string;
+    data: MySessionRegistrationData;
+};
+
+/**
  * OfficialVenueCreateRequest
  *
  * Officially managed venue — contact information is required.
@@ -2275,6 +3189,132 @@ export type OfficialVenueCreateRequest = {
 };
 
 /**
+ * OngoingEventDataData
+ */
+export type OngoingEventDataData = {
+    /**
+     * Started Events
+     */
+    started_events: Array<StartedEventSummaryResponse>;
+    /**
+     * Live Checkin Feed
+     */
+    live_checkin_feed: Array<LiveCheckinEntryResponse>;
+    /**
+     * Volunteer On Duty
+     */
+    volunteer_on_duty: Array<VolunteerOnDutyResponse>;
+    /**
+     * Session Progress
+     */
+    session_progress: Array<SessionProgressResponse>;
+    /**
+     * Pending Withdrawals
+     */
+    pending_withdrawals: Array<PendingWithdrawalAlertResponse>;
+    /**
+     * Late Registrations
+     */
+    late_registrations: Array<LateRegistrationResponse>;
+};
+
+/**
+ * OngoingEventDataResponse
+ */
+export type OngoingEventDataResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Message
+     */
+    message?: string;
+    data: OngoingEventDataData;
+};
+
+/**
+ * OngoingPerformanceData
+ */
+export type OngoingPerformanceData = {
+    /**
+     * Live Attendance
+     */
+    live_attendance: Array<LiveAttendanceResponse>;
+    /**
+     * Real Time Slot Availability
+     */
+    real_time_slot_availability: Array<LiveAttendanceResponse>;
+};
+
+/**
+ * OngoingPerformanceResponse
+ */
+export type OngoingPerformanceResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Message
+     */
+    message?: string;
+    data: OngoingPerformanceData;
+};
+
+/**
+ * OrganizerOutputResponse
+ */
+export type OrganizerOutputResponse = {
+    /**
+     * Organizer Id
+     */
+    organizer_id: string;
+    /**
+     * First Name
+     */
+    first_name?: string | null;
+    /**
+     * Last Name
+     */
+    last_name?: string | null;
+    /**
+     * Alias
+     */
+    alias?: string | null;
+    /**
+     * Total Events Created
+     */
+    total_events_created: number;
+    /**
+     * Average Sessions Per Event
+     */
+    average_sessions_per_event?: number | null;
+    /**
+     * Average Attendance Rate Pct
+     */
+    average_attendance_rate_pct?: number | null;
+};
+
+/**
+ * OsBreakdownResponse
+ */
+export type OsBreakdownResponse = {
+    /**
+     * Os
+     */
+    os: string;
+    /**
+     * Count
+     */
+    count: number;
+    /**
+     * Percentage
+     */
+    percentage?: number | null;
+};
+
+/**
  * ParticipantLeaderboardResponse
  */
 export type ParticipantLeaderboardResponse = {
@@ -2298,6 +3338,66 @@ export type ParticipantLeaderboardResponse = {
      * Count
      */
     count: number;
+};
+
+/**
+ * PendingWithdrawalAlertResponse
+ */
+export type PendingWithdrawalAlertResponse = {
+    /**
+     * Session Id
+     */
+    session_id: string;
+    /**
+     * Session Title
+     */
+    session_title: string;
+    /**
+     * Event Id
+     */
+    event_id: string;
+    /**
+     * Withdrawal Count
+     */
+    withdrawal_count: number;
+};
+
+/**
+ * PeriodComparisonResponse
+ */
+export type PeriodComparisonResponse = {
+    /**
+     * Period Label
+     */
+    period_label: string;
+    /**
+     * From Date
+     */
+    from_date: string;
+    /**
+     * To Date
+     */
+    to_date: string;
+    /**
+     * Total Events
+     */
+    total_events: number;
+    /**
+     * Total Registered
+     */
+    total_registered: number;
+    /**
+     * Total Attended
+     */
+    total_attended: number;
+    /**
+     * Average Attendance Rate Pct
+     */
+    average_attendance_rate_pct?: number | null;
+    /**
+     * Average Feedback
+     */
+    average_feedback?: number | null;
 };
 
 /**
@@ -2368,6 +3468,66 @@ export type ProfileAvatarUploadResponse = {
      * Access Token
      */
     access_token: string;
+};
+
+/**
+ * PublicEventDetailResponse
+ */
+export type PublicEventDetailResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Message
+     */
+    message?: string;
+    data: HomeEventWithSessions;
+};
+
+/**
+ * PublicEventsListData
+ */
+export type PublicEventsListData = {
+    /**
+     * Events
+     */
+    events: Array<HomeEventWithSessions>;
+    /**
+     * Total
+     */
+    total: number;
+    /**
+     * Page
+     */
+    page: number;
+    /**
+     * Page Size
+     */
+    page_size: number;
+    /**
+     * Total Pages
+     */
+    total_pages: number;
+    /**
+     * Events Type
+     */
+    events_type: string;
+};
+
+/**
+ * PublicEventsListResponse
+ */
+export type PublicEventsListResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Message
+     */
+    message?: string;
+    data: PublicEventsListData;
 };
 
 /**
@@ -2616,6 +3776,73 @@ export type RegisterResponse = {
      * Only included in DEBUG mode
      */
     verification_token?: string | null;
+};
+
+/**
+ * RegistrationLogisticsData
+ */
+export type RegistrationLogisticsData = {
+    /**
+     * Sessions
+     */
+    sessions: Array<RegistrationLogisticsEntryResponse>;
+};
+
+/**
+ * RegistrationLogisticsEntryResponse
+ */
+export type RegistrationLogisticsEntryResponse = {
+    /**
+     * Session Id
+     */
+    session_id: string;
+    /**
+     * Session Title
+     */
+    session_title: string;
+    /**
+     * Total Registrations
+     */
+    total_registrations: number;
+    /**
+     * Cancelled Count
+     */
+    cancelled_count: number;
+    /**
+     * Cancellation Rate Pct
+     */
+    cancellation_rate_pct?: number | null;
+    /**
+     * No Show Count
+     */
+    no_show_count: number;
+    /**
+     * No Show Rate Pct
+     */
+    no_show_rate_pct?: number | null;
+    /**
+     * Qr Checkin Count
+     */
+    qr_checkin_count: number;
+    /**
+     * Manual Checkin Count
+     */
+    manual_checkin_count: number;
+};
+
+/**
+ * RegistrationLogisticsResponse
+ */
+export type RegistrationLogisticsResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Message
+     */
+    message?: string;
+    data: RegistrationLogisticsData;
 };
 
 /**
@@ -2919,6 +4146,215 @@ export type SendUserPasswordResetResponse = {
 };
 
 /**
+ * SessionProgressResponse
+ */
+export type SessionProgressResponse = {
+    /**
+     * Session Id
+     */
+    session_id: string;
+    /**
+     * Session Title
+     */
+    session_title: string;
+    /**
+     * Event Id
+     */
+    event_id: string;
+    /**
+     * Event Title
+     */
+    event_title: string;
+    /**
+     * Start Datetime
+     */
+    start_datetime: string;
+    /**
+     * End Datetime
+     */
+    end_datetime: string;
+    /**
+     * Elapsed Pct
+     */
+    elapsed_pct: number;
+};
+
+/**
+ * SessionStatusDistributionResponse
+ */
+export type SessionStatusDistributionResponse = {
+    /**
+     * Status
+     */
+    status: string;
+    /**
+     * Count
+     */
+    count: number;
+};
+
+/**
+ * SessionTimelineData
+ */
+export type SessionTimelineData = {
+    /**
+     * Ongoing
+     */
+    ongoing: Array<SessionTimelineEntryResponse>;
+    /**
+     * Upcoming
+     */
+    upcoming: Array<SessionTimelineEntryResponse>;
+    /**
+     * Completed
+     */
+    completed: Array<SessionTimelineEntryResponse>;
+};
+
+/**
+ * SessionTimelineEntryResponse
+ */
+export type SessionTimelineEntryResponse = {
+    /**
+     * Session Id
+     */
+    session_id: string;
+    /**
+     * Session Title
+     */
+    session_title: string;
+    /**
+     * Event Id
+     */
+    event_id: string;
+    /**
+     * Event Title
+     */
+    event_title: string;
+    /**
+     * Venue Id
+     */
+    venue_id: string;
+    /**
+     * Venue Name
+     */
+    venue_name: string;
+    /**
+     * Start Datetime
+     */
+    start_datetime: string;
+    /**
+     * End Datetime
+     */
+    end_datetime: string;
+    /**
+     * Status
+     */
+    status: string;
+};
+
+/**
+ * SessionTimelineResponse
+ */
+export type SessionTimelineResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Message
+     */
+    message?: string;
+    data: SessionTimelineData;
+};
+
+/**
+ * SessionUtilisationResponse
+ */
+export type SessionUtilisationResponse = {
+    /**
+     * Session Id
+     */
+    session_id: string;
+    /**
+     * Session Title
+     */
+    session_title: string;
+    /**
+     * Checked In
+     */
+    checked_in: number;
+    /**
+     * Max Slots
+     */
+    max_slots?: number | null;
+    /**
+     * Utilisation Pct
+     */
+    utilisation_pct?: number | null;
+    /**
+     * Over Capacity
+     */
+    over_capacity?: boolean;
+};
+
+/**
+ * SessionVenueAssignmentResponse
+ */
+export type SessionVenueAssignmentResponse = {
+    /**
+     * Session Id
+     */
+    session_id: string;
+    /**
+     * Session Title
+     */
+    session_title: string;
+    /**
+     * Venue Id
+     */
+    venue_id: string;
+    /**
+     * Venue Name
+     */
+    venue_name: string;
+    /**
+     * Venue City
+     */
+    venue_city?: string | null;
+    /**
+     * Venue Capacity
+     */
+    venue_capacity: number;
+};
+
+/**
+ * StartedEventSummaryResponse
+ */
+export type StartedEventSummaryResponse = {
+    /**
+     * Event Id
+     */
+    event_id: string;
+    /**
+     * Event Title
+     */
+    event_title: string;
+    /**
+     * Session Count
+     */
+    session_count: number;
+    /**
+     * Checked In Count
+     */
+    checked_in_count: number;
+    /**
+     * Remaining Slots
+     */
+    remaining_slots?: number | null;
+};
+
+/**
  * SubmitAppFeedbackRequest
  */
 export type SubmitAppFeedbackRequest = {
@@ -3024,6 +4460,28 @@ export type SuggestedVenueUpdateRequest = {
      * Contact Email
      */
     contact_email?: string | null;
+};
+
+/**
+ * TopRatedEventResponse
+ */
+export type TopRatedEventResponse = {
+    /**
+     * Event Id
+     */
+    event_id: string;
+    /**
+     * Event Title
+     */
+    event_title: string;
+    /**
+     * Average Rating
+     */
+    average_rating: number;
+    /**
+     * Feedback Count
+     */
+    feedback_count: number;
 };
 
 /**
@@ -3566,6 +5024,28 @@ export type VenueCapacityResponse = {
 };
 
 /**
+ * VenueCapacityVsRegistrationResponse
+ */
+export type VenueCapacityVsRegistrationResponse = {
+    /**
+     * Session Id
+     */
+    session_id: string;
+    /**
+     * Session Title
+     */
+    session_title: string;
+    /**
+     * Venue Capacity
+     */
+    venue_capacity: number;
+    /**
+     * Registered Count
+     */
+    registered_count: number;
+};
+
+/**
  * VenueImageUploadData
  */
 export type VenueImageUploadData = {
@@ -4088,6 +5568,183 @@ export type VolunteerLeaderboardResponse = {
 };
 
 /**
+ * VolunteerLogisticsData
+ */
+export type VolunteerLogisticsData = {
+    /**
+     * Event Id
+     */
+    event_id: string;
+    /**
+     * Event Title
+     */
+    event_title: string;
+    /**
+     * Joined Volunteer Count
+     */
+    joined_volunteer_count: number;
+    /**
+     * Joined Volunteer Roster
+     */
+    joined_volunteer_roster: Array<VolunteerRosterEntryResponse>;
+    /**
+     * Volunteer To Participant Ratio
+     */
+    volunteer_to_participant_ratio?: number | null;
+    /**
+     * Pending Volunteer Count
+     */
+    pending_volunteer_count: number;
+};
+
+/**
+ * VolunteerLogisticsResponse
+ */
+export type VolunteerLogisticsResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Message
+     */
+    message?: string;
+    data: VolunteerLogisticsData;
+};
+
+/**
+ * VolunteerOnDutyResponse
+ */
+export type VolunteerOnDutyResponse = {
+    /**
+     * Volunteer Id
+     */
+    volunteer_id: string;
+    /**
+     * User Id
+     */
+    user_id: string;
+    /**
+     * First Name
+     */
+    first_name?: string | null;
+    /**
+     * Last Name
+     */
+    last_name?: string | null;
+    /**
+     * Alias
+     */
+    alias?: string | null;
+    /**
+     * Contact Phone
+     */
+    contact_phone: string;
+    /**
+     * Role Name
+     */
+    role_name?: string | null;
+    /**
+     * Event Id
+     */
+    event_id: string;
+    /**
+     * Event Title
+     */
+    event_title: string;
+};
+
+/**
+ * VolunteerPerformanceResponse
+ */
+export type VolunteerPerformanceResponse = {
+    /**
+     * Volunteer Id
+     */
+    volunteer_id: string;
+    /**
+     * User Id
+     */
+    user_id: string;
+    /**
+     * First Name
+     */
+    first_name?: string | null;
+    /**
+     * Last Name
+     */
+    last_name?: string | null;
+    /**
+     * Alias
+     */
+    alias?: string | null;
+    /**
+     * Role Name
+     */
+    role_name?: string | null;
+    /**
+     * Joined Count
+     */
+    joined_count: number;
+    /**
+     * Left Count
+     */
+    left_count: number;
+};
+
+/**
+ * VolunteerRoleBreakdownResponse
+ */
+export type VolunteerRoleBreakdownResponse = {
+    /**
+     * Role Name
+     */
+    role_name: string;
+    /**
+     * Count
+     */
+    count: number;
+};
+
+/**
+ * VolunteerRosterEntryResponse
+ */
+export type VolunteerRosterEntryResponse = {
+    /**
+     * Volunteer Id
+     */
+    volunteer_id: string;
+    /**
+     * User Id
+     */
+    user_id: string;
+    /**
+     * First Name
+     */
+    first_name?: string | null;
+    /**
+     * Last Name
+     */
+    last_name?: string | null;
+    /**
+     * Alias
+     */
+    alias?: string | null;
+    /**
+     * Role Name
+     */
+    role_name?: string | null;
+    /**
+     * Contact Phone
+     */
+    contact_phone?: string | null;
+    /**
+     * Status
+     */
+    status: string;
+};
+
+/**
  * VolunteerStatus
  */
 export type VolunteerStatus = 'active' | 'inactive' | 'suspended';
@@ -4160,6 +5817,24 @@ export type WorkerHealthEntrySchema = {
 };
 
 /**
+ * YearOverYearAttendanceResponse
+ */
+export type YearOverYearAttendanceResponse = {
+    /**
+     * Year
+     */
+    year: number;
+    /**
+     * Attended Count
+     */
+    attended_count: number;
+    /**
+     * Growth Pct
+     */
+    growth_pct?: number | null;
+};
+
+/**
  * PaginationMeta
  */
 export type AppControllerSchemasAuditLogSchemaPaginationMeta = {
@@ -4202,6 +5877,314 @@ export type AppControllerSchemasEventParticipantSchemaPaginationMeta = {
      */
     offset: number;
 };
+
+export type GetEventLogisticsOverviewAnalyticsLogisticsOverviewEventIdGetData = {
+    body?: never;
+    path: {
+        /**
+         * Event Id
+         */
+        event_id: string;
+    };
+    query?: never;
+    url: '/analytics/logistics/overview/{event_id}';
+};
+
+export type GetEventLogisticsOverviewAnalyticsLogisticsOverviewEventIdGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetEventLogisticsOverviewAnalyticsLogisticsOverviewEventIdGetError = GetEventLogisticsOverviewAnalyticsLogisticsOverviewEventIdGetErrors[keyof GetEventLogisticsOverviewAnalyticsLogisticsOverviewEventIdGetErrors];
+
+export type GetEventLogisticsOverviewAnalyticsLogisticsOverviewEventIdGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: EventLogisticsOverviewResponse;
+};
+
+export type GetEventLogisticsOverviewAnalyticsLogisticsOverviewEventIdGetResponse = GetEventLogisticsOverviewAnalyticsLogisticsOverviewEventIdGetResponses[keyof GetEventLogisticsOverviewAnalyticsLogisticsOverviewEventIdGetResponses];
+
+export type GetSessionTimelineAnalyticsLogisticsTimelineGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/analytics/logistics/timeline';
+};
+
+export type GetSessionTimelineAnalyticsLogisticsTimelineGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: SessionTimelineResponse;
+};
+
+export type GetSessionTimelineAnalyticsLogisticsTimelineGetResponse = GetSessionTimelineAnalyticsLogisticsTimelineGetResponses[keyof GetSessionTimelineAnalyticsLogisticsTimelineGetResponses];
+
+export type GetVolunteerLogisticsAnalyticsLogisticsVolunteersEventIdGetData = {
+    body?: never;
+    path: {
+        /**
+         * Event Id
+         */
+        event_id: string;
+    };
+    query?: never;
+    url: '/analytics/logistics/volunteers/{event_id}';
+};
+
+export type GetVolunteerLogisticsAnalyticsLogisticsVolunteersEventIdGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetVolunteerLogisticsAnalyticsLogisticsVolunteersEventIdGetError = GetVolunteerLogisticsAnalyticsLogisticsVolunteersEventIdGetErrors[keyof GetVolunteerLogisticsAnalyticsLogisticsVolunteersEventIdGetErrors];
+
+export type GetVolunteerLogisticsAnalyticsLogisticsVolunteersEventIdGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: VolunteerLogisticsResponse;
+};
+
+export type GetVolunteerLogisticsAnalyticsLogisticsVolunteersEventIdGetResponse = GetVolunteerLogisticsAnalyticsLogisticsVolunteersEventIdGetResponses[keyof GetVolunteerLogisticsAnalyticsLogisticsVolunteersEventIdGetResponses];
+
+export type GetRegistrationLogisticsAnalyticsLogisticsRegistrationsEventIdGetData = {
+    body?: never;
+    path: {
+        /**
+         * Event Id
+         */
+        event_id: string;
+    };
+    query?: never;
+    url: '/analytics/logistics/registrations/{event_id}';
+};
+
+export type GetRegistrationLogisticsAnalyticsLogisticsRegistrationsEventIdGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetRegistrationLogisticsAnalyticsLogisticsRegistrationsEventIdGetError = GetRegistrationLogisticsAnalyticsLogisticsRegistrationsEventIdGetErrors[keyof GetRegistrationLogisticsAnalyticsLogisticsRegistrationsEventIdGetErrors];
+
+export type GetRegistrationLogisticsAnalyticsLogisticsRegistrationsEventIdGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: RegistrationLogisticsResponse;
+};
+
+export type GetRegistrationLogisticsAnalyticsLogisticsRegistrationsEventIdGetResponse = GetRegistrationLogisticsAnalyticsLogisticsRegistrationsEventIdGetResponses[keyof GetRegistrationLogisticsAnalyticsLogisticsRegistrationsEventIdGetResponses];
+
+export type GetEventPerformanceAnalyticsPerformanceEventGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Event Id
+         *
+         * Filter attendance rates to a specific event
+         */
+        event_id?: string | null;
+        /**
+         * Min Feedback Count
+         *
+         * Minimum feedback count for top-rated events
+         */
+        min_feedback_count?: number;
+        /**
+         * Feedback Trend Limit
+         *
+         * Number of past events for feedback trend
+         */
+        feedback_trend_limit?: number;
+    };
+    url: '/analytics/performance/event';
+};
+
+export type GetEventPerformanceAnalyticsPerformanceEventGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetEventPerformanceAnalyticsPerformanceEventGetError = GetEventPerformanceAnalyticsPerformanceEventGetErrors[keyof GetEventPerformanceAnalyticsPerformanceEventGetErrors];
+
+export type GetEventPerformanceAnalyticsPerformanceEventGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: EventPerformanceResponse;
+};
+
+export type GetEventPerformanceAnalyticsPerformanceEventGetResponse = GetEventPerformanceAnalyticsPerformanceEventGetResponses[keyof GetEventPerformanceAnalyticsPerformanceEventGetResponses];
+
+export type GetOngoingPerformanceAnalyticsPerformanceOngoingGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/analytics/performance/ongoing';
+};
+
+export type GetOngoingPerformanceAnalyticsPerformanceOngoingGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: OngoingPerformanceResponse;
+};
+
+export type GetOngoingPerformanceAnalyticsPerformanceOngoingGetResponse = GetOngoingPerformanceAnalyticsPerformanceOngoingGetResponses[keyof GetOngoingPerformanceAnalyticsPerformanceOngoingGetResponses];
+
+export type GetHistoricalPerformanceAnalyticsPerformanceHistoricalGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/analytics/performance/historical';
+};
+
+export type GetHistoricalPerformanceAnalyticsPerformanceHistoricalGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: HistoricalPerformanceResponse;
+};
+
+export type GetHistoricalPerformanceAnalyticsPerformanceHistoricalGetResponse = GetHistoricalPerformanceAnalyticsPerformanceHistoricalGetResponses[keyof GetHistoricalPerformanceAnalyticsPerformanceHistoricalGetResponses];
+
+export type GetDemographicAnalyticsAnalyticsDemographicsGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Top Cities Limit
+         *
+         * Number of top cities to return
+         */
+        top_cities_limit?: number;
+    };
+    url: '/analytics/demographics';
+};
+
+export type GetDemographicAnalyticsAnalyticsDemographicsGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetDemographicAnalyticsAnalyticsDemographicsGetError = GetDemographicAnalyticsAnalyticsDemographicsGetErrors[keyof GetDemographicAnalyticsAnalyticsDemographicsGetErrors];
+
+export type GetDemographicAnalyticsAnalyticsDemographicsGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: DemographicAnalyticsResponse;
+};
+
+export type GetDemographicAnalyticsAnalyticsDemographicsGetResponse = GetDemographicAnalyticsAnalyticsDemographicsGetResponses[keyof GetDemographicAnalyticsAnalyticsDemographicsGetResponses];
+
+export type GetOngoingEventDataAnalyticsOngoingGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Checkin Feed Limit
+         *
+         * Number of recent check-ins to return
+         */
+        checkin_feed_limit?: number;
+    };
+    url: '/analytics/ongoing';
+};
+
+export type GetOngoingEventDataAnalyticsOngoingGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetOngoingEventDataAnalyticsOngoingGetError = GetOngoingEventDataAnalyticsOngoingGetErrors[keyof GetOngoingEventDataAnalyticsOngoingGetErrors];
+
+export type GetOngoingEventDataAnalyticsOngoingGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: OngoingEventDataResponse;
+};
+
+export type GetOngoingEventDataAnalyticsOngoingGetResponse = GetOngoingEventDataAnalyticsOngoingGetResponses[keyof GetOngoingEventDataAnalyticsOngoingGetResponses];
+
+export type GetHistoricalEventDataAnalyticsHistoricalGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * From Date
+         *
+         * Filter events starting on or after this date
+         */
+        from_date?: string | null;
+        /**
+         * To Date
+         *
+         * Filter events ending on or before this date
+         */
+        to_date?: string | null;
+        /**
+         * Organizer Id
+         *
+         * Filter events by creator
+         */
+        organizer_id?: string | null;
+        /**
+         * Venue Id
+         *
+         * Filter events with sessions at this venue
+         */
+        venue_id?: string | null;
+        /**
+         * Compare From Date
+         *
+         * Comparison period start date
+         */
+        compare_from_date?: string | null;
+        /**
+         * Compare To Date
+         *
+         * Comparison period end date
+         */
+        compare_to_date?: string | null;
+    };
+    url: '/analytics/historical';
+};
+
+export type GetHistoricalEventDataAnalyticsHistoricalGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetHistoricalEventDataAnalyticsHistoricalGetError = GetHistoricalEventDataAnalyticsHistoricalGetErrors[keyof GetHistoricalEventDataAnalyticsHistoricalGetErrors];
+
+export type GetHistoricalEventDataAnalyticsHistoricalGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: HistoricalEventDataResponse;
+};
+
+export type GetHistoricalEventDataAnalyticsHistoricalGetResponse = GetHistoricalEventDataAnalyticsHistoricalGetResponses[keyof GetHistoricalEventDataAnalyticsHistoricalGetResponses];
 
 export type ListAppFeedbackAppFeedbackGetData = {
     body?: never;
@@ -4935,6 +6918,48 @@ export type GetEventsAttendedUserProfileEventsAttendedGetResponses = {
 };
 
 export type GetEventsAttendedUserProfileEventsAttendedGetResponse = GetEventsAttendedUserProfileEventsAttendedGetResponses[keyof GetEventsAttendedUserProfileEventsAttendedGetResponses];
+
+export type GetMyEventsUserProfileMyEventsGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Limit
+         */
+        limit?: number;
+    };
+    url: '/user/profile/my-events';
+};
+
+export type GetMyEventsUserProfileMyEventsGetErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden — account is inactive or deleted
+     */
+    403: ErrorResponse;
+    /**
+     * User not found
+     */
+    404: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetMyEventsUserProfileMyEventsGetError = GetMyEventsUserProfileMyEventsGetErrors[keyof GetMyEventsUserProfileMyEventsGetErrors];
+
+export type GetMyEventsUserProfileMyEventsGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: MyEventsResponse;
+};
+
+export type GetMyEventsUserProfileMyEventsGetResponse = GetMyEventsUserProfileMyEventsGetResponses[keyof GetMyEventsUserProfileMyEventsGetResponses];
 
 export type UploadProfileAvatarUserProfileAvatarPatchData = {
     body: ProfileAvatarUploadRequest;
@@ -7292,6 +9317,96 @@ export type UpdateMyVenueRatingVenuesVenueIdRatingsMePatchResponses = {
 
 export type UpdateMyVenueRatingVenuesVenueIdRatingsMePatchResponse = UpdateMyVenueRatingVenuesVenueIdRatingsMePatchResponses[keyof UpdateMyVenueRatingVenuesVenueIdRatingsMePatchResponses];
 
+export type GetPublicEventsEventsPublicGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Q
+         *
+         * Case-insensitive title search
+         */
+        q?: string | null;
+        /**
+         * Page
+         *
+         * Page number (1-based)
+         */
+        page?: number;
+        /**
+         * Page Size
+         *
+         * Items per page (max 50)
+         */
+        page_size?: number;
+    };
+    url: '/events/public';
+};
+
+export type GetPublicEventsEventsPublicGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetPublicEventsEventsPublicGetError = GetPublicEventsEventsPublicGetErrors[keyof GetPublicEventsEventsPublicGetErrors];
+
+export type GetPublicEventsEventsPublicGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: PublicEventsListResponse;
+};
+
+export type GetPublicEventsEventsPublicGetResponse = GetPublicEventsEventsPublicGetResponses[keyof GetPublicEventsEventsPublicGetResponses];
+
+export type GetHomeEventsEventsPublicHomeGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/events/public/home';
+};
+
+export type GetHomeEventsEventsPublicHomeGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: HomeEventsResponse;
+};
+
+export type GetHomeEventsEventsPublicHomeGetResponse = GetHomeEventsEventsPublicHomeGetResponses[keyof GetHomeEventsEventsPublicHomeGetResponses];
+
+export type GetPublicEventDetailEventsPublicEventIdGetData = {
+    body?: never;
+    path: {
+        /**
+         * Event Id
+         */
+        event_id: string;
+    };
+    query?: never;
+    url: '/events/public/{event_id}';
+};
+
+export type GetPublicEventDetailEventsPublicEventIdGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetPublicEventDetailEventsPublicEventIdGetError = GetPublicEventDetailEventsPublicEventIdGetErrors[keyof GetPublicEventDetailEventsPublicEventIdGetErrors];
+
+export type GetPublicEventDetailEventsPublicEventIdGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: PublicEventDetailResponse;
+};
+
+export type GetPublicEventDetailEventsPublicEventIdGetResponse = GetPublicEventDetailEventsPublicEventIdGetResponses[keyof GetPublicEventDetailEventsPublicEventIdGetResponses];
+
 export type GetAllEventsEventsGetData = {
     body?: never;
     path?: never;
@@ -7795,6 +9910,44 @@ export type UploadEventBannerEventsEventIdBannerPostResponses = {
 
 export type UploadEventBannerEventsEventIdBannerPostResponse = UploadEventBannerEventsEventIdBannerPostResponses[keyof UploadEventBannerEventsEventIdBannerPostResponses];
 
+export type GetMyFeedbackStatusEventsEventIdFeedbackMyStatusGetData = {
+    body?: never;
+    path: {
+        /**
+         * Event Id
+         */
+        event_id: string;
+    };
+    query?: never;
+    url: '/events/{event_id}/feedback/my-status';
+};
+
+export type GetMyFeedbackStatusEventsEventIdFeedbackMyStatusGetErrors = {
+    /**
+     * Missing or invalid Bearer token
+     */
+    401: ErrorResponse;
+    /**
+     * Event not found
+     */
+    404: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetMyFeedbackStatusEventsEventIdFeedbackMyStatusGetError = GetMyFeedbackStatusEventsEventIdFeedbackMyStatusGetErrors[keyof GetMyFeedbackStatusEventsEventIdFeedbackMyStatusGetErrors];
+
+export type GetMyFeedbackStatusEventsEventIdFeedbackMyStatusGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: MyEventFeedbackStatusResponse;
+};
+
+export type GetMyFeedbackStatusEventsEventIdFeedbackMyStatusGetResponse = GetMyFeedbackStatusEventsEventIdFeedbackMyStatusGetResponses[keyof GetMyFeedbackStatusEventsEventIdFeedbackMyStatusGetResponses];
+
 export type ListEventFeedbackEventsEventIdFeedbackGetData = {
     body?: never;
     path: {
@@ -7988,6 +10141,44 @@ export type WithdrawRegistrationEventsEventIdSessionSessionIdRegisterDeleteRespo
 };
 
 export type WithdrawRegistrationEventsEventIdSessionSessionIdRegisterDeleteResponse = WithdrawRegistrationEventsEventIdSessionSessionIdRegisterDeleteResponses[keyof WithdrawRegistrationEventsEventIdSessionSessionIdRegisterDeleteResponses];
+
+export type GetMySessionRegistrationStatusEventsEventIdSessionSessionIdRegisterGetData = {
+    body?: never;
+    path: {
+        /**
+         * Event Id
+         */
+        event_id: string;
+        /**
+         * Session Id
+         */
+        session_id: string;
+    };
+    query?: never;
+    url: '/events/{event_id}/session/{session_id}/register';
+};
+
+export type GetMySessionRegistrationStatusEventsEventIdSessionSessionIdRegisterGetErrors = {
+    /**
+     * Missing or invalid Bearer token
+     */
+    401: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetMySessionRegistrationStatusEventsEventIdSessionSessionIdRegisterGetError = GetMySessionRegistrationStatusEventsEventIdSessionSessionIdRegisterGetErrors[keyof GetMySessionRegistrationStatusEventsEventIdSessionSessionIdRegisterGetErrors];
+
+export type GetMySessionRegistrationStatusEventsEventIdSessionSessionIdRegisterGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: MySessionRegistrationResponse;
+};
+
+export type GetMySessionRegistrationStatusEventsEventIdSessionSessionIdRegisterGetResponse = GetMySessionRegistrationStatusEventsEventIdSessionSessionIdRegisterGetResponses[keyof GetMySessionRegistrationStatusEventsEventIdSessionSessionIdRegisterGetResponses];
 
 export type RegisterForSessionEventsEventIdSessionSessionIdRegisterPostData = {
     body?: never;

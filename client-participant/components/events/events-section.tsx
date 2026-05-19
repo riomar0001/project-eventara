@@ -16,8 +16,8 @@ export function EventsSection({ events, eventsType, loading }: EventsSectionProp
   if (loading) {
     return (
       <section className="relative py-10">
-        <div className="container mx-auto max-w-[1240px] px-8">
-          <div className="grid grid-cols-3 gap-[22px]">
+        <div className="container mx-auto max-w-[1240px] px-4 md:px-8">
+          <div className="grid grid-cols-1 gap-[22px] sm:grid-cols-2 lg:grid-cols-3">
             {[0, 1, 2].map((i) => (
               <div key={i} className="border-line-soft bg-surface h-[360px] animate-pulse rounded-[20px] border" />
             ))}
@@ -29,7 +29,7 @@ export function EventsSection({ events, eventsType, loading }: EventsSectionProp
 
   return (
     <section className="relative py-10">
-      <div className="container mx-auto max-w-[1240px] px-8">
+      <div className="container mx-auto max-w-[1240px] px-4 md:px-8">
         <div className="mb-10 flex flex-wrap items-end justify-between gap-6">
           <div>
             <div className="text-text-mute mb-2 inline-flex items-center gap-2.5 font-mono text-[11px] tracking-[0.18em] uppercase">
@@ -44,14 +44,14 @@ export function EventsSection({ events, eventsType, loading }: EventsSectionProp
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-[22px]">
+        <div className="grid grid-cols-1 gap-[22px] sm:grid-cols-2 lg:grid-cols-3">
           {events.map((event, i) => (
             <EventCard key={event.id} event={event} index={i} />
           ))}
         </div>
 
         {events.length === 0 && (
-          <div className="border-line-soft text-text-mute rounded-[18px] border border-dashed px-10 py-[60px] text-center">
+          <div className="border-line-soft text-text-mute rounded-[18px] border border-dashed px-6 py-[60px] text-center md:px-10">
             No events scheduled. Check back soon.
           </div>
         )}

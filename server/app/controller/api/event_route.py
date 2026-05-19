@@ -154,6 +154,7 @@ def _to_session_response(session: EventSessionEntity) -> EventSessionRecordRespo
         end_datetime=session.end_datetime,
         status=session.status.value if hasattr(session.status, "value") else session.status,
         max_slots=session.max_slots,
+        registered_count=session.registered_count,
         created_at=session.created_at,
         updated_at=session.updated_at,
     )

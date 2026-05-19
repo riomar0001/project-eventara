@@ -1,25 +1,22 @@
-/**
- * Validation utilities for Venue Hub forms
- */
 import type { AddVenueFormData, ReportFormData, FormErrors } from '@/types';
 
 export const validateAddVenueForm = (data: Partial<AddVenueFormData>): FormErrors => {
   const errors: FormErrors = {};
 
   if (!data.name || data.name.trim().length === 0) {
-    errors.name = 'Venue name is required';
+    errors.name = 'Please enter a venue name.';
   }
 
   if (!data.location || data.location.trim().length === 0) {
-    errors.location = 'Location is required';
+    errors.location = 'Please enter a location.';
   }
 
   if (!data.capacity || parseInt(data.capacity) <= 0) {
-    errors.capacity = 'Capacity must be greater than 0';
+    errors.capacity = 'Capacity must be at least 1.';
   }
 
   if (!data.type) {
-    errors.type = 'Venue type is required';
+    errors.type = 'Please select a venue type.';
   }
 
   return errors;
@@ -29,15 +26,15 @@ export const validateReportForm = (data: Partial<ReportFormData>): FormErrors =>
   const errors: FormErrors = {};
 
   if (!data.reason) {
-    errors.reason = 'Please select a reason';
+    errors.reason = 'Please choose a reason.';
   }
 
   if (!data.detail || data.detail.trim().length === 0) {
-    errors.detail = 'Please provide details';
+    errors.detail = 'Please add some details.';
   }
 
   if (data.detail && data.detail.length < 10) {
-    errors.detail = 'Details must be at least 10 characters';
+    errors.detail = 'Please add a bit more detail (at least 10 characters).';
   }
 
   return errors;
@@ -51,14 +48,14 @@ export type RegisterErrors = Partial<Record<'firstName' | 'lastName' | 'email' |
 
 export const validateRegisterForm = (data: { firstName: string; lastName: string; email: string; password: string; confirm: string }): RegisterErrors => {
   const errors: RegisterErrors = {};
-  if (!data.firstName.trim()) errors.firstName = 'First name is required.';
-  if (!data.lastName.trim()) errors.lastName = 'Last name is required.';
-  if (!data.email.trim()) errors.email = 'Email is required.';
-  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) errors.email = 'Enter a valid email address.';
-  if (!data.password) errors.password = 'Password is required.';
-  else if (data.password.length < 8) errors.password = 'Password must be at least 8 characters.';
+  if (!data.firstName.trim()) errors.firstName = 'Please enter your first name.';
+  if (!data.lastName.trim()) errors.lastName = 'Please enter your last name.';
+  if (!data.email.trim()) errors.email = 'Please enter your email address.';
+  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) errors.email = "That doesn't look like a valid email address.";
+  if (!data.password) errors.password = 'Please enter a password.';
+  else if (data.password.length < 8) errors.password = 'Password must be at least 8 characters long.';
   if (!data.confirm) errors.confirm = 'Please confirm your password.';
-  else if (data.password !== data.confirm) errors.confirm = 'Passwords do not match.';
+  else if (data.password !== data.confirm) errors.confirm = "Those passwords don't match.";
   return errors;
 };
 
@@ -66,9 +63,9 @@ export type SuggestVenueErrors = Partial<Record<'name' | 'location' | 'capacity'
 
 export const validateSuggestVenueForm = (data: { name: string; location: string; capacity: string; type: string }): SuggestVenueErrors => {
   const errors: SuggestVenueErrors = {};
-  if (!data.name.trim()) errors.name = 'Venue name is required.';
-  if (!data.location.trim()) errors.location = 'Location is required.';
-  if (!data.capacity || isNaN(Number(data.capacity)) || Number(data.capacity) <= 0) errors.capacity = 'Enter a valid capacity.';
-  if (!data.type) errors.type = 'Select a venue type.';
+  if (!data.name.trim()) errors.name = 'Please enter a venue name.';
+  if (!data.location.trim()) errors.location = 'Please enter a location.';
+  if (!data.capacity || isNaN(Number(data.capacity)) || Number(data.capacity) <= 0) errors.capacity = 'Please enter a valid capacity (numbers only).';
+  if (!data.type) errors.type = 'Please select a venue type.';
   return errors;
 };

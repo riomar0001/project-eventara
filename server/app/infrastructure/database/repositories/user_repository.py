@@ -515,6 +515,52 @@ class UserRepository:
                 session_start_datetime=row.session_start_datetime,
                 session_end_datetime=row.session_end_datetime,
                 attended_at=row.attended_at,
+                status=row.status.value if hasattr(row.status, "value") else str(row.status),
+            )
+            for row in result.all()
+        ]
+
+    async def list_my_events_by_user_id(self, user_id: uuid.UUID, limit: int = 50) -> list[AttendedEventRecord]:
+        """Return REGISTERED and ATTENDED events for a user, newest first."""
+        result = await self.db.execute(
+            select(
+                EventParticipant.id.label("participant_id"),
+                Event.id.label("event_id"),
+                Event.title.label("event_title"),
+                Event.start_date.label("event_start_date"),
+                Event.end_date.label("event_end_date"),
+                Event.banner_url.label("event_banner_url"),
+                EventSession.id.label("session_id"),
+                EventSession.title.label("session_title"),
+                EventSession.start_datetime.label("session_start_datetime"),
+                EventSession.end_datetime.label("session_end_datetime"),
+                EventParticipant.updated_at.label("attended_at"),
+                EventParticipant.status.label("status"),
+            )
+            .select_from(EventParticipant)
+            .join(EventSession, EventSession.id == EventParticipant.event_session_id)
+            .join(Event, Event.id == EventSession.event_id)
+            .where(
+                EventParticipant.user_id == user_id,
+                EventParticipant.status.in_([EventParticipantStatus.REGISTERED, EventParticipantStatus.ATTENDED]),
+            )
+            .order_by(EventParticipant.updated_at.desc(), EventSession.start_datetime.desc())
+            .limit(limit)
+        )
+        return [
+            AttendedEventRecord(
+                participant_id=row.participant_id,
+                event_id=row.event_id,
+                event_title=row.event_title,
+                event_start_date=row.event_start_date,
+                event_end_date=row.event_end_date,
+                event_banner_url=row.event_banner_url,
+                session_id=row.session_id,
+                session_title=row.session_title,
+                session_start_datetime=row.session_start_datetime,
+                session_end_datetime=row.session_end_datetime,
+                attended_at=row.attended_at,
+                status=row.status.value if hasattr(row.status, "value") else str(row.status),
             )
             for row in result.all()
         ]

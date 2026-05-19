@@ -6,13 +6,13 @@
 
 import { useState } from 'react';
 import { Icon } from '@/components/ui/icon';
-import type { Venue } from '@/types/venue';
+import type { ApiVenue } from '@/types/venue';
 import { ModalBackdrop } from './modal-backdrop';
 import { validateReportForm } from '@/lib/validators';
 import type { ReportFormData } from '@/types';
 
 interface ReportModalProps {
-  venue: Venue | null;
+  venue: ApiVenue | null;
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: ReportFormData) => void;

@@ -7,6 +7,7 @@ from app.application.dto.account_settings_dto import ChangePasswordInput, Reques
 from app.application.dto.profile_dto import (
     GetEventsAttendedInput,
     GetLoginHistoryInput,
+    GetMyEventsInput,
     GetUserDetailsInput,
     UpdateProfileAvatarInput,
     UpdateProfileInput,
@@ -18,6 +19,7 @@ from app.application.use_cases.profile_usecase import (
     CheckAliasUseCase,
     GetEventsAttendedUseCase,
     GetLoginHistoryUseCase,
+    GetMyEventsUseCase,
     GetUserDetailsUseCase,
     OnboardingUseCase,
     UpdateProfileAvatarUseCase,
@@ -38,6 +40,7 @@ from app.controller.dependencies.use_cases_depends import (
     get_check_alias_use_case,
     get_delete_account_use_case,
     get_login_history_use_case,
+    get_my_events_use_case,
     get_update_profile_avatar_use_case,
 )
 from app.controller.docs.user_docs import (
@@ -70,6 +73,7 @@ from app.controller.schemas.user_schema import (
     DeleteAccountRequest,
     DeleteAccountResponse,
     EventsAttendedResponse,
+    MyEventsResponse,
     LoginHistoryEntryResponse,
     LoginHistoryListResponse,
     ProfileAvatarData,
@@ -114,12 +118,13 @@ def _to_attended_event_response(event) -> AttendedEventResponse:
         event_title=event.event_title,
         event_start_date=event.event_start_date,
         event_end_date=event.event_end_date,
-        event_banner_url=event.event_banner_url,
+        event_banner_url=StorageService.public_url_for_object_key(event.event_banner_url),
         session_id=event.session_id,
         session_title=event.session_title,
         session_start_datetime=event.session_start_datetime,
         session_end_datetime=event.session_end_datetime,
         attended_at=event.attended_at,
+        status=getattr(event, "status", "attended"),
     )
 
 
@@ -258,6 +263,47 @@ async def get_events_attended(
         new_values={"events_attended_count": len(result.events)},
     )
     return EventsAttendedResponse(data=[_to_attended_event_response(event) for event in result.events])
+
+
+@account_settings_router.get(
+    "/profile/my-events",
+    response_model=MyEventsResponse,
+    status_code=status.HTTP_200_OK,
+    responses={**UNAUTHORIZED, **UPDATE_PROFILE_FORBIDDEN, **USER_NOT_FOUND},
+    summary="My events (registered + attended)",
+    description=(
+        "Return events where the authenticated user is currently registered or has attended. "
+        "Results are ordered newest first and capped at ``limit`` (max 50)."
+    ),
+)
+async def get_my_events(
+    request: Request,
+    limit: int = Query(default=50, ge=0, le=50),
+    user_id: uuid.UUID = Depends(get_current_user_id),
+    use_case: GetMyEventsUseCase = Depends(get_my_events_use_case),
+    audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
+) -> MyEventsResponse:
+    """Return all registered and attended events for the authenticated user."""
+    try:
+        result = await use_case.execute(GetMyEventsInput(user_id=user_id, limit=limit))
+    except UserNotFoundError as exc:
+        await _audit_profile_failure(audit_use_case, request, user_id, ActionType.READ, "my_events", str(exc))
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except UserInactiveError as exc:
+        await _audit_profile_failure(audit_use_case, request, user_id, ActionType.READ, "my_events", str(exc))
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
+
+    await safe_audit_log(
+        audit_use_case,
+        request,
+        user_id=user_id,
+        action_type=ActionType.READ,
+        resource_type="my_events",
+        resource_id=str(user_id),
+        status=AuditLogStatus.SUCCESS,
+        new_values={"my_events_count": len(result.events)},
+    )
+    return MyEventsResponse(data=[_to_attended_event_response(event) for event in result.events])
 
 
 @account_settings_router.patch(

@@ -6,6 +6,8 @@ from app.application.dto.profile_dto import (
     GetEventsAttendedOutput,
     GetLoginHistoryInput,
     GetLoginHistoryOutput,
+    GetMyEventsInput,
+    GetMyEventsOutput,
     GetUserDetailsInput,
     GetUserDetailsOutput,
     UpdateProfileAvatarInput,
@@ -274,6 +276,22 @@ class GetEventsAttendedUseCase:
 
         events = await self.repo.list_attended_events_by_user_id(data.user_id, data.limit)
         return GetEventsAttendedOutput(events=events)
+
+
+class GetMyEventsUseCase:
+    """Returns all registered and attended events for the authenticated user."""
+
+    def __init__(self, repo: IUserRepository) -> None:
+        self.repo = repo
+
+    async def execute(self, data: GetMyEventsInput) -> GetMyEventsOutput:
+        user = await self.repo.get_by_id(data.user_id)
+        if not user:
+            raise UserNotFoundError()
+        if user.status in (UserStatus.INACTIVE, UserStatus.DELETED):
+            raise UserInactiveError()
+        events = await self.repo.list_my_events_by_user_id(data.user_id, data.limit)
+        return GetMyEventsOutput(events=events)
 
 
 class GetUserDetailsUseCase:

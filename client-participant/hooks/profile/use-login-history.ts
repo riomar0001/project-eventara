@@ -14,7 +14,7 @@ export function useLoginHistory() {
   useEffect(() => {
     AccountSettings.getLoginHistoryUserLoginHistoryGet({ query: { limit: 20 } }).then(({ data, error: apiError }) => {
       if (apiError || !data) {
-        setError('Failed to load login history.');
+        setError('Unable to load your login history. Please try refreshing.');
       } else {
         setSessions(data.data);
       }

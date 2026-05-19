@@ -33,6 +33,8 @@ class IUserRepository(Protocol):
 
     async def list_attended_events_by_user_id(self, user_id: uuid.UUID, limit: int = 10) -> list[AttendedEventRecord]: ...
 
+    async def list_my_events_by_user_id(self, user_id: uuid.UUID, limit: int = 50) -> list[AttendedEventRecord]: ...
+
     async def update_profile(
         self,
         user_id: uuid.UUID,

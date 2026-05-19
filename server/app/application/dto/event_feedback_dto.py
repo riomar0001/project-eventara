@@ -22,3 +22,9 @@ class EventFeedbackOutput:
 class EventFeedbackListOutput:
     feedback: list[EventFeedback]
     total: int
+
+
+@dataclass
+class MyEventFeedbackStatusOutput:
+    is_checked_in: bool
+    has_submitted_feedback: bool

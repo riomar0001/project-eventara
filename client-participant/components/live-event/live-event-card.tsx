@@ -43,8 +43,8 @@ export function LiveEventCard({ liveEvent, loading }: LiveEventCardProps) {
   if (loading) {
     return (
       <section className="relative py-10">
-        <div className="mx-auto max-w-[1240px] px-8">
-          <div className="border-border from-card min-h-[420px] animate-pulse rounded-[24px] border bg-linear-[180deg] to-[oklch(0.97_0.005_150)]" />
+        <div className="mx-auto max-w-[1240px] px-4 md:px-8">
+          <div className="border-border from-card min-h-[300px] animate-pulse rounded-[24px] border bg-linear-[180deg] to-[oklch(0.97_0.005_150)] md:min-h-[420px]" />
         </div>
       </section>
     );
@@ -63,7 +63,7 @@ export function LiveEventCard({ liveEvent, loading }: LiveEventCardProps) {
 
   return (
     <section className="relative py-10">
-      <div className="mx-auto max-w-[1240px] px-8">
+      <div className="mx-auto max-w-[1240px] px-4 md:px-8">
         <div className="mb-10 flex flex-wrap items-end justify-between gap-6">
           <div>
             <div className="text-muted-foreground mb-2 inline-flex items-center gap-2.5 font-mono text-[11px] tracking-[0.18em] uppercase">
@@ -79,10 +79,10 @@ export function LiveEventCard({ liveEvent, loading }: LiveEventCardProps) {
           </p>
         </div>
 
-        <div className="border-border from-card relative grid min-h-[420px] grid-cols-[1.1fr_1fr] overflow-hidden rounded-[24px] border bg-linear-[180deg] to-[oklch(0.97_0.005_150)] p-0">
+        <div className="border-border from-card relative grid grid-cols-1 overflow-hidden rounded-[24px] border bg-linear-[180deg] to-[oklch(0.97_0.005_150)] p-0 md:grid-cols-[1.1fr_1fr] md:min-h-[420px]">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_90%_10%,oklch(0.62_0.16_60_/_0.1),transparent_40%)]" />
 
-          <div className="relative flex flex-col gap-[18px] py-10 pr-10 pl-9">
+          <div className="relative flex flex-col gap-[18px] p-6 md:py-10 md:pr-10 md:pl-9">
             <div className="inline-flex w-fit items-center gap-2 rounded-full border border-orange-400/35 bg-orange-400/10 px-3 py-1.5 font-mono text-[11px] tracking-[0.14em] text-orange-400 uppercase">
               <span className="relative inline-block h-2 w-2 animate-[ping_1.6s_cubic-bezier(0,0,0.2,1)_infinite] rounded-full bg-orange-400" />
               LIVE · DAY {pad(day)} OF {pad(totalDays)}
@@ -92,7 +92,7 @@ export function LiveEventCard({ liveEvent, loading }: LiveEventCardProps) {
               {event.title}
             </h3>
 
-            <div className="grid grid-cols-2 gap-x-[28px] gap-y-[18px]">
+            <div className="grid grid-cols-1 gap-x-[28px] gap-y-[18px] sm:grid-cols-2">
               {[
                 ['Venue', venueDisplay],
                 ['Session', `Session ${sessionIndex} of ${sessions.length}`],
@@ -121,7 +121,7 @@ export function LiveEventCard({ liveEvent, loading }: LiveEventCardProps) {
             </div>
           </div>
 
-          <div className="border-border relative overflow-hidden border-l bg-linear-[135deg] from-[oklch(0.2_0.01_150)] to-[oklch(0.15_0.008_150)]">
+          <div className="border-border relative aspect-video overflow-hidden border-t bg-linear-[135deg] from-[oklch(0.2_0.01_150)] to-[oklch(0.15_0.008_150)] md:aspect-auto md:border-t-0 md:border-l">
             <div className="absolute inset-0 bg-[repeating-linear-gradient(110deg,transparent_0_22px,oklch(1_0_0_/_0.025)_22px_24px)]" />
             <div className="bg-primary absolute top-[22%] left-[18%] h-[220px] w-[220px] rounded-full opacity-30 blur-[26px]" />
             <div className="absolute right-[14%] bottom-[18%] h-[180px] w-[180px] rounded-full bg-orange-400 opacity-40 blur-[26px]" />

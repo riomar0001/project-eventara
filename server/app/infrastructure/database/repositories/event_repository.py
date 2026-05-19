@@ -34,7 +34,7 @@ from app.domain.entities.event_entity import (
     EventSessionStatus,
     EventStatus,
 )
-from app.infrastructure.database.models.event_models import Event, EventSession
+from app.infrastructure.database.models.event_models import Event, EventParticipant, EventSession
 from app.infrastructure.database.models.venue_models import Venue
 
 
@@ -66,6 +66,7 @@ class EventRepository:
         *,
         venue_name: str | None = None,
         venue_location: str | None = None,
+        registered_count: int = 0,
     ) -> EventSessionEntity:
         """Map an EventSession ORM row to its domain entity."""
         return EventSessionEntity(
@@ -78,6 +79,7 @@ class EventRepository:
             end_datetime=orm.end_datetime,
             status=EventSessionStatus(orm.status),
             max_slots=orm.max_slots,
+            registered_count=registered_count,
             venue_name=venue_name,
             venue_location=venue_location,
             created_at=orm.created_at,
@@ -236,13 +238,36 @@ class EventRepository:
         Returns:
             List of ``EventSessionEntity`` objects, earliest first.
         """
+        registered_count_subq = (
+            select(func.count())
+            .select_from(EventParticipant)
+            .where(
+                EventParticipant.event_session_id == EventSession.id,
+                EventParticipant.status != "cancelled",
+            )
+            .correlate(EventSession)
+            .scalar_subquery()
+        )
         result = await self.db.execute(
-            select(EventSession, Venue.name.label("venue_name"), Venue.city.label("venue_location"))
+            select(
+                EventSession,
+                Venue.name.label("venue_name"),
+                Venue.city.label("venue_location"),
+                registered_count_subq.label("registered_count"),
+            )
             .outerjoin(Venue, EventSession.venue_id == Venue.id)
             .where(EventSession.event_id == event_id)
             .order_by(EventSession.start_datetime)
         )
-        return [self._to_session_entity(row.EventSession, venue_name=row.venue_name, venue_location=row.venue_location) for row in result.all()]
+        return [
+            self._to_session_entity(
+                row.EventSession,
+                venue_name=row.venue_name,
+                venue_location=row.venue_location,
+                registered_count=row.registered_count or 0,
+            )
+            for row in result.all()
+        ]
 
     async def get_sessions_for_events(self, event_ids: list[uuid.UUID]) -> list[EventSessionEntity]:
         """Return all sessions for the given event IDs in a single query, ordered by start time.

@@ -2,6 +2,7 @@
 
 import { Loader2, RotateCcw, Save } from 'lucide-react';
 import { useProfileForm } from '@/hooks/profile/use-profile-form';
+import { useAuthStore } from '@/store/auth-store';
 import { AGE_GROUP_OPTIONS, GENDER_OPTIONS, EDUCATION_LEVEL_OPTIONS } from '@/constants/profile';
 
 const INPUT =
@@ -11,15 +12,20 @@ const labelCls = 'mb-1.5 block font-mono text-[11px] tracking-[0.14em] uppercase
 
 export function ProfileForm() {
   const { form, saving, saved, error, setField, reset, handleSubmit } = useProfileForm();
+  const user = useAuthStore((s) => s.user);
 
   return (
     <form onSubmit={handleSubmit} className="max-w-2xl space-y-6">
       <div>
         <p className="text-muted-foreground mb-3 font-mono text-[11px] tracking-[0.14em] uppercase">Profile picture</p>
         <div className="flex items-center gap-4">
-          <div className="bg-primary/10 text-primary flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl text-2xl font-bold">
-            {(form.firstName[0] ?? 'U').toUpperCase()}
-          </div>
+          {user?.image ? (
+            <img src={user.image} alt="Profile" className="h-16 w-16 shrink-0 rounded-2xl object-cover" />
+          ) : (
+            <div className="bg-primary/10 text-primary flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl text-2xl font-bold">
+              {(form.firstName[0] ?? 'U').toUpperCase()}
+            </div>
+          )}
           <div className="flex-1">
             <p className="text-foreground text-sm font-medium">Upload a photo</p>
             <p className="text-muted-foreground mt-0.5 text-xs">JPG or PNG · max 2 MB</p>

@@ -147,6 +147,7 @@ class AttendedEventResponse(BaseModel):
     session_start_datetime: datetime
     session_end_datetime: datetime
     attended_at: datetime | None = None
+    status: str = "attended"
 
 
 class UserDetailsData(BaseModel):
@@ -174,6 +175,12 @@ class UserDetailsResponse(BaseModel):
 class EventsAttendedResponse(BaseModel):
     success: bool = True
     message: str = "Events attended retrieved successfully."
+    data: list[AttendedEventResponse]
+
+
+class MyEventsResponse(BaseModel):
+    success: bool = True
+    message: str = "Events retrieved successfully."
     data: list[AttendedEventResponse]
 
 

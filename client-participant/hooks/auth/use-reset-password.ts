@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Auth } from '@/api/sdk.gen';
+import { humanizeApiError } from '@/lib/api-error';
 
 export function useResetPassword(token: string) {
   const router = useRouter();
@@ -18,11 +19,11 @@ export function useResetPassword(token: string) {
     e.preventDefault();
     setError('');
     if (password.length < 8) {
-      setError('Password must be at least 8 characters.');
+      setError('Your password needs to be at least 8 characters long.');
       return;
     }
     if (password !== confirm) {
-      setError('Passwords do not match.');
+      setError("Those passwords don't match. Please try again.");
       return;
     }
     setLoading(true);
@@ -35,8 +36,7 @@ export function useResetPassword(token: string) {
     setLoading(false);
 
     if (apiError) {
-      const msg = (apiError as { message?: string } | null)?.message;
-      setError(msg ?? 'Reset failed. The link may have expired. Request a new one.');
+      setError(humanizeApiError((apiError as { message?: string } | null)?.message, 'This reset link has expired or is no longer valid. Please request a new one.'));
       return;
     }
 

@@ -1,10 +1,12 @@
 'use client';
 
-import { MapPin } from 'lucide-react';
+import { useState } from 'react';
+import { MapPin, QrCode } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import type { ApiEventSession } from '@/hooks/events/use-home-events';
 import { useSessionRegister } from '@/hooks/events/use-session-register';
 import { useAuthStore } from '@/store/auth-store';
+import { SessionQrModal } from './session-qr-modal';
 
 const STATUS_STYLES: Record<string, { bg: string; color: string; label: string }> = {
   scheduled: { bg: 'bg-primary/10', color: 'text-primary', label: 'Scheduled' },
@@ -26,9 +28,10 @@ function formatDuration(startIso: string, endIso: string): string {
 interface SessionCardProps {
   session: ApiEventSession;
   eventId: string;
+  onRegistrationChange?: () => void;
 }
 
-export function SessionCard({ session, eventId }: SessionCardProps) {
+export function SessionCard({ session, eventId, onRegistrationChange }: SessionCardProps) {
   const timeStr = new Date(session.start_datetime).toLocaleTimeString('en-US', {
     hour: '2-digit',
     minute: '2-digit',
@@ -38,16 +41,23 @@ export function SessionCard({ session, eventId }: SessionCardProps) {
   const venue = [session.venue_name, session.venue_location].filter(Boolean).join(', ');
 
   const canRegister = session.status === 'scheduled' || session.status === 'posted';
-  const { isRegistered, loading, error, register, withdraw } = useSessionRegister(eventId, session.id);
+  const { isRegistered, initializing, loading, error, cooldownMsg, register, withdraw } = useSessionRegister(eventId, session.id);
   const user = useAuthStore((s) => s.user);
   const router = useRouter();
+  const [showQr, setShowQr] = useState(false);
 
-  function handleRegister() {
+  async function handleRegister() {
     if (!user) {
       router.push('/login');
       return;
     }
-    register();
+    const ok = await register();
+    if (ok) onRegistrationChange?.();
+  }
+
+  async function handleWithdraw() {
+    const ok = await withdraw();
+    if (ok) onRegistrationChange?.();
   }
 
   return (
@@ -76,20 +86,34 @@ export function SessionCard({ session, eventId }: SessionCardProps) {
           </div>
         )}
         {session.max_slots != null && (
-          <p className="text-muted-foreground mt-1 font-mono text-[11px]">{session.max_slots} slots</p>
+          <p className="text-muted-foreground mt-1 font-mono text-[11px]">
+            {Math.max(0, session.max_slots - session.registered_count)} / {session.max_slots} slots remaining
+          </p>
         )}
 
         {canRegister && (
           <div className="mt-3">
             {error && <p className="text-destructive mb-2 text-[11px]">{error}</p>}
-            {isRegistered ? (
-              <button
-                onClick={withdraw}
-                disabled={loading}
-                className="border-destructive/40 text-destructive hover:bg-destructive/5 rounded-full border px-4 py-1.5 text-[12px] font-medium transition-all disabled:opacity-50"
-              >
-                {loading ? 'Withdrawing…' : 'Withdraw Registration'}
-              </button>
+            {cooldownMsg && <p className="text-amber-500 mb-2 text-[11px]">{cooldownMsg}</p>}
+            {initializing ? (
+              <div className="bg-muted h-7 w-36 animate-pulse rounded-full" />
+            ) : isRegistered ? (
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  onClick={() => setShowQr(true)}
+                  className="bg-primary text-primary-foreground flex items-center gap-1.5 rounded-full px-4 py-1.5 text-[12px] font-semibold shadow-[0_4px_14px_-4px_var(--lime-glow)] transition-all hover:opacity-90"
+                >
+                  <QrCode size={13} />
+                  View QR Code
+                </button>
+                <button
+                  onClick={handleWithdraw}
+                  disabled={loading}
+                  className="border-destructive/40 text-destructive hover:bg-destructive/5 rounded-full border px-4 py-1.5 text-[12px] font-medium transition-all disabled:opacity-50"
+                >
+                  {loading ? 'Withdrawing…' : 'Withdraw'}
+                </button>
+              </div>
             ) : (
               <button
                 onClick={handleRegister}
@@ -100,6 +124,15 @@ export function SessionCard({ session, eventId }: SessionCardProps) {
               </button>
             )}
           </div>
+        )}
+
+        {showQr && (
+          <SessionQrModal
+            eventId={eventId}
+            sessionId={session.id}
+            sessionTitle={session.title}
+            onClose={() => setShowQr(false)}
+          />
         )}
       </div>
     </div>

@@ -4,7 +4,7 @@ import Link from 'next/link';
 
 export function HeroSection() {
   return (
-    <section className="relative pt-[96px] pb-[120px] text-center">
+    <section className="relative pt-16 pb-20 text-center md:pt-[96px] md:pb-[120px]">
       {/* Mesh background */}
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
         {/* Lime orb */}
@@ -16,7 +16,7 @@ export function HeroSection() {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 container mx-auto max-w-[1240px] px-8">
+      <div className="relative z-10 container mx-auto max-w-[1240px] px-4 md:px-8">
         {/* Eyebrow */}
         <div className="text-text-mute inline-flex items-center gap-2.5 font-mono text-[11px] tracking-[0.18em] uppercase">
           <span className="bg-lime inline-block h-1.5 w-1.5 rounded-full shadow-[0_0_12px_var(--lime-glow)]" />

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { humanizeApiError } from '@/lib/api-error';
 
 export interface ApiEventSession {
   id: string;
@@ -14,6 +15,7 @@ export interface ApiEventSession {
   end_datetime: string;
   status: string;
   max_slots: number | null;
+  registered_count: number;
 }
 
 export interface HomeEventRecord {
@@ -48,9 +50,9 @@ export function useHomeEvents() {
       .then((r) => r.json())
       .then((json) => {
         if (json.success) setData(json.data);
-        else setError(json.message ?? 'Failed to load events');
+        else setError(humanizeApiError(json.message, 'Unable to load events. Please try refreshing the page.'));
       })
-      .catch(() => setError('Failed to load events'))
+      .catch(() => setError('Unable to load events. Please try refreshing the page.'))
       .finally(() => setLoading(false));
   }, []);
 

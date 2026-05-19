@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Auth } from '@/api/sdk.gen';
+import { humanizeApiError } from '@/lib/api-error';
 import { validateRegisterForm } from '@/lib/validators';
 import type { RegisterErrors } from '@/lib/validators';
 
@@ -49,8 +50,7 @@ export function useRegisterForm() {
     setLoading(false);
 
     if (apiError) {
-      const msg = (apiError as { message?: string } | null)?.message;
-      setErrors({ email: msg ?? 'Registration failed. This email may already be in use.' });
+      setErrors({ email: humanizeApiError((apiError as { message?: string } | null)?.message, "Couldn't create your account. This email may already be registered.") });
       return;
     }
 
