@@ -1,6 +1,9 @@
 'use client';
 
-import { BarChart3, Globe, Radio, Clock, Truck } from 'lucide-react';
+import { useCallback, useState } from 'react';
+import { BarChart3, Globe, Radio, Clock, Truck, Download, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DemographicsTab } from './analytics/analytics-demographics';
 import { HistoricalTab } from './analytics/analytics-historical';
@@ -8,6 +11,9 @@ import { LogisticsTab } from './analytics/analytics-logistics';
 import { OngoingTab } from './analytics/analytics-ongoing';
 import { PerformanceTab } from './analytics/analytics-performance';
 import { Section } from './shared';
+import { downloadCsv } from '@/lib/analytics/csv-utils';
+import { fetchAllAnalyticsData } from '@/lib/analytics/fetch-analytics';
+import { generateAnalyticsCsv } from '@/lib/analytics/generate-csv';
 
 const tabs = [
   { id: 'performance', label: 'Performance', icon: BarChart3, Component: PerformanceTab },
@@ -18,8 +24,38 @@ const tabs = [
 ] as const;
 
 export function AnalyticsSection() {
+  const [exporting, setExporting] = useState(false);
+
+  const handleExport = useCallback(async () => {
+    setExporting(true);
+    try {
+      const data = await fetchAllAnalyticsData();
+      const csv = generateAnalyticsCsv(data);
+      const dateStr = new Date().toISOString().split('T')[0];
+      downloadCsv(csv, `analytics_report_${dateStr}.csv`);
+      const errorCount = Object.keys(data.errors).length;
+      if (errorCount > 0) {
+        toast.warning(`CSV exported with ${errorCount} section(s) missing`);
+      } else {
+        toast.success('Analytics CSV exported');
+      }
+    } catch {
+      toast.error('Failed to export analytics CSV');
+    } finally {
+      setExporting(false);
+    }
+  }, []);
+
   return (
-    <Section title="Analytics Dashboard">
+    <Section
+      title="Analytics Dashboard"
+      action={
+        <Button variant="outline" size="sm" onClick={handleExport} disabled={exporting}>
+          {exporting ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
+          {exporting ? 'Exporting…' : 'Export to CSV'}
+        </Button>
+      }
+    >
       <Tabs defaultValue="performance" className="w-full">
         <TabsList className="w-full justify-start gap-2 overflow-x-auto rounded-none border-b bg-transparent px-0">
           {tabs.map(({ id, label, icon: Icon }) => (
