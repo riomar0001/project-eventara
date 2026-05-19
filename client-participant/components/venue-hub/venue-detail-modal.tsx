@@ -155,7 +155,17 @@ export function VenueDetailModal({ venue, isOpen, onClose }: VenueDetailModalPro
           <div className="flex-1 overflow-y-auto p-5 md:p-6">
             <div className="mb-4">
               <h3 className="text-text m-0 mb-1 text-2xl font-semibold tracking-[-0.02em]">{venue.name}</h3>
-              <span className="text-text-mute font-mono text-sm capitalize">{typeLabel}</span>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-text-mute font-mono text-sm capitalize">{typeLabel}</span>
+                {venue.creator_alias && (
+                  <>
+                    <span className="text-text-mute opacity-40">·</span>
+                    <span className="text-text-mute font-mono text-xs">
+                      Added by <span className="text-lime">@{venue.creator_alias}</span>
+                    </span>
+                  </>
+                )}
+              </div>
             </div>
 
             {venue.description && (

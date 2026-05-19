@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ArrowLeft, Star, MapPin, Users, Zap, CalendarDays } from 'lucide-react';
+import { ArrowLeft, Pencil, Star, MapPin, Users, Zap, CalendarDays } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { Footer } from '@/components/footer/footer';
@@ -58,7 +58,8 @@ export default function VenueDetailPage() {
   const isLoggedIn = Boolean(user);
 
   const [reviewPage, setReviewPage] = useState(1);
-  const { ratings, pagination, loading: ratingsLoading } = useVenuePublicRatings(venueId, reviewPage);
+  const [ratingsRefreshKey, setRatingsRefreshKey] = useState(0);
+  const { ratings, pagination, loading: ratingsLoading } = useVenuePublicRatings(venueId, reviewPage, 10, ratingsRefreshKey);
 
   const [starValue, setStarValue] = useState(0);
   const [starHovered, setStarHovered] = useState(0);
@@ -81,6 +82,8 @@ export default function VenueDetailPage() {
     if (ok) {
       setSubmitted(true);
       setEditing(false);
+      setReviewPage(1);
+      setRatingsRefreshKey((k) => k + 1);
     }
   }
 
@@ -90,6 +93,8 @@ export default function VenueDetailPage() {
       setStarValue(0);
       setComment('');
       setSubmitted(false);
+      setReviewPage(1);
+      setRatingsRefreshKey((k) => k + 1);
     }
   }
 
@@ -145,11 +150,22 @@ export default function VenueDetailPage() {
           <div className="space-y-4">
             {/* Hero */}
             <div>
-              {/* Back button */}
-              <Link href="/venues" className="text-text-mute hover:text-text mb-3 inline-flex items-center gap-2 text-sm transition-colors">
-                <ArrowLeft size={15} />
-                Back to venues
-              </Link>
+              {/* Back + Edit row */}
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <Link href="/venues" className="text-text-mute hover:text-text inline-flex items-center gap-2 text-sm transition-colors">
+                  <ArrowLeft size={15} />
+                  Back to venues
+                </Link>
+                {user && !venue.is_partner && user.alias && venue.creator_alias === user.alias && (
+                  <Link
+                    href={`/venues/contribute/${venue.id}/edit`}
+                    className="border-line-soft text-text-mute hover:border-text-mute hover:text-text inline-flex items-center gap-1.5 rounded-full border px-4 py-1.5 font-mono text-xs transition-all"
+                  >
+                    <Pencil size={12} />
+                    Edit venue
+                  </Link>
+                )}
+              </div>
 
               <div className="relative aspect-video max-h-120 w-full overflow-hidden rounded-2xl bg-linear-to-br from-[oklch(0.18_0.01_150)] to-[oklch(0.12_0.008_150)] md:rounded-3xl">
                   {venue.image_url ? (
@@ -180,10 +196,15 @@ export default function VenueDetailPage() {
               </div>
             {/* Name + description card */}
             <div className="border-line-soft bg-surface rounded-xl border p-5">
-              <div className="mb-2 flex items-center gap-2">
+              <div className="mb-2 flex flex-wrap items-center gap-2">
                 <span className="text-lime inline-block rounded-full bg-[oklch(0.9_0.22_128_/_0.08)] px-3 py-1 font-mono text-[10px] tracking-[0.14em] uppercase">
                   {typeLabel}
                 </span>
+                {venue.creator_alias && (
+                  <span className="text-text-mute font-mono text-xs">
+                    Added by <span className="text-lime font-semibold">@{venue.creator_alias}</span>
+                  </span>
+                )}
               </div>
               <h1 className="text-text text-2xl font-bold tracking-[-0.03em] md:text-3xl">{venue.name}</h1>
               {venue.description && <p className="text-text-dim mt-2 text-sm leading-relaxed">{venue.description}</p>}

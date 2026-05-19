@@ -456,6 +456,7 @@ export function EventForm({ mode, event, initialSessions = [] }: EventFormProps)
                     onFileSelected={setPendingBannerFile}
                     disabled={isSubmitting || isUploadingBanner}
                     className="aspect-video w-full"
+                    hint="Use a 16:9 image for the best result (e.g. 1280 × 720 px)."
                   />
                 </div>
 

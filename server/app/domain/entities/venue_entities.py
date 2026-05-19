@@ -44,6 +44,7 @@ class Venue(BaseModel):
     updated_at: datetime | None = None
     average_rating: float | None = None
     rating_count: int = 0
+    creator_alias: str | None = None
 
     model_config = {"from_attributes": True}
 

@@ -1,8 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { Star } from 'lucide-react';
+import { Pencil, Star } from 'lucide-react';
 import { Icon } from '@/components/ui/icon';
+import { useAuthStore } from '@/store/auth-store';
 import type { ApiVenue } from '@/types/venue';
 
 interface VenueCardProps {
@@ -12,6 +13,7 @@ interface VenueCardProps {
 const TYPE_LABEL: Record<string, string> = { indoor: 'Indoor', outdoor: 'Outdoor', hybrid: 'Hybrid' };
 
 export function VenueCard({ venue }: VenueCardProps) {
+  const user = useAuthStore((s) => s.user);
   const location = [venue.address_line, venue.city].filter(Boolean).join(', ');
   const typeLabel = TYPE_LABEL[venue.venue_type] ?? venue.venue_type;
 
@@ -70,6 +72,11 @@ export function VenueCard({ venue }: VenueCardProps) {
               <span>{venue.popularity_count} times used in events</span>
             </div>
           )}
+          {venue.creator_alias && (
+            <div className="text-text-mute font-mono text-[10px]">
+              Added by <span className="text-lime">@{venue.creator_alias}</span>
+            </div>
+          )}
         </div>
 
         {venue.amenities && venue.amenities.length > 0 && (
@@ -84,13 +91,22 @@ export function VenueCard({ venue }: VenueCardProps) {
 
         <div className="flex-1" />
 
-        <div className="border-line-soft border-t border-dashed pt-2.5">
+        <div className="border-line-soft border-t border-dashed pt-2.5 flex gap-2">
           <Link
             href={`/venues/${venue.id}`}
-            className="border-lime text-lime block w-full rounded-full border bg-[oklch(0.9_0.22_128_/_0.05)] px-3 py-2 text-center text-sm font-medium transition-all hover:bg-[oklch(0.9_0.22_128_/_0.12)] hover:shadow-[0_0_16px_-4px_oklch(0.7_0.2_130_/_0.5)]"
+            className="border-lime text-lime flex-1 block rounded-full border bg-[oklch(0.9_0.22_128_/_0.05)] px-3 py-2 text-center text-sm font-medium transition-all hover:bg-[oklch(0.9_0.22_128_/_0.12)] hover:shadow-[0_0_16px_-4px_oklch(0.7_0.2_130_/_0.5)]"
           >
             View Details
           </Link>
+          {user && !venue.is_partner && user.alias && venue.creator_alias === user.alias && (
+            <Link
+              href={`/venues/contribute/${venue.id}/edit`}
+              className="border-line-soft text-text-mute hover:border-text-mute hover:text-text flex items-center gap-1 rounded-full border px-3 py-2 text-sm font-medium transition-all"
+              title="Edit this venue"
+            >
+              <Pencil size={13} />
+            </Link>
+          )}
         </div>
       </div>
     </div>

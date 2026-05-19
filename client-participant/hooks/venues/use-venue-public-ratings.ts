@@ -19,7 +19,7 @@ export interface RatingPagination {
   has_previous: boolean;
 }
 
-export function useVenuePublicRatings(venueId: string, page = 1, pageSize = 10) {
+export function useVenuePublicRatings(venueId: string, page = 1, pageSize = 10, refreshKey = 0) {
   const [ratings, setRatings] = useState<PublicRating[]>([]);
   const [pagination, setPagination] = useState<RatingPagination | null>(null);
   const [loading, setLoading] = useState(true);
@@ -46,7 +46,7 @@ export function useVenuePublicRatings(venueId: string, page = 1, pageSize = 10) 
       .finally(() => { if (!cancelled) setLoading(false); });
 
     return () => { cancelled = true; };
-  }, [venueId, page, pageSize]);
+  }, [venueId, page, pageSize, refreshKey]);
 
   return { ratings, pagination, loading, error };
 }

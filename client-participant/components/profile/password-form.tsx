@@ -13,11 +13,13 @@ const FIELDS: { key: FieldKey; label: string }[] = [
 
 const INPUT =
   'w-full rounded-xl border border-border bg-background px-4 py-3 pr-11 text-foreground placeholder-muted-foreground transition-all focus:border-primary focus:ring-2 focus:ring-primary/10 focus:outline-none';
+const INPUT_ERROR =
+  'w-full rounded-xl border border-destructive bg-background px-4 py-3 pr-11 text-foreground placeholder-muted-foreground transition-all focus:border-destructive focus:ring-2 focus:ring-destructive/10 focus:outline-none';
 
 const labelCls = 'mb-1.5 block font-mono text-[11px] tracking-[0.14em] uppercase text-muted-foreground';
 
 export function PasswordForm() {
-  const { form, show, saving, error, success, setValue, toggleShow, handleSubmit } = usePasswordForm();
+  const { form, show, saving, error, errors, success, setValue, toggleShow, handleSubmit } = usePasswordForm();
 
   return (
     <form onSubmit={handleSubmit} className="max-w-md space-y-5">
@@ -36,7 +38,7 @@ export function PasswordForm() {
               onChange={(e) => setValue(key, e.target.value)}
               required
               placeholder="••••••••"
-              className={INPUT}
+              className={errors[key] ? INPUT_ERROR : INPUT}
             />
             <button
               type="button"
@@ -46,6 +48,7 @@ export function PasswordForm() {
               {show[key] ? <EyeOff size={15} /> : <Eye size={15} />}
             </button>
           </div>
+          {errors[key] && <p className="text-destructive mt-1.5 text-[13px]">{errors[key]}</p>}
         </div>
       ))}
 

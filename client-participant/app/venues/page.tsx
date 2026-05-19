@@ -1,22 +1,32 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Footer } from '@/components/footer/footer';
 import { Navbar } from '@/components/navigation/navbar';
-import { ActionBar, VenueGrid, Pagination, ReportModal, ContributionBanner, AddVenueModal } from '@/components/venue-hub';
+import { ActionBar, VenueGrid, Pagination, ReportModal, ContributionBanner } from '@/components/venue-hub';
 import { useVenueModals } from '@/hooks/use-venue-modals';
 import { useVenues } from '@/hooks/venues/use-venues';
-import { Venues } from '@/api';
-import { useAuthStore } from '@/store/auth-store';
-import { humanizeApiError } from '@/lib/api-error';
-import type { AddVenueFormData, ReportFormData } from '@/types';
+import type { ReportFormData } from '@/types';
 
 const PER_PAGE = 9;
 
 export default function VenuesPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const modals = useVenueModals();
-  const { accessToken } = useAuthStore();
-  const [addVenueSubmitting, setAddVenueSubmitting] = useState(false);
+
+  // Show success toast when returning from /venues/contribute or edit
+  useEffect(() => {
+    if (searchParams.get('contributed') === '1') {
+      modals.showToast('Venue submitted! It will be reviewed within 24 hours.');
+      router.replace('/venues');
+    } else if (searchParams.get('updated') === '1') {
+      modals.showToast('Venue updated successfully.');
+      router.replace('/venues');
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Partner venues state
   const [partnerSearch, setPartnerSearch] = useState('');
@@ -53,37 +63,8 @@ export default function VenuesPage() {
     loading: communityLoading,
   } = useVenues({ hub: 'contribute', search: communityDebouncedSearch, page: communityPage, pageSize: PER_PAGE });
 
-  async function handleAddVenue(data: AddVenueFormData) {
-    if (!accessToken) {
-      modals.showToast('Please sign in to contribute a venue.');
-      return;
-    }
-    setAddVenueSubmitting(true);
-    const { error } = await Venues.createCommunityVenueVenuesCommunityPost({
-      body: {
-        name: data.name,
-        address_line: data.address_line,
-        city: data.city,
-        province: data.province,
-        postal_code: '8000',
-        region: 'Region XI',
-        country: 'Philippines',
-        capacity: parseInt(data.capacity, 10),
-        venue_type: data.venue_type,
-        amenities: data.amenities,
-        description: data.description || null,
-        contact_name: data.contact_name || null,
-        contact_email: data.contact_email || null,
-      },
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
-    setAddVenueSubmitting(false);
-    if (error) {
-      modals.showToast(humanizeApiError((error as { message?: string })?.message, 'Failed to submit venue. Please try again.'));
-      return;
-    }
-    modals.closeAddVenue();
-    modals.showToast('Venue submitted! It will be reviewed within 24 hours.');
+  function goContribute() {
+    router.push('/venues/contribute');
   }
 
   const handleReportVenue = (data: ReportFormData) => {
@@ -170,7 +151,7 @@ export default function VenuesPage() {
         {/* ── Community Suggestions ── */}
         <div className="px-4 md:px-8">
           <div className="mx-auto max-w-[1240px] mb-8">
-            <ContributionBanner onAddVenue={modals.openAddVenue} />
+            <ContributionBanner onAddVenue={goContribute} />
           </div>
           <div className="mx-auto max-w-[1240px]">
             <div className="mb-1">
@@ -195,7 +176,7 @@ export default function VenuesPage() {
           onCapacityChange={() => {}}
           sortKey="rating"
           onSortChange={() => {}}
-          onAddVenue={modals.openAddVenue}
+          onAddVenue={goContribute}
         />
 
         <main className="px-4 pb-20 md:px-8">
@@ -221,7 +202,6 @@ export default function VenuesPage() {
       </div>
 
       {/* Modals */}
-      <AddVenueModal isOpen={modals.addVenueOpen} onClose={modals.closeAddVenue} onSubmit={handleAddVenue} submitting={addVenueSubmitting} />
       <ReportModal venue={modals.reportVenue} isOpen={Boolean(modals.reportVenue)} onClose={modals.closeReport} onSubmit={handleReportVenue} />
 
       {modals.toast && (

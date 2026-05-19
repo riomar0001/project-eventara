@@ -17,6 +17,7 @@ export type ApiVenueType = 'indoor' | 'outdoor' | 'hybrid';
 
 export interface ApiVenue {
   id: string;
+  creator_alias: string | null;
   image_url: string | null;
   name: string;
   description: string | null;

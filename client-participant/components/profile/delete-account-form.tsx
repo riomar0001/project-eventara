@@ -6,6 +6,8 @@ import { useDeleteAccount, DELETE_ACCOUNT_REASON_OPTIONS, DELETE_CONFIRMATION_WO
 
 const INPUT =
   'w-full rounded-xl border border-border bg-background px-4 py-3 text-foreground placeholder-muted-foreground transition-all focus:border-destructive focus:ring-2 focus:ring-destructive/10 focus:outline-none';
+const INPUT_ERROR =
+  'w-full rounded-xl border border-destructive bg-background px-4 py-3 text-foreground placeholder-muted-foreground transition-all focus:border-destructive focus:ring-2 focus:ring-destructive/10 focus:outline-none';
 
 const labelCls = 'mb-1.5 block font-mono text-[11px] tracking-[0.14em] uppercase text-muted-foreground';
 
@@ -17,6 +19,7 @@ export function DeleteAccountForm() {
     confirmation,
     submitting,
     error,
+    errors,
     scheduledDate,
     isOther,
     isConfirmed,
@@ -63,7 +66,7 @@ export function DeleteAccountForm() {
 
       <div>
         <label className={labelCls}>Why are you leaving?</label>
-        <select className={INPUT} value={reasonOption} onChange={(e) => setReasonOption(e.target.value as typeof reasonOption)}>
+        <select className={errors.reason ? INPUT_ERROR : INPUT} value={reasonOption} onChange={(e) => setReasonOption(e.target.value as typeof reasonOption)}>
           <option value="">Select a reason…</option>
           {DELETE_ACCOUNT_REASON_OPTIONS.map((r) => (
             <option key={r} value={r}>
@@ -71,18 +74,20 @@ export function DeleteAccountForm() {
             </option>
           ))}
         </select>
+        {errors.reason && <p className="text-destructive mt-1.5 text-[13px]">{errors.reason}</p>}
       </div>
 
       {isOther && (
         <div>
           <label className={labelCls}>Tell us more</label>
           <textarea
-            className={`${INPUT} resize-none`}
+            className={`${errors.otherReason ? INPUT_ERROR : INPUT} resize-none`}
             rows={3}
             placeholder="Describe your reason…"
             value={otherReason}
             onChange={(e) => setOtherReason(e.target.value)}
           />
+          {errors.otherReason && <p className="text-destructive mt-1.5 text-[13px]">{errors.otherReason}</p>}
         </div>
       )}
 
@@ -90,7 +95,7 @@ export function DeleteAccountForm() {
         <label className={labelCls}>Current password</label>
         <div className="relative">
           <input
-            className={`${INPUT} pr-11`}
+            className={`${errors.password ? INPUT_ERROR : INPUT} pr-11`}
             type={showPassword ? 'text' : 'password'}
             placeholder="Enter your current password"
             value={currentPassword}
@@ -105,6 +110,7 @@ export function DeleteAccountForm() {
             {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
           </button>
         </div>
+        {errors.password && <p className="text-destructive mt-1.5 text-[13px]">{errors.password}</p>}
       </div>
 
       <div>

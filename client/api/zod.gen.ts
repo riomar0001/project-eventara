@@ -3,6 +3,15 @@
 import * as z from 'zod';
 
 /**
+ * AccountAgeDistributionResponse
+ */
+export const zAccountAgeDistributionResponse = z.object({
+    bucket: z.string(),
+    count: z.int(),
+    percentage: z.number().nullish()
+});
+
+/**
  * ActionType
  */
 export const zActionType = z.enum([
@@ -119,6 +128,18 @@ export const zAssignVolunteerRequest = z.object({
 });
 
 /**
+ * AttendanceRateResponse
+ */
+export const zAttendanceRateResponse = z.object({
+    session_id: z.uuid(),
+    session_title: z.string(),
+    event_id: z.uuid(),
+    registered_count: z.int(),
+    attended_count: z.int(),
+    attendance_rate_pct: z.number().nullish()
+});
+
+/**
  * AttendedEventResponse
  */
 export const zAttendedEventResponse = z.object({
@@ -132,7 +153,8 @@ export const zAttendedEventResponse = z.object({
     session_title: z.string(),
     session_start_datetime: z.iso.datetime(),
     session_end_datetime: z.iso.datetime(),
-    attended_at: z.iso.datetime().nullish()
+    attended_at: z.iso.datetime().nullish(),
+    status: z.string().optional().default('attended')
 });
 
 /**
@@ -156,6 +178,29 @@ export const zAuditLogResponse = z.object({
     old_values: z.record(z.string(), z.unknown()).nullable(),
     new_values: z.record(z.string(), z.unknown()).nullable(),
     additional_context: z.record(z.string(), z.unknown()).nullable()
+});
+
+/**
+ * BrowserBreakdownResponse
+ */
+export const zBrowserBreakdownResponse = z.object({
+    browser: z.string(),
+    count: z.int(),
+    percentage: z.number().nullish()
+});
+
+/**
+ * CancelledEventReportResponse
+ */
+export const zCancelledEventReportResponse = z.object({
+    event_id: z.uuid(),
+    event_title: z.string(),
+    cancelled_at: z.iso.datetime().nullish(),
+    created_by: z.uuid(),
+    creator_first_name: z.string().nullish(),
+    creator_last_name: z.string().nullish(),
+    creator_alias: z.string().nullish(),
+    session_count: z.int()
 });
 
 /**
@@ -212,6 +257,15 @@ export const zCheckAliasResponse = z.object({
  */
 export const zCheckInParticipantQrCodeRequest = z.object({
     token: z.string()
+});
+
+/**
+ * CityParticipationResponse
+ */
+export const zCityParticipationResponse = z.object({
+    city: z.string(),
+    country: z.string().nullish(),
+    participant_count: z.int()
 });
 
 /**
@@ -276,6 +330,15 @@ export const zDeleteJobResponse = z.object({
 });
 
 /**
+ * DeviceBreakdownResponse
+ */
+export const zDeviceBreakdownResponse = z.object({
+    device_type: z.string(),
+    count: z.int(),
+    percentage: z.number().nullish()
+});
+
+/**
  * EducationLevel
  */
 export const zEducationLevel = z.enum([
@@ -295,11 +358,37 @@ export const zEducationLevel = z.enum([
 ]);
 
 /**
+ * EndedEventSummaryResponse
+ */
+export const zEndedEventSummaryResponse = z.object({
+    event_id: z.uuid(),
+    event_title: z.string(),
+    start_date: z.iso.datetime(),
+    end_date: z.iso.datetime(),
+    total_registered: z.int(),
+    total_attended: z.int(),
+    total_no_show: z.int(),
+    total_cancelled: z.int(),
+    average_feedback: z.number().nullish()
+});
+
+/**
  * ErrorResponse
  */
 export const zErrorResponse = z.object({
     success: z.boolean().optional().default(false),
     message: z.string()
+});
+
+/**
+ * EventAttendanceRateResponse
+ */
+export const zEventAttendanceRateResponse = z.object({
+    event_id: z.uuid(),
+    event_title: z.string(),
+    registered_count: z.int(),
+    attended_count: z.int(),
+    attendance_rate_pct: z.number().nullish()
 });
 
 /**
@@ -360,6 +449,15 @@ export const zEventFeedbackResponse = z.object({
     success: z.boolean().optional().default(true),
     message: z.string().optional().default('Event feedback submitted successfully.'),
     data: zEventFeedbackRecordResponse
+});
+
+/**
+ * EventInterestCategoryResponse
+ */
+export const zEventInterestCategoryResponse = z.object({
+    category: z.string().nullish(),
+    event_count: z.int(),
+    registration_count: z.int()
 });
 
 /**
@@ -512,6 +610,7 @@ export const zEventSessionRecordResponse = z.object({
     end_datetime: z.iso.datetime(),
     status: z.string(),
     max_slots: z.int().nullable(),
+    registered_count: z.int().optional().default(0),
     created_at: z.iso.datetime().nullable(),
     updated_at: z.iso.datetime().nullable()
 });
@@ -604,6 +703,15 @@ export const zEventStatus = z.enum([
     'ended',
     'postponed'
 ]);
+
+/**
+ * EventStatusTransitionResponse
+ */
+export const zEventStatusTransitionResponse = z.object({
+    period: z.string(),
+    status: z.string(),
+    count: z.int()
+});
 
 /**
  * EventStatusUpdateRequest
@@ -758,6 +866,48 @@ export const zFeatureUpdateRequest = z.object({
 });
 
 /**
+ * FeedbackCompletenessResponse
+ */
+export const zFeedbackCompletenessResponse = z.object({
+    event_id: z.uuid(),
+    event_title: z.string(),
+    attended_count: z.int(),
+    feedback_count: z.int(),
+    completeness_rate_pct: z.number().nullish()
+});
+
+/**
+ * FeedbackScoreSummaryResponse
+ */
+export const zFeedbackScoreSummaryResponse = z.object({
+    event_id: z.uuid(),
+    event_title: z.string(),
+    average_rating: z.number().nullish(),
+    total_feedback_count: z.int()
+});
+
+/**
+ * FeedbackTrendPointResponse
+ */
+export const zFeedbackTrendPointResponse = z.object({
+    event_id: z.uuid(),
+    event_title: z.string(),
+    end_date: z.iso.datetime(),
+    average_rating: z.number().nullish(),
+    feedback_count: z.int()
+});
+
+/**
+ * FirstTimeVsReturningResponse
+ */
+export const zFirstTimeVsReturningResponse = z.object({
+    event_id: z.uuid(),
+    event_title: z.string(),
+    first_time_count: z.int(),
+    returning_count: z.int()
+});
+
+/**
  * ForgotPasswordRequest
  */
 export const zForgotPasswordRequest = z.object({
@@ -776,6 +926,25 @@ export const zForgotPasswordResponse = z.object({
  * Gender
  */
 export const zGender = z.enum(['male', 'female']);
+
+/**
+ * GenderDistributionResponse
+ */
+export const zGenderDistributionResponse = z.object({
+    gender: z.string(),
+    count: z.int(),
+    percentage: z.number().nullish()
+});
+
+/**
+ * GeographicSpreadResponse
+ */
+export const zGeographicSpreadResponse = z.object({
+    city: z.string(),
+    latitude: z.number().nullish(),
+    longitude: z.number().nullish(),
+    participant_count: z.int()
+});
 
 /**
  * GrantEffect
@@ -802,6 +971,36 @@ export const zGrantFeatureListResponse = z.object({
 });
 
 /**
+ * HomeEventWithSessions
+ */
+export const zHomeEventWithSessions = z.object({
+    id: z.uuid(),
+    title: z.string(),
+    description: z.string(),
+    start_date: z.iso.datetime(),
+    end_date: z.iso.datetime(),
+    status: z.string(),
+    banner_url: z.string().nullish(),
+    sessions: z.array(zEventSessionRecordResponse)
+});
+
+/**
+ * LateRegistrationResponse
+ */
+export const zLateRegistrationResponse = z.object({
+    participant_id: z.uuid(),
+    user_id: z.uuid(),
+    first_name: z.string().nullish(),
+    last_name: z.string().nullish(),
+    alias: z.string().nullish(),
+    session_id: z.uuid(),
+    session_title: z.string(),
+    event_id: z.uuid(),
+    registered_at: z.iso.datetime(),
+    session_started_at: z.iso.datetime()
+});
+
+/**
  * ListDeadJobsResponse
  */
 export const zListDeadJobsResponse = z.object({
@@ -811,6 +1010,62 @@ export const zListDeadJobsResponse = z.object({
     page: z.int(),
     limit: z.int(),
     total_pages: z.int()
+});
+
+/**
+ * LiveAttendanceResponse
+ */
+export const zLiveAttendanceResponse = z.object({
+    session_id: z.uuid(),
+    session_title: z.string(),
+    event_id: z.uuid(),
+    event_title: z.string(),
+    checked_in_count: z.int(),
+    max_slots: z.int().nullish(),
+    remaining_slots: z.int().nullish()
+});
+
+/**
+ * LiveCheckinEntryResponse
+ */
+export const zLiveCheckinEntryResponse = z.object({
+    participant_id: z.uuid(),
+    user_id: z.uuid(),
+    first_name: z.string().nullish(),
+    last_name: z.string().nullish(),
+    alias: z.string().nullish(),
+    session_id: z.uuid(),
+    session_title: z.string(),
+    event_id: z.uuid(),
+    event_title: z.string(),
+    checked_in_time: z.iso.datetime().nullish(),
+    checkin_method: z.string()
+});
+
+/**
+ * LiveEventData
+ */
+export const zLiveEventData = z.object({
+    event: zEventRecordResponse,
+    sessions: z.array(zEventSessionRecordResponse)
+});
+
+/**
+ * HomeEventsData
+ */
+export const zHomeEventsData = z.object({
+    live_event: zLiveEventData.nullable(),
+    events: z.array(zHomeEventWithSessions),
+    events_type: z.string()
+});
+
+/**
+ * HomeEventsResponse
+ */
+export const zHomeEventsResponse = z.object({
+    success: z.boolean().optional().default(true),
+    message: z.string().optional().default('Home events retrieved successfully.'),
+    data: zHomeEventsData
 });
 
 /**
@@ -891,6 +1146,104 @@ export const zLogoutResponse = z.object({
 });
 
 /**
+ * MyEventFeedbackStatusData
+ */
+export const zMyEventFeedbackStatusData = z.object({
+    is_checked_in: z.boolean(),
+    has_submitted_feedback: z.boolean()
+});
+
+/**
+ * MyEventFeedbackStatusResponse
+ */
+export const zMyEventFeedbackStatusResponse = z.object({
+    success: z.boolean().optional().default(true),
+    message: z.string().optional().default('Feedback status retrieved successfully.'),
+    data: zMyEventFeedbackStatusData
+});
+
+/**
+ * MyEventsResponse
+ */
+export const zMyEventsResponse = z.object({
+    success: z.boolean().optional().default(true),
+    message: z.string().optional().default('Events retrieved successfully.'),
+    data: z.array(zAttendedEventResponse)
+});
+
+/**
+ * MyQrTokenData
+ */
+export const zMyQrTokenData = z.object({
+    qr_token: z.string()
+});
+
+/**
+ * MyQrTokenResponse
+ */
+export const zMyQrTokenResponse = z.object({
+    success: z.boolean().optional().default(true),
+    message: z.string().optional().default('QR token retrieved.'),
+    data: zMyQrTokenData
+});
+
+/**
+ * MySessionRegistrationData
+ */
+export const zMySessionRegistrationData = z.object({
+    is_registered: z.boolean(),
+    status: z.string().nullish()
+});
+
+/**
+ * MySessionRegistrationResponse
+ */
+export const zMySessionRegistrationResponse = z.object({
+    success: z.boolean().optional().default(true),
+    message: z.string().optional().default('Session registration status retrieved.'),
+    data: zMySessionRegistrationData
+});
+
+/**
+ * OngoingPerformanceData
+ */
+export const zOngoingPerformanceData = z.object({
+    live_attendance: z.array(zLiveAttendanceResponse),
+    real_time_slot_availability: z.array(zLiveAttendanceResponse)
+});
+
+/**
+ * OngoingPerformanceResponse
+ */
+export const zOngoingPerformanceResponse = z.object({
+    success: z.boolean().optional().default(true),
+    message: z.string().optional().default('Ongoing performance data retrieved successfully'),
+    data: zOngoingPerformanceData
+});
+
+/**
+ * OrganizerOutputResponse
+ */
+export const zOrganizerOutputResponse = z.object({
+    organizer_id: z.uuid(),
+    first_name: z.string().nullish(),
+    last_name: z.string().nullish(),
+    alias: z.string().nullish(),
+    total_events_created: z.int(),
+    average_sessions_per_event: z.number().nullish(),
+    average_attendance_rate_pct: z.number().nullish()
+});
+
+/**
+ * OsBreakdownResponse
+ */
+export const zOsBreakdownResponse = z.object({
+    os: z.string(),
+    count: z.int(),
+    percentage: z.number().nullish()
+});
+
+/**
  * ParticipantLeaderboardResponse
  */
 export const zParticipantLeaderboardResponse = z.object({
@@ -899,6 +1252,50 @@ export const zParticipantLeaderboardResponse = z.object({
     alias: z.string().nullish(),
     profile_picture_url: z.string().nullish(),
     count: z.int()
+});
+
+/**
+ * PendingWithdrawalAlertResponse
+ */
+export const zPendingWithdrawalAlertResponse = z.object({
+    session_id: z.uuid(),
+    session_title: z.string(),
+    event_id: z.uuid(),
+    withdrawal_count: z.int()
+});
+
+/**
+ * PeriodComparisonResponse
+ */
+export const zPeriodComparisonResponse = z.object({
+    period_label: z.string(),
+    from_date: z.iso.datetime(),
+    to_date: z.iso.datetime(),
+    total_events: z.int(),
+    total_registered: z.int(),
+    total_attended: z.int(),
+    average_attendance_rate_pct: z.number().nullish(),
+    average_feedback: z.number().nullish()
+});
+
+/**
+ * HistoricalEventDataData
+ */
+export const zHistoricalEventDataData = z.object({
+    ended_events: z.array(zEndedEventSummaryResponse),
+    cancelled_events: z.array(zCancelledEventReportResponse),
+    feedback_completeness: z.array(zFeedbackCompletenessResponse),
+    period_comparisons: z.array(zPeriodComparisonResponse).nullish(),
+    total_count: z.int()
+});
+
+/**
+ * HistoricalEventDataResponse
+ */
+export const zHistoricalEventDataResponse = z.object({
+    success: z.boolean().optional().default(true),
+    message: z.string().optional().default('Historical event data retrieved successfully'),
+    data: zHistoricalEventDataData
 });
 
 /**
@@ -936,6 +1333,47 @@ export const zProfileAvatarUploadResponse = z.object({
     data: zProfileAvatarData,
     upload: zProfileAvatarUploadData,
     access_token: z.string()
+});
+
+/**
+ * PublicEventDetailResponse
+ */
+export const zPublicEventDetailResponse = z.object({
+    success: z.boolean().optional().default(true),
+    message: z.string().optional().default('Event retrieved successfully.'),
+    data: zHomeEventWithSessions
+});
+
+/**
+ * PublicEventsListData
+ */
+export const zPublicEventsListData = z.object({
+    events: z.array(zHomeEventWithSessions),
+    total: z.int(),
+    page: z.int(),
+    page_size: z.int(),
+    total_pages: z.int(),
+    events_type: z.string()
+});
+
+/**
+ * PublicEventsListResponse
+ */
+export const zPublicEventsListResponse = z.object({
+    success: z.boolean().optional().default(true),
+    message: z.string().optional().default('Events retrieved successfully.'),
+    data: zPublicEventsListData
+});
+
+/**
+ * PublicVenueRatingRecordResponse
+ */
+export const zPublicVenueRatingRecordResponse = z.object({
+    id: z.uuid(),
+    alias: z.string(),
+    rating: z.int(),
+    comment: z.string().nullable(),
+    created_at: z.iso.datetime().nullable()
 });
 
 /**
@@ -991,6 +1429,37 @@ export const zRegisterResponse = z.object({
     email: z.string(),
     message: z.string().optional().default('Registration successful. Please verify your email.'),
     verification_token: z.string().nullish()
+});
+
+/**
+ * RegistrationLogisticsEntryResponse
+ */
+export const zRegistrationLogisticsEntryResponse = z.object({
+    session_id: z.uuid(),
+    session_title: z.string(),
+    total_registrations: z.int(),
+    cancelled_count: z.int(),
+    cancellation_rate_pct: z.number().nullish(),
+    no_show_count: z.int(),
+    no_show_rate_pct: z.number().nullish(),
+    qr_checkin_count: z.int(),
+    manual_checkin_count: z.int()
+});
+
+/**
+ * RegistrationLogisticsData
+ */
+export const zRegistrationLogisticsData = z.object({
+    sessions: z.array(zRegistrationLogisticsEntryResponse)
+});
+
+/**
+ * RegistrationLogisticsResponse
+ */
+export const zRegistrationLogisticsResponse = z.object({
+    success: z.boolean().optional().default(true),
+    message: z.string().optional().default('Registration logistics retrieved successfully'),
+    data: zRegistrationLogisticsData
 });
 
 /**
@@ -1205,6 +1674,95 @@ export const zSendUserPasswordResetResponse = z.object({
 });
 
 /**
+ * SessionProgressResponse
+ */
+export const zSessionProgressResponse = z.object({
+    session_id: z.uuid(),
+    session_title: z.string(),
+    event_id: z.uuid(),
+    event_title: z.string(),
+    start_datetime: z.iso.datetime(),
+    end_datetime: z.iso.datetime(),
+    elapsed_pct: z.number()
+});
+
+/**
+ * SessionStatusDistributionResponse
+ */
+export const zSessionStatusDistributionResponse = z.object({
+    status: z.string(),
+    count: z.int()
+});
+
+/**
+ * SessionTimelineEntryResponse
+ */
+export const zSessionTimelineEntryResponse = z.object({
+    session_id: z.uuid(),
+    session_title: z.string(),
+    event_id: z.uuid(),
+    event_title: z.string(),
+    venue_id: z.uuid(),
+    venue_name: z.string(),
+    start_datetime: z.iso.datetime(),
+    end_datetime: z.iso.datetime(),
+    status: z.string()
+});
+
+/**
+ * SessionTimelineData
+ */
+export const zSessionTimelineData = z.object({
+    ongoing: z.array(zSessionTimelineEntryResponse),
+    upcoming: z.array(zSessionTimelineEntryResponse),
+    completed: z.array(zSessionTimelineEntryResponse)
+});
+
+/**
+ * SessionTimelineResponse
+ */
+export const zSessionTimelineResponse = z.object({
+    success: z.boolean().optional().default(true),
+    message: z.string().optional().default('Session timeline retrieved successfully'),
+    data: zSessionTimelineData
+});
+
+/**
+ * SessionUtilisationResponse
+ */
+export const zSessionUtilisationResponse = z.object({
+    session_id: z.uuid(),
+    session_title: z.string(),
+    checked_in: z.int(),
+    max_slots: z.int().nullish(),
+    utilisation_pct: z.number().nullish(),
+    over_capacity: z.boolean().optional().default(false)
+});
+
+/**
+ * SessionVenueAssignmentResponse
+ */
+export const zSessionVenueAssignmentResponse = z.object({
+    session_id: z.uuid(),
+    session_title: z.string(),
+    venue_id: z.uuid(),
+    venue_name: z.string(),
+    venue_city: z.string().nullish(),
+    venue_capacity: z.int()
+});
+
+/**
+ * StartedEventSummaryResponse
+ */
+export const zStartedEventSummaryResponse = z.object({
+    event_id: z.uuid(),
+    event_title: z.string(),
+    session_count: z.int(),
+    checked_in_count: z.int(),
+    remaining_slots: z.int().nullish()
+});
+
+/**
  * SubmitAppFeedbackRequest
  */
 export const zSubmitAppFeedbackRequest = z.object({
@@ -1226,6 +1784,16 @@ export const zSubmitAppFeedbackResponse = z.object({
  */
 export const zSubmitApplicationRequest = z.object({
     application_data: z.record(z.string(), z.unknown()).nullish()
+});
+
+/**
+ * TopRatedEventResponse
+ */
+export const zTopRatedEventResponse = z.object({
+    event_id: z.uuid(),
+    event_title: z.string(),
+    average_rating: z.number(),
+    feedback_count: z.int()
 });
 
 /**
@@ -1549,6 +2117,39 @@ export const zVenueCapacityResponse = z.object({
 });
 
 /**
+ * VenueCapacityVsRegistrationResponse
+ */
+export const zVenueCapacityVsRegistrationResponse = z.object({
+    session_id: z.uuid(),
+    session_title: z.string(),
+    venue_capacity: z.int(),
+    registered_count: z.int()
+});
+
+/**
+ * EventLogisticsOverviewData
+ */
+export const zEventLogisticsOverviewData = z.object({
+    event_id: z.uuid(),
+    event_title: z.string(),
+    total_sessions: z.int(),
+    scheduled_dates: z.array(z.iso.datetime()),
+    venue_assignments: z.array(zSessionVenueAssignmentResponse),
+    session_utilisation: z.array(zSessionUtilisationResponse),
+    over_capacity_sessions: z.array(zSessionUtilisationResponse),
+    venue_capacity_vs_registrations: z.array(zVenueCapacityVsRegistrationResponse)
+});
+
+/**
+ * EventLogisticsOverviewResponse
+ */
+export const zEventLogisticsOverviewResponse = z.object({
+    success: z.boolean().optional().default(true),
+    message: z.string().optional().default('Event logistics overview retrieved successfully'),
+    data: zEventLogisticsOverviewData
+});
+
+/**
  * VenueImageUploadData
  */
 export const zVenueImageUploadData = z.object({
@@ -1623,6 +2224,15 @@ export const zVenueRatingPaginationResponse = z.object({
 });
 
 /**
+ * PublicVenueRatingListResponse
+ */
+export const zPublicVenueRatingListResponse = z.object({
+    success: z.boolean().optional().default(true),
+    data: z.array(zPublicVenueRatingRecordResponse),
+    pagination: zVenueRatingPaginationResponse
+});
+
+/**
  * VenueRatingRecordResponse
  */
 export const zVenueRatingRecordResponse = z.object({
@@ -1685,7 +2295,7 @@ export const zCommunityVenueCreateRequest = z.object({
     postal_code: z.string().min(1).max(20),
     region: z.string().min(1).max(100),
     country: z.string().min(1).max(100),
-    capacity: z.int().gt(0),
+    capacity: z.int().gt(0).lte(1000000),
     venue_type: zVenueType,
     amenities: z.array(z.string()).nullish(),
     contact_name: z.string().max(255).nullish(),
@@ -1708,7 +2318,7 @@ export const zOfficialVenueCreateRequest = z.object({
     postal_code: z.string().min(1).max(20),
     region: z.string().min(1).max(100),
     country: z.string().min(1).max(100),
-    capacity: z.int().gt(0),
+    capacity: z.int().gt(0).lte(1000000),
     venue_type: zVenueType,
     amenities: z.array(z.string()).nullish(),
     contact_name: z.string().min(1).max(255),
@@ -1721,6 +2331,7 @@ export const zOfficialVenueCreateRequest = z.object({
  */
 export const zPublicVenueRecordResponse = z.object({
     id: z.uuid(),
+    creator_alias: z.string().nullish(),
     image_url: z.string().nullish(),
     name: z.string(),
     description: z.string().nullable(),
@@ -1737,7 +2348,9 @@ export const zPublicVenueRecordResponse = z.object({
     is_partner: z.boolean(),
     amenities: z.array(z.string()).nullable(),
     created_at: z.iso.datetime().nullable(),
-    updated_at: z.iso.datetime().nullable()
+    updated_at: z.iso.datetime().nullable(),
+    average_rating: z.number().nullish(),
+    rating_count: z.int().optional().default(0)
 });
 
 /**
@@ -1770,7 +2383,7 @@ export const zSuggestedVenueUpdateRequest = z.object({
     postal_code: z.string().min(1).max(20),
     region: z.string().min(1).max(100),
     country: z.string().min(1).max(100),
-    capacity: z.int().gt(0),
+    capacity: z.int().gt(0).lte(1000000),
     venue_type: zVenueType,
     amenities: z.array(z.string()).nullish(),
     contact_name: z.string().max(255).nullish(),
@@ -1784,6 +2397,7 @@ export const zSuggestedVenueUpdateRequest = z.object({
 export const zVenueRecordResponse = z.object({
     id: z.uuid(),
     creator_id: z.uuid(),
+    creator_alias: z.string().nullish(),
     image_url: z.string().nullish(),
     name: z.string(),
     description: z.string().nullable(),
@@ -1847,7 +2461,7 @@ export const zVenueUpdateRequest = z.object({
     postal_code: z.string().min(1).max(20),
     region: z.string().min(1).max(100),
     country: z.string().min(1).max(100),
-    capacity: z.int().gt(0),
+    capacity: z.int().gt(0).lte(1000000),
     venue_type: zVenueType,
     is_partner: z.boolean().optional().default(false),
     amenities: z.array(z.string()).nullish(),
@@ -1913,6 +2527,149 @@ export const zDashboardDataResponse = z.object({
     success: z.boolean().optional().default(true),
     message: z.string().optional().default('Dashboard data retrieved successfully'),
     data: zDashboardMetricsResponse
+});
+
+/**
+ * VolunteerOnDutyResponse
+ */
+export const zVolunteerOnDutyResponse = z.object({
+    volunteer_id: z.uuid(),
+    user_id: z.uuid(),
+    first_name: z.string().nullish(),
+    last_name: z.string().nullish(),
+    alias: z.string().nullish(),
+    contact_phone: z.string(),
+    role_name: z.string().nullish(),
+    event_id: z.uuid(),
+    event_title: z.string()
+});
+
+/**
+ * OngoingEventDataData
+ */
+export const zOngoingEventDataData = z.object({
+    started_events: z.array(zStartedEventSummaryResponse),
+    live_checkin_feed: z.array(zLiveCheckinEntryResponse),
+    volunteer_on_duty: z.array(zVolunteerOnDutyResponse),
+    session_progress: z.array(zSessionProgressResponse),
+    pending_withdrawals: z.array(zPendingWithdrawalAlertResponse),
+    late_registrations: z.array(zLateRegistrationResponse)
+});
+
+/**
+ * OngoingEventDataResponse
+ */
+export const zOngoingEventDataResponse = z.object({
+    success: z.boolean().optional().default(true),
+    message: z.string().optional().default('Ongoing event data retrieved successfully'),
+    data: zOngoingEventDataData
+});
+
+/**
+ * VolunteerPerformanceResponse
+ */
+export const zVolunteerPerformanceResponse = z.object({
+    volunteer_id: z.uuid(),
+    user_id: z.uuid(),
+    first_name: z.string().nullish(),
+    last_name: z.string().nullish(),
+    alias: z.string().nullish(),
+    role_name: z.string().nullish(),
+    joined_count: z.int(),
+    left_count: z.int()
+});
+
+/**
+ * EventPerformanceData
+ */
+export const zEventPerformanceData = z.object({
+    attendance_rates: z.array(zAttendanceRateResponse),
+    event_attendance_rates: z.array(zEventAttendanceRateResponse),
+    feedback_summaries: z.array(zFeedbackScoreSummaryResponse),
+    feedback_trend: z.array(zFeedbackTrendPointResponse),
+    top_rated_events: z.array(zTopRatedEventResponse),
+    volunteer_performance: z.array(zVolunteerPerformanceResponse),
+    organizer_output: z.array(zOrganizerOutputResponse),
+    session_status_distribution: z.array(zSessionStatusDistributionResponse),
+    repeat_attendee_rate_pct: z.number().nullish(),
+    average_registration_to_checkin_lead_time_hours: z.number().nullish()
+});
+
+/**
+ * EventPerformanceResponse
+ */
+export const zEventPerformanceResponse = z.object({
+    success: z.boolean().optional().default(true),
+    message: z.string().optional().default('Event performance data retrieved successfully'),
+    data: zEventPerformanceData
+});
+
+/**
+ * VolunteerRoleBreakdownResponse
+ */
+export const zVolunteerRoleBreakdownResponse = z.object({
+    role_name: z.string(),
+    count: z.int()
+});
+
+/**
+ * DemographicAnalyticsData
+ */
+export const zDemographicAnalyticsData = z.object({
+    device_breakdown: z.array(zDeviceBreakdownResponse),
+    os_breakdown: z.array(zOsBreakdownResponse),
+    browser_breakdown: z.array(zBrowserBreakdownResponse),
+    top_cities: z.array(zCityParticipationResponse),
+    account_age_distribution: z.array(zAccountAgeDistributionResponse),
+    volunteer_role_breakdown: z.array(zVolunteerRoleBreakdownResponse),
+    event_interest_categories: z.array(zEventInterestCategoryResponse),
+    first_time_vs_returning: z.array(zFirstTimeVsReturningResponse),
+    gender_distribution: z.array(zGenderDistributionResponse),
+    geographic_spread: z.array(zGeographicSpreadResponse)
+});
+
+/**
+ * DemographicAnalyticsResponse
+ */
+export const zDemographicAnalyticsResponse = z.object({
+    success: z.boolean().optional().default(true),
+    message: z.string().optional().default('Demographic analytics retrieved successfully'),
+    data: zDemographicAnalyticsData
+});
+
+/**
+ * VolunteerRosterEntryResponse
+ */
+export const zVolunteerRosterEntryResponse = z.object({
+    volunteer_id: z.uuid(),
+    user_id: z.uuid(),
+    first_name: z.string().nullish(),
+    last_name: z.string().nullish(),
+    alias: z.string().nullish(),
+    role_name: z.string().nullish(),
+    contact_phone: z.string().nullish(),
+    status: z.string()
+});
+
+/**
+ * VolunteerLogisticsData
+ */
+export const zVolunteerLogisticsData = z.object({
+    event_id: z.uuid(),
+    event_title: z.string(),
+    joined_volunteer_count: z.int(),
+    joined_volunteer_roster: z.array(zVolunteerRosterEntryResponse),
+    volunteer_to_participant_ratio: z.number().nullish(),
+    pending_volunteer_count: z.int()
+});
+
+/**
+ * VolunteerLogisticsResponse
+ */
+export const zVolunteerLogisticsResponse = z.object({
+    success: z.boolean().optional().default(true),
+    message: z.string().optional().default('Volunteer logistics retrieved successfully'),
+    data: zVolunteerLogisticsData
 });
 
 /**
@@ -1995,6 +2752,32 @@ export const zQueueStatsResponse = z.object({
 });
 
 /**
+ * YearOverYearAttendanceResponse
+ */
+export const zYearOverYearAttendanceResponse = z.object({
+    year: z.int(),
+    attended_count: z.int(),
+    growth_pct: z.number().nullish()
+});
+
+/**
+ * HistoricalPerformanceData
+ */
+export const zHistoricalPerformanceData = z.object({
+    year_over_year_attendance: z.array(zYearOverYearAttendanceResponse),
+    events_by_status_over_time: z.array(zEventStatusTransitionResponse)
+});
+
+/**
+ * HistoricalPerformanceResponse
+ */
+export const zHistoricalPerformanceResponse = z.object({
+    success: z.boolean().optional().default(true),
+    message: z.string().optional().default('Historical performance data retrieved successfully'),
+    data: zHistoricalPerformanceData
+});
+
+/**
  * PaginationMeta
  */
 export const zAppControllerSchemasAuditLogSchemaPaginationMeta = z.object({
@@ -2032,6 +2815,91 @@ export const zEventParticipantsResponse = z.object({
     data: z.array(zEventParticipantRecord),
     meta: zAppControllerSchemasEventParticipantSchemaPaginationMeta
 });
+
+export const zGetEventLogisticsOverviewAnalyticsLogisticsOverviewEventIdGetPath = z.object({
+    event_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zGetEventLogisticsOverviewAnalyticsLogisticsOverviewEventIdGetResponse = zEventLogisticsOverviewResponse;
+
+/**
+ * Successful Response
+ */
+export const zGetSessionTimelineAnalyticsLogisticsTimelineGetResponse = zSessionTimelineResponse;
+
+export const zGetVolunteerLogisticsAnalyticsLogisticsVolunteersEventIdGetPath = z.object({
+    event_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zGetVolunteerLogisticsAnalyticsLogisticsVolunteersEventIdGetResponse = zVolunteerLogisticsResponse;
+
+export const zGetRegistrationLogisticsAnalyticsLogisticsRegistrationsEventIdGetPath = z.object({
+    event_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zGetRegistrationLogisticsAnalyticsLogisticsRegistrationsEventIdGetResponse = zRegistrationLogisticsResponse;
+
+export const zGetEventPerformanceAnalyticsPerformanceEventGetQuery = z.object({
+    event_id: z.uuid().nullish(),
+    min_feedback_count: z.int().optional().default(3),
+    feedback_trend_limit: z.int().optional().default(12)
+});
+
+/**
+ * Successful Response
+ */
+export const zGetEventPerformanceAnalyticsPerformanceEventGetResponse = zEventPerformanceResponse;
+
+/**
+ * Successful Response
+ */
+export const zGetOngoingPerformanceAnalyticsPerformanceOngoingGetResponse = zOngoingPerformanceResponse;
+
+/**
+ * Successful Response
+ */
+export const zGetHistoricalPerformanceAnalyticsPerformanceHistoricalGetResponse = zHistoricalPerformanceResponse;
+
+export const zGetDemographicAnalyticsAnalyticsDemographicsGetQuery = z.object({
+    top_cities_limit: z.int().optional().default(10)
+});
+
+/**
+ * Successful Response
+ */
+export const zGetDemographicAnalyticsAnalyticsDemographicsGetResponse = zDemographicAnalyticsResponse;
+
+export const zGetOngoingEventDataAnalyticsOngoingGetQuery = z.object({
+    checkin_feed_limit: z.int().optional().default(50)
+});
+
+/**
+ * Successful Response
+ */
+export const zGetOngoingEventDataAnalyticsOngoingGetResponse = zOngoingEventDataResponse;
+
+export const zGetHistoricalEventDataAnalyticsHistoricalGetQuery = z.object({
+    from_date: z.iso.datetime().nullish(),
+    to_date: z.iso.datetime().nullish(),
+    organizer_id: z.uuid().nullish(),
+    venue_id: z.uuid().nullish(),
+    compare_from_date: z.iso.datetime().nullish(),
+    compare_to_date: z.iso.datetime().nullish()
+});
+
+/**
+ * Successful Response
+ */
+export const zGetHistoricalEventDataAnalyticsHistoricalGetResponse = zHistoricalEventDataResponse;
 
 export const zListAppFeedbackAppFeedbackGetQuery = z.object({
     page: z.int().gte(1).optional().default(1),
@@ -2185,6 +3053,15 @@ export const zGetEventsAttendedUserProfileEventsAttendedGetQuery = z.object({
  * Successful Response
  */
 export const zGetEventsAttendedUserProfileEventsAttendedGetResponse = zEventsAttendedResponse;
+
+export const zGetMyEventsUserProfileMyEventsGetQuery = z.object({
+    limit: z.int().gte(0).lte(50).optional().default(50)
+});
+
+/**
+ * Successful Response
+ */
+export const zGetMyEventsUserProfileMyEventsGetResponse = zMyEventsResponse;
 
 export const zUploadProfileAvatarUserProfileAvatarPatchBody = zProfileAvatarUploadRequest;
 
@@ -2658,6 +3535,20 @@ export const zCreateVenueRatingVenuesVenueIdRatingsPostPath = z.object({
  */
 export const zCreateVenueRatingVenuesVenueIdRatingsPostResponse = zVenueRatingResponse;
 
+export const zListPublicVenueRatingsVenuesVenueIdRatingsPublicGetPath = z.object({
+    venue_id: z.uuid()
+});
+
+export const zListPublicVenueRatingsVenuesVenueIdRatingsPublicGetQuery = z.object({
+    page: z.int().gte(1).optional().default(1),
+    page_size: z.int().gte(1).lte(100).optional().default(10)
+});
+
+/**
+ * Successful Response
+ */
+export const zListPublicVenueRatingsVenuesVenueIdRatingsPublicGetResponse = zPublicVenueRatingListResponse;
+
 export const zGetVenueRatingAverageVenuesVenueIdRatingsAverageGetPath = z.object({
     venue_id: z.uuid()
 });
@@ -2695,6 +3586,31 @@ export const zUpdateMyVenueRatingVenuesVenueIdRatingsMePatchPath = z.object({
  * Successful Response
  */
 export const zUpdateMyVenueRatingVenuesVenueIdRatingsMePatchResponse = zVenueRatingResponse;
+
+export const zGetPublicEventsEventsPublicGetQuery = z.object({
+    q: z.string().nullish(),
+    page: z.int().gte(1).optional().default(1),
+    page_size: z.int().gte(1).lte(50).optional().default(9)
+});
+
+/**
+ * Successful Response
+ */
+export const zGetPublicEventsEventsPublicGetResponse = zPublicEventsListResponse;
+
+/**
+ * Successful Response
+ */
+export const zGetHomeEventsEventsPublicHomeGetResponse = zHomeEventsResponse;
+
+export const zGetPublicEventDetailEventsPublicEventIdGetPath = z.object({
+    event_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zGetPublicEventDetailEventsPublicEventIdGetResponse = zPublicEventDetailResponse;
 
 export const zGetAllEventsEventsGetQuery = z.object({
     status: zEventStatus.nullish(),
@@ -2810,6 +3726,15 @@ export const zUploadEventBannerEventsEventIdBannerPostPath = z.object({
  */
 export const zUploadEventBannerEventsEventIdBannerPostResponse = zEventBannerUploadResponse;
 
+export const zGetMyFeedbackStatusEventsEventIdFeedbackMyStatusGetPath = z.object({
+    event_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zGetMyFeedbackStatusEventsEventIdFeedbackMyStatusGetResponse = zMyEventFeedbackStatusResponse;
+
 export const zListEventFeedbackEventsEventIdFeedbackGetPath = z.object({
     event_id: z.uuid()
 });
@@ -2860,6 +3785,16 @@ export const zWithdrawRegistrationEventsEventIdSessionSessionIdRegisterDeletePat
  */
 export const zWithdrawRegistrationEventsEventIdSessionSessionIdRegisterDeleteResponse = zWithdrawRegistrationResponse;
 
+export const zGetMySessionRegistrationStatusEventsEventIdSessionSessionIdRegisterGetPath = z.object({
+    event_id: z.uuid(),
+    session_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zGetMySessionRegistrationStatusEventsEventIdSessionSessionIdRegisterGetResponse = zMySessionRegistrationResponse;
+
 export const zRegisterForSessionEventsEventIdSessionSessionIdRegisterPostPath = z.object({
     event_id: z.uuid(),
     session_id: z.uuid()
@@ -2869,6 +3804,16 @@ export const zRegisterForSessionEventsEventIdSessionSessionIdRegisterPostPath = 
  * Successful Response
  */
 export const zRegisterForSessionEventsEventIdSessionSessionIdRegisterPostResponse = zRegisterForSessionResponse;
+
+export const zGetMyQrTokenEventsEventIdSessionSessionIdMyQrGetPath = z.object({
+    event_id: z.uuid(),
+    session_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zGetMyQrTokenEventsEventIdSessionSessionIdMyQrGetResponse = zMyQrTokenResponse;
 
 export const zUpdateParticipantStatusEventsEventIdSessionSessionIdParticipantsParticipantIdPatchBody = zUpdateParticipantStatusRequest;
 

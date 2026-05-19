@@ -16,9 +16,10 @@ interface ImageUploadProps {
   onFileSelected?: (file: File | null) => void;
   className?: string;
   disabled?: boolean;
+  hint?: string;
 }
 
-export function ImageUpload({ value, onChange, resourceType, resourceId, deferUpload, onFileSelected, className, disabled }: ImageUploadProps) {
+export function ImageUpload({ value, onChange, resourceType, resourceId, deferUpload, onFileSelected, className, disabled, hint }: ImageUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const { upload, isUploading } = useUpload();
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -91,8 +92,13 @@ export function ImageUpload({ value, onChange, resourceType, resourceId, deferUp
           type="button"
           onClick={() => inputRef.current?.click()}
           disabled={disabled || isUploading}
-          className="flex h-full w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-neutral-200 bg-neutral-50 transition-colors hover:border-neutral-400 hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50"
+          className="relative flex h-full w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-neutral-200 bg-neutral-50 transition-colors hover:border-neutral-400 hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50"
         >
+          {hint && (
+            <span className="absolute top-2.5 right-3 font-mono text-[10px] font-semibold tracking-[0.14em] text-neutral-400 select-none">
+              16 : 9
+            </span>
+          )}
           {isUploading ? (
             <>
               <Loader2 className="size-6 animate-spin text-neutral-400" />
@@ -109,6 +115,7 @@ export function ImageUpload({ value, onChange, resourceType, resourceId, deferUp
       )}
 
       {error && <p className="mt-1.5 text-sm text-red-600">{error}</p>}
+      {hint && <p className="mt-1.5 text-xs text-neutral-400">{hint}</p>}
     </div>
   );
 }

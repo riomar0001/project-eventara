@@ -114,6 +114,7 @@ def _to_venue_response(venue) -> VenueRecordResponse:
     return VenueRecordResponse(
         id=venue.id,
         creator_id=venue.creator_id,
+        creator_alias=venue.creator_alias,
         image_url=StorageService.public_url_for_object_key(venue.image_url),
         name=venue.name,
         description=venue.description,
@@ -140,6 +141,7 @@ def _to_venue_response(venue) -> VenueRecordResponse:
 def _to_public_venue_response(venue) -> PublicVenueRecordResponse:
     return PublicVenueRecordResponse(
         id=venue.id,
+        creator_alias=venue.creator_alias,
         image_url=StorageService.public_url_for_object_key(venue.image_url),
         name=venue.name,
         description=venue.description,

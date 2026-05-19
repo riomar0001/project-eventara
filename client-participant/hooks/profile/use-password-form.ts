@@ -6,16 +6,19 @@ import { humanizeApiError } from '@/lib/api-error';
 
 type PasswordForm = { current: string; next: string; confirm: string };
 type ShowState = { current: boolean; next: boolean; confirm: boolean };
+type FieldErrors = { current: string; next: string; confirm: string };
 
 export function usePasswordForm() {
   const [form, setForm] = useState<PasswordForm>({ current: '', next: '', confirm: '' });
   const [show, setShow] = useState<ShowState>({ current: false, next: false, confirm: false });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [errors, setErrors] = useState<FieldErrors>({ current: '', next: '', confirm: '' });
   const [success, setSuccess] = useState(false);
 
   function setValue(key: keyof PasswordForm, value: string) {
     setForm((prev) => ({ ...prev, [key]: value }));
+    if (errors[key]) setErrors((prev) => ({ ...prev, [key]: '' }));
     setError('');
     setSuccess(false);
   }
@@ -28,12 +31,11 @@ export function usePasswordForm() {
     e.preventDefault();
     setError('');
     setSuccess(false);
-    if (form.next.length < 8) {
-      setError('Your new password needs to be at least 8 characters long.');
-      return;
-    }
-    if (form.next !== form.confirm) {
-      setError("Those passwords don't match. Please double-check and try again.");
+    const nextErrors: FieldErrors = { current: '', next: '', confirm: '' };
+    if (form.next.length < 8) nextErrors.next = 'Your new password needs to be at least 8 characters long.';
+    if (form.next !== form.confirm) nextErrors.confirm = "Those passwords don't match. Please double-check and try again.";
+    if (nextErrors.next || nextErrors.confirm) {
+      setErrors(nextErrors);
       return;
     }
     setSaving(true);
@@ -51,7 +53,8 @@ export function usePasswordForm() {
 
     setSuccess(true);
     setForm({ current: '', next: '', confirm: '' });
+    setErrors({ current: '', next: '', confirm: '' });
   }
 
-  return { form, show, saving, error, success, setValue, toggleShow, handleSubmit };
+  return { form, show, saving, error, errors, success, setValue, toggleShow, handleSubmit };
 }

@@ -10,6 +10,7 @@ const NAV_LINKS = [
   { label: 'Home', href: '/' },
   { label: 'Events', href: '/events' },
   { label: 'Venue Hub', href: '/venues' },
+  { label: 'Volunteer', href: '/volunteer' },
   { label: 'About', href: '/#about' }
 ];
 

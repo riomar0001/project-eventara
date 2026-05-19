@@ -1927,6 +1927,10 @@ export type EventSessionRecordResponse = {
      */
     max_slots: number | null;
     /**
+     * Registered Count
+     */
+    registered_count?: number;
+    /**
      * Created At
      */
     created_at: string | null;
@@ -3095,6 +3099,31 @@ export type MyEventsResponse = {
 };
 
 /**
+ * MyQrTokenData
+ */
+export type MyQrTokenData = {
+    /**
+     * Qr Token
+     */
+    qr_token: string;
+};
+
+/**
+ * MyQrTokenResponse
+ */
+export type MyQrTokenResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Message
+     */
+    message?: string;
+    data: MyQrTokenData;
+};
+
+/**
  * MySessionRegistrationData
  */
 export type MySessionRegistrationData = {
@@ -3546,6 +3575,47 @@ export type PublicVenueListResponse = {
 };
 
 /**
+ * PublicVenueRatingListResponse
+ */
+export type PublicVenueRatingListResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Data
+     */
+    data: Array<PublicVenueRatingRecordResponse>;
+    pagination: VenueRatingPaginationResponse;
+};
+
+/**
+ * PublicVenueRatingRecordResponse
+ */
+export type PublicVenueRatingRecordResponse = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Alias
+     */
+    alias: string;
+    /**
+     * Rating
+     */
+    rating: number;
+    /**
+     * Comment
+     */
+    comment: string | null;
+    /**
+     * Created At
+     */
+    created_at: string | null;
+};
+
+/**
  * PublicVenueRecordResponse
  */
 export type PublicVenueRecordResponse = {
@@ -3553,6 +3623,10 @@ export type PublicVenueRecordResponse = {
      * Id
      */
     id: string;
+    /**
+     * Creator Alias
+     */
+    creator_alias?: string | null;
     /**
      * Image Url
      */
@@ -3618,6 +3692,14 @@ export type PublicVenueRecordResponse = {
      * Updated At
      */
     updated_at: string | null;
+    /**
+     * Average Rating
+     */
+    average_rating?: number | null;
+    /**
+     * Rating Count
+     */
+    rating_count?: number;
 };
 
 /**
@@ -5315,6 +5397,10 @@ export type VenueRecordResponse = {
      * Creator Id
      */
     creator_id: string;
+    /**
+     * Creator Alias
+     */
+    creator_alias?: string | null;
     /**
      * Image Url
      */
@@ -9169,6 +9255,49 @@ export type CreateVenueRatingVenuesVenueIdRatingsPostResponses = {
 
 export type CreateVenueRatingVenuesVenueIdRatingsPostResponse = CreateVenueRatingVenuesVenueIdRatingsPostResponses[keyof CreateVenueRatingVenuesVenueIdRatingsPostResponses];
 
+export type ListPublicVenueRatingsVenuesVenueIdRatingsPublicGetData = {
+    body?: never;
+    path: {
+        /**
+         * Venue Id
+         */
+        venue_id: string;
+    };
+    query?: {
+        /**
+         * Page
+         */
+        page?: number;
+        /**
+         * Page Size
+         */
+        page_size?: number;
+    };
+    url: '/venues/{venue_id}/ratings/public';
+};
+
+export type ListPublicVenueRatingsVenuesVenueIdRatingsPublicGetErrors = {
+    /**
+     * Venue not found
+     */
+    404: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListPublicVenueRatingsVenuesVenueIdRatingsPublicGetError = ListPublicVenueRatingsVenuesVenueIdRatingsPublicGetErrors[keyof ListPublicVenueRatingsVenuesVenueIdRatingsPublicGetErrors];
+
+export type ListPublicVenueRatingsVenuesVenueIdRatingsPublicGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: PublicVenueRatingListResponse;
+};
+
+export type ListPublicVenueRatingsVenuesVenueIdRatingsPublicGetResponse = ListPublicVenueRatingsVenuesVenueIdRatingsPublicGetResponses[keyof ListPublicVenueRatingsVenuesVenueIdRatingsPublicGetResponses];
+
 export type GetVenueRatingAverageVenuesVenueIdRatingsAverageGetData = {
     body?: never;
     path: {
@@ -10229,6 +10358,48 @@ export type RegisterForSessionEventsEventIdSessionSessionIdRegisterPostResponses
 };
 
 export type RegisterForSessionEventsEventIdSessionSessionIdRegisterPostResponse = RegisterForSessionEventsEventIdSessionSessionIdRegisterPostResponses[keyof RegisterForSessionEventsEventIdSessionSessionIdRegisterPostResponses];
+
+export type GetMyQrTokenEventsEventIdSessionSessionIdMyQrGetData = {
+    body?: never;
+    path: {
+        /**
+         * Event Id
+         */
+        event_id: string;
+        /**
+         * Session Id
+         */
+        session_id: string;
+    };
+    query?: never;
+    url: '/events/{event_id}/session/{session_id}/my-qr';
+};
+
+export type GetMyQrTokenEventsEventIdSessionSessionIdMyQrGetErrors = {
+    /**
+     * Missing or invalid Bearer token
+     */
+    401: ErrorResponse;
+    /**
+     * Event session not found
+     */
+    404: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetMyQrTokenEventsEventIdSessionSessionIdMyQrGetError = GetMyQrTokenEventsEventIdSessionSessionIdMyQrGetErrors[keyof GetMyQrTokenEventsEventIdSessionSessionIdMyQrGetErrors];
+
+export type GetMyQrTokenEventsEventIdSessionSessionIdMyQrGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: MyQrTokenResponse;
+};
+
+export type GetMyQrTokenEventsEventIdSessionSessionIdMyQrGetResponse = GetMyQrTokenEventsEventIdSessionSessionIdMyQrGetResponses[keyof GetMyQrTokenEventsEventIdSessionSessionIdMyQrGetResponses];
 
 export type UpdateParticipantStatusEventsEventIdSessionSessionIdParticipantsParticipantIdPatchData = {
     body: UpdateParticipantStatusRequest;

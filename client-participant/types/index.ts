@@ -1,7 +1,7 @@
 /**
  * Form types
  */
-import { VenueType, Amenity } from './venue';
+import { ApiVenueType, Amenity } from './venue';
 
 export interface AddVenueFormData {
   name: string;
@@ -9,7 +9,7 @@ export interface AddVenueFormData {
   city: string;
   province: string;
   capacity: string;
-  venue_type: VenueType;
+  venue_type: ApiVenueType;
   amenities: Amenity[];
   description?: string;
   contact_name?: string;

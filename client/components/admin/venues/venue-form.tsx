@@ -225,6 +225,7 @@ export function VenueForm({ mode, suggestedVenue = false, venue }: { mode: 'crea
                       onFileSelected={setPendingImageFile}
                       disabled={isSubmitting}
                       className="aspect-video w-full"
+                      hint="Use a 16:9 image for the best result (e.g. 1280 × 720 px)."
                     />
                   </div>
 
@@ -248,6 +249,7 @@ export function VenueForm({ mode, suggestedVenue = false, venue }: { mode: 'crea
                       id="venue-capacity"
                       type="number"
                       min={1}
+                      max={1_000_000}
                       value={form.capacity}
                       onChange={(e) => set('capacity', e.target.value)}
                       placeholder="250"

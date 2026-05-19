@@ -17,7 +17,7 @@ class _VenueBaseRequest(BaseModel):
     postal_code: str = Field(min_length=1, max_length=20)
     region: str = Field(min_length=1, max_length=100)
     country: str = Field(min_length=1, max_length=100)
-    capacity: int = Field(gt=0)
+    capacity: int = Field(gt=0, le=1_000_000)
     venue_type: VenueType
     amenities: list[str] | None = None
 
@@ -69,7 +69,7 @@ class VenueUpdateRequest(BaseModel):
     postal_code: str = Field(min_length=1, max_length=20)
     region: str = Field(min_length=1, max_length=100)
     country: str = Field(min_length=1, max_length=100)
-    capacity: int = Field(gt=0)
+    capacity: int = Field(gt=0, le=1_000_000)
     venue_type: VenueType
     is_partner: bool = False
     amenities: list[str] | None = None
@@ -88,6 +88,7 @@ class VenueUpdateRequest(BaseModel):
 class VenueRecordResponse(BaseModel):
     id: uuid.UUID
     creator_id: uuid.UUID
+    creator_alias: str | None = None
     image_url: str | None = None
     name: str
     description: str | None
@@ -135,6 +136,7 @@ class VenueListResponse(BaseModel):
 
 class PublicVenueRecordResponse(BaseModel):
     id: uuid.UUID
+    creator_alias: str | None = None
     image_url: str | None = None
     name: str
     description: str | None

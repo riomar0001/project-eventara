@@ -87,7 +87,6 @@ export function useVenueRating(venueId: string | null): UseVenueRatingReturn {
       const json = await res.json();
       if (!res.ok) { setError(humanizeApiError(json.message, "Couldn't submit your rating. Please try again.")); return false; }
       setMyRating({ id: json.data.id, rating: json.data.rating, comment: json.data.comment });
-      setAverage(null);
       setCount((c) => c + 1);
       // Refresh average
       fetch(`/api/venues/${venueId}/ratings/average`)

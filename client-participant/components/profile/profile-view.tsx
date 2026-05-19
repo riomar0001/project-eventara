@@ -1,6 +1,6 @@
 'use client';
 
-import { Calendar, Settings, Loader2 } from 'lucide-react';
+import { Calendar, Settings, Loader2, Users } from 'lucide-react';
 import Link from 'next/link';
 import { useAuthStore } from '@/store/auth-store';
 import { useUserDetails } from '@/hooks/profile/use-user-details';
@@ -122,6 +122,30 @@ export function ProfileView() {
             <p className="text-muted-foreground mt-2 text-[13.5px] leading-relaxed">{bio}</p>
           </div>
         )}
+
+        <div className="border-primary/20 bg-primary/5 rounded-2xl border p-5">
+          <div className="mb-3 flex items-center gap-2.5">
+            <div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-xl">
+              <Users size={15} className="text-primary" />
+            </div>
+            <p className="text-foreground text-[13.5px] font-semibold">Volunteer Programme</p>
+          </div>
+          <p className="text-muted-foreground text-[12.5px] leading-relaxed">
+            Join the Eventara volunteer team and help shape memorable events for the Davao tech community.
+          </p>
+          <Link
+            href="/volunteer"
+            className="bg-primary text-primary-foreground mt-4 flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-[13px] font-semibold shadow-[0_6px_18px_-6px_var(--lime-glow)] transition-all hover:-translate-y-0.5"
+          >
+            Apply to volunteer
+          </Link>
+          <Link
+            href="/volunteer"
+            className="text-primary mt-2 flex w-full items-center justify-center gap-1.5 rounded-xl py-1.5 text-[12px] font-medium transition-all hover:underline"
+          >
+            Learn more →
+          </Link>
+        </div>
       </div>
 
       <div className="space-y-4">

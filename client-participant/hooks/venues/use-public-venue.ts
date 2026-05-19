@@ -6,6 +6,7 @@ import type { ApiVenue } from '@/types/venue';
 function toApiVenue(data: Record<string, unknown>): ApiVenue {
   return {
     id: data.id as string,
+    creator_alias: (data.creator_alias as string) ?? null,
     name: data.name as string,
     description: (data.description as string) ?? '',
     address_line: data.address_line as string,
@@ -20,6 +21,8 @@ function toApiVenue(data: Record<string, unknown>): ApiVenue {
     image_url: (data.image_url as string) ?? null,
     average_rating: (data.average_rating as number) ?? null,
     rating_count: (data.rating_count as number) ?? 0,
+    created_at: (data.created_at as string) ?? null,
+    updated_at: (data.updated_at as string) ?? null,
     orb: (data.is_partner as boolean) ? 'lime' : 'amber',
     angle: '135deg',
   };
