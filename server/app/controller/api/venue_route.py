@@ -79,6 +79,8 @@ from app.controller.schemas.venue_management_schema import (
     VenueUpdateRequest,
 )
 from app.controller.schemas.venue_rating_schema import (
+    PublicVenueRatingListResponse,
+    PublicVenueRatingRecordResponse,
     VenueRatingAverageData,
     VenueRatingAverageResponse,
     VenueRatingCreateRequest,
@@ -155,6 +157,8 @@ def _to_public_venue_response(venue) -> PublicVenueRecordResponse:
         amenities=venue.amenities,
         created_at=venue.created_at,
         updated_at=venue.updated_at,
+        average_rating=getattr(venue, "average_rating", None),
+        rating_count=getattr(venue, "rating_count", 0),
     )
 
 
@@ -957,6 +961,40 @@ async def list_venue_ratings(
 
     return VenueRatingListResponse(
         data=[_to_rating_response(r) for r in result.ratings],
+        pagination=_build_rating_pagination(result),
+    )
+
+
+@venue_router.get(
+    "/{venue_id}/ratings/public",
+    response_model=PublicVenueRatingListResponse,
+    status_code=status.HTTP_200_OK,
+    responses={**VENUE_NOT_FOUND},
+    summary="List public ratings for a venue (alias only)",
+    description="Return a paginated list of ratings showing only the submitter's alias. No authentication required.",
+)
+async def list_public_venue_ratings(
+    venue_id: uuid.UUID,
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=10, ge=1, le=100),
+    use_case: VenueRatingUseCase = Depends(get_venue_rating_use_case),
+) -> PublicVenueRatingListResponse:
+    try:
+        result = await use_case.list_public_ratings(ListVenueRatingsInput(venue_id=venue_id, page=page, page_size=page_size))
+    except VenueNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+
+    return PublicVenueRatingListResponse(
+        data=[
+            PublicVenueRatingRecordResponse(
+                id=r.id,
+                alias=r.alias,
+                rating=r.rating,
+                comment=r.comment,
+                created_at=r.created_at,
+            )
+            for r in result.ratings
+        ],
         pagination=_build_rating_pagination(result),
     )
 

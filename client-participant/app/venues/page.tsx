@@ -3,15 +3,20 @@
 import { useState, useEffect } from 'react';
 import { Footer } from '@/components/footer/footer';
 import { Navbar } from '@/components/navigation/navbar';
-import { ActionBar, VenueGrid, Pagination, VenueDetailModal, ReportModal, ContributionBanner } from '@/components/venue-hub';
+import { ActionBar, VenueGrid, Pagination, ReportModal, ContributionBanner, AddVenueModal } from '@/components/venue-hub';
 import { useVenueModals } from '@/hooks/use-venue-modals';
 import { useVenues } from '@/hooks/venues/use-venues';
-import type { ReportFormData } from '@/types';
+import { Venues } from '@/api';
+import { useAuthStore } from '@/store/auth-store';
+import { humanizeApiError } from '@/lib/api-error';
+import type { AddVenueFormData, ReportFormData } from '@/types';
 
 const PER_PAGE = 9;
 
 export default function VenuesPage() {
   const modals = useVenueModals();
+  const { accessToken } = useAuthStore();
+  const [addVenueSubmitting, setAddVenueSubmitting] = useState(false);
 
   // Partner venues state
   const [partnerSearch, setPartnerSearch] = useState('');
@@ -47,6 +52,39 @@ export default function VenuesPage() {
     pagination: communityPagination,
     loading: communityLoading,
   } = useVenues({ hub: 'contribute', search: communityDebouncedSearch, page: communityPage, pageSize: PER_PAGE });
+
+  async function handleAddVenue(data: AddVenueFormData) {
+    if (!accessToken) {
+      modals.showToast('Please sign in to contribute a venue.');
+      return;
+    }
+    setAddVenueSubmitting(true);
+    const { error } = await Venues.createCommunityVenueVenuesCommunityPost({
+      body: {
+        name: data.name,
+        address_line: data.address_line,
+        city: data.city,
+        province: data.province,
+        postal_code: '8000',
+        region: 'Region XI',
+        country: 'Philippines',
+        capacity: parseInt(data.capacity, 10),
+        venue_type: data.venue_type,
+        amenities: data.amenities,
+        description: data.description || null,
+        contact_name: data.contact_name || null,
+        contact_email: data.contact_email || null,
+      },
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    setAddVenueSubmitting(false);
+    if (error) {
+      modals.showToast(humanizeApiError((error as { message?: string })?.message, 'Failed to submit venue. Please try again.'));
+      return;
+    }
+    modals.closeAddVenue();
+    modals.showToast('Venue submitted! It will be reviewed within 24 hours.');
+  }
 
   const handleReportVenue = (data: ReportFormData) => {
     console.log('Report venue:', data);
@@ -111,7 +149,6 @@ export default function VenuesPage() {
               venues={partnerVenues}
               loading={partnerLoading}
               perPage={PER_PAGE}
-              onViewDetail={modals.openDetail}
             />
             {!partnerLoading && (partnerPagination?.total_pages ?? 0) > 1 && (
               <div className="mt-8">
@@ -133,7 +170,7 @@ export default function VenuesPage() {
         {/* ── Community Suggestions ── */}
         <div className="px-4 md:px-8">
           <div className="mx-auto max-w-[1240px] mb-8">
-            <ContributionBanner onAddVenue={() => {}} />
+            <ContributionBanner onAddVenue={modals.openAddVenue} />
           </div>
           <div className="mx-auto max-w-[1240px]">
             <div className="mb-1">
@@ -158,7 +195,7 @@ export default function VenuesPage() {
           onCapacityChange={() => {}}
           sortKey="rating"
           onSortChange={() => {}}
-          onAddVenue={() => {}}
+          onAddVenue={modals.openAddVenue}
         />
 
         <main className="px-4 pb-20 md:px-8">
@@ -167,7 +204,6 @@ export default function VenuesPage() {
               venues={communityVenues}
               loading={communityLoading}
               perPage={PER_PAGE}
-              onViewDetail={modals.openDetail}
             />
             {!communityLoading && (communityPagination?.total_pages ?? 0) > 1 && (
               <div className="mt-8">
@@ -185,7 +221,7 @@ export default function VenuesPage() {
       </div>
 
       {/* Modals */}
-      <VenueDetailModal venue={modals.detailVenue} isOpen={Boolean(modals.detailVenue)} onClose={modals.closeDetail} />
+      <AddVenueModal isOpen={modals.addVenueOpen} onClose={modals.closeAddVenue} onSubmit={handleAddVenue} submitting={addVenueSubmitting} />
       <ReportModal venue={modals.reportVenue} isOpen={Boolean(modals.reportVenue)} onClose={modals.closeReport} onSubmit={handleReportVenue} />
 
       {modals.toast && (

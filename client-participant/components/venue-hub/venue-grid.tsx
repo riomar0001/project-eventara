@@ -7,10 +7,9 @@ interface VenueGridProps {
   venues: ApiVenue[];
   loading?: boolean;
   perPage?: number;
-  onViewDetail: (v: ApiVenue) => void;
 }
 
-export function VenueGrid({ venues, loading, perPage = 9, onViewDetail }: VenueGridProps) {
+export function VenueGrid({ venues, loading, perPage = 9 }: VenueGridProps) {
   if (loading) {
     return (
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -34,7 +33,7 @@ export function VenueGrid({ venues, loading, perPage = 9, onViewDetail }: VenueG
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
       {venues.map((venue) => (
-        <VenueCard key={venue.id} venue={venue} onView={onViewDetail} />
+        <VenueCard key={venue.id} venue={venue} />
       ))}
     </div>
   );

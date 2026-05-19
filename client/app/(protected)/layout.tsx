@@ -3,9 +3,11 @@
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/auth-store';
+import NotFound from './(admin-dashboard)/not-found';
 
 export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
   const [isChecking, setIsChecking] = useState(true);
+  const [isDenied, setIsDenied] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -25,6 +27,12 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
 
       if (!isAuthenticated) {
         router.replace('/login');
+        return;
+      }
+
+      if (user?.role === 'participant') {
+        setIsDenied(true);
+        setIsChecking(false);
         return;
       }
 
@@ -49,6 +57,7 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
   }, [pathname, router]);
 
   if (isChecking) return null;
+  if (isDenied) return <NotFound hideActions />;
 
   return <>{children}</>;
 }

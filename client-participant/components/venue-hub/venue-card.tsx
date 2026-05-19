@@ -1,16 +1,17 @@
 'use client';
 
+import Link from 'next/link';
+import { Star } from 'lucide-react';
 import { Icon } from '@/components/ui/icon';
 import type { ApiVenue } from '@/types/venue';
 
 interface VenueCardProps {
   venue: ApiVenue;
-  onView: (v: ApiVenue) => void;
 }
 
 const TYPE_LABEL: Record<string, string> = { indoor: 'Indoor', outdoor: 'Outdoor', hybrid: 'Hybrid' };
 
-export function VenueCard({ venue, onView }: VenueCardProps) {
+export function VenueCard({ venue }: VenueCardProps) {
   const location = [venue.address_line, venue.city].filter(Boolean).join(', ');
   const typeLabel = TYPE_LABEL[venue.venue_type] ?? venue.venue_type;
 
@@ -36,8 +37,17 @@ export function VenueCard({ venue, onView }: VenueCardProps) {
           {typeLabel}
         </div>
 
+        {/* Rating badge */}
+        {venue.rating_count > 0 && venue.average_rating !== null && (
+          <div className="absolute top-3 right-3 flex items-center gap-1 rounded-full border border-[oklch(1_0_0_/_0.15)] bg-black/55 px-2.5 py-1 font-mono text-[10px] text-white/70 backdrop-blur-[8px]">
+            <Star size={10} className="fill-amber-400 text-amber-400" />
+            <span className="text-amber-400">{venue.average_rating.toFixed(1)}</span>
+            <span className="text-white/40">({venue.rating_count})</span>
+          </div>
+        )}
+
         {/* Capacity badge */}
-        <div className="absolute top-3 right-3 flex items-center gap-1 rounded-full border border-[oklch(1_0_0_/_0.15)] bg-black/55 px-2.5 py-1 font-mono text-[10px] text-white/70 backdrop-blur-[8px]">
+        <div className="absolute bottom-3 right-3 flex items-center gap-1 rounded-full border border-[oklch(1_0_0_/_0.15)] bg-black/55 px-2.5 py-1 font-mono text-[10px] text-white/70 backdrop-blur-[8px]">
           <Icon name="users" size={10} />
           {venue.capacity}
         </div>
@@ -75,12 +85,12 @@ export function VenueCard({ venue, onView }: VenueCardProps) {
         <div className="flex-1" />
 
         <div className="border-line-soft border-t border-dashed pt-2.5">
-          <button
-            onClick={() => onView(venue)}
-            className="border-lime text-lime w-full rounded-full border bg-[oklch(0.9_0.22_128_/_0.05)] px-3 py-2 text-sm font-medium transition-all hover:bg-[oklch(0.9_0.22_128_/_0.12)] hover:shadow-[0_0_16px_-4px_oklch(0.7_0.2_130_/_0.5)]"
+          <Link
+            href={`/venues/${venue.id}`}
+            className="border-lime text-lime block w-full rounded-full border bg-[oklch(0.9_0.22_128_/_0.05)] px-3 py-2 text-center text-sm font-medium transition-all hover:bg-[oklch(0.9_0.22_128_/_0.12)] hover:shadow-[0_0_16px_-4px_oklch(0.7_0.2_130_/_0.5)]"
           >
             View Details
-          </button>
+          </Link>
         </div>
       </div>
     </div>

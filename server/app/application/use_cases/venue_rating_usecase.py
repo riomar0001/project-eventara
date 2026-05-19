@@ -24,8 +24,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application.dto.venue_rating_dto import (
     CreateVenueRatingInput,
+    ListPublicVenueRatingsOutput,
     ListVenueRatingsInput,
     ListVenueRatingsOutput,
+    PublicVenueRatingRecord,
     UpdateVenueRatingInput,
     VenueAverageRatingOutput,
     VenueRatingOutput,
@@ -231,3 +233,26 @@ class VenueRatingUseCase:
             page=data.page,
             page_size=data.page_size,
         )
+
+    async def list_public_ratings(self, data: ListVenueRatingsInput) -> ListPublicVenueRatingsOutput:
+        """Return a paginated list of ratings with submitter alias only (no user_id).
+
+        Raises:
+            VenueNotFoundError: No venue exists for the given ID.
+        """
+        if not await self.repo.venue_exists(data.venue_id):
+            raise VenueNotFoundError()
+
+        pairs, total = await self.repo.list_by_venue_public(data.venue_id, page=data.page, page_size=data.page_size)
+        records = [
+            PublicVenueRatingRecord(
+                id=entity.id,
+                alias=alias,
+                venue_id=entity.venue_id,
+                rating=entity.rating,
+                comment=entity.comment,
+                created_at=entity.created_at,
+            )
+            for entity, alias in pairs
+        ]
+        return ListPublicVenueRatingsOutput(ratings=records, total_count=total, page=data.page, page_size=data.page_size)

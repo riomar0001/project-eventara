@@ -31,6 +31,8 @@ export interface ApiVenue {
   amenities: string[] | null;
   created_at: string | null;
   updated_at: string | null;
+  average_rating: number | null;
+  rating_count: number;
   orb: 'lime' | 'amber';
   angle: string;
 }

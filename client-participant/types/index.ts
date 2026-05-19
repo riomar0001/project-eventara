@@ -5,11 +5,15 @@ import { VenueType, Amenity } from './venue';
 
 export interface AddVenueFormData {
   name: string;
-  location: string;
+  address_line: string;
+  city: string;
+  province: string;
   capacity: string;
-  type: VenueType;
+  venue_type: VenueType;
   amenities: Amenity[];
-  notes?: string;
+  description?: string;
+  contact_name?: string;
+  contact_email?: string;
 }
 
 export interface ReportFormData {

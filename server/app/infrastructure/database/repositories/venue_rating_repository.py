@@ -19,6 +19,7 @@ import uuid
 
 from sqlalchemy import delete, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 from sqlalchemy.sql import func as sqlfunc
 
 from app.domain.entities.venue_entities import VenueRating as VenueRatingEntity
@@ -93,6 +94,28 @@ class VenueRatingRepository:
         )
         rows = data_result.scalars().all()
         return [self._to_entity(row) for row in rows], total
+
+    async def list_by_venue_public(
+        self,
+        venue_id: uuid.UUID,
+        *,
+        page: int,
+        page_size: int,
+    ) -> tuple[list[tuple[VenueRatingEntity, str]], int]:
+        """Return paginated ratings with the submitter's alias, newest first."""
+        count_result = await self.db.execute(select(func.count(VenueRating.id)).where(VenueRating.venue_id == venue_id))
+        total = count_result.scalar_one()
+
+        data_result = await self.db.execute(
+            select(VenueRating)
+            .options(selectinload(VenueRating.user))
+            .where(VenueRating.venue_id == venue_id)
+            .order_by(VenueRating.created_at.desc())
+            .offset((page - 1) * page_size)
+            .limit(page_size)
+        )
+        rows = data_result.scalars().all()
+        return [(self._to_entity(row), row.user.alias) for row in rows], total
 
     async def create(
         self,

@@ -256,18 +256,21 @@ class EventParticipantUseCase:
         return WithdrawRegistrationOutput(participant=updated, old_participant=old_participant)
 
     async def _assign_rbac_participant_role(self, user_id) -> None:
-        """Assign the platform 'participant' RBAC role to the user if available.
+        """Assign the platform 'participant' RBAC role to the user only if they
+        have no active role yet.
 
-        Silently skips if no RBAC role named 'participant' exists or if the user
-        already holds the assignment, so that missing platform configuration never
-        blocks event registration.
+        Silently skips if no RBAC role named 'participant' exists, if the user
+        already holds any active role assignment, or if the insert races another
+        concurrent request, so that missing platform configuration never blocks
+        event registration and existing roles (organizer, volunteer, etc.) are
+        never overridden.
         """
         rbac_role = await self.role_repo.get_role_by_name(_PARTICIPANT_RBAC_ROLE_NAME)
         if not rbac_role:
             return
 
-        existing = await self.role_repo.get_active_assignment(user_id, rbac_role.id)
-        if existing:
+        existing_assignments = await self.role_repo.get_active_assignments_for_user(user_id)
+        if existing_assignments:
             return
 
         try:

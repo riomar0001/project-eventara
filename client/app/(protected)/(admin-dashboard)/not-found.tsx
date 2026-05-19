@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
-export default function NotFound() {
+export default function NotFound({ hideActions }: { hideActions?: boolean } = {}) {
   const router = useRouter();
 
   return (
@@ -93,33 +93,35 @@ export default function NotFound() {
         </p>
       </div>
 
-      {/* Hairline divider */}
-      <div className="mt-8 mb-6 h-px w-10 rounded-full" style={{ background: 'color-mix(in oklch, var(--border) 80%, transparent)' }} />
-
-      {/* Action buttons */}
-      <div className="flex flex-col items-center gap-2.5 sm:flex-row">
-        <Link
-          href="/dashboard"
-          className="inline-flex h-9 items-center justify-center rounded-lg px-5 text-sm font-medium transition-all hover:opacity-90 active:scale-[0.98]"
-          style={{
-            background: 'var(--primary)',
-            color: 'var(--primary-foreground)'
-          }}
-        >
-          Go to dashboard
-        </Link>
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="inline-flex h-9 items-center justify-center rounded-lg border px-5 text-sm font-medium transition-all hover:bg-[color-mix(in_oklch,var(--muted)_60%,transparent)] active:scale-[0.98]"
-          style={{
-            borderColor: 'var(--border)',
-            color: 'var(--muted-foreground)'
-          }}
-        >
-          Go back
-        </button>
-      </div>
+      {!hideActions && (
+        <>
+        {/* Hairline divider */}
+        <div className="mt-8 mb-6 h-px w-10 rounded-full" style={{ background: 'color-mix(in oklch, var(--border) 80%, transparent)' }} />
+        <div className="flex flex-col items-center gap-2.5 sm:flex-row">
+          <Link
+            href="/dashboard"
+            className="inline-flex h-9 items-center justify-center rounded-lg px-5 text-sm font-medium transition-all hover:opacity-90 active:scale-[0.98]"
+            style={{
+              background: 'var(--primary)',
+              color: 'var(--primary-foreground)'
+            }}
+          >
+            Go to dashboard
+          </Link>
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="inline-flex h-9 items-center justify-center rounded-lg border px-5 text-sm font-medium transition-all hover:bg-[color-mix(in_oklch,var(--muted)_60%,transparent)] active:scale-[0.98]"
+            style={{
+              borderColor: 'var(--border)',
+              color: 'var(--muted-foreground)'
+            }}
+          >
+            Go back
+          </button>
+        </div>
+        </>
+      )}
     </div>
   );
 }

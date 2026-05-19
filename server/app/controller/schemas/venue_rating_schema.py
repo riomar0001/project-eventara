@@ -61,3 +61,19 @@ class VenueRatingAverageData(BaseModel):
 class VenueRatingAverageResponse(BaseModel):
     success: bool = True
     data: VenueRatingAverageData
+
+
+class PublicVenueRatingRecordResponse(BaseModel):
+    id: uuid.UUID
+    alias: str
+    rating: int
+    comment: str | None
+    created_at: datetime | None
+
+    model_config = {"from_attributes": True}
+
+
+class PublicVenueRatingListResponse(BaseModel):
+    success: bool = True
+    data: list[PublicVenueRatingRecordResponse]
+    pagination: VenueRatingPaginationResponse

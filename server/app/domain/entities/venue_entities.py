@@ -42,6 +42,8 @@ class Venue(BaseModel):
     contact_email: str | None = Field(default=None, max_length=255)
     created_at: datetime | None = None
     updated_at: datetime | None = None
+    average_rating: float | None = None
+    rating_count: int = 0
 
     model_config = {"from_attributes": True}
 

@@ -152,6 +152,8 @@ class PublicVenueRecordResponse(BaseModel):
     amenities: list[str] | None
     created_at: datetime | None
     updated_at: datetime | None
+    average_rating: float | None = None
+    rating_count: int = 0
 
     model_config = {"from_attributes": True}
 

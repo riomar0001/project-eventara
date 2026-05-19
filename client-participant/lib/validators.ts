@@ -7,16 +7,28 @@ export const validateAddVenueForm = (data: Partial<AddVenueFormData>): FormError
     errors.name = 'Please enter a venue name.';
   }
 
-  if (!data.location || data.location.trim().length === 0) {
-    errors.location = 'Please enter a location.';
+  if (!data.address_line || data.address_line.trim().length === 0) {
+    errors.address_line = 'Please enter the street address.';
+  }
+
+  if (!data.city || data.city.trim().length === 0) {
+    errors.city = 'Please enter the city.';
+  }
+
+  if (!data.province || data.province.trim().length === 0) {
+    errors.province = 'Please enter the province.';
   }
 
   if (!data.capacity || parseInt(data.capacity) <= 0) {
     errors.capacity = 'Capacity must be at least 1.';
   }
 
-  if (!data.type) {
-    errors.type = 'Please select a venue type.';
+  if (!data.venue_type) {
+    errors.venue_type = 'Please select a venue type.';
+  }
+
+  if (data.contact_email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.contact_email)) {
+    errors.contact_email = 'Please enter a valid email address.';
   }
 
   return errors;

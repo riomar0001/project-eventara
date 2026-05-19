@@ -44,6 +44,8 @@ export function useVenues({ hub, search, page, pageSize = 9 }: UseVenuesParams):
         if (json.success) {
           const venues: ApiVenue[] = (json.data as ApiVenue[]).map((v, i) => ({
             ...v,
+            average_rating: v.average_rating ?? null,
+            rating_count: v.rating_count ?? 0,
             orb: ORBS[i % ORBS.length],
             angle: ANGLES[i % ANGLES.length],
           }));

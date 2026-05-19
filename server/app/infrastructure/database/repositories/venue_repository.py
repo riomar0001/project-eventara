@@ -26,7 +26,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.entities.venue_entities import Venue as VenueEntity
 from app.domain.entities.venue_entities import VenueType
-from app.infrastructure.database.models.venue_models import Venue
+from app.infrastructure.database.models.venue_models import Venue, VenueRating
 
 
 class VenueRepository:
@@ -36,7 +36,7 @@ class VenueRepository:
         self.db = db
 
     @staticmethod
-    def _to_entity(orm: Venue) -> VenueEntity:
+    def _to_entity(orm: Venue, *, average_rating: float | None = None, rating_count: int = 0) -> VenueEntity:
         """Map a Venue ORM row to its domain entity representation."""
         return VenueEntity(
             id=orm.id,
@@ -61,6 +61,8 @@ class VenueRepository:
             contact_email=orm.contact_email,
             created_at=orm.created_at,
             updated_at=orm.updated_at,
+            average_rating=average_rating,
+            rating_count=rating_count,
         )
 
     async def list_venues(
@@ -83,7 +85,19 @@ class VenueRepository:
         Returns:
             A tuple of (venue entities for the current page, total matching count).
         """
-        query = select(Venue)
+        rating_subq = (
+            select(
+                VenueRating.venue_id,
+                func.avg(VenueRating.rating).label("avg_rating"),
+                func.count(VenueRating.id).label("rating_count"),
+            )
+            .group_by(VenueRating.venue_id)
+            .subquery()
+        )
+
+        query = select(Venue, rating_subq.c.avg_rating, rating_subq.c.rating_count).outerjoin(
+            rating_subq, rating_subq.c.venue_id == Venue.id
+        )
         count_query = select(func.count()).select_from(Venue)
 
         if search:
@@ -101,9 +115,16 @@ class VenueRepository:
             count_query = count_query.where(Venue.is_partner == is_partner)
 
         total = (await self.db.execute(count_query)).scalar_one()
-        rows = (await self.db.execute(query.order_by(Venue.name).offset((page - 1) * page_size).limit(page_size))).scalars().all()
+        rows = (await self.db.execute(query.order_by(Venue.name).offset((page - 1) * page_size).limit(page_size))).all()
 
-        return [self._to_entity(r) for r in rows], total
+        return [
+            self._to_entity(
+                row.Venue,
+                average_rating=float(row.avg_rating) if row.avg_rating is not None else None,
+                rating_count=int(row.rating_count) if row.rating_count else 0,
+            )
+            for row in rows
+        ], total
 
     async def get_venue_by_id(self, venue_id: uuid.UUID, *, for_update: bool = False) -> VenueEntity | None:
         """Return a single venue entity by primary key, optionally locking the row.

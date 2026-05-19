@@ -14,5 +14,4 @@ export { RatingBadge } from './rating-badge';
 export { CapacityBadge } from './capacity-badge';
 export { ModalBackdrop } from './modal-backdrop';
 export { AddVenueModal } from './add-venue-modal';
-export { VenueDetailModal } from './venue-detail-modal';
 export { ReportModal } from './report-modal';
