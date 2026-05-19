@@ -1,9 +1,12 @@
 import * as React from 'react';
 
-export function Section({ title, children }: { title: string; children: React.ReactNode }) {
+export function Section({ title, children, action }: { title: string; children: React.ReactNode; action?: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-3">
-      <p className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">{title}</p>
+      <div className="flex items-center justify-between">
+        <p className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">{title}</p>
+        {action && <div className="shrink-0">{action}</div>}
+      </div>
       {children}
     </div>
   );
