@@ -32,7 +32,22 @@ class CreateVolunteerRoleRequest(BaseModel):
 
 
 class SubmitApplicationRequest(BaseModel):
-    application_data: dict | None = None
+    full_name: str = Field(min_length=1, max_length=100)
+    email: str = Field(min_length=3, max_length=254)
+    preferred_role: str | None = Field(default=None, max_length=100)
+    reason: str = Field(min_length=10, max_length=1000)
+    skills_experience: str | None = Field(default=None, max_length=1000)
+    availability: str | None = Field(default=None, max_length=200)
+
+    @field_validator("full_name", "email", "reason")
+    @classmethod
+    def strip_required(cls, v: str) -> str:
+        return v.strip()
+
+    @field_validator("preferred_role", "skills_experience", "availability")
+    @classmethod
+    def strip_optional(cls, v: str | None) -> str | None:
+        return v.strip() if v else v
 
 
 class ReviewApplicationRequest(BaseModel):

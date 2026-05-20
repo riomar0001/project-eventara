@@ -2,11 +2,12 @@
 
 Populates:
   - 150 users (with profiles, security, activity records)
+  - 1 system admin from .env ADMIN_EMAIL / ADMIN_PASSWORD (full permissions)
   - 10 venues
   - 10 events (20 sessions total, 2 per event)
   - 15-30 participants per session
   - 30 volunteers, 20 volunteer custom roles
-  - 22+ features, 5 roles, role permissions, user grants
+  - 18 features, 5 roles, role permissions, user grants
   - event ratings, event feedback, venue ratings, app feedback, feedback reports
 
 Does NOT touch: audit_logs
@@ -22,6 +23,7 @@ from datetime import UTC, datetime, timedelta
 
 import bcrypt
 
+from app.core.config import settings
 from app.infrastructure.database.models import (
     AppFeedbackModel,
     Event,
@@ -560,37 +562,33 @@ EVENT_ROWS = [
 # ---------------------------------------------------------------------------
 
 FEATURE_ROWS = [
-    ("events", "Events Management", "Create and manage events on the platform"),
-    ("venues", "Venue Management", "Manage event venues and facilities"),
-    ("users", "User Management", "Manage platform user accounts"),
-    ("volunteers", "Volunteer Management", "Manage volunteers and their assignments"),
-    ("feedback", "Feedback System", "Collect and manage participant feedback"),
-    ("reports", "Reports & Analytics", "Generate and view platform reports"),
-    ("ratings", "Rating System", "Event and venue rating functionality"),
-    ("sessions", "Session Management", "Manage sessions within events"),
-    ("participants", "Participant Management", "Manage event participants and check-ins"),
-    ("roles", "Role Management", "Manage user roles and permissions"),
-    ("notifications", "Notification System", "Send and manage platform notifications"),
-    ("app-feedback", "App Feedback", "Collect anonymous app feedback"),
-    ("audit-logs", "Audit Logs", "View system audit logs"),
-    ("profile", "User Profile", "View and edit user profiles"),
-    ("onboarding", "Onboarding", "User onboarding flow management"),
-    ("dashboard", "Dashboard", "Access the platform dashboard"),
-    ("analytics", "Analytics", "View detailed platform analytics"),
-    ("exports", "Data Export", "Export data from the platform"),
-    ("content", "Content Management", "Manage platform content and media"),
-    ("security", "Security Settings", "Manage account and platform security settings"),
-    ("volunteer-applications", "Volunteer Applications", "Manage volunteer application submissions"),
-    ("event-ratings", "Event Ratings", "Manage and moderate event ratings"),
+    ("venues", "Venues", "Create, read, update, and delete venue records."),
+    ("user-roles", "User Roles", "Assign, view, update, and revoke user role assignments."),
+    ("user-grants", "User Grants", "Manage fine-grained per-user permission grants."),
+    ("queues", "Queues", "Inspect and manage background job queues."),
+    ("audit-logs", "Audit Logs", "View system audit log entries."),
+    ("user-accounts", "User Accounts", "Manage account-level lifecycle operations such as administrative deletion scheduling."),
+    ("features", "Features", "Manage RBAC feature definitions used by roles and user grants."),
+    ("roles", "Roles", "Manage RBAC role definitions and their feature permission matrix."),
+    ("events", "Events", "Create, read, update, and delete events and their sessions."),
+    ("event-participants", "Event Participants", "Register, withdraw, check in, and manage event session participants."),
+    ("event-feedback", "Event Feedback", "Submit and view post-event feedback from checked-in attendees."),
+    ("event-volunteers", "Event Volunteers", "Apply for, assign, and manage volunteer rosters for events."),
+    ("volunteers", "Volunteers", "Register and manage volunteer profiles and information."),
+    ("volunteer-roles", "Volunteer Roles", "Create, read, update, and delete volunteer role definitions."),
+    ("volunteer-applications", "Volunteer Applications", "Review and process volunteer applications."),
+    ("dashboard", "Dashboard", "View aggregated platform metrics on the admin dashboard."),
+    ("app-feedback", "App Feedback", "Submit anonymous app feedback and view feedback analytics."),
+    ("analytics", "Analytics", "View logistics, performance, demographic, on-going, and historical analytics."),
 ]
 
 ROLE_ROWS = [
     # (name, description, is_default, is_system)
-    ("admin", "System Administrator with full platform access", False, True),
-    ("organizer", "Event Organizer who creates and manages events", False, False),
-    ("volunteer", "Event Volunteer assigned to assist in events", False, False),
-    ("participant", "General Participant and default platform user role", True, False),
-    ("moderator", "Content Moderator who reviews and manages platform content", False, False),
+    ("participant", "The baseline role for attendees. Can sign in/out, view their own profile, update/edit their own details, and delete their own account.", True, False),
+    ("volunteer", "Users who assist on the ground during events. Standard member permissions plus access to event onboarding/check-in features and limited participant data viewing.", False, False),
+    ("event_organizer", "Users responsible for planning and executing specific events. Can create/manage events, venues, and view complete attendance and demographic data for events they manage.", False, False),
+    ("community_leader", "The Davao DeFi Community PH management team. Read-only or read/write access across all events with access to consolidated data, reporting, analytics, and participant demographics.", False, True),
+    ("system_administrator", "The IT personnel maintaining Eventara. Complete CRUD access to all entities including user profiles/accounts, features, roles, and permissions.", False, True),
 ]
 
 VOLUNTEER_ROLE_ROWS = [
@@ -826,23 +824,33 @@ async def seed() -> None:  # noqa: C901
         # ── 3. Role Permissions ──────────────────────────────────────────
         print("[3/21] Seeding role permissions...")
         rp_count = 0
+        # Each entry: role_name → (feature_list, actions)
         role_permissions_matrix = {
-            "admin": (features, ["create", "read", "update", "delete"]),
-            "organizer": (
-                [feature_by_slug[s] for s in ("events", "sessions", "participants", "feedback", "event-ratings", "volunteers", "venues", "ratings")],
+            "system_administrator": (features, ["create", "read", "update", "delete"]),
+            "event_organizer": (
+                [feature_by_slug[s] for s in (
+                    "venues", "events", "event-participants", "event-feedback",
+                    "event-volunteers", "volunteers", "volunteer-roles",
+                    "volunteer-applications", "dashboard", "analytics",
+                )],
                 ["create", "read", "update", "delete"],
             ),
-            "moderator": (
-                [feature_by_slug[s] for s in ("events", "venues", "users", "feedback", "reports", "ratings", "event-ratings", "content")],
-                ["read", "update", "delete"],
+            "community_leader": (
+                [feature_by_slug[s] for s in (
+                    "venues", "user-roles", "user-grants", "features", "roles",
+                    "queues", "audit-logs", "events", "event-participants",
+                    "event-feedback", "event-volunteers", "volunteers",
+                    "volunteer-roles", "dashboard", "app-feedback", "analytics",
+                )],
+                ["read"],
             ),
             "participant": (
-                [feature_by_slug[s] for s in ("events", "sessions", "ratings", "feedback", "profile", "app-feedback", "participants")],
-                ["read", "create"],
+                [feature_by_slug[s] for s in ("events", "event-participants", "event-feedback")],
+                ["create", "read"],
             ),
             "volunteer": (
-                [feature_by_slug[s] for s in ("events", "sessions", "participants")],
-                ["read"],
+                [feature_by_slug[s] for s in ("events", "event-participants", "event-feedback", "event-volunteers")],
+                ["create", "read"],
             ),
         }
         for role_name, (feat_list, actions) in role_permissions_matrix.items():
@@ -937,9 +945,9 @@ async def seed() -> None:  # noqa: C901
         ur_count = 0
 
         role_assignments = [
-            (users[:3], "admin"),
-            (users[3:10], "organizer"),
-            (users[10:15], "moderator"),
+            (users[:3], "system_administrator"),
+            (users[3:10], "event_organizer"),
+            (users[10:15], "community_leader"),
             (users[15:45], "volunteer"),
             (users[45:], "participant"),
         ]
@@ -1002,6 +1010,87 @@ async def seed() -> None:  # noqa: C901
             grant_count += 1
         await db.flush()
         print(f"       → {grant_count} user grants")
+
+        # ── System Admin (from .env) ──────────────────────────────────────
+        print("[+] Seeding system admin from .env...")
+        admin_pwd_hash = bcrypt.hashpw(settings.ADMIN_PASSWORD.encode(), bcrypt.gensalt(rounds=10)).decode()
+        system_admin = User(
+            id=uid(),
+            email=settings.ADMIN_EMAIL,
+            password=admin_pwd_hash,
+            onboarding_completed=True,
+            onboarding_completed_at=past_naive(1),
+            accepted_terms=True,
+            accepted_terms_at=past_naive(1),
+            accepted_privacy_policy=True,
+            accepted_privacy_policy_at=past_naive(1),
+            status="active",
+        )
+        db.add(system_admin)
+        await db.flush()
+
+        db.add(
+            UserProfile(
+                id=uid(),
+                user_id=system_admin.id,
+                alias="system_admin",
+                first_name="System",
+                last_name="Administrator",
+                age_group="adult",
+                gender="male",
+                education_level="bachelors_degree",
+                bio="System Administrator account for Eventara platform management.",
+                preferences={"newsletter": False, "notifications": True, "language": "en"},
+            )
+        )
+        db.add(
+            UserSecurity(
+                id=uid(),
+                user_id=system_admin.id,
+                email_verified=True,
+                email_verified_at=past_naive(1),
+                failed_login_attempts=0,
+            )
+        )
+        db.add(
+            UserActivity(
+                id=uid(),
+                user_id=system_admin.id,
+                last_login_at=past_naive(1),
+                last_activity_at=past_naive(1),
+                login_count=1,
+            )
+        )
+        db.add(
+            UserRole(
+                id=uid(),
+                user_id=system_admin.id,
+                role_id=role_by_name["system_administrator"].id,
+                assigned_by=system_admin.id,
+                assigned_at=past_naive(1),
+            )
+        )
+        await db.flush()
+
+        sa_grant_count = 0
+        for feat in features:
+            for action in ["create", "read", "update", "delete"]:
+                db.add(
+                    UserGrant(
+                        id=uid(),
+                        user_id=system_admin.id,
+                        role_id=role_by_name["system_administrator"].id,
+                        feature_id=feat.id,
+                        action=action,
+                        effect="allow",
+                        reason="System administrator — full platform access",
+                        granted_by=system_admin.id,
+                    )
+                )
+                sa_grant_count += 1
+        await db.flush()
+        print(f"       → Created: {settings.ADMIN_EMAIL}")
+        print(f"       → {sa_grant_count} grants (all {len(features)} features x all actions)")
 
         # ── 11. Venues ────────────────────────────────────────────────────
         print("[11/21] Seeding venues...")
@@ -1084,20 +1173,49 @@ async def seed() -> None:  # noqa: C901
         print("[14/21] Seeding volunteer applications...")
         applicant_users = users[15:60]  # 45 applicants
         va_count = 0
-        for user in applicant_users:
+
+        _REASONS = [
+            "I want to give back to the community and help make events more memorable for everyone.",
+            "I'm passionate about the Davao tech and Web3 scene and want to be part of building it.",
+            "Volunteering is a great way to meet like-minded people and grow my professional network.",
+            "I love the energy of live events and want to contribute to making them run smoothly.",
+            "I want to gain hands-on experience in event production and community coordination.",
+            "Being part of the organizing team has always been a dream — this is my chance.",
+            "I believe in the mission of Eventara and want to support the community from the inside.",
+            "I'm new to the city and volunteering seems like the best way to meet people and get involved.",
+        ]
+        _SKILLS = [
+            "Strong communication and interpersonal skills. Experience in customer service and event logistics.",
+            "Technical background in AV setup and live streaming. Comfortable operating sound and video equipment.",
+            "2 years of community event coordination. Skilled in crowd management and guest relations.",
+            "Photography and social media content creation. Proficient in Adobe Lightroom and Canva.",
+            "Logistics coordination and inventory management. Detail-oriented and works well under pressure.",
+            "First aid certified. Experience as a safety officer at school and community events.",
+            "Marketing background with experience in event promotion and on-ground activations.",
+            "Fluent in Cebuano, Filipino, and English. Great at translation and attendee assistance.",
+            None,
+            None,
+        ]
+        _AVAILABILITIES = ["weekdays", "weekends", "both", "flexible"]
+        _PREFERRED_ROLES = [name for name, _ in VOLUNTEER_ROLE_ROWS]
+
+        for i, user in enumerate(applicant_users):
             status = random.choices(["pending", "approved", "rejected", "withdrawn"], weights=[15, 65, 15, 5])[0]
+            gender = random.choice(GENDERS)
+            first = random.choice(FIRST_NAMES_M if gender == "male" else FIRST_NAMES_F)
+            last = random.choice(LAST_NAMES)
             db.add(
                 VolunteerApplication(
                     id=uid(),
                     user_id=user.id,
                     status=status,
                     application_data={
-                        "motivation": "I am passionate about community events and want to contribute meaningfully.",
-                        "experience": f"{random.randint(1, 8)} years of event volunteering experience",
-                        "availability": random.choice(["Weekends only", "Weekdays and weekends", "Flexible schedule"]),
-                        "skills": random.sample(
-                            ["communication", "leadership", "technical", "logistics", "first aid", "photography", "social media"], 3
-                        ),
+                        "full_name": f"{first} {last}",
+                        "email": f"user{(15 + i + 1):03d}@eventara.dev",
+                        "preferred_role": random.choice(_PREFERRED_ROLES),
+                        "reason": random.choice(_REASONS),
+                        "skills_experience": random.choice(_SKILLS),
+                        "availability": random.choice(_AVAILABILITIES),
                     },
                 )
             )
@@ -1364,6 +1482,7 @@ async def seed() -> None:  # noqa: C901
     print("  Seed complete!")
     print("=" * 60)
     print(f"  Users:                {NUM_USERS:>4}  (password: {SEED_PASSWORD})")
+    print(f"  System admin:              {settings.ADMIN_EMAIL}")
     print(f"  Venues:               {NUM_VENUES:>4}")
     print(f"  Events:               {NUM_EVENTS:>4}  (2 sessions each)")
     print(f"  Event participants:   {ep_count:>4}  (15-30 per session)")

@@ -1783,7 +1783,12 @@ export const zSubmitAppFeedbackResponse = z.object({
  * SubmitApplicationRequest
  */
 export const zSubmitApplicationRequest = z.object({
-    application_data: z.record(z.string(), z.unknown()).nullish()
+    full_name: z.string().min(1).max(100),
+    email: z.string().min(3).max(254),
+    preferred_role: z.string().max(100).nullish(),
+    reason: z.string().min(10).max(1000),
+    skills_experience: z.string().max(1000).nullish(),
+    availability: z.string().max(200).nullish()
 });
 
 /**

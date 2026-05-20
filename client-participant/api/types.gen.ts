@@ -4474,11 +4474,29 @@ export type SubmitAppFeedbackResponse = {
  */
 export type SubmitApplicationRequest = {
     /**
-     * Application Data
+     * Full Name
      */
-    application_data?: {
-        [key: string]: unknown;
-    } | null;
+    full_name: string;
+    /**
+     * Email
+     */
+    email: string;
+    /**
+     * Preferred Role
+     */
+    preferred_role?: string | null;
+    /**
+     * Reason
+     */
+    reason: string;
+    /**
+     * Skills Experience
+     */
+    skills_experience?: string | null;
+    /**
+     * Availability
+     */
+    availability?: string | null;
 };
 
 /**

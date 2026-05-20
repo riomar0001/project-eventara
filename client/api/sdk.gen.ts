@@ -2673,7 +2673,7 @@ export class Volunteers {
     /**
      * Submit a volunteer application
      *
-     * Submit a volunteer application for the authenticated user. A user who is already an active volunteer or already has a pending or approved application cannot submit a new one. Optional application_data may include free-form fields such as skills and availability.
+     * Submit a volunteer application for the authenticated user. Provide full_name, email, preferred_role, reason, skills_experience, and availability. A user who is already an active volunteer or already has a pending or approved application cannot submit a new one.
      */
     public static submitApplicationVolunteerApplicationsPost<ThrowOnError extends boolean = false>(options: Options<SubmitApplicationVolunteerApplicationsPostData, ThrowOnError>) {
         return (options.client ?? client).post<SubmitApplicationVolunteerApplicationsPostResponses, SubmitApplicationVolunteerApplicationsPostErrors, ThrowOnError>({

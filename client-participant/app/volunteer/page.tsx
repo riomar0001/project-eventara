@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Navbar } from '@/components/navigation/navbar';
 import { Footer } from '@/components/footer/footer';
+import { useVolunteerApplication } from '@/hooks/use-volunteer-application';
 
 const REASONS = [
   {
@@ -71,12 +72,11 @@ const ROLES = [
   { label: 'General Support', icon: '⚡' },
 ];
 
-const INITIAL = { name: '', email: '', role: '', motivation: '', skills: '', availability: '' };
+const INITIAL = { full_name: '', email: '', preferred_role: '', reason: '', skills_experience: '', availability: '' };
 
 export default function VolunteerPage() {
   const [form, setForm] = useState(INITIAL);
-  const [submitted, setSubmitted] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const { submit, loading, error, submitted } = useVolunteerApplication();
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
@@ -84,10 +84,7 @@ export default function VolunteerPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setLoading(true);
-    await new Promise((r) => setTimeout(r, 1200));
-    setLoading(false);
-    setSubmitted(true);
+    await submit(form);
   }
 
   return (
@@ -261,8 +258,8 @@ export default function VolunteerPage() {
                           Full name <span className="text-orange-400">*</span>
                         </label>
                         <input
-                          name="name"
-                          value={form.name}
+                          name="full_name"
+                          value={form.full_name}
                           onChange={handleChange}
                           required
                           placeholder="Your full name"
@@ -290,8 +287,8 @@ export default function VolunteerPage() {
                         Preferred role <span className="text-orange-400">*</span>
                       </label>
                       <select
-                        name="role"
-                        value={form.role}
+                        name="preferred_role"
+                        value={form.preferred_role}
                         onChange={handleChange}
                         required
                         className="border-border bg-background text-foreground focus:border-primary w-full rounded-xl border px-3.5 py-2.5 text-[13.5px] outline-none transition-colors"
@@ -308,8 +305,8 @@ export default function VolunteerPage() {
                         Why do you want to volunteer? <span className="text-orange-400">*</span>
                       </label>
                       <textarea
-                        name="motivation"
-                        value={form.motivation}
+                        name="reason"
+                        value={form.reason}
                         onChange={handleChange}
                         required
                         rows={3}
@@ -323,8 +320,8 @@ export default function VolunteerPage() {
                         Relevant skills or experience
                       </label>
                       <textarea
-                        name="skills"
-                        value={form.skills}
+                        name="skills_experience"
+                        value={form.skills_experience}
                         onChange={handleChange}
                         rows={2}
                         placeholder="e.g. event coordination, photography, customer service…"
@@ -350,6 +347,12 @@ export default function VolunteerPage() {
                         <option value="flexible">Flexible / event-by-event</option>
                       </select>
                     </div>
+
+                    {error && (
+                      <p className="rounded-xl border border-red-200 bg-red-50 px-3.5 py-2.5 text-[13px] text-red-600">
+                        {error}
+                      </p>
+                    )}
 
                     <button
                       type="submit"

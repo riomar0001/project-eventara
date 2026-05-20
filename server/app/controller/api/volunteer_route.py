@@ -488,9 +488,9 @@ async def create_volunteer_role(
     summary="Submit a volunteer application",
     description=(
         "Submit a volunteer application for the authenticated user. "
+        "Provide full_name, email, preferred_role, reason, skills_experience, and availability. "
         "A user who is already an active volunteer or already has a pending or approved "
-        "application cannot submit a new one. "
-        "Optional application_data may include free-form fields such as skills and availability."
+        "application cannot submit a new one."
     ),
 )
 async def submit_application(
@@ -512,7 +512,14 @@ async def submit_application(
         result = await use_case.submit_application(
             SubmitApplicationInput(
                 user_id=caller_id,
-                application_data=body.application_data,
+                application_data={
+                    "full_name": body.full_name,
+                    "email": body.email,
+                    "preferred_role": body.preferred_role,
+                    "reason": body.reason,
+                    "skills_experience": body.skills_experience,
+                    "availability": body.availability,
+                },
             )
         )
     except UserNotFoundError as exc:
