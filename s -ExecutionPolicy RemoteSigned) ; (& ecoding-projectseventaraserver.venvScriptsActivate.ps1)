@@ -1,0 +1,367 @@
+[33mcommit 50d9d32d4f895d7bec985893d1da3e13d5cfcef7[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: riomar0001 <mariojringuito@riomar.dev>
+Date:   Wed May 20 07:23:44 2026 +0800
+
+    feat(venue): add creator alias to venue details and forms
+    
+    - Include creator alias in venue detail view to show who added the venue.
+    - Update venue form to accept and display creator alias.
+    - Enhance image upload components with hints for optimal image dimensions.
+    - Set maximum capacity limit for venues to 1,000,000 in forms and schemas.
+    - Ensure backend models and responses reflect the new creator alias field.
+
+[33mcommit aebfe05eb799be19fa828735d5aee2f3cc5b8f01[m
+Author: riomar0001 <mariojringuito@riomar.dev>
+Date:   Wed May 20 01:11:26 2026 +0800
+
+    feat(venue): add public venue ratings and improve venue form validation
+    
+    - Introduced `usePublicVenue` and `useVenuePublicRatings` hooks for fetching venue details and public ratings.
+    - Updated `VenueGrid` component to remove the `onViewDetail` prop and adjusted `VenueCard` usage.
+    - Enhanced venue form validation to include checks for address, city, province, and venue type.
+    - Modified venue-related types to include `average_rating` and `rating_count`.
+    - Implemented API endpoints for listing public venue ratings and adjusted database queries accordingly.
+    - Refactored venue repository to calculate average ratings and count during venue listing.
+
+[33mcommit c495a75c5f73dc10c8b9ffa48a04ed9d238c1ff7[m
+Author: riomar0001 <mariojringuito@riomar.dev>
+Date:   Tue May 19 22:53:56 2026 +0800
+
+    feat(event): add user feedback status and session registration features
+    
+    - Introduced endpoints to retrieve the current user's feedback status for events.
+    - Added functionality to check session registration status and generate QR tokens for registered sessions.
+    - Enhanced user event retrieval to include both registered and attended events.
+    - Updated data models and schemas to support new features and ensure data integrity.
+
+[33mcommit 7355aa05cb7b5b65b32c934e3df09c1c06002a4e[m
+Merge: 1404e4e 7733d70
+Author: riomar0001 <mariojringuito@riomar.dev>
+Date:   Tue May 19 22:53:16 2026 +0800
+
+    Merge branch 'main' of github.com:riomar0001/project-eventara
+
+[33mcommit 7733d70afb9626d793751dde99dee2714c87f46f[m
+Merge: 795d435 858af98
+Author: Mark Jade Palma <145734052+MatchanJJ@users.noreply.github.com>
+Date:   Tue May 19 17:27:20 2026 +0800
+
+    Merge pull request #70 from riomar0001/feat/analytics
+    
+    feat(analytics): add client-side CSV export to analytics dashboard
+
+[33mcommit 858af9827eba6f5d5e644b87f805e9786acc03a7[m
+Author: MatchanJJ <jedzxcx1@gmail.com>
+Date:   Tue May 19 17:24:10 2026 +0800
+
+    feat(analytics): add client-side CSV export to analytics dashboard
+
+[33mcommit 1404e4eed5214fe6cabbc61a27c3bded13d4e37a[m
+Author: riomar0001 <mariojringuito@riomar.dev>
+Date:   Tue May 19 09:25:31 2026 +0800
+
+    feat(events): add events directory and home events hooks
+    
+    - Implemented `useEventsDirectory` for fetching public events with pagination and search functionality.
+    - Created `useHomeEvents` to retrieve live and upcoming/past events for the home page.
+    - Added `useSessionRegister` for session registration and withdrawal.
+    - Enhanced onboarding process with additional fields and API integration.
+    - Updated profile management hooks to include password change and account deletion functionalities.
+    - Introduced user details and login history hooks for better user experience.
+    - Refactored modal state management to accommodate new event data structures.
+    - Added JWT token decoding utility for user authentication and session management.
+    - Implemented Zustand store for managing authentication state persistently.
+    - Updated event-related data models and API endpoints to support new features and improve data handling.
+
+[33mcommit 795d43551b9290a64da3b7ddc72df9af1b12bf5c[m
+Merge: 1f1f74b d55d680
+Author: Mark Jade Palma <145734052+MatchanJJ@users.noreply.github.com>
+Date:   Sat May 16 21:03:48 2026 +0800
+
+    Merge pull request #69 from riomar0001/feat/analytics
+    
+     fix: resolve analytics 500s, seeder schema drift, and dashboard GROU…
+
+[33mcommit d55d6807f2d046f11bad6548f0855ba8ede4132f[m
+Merge: 2131977 1f1f74b
+Author: Mark Jade Palma <145734052+MatchanJJ@users.noreply.github.com>
+Date:   Sat May 16 21:02:32 2026 +0800
+
+    Merge branch 'main' into feat/analytics
+
+[33mcommit 21319777a80b8aa28fb1ea14b86db82c59a7e157[m
+Author: MatchanJJ <jedzxcx1@gmail.com>
+Date:   Sat May 16 20:55:25 2026 +0800
+
+     fix: resolve analytics 500s, seeder schema drift, and dashboard GROUP BY error
+    
+      Replace Python float() with SQLAlchemy Float in .cast() calls
+      (4 occurrences). Remove nested avg() wrapper in organizer output
+      attendance subquery. Use column label in dashboard GROUP BY
+      instead of repeating parameterized date_trunc. Fix 6 naive
+      datetime fields in seeder with past_naive() helper. Add
+      truncation step to seeder for idempotent runs. Add created_at
+      and updated_at to VenueRating seeder insert. Fix subquery
+      column labels in demographics with .label user_id.
+
+[33mcommit 1f1f74b2ec0b53ce86a97104449729e7b28c3ec9[m
+Merge: a9cfae7 5658aa5
+Author: riomar0001 <mariojringuito@riomar.dev>
+Date:   Sat May 16 19:26:11 2026 +0800
+
+    Merge branch 'main' of github.com:riomar0001/project-eventara
+
+[33mcommit a9cfae7100cc448518a119a22529d8eacd3e7c41[m
+Author: riomar0001 <mariojringuito@riomar.dev>
+Date:   Fri May 15 23:04:39 2026 +0800
+
+    feat(auth): implement OTP verification and resend functionality
+    
+    - Added OTP verification logic for login and registration purposes.
+    - Integrated API calls for verifying OTP and resending OTP.
+    - Enhanced error handling for API responses.
+    - Introduced countdown timer for OTP resend functionality.
+    
+    feat(events): refactor event detail and feedback hooks
+    
+    - Replaced memoization with state management for event details and sessions.
+    - Integrated API calls to fetch event details and sessions.
+    - Added feedback submission functionality with error handling.
+    
+    feat(events): create hooks for event list and session registration
+    
+    - Implemented hooks to fetch and manage event lists with pagination and filtering.
+    - Added session registration functionality with error handling.
+    
+    feat(profile): enhance profile management hooks
+    
+    - Implemented hooks for user profile data fetching and updating.
+    - Added account deletion functionality with error handling.
+    
+    feat(venues): create hooks for venue suggestions and ratings
+    
+    - Implemented venue suggestion submission with API integration.
+    - Added venue rating functionality with error handling.
+    
+    chore: add auth utility functions for token management
+    
+    - Created utility functions for managing access, refresh, and login tokens.
+    - Implemented error extraction for API responses.
+    
+    fix: update types for event and venue models
+    
+    - Changed ID types from number to string for consistency across the application.
+
+[33mcommit 5658aa593874e3a2d2a6fbd1d6422facacaac423[m
+Merge: 7587e9e 3e52b75
+Author: Mark Jade Palma <145734052+MatchanJJ@users.noreply.github.com>
+Date:   Sat May 16 00:27:27 2026 +0800
+
+    Merge pull request #68 from riomar0001/feat/analytics
+    
+    Feat/analytics
+
+[33mcommit 3e52b753ea4efb55062009c185d25909e2ce2f56[m
+Author: MatchanJJ <jedzxcx1@gmail.com>
+Date:   Sat May 16 00:25:25 2026 +0800
+
+    feat(analytics_ui): implement analytics dashboard with 5-domain visualization suite
+    
+      Fix 8 analytics hooks missing /api prefix causing 404s. Create
+      Alembic baseline and schema migration for missing event_feedback
+      table and event_participants check-in columns. Fix subquery column
+      references in demographics queries where unlabeled func.distinct()
+      broke column access. Build tabbed analytics dashboard with 29
+      visualizations across Performance, Demographics, Ongoing,
+      Historical, and Logistics tabs. Add empty states across all
+      sections with consistent card-shell pattern.
+
+[33mcommit 70cda60ef24bba7acd361feadfbf4843954ad53b[m
+Author: MatchanJJ <jedzxcx1@gmail.com>
+Date:   Fri May 15 23:11:34 2026 +0800
+
+    fix: resolve analytics API 404s and database schema mismatches
+    
+      Add /api prefix to 5 analytics hooks so Next.js proxy rewrites
+      requests to the FastAPI backend. Create Alembic migration for
+      missing event_feedback table and event_participants check-in
+      columns. Fix subquery column references in demographics queries
+      where unlabeled func.distinct() broke column access.
+
+[33mcommit 7587e9e993a8c2f79a49b72c277c932ceb6a8057[m
+Merge: 53df16f d740cb6
+Author: Mark Jade Palma <145734052+MatchanJJ@users.noreply.github.com>
+Date:   Fri May 15 12:39:41 2026 +0800
+
+    Merge pull request #67 from riomar0001/analytics-reporting
+    
+    Analytics reporting
+
+[33mcommit d740cb62b671786130290d961d2bc12c5a660466[m
+Merge: 88c033c 53df16f
+Author: MatchanJJ <jedzxcx1@gmail.com>
+Date:   Fri May 15 12:33:15 2026 +0800
+
+    Merge branch 'main' of github.com:riomar0001/project-eventara into analytics-reporting
+
+[33mcommit 88c033cae0f1dac8604ebce88f81ca9b0a430b0c[m
+Author: MatchanJJ <jedzxcx1@gmail.com>
+Date:   Fri May 15 12:30:04 2026 +0800
+
+    ref: lint
+
+[33mcommit ac940dd533f44217f25a708fd8ebf936a6afc85b[m
+Merge: e12b272 d86c643
+Author: MatchanJJ <jedzxcx1@gmail.com>
+Date:   Fri May 15 12:26:11 2026 +0800
+
+    merge
+
+[33mcommit 53df16fd1a00fc99875cde4bba1665939ee72fd3[m
+Merge: d86c643 3b7fc38
+Author: Eduard Anthony <eduardanthony1208@gmail.com>
+Date:   Fri May 15 12:25:02 2026 +0800
+
+    Merge pull request #66 from riomar0001/analytics-reporting
+    
+    analytics and reporting feature implementation
+
+[33mcommit 3b7fc3817d47a56f42250f6adbc61d34708b6322[m
+Merge: d33e9a3 d86c643
+Author: Eduard Anthony <eduardanthony1208@gmail.com>
+Date:   Fri May 15 12:22:53 2026 +0800
+
+    Merge branch 'main' into analytics-reporting
+
+[33mcommit d86c643cebf5d1dd71a1276cf2cfb944c71d7aeb[m
+Merge: bd52225 8701668
+Author: Mark Jade Palma <145734052+MatchanJJ@users.noreply.github.com>
+Date:   Fri May 15 12:19:17 2026 +0800
+
+    Merge pull request #64 from riomar0001/feat/analytics
+    
+    Feat/analytics
+
+[33mcommit d33e9a358e08f513286b73277513613c5f01c63f[m
+Author: chicocaine <eduardanthony1208@gmail.com>
+Date:   Fri May 15 12:15:57 2026 +0800
+
+    ```
+    test: improve test readability and consistency across analytics use cases
+    
+    - Refactored test cases to enhance readability by aligning default values and parameters.
+    - Ensured consistent formatting in the creation of mock data across various test files.
+    - Simplified assertions and method calls for better clarity and maintainability.
+    ```
+
+[33mcommit 0950b87b7630aeb178b8c88f624a3b8e78223c81[m
+Author: chicocaine <eduardanthony1208@gmail.com>
+Date:   Fri May 15 12:08:30 2026 +0800
+
+    style(dto): improve import organization and formatting
+    
+    - Removed unused field import from dataclasses in app_feedback_dto.py
+    - Consolidated exception imports in event_feedback_usecase.py
+    - Updated datetime imports to use UTC for consistency in app_feedback_repository.py and dashboard_repository.py
+    - Enhanced readability of return type annotations in app_feedback_schema.py
+    - Improved formatting in test files for better clarity
+
+[33mcommit 385d84e561800ebda258de41c4ef379b9319831b[m
+Author: chicocaine <eduardanthony1208@gmail.com>
+Date:   Fri May 15 11:59:16 2026 +0800
+
+    style(components): improve code formatting and organization
+    
+    - Consolidated multiple lines into single lines for better readability.
+    - Adjusted the order of imports for consistency across files.
+    - Enhanced the layout of JSX elements for improved visual structure.
+    - Updated package versions in package-lock.json for better dependency management.
+
+[33mcommit 87016687840364bd6e39ab157484580568211e5b[m
+Author: MatchanJJ <jedzxcx1@gmail.com>
+Date:   Fri May 15 11:18:26 2026 +0800
+
+    ref: linter
+
+[33mcommit 62c702c2d14364d137adf9101b96db9390ab426e[m
+Author: MatchanJJ <jedzxcx1@gmail.com>
+Date:   Fri May 15 11:09:23 2026 +0800
+
+    feat(analytics): UI setup
+
+[33mcommit e12b272383bfd40fb0ae89ec422d279c29f41f32[m
+Author: chicocaine <eduardanthony1208@gmail.com>
+Date:   Fri May 15 04:07:15 2026 +0800
+
+    feat(analytics): add comprehensive analytics hooks for demographic, historical, ongoing, logistics, and performance data
+    
+    - Introduced hooks for demographic analytics to fetch and manage demographic data.
+    - Added historical event data hooks to retrieve historical analytics and cancelled events reports.
+    - Implemented logistics analytics hooks for event logistics overview, session timelines, and volunteer logistics.
+    - Created ongoing event data hooks to manage real-time event data and check-in information.
+    - Developed performance analytics hooks to gather event performance metrics and historical performance data.
+
+[33mcommit 6458665cad17a9cd62cf06a428412cdf605d0340[m
+Author: chicocaine <eduardanthony1208@gmail.com>
+Date:   Fri May 15 04:06:45 2026 +0800
+
+    test(analytics): add unit tests for various analytics use cases
+    
+    - Implement unit tests for HistoricalEventDataUseCase to ensure accurate data retrieval and filtering.
+    - Create tests for LogisticsAnalyticsUseCase covering event logistics, session timelines, and volunteer logistics.
+    - Add tests for OngoingEventDataUseCase to validate ongoing event data and check-in methods.
+    - Develop tests for PerformanceAnalyticsUseCase to verify performance metrics and attendance rates.
+
+[33mcommit d6a04b69798ad5a85307ca0bbb0e18e2cf95a1aa[m
+Author: chicocaine <eduardanthony1208@gmail.com>
+Date:   Fri May 15 04:06:28 2026 +0800
+
+    feat(analytics): add use cases and routes for analytics features
+    
+    - Introduced new use cases for logistics, performance, demographic, ongoing, and historical event data analytics.
+    - Updated router to include analytics routes for better API organization.
+    - Enhanced RBAC to support permissions for analytics features.
+
+[33mcommit be07573cf26e7d85eae3a3eb36b488f5d01b0aeb[m
+Author: chicocaine <eduardanthony1208@gmail.com>
+Date:   Fri May 15 04:06:00 2026 +0800
+
+    feat(analytics): add HTTP routes and schemas for logistics, performance, and demographic analytics
+    
+    - Implemented new API routes for logistics overview, session timeline, volunteer logistics, registration logistics, event performance, ongoing performance, and historical performance.
+    - Created corresponding response models and data structures to support the new analytics features.
+    - Enhanced the analytics module to provide comprehensive data retrieval for various event metrics.
+
+[33mcommit 17fa00f904858d19195b915ba31c7dd12759e120[m
+Author: chicocaine <eduardanthony1208@gmail.com>
+Date:   Fri May 15 04:05:45 2026 +0800
+
+    ```
+    feat(api): add user authentication endpoint
+    
+    - Introduced a new endpoint for user authentication to enhance security.
+    - This allows users to log in and receive a token for subsequent requests.
+    - Improved user experience by providing a streamlined login process.
+    ```
+
+[33mcommit 7ba368775ba2f6cac86f18f8323f340235d9f521[m
+Author: chicocaine <eduardanthony1208@gmail.com>
+Date:   Fri May 15 04:05:15 2026 +0800
+
+    feat(analytics): add use cases for demographic, historical, ongoing, logistics, and performance analytics
+    
+    - Implemented DemographicAnalyticsUseCase for demographic data retrieval.
+    - Added HistoricalEventDataUseCase to fetch historical event data.
+    - Created OngoingEventDataUseCase for ongoing event analytics.
+    - Developed LogisticsAnalyticsUseCase for event logistics overview and volunteer logistics.
+    - Introduced PerformanceAnalyticsUseCase to gather performance metrics for events.
+
+[33mcommit 0e864c63f47414340e2d89d00cef260f0347c0ad[m
+Author: chicocaine <eduardanthony1208@gmail.com>
+Date:   Fri May 15 04:05:10 2026 +0800
+
+    feat(analytics): add DTOs and repository interface for analytics domains
+    
+    - Introduced data transfer objects (DTOs) for logistics, performance, and demographics analytics.
+    - Created an interface for read-only aggregate queries across all analytics domains.
+    - Enhanced structure for better data handling and retrieval in analytics features.

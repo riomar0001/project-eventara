@@ -63,12 +63,20 @@ export default function VerifyEmailPage({ params }: { params: { token: string } 
               </div>
               <h2 className="text-foreground text-xl font-bold tracking-[-0.02em]">Verification failed</h2>
               <p className="text-muted-foreground mt-2 text-[13.5px]">{message}</p>
-              <Link
-                href="/login"
-                className="text-primary mt-6 inline-block text-[13.5px] font-semibold transition-colors hover:underline"
-              >
-                Back to sign in
-              </Link>
+              <div className="mt-6 flex flex-col items-center gap-2">
+                <Link
+                  href="/resend-verification"
+                  className="bg-primary text-primary-foreground inline-flex items-center rounded-full px-5 py-2.5 text-sm font-semibold shadow-[0_8px_28px_-10px_var(--lime-glow)] transition-all hover:-translate-y-0.5"
+                >
+                  Resend verification email
+                </Link>
+                <Link
+                  href="/login"
+                  className="text-muted-foreground text-[13.5px] font-semibold transition-colors hover:underline"
+                >
+                  Back to sign in
+                </Link>
+              </div>
             </>
           )}
         </div>
