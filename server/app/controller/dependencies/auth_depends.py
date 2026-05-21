@@ -36,6 +36,17 @@ def _auth_detail(exc: ValueError) -> str:
     return "Not authenticated"
 
 
+def get_caller_role(
+    credentials: HTTPAuthorizationCredentials = Depends(_bearer),
+) -> str | None:
+    """Return the role claim from the access token, or None if the token is invalid."""
+    try:
+        payload = verify_access_token(credentials.credentials)
+        return payload.role
+    except ValueError:
+        return None
+
+
 def get_current_user_id(
     credentials: HTTPAuthorizationCredentials = Depends(_bearer),
 ) -> uuid.UUID:

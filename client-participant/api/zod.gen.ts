@@ -1783,9 +1783,8 @@ export const zSubmitAppFeedbackResponse = z.object({
  * SubmitApplicationRequest
  */
 export const zSubmitApplicationRequest = z.object({
-    full_name: z.string().min(1).max(100),
-    email: z.string().min(3).max(254),
     preferred_role: z.string().max(100).nullish(),
+    contact_phone: z.string().min(7).max(20),
     reason: z.string().min(10).max(1000),
     skills_experience: z.string().max(1000).nullish(),
     availability: z.string().max(200).nullish()
@@ -3948,6 +3947,19 @@ export const zUpdateVolunteerRoleVolunteerRolesRoleIdPatchPath = z.object({
  */
 export const zUpdateVolunteerRoleVolunteerRolesRoleIdPatchResponse = z.record(z.string(), z.unknown());
 
+export const zListApplicationsVolunteerApplicationsGetQuery = z.object({
+    page: z.int().gte(1).optional().default(1),
+    page_size: z.int().gte(1).lte(100).optional().default(20),
+    status: zApplicationStatus.nullish()
+});
+
+/**
+ * Response List Applications Volunteer Applications Get
+ *
+ * Successful Response
+ */
+export const zListApplicationsVolunteerApplicationsGetResponse = z.record(z.string(), z.unknown());
+
 export const zSubmitApplicationVolunteerApplicationsPostBody = zSubmitApplicationRequest;
 
 /**
@@ -3956,6 +3968,13 @@ export const zSubmitApplicationVolunteerApplicationsPostBody = zSubmitApplicatio
  * Successful Response
  */
 export const zSubmitApplicationVolunteerApplicationsPostResponse = z.record(z.string(), z.unknown());
+
+/**
+ * Response Get My Application Volunteer Applications Me Get
+ *
+ * Successful Response
+ */
+export const zGetMyApplicationVolunteerApplicationsMeGetResponse = z.record(z.string(), z.unknown());
 
 export const zReviewApplicationVolunteerApplicationsApplicationIdReviewPatchBody = zReviewApplicationRequest;
 

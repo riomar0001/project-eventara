@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 
 from app.domain.entities.volunteer_entity import (
     ApplicationStatus,
+    ApplicationSummary,
     PotentialVolunteer,
     Volunteer,
     VolunteerApplication,
@@ -100,6 +101,23 @@ class DeleteVolunteerRoleOutput:
 
 
 @dataclass
+class ListApplicationsInput:
+    page: int
+    page_size: int
+    status: ApplicationStatus | None = None
+    search: str | None = None
+
+
+@dataclass
+class ListApplicationsOutput:
+    applications: list[ApplicationSummary]
+    total: int
+    page: int
+    page_size: int
+    total_pages: int
+
+
+@dataclass
 class SubmitApplicationInput:
     user_id: uuid.UUID
     application_data: dict | None
@@ -157,6 +175,16 @@ class GetPotentialVolunteersInput:
     page_size: int
     min_events: int = 1
     search: str | None = None
+
+
+@dataclass
+class GetMyApplicationInput:
+    user_id: uuid.UUID
+
+
+@dataclass
+class GetMyApplicationOutput:
+    application: VolunteerApplication | None
 
 
 @dataclass

@@ -42,6 +42,9 @@ def _to_utc(value: datetime) -> datetime:
     return value.astimezone(UTC)
 
 
+_PRIVILEGED_ROLES: frozenset[str] = frozenset({"community_leader", "system_administrator"})
+
+
 def resolve_event_status_for_dates(current_status: EventStatus, start_date: datetime, end_date: datetime, now: datetime | None = None) -> EventStatus:
     """Resolve the event lifecycle status after a date-range update.
 
@@ -217,7 +220,7 @@ class EventUseCase:
         if event is None:
             raise EventNotFoundError(str(data.event_id))
 
-        if event.created_by != data.updated_by:
+        if event.created_by != data.updated_by and data.caller_role not in _PRIVILEGED_ROLES:
             raise UnauthorizedEventOperationError(str(data.event_id))
 
         if data.end_datetime <= data.start_datetime:
@@ -269,7 +272,7 @@ class EventUseCase:
         if event is None:
             raise EventNotFoundError(str(data.event_id))
 
-        if event.created_by != data.updated_by:
+        if event.created_by != data.updated_by and data.caller_role not in _PRIVILEGED_ROLES:
             raise UnauthorizedEventOperationError(str(data.event_id))
 
         if data.end_date <= data.start_date:
@@ -322,7 +325,7 @@ class EventUseCase:
         if event is None:
             raise EventNotFoundError(str(data.event_id))
 
-        if event.created_by != data.updated_by:
+        if event.created_by != data.updated_by and data.caller_role not in _PRIVILEGED_ROLES:
             raise UnauthorizedEventOperationError(str(data.event_id))
 
         old_banner_url = event.banner_url
@@ -366,7 +369,7 @@ class EventUseCase:
         if event is None:
             raise EventNotFoundError(str(old_session.event_id))
 
-        if event.created_by != data.updated_by:
+        if event.created_by != data.updated_by and data.caller_role not in _PRIVILEGED_ROLES:
             raise UnauthorizedEventOperationError(str(event.id))
 
         if data.end_datetime <= data.start_datetime:

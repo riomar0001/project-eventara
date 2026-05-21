@@ -20,6 +20,8 @@ from app.domain.exceptions.event_session_exceptions import (
 )
 from app.infrastructure.database.repositories.event_repository import EventRepository
 
+_PRIVILEGED_ROLES: frozenset[str] = frozenset({"community_leader", "system_administrator"})
+
 _ALLOWED_EVENT_TRANSITIONS: dict[EventStatus, set[EventStatus]] = {
     EventStatus.DRAFT: {EventStatus.POSTED, EventStatus.CANCELLED},
     EventStatus.POSTED: {EventStatus.DRAFT, EventStatus.STARTED, EventStatus.POSTPONED, EventStatus.CANCELLED},
@@ -84,7 +86,7 @@ class EventStatusUseCase:
         if event is None:
             raise EventNotFoundError(str(data.event_id))
 
-        if event.created_by != data.updated_by:
+        if event.created_by != data.updated_by and data.caller_role not in _PRIVILEGED_ROLES:
             raise UnauthorizedEventOperationError(str(data.event_id))
 
         if data.new_status not in _ALLOWED_EVENT_TRANSITIONS[event.status]:
@@ -126,7 +128,7 @@ class EventStatusUseCase:
         if event is None:
             raise EventNotFoundError(str(old_session.event_id))
 
-        if event.created_by != data.updated_by:
+        if event.created_by != data.updated_by and data.caller_role not in _PRIVILEGED_ROLES:
             raise UnauthorizedEventOperationError(str(event.id))
 
         if data.new_status not in _ALLOWED_SESSION_TRANSITIONS[old_session.status]:

@@ -43,6 +43,7 @@ from app.domain.entities.user_entity import (
 from app.domain.entities.venue_entities import PublicVenue, RatingValue, Venue, VenueRating, VenueType
 from app.domain.entities.volunteer_entity import (
     ApplicationStatus,
+    ApplicationSummary,
     Volunteer,
     VolunteerApplication,
     VolunteerRole,
@@ -103,6 +104,7 @@ __all__ = [
     "VenueType",
     # volunteer
     "ApplicationStatus",
+    "ApplicationSummary",
     "Volunteer",
     "VolunteerApplication",
     "VolunteerRole",

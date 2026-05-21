@@ -1,4 +1,5 @@
 from app.controller.dependencies.auth_depends import (
+    get_caller_role,
     get_current_user_id,
     require_completed_onboarding,
 )
@@ -37,6 +38,7 @@ __all__ = [
     "get_app_feedback_use_case",
     "get_audit_log_use_case",
     "get_auth_use_case",
+    "get_caller_role",
     "get_current_user_id",
     "get_dashboard_use_case",
     "get_delete_account_use_case",

@@ -19,6 +19,7 @@ from app.domain.exceptions.event_session_exceptions import (
 )
 from app.infrastructure.database.repositories.event_repository import EventRepository
 
+_PRIVILEGED_ROLES: frozenset[str] = frozenset({"community_leader", "system_administrator"})
 _UNDELETABLE_EVENT_STATUSES = {EventStatus.POSTED, EventStatus.STARTED, EventStatus.ENDED}
 _UNDELETABLE_SESSION_STATUSES = {EventSessionStatus.POSTED, EventSessionStatus.STARTED, EventSessionStatus.ENDED}
 
@@ -33,7 +34,7 @@ class EventDeletionUseCase:
             event = await self.event_repo.get_event_by_id(data.event_id, for_update=True)
             if event is None:
                 raise EventNotFoundError(str(data.event_id))
-            if event.created_by != data.deleted_by:
+            if event.created_by != data.deleted_by and data.caller_role not in _PRIVILEGED_ROLES:
                 raise UnauthorizedEventOperationError(str(data.event_id))
             if event.status in _UNDELETABLE_EVENT_STATUSES:
                 raise EventDeletionNotAllowedError(str(data.event_id))
@@ -45,7 +46,7 @@ class EventDeletionUseCase:
             event = await self.event_repo.get_event_by_id(data.event_id, for_update=True)
             if event is None:
                 raise EventNotFoundError(str(data.event_id))
-            if event.created_by != data.deleted_by:
+            if event.created_by != data.deleted_by and data.caller_role not in _PRIVILEGED_ROLES:
                 raise UnauthorizedEventOperationError(str(data.event_id))
             session = await self.event_repo.get_session_by_id(data.session_id)
             if session is None or session.event_id != data.event_id:

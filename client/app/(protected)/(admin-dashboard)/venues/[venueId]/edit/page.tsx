@@ -12,7 +12,8 @@ import { useAuthStore } from '@/store/auth-store';
 function VenueEditContent({ venueId }: { venueId: string }) {
   const { venue, isLoading, error } = useVenue(venueId);
   const { can } = usePermissions();
-  const currentUserId = useAuthStore((state) => state.user?.id ?? null);
+  const currentUser = useAuthStore((state) => state.user);
+  const currentUserId = currentUser?.id ?? null;
 
   if (isLoading) {
     return (
@@ -36,10 +37,11 @@ function VenueEditContent({ venueId }: { venueId: string }) {
 
   const canUpdateVenue = can('venues', 'update');
   const canUpdateOwnSuggestion = !venue.is_partner && venue.creator_id === currentUserId;
+  const isPrivilegedRole = ['community_leader', 'system_administrator'].includes(currentUser?.role ?? '');
 
-  if (!canUpdateVenue && !canUpdateOwnSuggestion) notFound();
+  if (!canUpdateVenue && !canUpdateOwnSuggestion && !isPrivilegedRole) notFound();
 
-  return <VenueForm mode="edit" venue={venue} suggestedVenue={!canUpdateVenue && canUpdateOwnSuggestion} />;
+  return <VenueForm mode="edit" venue={venue} suggestedVenue={!canUpdateVenue && !isPrivilegedRole && canUpdateOwnSuggestion} />;
 }
 
 export default function AdminVenueEditPage({ params }: { params: Promise<{ venueId: string }> }) {

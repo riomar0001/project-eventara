@@ -48,6 +48,8 @@ from app.domain.exceptions.venue_exceptions import (
 )
 from app.infrastructure.database.repositories.venue_repository import VenueRepository
 
+_PRIVILEGED_ROLES: frozenset[str] = frozenset({"community_leader", "system_administrator"})
+
 
 def _normalise_amenities(amenities: list[str] | None) -> list[str] | None:
     """Convert raw amenity strings to deduplicated, Title-Case entries.
@@ -235,7 +237,7 @@ class VenueManagementUseCase:
             if existing.is_partner:
                 raise VenueNotCommunitySuggestionError(str(data.venue_id))
 
-            if existing.creator_id != data.updated_by:
+            if existing.creator_id != data.updated_by and data.caller_role not in _PRIVILEGED_ROLES:
                 raise UnauthorizedVenueOperationError(str(data.venue_id))
 
             name_changed = existing.name.lower() != data.name.lower()
@@ -300,7 +302,7 @@ class VenueManagementUseCase:
             if venue.is_partner:
                 raise VenueNotCommunitySuggestionError(str(data.venue_id))
 
-            if venue.creator_id != data.deleted_by:
+            if venue.creator_id != data.deleted_by and data.caller_role not in _PRIVILEGED_ROLES:
                 raise UnauthorizedVenueOperationError(str(data.venue_id))
 
             session_count = await self.repo.get_event_session_count(data.venue_id)
@@ -346,7 +348,7 @@ class VenueManagementUseCase:
             if venue is None:
                 raise VenueNotFoundError(str(data.venue_id))
 
-            if venue.creator_id != data.updated_by:
+            if venue.creator_id != data.updated_by and data.caller_role not in _PRIVILEGED_ROLES:
                 raise UnauthorizedVenueOperationError(str(data.venue_id))
 
             old_image_url = venue.image_url

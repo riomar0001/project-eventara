@@ -76,12 +76,14 @@ class UpdateSuggestedVenueInput:
     contact_name: str | None = None
     contact_phone: str | None = None
     contact_email: str | None = None
+    caller_role: str | None = None
 
 
 @dataclass
 class DeleteSuggestedVenueInput:
     venue_id: uuid.UUID
     deleted_by: uuid.UUID
+    caller_role: str | None = None
 
 
 @dataclass
@@ -105,6 +107,7 @@ class UpdateVenueImageInput:
     venue_id: uuid.UUID
     updated_by: uuid.UUID
     image_url: str
+    caller_role: str | None = None
 
 
 @dataclass

@@ -56,12 +56,10 @@ export const isFormValid = (errors: FormErrors): boolean => {
   return Object.keys(errors).length === 0;
 };
 
-export type RegisterErrors = Partial<Record<'firstName' | 'lastName' | 'email' | 'password' | 'confirm', string>>;
+export type RegisterErrors = Partial<Record<'email' | 'password' | 'confirm', string>>;
 
-export const validateRegisterForm = (data: { firstName: string; lastName: string; email: string; password: string; confirm: string }): RegisterErrors => {
+export const validateRegisterForm = (data: { email: string; password: string; confirm: string }): RegisterErrors => {
   const errors: RegisterErrors = {};
-  if (!data.firstName.trim()) errors.firstName = 'Please enter your first name.';
-  if (!data.lastName.trim()) errors.lastName = 'Please enter your last name.';
   if (!data.email.trim()) errors.email = 'Please enter your email address.';
   else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) errors.email = "That doesn't look like a valid email address.";
   if (!data.password) errors.password = 'Please enter a password.';

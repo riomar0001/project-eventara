@@ -36,6 +36,7 @@ class CreateEventSessionForEventInput:
     start_datetime: datetime
     end_datetime: datetime
     max_slots: int | None = None
+    caller_role: str | None = None
 
 
 @dataclass
@@ -58,6 +59,7 @@ class UpdateEventMetadataInput:
     start_date: datetime
     end_date: datetime
     banner_url: str | None = None
+    caller_role: str | None = None
 
 
 @dataclass
@@ -76,6 +78,7 @@ class UpdateEventSessionInput:
     start_datetime: datetime
     end_datetime: datetime
     max_slots: int | None = None
+    caller_role: str | None = None
 
 
 @dataclass
@@ -88,6 +91,7 @@ class UpdateEventSessionOutput:
 class DeleteEventInput:
     event_id: uuid.UUID
     deleted_by: uuid.UUID
+    caller_role: str | None = None
 
 
 @dataclass
@@ -100,6 +104,7 @@ class DeleteEventSessionInput:
     session_id: uuid.UUID
     event_id: uuid.UUID
     deleted_by: uuid.UUID
+    caller_role: str | None = None
 
 
 @dataclass
@@ -112,6 +117,7 @@ class UpdateEventBannerInput:
     event_id: uuid.UUID
     updated_by: uuid.UUID
     banner_url: str
+    caller_role: str | None = None
 
 
 @dataclass
@@ -150,7 +156,7 @@ class GetPublicEventsInput:
 
 @dataclass
 class PublicEventsOutput:
-    events: list["HomeEventRecord"]
+    events: list[HomeEventRecord]
     total: int
     page: int
     page_size: int

@@ -2,6 +2,7 @@
 
 import { Loader2, RotateCcw, Save } from 'lucide-react';
 import { useProfileForm } from '@/hooks/profile/use-profile-form';
+import { useAvatarUpload } from '@/hooks/profile/use-avatar-upload';
 import { useAuthStore } from '@/store/auth-store';
 import { AGE_GROUP_OPTIONS, GENDER_OPTIONS, EDUCATION_LEVEL_OPTIONS } from '@/constants/profile';
 
@@ -12,6 +13,7 @@ const labelCls = 'mb-1.5 block font-mono text-[11px] tracking-[0.14em] uppercase
 
 export function ProfileForm() {
   const { form, saving, saved, error, setField, reset, handleSubmit } = useProfileForm();
+  const { inputRef, uploading, error: uploadError, openPicker, handleFileChange } = useAvatarUpload();
   const user = useAuthStore((s) => s.user);
 
   return (
@@ -28,13 +30,23 @@ export function ProfileForm() {
           )}
           <div className="flex-1">
             <p className="text-foreground text-sm font-medium">Upload a photo</p>
-            <p className="text-muted-foreground mt-0.5 text-xs">JPG or PNG · max 2 MB</p>
+            <p className="text-muted-foreground mt-0.5 text-xs">JPG, PNG, WebP, or GIF · max 2 MB</p>
+            {uploadError && <p className="mt-1 text-xs text-red-500">{uploadError}</p>}
           </div>
+          <input
+            ref={inputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            className="hidden"
+            onChange={handleFileChange}
+          />
           <button
             type="button"
-            className="border-border text-muted-foreground hover:border-muted-foreground shrink-0 rounded-xl border px-3 py-2 text-xs font-medium transition-all"
+            disabled={uploading}
+            onClick={openPicker}
+            className="border-border text-muted-foreground hover:border-muted-foreground shrink-0 rounded-xl border px-3 py-2 text-xs font-medium transition-all disabled:opacity-60"
           >
-            Choose file
+            {uploading ? 'Uploading…' : 'Choose file'}
           </button>
         </div>
       </div>

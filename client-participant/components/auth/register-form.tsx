@@ -21,19 +21,6 @@ export function RegisterForm() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className={labelCls}>First name</label>
-            <input className={INPUT} value={form.firstName} onChange={(e) => setField('firstName', e.target.value)} placeholder="Alex" />
-            {errors.firstName && <p className={errorCls}>{errors.firstName}</p>}
-          </div>
-          <div>
-            <label className={labelCls}>Last name</label>
-            <input className={INPUT} value={form.lastName} onChange={(e) => setField('lastName', e.target.value)} placeholder="Rivera" />
-            {errors.lastName && <p className={errorCls}>{errors.lastName}</p>}
-          </div>
-        </div>
-
         <div>
           <label className={labelCls}>Email</label>
           <input type="email" className={INPUT} value={form.email} onChange={(e) => setField('email', e.target.value)} placeholder="you@eventara.io" />

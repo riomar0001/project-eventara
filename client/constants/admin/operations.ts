@@ -12,6 +12,7 @@ export const ADMIN_OPERATIONS_PATHS = {
   volunteerCreate: '/volunteers/new',
   volunteerDetail: (volunteerId: string) => `/volunteers/${volunteerId}`,
   volunteerEdit: (volunteerId: string) => `/volunteers/${volunteerId}/edit`,
+  volunteerApplications: '/volunteers/applications',
   volunteerPotentialVolunteers: '/volunteers/potential-volunteers',
   volunteerRoles: '/volunteers/roles',
   queues: '/queues',

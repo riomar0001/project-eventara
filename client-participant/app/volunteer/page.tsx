@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { Navbar } from '@/components/navigation/navbar';
 import { Footer } from '@/components/footer/footer';
 import { useVolunteerApplication } from '@/hooks/use-volunteer-application';
+import { useVolunteerRoles } from '@/hooks/use-volunteer-roles';
+import { useAuthStore } from '@/store/auth-store';
 
 const REASONS = [
   {
@@ -63,20 +65,13 @@ const REASONS = [
   },
 ];
 
-const ROLES = [
-  { label: 'Registration & Check-in', icon: '🎟️' },
-  { label: 'Event Logistics', icon: '📦' },
-  { label: 'AV & Tech Support', icon: '🎛️' },
-  { label: 'Guest Relations', icon: '🤝' },
-  { label: 'Social Media Crew', icon: '📸' },
-  { label: 'General Support', icon: '⚡' },
-];
-
-const INITIAL = { full_name: '', email: '', preferred_role: '', reason: '', skills_experience: '', availability: '' };
+const INITIAL = { preferred_role: '', contact_phone: '', reason: '', skills_experience: '', availability: '' };
 
 export default function VolunteerPage() {
   const [form, setForm] = useState(INITIAL);
   const { submit, loading, error, submitted } = useVolunteerApplication();
+  const { roles, loading: rolesLoading, error: rolesError } = useVolunteerRoles();
+  const isAuthenticated = useAuthStore((s) => !!s.accessToken);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
@@ -190,12 +185,19 @@ export default function VolunteerPage() {
               <h2 className="text-foreground mt-1.5 text-xl font-bold tracking-[-0.02em] md:text-2xl">Volunteer roles available</h2>
               <p className="text-muted-foreground mt-1.5 text-[14px]">Choose the role that fits you best when you apply.</p>
               <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
-                {ROLES.map(({ label, icon }) => (
-                  <div key={label} className="border-border hover:border-primary/50 hover:bg-primary/5 flex items-center gap-3 rounded-xl border px-4 py-3 transition-all">
-                    <span className="text-xl">{icon}</span>
-                    <span className="text-foreground text-[13.5px] font-medium">{label}</span>
-                  </div>
-                ))}
+                {rolesLoading ? (
+                  Array.from({ length: 6 }).map((_, i) => (
+                    <div key={i} className="border-border bg-muted/40 h-[46px] animate-pulse rounded-xl border" />
+                  ))
+                ) : rolesError ? (
+                  <p className="text-muted-foreground col-span-2 text-[13.5px] sm:col-span-3">{rolesError}</p>
+                ) : (
+                  roles.map((role) => (
+                    <div key={role.id} className="border-border hover:border-primary/50 hover:bg-primary/5 flex items-center gap-3 rounded-xl border px-4 py-3 transition-all">
+                      <span className="text-foreground text-[13.5px] font-medium">{role.name}</span>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </div>
@@ -230,7 +232,33 @@ export default function VolunteerPage() {
               </div>
 
               <div className="border-border bg-card rounded-2xl border p-6 md:p-8">
-                {submitted ? (
+                {!isAuthenticated ? (
+                  <div className="flex flex-col items-center py-10 text-center">
+                    <div className="bg-primary/10 mb-4 flex h-16 w-16 items-center justify-center rounded-2xl">
+                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
+                      </svg>
+                    </div>
+                    <h3 className="text-foreground text-xl font-bold tracking-[-0.02em]">Sign in to apply</h3>
+                    <p className="text-muted-foreground mt-2 max-w-[30ch] text-[14px] leading-relaxed">
+                      You need to be logged in to submit a volunteer application.
+                    </p>
+                    <div className="mt-6 flex flex-col gap-3 w-full max-w-[220px]">
+                      <Link
+                        href={`/login?redirect=/volunteer%23apply`}
+                        className="bg-primary text-primary-foreground flex items-center justify-center rounded-full px-5 py-2.5 text-[13.5px] font-semibold shadow-[0_6px_18px_-6px_var(--lime-glow)] transition-all hover:-translate-y-0.5"
+                      >
+                        Log in
+                      </Link>
+                      <Link
+                        href="/register"
+                        className="border-border text-muted-foreground hover:text-foreground rounded-full border px-5 py-2.5 text-[13.5px] font-medium text-center transition-all hover:bg-muted/40"
+                      >
+                        Create an account
+                      </Link>
+                    </div>
+                  </div>
+                ) : submitted ? (
                   <div className="flex flex-col items-center py-10 text-center">
                     <div className="bg-primary/10 mb-4 flex h-16 w-16 items-center justify-center rounded-2xl">
                       <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
@@ -252,36 +280,6 @@ export default function VolunteerPage() {
                   <form onSubmit={handleSubmit} className="space-y-4">
                     <h3 className="text-foreground text-lg font-bold tracking-[-0.02em]">Volunteer Application</h3>
 
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <div>
-                        <label className="text-muted-foreground mb-1.5 block font-mono text-[11px] tracking-[0.14em] uppercase">
-                          Full name <span className="text-orange-400">*</span>
-                        </label>
-                        <input
-                          name="full_name"
-                          value={form.full_name}
-                          onChange={handleChange}
-                          required
-                          placeholder="Your full name"
-                          className="border-border bg-background text-foreground placeholder:text-muted-foreground/50 focus:border-primary w-full rounded-xl border px-3.5 py-2.5 text-[13.5px] outline-none transition-colors"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-muted-foreground mb-1.5 block font-mono text-[11px] tracking-[0.14em] uppercase">
-                          Email <span className="text-orange-400">*</span>
-                        </label>
-                        <input
-                          name="email"
-                          type="email"
-                          value={form.email}
-                          onChange={handleChange}
-                          required
-                          placeholder="you@email.com"
-                          className="border-border bg-background text-foreground placeholder:text-muted-foreground/50 focus:border-primary w-full rounded-xl border px-3.5 py-2.5 text-[13.5px] outline-none transition-colors"
-                        />
-                      </div>
-                    </div>
-
                     <div>
                       <label className="text-muted-foreground mb-1.5 block font-mono text-[11px] tracking-[0.14em] uppercase">
                         Preferred role <span className="text-orange-400">*</span>
@@ -294,10 +292,25 @@ export default function VolunteerPage() {
                         className="border-border bg-background text-foreground focus:border-primary w-full rounded-xl border px-3.5 py-2.5 text-[13.5px] outline-none transition-colors"
                       >
                         <option value="">Select a role…</option>
-                        {ROLES.map(({ label }) => (
-                          <option key={label} value={label}>{label}</option>
+                        {roles.map((role) => (
+                          <option key={role.id} value={role.name}>{role.name}</option>
                         ))}
                       </select>
+                    </div>
+
+                    <div>
+                      <label className="text-muted-foreground mb-1.5 block font-mono text-[11px] tracking-[0.14em] uppercase">
+                        Phone number <span className="text-orange-400">*</span>
+                      </label>
+                      <input
+                        name="contact_phone"
+                        type="tel"
+                        value={form.contact_phone}
+                        onChange={handleChange}
+                        required
+                        placeholder="+63 9XX XXX XXXX"
+                        className="border-border bg-background text-foreground placeholder:text-muted-foreground/50 focus:border-primary w-full rounded-xl border px-3.5 py-2.5 text-[13.5px] outline-none transition-colors"
+                      />
                     </div>
 
                     <div>

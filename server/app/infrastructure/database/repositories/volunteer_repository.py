@@ -24,6 +24,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.domain.entities.authorization_entities import Role as RoleEntity
 from app.domain.entities.user_entity import User as UserEntity
 from app.domain.entities.volunteer_entity import ApplicationStatus, VolunteerStatus
+from app.domain.entities.volunteer_entity import ApplicationSummary as ApplicationSummaryEntity
 from app.domain.entities.volunteer_entity import PotentialVolunteer as PotentialVolunteerEntity
 from app.domain.entities.volunteer_entity import Volunteer as VolunteerEntity
 from app.domain.entities.volunteer_entity import VolunteerApplication as VolunteerApplicationEntity
@@ -146,6 +147,7 @@ class VolunteerRepository:
         )
         self.db.add(orm)
         await self.db.flush()
+        await self.db.refresh(orm)
         return self._to_volunteer_role_entity(orm)
 
     async def get_user_by_id(self, user_id: uuid.UUID) -> UserEntity | None:
@@ -167,6 +169,22 @@ class VolunteerRepository:
             application_data=orm.application_data,
             created_at=orm.created_at,
             updated_at=orm.updated_at,
+        )
+
+    @staticmethod
+    def _to_application_summary_entity(row) -> ApplicationSummaryEntity:
+        app = row[0]  # first element is the VolunteerApplicationModel ORM instance
+        return ApplicationSummaryEntity(
+            id=app.id,
+            user_id=app.user_id,
+            status=ApplicationStatus(app.status),
+            application_data=app.application_data,
+            first_name=row.first_name,
+            last_name=row.last_name,
+            alias=row.alias,
+            email=row.email,
+            created_at=app.created_at,
+            updated_at=app.updated_at,
         )
 
     async def get_application_by_id(
@@ -208,6 +226,7 @@ class VolunteerRepository:
         orm = VolunteerApplicationModel(user_id=user_id, application_data=application_data)
         self.db.add(orm)
         await self.db.flush()
+        await self.db.refresh(orm)
         return self._to_application_entity(orm)
 
     async def update_application_status(
@@ -222,11 +241,12 @@ class VolunteerRepository:
             return None
         orm.status = new_status
         await self.db.flush()
+        await self.db.refresh(orm)
         return self._to_application_entity(orm)
 
     @staticmethod
     def _to_volunteer_summary_entity(row) -> VolunteerSummaryEntity:
-        v = row.Volunteer
+        v = row[0]  # first element is the Volunteer ORM instance
         return VolunteerSummaryEntity(
             id=v.id,
             user_id=v.user_id,
@@ -354,6 +374,7 @@ class VolunteerRepository:
             orm.is_active = is_active
 
         await self.db.flush()
+        await self.db.refresh(orm)
         return self._to_volunteer_role_entity(orm)
 
     async def delete_volunteers_by_role_id(self, role_id: uuid.UUID) -> int:
@@ -368,6 +389,71 @@ class VolunteerRepository:
         """Delete a volunteer role record by ID and flush within the current transaction."""
         await self.db.execute(sql_delete(VolunteerRole).where(VolunteerRole.id == role_id))
         await self.db.flush()
+
+    async def list_applications(
+        self,
+        status: ApplicationStatus | None,
+        page: int,
+        page_size: int,
+        search: str | None = None,
+    ) -> tuple[list[ApplicationSummaryEntity], int]:
+        """Fetch a paginated slice of volunteer applications with optional status and search filter."""
+        joined = (
+            VolunteerApplicationModel.__table__
+            .join(User.__table__, VolunteerApplicationModel.user_id == User.id)
+            .outerjoin(UserProfile.__table__, User.id == UserProfile.user_id)
+        )
+        base_query = (
+            select(
+                VolunteerApplicationModel,
+                User.email,
+                UserProfile.first_name,
+                UserProfile.last_name,
+                UserProfile.alias,
+            )
+            .join(User, VolunteerApplicationModel.user_id == User.id)
+            .outerjoin(UserProfile, User.id == UserProfile.user_id)
+        )
+        count_query = (
+            select(func.count())
+            .select_from(joined)
+        )
+
+        if status is not None:
+            base_query = base_query.where(VolunteerApplicationModel.status == status)
+            count_query = count_query.where(VolunteerApplicationModel.status == status)
+
+        if search:
+            term = f"%{search}%"
+            search_filter = or_(
+                UserProfile.first_name.ilike(term),
+                UserProfile.last_name.ilike(term),
+                UserProfile.alias.ilike(term),
+                User.email.ilike(term),
+                VolunteerApplicationModel.application_data["preferred_role"].astext.ilike(term),
+            )
+            base_query = base_query.where(search_filter)
+            count_query = count_query.where(search_filter)
+
+        total_result = await self.db.execute(count_query)
+        total = total_result.scalar_one()
+
+        offset = (page - 1) * page_size
+        paginated = base_query.order_by(VolunteerApplicationModel.created_at.desc()).offset(offset).limit(page_size)
+        rows_result = await self.db.execute(paginated)
+        rows = rows_result.all()
+        return [self._to_application_summary_entity(row) for row in rows], total
+
+    async def get_latest_application_by_user_id(self, user_id: uuid.UUID) -> VolunteerApplicationEntity | None:
+        """Fetch the most recently submitted application for a user regardless of status."""
+        result = await self.db.execute(
+            select(VolunteerApplicationModel)
+            .where(VolunteerApplicationModel.user_id == user_id)
+            .order_by(VolunteerApplicationModel.created_at.desc())
+            .limit(1)
+        )
+        orm = result.scalar_one_or_none()
+        return self._to_application_entity(orm) if orm else None
 
     async def get_volunteer_by_id(
         self,

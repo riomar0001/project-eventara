@@ -7,6 +7,7 @@ from app.domain.entities.authorization_entities import Role as RoleEntity
 from app.domain.entities.user_entity import User as UserEntity
 from app.domain.entities.volunteer_entity import (
     ApplicationStatus,
+    ApplicationSummary,
     PotentialVolunteer,
     Volunteer,
     VolunteerApplication,
@@ -121,3 +122,12 @@ class IVolunteerRepository(Protocol):
         min_events: int,
         search: str | None,
     ) -> tuple[list[PotentialVolunteer], int]: ...
+
+    async def list_applications(
+        self,
+        status: ApplicationStatus | None,
+        page: int,
+        page_size: int,
+    ) -> tuple[list[ApplicationSummary], int]: ...
+
+    async def get_latest_application_by_user_id(self, user_id: uuid.UUID) -> VolunteerApplication | None: ...

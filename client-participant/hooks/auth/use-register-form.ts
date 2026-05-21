@@ -8,14 +8,12 @@ import { validateRegisterForm } from '@/lib/validators';
 import type { RegisterErrors } from '@/lib/validators';
 
 type RegisterForm = {
-  firstName: string;
-  lastName: string;
   email: string;
   password: string;
   confirm: string;
 };
 
-const EMPTY: RegisterForm = { firstName: '', lastName: '', email: '', password: '', confirm: '' };
+const EMPTY: RegisterForm = { email: '', password: '', confirm: '' };
 
 export function useRegisterForm() {
   const router = useRouter();

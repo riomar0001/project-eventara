@@ -2,21 +2,25 @@
 
 import { useEffect, useState } from 'react';
 import { useAuthStore } from '@/store/auth-store';
-import { AccountSettings } from '@/api/sdk.gen';
-import type { AttendedEventResponse } from '@/api/types.gen';
+import { Volunteers } from '@/api/sdk.gen';
 import { humanizeApiError } from '@/lib/api-error';
 
-export type MyEventRecord = AttendedEventResponse;
+export interface VolunteerRole {
+  id: string;
+  name: string;
+  description: string | null;
+  is_active: boolean;
+}
 
-interface UseAttendedEventsReturn {
-  events: MyEventRecord[];
+interface UseVolunteerRolesReturn {
+  roles: VolunteerRole[];
   loading: boolean;
   error: string | null;
 }
 
-export function useAttendedEvents(limit = 50): UseAttendedEventsReturn {
+export function useVolunteerRoles(): UseVolunteerRolesReturn {
   const token = useAuthStore((s) => s.accessToken);
-  const [events, setEvents] = useState<MyEventRecord[]>([]);
+  const [roles, setRoles] = useState<VolunteerRole[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,23 +30,24 @@ export function useAttendedEvents(limit = 50): UseAttendedEventsReturn {
       return;
     }
 
-    AccountSettings.getMyEventsUserProfileMyEventsGet({
-      query: { limit },
+    Volunteers.getAllVolunteerRolesVolunteerRolesGet({
+      query: { is_active: true, page_size: 100 },
       headers: { Authorization: `Bearer ${token}` },
     }).then(({ data, error: apiError }) => {
       if (apiError || !data) {
         setError(
           humanizeApiError(
             (apiError as { message?: string } | null)?.message,
-            'Unable to load your events. Please try refreshing.',
+            'Unable to load volunteer roles.',
           ),
         );
       } else {
-        setEvents(data.data);
+        const payload = data as { data?: { roles?: VolunteerRole[] } };
+        setRoles(payload.data?.roles ?? []);
       }
       setLoading(false);
     });
-  }, [token, limit]);
+  }, [token]);
 
-  return { events, loading, error };
+  return { roles, loading, error };
 }

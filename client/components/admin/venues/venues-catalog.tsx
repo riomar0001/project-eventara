@@ -150,11 +150,11 @@ function SectionEmpty({ hasFilters, label }: { hasFilters: boolean; label: strin
 
 // ── Venue card grid ────────────────────────────────────────────────────────────
 
-function VenueGrid({ canUpdateVenue, currentUserId, venues }: { canUpdateVenue: boolean; currentUserId: string | null; venues: VenueRecordResponse[] }) {
+function VenueGrid({ canUpdateVenue, currentUserId, isPrivilegedRole, venues }: { canUpdateVenue: boolean; currentUserId: string | null; isPrivilegedRole: boolean; venues: VenueRecordResponse[] }) {
   return (
     <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
       {venues.map((venue) => {
-        const canEditVenue = canUpdateVenue || (!venue.is_partner && venue.creator_id === currentUserId);
+        const canEditVenue = canUpdateVenue || isPrivilegedRole || (!venue.is_partner && venue.creator_id === currentUserId);
 
         return (
           <CatalogCard
@@ -184,7 +184,9 @@ function VenueGrid({ canUpdateVenue, currentUserId, venues }: { canUpdateVenue: 
 export function VenuesCatalog() {
   const { venues, isLoading, error } = useVenues();
   const { can } = usePermissions();
-  const currentUserId = useAuthStore((state) => state.user?.id ?? null);
+  const currentUser = useAuthStore((state) => state.user);
+  const currentUserId = currentUser?.id ?? null;
+  const isPrivilegedRole = ['community_leader', 'system_administrator'].includes(currentUser?.role ?? '');
   const [query, setQuery] = useState('');
   const [capacityKey, setCapacityKey] = useState('any');
   const [sortKey, setSortKey] = useState('name');
@@ -399,7 +401,7 @@ export function VenuesCatalog() {
             {pagedPartners.length === 0 ? (
               <SectionEmpty hasFilters={hasActiveFilters} label="official partner venues" />
             ) : (
-              <VenueGrid venues={pagedPartners} canUpdateVenue={canUpdateVenue} currentUserId={currentUserId} />
+              <VenueGrid venues={pagedPartners} canUpdateVenue={canUpdateVenue} currentUserId={currentUserId} isPrivilegedRole={isPrivilegedRole} />
             )}
 
             <SectionPagination
@@ -425,7 +427,7 @@ export function VenuesCatalog() {
               <SectionEmpty hasFilters={hasActiveFilters} label="community venues" />
             ) : (
               <>
-                <VenueGrid venues={pagedCommunity} canUpdateVenue={canUpdateVenue} currentUserId={currentUserId} />
+                <VenueGrid venues={pagedCommunity} canUpdateVenue={canUpdateVenue} currentUserId={currentUserId} isPrivilegedRole={isPrivilegedRole} />
                 {!hasActiveFilters && communityCurrentPage === 1 && filteredCommunity.length > 0 && (
                   <div className="overflow-hidden rounded-2xl border border-sky-100 bg-sky-50 px-5 py-4">
                     <div className="flex flex-wrap items-center justify-between gap-3">

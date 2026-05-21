@@ -35,7 +35,7 @@ from app.application.use_cases.venue_query_usecase import GetVenueCapacityUseCas
 from app.application.use_cases.venue_rating_usecase import VenueRatingUseCase
 from app.application.use_cases.venue_usecase import VenueManagementUseCase
 from app.controller.api.audit_helpers import safe_audit_log, serialize_venue, serialize_venue_rating
-from app.controller.dependencies import get_audit_log_use_case, get_current_user_id, require_permission
+from app.controller.dependencies import get_audit_log_use_case, get_caller_role, get_current_user_id, require_permission
 from app.controller.dependencies.storage_depends import get_storage_service
 from app.controller.dependencies.use_cases_depends import get_venue_capacity_use_case, get_venue_management_use_case, get_venue_rating_use_case
 from app.controller.docs.venue_management_docs import (
@@ -489,6 +489,7 @@ async def update_suggested_venue(
     venue_id: uuid.UUID,
     body: SuggestedVenueUpdateRequest,
     caller_id: uuid.UUID = Depends(get_current_user_id),
+    caller_role: str | None = Depends(get_caller_role),
     use_case: VenueManagementUseCase = Depends(get_venue_management_use_case),
     audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> VenueResponse:
@@ -522,6 +523,7 @@ async def update_suggested_venue(
                 contact_name=body.contact_name,
                 contact_phone=body.contact_phone,
                 contact_email=body.contact_email,
+                caller_role=caller_role,
             )
         )
     except VenueNotCommunitySuggestionError as exc:
@@ -559,6 +561,7 @@ async def delete_suggested_venue(
     request: Request,
     venue_id: uuid.UUID,
     caller_id: uuid.UUID = Depends(get_current_user_id),
+    caller_role: str | None = Depends(get_caller_role),
     use_case: VenueManagementUseCase = Depends(get_venue_management_use_case),
     audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> None:
@@ -572,7 +575,7 @@ async def delete_suggested_venue(
     - **409 Conflict** — one or more event sessions still reference this venue.
     """
     try:
-        result = await use_case.delete_suggested_venue(DeleteSuggestedVenueInput(venue_id=venue_id, deleted_by=caller_id))
+        result = await use_case.delete_suggested_venue(DeleteSuggestedVenueInput(venue_id=venue_id, deleted_by=caller_id, caller_role=caller_role))
     except VenueNotCommunitySuggestionError as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
     except UnauthorizedVenueOperationError as exc:
@@ -801,6 +804,7 @@ async def upload_venue_image(
     venue_id: uuid.UUID,
     body: VenueImageUploadRequest,
     caller_id: uuid.UUID = Depends(get_current_user_id),
+    caller_role: str | None = Depends(get_caller_role),
     use_case: VenueManagementUseCase = Depends(get_venue_management_use_case),
     audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
     storage: StorageService = Depends(get_storage_service),
@@ -822,6 +826,7 @@ async def upload_venue_image(
                 venue_id=venue_id,
                 updated_by=caller_id,
                 image_url=object_key,
+                caller_role=caller_role,
             )
         )
     except UnauthorizedVenueOperationError as exc:

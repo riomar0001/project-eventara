@@ -24,7 +24,9 @@ from app.application.dto.volunteer_dto import (
     DeleteVolunteerRoleInput,
     GetAllVolunteerRolesInput,
     GetAllVolunteersInput,
+    GetMyApplicationInput,
     GetPotentialVolunteersInput,
+    ListApplicationsInput,
     ReviewApplicationInput,
     SubmitApplicationInput,
     UpdateVolunteerInfoInput,
@@ -104,6 +106,21 @@ def _serialize_application(application) -> dict:
         "application_data": application.application_data,
         "created_at": application.created_at.isoformat() if application.created_at else None,
         "updated_at": application.updated_at.isoformat() if application.updated_at else None,
+    }
+
+
+def _serialize_application_summary(app_summary) -> dict:
+    return {
+        "id": str(app_summary.id),
+        "user_id": str(app_summary.user_id),
+        "status": app_summary.status.value if hasattr(app_summary.status, "value") else app_summary.status,
+        "application_data": app_summary.application_data,
+        "first_name": app_summary.first_name,
+        "last_name": app_summary.last_name,
+        "alias": app_summary.alias,
+        "email": app_summary.email,
+        "created_at": app_summary.created_at.isoformat() if app_summary.created_at else None,
+        "updated_at": app_summary.updated_at.isoformat() if app_summary.updated_at else None,
     }
 
 
@@ -476,6 +493,73 @@ async def create_volunteer_role(
     }
 
 
+@volunteer_application_router.get(
+    "",
+    status_code=status.HTTP_200_OK,
+    responses={**UNAUTHORIZED, **FORBIDDEN, **VALIDATION_ERROR},
+    summary="List volunteer applications",
+    description=(
+        "Return a paginated list of volunteer applications. "
+        "Optionally filter by status (pending, approved, rejected, withdrawn). "
+        "Results are ordered by submission date descending."
+    ),
+)
+async def list_applications(
+    request: Request,
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=20, ge=1, le=100),
+    app_status: ApplicationStatus | None = Query(default=None, alias="status"),
+    search: str | None = Query(default=None, max_length=100),
+    caller_id: uuid.UUID = Depends(require_permission("volunteer-applications", RoleAction.READ)),
+    use_case: VolunteerApplicationUseCase = Depends(get_volunteer_application_use_case),
+) -> dict:
+    """Return a paginated list of volunteer applications.
+
+    # Error mapping
+    - **401 Unauthorized** — missing, expired, or invalid Bearer token.
+    - **403 Forbidden** — caller lacks ``read`` permission on ``volunteer-applications``.
+    - **422 Unprocessable Entity** — query parameter validation failed.
+    """
+    result = await use_case.list_applications(
+        ListApplicationsInput(page=page, page_size=page_size, status=app_status, search=search or None)
+    )
+    return {
+        "success": True,
+        "message": "Volunteer applications retrieved successfully.",
+        "data": {
+            "applications": [_serialize_application_summary(a) for a in result.applications],
+            "total": result.total,
+            "page": result.page,
+            "page_size": result.page_size,
+            "total_pages": result.total_pages,
+        },
+    }
+
+
+@volunteer_application_router.get(
+    "/me",
+    status_code=status.HTTP_200_OK,
+    responses={**UNAUTHORIZED, **VALIDATION_ERROR},
+    summary="Get my volunteer application",
+    description="Return the caller's most recent volunteer application, or null if they have never applied.",
+)
+async def get_my_application(
+    caller_id: uuid.UUID = Depends(require_completed_onboarding),
+    use_case: VolunteerApplicationUseCase = Depends(get_volunteer_application_use_case),
+) -> dict:
+    """Return the authenticated user's most recent volunteer application.
+
+    # Error mapping
+    - **401 Unauthorized** — missing, expired, or invalid Bearer token.
+    """
+    result = await use_case.get_my_application(GetMyApplicationInput(user_id=caller_id))
+    return {
+        "success": True,
+        "message": "Application retrieved." if result.application else "No application found.",
+        "data": _serialize_application(result.application) if result.application else None,
+    }
+
+
 @volunteer_application_router.post(
     "",
     status_code=status.HTTP_201_CREATED,
@@ -513,9 +597,8 @@ async def submit_application(
             SubmitApplicationInput(
                 user_id=caller_id,
                 application_data={
-                    "full_name": body.full_name,
-                    "email": body.email,
                     "preferred_role": body.preferred_role,
+                    "contact_phone": body.contact_phone,
                     "reason": body.reason,
                     "skills_experience": body.skills_experience,
                     "availability": body.availability,

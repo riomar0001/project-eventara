@@ -56,6 +56,7 @@ export const dashboardNavGroups: DashboardNavGroup[] = [
         permission: { feature: 'volunteers', action: 'read' },
         children: [
           { label: 'Roster', href: ADMIN_OPERATIONS_PATHS.volunteers, permission: { feature: 'volunteers', action: 'read' } },
+          { label: 'Applications', href: ADMIN_OPERATIONS_PATHS.volunteerApplications, permission: { feature: 'volunteer-applications', action: 'read' } },
           { label: 'Potential Volunteers', href: ADMIN_OPERATIONS_PATHS.volunteerPotentialVolunteers, permission: { feature: 'volunteers', action: 'read' } },
           { label: 'Roles', href: ADMIN_OPERATIONS_PATHS.volunteerRoles, permission: { feature: 'volunteer-roles', action: 'read' } }
         ]

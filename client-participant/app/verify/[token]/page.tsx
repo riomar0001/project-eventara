@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { CheckCircle2, XCircle, Loader2 } from 'lucide-react';
 import { Auth } from '@/api/sdk.gen';
@@ -9,13 +9,14 @@ import Link from 'next/link';
 
 type Status = 'loading' | 'success' | 'error';
 
-export default function VerifyEmailPage({ params }: { params: { token: string } }) {
+export default function VerifyEmailPage({ params }: { params: Promise<{ token: string }> }) {
+  const { token } = use(params);
   const router = useRouter();
   const [status, setStatus] = useState<Status>('loading');
   const [message, setMessage] = useState('');
 
   useEffect(() => {
-    Auth.verifyEmailAuthVerifyTokenGet({ path: { token: params.token } }).then(({ error: apiError }) => {
+    Auth.verifyEmailAuthVerifyTokenGet({ path: { token } }).then(({ error: apiError }) => {
       if (apiError) {
         const msg = (apiError as { message?: string } | null)?.message;
         setMessage(msg ?? 'This verification link has expired or has already been used.');
@@ -25,7 +26,7 @@ export default function VerifyEmailPage({ params }: { params: { token: string } 
         setTimeout(() => router.replace('/login'), 3000);
       }
     });
-  }, [params.token, router]);
+  }, [token, router]);
 
   return (
     <main className="bg-background relative flex min-h-screen items-center justify-center overflow-hidden px-5 py-12">

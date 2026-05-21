@@ -62,7 +62,8 @@ function VenueFact({ accent, label, value }: { accent?: boolean; label: string; 
 export function VenueDetail({ venueId }: { venueId: string }) {
   const { venue, isLoading, error } = useVenue(venueId);
   const { can } = usePermissions();
-  const currentUserId = useAuthStore((state) => state.user?.id ?? null);
+  const currentUser = useAuthStore((state) => state.user);
+  const currentUserId = currentUser?.id ?? null;
 
   if (isLoading) {
     return (
@@ -96,8 +97,9 @@ export function VenueDetail({ venueId }: { venueId: string }) {
   const canUpdateVenue = can('venues', 'update');
   const canDeleteVenue = can('venues', 'delete');
   const canManageOwnSuggestion = !venue.is_partner && venue.creator_id === currentUserId;
-  const showEditVenue = canUpdateVenue || canManageOwnSuggestion;
-  const showDeleteVenue = canDeleteVenue || canManageOwnSuggestion;
+  const isPrivilegedRole = ['community_leader', 'system_administrator'].includes(currentUser?.role ?? '');
+  const showEditVenue = canUpdateVenue || canManageOwnSuggestion || isPrivilegedRole;
+  const showDeleteVenue = canDeleteVenue || canManageOwnSuggestion || isPrivilegedRole;
 
   return (
     <div className="space-y-6">
@@ -112,7 +114,7 @@ export function VenueDetail({ venueId }: { venueId: string }) {
             </Link>
           </Button>
         ) : null}
-        {showDeleteVenue ? <DeleteVenueButton suggestedVenue={!canDeleteVenue && canManageOwnSuggestion} venueId={venue.id} venueName={venue.name} /> : null}
+        {showDeleteVenue ? <DeleteVenueButton suggestedVenue={!canDeleteVenue && !isPrivilegedRole && canManageOwnSuggestion} venueId={venue.id} venueName={venue.name} /> : null}
       </div>
 
       {/* ── Hero photo panel ─────────────────────────────────────────────────── */}

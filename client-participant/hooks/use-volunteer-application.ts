@@ -6,9 +6,8 @@ import { Volunteers } from '@/api';
 import { humanizeApiError } from '@/lib/api-error';
 
 export interface VolunteerApplicationForm {
-  full_name: string;
-  email: string;
   preferred_role: string;
+  contact_phone: string;
   reason: string;
   skills_experience: string;
   availability: string;
@@ -30,13 +29,13 @@ export function useVolunteerApplication() {
 
     const { error: err } = await Volunteers.submitApplicationVolunteerApplicationsPost({
       body: {
-        full_name: form.full_name,
-        email: form.email,
         preferred_role: form.preferred_role || null,
+        contact_phone: form.contact_phone,
         reason: form.reason,
         skills_experience: form.skills_experience || null,
         availability: form.availability || null,
       },
+      headers: { Authorization: `Bearer ${token}` },
     });
 
     setLoading(false);

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useAuthStore } from '@/store/auth-store';
 import { useUserDetails } from '@/hooks/profile/use-user-details';
 import { useAttendedEvents, type MyEventRecord } from '@/hooks/profile/use-attended-events';
+import { useMyVolunteerStatus } from '@/hooks/use-my-volunteer-status';
 
 function EventCard({ event }: { event: MyEventRecord }) {
   const eventDate = new Date(event.event_start_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
@@ -47,6 +48,7 @@ export function ProfileView() {
   const user = useAuthStore((s) => s.user);
   const { userDetails, loading } = useUserDetails();
   const { events: attendedEvents, loading: eventsLoading } = useAttendedEvents();
+  const { application: myApplication, loading: volunteerLoading } = useMyVolunteerStatus();
 
   const firstName = user?.firstName ?? userDetails?.first_name ?? '';
   const lastName = user?.lastName ?? userDetails?.last_name ?? '';
@@ -130,21 +132,63 @@ export function ProfileView() {
             </div>
             <p className="text-foreground text-[13.5px] font-semibold">Volunteer Programme</p>
           </div>
-          <p className="text-muted-foreground text-[12.5px] leading-relaxed">
-            Join the Eventara volunteer team and help shape memorable events for the Davao tech community.
-          </p>
-          <Link
-            href="/volunteer"
-            className="bg-primary text-primary-foreground mt-4 flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-[13px] font-semibold shadow-[0_6px_18px_-6px_var(--lime-glow)] transition-all hover:-translate-y-0.5"
-          >
-            Apply to volunteer
-          </Link>
-          <Link
-            href="/volunteer"
-            className="text-primary mt-2 flex w-full items-center justify-center gap-1.5 rounded-xl py-1.5 text-[12px] font-medium transition-all hover:underline"
-          >
-            Learn more →
-          </Link>
+
+          {volunteerLoading ? (
+            <div className="h-8 animate-pulse rounded-lg bg-primary/10" />
+          ) : myApplication === null || myApplication.status === 'withdrawn' ? (
+            <>
+              <p className="text-muted-foreground text-[12.5px] leading-relaxed">
+                Join the Eventara volunteer team and help shape memorable events for the Davao tech community.
+              </p>
+              <Link
+                href="/volunteer"
+                className="bg-primary text-primary-foreground mt-4 flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-[13px] font-semibold shadow-[0_6px_18px_-6px_var(--lime-glow)] transition-all hover:-translate-y-0.5"
+              >
+                Apply to volunteer
+              </Link>
+            </>
+          ) : myApplication.status === 'pending' ? (
+            <>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-2.5 py-1 font-mono text-[11px] font-semibold text-amber-700 uppercase">
+                <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                Application pending
+              </span>
+              <p className="text-muted-foreground mt-2 text-[12.5px] leading-relaxed">
+                Your volunteer application is being reviewed. We&apos;ll notify you once a decision is made.
+              </p>
+              {myApplication.application_data?.preferred_role && (
+                <p className="text-muted-foreground mt-1 text-[12px]">
+                  Preferred role: <span className="text-foreground font-medium">{myApplication.application_data.preferred_role}</span>
+                </p>
+              )}
+            </>
+          ) : myApplication.status === 'approved' ? (
+            <>
+              <span className="bg-primary/15 text-primary inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 font-mono text-[11px] font-semibold uppercase">
+                <span className="bg-primary h-1.5 w-1.5 rounded-full shadow-[0_0_8px_var(--lime-glow)]" />
+                Active volunteer
+              </span>
+              <p className="text-muted-foreground mt-2 text-[12.5px] leading-relaxed">
+                You&apos;re part of the Eventara volunteer team. Thank you for your commitment to the community!
+              </p>
+            </>
+          ) : myApplication.status === 'rejected' ? (
+            <>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-red-100 px-2.5 py-1 font-mono text-[11px] font-semibold text-red-700 uppercase">
+                <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
+                Application not approved
+              </span>
+              <p className="text-muted-foreground mt-2 text-[12.5px] leading-relaxed">
+                Your application was not approved this time. You&apos;re welcome to submit a new application.
+              </p>
+              <Link
+                href="/volunteer"
+                className="bg-primary text-primary-foreground mt-4 flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-[13px] font-semibold shadow-[0_6px_18px_-6px_var(--lime-glow)] transition-all hover:-translate-y-0.5"
+              >
+                Apply again
+              </Link>
+            </>
+          ) : null}
         </div>
       </div>
 

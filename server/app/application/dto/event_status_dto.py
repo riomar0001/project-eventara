@@ -9,6 +9,7 @@ class UpdateEventStatusInput:
     event_id: uuid.UUID
     updated_by: uuid.UUID
     new_status: EventStatus
+    caller_role: str | None = None
 
 
 @dataclass
@@ -22,6 +23,7 @@ class UpdateEventSessionStatusInput:
     session_id: uuid.UUID
     updated_by: uuid.UUID
     new_status: EventSessionStatus
+    caller_role: str | None = None
 
 
 @dataclass

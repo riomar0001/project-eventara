@@ -4474,17 +4474,13 @@ export type SubmitAppFeedbackResponse = {
  */
 export type SubmitApplicationRequest = {
     /**
-     * Full Name
-     */
-    full_name: string;
-    /**
-     * Email
-     */
-    email: string;
-    /**
      * Preferred Role
      */
     preferred_role?: string | null;
+    /**
+     * Contact Phone
+     */
+    contact_phone: string;
     /**
      * Reason
      */
@@ -10966,6 +10962,60 @@ export type UpdateVolunteerRoleVolunteerRolesRoleIdPatchResponses = {
 
 export type UpdateVolunteerRoleVolunteerRolesRoleIdPatchResponse = UpdateVolunteerRoleVolunteerRolesRoleIdPatchResponses[keyof UpdateVolunteerRoleVolunteerRolesRoleIdPatchResponses];
 
+export type ListApplicationsVolunteerApplicationsGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Page
+         */
+        page?: number;
+        /**
+         * Page Size
+         */
+        page_size?: number;
+        /**
+         * Status
+         */
+        status?: ApplicationStatus | null;
+        /**
+         * Search
+         */
+        search?: string | null;
+    };
+    url: '/volunteer-applications';
+};
+
+export type ListApplicationsVolunteerApplicationsGetErrors = {
+    /**
+     * Missing or invalid Bearer token
+     */
+    401: ErrorResponse;
+    /**
+     * Insufficient permissions
+     */
+    403: ErrorResponse;
+    /**
+     * Request body failed schema validation
+     */
+    422: ValidationErrorResponse;
+};
+
+export type ListApplicationsVolunteerApplicationsGetError = ListApplicationsVolunteerApplicationsGetErrors[keyof ListApplicationsVolunteerApplicationsGetErrors];
+
+export type ListApplicationsVolunteerApplicationsGetResponses = {
+    /**
+     * Response List Applications Volunteer Applications Get
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type ListApplicationsVolunteerApplicationsGetResponse = ListApplicationsVolunteerApplicationsGetResponses[keyof ListApplicationsVolunteerApplicationsGetResponses];
+
 export type SubmitApplicationVolunteerApplicationsPostData = {
     body: SubmitApplicationRequest;
     path?: never;
@@ -11002,6 +11052,39 @@ export type SubmitApplicationVolunteerApplicationsPostResponses = {
 };
 
 export type SubmitApplicationVolunteerApplicationsPostResponse = SubmitApplicationVolunteerApplicationsPostResponses[keyof SubmitApplicationVolunteerApplicationsPostResponses];
+
+export type GetMyApplicationVolunteerApplicationsMeGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/volunteer-applications/me';
+};
+
+export type GetMyApplicationVolunteerApplicationsMeGetErrors = {
+    /**
+     * Missing or invalid Bearer token
+     */
+    401: ErrorResponse;
+    /**
+     * Request body failed schema validation
+     */
+    422: ValidationErrorResponse;
+};
+
+export type GetMyApplicationVolunteerApplicationsMeGetError = GetMyApplicationVolunteerApplicationsMeGetErrors[keyof GetMyApplicationVolunteerApplicationsMeGetErrors];
+
+export type GetMyApplicationVolunteerApplicationsMeGetResponses = {
+    /**
+     * Response Get My Application Volunteer Applications Me Get
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type GetMyApplicationVolunteerApplicationsMeGetResponse = GetMyApplicationVolunteerApplicationsMeGetResponses[keyof GetMyApplicationVolunteerApplicationsMeGetResponses];
 
 export type ReviewApplicationVolunteerApplicationsApplicationIdReviewPatchData = {
     body: ReviewApplicationRequest;

@@ -16,8 +16,12 @@ from app.application.dto.volunteer_dto import (
     GetAllVolunteerRolesOutput,
     GetAllVolunteersInput,
     GetAllVolunteersOutput,
+    GetMyApplicationInput,
+    GetMyApplicationOutput,
     GetPotentialVolunteersInput,
     GetPotentialVolunteersOutput,
+    ListApplicationsInput,
+    ListApplicationsOutput,
     ReviewApplicationInput,
     ReviewApplicationOutput,
     SubmitApplicationInput,
@@ -460,6 +464,28 @@ class VolunteerApplicationUseCase:
         self.repo = repo
         self.role_repo = role_repo
         self.db = db
+
+    async def list_applications(self, data: ListApplicationsInput) -> ListApplicationsOutput:
+        """Return a paginated, optionally filtered list of volunteer applications."""
+        applications, total = await self.repo.list_applications(
+            status=data.status,
+            page=data.page,
+            page_size=data.page_size,
+            search=data.search,
+        )
+        total_pages = math.ceil(total / data.page_size) if total > 0 else 1
+        return ListApplicationsOutput(
+            applications=applications,
+            total=total,
+            page=data.page,
+            page_size=data.page_size,
+            total_pages=total_pages,
+        )
+
+    async def get_my_application(self, data: GetMyApplicationInput) -> GetMyApplicationOutput:
+        """Return the caller's most recent volunteer application, or None if they have never applied."""
+        application = await self.repo.get_latest_application_by_user_id(data.user_id)
+        return GetMyApplicationOutput(application=application)
 
     async def submit_application(self, data: SubmitApplicationInput) -> SubmitApplicationOutput:
         """Submit a new volunteer application on behalf of the authenticated user.

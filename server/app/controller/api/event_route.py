@@ -26,19 +26,19 @@ from app.application.dto.event_dto import (
     DeleteEventSessionInput,
     GetAllEventsInput,
     GetEventWithSessionsInput,
+    GetPublicEventsInput,
     UpdateEventBannerInput,
     UpdateEventMetadataInput,
     UpdateEventSessionInput,
 )
 from app.application.dto.event_status_dto import UpdateEventSessionStatusInput, UpdateEventStatusInput
 from app.application.use_cases.audit_log_usecase import AuditLogUseCase
-from app.application.dto.event_dto import GetPublicEventsInput
 from app.application.use_cases.event_deletion_usecase import EventDeletionUseCase
 from app.application.use_cases.event_query_usecase import GetEventUseCase
 from app.application.use_cases.event_status_usecase import EventStatusUseCase
 from app.application.use_cases.event_usecase import EventUseCase
 from app.controller.api.audit_helpers import safe_audit_log, serialize_event, serialize_event_sessions
-from app.controller.dependencies import get_audit_log_use_case, require_permission
+from app.controller.dependencies import get_audit_log_use_case, get_caller_role, require_permission
 from app.controller.dependencies.storage_depends import get_storage_service
 from app.controller.dependencies.use_cases_depends import (
     get_event_deletion_use_case,
@@ -477,6 +477,7 @@ async def update_event_metadata(
     event_id: uuid.UUID,
     body: EventUpdateRequest,
     user_id: uuid.UUID = Depends(require_permission("events", RoleAction.UPDATE)),
+    caller_role: str | None = Depends(get_caller_role),
     use_case: EventUseCase = Depends(get_event_use_case),
     audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> EventMetadataUpdatedResponse:
@@ -491,6 +492,7 @@ async def update_event_metadata(
                 start_date=body.start_date,
                 end_date=body.end_date,
                 banner_url=StorageService.object_key_from_public_url(body.banner_url),
+                caller_role=caller_role,
             )
         )
     except UnauthorizedEventOperationError as exc:
@@ -540,6 +542,7 @@ async def update_event_session(
     session_id: uuid.UUID,
     body: EventSessionUpdateRequest,
     user_id: uuid.UUID = Depends(require_permission("events", RoleAction.UPDATE)),
+    caller_role: str | None = Depends(get_caller_role),
     use_case: EventUseCase = Depends(get_event_use_case),
     audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> EventSessionUpdatedResponse:
@@ -555,6 +558,7 @@ async def update_event_session(
                 start_datetime=body.start_datetime,
                 end_datetime=body.end_datetime,
                 max_slots=body.max_slots,
+                caller_role=caller_role,
             )
         )
     except UnauthorizedEventOperationError as exc:
@@ -604,6 +608,7 @@ async def create_event_session(
     event_id: uuid.UUID,
     body: EventSessionCreateRequest,
     user_id: uuid.UUID = Depends(require_permission("events", RoleAction.CREATE)),
+    caller_role: str | None = Depends(get_caller_role),
     use_case: EventUseCase = Depends(get_event_use_case),
     audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> EventSessionCreatedResponse:
@@ -619,6 +624,7 @@ async def create_event_session(
                 start_datetime=body.start_datetime,
                 end_datetime=body.end_datetime,
                 max_slots=body.max_slots,
+                caller_role=caller_role,
             )
         )
     except UnauthorizedEventOperationError as exc:
@@ -672,6 +678,7 @@ async def update_event_status(
     event_id: uuid.UUID,
     body: EventStatusUpdateRequest,
     user_id: uuid.UUID = Depends(require_permission("events", RoleAction.UPDATE)),
+    caller_role: str | None = Depends(get_caller_role),
     use_case: EventStatusUseCase = Depends(get_event_status_use_case),
     audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> EventStatusUpdatedResponse:
@@ -682,6 +689,7 @@ async def update_event_status(
                 event_id=event_id,
                 updated_by=user_id,
                 new_status=body.new_status,
+                caller_role=caller_role,
             )
         )
     except UnauthorizedEventOperationError as exc:
@@ -735,6 +743,7 @@ async def update_event_session_status(
     session_id: uuid.UUID,
     body: EventSessionStatusUpdateRequest,
     user_id: uuid.UUID = Depends(require_permission("events", RoleAction.UPDATE)),
+    caller_role: str | None = Depends(get_caller_role),
     use_case: EventStatusUseCase = Depends(get_event_status_use_case),
     audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> EventSessionStatusUpdatedResponse:
@@ -745,6 +754,7 @@ async def update_event_session_status(
                 session_id=session_id,
                 updated_by=user_id,
                 new_status=body.new_status,
+                caller_role=caller_role,
             )
         )
     except UnauthorizedEventOperationError as exc:
@@ -792,12 +802,13 @@ async def delete_event(
     request: Request,
     event_id: uuid.UUID,
     user_id: uuid.UUID = Depends(require_permission("events", RoleAction.DELETE)),
+    caller_role: str | None = Depends(get_caller_role),
     use_case: EventDeletionUseCase = Depends(get_event_deletion_use_case),
     audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> EventDeletedResponse:
     """Delete an event in one atomic transaction; cascades to all child sessions."""
     try:
-        result = await use_case.delete_event(DeleteEventInput(event_id=event_id, deleted_by=user_id))
+        result = await use_case.delete_event(DeleteEventInput(event_id=event_id, deleted_by=user_id, caller_role=caller_role))
     except UnauthorizedEventOperationError as exc:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
     except EventNotFoundError as exc:
@@ -845,12 +856,15 @@ async def delete_event_session(
     event_id: uuid.UUID,
     session_id: uuid.UUID,
     user_id: uuid.UUID = Depends(require_permission("events", RoleAction.DELETE)),
+    caller_role: str | None = Depends(get_caller_role),
     use_case: EventDeletionUseCase = Depends(get_event_deletion_use_case),
     audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
 ) -> EventSessionDeletedResponse:
     """Delete a single event session in one atomic transaction."""
     try:
-        result = await use_case.delete_event_session(DeleteEventSessionInput(session_id=session_id, event_id=event_id, deleted_by=user_id))
+        result = await use_case.delete_event_session(
+            DeleteEventSessionInput(session_id=session_id, event_id=event_id, deleted_by=user_id, caller_role=caller_role)
+        )
     except UnauthorizedEventOperationError as exc:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
     except EventNotFoundError as exc:
@@ -905,6 +919,7 @@ async def upload_event_banner(
     event_id: uuid.UUID,
     body: EventBannerUploadRequest,
     user_id: uuid.UUID = Depends(require_permission("events", RoleAction.UPDATE)),
+    caller_role: str | None = Depends(get_caller_role),
     use_case: EventUseCase = Depends(get_event_use_case),
     audit_use_case: AuditLogUseCase = Depends(get_audit_log_use_case),
     storage: StorageService = Depends(get_storage_service),
@@ -926,6 +941,7 @@ async def upload_event_banner(
                 event_id=event_id,
                 updated_by=user_id,
                 banner_url=object_key,
+                caller_role=caller_role,
             )
         )
     except UnauthorizedEventOperationError as exc:
