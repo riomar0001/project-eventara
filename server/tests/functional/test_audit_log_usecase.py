@@ -43,11 +43,11 @@ def _make_get_input(limit=50, cursor=None) -> GetAuditLogsInput:
 class TestCreateAuditLogUseCase:
     @pytest.mark.asyncio
     async def test_enqueues_via_redis_when_available(self):
-        """Enqueues the audit log as an ARQ job when a Redis connection is configured"""
+        """Enqueues the audit log as a background job when a job queue is configured"""
         repo = MagicMock()
         redis = AsyncMock()
         redis.enqueue_job = AsyncMock()
-        await AuditLogUseCase(repository=repo, redis=redis).create(_make_create_input())
+        await AuditLogUseCase(repository=repo, jobs=redis).create(_make_create_input())
         redis.enqueue_job.assert_awaited_once()
 
     @pytest.mark.asyncio
@@ -57,7 +57,7 @@ class TestCreateAuditLogUseCase:
         repo.create = AsyncMock()
         redis = AsyncMock()
         redis.enqueue_job = AsyncMock(side_effect=RuntimeError("redis down"))
-        await AuditLogUseCase(repository=repo, redis=redis).create(_make_create_input())
+        await AuditLogUseCase(repository=repo, jobs=redis).create(_make_create_input())
         repo.create.assert_awaited_once()
 
     @pytest.mark.asyncio
@@ -65,7 +65,7 @@ class TestCreateAuditLogUseCase:
         """Writes directly to the database repository when no Redis connection is configured"""
         repo = MagicMock()
         repo.create = AsyncMock()
-        await AuditLogUseCase(repository=repo, redis=None).create(_make_create_input())
+        await AuditLogUseCase(repository=repo, jobs=None).create(_make_create_input())
         repo.create.assert_awaited_once()
 
     @pytest.mark.asyncio
@@ -76,7 +76,7 @@ class TestCreateAuditLogUseCase:
         with patch("app.core.config.settings") as mock_settings:
             mock_settings.DEBUG = False
             with pytest.raises(AuditLogWriteError):
-                await AuditLogUseCase(repository=repo, redis=None).create(_make_create_input())
+                await AuditLogUseCase(repository=repo, jobs=None).create(_make_create_input())
 
 
 # ─── GetAuditLogsUseCase ──────────────────────────────────────────────────────

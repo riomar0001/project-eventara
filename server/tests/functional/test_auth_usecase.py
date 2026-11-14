@@ -78,7 +78,7 @@ def _make_usecase(*, repo=None, otp_repo=None, password_reset_repo=None):
     return AuthUseCase(
         repo=repo or _make_repo(),
         db=AsyncMock(),
-        arq=AsyncMock(),
+        jobs=AsyncMock(),
         otp_repo=otp_repo,
         password_reset_repo=password_reset_repo,
     )

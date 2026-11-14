@@ -65,7 +65,7 @@ QUEUE_RETRY_CONFLICT = {
 
 QUEUE_INTERNAL_ERROR = {
     status.HTTP_500_INTERNAL_SERVER_ERROR: {
-        "description": "Unexpected Redis or ARQ error during queue inspection",
+        "description": "Unexpected Redis or SQS error during queue inspection",
         "content": {
             "application/json": {
                 "example": {

@@ -1,6 +1,6 @@
-"""ARQ background jobs for automatic event and event session status transitions.
+"""Background jobs for automatic event and event session status transitions.
 
-These cron jobs run every minute and advance statuses based on wall-clock time,
+These scheduled jobs run every minute and advance statuses based on wall-clock time,
 eliminating the need for any application-side polling.  Each job opens its own
 database session so it is fully self-contained and independent of the request
 lifecycle.
@@ -23,18 +23,18 @@ from app.infrastructure.database.session import AsyncSessionLocal
 
 
 async def sync_event_session_statuses_job(ctx: dict) -> None:
-    """ARQ cron job that advances event session statuses based on their scheduled windows.
+    """Scheduled job that advances event session statuses based on their scheduled windows.
 
     Transitions in order:
       - ``POSTED`` → ``STARTED`` for sessions whose start window has arrived.
       - ``STARTED`` → ``ENDED`` for sessions whose end window has passed.
 
-    Runs every minute (``second={0}`` in ``WorkerSettings.cron_jobs``).  Both
+    Runs every minute (EventBridge Scheduler, see ``LOCAL_SCHEDULES`` in ``worker.py``).  Both
     passes execute within a single database transaction so a failure in the
     second pass rolls back the first, preserving consistency.
 
     Args:
-        ctx: ARQ worker context injected by the framework; not used directly.
+        ctx: Worker context; not used directly.
     """
     async with AsyncSessionLocal() as db:
         repo = EventRepository(db)
@@ -69,18 +69,18 @@ async def sync_event_session_statuses_job(ctx: dict) -> None:
 
 
 async def sync_event_statuses_job(ctx: dict) -> None:
-    """ARQ cron job that advances event statuses based on their scheduled date windows.
+    """Scheduled job that advances event statuses based on their scheduled date windows.
 
     Transitions in order:
       - ``POSTED`` → ``STARTED`` for events whose start date has arrived.
       - ``STARTED`` → ``ENDED`` for events whose end date has passed.
 
-    Runs every minute (``second={0}`` in ``WorkerSettings.cron_jobs``).  Both
+    Runs every minute (EventBridge Scheduler, see ``LOCAL_SCHEDULES`` in ``worker.py``).  Both
     passes execute within a single database transaction so a failure in the
     second pass rolls back the first, preserving consistency.
 
     Args:
-        ctx: ARQ worker context injected by the framework; not used directly.
+        ctx: Worker context; not used directly.
     """
     async with AsyncSessionLocal() as db:
         repo = EventRepository(db)

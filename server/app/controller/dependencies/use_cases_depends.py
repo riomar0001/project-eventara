@@ -60,12 +60,13 @@ from app.infrastructure.database.repositories.venue_rating_repository import Ven
 from app.infrastructure.database.repositories.venue_repository import VenueRepository as VenueRepo
 from app.infrastructure.database.repositories.volunteer_repository import VolunteerRepository
 from app.infrastructure.database.session import get_db
+from app.infrastructure.messaging.dead_jobs import DeadJobStore
 
 
 def get_auth_use_case(request: Request, db: AsyncSession = Depends(get_db)) -> AuthUseCase:
     """Construct a fully-wired ``AuthUseCase`` for the current request.
 
-    Injects the user repository, database session, ARQ job queue, the
+    Injects the user repository, database session, background job queue, the
     Redis-backed OTP repository, and the Redis-backed password reset repository
     so all auth flows — including forgot-password and reset-password — are
     available from a single dependency.
@@ -73,7 +74,7 @@ def get_auth_use_case(request: Request, db: AsyncSession = Depends(get_db)) -> A
     return AuthUseCase(
         UserRepository(db),
         db,
-        request.app.state.arq,
+        request.app.state.jobs,
         OTPRepository(request.app.state.redis),
         PasswordResetRepository(request.app.state.redis),
     )
@@ -119,9 +120,9 @@ def get_change_password_use_case(db: AsyncSession = Depends(get_db)) -> AccountS
     return AccountSettingsUseCase(UserRepository(db), db=db)
 
 
-def get_delete_account_use_case(request: Request, db: AsyncSession = Depends(get_db)) -> AccountSettingsUseCase:
+def get_delete_account_use_case(db: AsyncSession = Depends(get_db)) -> AccountSettingsUseCase:
     """Construct an ``AccountSettingsUseCase`` wired for account deletion scheduling."""
-    return AccountSettingsUseCase(UserRepository(db), arq=request.app.state.arq)
+    return AccountSettingsUseCase(UserRepository(db))
 
 
 def get_login_history_use_case(db: AsyncSession = Depends(get_db)) -> GetLoginHistoryUseCase:
@@ -135,7 +136,7 @@ def get_admin_user_account_use_case(request: Request, db: AsyncSession = Depends
         user_repo=UserRepository(db),
         role_repo=RoleRepository(db),
         db=db,
-        arq=request.app.state.arq,
+        jobs=request.app.state.jobs,
         password_reset_repo=PasswordResetRepository(request.app.state.redis),
     )
 
@@ -147,7 +148,7 @@ def get_otp_repository(request: Request) -> OTPRepository:
 
 def get_audit_log_use_case(request: Request, db: AsyncSession = Depends(get_db)) -> AuditLogUseCase:
     """Construct an ``AuditLogUseCase`` with async queue support."""
-    return AuditLogUseCase(AuditLogRepository(db), request.app.state.arq)
+    return AuditLogUseCase(AuditLogRepository(db), request.app.state.jobs)
 
 
 def get_role_use_case(db: AsyncSession = Depends(get_db)) -> UserRoleUseCase:
@@ -166,8 +167,8 @@ def get_role_management_use_case(db: AsyncSession = Depends(get_db)) -> RoleMana
 
 
 def get_queue_use_case(request: Request) -> QueueUseCase:
-    """Construct a ``QueueUseCase`` backed by the application ARQ pool."""
-    return QueueUseCase(request.app.state.arq)
+    """Construct a ``QueueUseCase`` over the job queue and the Redis dead-job store."""
+    return QueueUseCase(request.app.state.jobs, DeadJobStore(request.app.state.redis))
 
 
 def get_venue_management_use_case(db: AsyncSession = Depends(get_db)) -> VenueManagementUseCase:
@@ -204,7 +205,7 @@ def get_event_participant_use_case(request: Request, db: AsyncSession = Depends(
         db,
         EventVolunteerRepository(db),
         UserRepository(db),
-        request.app.state.arq,
+        request.app.state.jobs,
     )
 
 
@@ -217,7 +218,7 @@ def get_event_participant_check_in_use_case(request: Request, db: AsyncSession =
         db,
         EventVolunteerRepository(db),
         UserRepository(db),
-        request.app.state.arq,
+        request.app.state.jobs,
     )
 
 

@@ -1,6 +1,6 @@
 import logging
 
-from arq.connections import ArqRedis
+from redis.asyncio import Redis
 from sqlalchemy import text
 
 from app.infrastructure.database.session import engine
@@ -14,9 +14,9 @@ def _get_logger() -> logging.Logger:
 logger = _get_logger()
 
 
-async def verify_connections(arq: ArqRedis) -> None:
-    await arq.ping()
-    logger.info("ARQ Redis connected successfully")
+async def verify_connections(redis: Redis) -> None:
+    await redis.ping()
+    logger.info("Redis connected successfully")
 
     async with engine.connect() as conn:
         await conn.execute(text("SELECT 1"))

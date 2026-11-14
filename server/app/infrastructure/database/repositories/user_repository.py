@@ -1080,32 +1080,19 @@ class UserRepository:
         await self.db.commit()
         return cast("CursorResult", result).rowcount > 0
 
-    async def finalize_account_deletion(
-        self,
-        user_id: uuid.UUID,
-        *,
-        expected_requested_at: datetime,
-        expected_scheduled_for: datetime,
-    ) -> bool:
-        """Finalize a previously scheduled account deletion exactly once.
+    async def finalize_due_account_deletions(self) -> int:
+        """Delete every active account whose deletion grace period has elapsed.
 
-        The ARQ worker passes back the request timestamp and scheduled deadline
-        that were captured when the deletion was first enqueued.  Matching both
-        values turns the finalization step into a compare-and-swap update: if
-        the user logs in and clears the pending deletion, or an administrator
-        later reschedules a different window, the worker's conditional update
-        matches zero rows and becomes a safe no-op.
+        A single bulk UPDATE keeps this safe to run concurrently: a user who
+        logged in and cancelled has ``deletion_scheduled_for`` cleared, so the
+        WHERE clause no longer matches them. Returns the number of accounts deleted.
         """
         now = self._utcnow_naive()
-        normalized_requested_at = self._as_naive_utc(expected_requested_at)
-        normalized_scheduled_for = self._as_naive_utc(expected_scheduled_for)
         result = await self.db.execute(
             update(User)
             .where(
-                User.id == user_id,
                 User.status == UserStatus.ACTIVE,
-                User.deletion_requested_at == normalized_requested_at,
-                User.deletion_scheduled_for == normalized_scheduled_for,
+                User.deletion_scheduled_for.is_not(None),
                 User.deletion_scheduled_for <= now,
             )
             .values(
@@ -1118,4 +1105,4 @@ class UserRepository:
             )
         )
         await self.db.commit()
-        return cast("CursorResult", result).rowcount > 0
+        return cast("CursorResult", result).rowcount

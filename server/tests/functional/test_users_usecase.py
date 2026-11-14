@@ -79,7 +79,7 @@ def _make_uc(*, user_repo=None, role_repo=None, pr_repo=None) -> AdminUserAccoun
         user_repo=user_repo or _make_user_repo(),
         role_repo=role_repo or _make_role_repo(),
         db=AsyncMock(),
-        arq=AsyncMock(),
+        jobs=AsyncMock(),
         password_reset_repo=pr,
     )
 
@@ -244,7 +244,7 @@ class TestChangeRole:
         role_repo.replace_active_assignments = AsyncMock(side_effect=RuntimeError("db error"))
         db = AsyncMock()
         uc = AdminUserAccountUseCase(
-            user_repo=_make_user_repo(user=_make_user()), role_repo=role_repo, db=db, arq=AsyncMock(), password_reset_repo=AsyncMock()
+            user_repo=_make_user_repo(user=_make_user()), role_repo=role_repo, db=db, jobs=AsyncMock(), password_reset_repo=AsyncMock()
         )
         with pytest.raises(RuntimeError):
             await uc.change_role(self._data())
@@ -312,7 +312,7 @@ class TestChangeEmail:
         user_repo = _make_user_repo(user=_make_user())
         user_repo.update_email_and_clear_verification = AsyncMock(side_effect=RuntimeError("db error"))
         db = AsyncMock()
-        uc = AdminUserAccountUseCase(user_repo=user_repo, role_repo=_make_role_repo(), db=db, arq=AsyncMock(), password_reset_repo=AsyncMock())
+        uc = AdminUserAccountUseCase(user_repo=user_repo, role_repo=_make_role_repo(), db=db, jobs=AsyncMock(), password_reset_repo=AsyncMock())
         with pytest.raises(RuntimeError):
             await uc.change_email(self._data())
         db.rollback.assert_awaited_once()

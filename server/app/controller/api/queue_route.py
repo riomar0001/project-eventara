@@ -1,22 +1,22 @@
 """Queue management routes.
 
-Exposes read and administrative endpoints for the ARQ job queue and its
+Exposes read and administrative endpoints for the SQS job queue and its
 dead-letter store.  All routes require an authenticated caller with RBAC
 permission on the ``queues`` feature:
 
   - ``read``   — required for GET endpoints (stats and DLQ listing)
   - ``delete`` — required for POST retry and DELETE operations
 
-Dead-letter queue (DLQ): ARQ does not have a native DLQ — jobs that exhaust
-``max_tries`` have their final failure persisted in ``arq:result:{job_id}``
-with ``success=False``.  These endpoints treat that set of keys as the DLQ.
+Dead-letter store: SQS queues cannot be browsed, so the worker records each
+job's final failure (after ``JOB_MAX_TRIES`` attempts) in Redis under
+``jobs:dead:{job_id}``. These endpoints page, retry and delete those records.
 
 Error mapping summary:
   - 401  token missing / expired / invalid
   - 403  RBAC denial
   - 404  job result key not found or already expired
-  - 409  job is not failed, or concurrent retry already in progress
-  - 500  Redis / ARQ communication failure
+  - 409  concurrent retry already in progress
+  - 500  Redis / SQS communication failure
 """
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -63,7 +63,7 @@ router = APIRouter(prefix="/queues", tags=["Queue"])
     },
     summary="Get queue statistics",
     description=(
-        "Returns a live snapshot of the ARQ job queue, including pending, "
+        "Returns a live snapshot of the SQS job queue, including pending, "
         "in-progress, completed, and failed job counts, along with the last "
         "known worker heartbeat entries from the health-check sorted set.\n\n"
         "**Requires** ``read`` permission on the ``queues`` feature."
@@ -75,15 +75,14 @@ async def get_queue_stats(
 ) -> QueueStatsResponse:
     """Return a live queue activity snapshot.
 
-    Queries Redis directly for pending job counts, in-progress key counts,
-    and deserialises all stored results to partition them into completed and
-    failed totals.  Worker heartbeat entries from ``arq:queue:health-check``
-    are parsed and returned as structured objects.
+    Pending and in-flight counts come from SQS queue attributes (approximate);
+    failed and completed totals come from the Redis dead-job store. Lambda
+    workers report no heartbeats, so ``worker_health`` is always empty.
 
     Error mapping:
     - **401 Unauthorized** — missing, expired, or invalid Bearer token.
     - **403 Forbidden** — caller lacks ``read`` permission on ``queues``.
-    - **500 Internal Server Error** — Redis connection failure or ARQ error.
+    - **500 Internal Server Error** — Redis or SQS communication failure.
     """
     try:
         output = await use_case.get_stats()
@@ -136,9 +135,8 @@ async def list_dead_jobs(
 ) -> ListDeadJobsResponse:
     """List permanently failed jobs in the dead-letter store with pagination.
 
-    Scans ``arq:result:*`` and returns entries where ``JobResult.success``
-    is ``False``, sliced to the requested page.  Results that have already
-    expired (ARQ TTL elapsed) will not appear in this list.
+    Returns the newest failures first. Records expire 14 days after the
+    final failure and then no longer appear.
 
     Error mapping:
     - **401 Unauthorized** — missing, expired, or invalid Bearer token.
@@ -198,17 +196,16 @@ async def retry_dead_job(
 ) -> RetryJobResponse:
     """Re-enqueue a failed job from the dead-letter store.
 
-    Acquires a ``SET NX EX 30`` lock on ``arq:dlq:retry-lock:{job_id}`` to
-    serialise concurrent retry requests.  On success, the original result key
-    is deleted and a new job is placed on the default queue with a fresh retry
-    counter.
+    Acquires a ``SET NX EX 30`` lock on ``jobs:dead:retry-lock:{job_id}`` to
+    serialise concurrent retry requests.  On success, the failure record is
+    deleted and a new job is sent to the queue with a fresh retry counter.
 
     Error mapping:
     - **401 Unauthorized** — missing, expired, or invalid Bearer token.
     - **403 Forbidden** — caller lacks ``delete`` permission on ``queues``.
     - **404 Not Found** — job result absent or TTL expired.
     - **409 Conflict** — job succeeded (not in DLQ) or concurrent retry active.
-    - **500 Internal Server Error** — unexpected Redis or ARQ failure.
+    - **500 Internal Server Error** — unexpected Redis or SQS failure.
     """
     try:
         output = await use_case.retry_dead_job(job_id)
@@ -251,8 +248,7 @@ async def delete_dead_job(
 ) -> DeleteJobResponse:
     """Delete a single failed job from the dead-letter store.
 
-    Confirms the job exists and has failed before issuing the atomic ``DEL``
-    command on ``arq:result:{job_id}``.
+    Confirms the failure record exists before deleting it.
 
     Error mapping:
     - **401 Unauthorized** — missing, expired, or invalid Bearer token.
@@ -295,8 +291,7 @@ async def purge_dead_jobs(
 ) -> PurgeDeadJobsResponse:
     """Purge all failed jobs from the dead-letter store.
 
-    Collects all ``arq:result:*`` keys where ``success=False``, then issues a
-    single batched ``DEL`` for efficiency.  Returns the number of keys deleted.
+    Deletes every failure record in batches and returns how many were removed.
 
     Error mapping:
     - **401 Unauthorized** — missing, expired, or invalid Bearer token.

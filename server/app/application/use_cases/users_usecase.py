@@ -36,6 +36,7 @@ from app.application.dto.users_dto import (
     ListUserAccountsOutput,
     SendUserPasswordResetInput,
 )
+from app.application.interfaces.job_queue_interface import IJobQueue
 from app.application.interfaces.role_interface import IRoleRepository
 from app.application.interfaces.user_interface import IUserRepository
 from app.core.email_template import reset_password_email_html
@@ -67,13 +68,13 @@ class AdminUserAccountUseCase:
         user_repo: IUserRepository,
         role_repo: IRoleRepository,
         db: AsyncSession,
-        arq,
+        jobs: IJobQueue,
         password_reset_repo: PasswordResetRepository,
     ) -> None:
         self.user_repo = user_repo
         self.role_repo = role_repo
         self.db = db
-        self.arq = arq
+        self.jobs = jobs
         self.password_reset_repo = password_reset_repo
 
     async def list_user_accounts(self, data: ListUserAccountsInput) -> ListUserAccountsOutput:
@@ -184,7 +185,7 @@ class AdminUserAccountUseCase:
 
         verify_token = verification_token(updated_user.id, updated_user.email)
         await send_email(
-            self.arq,
+            self.jobs,
             to=updated_user.email,
             subject="Verify your updated Eventara email",
             html=verification_email_html(verify_token),
@@ -206,7 +207,7 @@ class AdminUserAccountUseCase:
         reset_token = create_password_reset_token(user.id, user.email)
         await self.password_reset_repo.store(user.id, reset_token)
         await send_email(
-            self.arq,
+            self.jobs,
             to=user.email,
             subject="Reset your Eventara password",
             html=reset_password_email_html(reset_token),

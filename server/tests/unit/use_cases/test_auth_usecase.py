@@ -78,11 +78,11 @@ def _make_usecase(
 ) -> AuthUseCase:
     repo = repo or _make_repo()
     db = AsyncMock()
-    arq = AsyncMock()
+    jobs = AsyncMock()
     return AuthUseCase(
         repo=repo,
         db=db,
-        arq=arq,
+        jobs=jobs,
         otp_repo=otp_repo,
         password_reset_repo=password_reset_repo,
     )

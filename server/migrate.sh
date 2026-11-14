@@ -1,4 +1,6 @@
 #!/bin/sh
+# Apply database migrations and the idempotent RBAC/admin seeds.
+# Run on AWS with: aws lambda invoke --function-name <worker> --payload '{"task":"migrate"}' out.json
 set -e
 
 echo "Running database migrations..."
@@ -9,6 +11,3 @@ python -m seeds.rbac_user_management
 
 echo "Seeding system administrator..."
 python -m seeds.system_admin
-
-echo "Starting Eventara API..."
-exec uvicorn main:app --host 0.0.0.0 --port 8000

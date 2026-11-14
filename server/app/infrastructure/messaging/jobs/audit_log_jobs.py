@@ -1,8 +1,8 @@
-"""ARQ background job for persisting audit logs asynchronously.
+"""Background job for persisting audit logs asynchronously.
 
 This job is enqueued by CreateAuditLogUseCase to write audit logs without blocking
-the main business transaction. If the job fails, ARQ will automatically retry with
-exponential backoff up to max_tries (configured on the worker).
+the main business transaction. If the job fails, the worker retries it with
+exponential backoff up to JOB_MAX_TRIES times.
 """
 
 import uuid
@@ -15,13 +15,13 @@ from app.infrastructure.database.session import AsyncSessionLocal
 
 
 async def persist_audit_log(ctx: dict, audit_log_data: dict) -> None:
-    """ARQ job that persists an audit log entry to PostgreSQL.
+    """Job that persists an audit log entry to PostgreSQL.
 
-    Runs inside the ARQ worker process. Creates a new database session for each
+    Runs inside the worker. Creates a new database session for each
     job execution to ensure transaction isolation from the main API request.
 
     Args:
-        ctx: ARQ worker context (injected by framework)
+        ctx: Worker context
         audit_log_data: Serialized audit log dictionary from domain entity
     """
     async with AsyncSessionLocal() as db:

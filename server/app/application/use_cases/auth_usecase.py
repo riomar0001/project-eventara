@@ -2,7 +2,6 @@ import re
 import uuid
 from datetime import UTC, datetime
 
-from arq.connections import ArqRedis
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -23,6 +22,7 @@ from app.application.dto.auth_dto import (
     ResetPasswordInput,
     VerifiedEmailOutput,
 )
+from app.application.interfaces.job_queue_interface import IJobQueue
 from app.application.interfaces.user_interface import IUserRepository
 from app.core.email_template import otp_email_html, reset_password_email_html
 from app.core.security.constants import LOCKOUT_DURATION, MAX_FAILED_LOGIN_ATTEMPTS
@@ -87,13 +87,13 @@ class AuthUseCase:
         self,
         repo: IUserRepository,
         db: AsyncSession,
-        arq: ArqRedis,
+        jobs: IJobQueue,
         otp_repo: OTPRepository | None = None,
         password_reset_repo: PasswordResetRepository | None = None,
     ) -> None:
         self.repo = repo
         self.db = db
-        self.arq = arq
+        self.jobs = jobs
         self.otp_repo = otp_repo
         self.password_reset_repo = password_reset_repo
 
@@ -205,7 +205,7 @@ class AuthUseCase:
         verify_token = verification_token(new_user.id, data.email)
 
         await send_email(
-            self.arq,
+            self.jobs,
             to=user.email,
             subject="Verify your Eventara email",
             html=verification_email_html(verify_token),
@@ -258,7 +258,7 @@ class AuthUseCase:
             raise EmailAlreadyVerifiedError()
 
         await send_email(
-            self.arq,
+            self.jobs,
             to=user.email,
             subject="Your Eventara email is verified",
             html=email_verified_html(user.email),
@@ -372,7 +372,7 @@ class AuthUseCase:
         code = await otp_repo.create_for_user(user.id)
 
         await send_email(
-            self.arq,
+            self.jobs,
             to=user.email,
             subject="Your Eventara login code",
             html=otp_email_html(code),
@@ -511,7 +511,7 @@ class AuthUseCase:
         code = await otp_repo.create_for_user(user_id)
 
         await send_email(
-            self.arq,
+            self.jobs,
             to=user.email,
             subject="Your new Eventara login code",
             html=otp_email_html(code),
@@ -661,7 +661,7 @@ class AuthUseCase:
         verify_token = verification_token(user.id, user.email)
 
         await send_email(
-            self.arq,
+            self.jobs,
             to=user.email,
             subject="Verify your Eventara email",
             html=verification_email_html(verify_token),
@@ -707,7 +707,7 @@ class AuthUseCase:
         await reset_repo.store(user.id, reset_token)
 
         await send_email(
-            self.arq,
+            self.jobs,
             to=user.email,
             subject="Reset your Eventara password",
             html=reset_password_email_html(reset_token),

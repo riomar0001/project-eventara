@@ -1,13 +1,12 @@
 """Use cases for audit log creation and retrieval."""
 
-from arq.connections import ArqRedis
-
 from app.application.dto.audit_log_dto import (
     CreateAuditLogInput,
     GetAuditLogsInput,
     GetAuditLogsOutput,
 )
 from app.application.interfaces.audit_log_interface import IAuditLogRepository
+from app.application.interfaces.job_queue_interface import IJobQueue
 from app.domain.entities.audit_log import AuditLog
 from app.domain.exceptions.audit_exceptions import AuditLogWriteError
 
@@ -15,8 +14,8 @@ from app.domain.exceptions.audit_exceptions import AuditLogWriteError
 class AuditLogUseCase:
     """Application service for creating and retrieving audit log entries.
 
-    Performance strategy: ``create`` enqueues writes through ARQ (Redis-backed
-    task queue) so audit persistence never blocks the business transaction.
+    Performance strategy: ``create`` enqueues writes through the background
+    job queue so audit persistence never blocks the business transaction.
     If queue submission fails the log is written synchronously as a fallback.
 
     Fail-safe strategy: audit log failures do **not** roll back successful
@@ -25,16 +24,16 @@ class AuditLogUseCase:
 
     Args:
         repository: Repository for synchronous / fallback audit log writes.
-        redis:      Optional ARQ pool.  When ``None``, every write falls back
+        jobs:       Optional job queue.  When ``None``, every write falls back
                     to the synchronous path immediately.
     """
 
     MAX_LIMIT = 1000
     DEFAULT_LIMIT = 100
 
-    def __init__(self, repository: IAuditLogRepository, redis: ArqRedis | None = None) -> None:
+    def __init__(self, repository: IAuditLogRepository, jobs: IJobQueue | None = None) -> None:
         self.repository = repository
-        self.redis = redis
+        self.jobs = jobs
 
     async def create(self, input_dto: CreateAuditLogInput) -> None:
         """Persist an audit log entry, preferring the async queue path.
@@ -59,9 +58,9 @@ class AuditLogUseCase:
             additional_context=input_dto.additional_context,
         )
 
-        if self.redis:
+        if self.jobs:
             try:
-                await self.redis.enqueue_job("persist_audit_log", audit_log.model_dump(mode="json"))
+                await self.jobs.enqueue_job("persist_audit_log", audit_log.model_dump(mode="json"))
             except Exception:
                 await self._fallback_sync_write(audit_log)
         else:

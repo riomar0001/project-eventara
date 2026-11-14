@@ -46,7 +46,7 @@ class TestCreateAuditLogUseCase:
         repo = MagicMock()
         redis = AsyncMock()
         redis.enqueue_job = AsyncMock()
-        uc = AuditLogUseCase(repository=repo, redis=redis)
+        uc = AuditLogUseCase(repository=repo, jobs=redis)
         await uc.create(_make_create_input())
         redis.enqueue_job.assert_awaited_once()
 
@@ -56,7 +56,7 @@ class TestCreateAuditLogUseCase:
         repo.create = AsyncMock()
         redis = AsyncMock()
         redis.enqueue_job = AsyncMock(side_effect=RuntimeError("redis down"))
-        uc = AuditLogUseCase(repository=repo, redis=redis)
+        uc = AuditLogUseCase(repository=repo, jobs=redis)
         await uc.create(_make_create_input())
         repo.create.assert_awaited_once()
 
@@ -64,7 +64,7 @@ class TestCreateAuditLogUseCase:
     async def test_writes_synchronously_when_no_redis(self):
         repo = MagicMock()
         repo.create = AsyncMock()
-        uc = AuditLogUseCase(repository=repo, redis=None)
+        uc = AuditLogUseCase(repository=repo, jobs=None)
         await uc.create(_make_create_input())
         repo.create.assert_awaited_once()
 
@@ -72,7 +72,7 @@ class TestCreateAuditLogUseCase:
     async def test_sync_write_failure_raises_audit_log_write_error(self):
         repo = MagicMock()
         repo.create = AsyncMock(side_effect=RuntimeError("db down"))
-        uc = AuditLogUseCase(repository=repo, redis=None)
+        uc = AuditLogUseCase(repository=repo, jobs=None)
         with patch("app.core.config.settings") as mock_settings:
             mock_settings.DEBUG = False
             with pytest.raises(AuditLogWriteError):

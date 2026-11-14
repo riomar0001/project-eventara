@@ -122,10 +122,4 @@ class IUserRepository(Protocol):
 
     async def cancel_pending_account_deletion(self, user_id: uuid.UUID) -> bool: ...
 
-    async def finalize_account_deletion(
-        self,
-        user_id: uuid.UUID,
-        *,
-        expected_requested_at: datetime,
-        expected_scheduled_for: datetime,
-    ) -> bool: ...
+    async def finalize_due_account_deletions(self) -> int: ...

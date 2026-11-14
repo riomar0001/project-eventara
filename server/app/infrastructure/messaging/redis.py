@@ -1,31 +1,10 @@
-from arq import create_pool
-from arq.connections import ArqRedis, RedisSettings
 from redis.asyncio import Redis
 
 from app.core.config import settings
 
 
-def get_redis_settings() -> RedisSettings:
-    return RedisSettings(
-        host=settings.REDIS_HOST,
-        port=settings.REDIS_PORT,
-        username=settings.REDIS_USERNAME or None,
-        password=settings.REDIS_PASSWORD or None,
-        ssl=settings.REDIS_SSL,
-    )
-
-
-async def create_arq_pool() -> ArqRedis:
-    """Create the ARQ job-queue connection pool."""
-    return await create_pool(get_redis_settings())
-
-
 async def create_redis_client() -> Redis:
-    """Create a direct async Redis client for general-purpose use (e.g. rate limiting).
-
-    Separate from the ARQ pool so job-queue and application traffic do not
-    share the same connection resources.
-    """
+    """Create the async Redis client used for rate limits, OTPs, reset tokens and dead jobs."""
     return Redis(
         host=settings.REDIS_HOST,
         port=settings.REDIS_PORT,
@@ -33,4 +12,6 @@ async def create_redis_client() -> Redis:
         password=settings.REDIS_PASSWORD or None,
         ssl=settings.REDIS_SSL,
         decode_responses=True,
+        socket_timeout=5,
+        socket_connect_timeout=5,
     )

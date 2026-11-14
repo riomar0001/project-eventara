@@ -438,7 +438,7 @@ async def send_user_password_reset(
         "Schedule account deletion for a target user after the same 30-day grace period used by self-service deletion. "
         "The caller must hold ``delete`` permission on the ``user-accounts`` feature. "
         "A required reason is captured in the request payload, the pending deletion is stored "
-        "immediately, and a deferred ARQ job is queued to finalize it when the grace "
+        "immediately, and a scheduled job finalizes it once the grace "
         "period expires unless the user logs in first."
     ),
 )

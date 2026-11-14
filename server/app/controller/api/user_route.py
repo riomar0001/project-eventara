@@ -714,7 +714,7 @@ async def change_password(
     description=(
         "Schedule the authenticated user's account for deletion after a 30-day grace period. "
         "The caller must confirm the request with their current password. "
-        "The request is persisted immediately, and a deferred ARQ job is enqueued to finalize the deletion once the grace period expires. "
+        "The request is persisted immediately, and a scheduled job finalizes the deletion once the grace period expires. "
         "If the user completes a fresh login during the grace period, the pending deletion is automatically canceled."
     ),
 )

@@ -1,1 +1,1 @@
-# ARQ job functions — registered with WorkerSettings.functions
+# Background job functions; registered in app.infrastructure.messaging.worker.JOBS

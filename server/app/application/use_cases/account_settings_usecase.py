@@ -1,7 +1,5 @@
-import uuid
 from datetime import UTC, datetime, timedelta
 
-from arq.connections import ArqRedis
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application.dto.account_settings_dto import (
@@ -36,11 +34,9 @@ class AccountSettingsUseCase:
         self,
         repo: IUserRepository,
         db: AsyncSession | None = None,
-        arq: ArqRedis | None = None,
     ) -> None:
         self.repo = repo
         self.db = db
-        self.arq = arq
 
     @staticmethod
     def _utcnow_naive() -> datetime:
@@ -161,15 +157,7 @@ class AccountSettingsUseCase:
         if deletion_requested_at is None or deletion_scheduled_for is None or deletion_requested_by is None:
             raise AccountDeletionAlreadyScheduledError()
 
-        await self.arq.enqueue_job(
-            "finalize_account_deletion_job",
-            str(scheduled_user.id),
-            deletion_requested_at.isoformat(),
-            deletion_scheduled_for.isoformat(),
-            _job_id=f"account-deletion:{scheduled_user.id}:{deletion_requested_at.isoformat()}",
-            _defer_until=deletion_scheduled_for.replace(tzinfo=UTC),
-            _expires=timedelta(days=2),
-        )
+        # finalize_due_account_deletions_job (scheduled every 5 minutes) completes it after the grace period.
 
         return RequestAccountDeletionOutput(
             user_id=scheduled_user.id,
@@ -178,9 +166,5 @@ class AccountSettingsUseCase:
             requested_by=deletion_requested_by,
         )
 
-    async def finalize_account_deletion(self, *, user_id: str, requested_at: str, scheduled_for: str) -> bool:
-        return await self.repo.finalize_account_deletion(
-            user_id=uuid.UUID(user_id),
-            expected_requested_at=datetime.fromisoformat(requested_at),
-            expected_scheduled_for=datetime.fromisoformat(scheduled_for),
-        )
+    async def finalize_due_account_deletions(self) -> int:
+        return await self.repo.finalize_due_account_deletions()

@@ -170,7 +170,7 @@ def _make_register_uc_with_email(event_repo=None, participant_repo=None, role_re
     role_repo = role_repo or _make_role_repo()
     user_repo = MagicMock(spec=UserRepository)
     user_repo.get_by_id = AsyncMock(return_value=MagicMock(email="attendee@example.com"))
-    arq = MagicMock()
+    jobs = MagicMock()
     email_sender = AsyncMock()
     db = AsyncMock(spec=AsyncSession)
     qr_token_factory = MagicMock(return_value="signed.qr.jwt")
@@ -182,7 +182,7 @@ def _make_register_uc_with_email(event_repo=None, participant_repo=None, role_re
             role_repo,
             db,
             user_repo=user_repo,
-            arq=arq,
+            jobs=jobs,
             qr_token_factory=qr_token_factory,
             email_sender=email_sender,
             registration_qr_email_template=registration_qr_email_template,

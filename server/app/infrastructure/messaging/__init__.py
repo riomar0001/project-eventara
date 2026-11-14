@@ -1,1 +1,1 @@
-# ARQ job queue — Redis-backed async task processing
+# Background jobs (SQS on AWS, in-process locally) and email delivery

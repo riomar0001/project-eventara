@@ -1,4 +1,4 @@
-"""ARQ background jobs for email delivery.
+"""Background jobs for email delivery.
 
 Separating the job definition from the transport layer (SMTP or SES) means the worker
 can import this module without pulling in application-layer dependencies, and
@@ -15,21 +15,20 @@ _FAILURE_TTL = int(timedelta(days=7).total_seconds())
 
 
 async def send_email_job(ctx: dict, *, to: str, subject: str, html: str) -> None:
-    """ARQ job that delivers a single HTML email via the configured provider.
+    """Job that delivers a single HTML email via the configured provider.
 
-    Runs inside the ARQ worker process.  ``deliver_email`` is synchronous, so it
+    Runs inside the worker.  ``deliver_email`` is synchronous, so it
     is offloaded to a thread to avoid blocking the worker event loop.
 
     TTL policy:
     - Queue TTL:        3 hours  (job discarded if not picked up in time)
-    - Success result:   12 hours (configured via ``func()`` in WorkerSettings)
     - Failure record:   7 days   (stored under ``email_failure:<job_id>`` in Redis)
 
-    ARQ will automatically retry this job up to ``max_tries`` times (configured
-    on the worker) with exponential back-off if an exception is raised.
+    The worker retries this job up to ``JOB_MAX_TRIES`` times with exponential
+    back-off if an exception is raised.
 
     Args:
-        ctx:     ARQ worker context (injected by the framework).
+        ctx:     Worker context.
         to:      Recipient email address.
         subject: Email subject line.
         html:    HTML body of the email.

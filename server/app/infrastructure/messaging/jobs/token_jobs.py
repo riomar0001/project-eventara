@@ -1,4 +1,4 @@
-"""ARQ background jobs for refresh token lifecycle management.
+"""Background jobs for refresh token lifecycle management.
 
 Keeping token jobs in a dedicated module separates scheduling concerns from
 the repository layer and makes it straightforward to add further token
@@ -13,9 +13,9 @@ from app.infrastructure.database.session import AsyncSessionLocal
 
 
 async def revoke_expired_tokens_job(ctx: dict) -> None:
-    """ARQ cron job that revokes all active refresh tokens past their expiry.
+    """Scheduled job that revokes all active refresh tokens past their expiry.
 
-    Runs once every 24 hours (scheduled via ``WorkerSettings.cron_jobs``).
+    Runs once every 24 hours (EventBridge Scheduler, see ``LOCAL_SCHEDULES`` in ``worker.py``).
     Opening its own database session keeps this job self-contained and
     independent of any request lifecycle.
 
@@ -27,7 +27,7 @@ async def revoke_expired_tokens_job(ctx: dict) -> None:
         commit a no-op — no duplicate revocations or data corruption can occur.
 
     Args:
-        ctx: ARQ worker context injected by the framework; not used directly.
+        ctx: Worker context; not used directly.
     """
     async with AsyncSessionLocal() as session:
         repo = RefreshTokenRepository(session)

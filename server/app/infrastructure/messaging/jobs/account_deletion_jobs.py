@@ -1,11 +1,10 @@
-"""ARQ background jobs for deferred account-deletion finalization.
+"""Scheduled job that finalizes account deletions after their grace period.
 
-Scheduling deletion is intentionally split into two phases:
-1. The request thread persists the pending deletion window immediately.
-2. ARQ executes the irreversible finalization after the grace period elapses.
-
-This keeps the API responsive while still giving the deletion lifecycle a
-single serialized execution path in the worker layer.
+Scheduling deletion is split into two phases:
+1. The request persists the pending deletion window immediately.
+2. This job, run every 5 minutes by the scheduler, deletes every account whose
+   window has elapsed. SQS cannot delay a message for the 30-day grace period,
+   so the database row, not a deferred message, is the source of truth.
 """
 
 from app.application.use_cases.account_settings_usecase import AccountSettingsUseCase
@@ -13,24 +12,7 @@ from app.infrastructure.database.repositories.user_repository import UserReposit
 from app.infrastructure.database.session import AsyncSessionLocal
 
 
-async def finalize_account_deletion_job(
-    ctx: dict,
-    user_id: str,
-    requested_at: str,
-    scheduled_for: str,
-) -> None:
-    """Finalize a pending account deletion if its original grace window is still active.
-
-    Args:
-        ctx: ARQ worker context injected by the framework; unused directly.
-        user_id: Serialized UUID of the account being finalized.
-        requested_at: Original request timestamp captured at scheduling time.
-        scheduled_for: Original grace-period deadline captured at scheduling time.
-    """
+async def finalize_due_account_deletions_job(ctx: dict) -> None:
+    """Finalize all account deletions whose grace period has elapsed."""
     async with AsyncSessionLocal() as session:
-        use_case = AccountSettingsUseCase(UserRepository(session))
-        await use_case.finalize_account_deletion(
-            user_id=user_id,
-            requested_at=requested_at,
-            scheduled_for=scheduled_for,
-        )
+        await AccountSettingsUseCase(UserRepository(session)).finalize_due_account_deletions()

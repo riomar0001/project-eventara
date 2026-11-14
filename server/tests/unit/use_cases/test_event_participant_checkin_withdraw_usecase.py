@@ -72,7 +72,7 @@ def _participant(**overrides):
     return EventParticipant(**defaults)
 
 
-def _use_case(participant_repo=None, event_repo=None, event_volunteer_repo=None, user_repo=None, arq=None, qr_token_verifier=None):
+def _use_case(participant_repo=None, event_repo=None, event_volunteer_repo=None, user_repo=None, jobs=None, qr_token_verifier=None):
     if participant_repo is None:
         participant_repo = MagicMock(spec=EventParticipantRepository)
         participant_repo.get_by_user_and_session = AsyncMock(return_value=_participant())
@@ -102,7 +102,7 @@ def _use_case(participant_repo=None, event_repo=None, event_volunteer_repo=None,
             db,
             event_volunteer_repo,
             user_repo,
-            arq,
+            jobs,
             qr_token_verifier=qr_token_verifier,
         ),
         participant_repo,

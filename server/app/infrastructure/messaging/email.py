@@ -6,9 +6,9 @@ from email.mime.text import MIMEText
 from functools import lru_cache
 
 import boto3
-from arq.connections import ArqRedis
 from botocore.config import Config
 
+from app.application.interfaces.job_queue_interface import IJobQueue
 from app.core.config import settings
 from app.core.email_template import (
     email_verified_html,
@@ -20,23 +20,20 @@ from app.core.email_template import (
 __all__ = ["deliver_email", "email_verified_html", "event_registration_qr_email_html", "otp_email_html", "send_email", "verification_email_html"]
 
 
-async def send_email(arq: ArqRedis, to: str, subject: str, html: str) -> None:
-    """Enqueue an email delivery job onto the ARQ Redis queue.
+async def send_email(jobs: IJobQueue, to: str, subject: str, html: str) -> None:
+    """Enqueue an email delivery job (``send_email_job``) and return immediately.
 
-    Returns immediately after the job is enqueued — the actual send
-    happens inside the ARQ worker process (``send_email_job``), decoupling
-    email delivery from the HTTP request lifecycle.
-
-    If delivery fails inside the worker, ARQ will retry the job
-    automatically according to the worker's ``max_tries`` setting.
+    Delivery happens in the worker, decoupled from the HTTP request; failed
+    sends are retried up to ``JOB_MAX_TRIES`` times. Undelivered mail older
+    than 3 hours is dropped rather than sent late.
 
     Args:
-        arq:     The ARQ connection pool used to enqueue the job.
+        jobs:    Job queue used to enqueue the delivery.
         to:      Recipient email address.
         subject: Email subject line.
         html:    HTML body of the email.
     """
-    await arq.enqueue_job("send_email_job", to=to, subject=subject, html=html, _expires=timedelta(hours=3))
+    await jobs.enqueue_job("send_email_job", to=to, subject=subject, html=html, _expires=timedelta(hours=3))
 
 
 def _send_smtp(to: str, subject: str, html: str) -> None:

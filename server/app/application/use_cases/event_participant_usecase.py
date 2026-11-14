@@ -3,7 +3,6 @@
 import uuid
 from datetime import UTC, datetime
 
-from arq.connections import ArqRedis
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application.dto.event_participant_dto import (
@@ -23,6 +22,7 @@ from app.application.dto.event_participant_dto import (
     WithdrawRegistrationInput,
     WithdrawRegistrationOutput,
 )
+from app.application.interfaces.job_queue_interface import IJobQueue
 from app.domain.entities.event_entity import EventParticipantStatus, EventSessionStatus
 from app.domain.exceptions.event_exceptions import EventNotFoundError
 from app.domain.exceptions.event_participant_exceptions import (
@@ -97,7 +97,7 @@ class EventParticipantUseCase:
         db:               The active async database session used for commit and rollback.
         event_volunteer_repo: Optional repository for joined-volunteer check-in authorization.
         user_repo: Optional repository used to resolve attendee emails for QR and receipt delivery.
-        arq: Optional ARQ queue used to enqueue email jobs after durable database commits.
+        jobs: Optional job queue used to enqueue email jobs after durable database commits.
         qr_token_factory: Optional JWT factory override for isolated tests.
         qr_token_verifier: Optional JWT verifier override for isolated tests.
         email_sender: Optional email queueing callable override for isolated tests.
@@ -113,7 +113,7 @@ class EventParticipantUseCase:
         db: AsyncSession,
         event_volunteer_repo: EventVolunteerRepository | None = None,
         user_repo: UserRepository | None = None,
-        arq: ArqRedis | None = None,
+        jobs: IJobQueue | None = None,
         qr_token_factory=None,
         qr_token_verifier=None,
         email_sender=None,
@@ -126,7 +126,7 @@ class EventParticipantUseCase:
         self.db = db
         self.event_volunteer_repo = event_volunteer_repo
         self.user_repo = user_repo
-        self.arq = arq
+        self.jobs = jobs
         self.qr_token_factory = qr_token_factory
         self.qr_token_verifier = qr_token_verifier
         self.email_sender = email_sender
@@ -669,11 +669,11 @@ class EventParticipantUseCase:
             session: Event session entity used to define the QR expiration.
 
         Side effects:
-            Enqueues a ``send_email_job`` through ARQ when user, event, and queue
+            Enqueues a ``send_email_job`` through the job queue when user, event, and queue
             dependencies are available. Queue or template failures are swallowed
             so the already-committed registration remains durable.
         """
-        if self.arq is None or self.user_repo is None:
+        if self.jobs is None or self.user_repo is None:
             return
 
         attendee = await self.user_repo.get_by_id(participant.user_id)
@@ -714,7 +714,7 @@ class EventParticipantUseCase:
 
                 email_sender = send_email
             await email_sender(
-                self.arq,
+                self.jobs,
                 attendee.email,
                 f"QR code for {event.title}",
                 html,
@@ -731,11 +731,11 @@ class EventParticipantUseCase:
             session_title: Title of the checked-in session.
 
         Side effects:
-            Enqueues a ``send_email_job`` through ARQ when user and queue
+            Enqueues a ``send_email_job`` through the job queue when user and queue
             dependencies were provided. Any queue failure is intentionally
             swallowed so the committed check-in remains durable.
         """
-        if self.arq is None or self.user_repo is None:
+        if self.jobs is None or self.user_repo is None:
             return
 
         attendee = await self.user_repo.get_by_id(participant.user_id)
@@ -763,7 +763,7 @@ class EventParticipantUseCase:
 
                 email_sender = send_email
             await email_sender(
-                self.arq,
+                self.jobs,
                 attendee.email,
                 f"Check-in receipt for {event_title}",
                 html,

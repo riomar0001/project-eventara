@@ -40,9 +40,11 @@ class Settings(BaseSettings):
     # ElastiCache with in-transit encryption requires TLS.
     REDIS_SSL: bool = False
 
-    # True runs the arq worker inside the API process (local dev). On AWS the API
-    # runs on Lambda, which freezes between requests, so a separate worker runs it.
-    RUN_EMBEDDED_WORKER: bool = True
+    # SQS queue for background jobs. Empty runs jobs and schedules in-process
+    # (local development); on AWS the worker Lambda consumes this queue.
+    JOB_QUEUE_URL: str = ""
+    JOB_MAX_TRIES: int = Field(default=3, ge=1, le=10)
+    JOB_RETRY_BASE_SECONDS: int = Field(default=30, ge=1, le=900)
 
     JWT_ALGORITHM: str = "HS256"
     JWT_ACCESS_TOKEN_SECRET: str

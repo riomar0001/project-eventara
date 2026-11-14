@@ -38,7 +38,7 @@ def _make_repo(*, user=None, security=None, updated=True, scheduled_user=None) -
     repo.get_security_by_user_id = AsyncMock(return_value=security)
     repo.update_password = AsyncMock(return_value=updated)
     repo.schedule_account_deletion = AsyncMock(return_value=scheduled_user)
-    repo.finalize_account_deletion = AsyncMock(return_value=True)
+    repo.finalize_due_account_deletions = AsyncMock(return_value=0)
     return repo
 
 
@@ -135,7 +135,7 @@ class TestDeleteAccountUseCase:
         return RequestAccountDeletionInput(target_user_id=USER_ID, requested_by=ADMIN_ID)
 
     def _make_uc(self, repo):
-        return AccountSettingsUseCase(repo=repo, arq=AsyncMock())
+        return AccountSettingsUseCase(repo=repo)
 
     def _make_scheduled_user(self):
         u = MagicMock()
@@ -149,12 +149,12 @@ class TestDeleteAccountUseCase:
     async def test_self_service_success(self):
         scheduled = self._make_scheduled_user()
         repo = _make_repo(user=_make_user(), scheduled_user=scheduled)
-        arq = AsyncMock()
-        uc = AccountSettingsUseCase(repo=repo, arq=arq)
+
+        uc = AccountSettingsUseCase(repo=repo)
         with patch("app.application.use_cases.account_settings_usecase.verify_hash", return_value=True):
             result = await uc.request_self_service_deletion(self._self_data())
         assert result.user_id == USER_ID
-        arq.enqueue_job.assert_awaited_once()
+        repo.schedule_account_deletion.assert_awaited_once()
 
     @pytest.mark.asyncio
     async def test_self_service_user_not_found(self):
@@ -189,11 +189,11 @@ class TestDeleteAccountUseCase:
     async def test_admin_deletion_success(self):
         scheduled = self._make_scheduled_user()
         repo = _make_repo(user=_make_user(), scheduled_user=scheduled)
-        arq = AsyncMock()
-        uc = AccountSettingsUseCase(repo=repo, arq=arq)
+
+        uc = AccountSettingsUseCase(repo=repo)
         result = await uc.request_admin_deletion(self._admin_data())
         assert result.user_id == USER_ID
-        arq.enqueue_job.assert_awaited_once()
+        repo.schedule_account_deletion.assert_awaited_once()
 
     @pytest.mark.asyncio
     async def test_admin_deletion_user_not_found(self):
@@ -214,27 +214,19 @@ class TestDeleteAccountUseCase:
             await self._make_uc(repo).request_admin_deletion(self._admin_data())
 
 
-# ─── finalize_account_deletion ────────────────────────────────────────────────
+# ─── finalize_due_account_deletions ──────────────────────────────────────────
 
 
-class TestFinalizeAccountDeletionUseCase:
+class TestFinalizeDueAccountDeletionsUseCase:
     @pytest.mark.asyncio
-    async def test_returns_true_when_finalized(self):
+    async def test_returns_number_of_deleted_accounts(self):
         repo = _make_repo()
-        result = await AccountSettingsUseCase(repo=repo).finalize_account_deletion(
-            user_id=str(USER_ID),
-            requested_at=datetime.now(UTC).isoformat(),
-            scheduled_for=datetime.now(UTC).isoformat(),
-        )
-        assert result is True
+        repo.finalize_due_account_deletions = AsyncMock(return_value=3)
+        assert await AccountSettingsUseCase(repo=repo).finalize_due_account_deletions() == 3
+        repo.finalize_due_account_deletions.assert_awaited_once()
 
     @pytest.mark.asyncio
-    async def test_returns_false_when_already_canceled(self):
+    async def test_returns_zero_when_nothing_is_due(self):
         repo = _make_repo()
-        repo.finalize_account_deletion = AsyncMock(return_value=False)
-        result = await AccountSettingsUseCase(repo=repo).finalize_account_deletion(
-            user_id=str(USER_ID),
-            requested_at=datetime.now(UTC).isoformat(),
-            scheduled_for=datetime.now(UTC).isoformat(),
-        )
-        assert result is False
+        repo.finalize_due_account_deletions = AsyncMock(return_value=0)
+        assert await AccountSettingsUseCase(repo=repo).finalize_due_account_deletions() == 0
