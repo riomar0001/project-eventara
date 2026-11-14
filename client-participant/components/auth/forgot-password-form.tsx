@@ -53,8 +53,19 @@ export function ForgotPasswordForm() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="text-muted-foreground mb-1.5 block font-mono text-[11px] tracking-[0.14em] uppercase">Email address</label>
-          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@eventara.io" className={INPUT} />
+          <label htmlFor="forgot-email" className="text-muted-foreground mb-1.5 block font-mono text-[11px] tracking-[0.14em] uppercase">
+            Email address
+          </label>
+          <input
+            id="forgot-email"
+            name="email"
+            autoComplete="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@eventara.io"
+            className={INPUT}
+          />
           {error && <p className="text-destructive mt-1 text-[12px]">{error}</p>}
         </div>
 

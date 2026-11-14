@@ -19,19 +19,36 @@ export function LoginForm() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="text-muted-foreground mb-1.5 block font-mono text-[11px] tracking-[0.14em] uppercase">Email</label>
-          <input type="email" value={form.email} onChange={(e) => setField('email', e.target.value)} required placeholder="you@eventara.io" className={INPUT} />
+          <label htmlFor="login-email" className="text-muted-foreground mb-1.5 block font-mono text-[11px] tracking-[0.14em] uppercase">
+            Email
+          </label>
+          <input
+            id="login-email"
+            name="email"
+            autoComplete="email"
+            type="email"
+            value={form.email}
+            onChange={(e) => setField('email', e.target.value)}
+            required
+            placeholder="you@eventara.io"
+            className={INPUT}
+          />
         </div>
 
         <div>
           <div className="mb-1.5 flex items-center justify-between">
-            <label className="text-muted-foreground font-mono text-[11px] tracking-[0.14em] uppercase">Password</label>
+            <label htmlFor="login-password" className="text-muted-foreground font-mono text-[11px] tracking-[0.14em] uppercase">
+              Password
+            </label>
             <Link href="/forgot-password" className="text-primary font-mono text-[11px] transition-colors hover:underline">
               Forgot password?
             </Link>
           </div>
           <div className="relative">
             <input
+              id="login-password"
+              name="password"
+              autoComplete="current-password"
               type={showPassword ? 'text' : 'password'}
               value={form.password}
               onChange={(e) => setField('password', e.target.value)}
@@ -42,6 +59,8 @@ export function LoginForm() {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              aria-pressed={showPassword}
               className="text-muted-foreground hover:bg-muted absolute top-1/2 right-3.5 -translate-y-1/2 rounded-lg p-1 transition-colors"
             >
               {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}

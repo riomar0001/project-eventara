@@ -30,9 +30,13 @@ export function PasswordForm() {
 
       {FIELDS.map(({ key, label }) => (
         <div key={key}>
-          <label className={labelCls}>{label}</label>
+          <label htmlFor={`password-${key}`} className={labelCls}>
+            {label}
+          </label>
           <div className="relative">
             <input
+              id={`password-${key}`}
+              autoComplete={key === 'current' ? 'current-password' : 'new-password'}
               type={show[key] ? 'text' : 'password'}
               value={form[key]}
               onChange={(e) => setValue(key, e.target.value)}
@@ -43,6 +47,8 @@ export function PasswordForm() {
             <button
               type="button"
               onClick={() => toggleShow(key)}
+              aria-label={`${show[key] ? 'Hide' : 'Show'} ${label.toLowerCase()}`}
+              aria-pressed={show[key]}
               className="text-muted-foreground hover:bg-muted absolute top-1/2 right-3.5 -translate-y-1/2 rounded-lg p-1 transition-colors"
             >
               {show[key] ? <EyeOff size={15} /> : <Eye size={15} />}

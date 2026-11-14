@@ -56,6 +56,8 @@ export function EventsDirectoryControls({ q, onQChange, cat, onCatChange, sort, 
           </span>
           <input
             className="text-text w-full border-none bg-transparent py-[18px] pr-[18px] pl-[52px] text-[15.5px] tracking-[-0.01em] outline-none"
+            type="search"
+            aria-label="Search events"
             placeholder="Search events, venues, tags…"
             value={q}
             onChange={(e) => onQChange(e.target.value)}

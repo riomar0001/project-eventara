@@ -22,15 +22,31 @@ export function RegisterForm() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className={labelCls}>Email</label>
-          <input type="email" className={INPUT} value={form.email} onChange={(e) => setField('email', e.target.value)} placeholder="you@eventara.io" />
+          <label htmlFor="register-email" className={labelCls}>
+            Email
+          </label>
+          <input
+            id="register-email"
+            name="email"
+            autoComplete="email"
+            type="email"
+            className={INPUT}
+            value={form.email}
+            onChange={(e) => setField('email', e.target.value)}
+            placeholder="you@eventara.io"
+          />
           {errors.email && <p className={errorCls}>{errors.email}</p>}
         </div>
 
         <div>
-          <label className={labelCls}>Password</label>
+          <label htmlFor="register-password" className={labelCls}>
+            Password
+          </label>
           <div className="relative">
             <input
+              id="register-password"
+              name="password"
+              autoComplete="new-password"
               type={showPassword ? 'text' : 'password'}
               className={`${INPUT} pr-11`}
               value={form.password}
@@ -40,6 +56,8 @@ export function RegisterForm() {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              aria-pressed={showPassword}
               className="text-muted-foreground hover:bg-muted absolute top-1/2 right-3.5 -translate-y-1/2 rounded-lg p-1 transition-colors"
             >
               {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
@@ -49,9 +67,14 @@ export function RegisterForm() {
         </div>
 
         <div>
-          <label className={labelCls}>Confirm password</label>
+          <label htmlFor="register-confirm" className={labelCls}>
+            Confirm password
+          </label>
           <div className="relative">
             <input
+              id="register-confirm"
+              name="confirm"
+              autoComplete="new-password"
               type={showConfirm ? 'text' : 'password'}
               className={`${INPUT} pr-11`}
               value={form.confirm}
@@ -61,6 +84,8 @@ export function RegisterForm() {
             <button
               type="button"
               onClick={() => setShowConfirm(!showConfirm)}
+              aria-label={showConfirm ? 'Hide password confirmation' : 'Show password confirmation'}
+              aria-pressed={showConfirm}
               className="text-muted-foreground hover:bg-muted absolute top-1/2 right-3.5 -translate-y-1/2 rounded-lg p-1 transition-colors"
             >
               {showConfirm ? <EyeOff size={15} /> : <Eye size={15} />}

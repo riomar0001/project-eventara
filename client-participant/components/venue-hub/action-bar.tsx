@@ -53,7 +53,8 @@ export function ActionBar({ query, onQueryChange, capacityKey, onCapacityChange,
           <div className="relative">
             <Icon name="search" size={16} className="text-text-mute absolute top-1/2 left-[18px] -translate-y-1/2" />
             <input
-              type="text"
+              type="search"
+              aria-label="Search venues"
               placeholder="Search venues, locations..."
               value={query}
               onChange={(e) => onQueryChange(e.target.value)}
@@ -127,6 +128,7 @@ export function ActionBar({ query, onQueryChange, capacityKey, onCapacityChange,
           {onAddVenue && (
             <button
               onClick={onAddVenue}
+              aria-label="Suggest a venue"
               className="bg-lime flex h-11 items-center justify-center gap-2 rounded-full px-5 text-sm font-semibold tracking-[-0.01em] text-white shadow-[0_8px_28px_-10px_var(--lime-glow)] transition-all hover:-translate-y-px hover:shadow-[0_14px_40px_-10px_var(--lime-glow)]"
             >
               <Icon name="plus" size={16} />

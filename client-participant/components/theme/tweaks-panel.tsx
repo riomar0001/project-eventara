@@ -43,7 +43,9 @@ export function TweaksPanel() {
       {/* Toggle button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="border-line-soft bg-surface hover:border--lime rounded-full border p-3 shadow-lg transition-all hover:shadow-[0_0_24px_-6px_var(--lime-glow)]"
+        aria-label="Theme settings"
+        aria-expanded={isOpen}
+        className="border-line-soft bg-surface hover:border-lime rounded-full border p-3 shadow-lg transition-all hover:shadow-[0_0_24px_-6px_var(--lime-glow)]"
       >
         <Settings className="text-lime h-5 w-5" />
       </button>
@@ -63,7 +65,7 @@ export function TweaksPanel() {
                 onClick={() => applyTheme(index)}
                 className={cn(
                   'w-full rounded-lg px-3 py-2 text-left text-sm font-medium transition-all',
-                  currentTheme === index ? 'bg-lime text-[#0a1005]' : 'border-line-soft text-text hover:border--lime border'
+                  currentTheme === index ? 'bg-lime text-[#0a1005]' : 'border-line-soft text-text hover:border-lime border'
                 )}
               >
                 {preset.name}
