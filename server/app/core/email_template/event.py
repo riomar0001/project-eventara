@@ -13,10 +13,10 @@ def check_in_receipt_email_html(
 ) -> str:
     """Build the check-in receipt email body for an attendee."""
     return (
-        f"<p>Your check-in for <strong>{event_title}</strong> is confirmed.</p>"
-        f"<p>Session: {session_title}</p>"
-        f"<p>Checked in at: {checked_in_time}</p>"
-        f"<p>Checked in by: {checked_in_by}</p>"
+        f"<p>Your check-in for <strong>{escape(event_title)}</strong> is confirmed.</p>"
+        f"<p>Session: {escape(session_title)}</p>"
+        f"<p>Checked in at: {escape(checked_in_time)}</p>"
+        f"<p>Checked in by: {escape(checked_in_by)}</p>"
     )
 
 
