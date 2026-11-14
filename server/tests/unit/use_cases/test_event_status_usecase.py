@@ -74,9 +74,13 @@ def _sample_session(**overrides) -> EventSession:
 # ---------------------------------------------------------------------------
 
 
-def _make_event_status_repo(event=None, updated_event=None):
+# Sentinel so callers can pass event=None to simulate a missing row.
+_DEFAULT = object()
+
+
+def _make_event_status_repo(event=_DEFAULT, updated_event=None):
     repo = MagicMock(spec=EventRepository)
-    repo.get_event_by_id = AsyncMock(return_value=event or _sample_event())
+    repo.get_event_by_id = AsyncMock(return_value=_sample_event() if event is _DEFAULT else event)
     repo.update_event_status = AsyncMock(return_value=updated_event or _sample_event(status=EventStatus.POSTED))
     return repo
 
@@ -223,10 +227,10 @@ async def test_update_event_status_does_not_commit_on_not_found():
 # ---------------------------------------------------------------------------
 
 
-def _make_session_status_repo(session=None, event=None, updated_session=None):
+def _make_session_status_repo(session=_DEFAULT, event=_DEFAULT, updated_session=None):
     repo = MagicMock(spec=EventRepository)
-    repo.get_session_by_id = AsyncMock(return_value=session or _sample_session())
-    repo.get_event_by_id = AsyncMock(return_value=event or _sample_event())
+    repo.get_session_by_id = AsyncMock(return_value=_sample_session() if session is _DEFAULT else session)
+    repo.get_event_by_id = AsyncMock(return_value=_sample_event() if event is _DEFAULT else event)
     repo.update_session_status = AsyncMock(return_value=updated_session or _sample_session(status=EventSessionStatus.POSTED))
     return repo
 

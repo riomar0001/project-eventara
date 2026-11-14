@@ -64,7 +64,7 @@ def pytest_runtest_makereport(item, call):
     )
 
 
-def _print_table(title: str, rows: list[dict]) -> None:
+def _print_table(title: str, rows: list[dict], out) -> None:
     keys = ["scenario", "expected", "actual", "result", "action"]
     headers = ["SCENARIOS", "EXPECTED RESULT", "ACTUAL RESULT", "TEST RESULT", "ACTION"]
 
@@ -82,31 +82,33 @@ def _print_table(title: str, rows: list[dict]) -> None:
     passed = sum(1 for r in rows if r["result"] == "PASS")
     failed = sum(1 for r in rows if r["result"] == "FAIL")
 
-    print(f"\n  {title}")
-    print(_divider("="))
-    print(_row(headers))
-    print(_divider("="))
+    out(f"\n  {title}")
+    out(_divider("="))
+    out(_row(headers))
+    out(_divider("="))
 
     prev_group = None
     for r in rows:
         group = r["scenario"].split(" - ")[0]
         if group != prev_group and prev_group is not None:
-            print(_divider())
+            out(_divider())
         prev_group = group
-        print(_row([r["scenario"], r["expected"], r["actual"], r["result"], r["action"]]))
+        out(_row([r["scenario"], r["expected"], r["actual"], r["result"], r["action"]]))
 
-    print(_divider("="))
-    print(f"  Total: {len(rows)}  |  Pass: {passed}  |  Fail: {failed}\n")
+    out(_divider("="))
+    out(f"  Total: {len(rows)}  |  Pass: {passed}  |  Fail: {failed}\n")
 
 
 def pytest_terminal_summary(terminalreporter, exitstatus, config):
     if not _BY_FILE:
         return
 
-    print("\n")
+    # pytest's writer survives non-UTF-8 consoles; print() crashed on cp1252.
+    out = terminalreporter.write_line
+    out("")
     for filepath, rows in _BY_FILE.items():
         # e.g. "test_auth_usecase.py  [functional]"
         filename = filepath.replace("\\", "/").split("/")[-1]
         tag = _suite_tag(filepath)
         title = f"{filename}  [{tag}]"
-        _print_table(title, rows)
+        _print_table(title, rows, out)
