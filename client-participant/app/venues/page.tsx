@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Footer } from '@/components/footer/footer';
 import { Navbar } from '@/components/navigation/navbar';
@@ -11,7 +11,16 @@ import type { ReportFormData } from '@/types';
 
 const PER_PAGE = 9;
 
+// useSearchParams() needs a Suspense boundary or the static build fails.
 export default function VenuesPage() {
+  return (
+    <Suspense>
+      <VenuesHub />
+    </Suspense>
+  );
+}
+
+function VenuesHub() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const modals = useVenueModals();
