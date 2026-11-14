@@ -1,4 +1,4 @@
-name: Lint & Format Check
+name: Lint, Format & Test
 
 on:
   pull_request:
@@ -35,6 +35,9 @@ jobs:
       - name: Format check (ruff format)
         run: uv run ruff format --check .
 
+      - name: Tests (pytest)
+        run: uv run pytest
+
   client-lint:
     name: Client (eslint + prettier)
     runs-on: ubuntu-latest
@@ -60,3 +63,6 @@ jobs:
 
       - name: Format check (prettier)
         run: npm run format:check
+
+      - name: Type check
+        run: npm run type-check
