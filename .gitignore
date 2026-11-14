@@ -123,3 +123,13 @@ desktop.ini
 skills-lock.json
 .agents/
 eventara_key.pem
+
+# -----------------------------------------------------------------------------
+# Terraform (infra/terraform)
+# -----------------------------------------------------------------------------
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+terraform.tfvars
+crash.log

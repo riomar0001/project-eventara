@@ -1,0 +1,22 @@
+# Copy to terraform.tfvars (git-ignored) and fill in.
+aws_region  = "ap-southeast-1"
+environment = "prod"
+
+# Set by scripts/deploy-server.sh, or pass -var image_tag=<git sha>
+image_tag = "CHANGE_ME"
+
+mail_domain = "eventara.example.com"
+mail_from   = "no-reply@eventara.example.com"
+
+admin_email    = "admin@eventara.example.com"
+admin_password = "CHANGE_ME_long_random_password"
+
+# Amplify Hosting (set enable_amplify = false to deploy only the backend)
+enable_amplify      = true
+github_repository   = "https://github.com/OWNER/REPO"
+github_access_token = "CHANGE_ME"
+amplify_branch      = "main"
+
+# Custom domains, once attached to the Amplify apps:
+# participant_url = "https://eventara.example.com"
+# admin_url       = "https://admin.eventara.example.com"
