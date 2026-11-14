@@ -1,15 +1,23 @@
 from datetime import timedelta
 
-from pydantic import field_validator
+from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 def _parse_duration(value: str) -> timedelta:
+    """Parse ``"15m"``, ``"3h"``, ``"7d"``, ``"30s"`` or bare minutes (``"60"``)."""
     units = {"s": "seconds", "m": "minutes", "h": "hours", "d": "days"}
     value = value.strip().lower()
-    if value[-1] in units:
-        return timedelta(**{units[value[-1]]: int(value[:-1])})
-    return timedelta(minutes=int(value))
+    if not value:
+        raise ValueError("Duration must not be empty")
+    unit = units.get(value[-1], "minutes")
+    number = value[:-1] if value[-1] in units else value
+    if not number.isdigit():
+        raise ValueError(f"Invalid duration {value!r}; expected e.g. '15m', '3h', '7d'")
+    amount = int(number)
+    if amount <= 0:
+        raise ValueError(f"Duration must be positive, got {value!r}")
+    return timedelta(**{unit: amount})
 
 
 class Settings(BaseSettings):
@@ -44,8 +52,9 @@ class Settings(BaseSettings):
 
     CORS_ORIGIN: str
     # Comma-separated string in .env: https://a.com,https://b.com
-    # Parsed into a list via the model_validator below.
-    ALLOWED_ORIGINS: str = "*"
+    # Empty by default (no cross-origin access). "*" is only allowed with DEBUG on:
+    # the API sends credentials, so Starlette would reflect any Origin back.
+    ALLOWED_ORIGINS: str = ""
 
     ADMIN_EMAIL: str
     ADMIN_PASSWORD: str
@@ -68,6 +77,12 @@ class Settings(BaseSettings):
         if isinstance(v, timedelta):
             return v
         return _parse_duration(str(v))
+
+    @model_validator(mode="after")
+    def reject_wildcard_origin_outside_debug(self) -> Settings:
+        if not self.DEBUG and "*" in self.allowed_origins_list:
+            raise ValueError("ALLOWED_ORIGINS must list explicit origins when DEBUG is off; '*' is unsafe with credentialed CORS")
+        return self
 
     @property
     def allowed_origins_list(self) -> list[str]:

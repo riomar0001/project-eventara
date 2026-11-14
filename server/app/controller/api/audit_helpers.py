@@ -195,17 +195,10 @@ def serialize_admin_user_account(detail: AdminUserAccountDetail) -> dict:
 
 
 def get_client_ip(request: Request) -> str | None:
-    forwarded_for = request.headers.get("x-forwarded-for")
-    if forwarded_for:
-        return forwarded_for.split(",")[0].strip()
-
-    real_ip = request.headers.get("x-real-ip")
-    if real_ip:
-        return real_ip.strip()
-
+    # X-Forwarded-For is client-controlled; uvicorn's --proxy-headers already
+    # resolves request.client from it, trusting only FORWARDED_ALLOW_IPS.
     if request.client and request.client.host:
         return request.client.host
-
     return None
 
 

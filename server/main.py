@@ -75,10 +75,6 @@ _OPENAPI_TAGS = [
         "description": "Admin dashboard — event status, participant/volunteer leaderboards, top venues, and weekly user growth trends.",
     },
     {
-        "name": "App Feedback",
-        "description": "Anonymous app feedback — submit ratings with optional comments, and retrieve paginated feedback with analytics for admins.",
-    },
-    {
         "name": "Analytics",
         "description": "Platform analytics — logistics, performance, demographic, on-going, and historical event data with filtering and export.",
     },
@@ -177,7 +173,7 @@ async def root():
     """Root endpoint"""
     return {
         "name": "Eventara API",
-        "version": "1.0.0",
+        "version": settings.APP_VERSION,
         "description": "API for Eventara, the ultimate event management platform by Davao Defi.",
         "docs": "/docs",
     }
