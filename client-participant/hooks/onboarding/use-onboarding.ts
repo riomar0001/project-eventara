@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Profile } from '@/api/sdk.gen';
-import { humanizeApiError } from '@/lib/api-error';
 import type { AgeGroup, Gender, EducationLevel } from '@/api/types.gen';
+import { humanizeApiError } from '@/lib/api-error';
 import { decodeTokenUser } from '@/lib/auth/token';
 import { useAuthStore } from '@/store/auth-store';
 
@@ -62,8 +62,8 @@ export function useOnboarding() {
           gender: form.gender as Gender,
           education_level: form.educationLevel as EducationLevel,
           occupation: form.occupation || null,
-          bio: form.bio || null,
-        },
+          bio: form.bio || null
+        }
       });
 
       setLoading(false);

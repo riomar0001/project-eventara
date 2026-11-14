@@ -1,15 +1,15 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { ArrowLeft, ImageIcon, Loader2, MapPin, Upload, X } from 'lucide-react';
-import Link from 'next/link';
 import Image from 'next/image';
-import { Venues } from '@/api';
-import { useAuthStore } from '@/store/auth-store';
-import { humanizeApiError } from '@/lib/api-error';
-import { AMENITY_OPTIONS } from '@/constants/amenities';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import type { Amenity } from '@/types/venue';
+import { Venues } from '@/api';
+import { AMENITY_OPTIONS } from '@/constants/amenities';
+import { humanizeApiError } from '@/lib/api-error';
+import { useAuthStore } from '@/store/auth-store';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -69,7 +69,7 @@ const INITIAL: FormValues = {
   amenities: [],
   contact_name: '',
   contact_phone: '',
-  contact_email: '',
+  contact_email: ''
 };
 
 function venueToForm(v: ExistingVenue): FormValues {
@@ -87,7 +87,7 @@ function venueToForm(v: ExistingVenue): FormValues {
     amenities: (v.amenities ?? []) as Amenity[],
     contact_name: '',
     contact_phone: '',
-    contact_email: '',
+    contact_email: ''
   };
 }
 
@@ -124,7 +124,7 @@ const fieldsetCls = 'border-line-soft rounded-2xl border p-5 space-y-4';
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex items-center gap-3 mb-2">
+    <div className="mb-2 flex items-center gap-3">
       <p className={sectionTitleCls}>{children}</p>
       <div className="border-line-soft flex-1 border-t" />
     </div>
@@ -137,7 +137,7 @@ export function ContributeVenueForm({ venueId, existingVenue }: ContributeVenueF
   const isEditMode = Boolean(venueId);
   const router = useRouter();
   const { accessToken } = useAuthStore();
-  const [form, setForm] = useState<FormValues>(() => existingVenue ? venueToForm(existingVenue) : INITIAL);
+  const [form, setForm] = useState<FormValues>(() => (existingVenue ? venueToForm(existingVenue) : INITIAL));
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -162,7 +162,11 @@ export function ContributeVenueForm({ venueId, existingVenue }: ContributeVenueF
 
   function set<K extends keyof FormValues>(key: K, value: FormValues[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
-    setErrors((prev) => { const n = { ...prev }; delete n[key]; return n; });
+    setErrors((prev) => {
+      const n = { ...prev };
+      delete n[key];
+      return n;
+    });
   }
 
   function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
@@ -197,9 +201,7 @@ export function ContributeVenueForm({ venueId, existingVenue }: ContributeVenueF
   function toggleAmenity(amenity: Amenity) {
     setForm((prev) => ({
       ...prev,
-      amenities: prev.amenities.includes(amenity)
-        ? prev.amenities.filter((a) => a !== amenity)
-        : [...prev.amenities, amenity],
+      amenities: prev.amenities.includes(amenity) ? prev.amenities.filter((a) => a !== amenity) : [...prev.amenities, amenity]
     }));
   }
 
@@ -210,7 +212,7 @@ export function ContributeVenueForm({ venueId, existingVenue }: ContributeVenueF
       ...prev,
       amenities: prev.amenities.map((a) => a.toLowerCase()).includes(trimmed.toLowerCase())
         ? prev.amenities
-        : [...prev.amenities as string[], trimmed] as Amenity[],
+        : ([...(prev.amenities as string[]), trimmed] as Amenity[])
     }));
     setAmenityDraft('');
   }
@@ -222,8 +224,10 @@ export function ContributeVenueForm({ venueId, existingVenue }: ContributeVenueF
   }
 
   function handleAmenityKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === 'Enter') { e.preventDefault(); addFreeAmenity(amenityDraft); }
-    else if (e.key === 'Backspace' && amenityDraft === '') {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addFreeAmenity(amenityDraft);
+    } else if (e.key === 'Backspace' && amenityDraft === '') {
       const extra = form.amenities.filter((a) => !AMENITY_OPTIONS.map((o) => o.key).includes(a));
       if (extra.length > 0) removeFreeAmenity(extra[extra.length - 1] as Amenity);
     }
@@ -232,7 +236,10 @@ export function ContributeVenueForm({ venueId, existingVenue }: ContributeVenueF
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const errs = validate(form);
-    if (Object.keys(errs).length > 0) { setErrors(errs); return; }
+    if (Object.keys(errs).length > 0) {
+      setErrors(errs);
+      return;
+    }
     if (!accessToken) {
       setSubmitError('You must be signed in to contribute a venue.');
       return;
@@ -250,13 +257,13 @@ export function ContributeVenueForm({ venueId, existingVenue }: ContributeVenueF
           const { data: uploadData } = await Venues.uploadVenueImageVenuesVenueIdImagePost({
             path: { venue_id: venueId },
             body: { content_type: pendingImageFile.type },
-            headers: { Authorization: `Bearer ${accessToken}` },
+            headers: { Authorization: `Bearer ${accessToken}` }
           });
           if (uploadData?.upload?.upload_url) {
             await fetch(uploadData.upload.upload_url, {
               method: 'PUT',
               headers: { 'Content-Type': pendingImageFile.type },
-              body: pendingImageFile,
+              body: pendingImageFile
             });
             imageUrl = uploadData.upload.public_url;
           }
@@ -282,9 +289,9 @@ export function ContributeVenueForm({ venueId, existingVenue }: ContributeVenueF
           amenities: form.amenities,
           contact_name: form.contact_name || null,
           contact_phone: form.contact_phone || null,
-          contact_email: form.contact_email || null,
+          contact_email: form.contact_email || null
         },
-        headers: { Authorization: `Bearer ${accessToken}` },
+        headers: { Authorization: `Bearer ${accessToken}` }
       });
 
       setSubmitting(false);
@@ -313,9 +320,9 @@ export function ContributeVenueForm({ venueId, existingVenue }: ContributeVenueF
         amenities: form.amenities,
         contact_name: form.contact_name || null,
         contact_phone: form.contact_phone || null,
-        contact_email: form.contact_email || null,
+        contact_email: form.contact_email || null
       },
-      headers: { Authorization: `Bearer ${accessToken}` },
+      headers: { Authorization: `Bearer ${accessToken}` }
     });
 
     if (createError || !createData) {
@@ -332,13 +339,13 @@ export function ContributeVenueForm({ venueId, existingVenue }: ContributeVenueF
         const { data: uploadData } = await Venues.uploadVenueImageVenuesVenueIdImagePost({
           path: { venue_id: newVenueId },
           body: { content_type: pendingImageFile.type },
-          headers: { Authorization: `Bearer ${accessToken}` },
+          headers: { Authorization: `Bearer ${accessToken}` }
         });
         if (uploadData?.upload?.upload_url) {
           await fetch(uploadData.upload.upload_url, {
             method: 'PUT',
             headers: { 'Content-Type': pendingImageFile.type },
-            body: pendingImageFile,
+            body: pendingImageFile
           });
         }
       } catch {
@@ -370,9 +377,7 @@ export function ContributeVenueForm({ venueId, existingVenue }: ContributeVenueF
           <span className="bg-lime inline-block h-1.5 w-1.5 rounded-full shadow-[0_0_8px_var(--lime-glow)]" />
           {isEditMode ? 'Edit submission' : 'Community contribution'}
         </div>
-        <h1 className="text-text m-0 text-3xl font-bold tracking-[-0.03em]">
-          {isEditMode ? 'Edit venue' : 'Contribute a venue'}
-        </h1>
+        <h1 className="text-text m-0 text-3xl font-bold tracking-[-0.03em]">{isEditMode ? 'Edit venue' : 'Contribute a venue'}</h1>
         <p className="text-text-dim mt-1.5 text-sm leading-relaxed">
           {isEditMode
             ? 'Update the details below. Your changes will be reflected immediately.'
@@ -383,7 +388,6 @@ export function ContributeVenueForm({ venueId, existingVenue }: ContributeVenueF
       <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
         {/* ── Left: Form ───────────────────────────────────────────────────── */}
         <form onSubmit={handleSubmit} className="space-y-5">
-
           {/* Basic information */}
           <div className={fieldsetCls}>
             <SectionTitle>Basic information</SectionTitle>
@@ -417,11 +421,7 @@ export function ContributeVenueForm({ venueId, existingVenue }: ContributeVenueF
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className={labelCls}>Venue type *</label>
-                  <select
-                    value={form.venue_type}
-                    onChange={(e) => set('venue_type', e.target.value as VenueTypeOption)}
-                    className={inputCls}
-                  >
+                  <select value={form.venue_type} onChange={(e) => set('venue_type', e.target.value as VenueTypeOption)} className={inputCls}>
                     <option value="indoor">Indoor</option>
                     <option value="outdoor">Outdoor</option>
                     <option value="hybrid">Hybrid</option>
@@ -460,13 +460,7 @@ export function ContributeVenueForm({ venueId, existingVenue }: ContributeVenueF
             <div className="relative aspect-video w-full overflow-hidden rounded-xl">
               {previewBlobUrl || existingImageUrl ? (
                 <>
-                  <Image
-                    src={previewBlobUrl ?? existingImageUrl!}
-                    alt="Venue preview"
-                    fill
-                    className="object-cover"
-                    unoptimized
-                  />
+                  <Image src={previewBlobUrl ?? existingImageUrl!} alt="Venue preview" fill className="object-cover" unoptimized />
                   {/* Hover overlay — replace or clear */}
                   <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/50 opacity-0 transition-opacity hover:opacity-100">
                     <button
@@ -496,9 +490,7 @@ export function ContributeVenueForm({ venueId, existingVenue }: ContributeVenueF
                   disabled={submitting}
                   className="border-line-soft bg-page absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed transition-colors hover:border-[oklch(0.6_0_0)] hover:bg-[oklch(1_0_0_/_0.02)] disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  <span className="absolute top-3 right-3 font-mono text-[10px] font-semibold tracking-[0.14em] text-[oklch(0.5_0_0)] select-none">
-                    16 : 9
-                  </span>
+                  <span className="absolute top-3 right-3 font-mono text-[10px] font-semibold tracking-[0.14em] text-[oklch(0.5_0_0)] select-none">16 : 9</span>
                   <ImageIcon size={26} className="text-text-mute opacity-50" />
                   <span className="text-sm font-medium text-[oklch(0.6_0_0)]">Click to upload image</span>
                   <span className="font-mono text-[10px] text-[oklch(0.5_0_0)]">JPEG, PNG, WebP, GIF · max 5 MB</span>
@@ -507,9 +499,7 @@ export function ContributeVenueForm({ venueId, existingVenue }: ContributeVenueF
             </div>
 
             {imageFileError && <p className={errorCls}>{imageFileError}</p>}
-            <p className="text-text-mute font-mono text-[10px]">
-              Use a 16:9 photo for the best result (e.g. 1280 × 720 px). Optional.
-            </p>
+            <p className="text-text-mute font-mono text-[10px]">Use a 16:9 photo for the best result (e.g. 1280 × 720 px). Optional.</p>
           </div>
 
           {/* Address */}
@@ -532,24 +522,12 @@ export function ContributeVenueForm({ venueId, existingVenue }: ContributeVenueF
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className={labelCls}>City *</label>
-                  <input
-                    type="text"
-                    value={form.city}
-                    onChange={(e) => set('city', e.target.value)}
-                    className={inputCls}
-                    placeholder="Davao City"
-                  />
+                  <input type="text" value={form.city} onChange={(e) => set('city', e.target.value)} className={inputCls} placeholder="Davao City" />
                   {errors.city && <p className={errorCls}>{errors.city}</p>}
                 </div>
                 <div>
                   <label className={labelCls}>Province *</label>
-                  <input
-                    type="text"
-                    value={form.province}
-                    onChange={(e) => set('province', e.target.value)}
-                    className={inputCls}
-                    placeholder="Davao del Sur"
-                  />
+                  <input type="text" value={form.province} onChange={(e) => set('province', e.target.value)} className={inputCls} placeholder="Davao del Sur" />
                   {errors.province && <p className={errorCls}>{errors.province}</p>}
                 </div>
               </div>
@@ -628,7 +606,10 @@ export function ContributeVenueForm({ venueId, existingVenue }: ContributeVenueF
                       {a}
                       <button
                         type="button"
-                        onClick={(e) => { e.stopPropagation(); removeFreeAmenity(a as Amenity); }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeFreeAmenity(a as Amenity);
+                        }}
                         className="text-text-mute hover:text-text ml-0.5"
                       >
                         <X size={10} />
@@ -693,9 +674,7 @@ export function ContributeVenueForm({ venueId, existingVenue }: ContributeVenueF
           </div>
 
           {/* Actions */}
-          {submitError && (
-            <p className="border border-red-500/20 bg-red-500/10 rounded-xl px-4 py-3 text-red-400 text-sm">{submitError}</p>
-          )}
+          {submitError && <p className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">{submitError}</p>}
           <div className="flex gap-3 pt-1">
             <button
               type="button"
@@ -711,9 +690,7 @@ export function ContributeVenueForm({ venueId, existingVenue }: ContributeVenueF
               className="bg-lime inline-flex items-center gap-2 rounded-full px-8 py-2.5 text-sm font-semibold text-white shadow-[0_8px_28px_-10px_var(--lime-glow),inset_0_-1px_0_oklch(0.7_0.2_128)] transition-all hover:-translate-y-0.5 hover:shadow-[0_14px_40px_-10px_var(--lime-glow)] disabled:translate-y-0 disabled:opacity-50"
             >
               {submitting && <Loader2 size={14} className="animate-spin" />}
-              {isEditMode
-                ? (submitting ? 'Saving…' : 'Save changes')
-                : (submitting ? 'Submitting…' : 'Submit venue')}
+              {isEditMode ? (submitting ? 'Saving…' : 'Save changes') : submitting ? 'Submitting…' : 'Submit venue'}
             </button>
           </div>
         </form>
@@ -724,26 +701,18 @@ export function ContributeVenueForm({ venueId, existingVenue }: ContributeVenueF
             {/* 16:9 image with name overlay */}
             <div className="relative aspect-video w-full overflow-hidden">
               {previewBlobUrl || existingImageUrl ? (
-                <Image
-                  src={previewBlobUrl ?? existingImageUrl!}
-                  alt="Venue preview"
-                  fill
-                  className="object-cover"
-                  unoptimized
-                />
+                <Image src={previewBlobUrl ?? existingImageUrl!} alt="Venue preview" fill className="object-cover" unoptimized />
               ) : (
                 <div className="bg-page absolute inset-0 flex items-center justify-center">
                   <ImageIcon size={36} className="text-text-mute opacity-20" />
                 </div>
               )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-4">
+              <div className="absolute right-0 bottom-0 left-0 p-4">
                 <p className="font-mono text-[10px] tracking-[0.16em] text-white/60 uppercase">
                   {[form.city, form.province].filter(Boolean).join(', ') || 'City, Province'}
                 </p>
-                <h2 className="mt-0.5 text-xl font-semibold tracking-tight text-white">
-                  {form.name || 'Untitled venue'}
-                </h2>
+                <h2 className="mt-0.5 text-xl font-semibold tracking-tight text-white">{form.name || 'Untitled venue'}</h2>
               </div>
             </div>
 
@@ -758,9 +727,7 @@ export function ContributeVenueForm({ venueId, existingVenue }: ContributeVenueF
               <div className="grid grid-cols-2 gap-3">
                 <div className="border-line-soft rounded-xl border px-4 py-3">
                   <p className="text-text-mute mb-0.5 font-mono text-[10px] tracking-[0.14em] uppercase">Capacity</p>
-                  <p className="text-text text-sm font-medium">
-                    {form.capacity ? `${Number(form.capacity).toLocaleString()} guests` : '—'}
-                  </p>
+                  <p className="text-text text-sm font-medium">{form.capacity ? `${Number(form.capacity).toLocaleString()} guests` : '—'}</p>
                 </div>
                 <div className="border-line-soft rounded-xl border px-4 py-3">
                   <p className="text-text-mute mb-0.5 font-mono text-[10px] tracking-[0.14em] uppercase">Type</p>
@@ -794,9 +761,7 @@ export function ContributeVenueForm({ venueId, existingVenue }: ContributeVenueF
 
               <div className="border-line-soft flex items-center gap-2 rounded-xl border px-4 py-3">
                 <MapPin size={13} className="text-text-mute shrink-0" />
-                <p className="text-text-mute text-sm">
-                  {isEditMode ? 'Community suggestion · editing' : 'Community suggestion · pending review'}
-                </p>
+                <p className="text-text-mute text-sm">{isEditMode ? 'Community suggestion · editing' : 'Community suggestion · pending review'}</p>
               </div>
             </div>
           </div>

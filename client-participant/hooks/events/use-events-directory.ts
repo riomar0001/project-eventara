@@ -30,7 +30,7 @@ const EMPTY: EventsDirectoryPage = {
   page: 1,
   pageSize: 9,
   totalPages: 1,
-  eventsType: 'upcoming',
+  eventsType: 'upcoming'
 };
 
 export function useEventsDirectory({ q, page, pageSize }: UseEventsDirectoryParams): State {
@@ -60,7 +60,7 @@ export function useEventsDirectory({ q, page, pageSize }: UseEventsDirectoryPara
             totalPages: d.total_pages,
             eventsType: d.events_type,
             loading: false,
-            error: null,
+            error: null
           });
         } else {
           setState((prev) => ({ ...prev, loading: false, error: humanizeApiError(json.message, 'Unable to load events. Please try refreshing the page.') }));

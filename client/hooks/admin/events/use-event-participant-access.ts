@@ -10,10 +10,7 @@ const PRIVILEGED_ROLES = ['community_leader', 'system_administrator'];
 export function useEventParticipantAccess(eventId: string, eventOwnerId?: string | null) {
   const user = useAuthStore((state) => state.user);
   const isPrivileged = useMemo(() => Boolean(user?.role && PRIVILEGED_ROLES.includes(user.role)), [user?.role]);
-  const isOwner = useMemo(
-    () => isPrivileged || Boolean(eventOwnerId && user?.id === eventOwnerId),
-    [isPrivileged, eventOwnerId, user?.id]
-  );
+  const isOwner = useMemo(() => isPrivileged || Boolean(eventOwnerId && user?.id === eventOwnerId), [isPrivileged, eventOwnerId, user?.id]);
   const [canAccess, setCanAccess] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

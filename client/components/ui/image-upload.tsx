@@ -94,11 +94,7 @@ export function ImageUpload({ value, onChange, resourceType, resourceId, deferUp
           disabled={disabled || isUploading}
           className="relative flex h-full w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-neutral-200 bg-neutral-50 transition-colors hover:border-neutral-400 hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {hint && (
-            <span className="absolute top-2.5 right-3 font-mono text-[10px] font-semibold tracking-[0.14em] text-neutral-400 select-none">
-              16 : 9
-            </span>
-          )}
+          {hint && <span className="absolute top-2.5 right-3 font-mono text-[10px] font-semibold tracking-[0.14em] text-neutral-400 select-none">16 : 9</span>}
           {isUploading ? (
             <>
               <Loader2 className="size-6 animate-spin text-neutral-400" />

@@ -8,21 +8,8 @@ import { StarRating } from './star-rating';
 type Props = { eventId: string; eventTitle: string; onClose?: () => void };
 
 export function FeedbackForm({ eventId, eventTitle, onClose }: Props) {
-  const {
-    status,
-    rating,
-    hovered,
-    comment,
-    suggestion,
-    submitting,
-    submitted,
-    error,
-    setRating,
-    setHovered,
-    setComment,
-    setSuggestion,
-    handleSubmit,
-  } = useEventFeedback(eventId);
+  const { status, rating, hovered, comment, suggestion, submitting, submitted, error, setRating, setHovered, setComment, setSuggestion, handleSubmit } =
+    useEventFeedback(eventId);
 
   const backAction = onClose ? (
     <button
@@ -55,9 +42,7 @@ export function FeedbackForm({ eventId, eventTitle, onClose }: Props) {
           <Lock size={28} className="text-muted-foreground" />
         </div>
         <h2 className="text-foreground text-2xl font-bold tracking-[-0.025em]">Feedback unavailable</h2>
-        <p className="text-muted-foreground mx-auto mt-2 max-w-[32ch] text-[13.5px]">
-          Only attendees who checked in to this event can leave feedback.
-        </p>
+        <p className="text-muted-foreground mx-auto mt-2 max-w-[32ch] text-[13.5px]">Only attendees who checked in to this event can leave feedback.</p>
         <div className="mt-6 flex justify-center">{backAction}</div>
       </div>
     );
@@ -69,9 +54,7 @@ export function FeedbackForm({ eventId, eventTitle, onClose }: Props) {
         <div className="bg-primary/10 mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl">
           <CheckCircle2 size={32} className="text-primary" />
         </div>
-        <h2 className="text-foreground text-2xl font-bold tracking-[-0.025em]">
-          {submitted ? 'Thank you!' : 'Already submitted'}
-        </h2>
+        <h2 className="text-foreground text-2xl font-bold tracking-[-0.025em]">{submitted ? 'Thank you!' : 'Already submitted'}</h2>
         <p className="text-muted-foreground mx-auto mt-2 max-w-[30ch] text-[13.5px]">
           {submitted ? 'Your feedback helps us improve every event.' : "You've already submitted feedback for this event."}
         </p>
@@ -137,9 +120,7 @@ export function FeedbackForm({ eventId, eventTitle, onClose }: Props) {
           </div>
         </div>
 
-        {error && (
-          <p className="text-destructive text-[13px]">{error}</p>
-        )}
+        {error && <p className="text-destructive text-[13px]">{error}</p>}
 
         <button
           type="submit"

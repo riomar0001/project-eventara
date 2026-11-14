@@ -42,10 +42,16 @@ export function useVenuePublicRatings(venueId: string, page = 1, pageSize = 10, 
           setError('Failed to load ratings.');
         }
       })
-      .catch(() => { if (!cancelled) setError('Failed to load ratings.'); })
-      .finally(() => { if (!cancelled) setLoading(false); });
+      .catch(() => {
+        if (!cancelled) setError('Failed to load ratings.');
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
 
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [venueId, page, pageSize, refreshKey]);
 
   return { ratings, pagination, loading, error };

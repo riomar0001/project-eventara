@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useAuthStore } from '@/store/auth-store';
 import { humanizeApiError } from '@/lib/api-error';
+import { useAuthStore } from '@/store/auth-store';
 
 type StatusState = 'loading' | 'not-checked-in' | 'already-submitted' | 'eligible';
 
@@ -27,13 +27,22 @@ export function useEventFeedback(eventId: string) {
 
     setStatus('loading');
     fetch(`/api/events/${eventId}/feedback/my-status`, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization: `Bearer ${token}` }
     })
       .then((r) => r.json())
       .then((json) => {
-        if (!json.success) { setStatus('not-checked-in'); return; }
-        if (json.data.has_submitted_feedback) { setStatus('already-submitted'); return; }
-        if (!json.data.is_checked_in) { setStatus('not-checked-in'); return; }
+        if (!json.success) {
+          setStatus('not-checked-in');
+          return;
+        }
+        if (json.data.has_submitted_feedback) {
+          setStatus('already-submitted');
+          return;
+        }
+        if (!json.data.is_checked_in) {
+          setStatus('not-checked-in');
+          return;
+        }
         setStatus('eligible');
       })
       .catch(() => setStatus('not-checked-in'));
@@ -50,9 +59,9 @@ export function useEventFeedback(eventId: string) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify({ rating, comment: comment || null, suggestion: suggestion || null }),
+        body: JSON.stringify({ rating, comment: comment || null, suggestion: suggestion || null })
       });
       const json = await res.json();
       if (!res.ok) {
@@ -81,6 +90,6 @@ export function useEventFeedback(eventId: string) {
     setHovered,
     setComment,
     setSuggestion,
-    handleSubmit,
+    handleSubmit
   };
 }

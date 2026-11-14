@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useAuthStore } from '@/store/auth-store';
 import { Volunteers } from '@/api/sdk.gen';
 import { humanizeApiError } from '@/lib/api-error';
+import { useAuthStore } from '@/store/auth-store';
 
 export interface VolunteerRole {
   id: string;
@@ -32,15 +32,10 @@ export function useVolunteerRoles(): UseVolunteerRolesReturn {
 
     Volunteers.getAllVolunteerRolesVolunteerRolesGet({
       query: { is_active: true, page_size: 100 },
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization: `Bearer ${token}` }
     }).then(({ data, error: apiError }) => {
       if (apiError || !data) {
-        setError(
-          humanizeApiError(
-            (apiError as { message?: string } | null)?.message,
-            'Unable to load volunteer roles.',
-          ),
-        );
+        setError(humanizeApiError((apiError as { message?: string } | null)?.message, 'Unable to load volunteer roles.'));
       } else {
         const payload = data as { data?: { roles?: VolunteerRole[] } };
         setRoles(payload.data?.roles ?? []);

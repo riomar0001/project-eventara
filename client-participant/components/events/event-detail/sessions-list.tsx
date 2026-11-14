@@ -1,5 +1,5 @@
-import { SessionCard } from './session-card';
 import type { ApiEventSession } from '@/hooks/events/use-home-events';
+import { SessionCard } from './session-card';
 
 export function SessionsList({ sessions, eventId, onRegistrationChange }: { sessions: ApiEventSession[]; eventId: string; onRegistrationChange?: () => void }) {
   if (sessions.length === 0) {

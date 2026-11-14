@@ -30,7 +30,7 @@ export function useEventDetail(id: string) {
   useEffect(() => {
     setState({ event: null, loading: true, error: null });
     fetchEvent();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const totalSlots = state.event?.sessions.reduce((sum, s) => sum + (s.max_slots ?? 0), 0) ?? 0;
@@ -44,6 +44,6 @@ export function useEventDetail(id: string) {
     seatsFilled,
     capacityPct: totalSlots > 0 ? Math.min(100, Math.round((seatsFilled / totalSlots) * 100)) : 0,
     isFull,
-    refetch: fetchEvent,
+    refetch: fetchEvent
   };
 }

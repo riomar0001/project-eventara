@@ -41,13 +41,18 @@ export function usePasswordForm() {
     setSaving(true);
 
     const { error: apiError } = await AccountSettings.changePasswordUserChangePasswordPost({
-      body: { current_password: form.current, new_password: form.next },
+      body: { current_password: form.current, new_password: form.next }
     });
 
     setSaving(false);
 
     if (apiError) {
-      setError(humanizeApiError((apiError as { message?: string } | null)?.message, "Couldn't update your password. Make sure your current password is correct and try again."));
+      setError(
+        humanizeApiError(
+          (apiError as { message?: string } | null)?.message,
+          "Couldn't update your password. Make sure your current password is correct and try again."
+        )
+      );
       return;
     }
 

@@ -25,9 +25,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const status = error.response?.status;
         const url = req?.url ?? '';
         const headers = req?.headers as Record<string, string | undefined> | undefined;
-        const hadBearer =
-          typeof headers?.Authorization === 'string' &&
-          headers.Authorization.startsWith('Bearer ');
+        const hadBearer = typeof headers?.Authorization === 'string' && headers.Authorization.startsWith('Bearer ');
 
         if (!req || status !== 401 || req._retry || !hadBearer || url.includes('/auth/refresh')) {
           return Promise.reject(error);
@@ -39,7 +37,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           refreshPromise = useAuthStore
             .getState()
             .tryRefresh()
-            .finally(() => { refreshPromise = null; });
+            .finally(() => {
+              refreshPromise = null;
+            });
         }
 
         const refreshed = await refreshPromise;
@@ -63,7 +63,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     );
 
-    return () => { client.instance.interceptors.response.eject(id); };
+    return () => {
+      client.instance.interceptors.response.eject(id);
+    };
   }, [initialize, router]);
 
   return <>{children}</>;

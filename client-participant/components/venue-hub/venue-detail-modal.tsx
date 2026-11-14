@@ -3,9 +3,9 @@
 import { useState, useEffect } from 'react';
 import { Star } from 'lucide-react';
 import { Icon } from '@/components/ui/icon';
+import { useVenueRating } from '@/hooks/venues/use-venue-rating';
 import type { ApiVenue } from '@/types/venue';
 import { ModalBackdrop } from './modal-backdrop';
-import { useVenueRating } from '@/hooks/venues/use-venue-rating';
 import { useAuthStore } from '@/store/auth-store';
 
 interface VenueDetailModalProps {
@@ -30,15 +30,10 @@ function StarPicker({ value, hovered, onChange, onHover }: { value: number; hove
           onMouseLeave={() => onHover(0)}
           className="rounded-lg p-0.5 transition-transform hover:scale-110"
         >
-          <Star
-            size={26}
-            className={`transition-colors ${n <= active ? 'fill-amber-400 text-amber-400' : 'text-[oklch(0.4_0_0)]'}`}
-          />
+          <Star size={26} className={`transition-colors ${n <= active ? 'fill-amber-400 text-amber-400' : 'text-[oklch(0.4_0_0)]'}`} />
         </button>
       ))}
-      {active > 0 && (
-        <span className="text-amber-400 ml-1.5 font-mono text-[12px] font-semibold">{STAR_LABELS[active]}</span>
-      )}
+      {active > 0 && <span className="ml-1.5 font-mono text-[12px] font-semibold text-amber-400">{STAR_LABELS[active]}</span>}
     </div>
   );
 }
@@ -83,18 +78,24 @@ export function VenueDetailModal({ venue, isOpen, onClose }: VenueDetailModalPro
     e.preventDefault();
     if (starValue === 0) return;
     const ok = await rating.updateRating(starValue, comment);
-    if (ok) { setEditing(false); setSubmitted(true); }
+    if (ok) {
+      setEditing(false);
+      setSubmitted(true);
+    }
   }
 
   async function handleDelete() {
     const ok = await rating.deleteRating();
-    if (ok) { setStarValue(0); setComment(''); setSubmitted(false); }
+    if (ok) {
+      setStarValue(0);
+      setComment('');
+      setSubmitted(false);
+    }
   }
 
   return (
     <ModalBackdrop isOpen={isOpen} onClose={onClose}>
       <div className="border-line bg-surface mx-4 flex w-full max-w-3xl flex-col overflow-hidden rounded-2xl border shadow-2xl shadow-[oklch(0_0_0_/_0.3)] md:mx-0 md:max-h-[90vh] md:flex-row md:items-start md:rounded-3xl">
-
         {/* ── Left: image panel (16:9) ── */}
         <div className="relative hidden w-2/5 shrink-0 overflow-hidden bg-gradient-to-br from-[oklch(0.2_0.01_150)] to-[oklch(0.15_0.008_150)] md:block md:aspect-video">
           {venue.image_url ? (
@@ -105,7 +106,9 @@ export function VenueDetailModal({ venue, isOpen, onClose }: VenueDetailModalPro
                 className="absolute inset-0"
                 style={{ backgroundImage: `repeating-linear-gradient(${venue.angle}, transparent 0 22px, oklch(1 0 0 / 0.035) 22px 24px)` }}
               />
-              <div className={`absolute top-[22%] left-[18%] h-[220px] w-[220px] rounded-full blur-[34px] ${venue.orb === 'lime' ? 'bg-lime opacity-30' : 'bg-amber opacity-40'}`} />
+              <div
+                className={`absolute top-[22%] left-[18%] h-[220px] w-[220px] rounded-full blur-[34px] ${venue.orb === 'lime' ? 'bg-lime opacity-30' : 'bg-amber opacity-40'}`}
+              />
             </>
           )}
 
@@ -114,7 +117,7 @@ export function VenueDetailModal({ venue, isOpen, onClose }: VenueDetailModalPro
             <div className="absolute bottom-4 left-4 flex items-center gap-1.5 rounded-full border border-[oklch(1_0_0_/_0.15)] bg-black/60 px-3 py-1.5 backdrop-blur-[8px]">
               <Star size={13} className="fill-amber-400 text-amber-400" />
               <span className="font-mono text-[13px] font-semibold text-white">{rating.average.toFixed(1)}</span>
-              <span className="text-white/50 font-mono text-[11px]">({rating.count})</span>
+              <span className="font-mono text-[11px] text-white/50">({rating.count})</span>
             </div>
           )}
         </div>
@@ -131,14 +134,16 @@ export function VenueDetailModal({ venue, isOpen, onClose }: VenueDetailModalPro
                   className="absolute inset-0"
                   style={{ backgroundImage: `repeating-linear-gradient(${venue.angle}, transparent 0 22px, oklch(1 0 0 / 0.035) 22px 24px)` }}
                 />
-                <div className={`absolute top-[22%] left-[18%] h-[220px] w-[220px] rounded-full blur-[34px] ${venue.orb === 'lime' ? 'bg-lime opacity-30' : 'bg-amber opacity-40'}`} />
+                <div
+                  className={`absolute top-[22%] left-[18%] h-[220px] w-[220px] rounded-full blur-[34px] ${venue.orb === 'lime' ? 'bg-lime opacity-30' : 'bg-amber opacity-40'}`}
+                />
               </>
             )}
             {!rating.loadingAverage && rating.count > 0 && rating.average !== null && (
               <div className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-full border border-[oklch(1_0_0_/_0.15)] bg-black/60 px-3 py-1.5 backdrop-blur-[8px]">
                 <Star size={13} className="fill-amber-400 text-amber-400" />
                 <span className="font-mono text-[13px] font-semibold text-white">{rating.average.toFixed(1)}</span>
-                <span className="text-white/50 font-mono text-[11px]">({rating.count})</span>
+                <span className="font-mono text-[11px] text-white/50">({rating.count})</span>
               </div>
             )}
           </div>
@@ -168,9 +173,7 @@ export function VenueDetailModal({ venue, isOpen, onClose }: VenueDetailModalPro
               </div>
             </div>
 
-            {venue.description && (
-              <p className="text-text-dim mb-4 text-sm leading-relaxed">{venue.description}</p>
-            )}
+            {venue.description && <p className="text-text-dim mb-4 text-sm leading-relaxed">{venue.description}</p>}
 
             <div className="grid grid-cols-2 gap-3 py-4">
               <div className="border-line-soft bg-page rounded-lg border p-3.5">
@@ -196,7 +199,9 @@ export function VenueDetailModal({ venue, isOpen, onClose }: VenueDetailModalPro
 
               <div className="border-line-soft bg-page rounded-lg border p-3.5">
                 <div className="text-text-mute font-mono text-xs tracking-[0.14em] uppercase">Times used</div>
-                <div className="text-text mt-2 text-sm font-medium">{venue.usage_count} event{venue.usage_count !== 1 ? 's' : ''}</div>
+                <div className="text-text mt-2 text-sm font-medium">
+                  {venue.usage_count} event{venue.usage_count !== 1 ? 's' : ''}
+                </div>
               </div>
             </div>
 
@@ -234,7 +239,11 @@ export function VenueDetailModal({ venue, isOpen, onClose }: VenueDetailModalPro
                       <button onClick={() => setEditing(true)} className="text-text-mute hover:text-text rounded-md px-2 py-1 text-xs transition-colors">
                         Edit
                       </button>
-                      <button onClick={handleDelete} disabled={rating.submitting} className="text-red-400/70 hover:text-red-400 rounded-md px-2 py-1 text-xs transition-colors disabled:opacity-50">
+                      <button
+                        onClick={handleDelete}
+                        disabled={rating.submitting}
+                        className="rounded-md px-2 py-1 text-xs text-red-400/70 transition-colors hover:text-red-400 disabled:opacity-50"
+                      >
                         Remove
                       </button>
                     </div>
@@ -251,9 +260,9 @@ export function VenueDetailModal({ venue, isOpen, onClose }: VenueDetailModalPro
                     onChange={(e) => setComment(e.target.value)}
                     maxLength={500}
                     rows={2}
-                    className="border-line-soft bg-page text-text placeholder-text-mute focus:border-lime w-full resize-none rounded-xl border px-4 py-3 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-[oklch(0.9_0.22_128_/_0.12)]"
+                    className="border-line-soft bg-page text-text placeholder-text-mute focus:border-lime w-full resize-none rounded-xl border px-4 py-3 text-sm transition-all focus:ring-2 focus:ring-[oklch(0.9_0.22_128_/_0.12)] focus:outline-none"
                   />
-                  {rating.error && <p className="text-red-400 text-xs">{rating.error}</p>}
+                  {rating.error && <p className="text-xs text-red-400">{rating.error}</p>}
                   <div className="flex items-center gap-2">
                     <button
                       type="submit"
@@ -265,7 +274,12 @@ export function VenueDetailModal({ venue, isOpen, onClose }: VenueDetailModalPro
                     {editing && (
                       <button
                         type="button"
-                        onClick={() => { setEditing(false); setStarValue(rating.myRating!.rating); setComment(rating.myRating!.comment ?? ''); rating.clearError(); }}
+                        onClick={() => {
+                          setEditing(false);
+                          setStarValue(rating.myRating!.rating);
+                          setComment(rating.myRating!.comment ?? '');
+                          rating.clearError();
+                        }}
                         className="text-text-mute hover:text-text rounded-full px-4 py-2 text-sm transition-colors"
                       >
                         Cancel

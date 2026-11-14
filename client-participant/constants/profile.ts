@@ -2,12 +2,12 @@ export const AGE_GROUP_OPTIONS = [
   { value: 'child', label: 'Under 13' },
   { value: 'teen', label: '13–17' },
   { value: 'adult', label: '18–54' },
-  { value: 'senior', label: '55+' },
+  { value: 'senior', label: '55+' }
 ] as const;
 
 export const GENDER_OPTIONS = [
   { value: 'male', label: 'Male' },
-  { value: 'female', label: 'Female' },
+  { value: 'female', label: 'Female' }
 ] as const;
 
 export const EDUCATION_LEVEL_OPTIONS = [
@@ -23,7 +23,7 @@ export const EDUCATION_LEVEL_OPTIONS = [
   { value: 'associate_degree', label: 'Associate degree' },
   { value: 'bachelors_degree', label: "Bachelor's degree" },
   { value: 'masters_degree', label: "Master's degree" },
-  { value: 'doctorate_degree', label: 'Doctorate' },
+  { value: 'doctorate_degree', label: 'Doctorate' }
 ] as const;
 
 // Legacy string arrays kept for backwards compatibility

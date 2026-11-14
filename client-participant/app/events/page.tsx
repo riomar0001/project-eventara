@@ -9,10 +9,10 @@ import { EventsDirectoryPagination } from '@/components/events/directory/events-
 import { Icon } from '@/components/events/directory/icon';
 import { Footer } from '@/components/footer/footer';
 import { Navbar } from '@/components/navigation/navbar';
-import type { DirectoryEvent, SortOption, ViewMode, TweaksConfig, FeaturedEvent } from '@/types/event-directory';
 import { useEventsDirectory } from '@/hooks/events/use-events-directory';
 import { useHomeEvents } from '@/hooks/events/use-home-events';
 import type { HomeEventRecord } from '@/hooks/events/use-home-events';
+import type { DirectoryEvent, SortOption, ViewMode, TweaksConfig, FeaturedEvent } from '@/types/event-directory';
 
 const TWEAKS_DEFAULTS: TweaksConfig = { density: 'comfortable', bannerVariant: 'featured', badgeStyle: 'floating' };
 const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
@@ -20,22 +20,21 @@ const ORBS: Array<'lime' | 'amber'> = ['lime', 'amber'];
 const ANGLES = ['115deg', '130deg', '145deg', '160deg', '175deg', '190deg'];
 
 function stripHtml(html: string): string {
-  return html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+  return html
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 function toDirectoryEvent(record: HomeEventRecord, index: number): DirectoryEvent {
   const start = new Date(record.start_date);
   const session = record.sessions[0];
-  const venue = session
-    ? [session.venue_name, session.venue_location].filter(Boolean).join(', ')
-    : 'TBD';
-  const time = session
-    ? new Date(session.start_datetime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
-    : 'TBD';
+  const venue = session ? [session.venue_name, session.venue_location].filter(Boolean).join(', ') : 'TBD';
+  const time = session ? new Date(session.start_datetime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : 'TBD';
   const maxSlots = session?.max_slots ?? 0;
   const statusMap: Record<string, DirectoryEvent['status']> = {
     started: 'live',
-    posted: 'new',
+    posted: 'new'
   };
 
   return {
@@ -55,19 +54,15 @@ function toDirectoryEvent(record: HomeEventRecord, index: number): DirectoryEven
     status: statusMap[record.status] ?? null,
     orb: ORBS[index % ORBS.length],
     angle: ANGLES[index % ANGLES.length],
-    banner_url: record.banner_url ?? null,
+    banner_url: record.banner_url ?? null
   };
 }
 
 function toLiveEventFeatured(record: HomeEventRecord): FeaturedEvent {
   const session = record.sessions[0];
   const start = new Date(record.start_date);
-  const venue = session
-    ? [session.venue_name, session.venue_location].filter(Boolean).join(', ')
-    : 'TBD';
-  const time = session
-    ? new Date(session.start_datetime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
-    : 'TBD';
+  const venue = session ? [session.venue_name, session.venue_location].filter(Boolean).join(', ') : 'TBD';
+  const time = session ? new Date(session.start_datetime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : 'TBD';
 
   return {
     tag: 'LIVE NOW',
@@ -76,7 +71,7 @@ function toLiveEventFeatured(record: HomeEventRecord): FeaturedEvent {
     date: start.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
     time,
     venue,
-    banner_url: record.banner_url ?? null,
+    banner_url: record.banner_url ?? null
   };
 }
 
@@ -108,20 +103,18 @@ export default function EventsPage() {
   const { events, total, totalPages, loading, error } = useEventsDirectory({ q: debouncedQ, page, pageSize: PER_PAGE });
   const { data: homeData } = useHomeEvents();
 
-  const liveEvent: HomeEventRecord | null = homeData?.live_event
-    ? { ...homeData.live_event.event, sessions: homeData.live_event.sessions }
-    : null;
+  const liveEvent: HomeEventRecord | null = homeData?.live_event ? { ...homeData.live_event.event, sessions: homeData.live_event.sessions } : null;
 
-  const directoryEvents = useMemo<DirectoryEvent[]>(
-    () => events.map((ev, i) => toDirectoryEvent(ev, i)),
-    [events]
-  );
+  const directoryEvents = useMemo<DirectoryEvent[]>(() => events.map((ev, i) => toDirectoryEvent(ev, i)), [events]);
 
   const counts = useMemo(() => ({ All: total }), [total]);
 
-  const handleOpen = useCallback((id: string) => {
-    router.push(`/events/${id}`);
-  }, [router]);
+  const handleOpen = useCallback(
+    (id: string) => {
+      router.push(`/events/${id}`);
+    },
+    [router]
+  );
 
   const handleOpenFeatured = useCallback(() => {
     if (liveEvent) router.push(`/events/${liveEvent.id}`);
@@ -202,9 +195,7 @@ export default function EventsPage() {
               counts={counts}
             />
 
-            {showFeatured && featuredData && (
-              <EventsDirectoryFeatured featured={featuredData} onOpen={handleOpenFeatured} />
-            )}
+            {showFeatured && featuredData && <EventsDirectoryFeatured featured={featuredData} onOpen={handleOpenFeatured} />}
           </header>
 
           <section>
@@ -212,7 +203,9 @@ export default function EventsPage() {
               <div>
                 <h3 className="text-foreground m-0 text-[24px] font-semibold tracking-[-0.02em]">All events</h3>
                 <div className="text-muted-foreground mt-1 font-mono text-[12px]">
-                  {loading ? 'Loading…' : (
+                  {loading ? (
+                    'Loading…'
+                  ) : (
                     <>
                       {total} result{total !== 1 ? 's' : ''}
                       {debouncedQ && (
@@ -267,13 +260,7 @@ export default function EventsPage() {
           </section>
 
           {!loading && total > 0 && (
-            <EventsDirectoryPagination
-              currentPage={page}
-              totalPages={totalPages}
-              filteredLength={total}
-              perPage={PER_PAGE}
-              onPageChange={setPage}
-            />
+            <EventsDirectoryPagination currentPage={page} totalPages={totalPages} filteredLength={total} perPage={PER_PAGE} onPageChange={setPage} />
           )}
         </div>
       </div>

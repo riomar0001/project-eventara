@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { AccountSettings } from '@/api/sdk.gen';
-import { humanizeApiError } from '@/lib/api-error';
 import { DELETE_ACCOUNT_REASON_OPTIONS, DELETE_ACCOUNT_OTHER_REASON, DELETE_CONFIRMATION_WORD, type DeleteAccountReason } from '@/constants/delete-account';
+import { humanizeApiError } from '@/lib/api-error';
 
 export { DELETE_ACCOUNT_REASON_OPTIONS, DELETE_ACCOUNT_OTHER_REASON, DELETE_CONFIRMATION_WORD };
 
@@ -58,13 +58,18 @@ export function useDeleteAccount() {
     const reason = isOther ? otherReason.trim() : (reasonOption as string);
 
     const { data, error: apiError } = await AccountSettings.scheduleOwnAccountDeletionUserAccountDeletionPost({
-      body: { current_password: currentPassword, reason },
+      body: { current_password: currentPassword, reason }
     });
 
     setSubmitting(false);
 
     if (apiError || !data) {
-      setError(humanizeApiError((apiError as { message?: string } | null)?.message, "Couldn't schedule your account deletion. Please check your password and try again."));
+      setError(
+        humanizeApiError(
+          (apiError as { message?: string } | null)?.message,
+          "Couldn't schedule your account deletion. Please check your password and try again."
+        )
+      );
       return;
     }
 

@@ -1,7 +1,7 @@
 'use client';
 
-import { AlertTriangle, Eye, EyeOff, Loader2, ShieldAlert } from 'lucide-react';
 import { useState } from 'react';
+import { AlertTriangle, Eye, EyeOff, Loader2, ShieldAlert } from 'lucide-react';
 import { useDeleteAccount, DELETE_ACCOUNT_REASON_OPTIONS, DELETE_CONFIRMATION_WORD } from '@/hooks/profile/use-delete-account';
 
 const INPUT =

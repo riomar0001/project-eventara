@@ -28,9 +28,7 @@ export function EventCard({ event, index }: EventCardProps) {
   const angle = ANGLES[index % 3];
   const firstSession = event.sessions[0];
   const venueName = firstSession?.venue_name ?? 'TBD';
-  const venueDisplay = firstSession?.venue_location
-    ? `${venueName} · ${firstSession.venue_location}`
-    : venueName;
+  const venueDisplay = firstSession?.venue_location ? `${venueName} · ${firstSession.venue_location}` : venueName;
   const slots = firstSession?.max_slots;
   const slotsDisplay = slots ? `${slots} seats` : 'Open';
   const desc = stripHtml(event.description);
@@ -66,9 +64,7 @@ export function EventCard({ event, index }: EventCardProps) {
           {event.status}
         </div>
 
-        <div className="absolute bottom-3 left-3 font-mono text-[9.5px] tracking-[0.15em] text-white/30 uppercase">
-          [ event cover · 16:9 ]
-        </div>
+        <div className="absolute bottom-3 left-3 font-mono text-[9.5px] tracking-[0.15em] text-white/30 uppercase">[ event cover · 16:9 ]</div>
       </div>
 
       <div className="flex flex-1 flex-col gap-2.5 px-[22px] py-[24px]">

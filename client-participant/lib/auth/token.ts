@@ -48,7 +48,7 @@ export function decodeTokenUser(token: string): AuthUser | null {
       educationLevel: p.education_level ?? undefined,
       occupation: p.occupation ?? undefined,
       bio: p.bio ?? undefined,
-      image: p.image ?? undefined,
+      image: p.image ?? undefined
     };
   } catch {
     return null;

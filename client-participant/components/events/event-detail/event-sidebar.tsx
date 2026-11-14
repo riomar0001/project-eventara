@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { Calendar, Clock, MapPin, MessageSquare, QrCode } from 'lucide-react';
-import type { HomeEventRecord, ApiEventSession } from '@/hooks/events/use-home-events';
 import { useEventRegistrations } from '@/hooks/events/use-event-registrations';
+import type { HomeEventRecord, ApiEventSession } from '@/hooks/events/use-home-events';
 import { SessionQrModal } from './session-qr-modal';
 
 const DONE_STATUSES = new Set(['ended', 'cancelled']);
@@ -14,12 +14,8 @@ export function EventSidebar({ event, totalSlots, isFull, onFeedbackClick }: Pro
   const start = new Date(event.start_date);
   const dateStr = start.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
   const session = event.sessions[0];
-  const timeStr = session
-    ? new Date(session.start_datetime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
-    : '—';
-  const venue = session
-    ? [session.venue_name, session.venue_location].filter(Boolean).join(', ')
-    : '—';
+  const timeStr = session ? new Date(session.start_datetime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '—';
+  const venue = session ? [session.venue_name, session.venue_location].filter(Boolean).join(', ') : '—';
 
   const isDone = DONE_STATUSES.has(event.status);
 
@@ -57,7 +53,7 @@ export function EventSidebar({ event, totalSlots, isFull, onFeedbackClick }: Pro
               <div className="space-y-2">
                 {registeredSessions.map((s) => (
                   <div key={s.id} className="bg-background rounded-xl p-3">
-                    <p className="text-foreground text-[13px] font-semibold leading-snug">{s.title}</p>
+                    <p className="text-foreground text-[13px] leading-snug font-semibold">{s.title}</p>
                     <p className="text-muted-foreground mt-0.5 font-mono text-[11px]">
                       {new Date(s.start_datetime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
                       {' · '}
@@ -81,8 +77,8 @@ export function EventSidebar({ event, totalSlots, isFull, onFeedbackClick }: Pro
                 {isFull
                   ? 'This event is fully booked.'
                   : totalSlots > 0
-                  ? `${totalSlots} spot${totalSlots !== 1 ? 's' : ''} available.`
-                  : 'Open attendance — secure your spot.'}
+                    ? `${totalSlots} spot${totalSlots !== 1 ? 's' : ''} available.`
+                    : 'Open attendance — secure your spot.'}
               </p>
               {!isFull ? (
                 <a
@@ -106,7 +102,7 @@ export function EventSidebar({ event, totalSlots, isFull, onFeedbackClick }: Pro
             {[
               { icon: Calendar, label: dateStr },
               { icon: Clock, label: timeStr },
-              { icon: MapPin, label: venue },
+              { icon: MapPin, label: venue }
             ].map(({ icon: Icon, label }) => (
               <div key={label} className="text-muted-foreground flex items-center gap-2.5 text-[13px]">
                 <Icon size={14} className="text-muted-foreground" />
@@ -117,14 +113,7 @@ export function EventSidebar({ event, totalSlots, isFull, onFeedbackClick }: Pro
         </div>
       </div>
 
-      {qrSession && (
-        <SessionQrModal
-          eventId={event.id}
-          sessionId={qrSession.id}
-          sessionTitle={qrSession.title}
-          onClose={() => setQrSession(null)}
-        />
-      )}
+      {qrSession && <SessionQrModal eventId={event.id} sessionId={qrSession.id} sessionTitle={qrSession.title} onClose={() => setQrSession(null)} />}
     </>
   );
 }

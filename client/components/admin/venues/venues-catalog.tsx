@@ -150,7 +150,17 @@ function SectionEmpty({ hasFilters, label }: { hasFilters: boolean; label: strin
 
 // ── Venue card grid ────────────────────────────────────────────────────────────
 
-function VenueGrid({ canUpdateVenue, currentUserId, isPrivilegedRole, venues }: { canUpdateVenue: boolean; currentUserId: string | null; isPrivilegedRole: boolean; venues: VenueRecordResponse[] }) {
+function VenueGrid({
+  canUpdateVenue,
+  currentUserId,
+  isPrivilegedRole,
+  venues
+}: {
+  canUpdateVenue: boolean;
+  currentUserId: string | null;
+  isPrivilegedRole: boolean;
+  venues: VenueRecordResponse[];
+}) {
   return (
     <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
       {venues.map((venue) => {

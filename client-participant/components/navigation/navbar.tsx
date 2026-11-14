@@ -3,8 +3,8 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useAuthStore } from '@/store/auth-store';
 import { Auth } from '@/api/sdk.gen';
+import { useAuthStore } from '@/store/auth-store';
 
 const NAV_LINKS = [
   { label: 'Home', href: '/' },
@@ -35,7 +35,9 @@ export function Navbar() {
   }, []);
 
   // Close mobile menu on route change
-  useEffect(() => { setMobileOpen(false); }, [pathname]);
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
 
   async function handleSignOut() {
     setOpen(false);
@@ -50,11 +52,8 @@ export function Navbar() {
   const firstName = user?.firstName ?? '';
   const lastName = user?.lastName ?? '';
   const displayName = firstName ? `${firstName}${lastName ? ` ${lastName[0]}.` : ''}` : (user?.email?.split('@')[0] ?? '');
-  const initials = firstName && lastName
-    ? `${firstName[0]}${lastName[0]}`.toUpperCase()
-    : firstName
-    ? firstName[0].toUpperCase()
-    : (user?.email?.[0]?.toUpperCase() ?? '?');
+  const initials =
+    firstName && lastName ? `${firstName[0]}${lastName[0]}`.toUpperCase() : firstName ? firstName[0].toUpperCase() : (user?.email?.[0]?.toUpperCase() ?? '?');
 
   return (
     <>
@@ -110,26 +109,60 @@ export function Navbar() {
                     <div className="text-foreground max-w-[120px] truncate text-[13.5px] font-medium">{displayName}</div>
                     <div className="text-primary font-mono text-[10.5px] tracking-[0.14em] uppercase">Participant</div>
                   </div>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="shrink-0"
+                  >
                     <path d="m6 9 6 6 6-6" />
                   </svg>
                 </button>
                 {open && (
                   <div className="border-border bg-card absolute right-0 z-50 mt-2 min-w-[200px] rounded-xl border p-1.5 shadow-[0_12px_40px_-16px_oklch(0_0_0_/_0.18)]">
-                    <Link href="/profile" onClick={() => setOpen(false)} className="text-muted-foreground hover:bg-muted/50 hover:text-foreground flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-[13px] transition-all">
+                    <Link
+                      href="/profile"
+                      onClick={() => setOpen(false)}
+                      className="text-muted-foreground hover:bg-muted/50 hover:text-foreground flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-[13px] transition-all"
+                    >
                       My Profile
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg
+                        width="12"
+                        height="12"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
                         <path d="M5 12h14M13 6l6 6-6 6" />
                       </svg>
                     </Link>
-                    <Link href="/profile/settings/profile" onClick={() => setOpen(false)} className="text-muted-foreground hover:bg-muted/50 hover:text-foreground flex w-full items-center rounded-lg px-3 py-2.5 text-[13px] transition-all">
+                    <Link
+                      href="/profile/settings/profile"
+                      onClick={() => setOpen(false)}
+                      className="text-muted-foreground hover:bg-muted/50 hover:text-foreground flex w-full items-center rounded-lg px-3 py-2.5 text-[13px] transition-all"
+                    >
                       Account settings
                     </Link>
-                    <Link href="/profile/my-events" onClick={() => setOpen(false)} className="text-muted-foreground hover:bg-muted/50 hover:text-foreground flex w-full items-center rounded-lg px-3 py-2.5 text-[13px] transition-all">
+                    <Link
+                      href="/profile/my-events"
+                      onClick={() => setOpen(false)}
+                      className="text-muted-foreground hover:bg-muted/50 hover:text-foreground flex w-full items-center rounded-lg px-3 py-2.5 text-[13px] transition-all"
+                    >
                       My Events
                     </Link>
                     <div className="bg-border mx-2 my-1.5 h-px" />
-                    <button onClick={handleSignOut} className="hover:bg-muted/50 flex w-full items-center rounded-lg px-3 py-2.5 text-left text-[13px] text-orange-400 transition-all">
+                    <button
+                      onClick={handleSignOut}
+                      className="hover:bg-muted/50 flex w-full items-center rounded-lg px-3 py-2.5 text-left text-[13px] text-orange-400 transition-all"
+                    >
                       Sign out
                     </button>
                   </div>
@@ -140,7 +173,10 @@ export function Navbar() {
                 <Link href="/login" className="text-muted-foreground hover:text-foreground rounded-full px-4 py-2 text-[14px] font-medium transition-colors">
                   Sign in
                 </Link>
-                <Link href="/register" className="bg-primary text-primary-foreground rounded-full px-4 py-2 text-[14px] font-semibold shadow-[0_6px_20px_-8px_var(--lime-glow)] transition-all hover:-translate-y-0.5">
+                <Link
+                  href="/register"
+                  className="bg-primary text-primary-foreground rounded-full px-4 py-2 text-[14px] font-semibold shadow-[0_6px_20px_-8px_var(--lime-glow)] transition-all hover:-translate-y-0.5"
+                >
                   Sign up
                 </Link>
               </div>
@@ -160,7 +196,9 @@ export function Navbar() {
                 </Link>
               )}
               {isInitialized && !user && (
-                <Link href="/login" className="text-muted-foreground text-[14px] font-medium">Sign in</Link>
+                <Link href="/login" className="text-muted-foreground text-[14px] font-medium">
+                  Sign in
+                </Link>
               )}
               <button
                 onClick={() => setMobileOpen((o) => !o)}
@@ -168,11 +206,29 @@ export function Navbar() {
                 aria-label="Toggle menu"
               >
                 {mobileOpen ? (
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
                     <path d="M18 6 6 18M6 6l12 12" />
                   </svg>
                 ) : (
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
                     <path d="M4 6h16M4 12h16M4 18h16" />
                   </svg>
                 )}
@@ -184,7 +240,7 @@ export function Navbar() {
         {/* Mobile menu */}
         {mobileOpen && (
           <div className="border-border bg-background border-t px-4 pb-4 md:hidden">
-            <div className="pt-2 space-y-0.5">
+            <div className="space-y-0.5 pt-2">
               {NAV_LINKS.map(({ label, href }) => {
                 const isActive = href === '/' ? pathname === '/' : pathname.startsWith(href);
                 return (
@@ -202,13 +258,22 @@ export function Navbar() {
               <>
                 <div className="bg-border my-3 h-px" />
                 <div className="space-y-0.5">
-                  <Link href="/profile/settings/profile" className="text-muted-foreground hover:text-foreground flex rounded-xl px-4 py-3 text-[15px] font-medium transition-colors hover:bg-muted/40">
+                  <Link
+                    href="/profile/settings/profile"
+                    className="text-muted-foreground hover:text-foreground hover:bg-muted/40 flex rounded-xl px-4 py-3 text-[15px] font-medium transition-colors"
+                  >
                     Account settings
                   </Link>
-                  <Link href="/profile/my-events" className="text-muted-foreground hover:text-foreground flex rounded-xl px-4 py-3 text-[15px] font-medium transition-colors hover:bg-muted/40">
+                  <Link
+                    href="/profile/my-events"
+                    className="text-muted-foreground hover:text-foreground hover:bg-muted/40 flex rounded-xl px-4 py-3 text-[15px] font-medium transition-colors"
+                  >
                     My Events
                   </Link>
-                  <button onClick={handleSignOut} className="flex w-full rounded-xl px-4 py-3 text-left text-[15px] font-medium text-orange-400 transition-colors hover:bg-muted/40">
+                  <button
+                    onClick={handleSignOut}
+                    className="hover:bg-muted/40 flex w-full rounded-xl px-4 py-3 text-left text-[15px] font-medium text-orange-400 transition-colors"
+                  >
                     Sign out
                   </button>
                 </div>
@@ -218,7 +283,10 @@ export function Navbar() {
               <>
                 <div className="bg-border my-3 h-px" />
                 <div className="flex gap-2 pt-1">
-                  <Link href="/register" className="bg-primary text-primary-foreground flex-1 rounded-full py-3 text-center text-[14px] font-semibold shadow-[0_6px_20px_-8px_var(--lime-glow)]">
+                  <Link
+                    href="/register"
+                    className="bg-primary text-primary-foreground flex-1 rounded-full py-3 text-center text-[14px] font-semibold shadow-[0_6px_20px_-8px_var(--lime-glow)]"
+                  >
                     Sign up
                   </Link>
                 </div>

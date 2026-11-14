@@ -2,15 +2,28 @@
 
 import { CheckCircle2, Eye, EyeOff, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { useResetPassword } from '@/hooks/auth/use-reset-password';
 import { MeshBg } from '@/components/shared/mesh-bg';
+import { useResetPassword } from '@/hooks/auth/use-reset-password';
 
 const INPUT =
   'w-full rounded-xl border border-border bg-background px-4 py-3 pr-11 text-foreground placeholder-muted-foreground transition-all focus:border-primary focus:ring-2 focus:ring-primary/10 focus:outline-none';
 
 export default function ResetPasswordPage({ params }: { params: { token: string } }) {
-  const { password, setPassword, confirm, setConfirm, showPassword, setShowPassword, showConfirm, setShowConfirm, loading, error, errors, success, handleSubmit } =
-    useResetPassword(params.token);
+  const {
+    password,
+    setPassword,
+    confirm,
+    setConfirm,
+    showPassword,
+    setShowPassword,
+    showConfirm,
+    setShowConfirm,
+    loading,
+    error,
+    errors,
+    success,
+    handleSubmit
+  } = useResetPassword(params.token);
 
   return (
     <main className="bg-background relative flex min-h-screen items-center justify-center overflow-hidden px-5 py-12">
@@ -52,7 +65,14 @@ export default function ResetPasswordPage({ params }: { params: { token: string 
                   <label className="text-muted-foreground mb-1.5 block font-mono text-[11px] tracking-[0.14em] uppercase">New password</label>
                   <div className="relative">
                     <input
-                      className={errors.password ? INPUT.replace('border-border', 'border-destructive').replace('focus:border-primary focus:ring-primary/10', 'focus:border-destructive focus:ring-destructive/10') : INPUT}
+                      className={
+                        errors.password
+                          ? INPUT.replace('border-border', 'border-destructive').replace(
+                              'focus:border-primary focus:ring-primary/10',
+                              'focus:border-destructive focus:ring-destructive/10'
+                            )
+                          : INPUT
+                      }
                       type={showPassword ? 'text' : 'password'}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
@@ -74,7 +94,14 @@ export default function ResetPasswordPage({ params }: { params: { token: string 
                   <label className="text-muted-foreground mb-1.5 block font-mono text-[11px] tracking-[0.14em] uppercase">Confirm password</label>
                   <div className="relative">
                     <input
-                      className={errors.confirm ? INPUT.replace('border-border', 'border-destructive').replace('focus:border-primary focus:ring-primary/10', 'focus:border-destructive focus:ring-destructive/10') : INPUT}
+                      className={
+                        errors.confirm
+                          ? INPUT.replace('border-border', 'border-destructive').replace(
+                              'focus:border-primary focus:ring-primary/10',
+                              'focus:border-destructive focus:ring-destructive/10'
+                            )
+                          : INPUT
+                      }
                       type={showConfirm ? 'text' : 'password'}
                       value={confirm}
                       onChange={(e) => setConfirm(e.target.value)}

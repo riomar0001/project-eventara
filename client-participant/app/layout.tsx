@@ -1,6 +1,6 @@
 import { Plus_Jakarta_Sans, JetBrains_Mono } from 'next/font/google';
-import { ThemeProvider } from '@/components/theme-provider';
 import { AuthProvider } from '@/components/auth/auth-provider';
+import { ThemeProvider } from '@/components/theme-provider';
 import './globals.css';
 import { cn } from '@/lib/utils';
 

@@ -65,7 +65,7 @@ export function ActionBar({ query, onQueryChange, capacityKey, onCapacityChange,
           <div ref={capacityRef} className="relative">
             <button
               onClick={() => setCapacityOpen(!capacityOpen)}
-              className="border-line-soft bg-surface hover:border-text-mute flex h-14 w-full items-center justify-between gap-2 rounded-[14px] border px-[18px] py-4 text-sm transition-all md:min-w-[180px] md:w-auto"
+              className="border-line-soft bg-surface hover:border-text-mute flex h-14 w-full items-center justify-between gap-2 rounded-[14px] border px-[18px] py-4 text-sm transition-all md:w-auto md:min-w-[180px]"
             >
               <div className="flex flex-row items-center gap-1.5">
                 <span className="text-text-mute font-mono text-[10.5px] tracking-[0.14em] uppercase">Capacity</span>
@@ -96,7 +96,7 @@ export function ActionBar({ query, onQueryChange, capacityKey, onCapacityChange,
           <div ref={sortRef} className="relative">
             <button
               onClick={() => setSortOpen(!sortOpen)}
-              className="border-line-soft bg-surface hover:border-text-mute flex h-14 w-full items-center justify-between gap-2 rounded-[14px] border px-[18px] py-4 text-sm transition-all md:min-w-[180px] md:w-auto"
+              className="border-line-soft bg-surface hover:border-text-mute flex h-14 w-full items-center justify-between gap-2 rounded-[14px] border px-[18px] py-4 text-sm transition-all md:w-auto md:min-w-[180px]"
             >
               <div className="flex flex-row items-center gap-1.5">
                 <span className="text-text-mute font-mono text-[10.5px] tracking-[0.14em] uppercase">Sort</span>

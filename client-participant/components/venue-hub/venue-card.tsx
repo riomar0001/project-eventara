@@ -1,10 +1,10 @@
 'use client';
 
-import Link from 'next/link';
 import { Pencil, Star } from 'lucide-react';
+import Link from 'next/link';
 import { Icon } from '@/components/ui/icon';
-import { useAuthStore } from '@/store/auth-store';
 import type { ApiVenue } from '@/types/venue';
+import { useAuthStore } from '@/store/auth-store';
 
 interface VenueCardProps {
   venue: ApiVenue;
@@ -29,8 +29,12 @@ export function VenueCard({ venue }: VenueCardProps) {
               className="absolute inset-0"
               style={{ backgroundImage: `repeating-linear-gradient(${venue.angle}, transparent 0 22px, oklch(1 0 0 / 0.035) 22px 24px)` }}
             />
-            <div className={`absolute top-[22%] left-[18%] h-[220px] w-[220px] rounded-full blur-[34px] ${venue.orb === 'lime' ? 'bg-lime opacity-30' : 'bg-amber opacity-40'}`} />
-            <div className={`absolute right-[14%] bottom-[18%] h-[180px] w-[180px] rounded-full blur-[34px] ${venue.orb === 'lime' ? 'bg-amber' : 'bg-lime'} opacity-25`} />
+            <div
+              className={`absolute top-[22%] left-[18%] h-[220px] w-[220px] rounded-full blur-[34px] ${venue.orb === 'lime' ? 'bg-lime opacity-30' : 'bg-amber opacity-40'}`}
+            />
+            <div
+              className={`absolute right-[14%] bottom-[18%] h-[180px] w-[180px] rounded-full blur-[34px] ${venue.orb === 'lime' ? 'bg-amber' : 'bg-lime'} opacity-25`}
+            />
           </>
         )}
 
@@ -49,7 +53,7 @@ export function VenueCard({ venue }: VenueCardProps) {
         )}
 
         {/* Capacity badge */}
-        <div className="absolute bottom-3 right-3 flex items-center gap-1 rounded-full border border-[oklch(1_0_0_/_0.15)] bg-black/55 px-2.5 py-1 font-mono text-[10px] text-white/70 backdrop-blur-[8px]">
+        <div className="absolute right-3 bottom-3 flex items-center gap-1 rounded-full border border-[oklch(1_0_0_/_0.15)] bg-black/55 px-2.5 py-1 font-mono text-[10px] text-white/70 backdrop-blur-[8px]">
           <Icon name="users" size={10} />
           {venue.capacity}
         </div>
@@ -91,10 +95,10 @@ export function VenueCard({ venue }: VenueCardProps) {
 
         <div className="flex-1" />
 
-        <div className="border-line-soft border-t border-dashed pt-2.5 flex gap-2">
+        <div className="border-line-soft flex gap-2 border-t border-dashed pt-2.5">
           <Link
             href={`/venues/${venue.id}`}
-            className="border-lime text-lime flex-1 block rounded-full border bg-[oklch(0.9_0.22_128_/_0.05)] px-3 py-2 text-center text-sm font-medium transition-all hover:bg-[oklch(0.9_0.22_128_/_0.12)] hover:shadow-[0_0_16px_-4px_oklch(0.7_0.2_130_/_0.5)]"
+            className="border-lime text-lime block flex-1 rounded-full border bg-[oklch(0.9_0.22_128_/_0.05)] px-3 py-2 text-center text-sm font-medium transition-all hover:bg-[oklch(0.9_0.22_128_/_0.12)] hover:shadow-[0_0_16px_-4px_oklch(0.7_0.2_130_/_0.5)]"
           >
             View Details
           </Link>

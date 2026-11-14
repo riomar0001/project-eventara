@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useAuthStore } from '@/store/auth-store';
 import type { ApiEventSession } from '@/hooks/events/use-home-events';
+import { useAuthStore } from '@/store/auth-store';
 
 export function useEventRegistrations(eventId: string, sessions: ApiEventSession[]) {
   const { accessToken: token } = useAuthStore();
@@ -20,12 +20,12 @@ export function useEventRegistrations(eventId: string, sessions: ApiEventSession
     Promise.all(
       ids.map((id) =>
         fetch(`/api/events/${eventId}/session/${id}/register`, {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${token}` }
         })
           .then((r) => r.json())
           .then((json) => ({ id, registered: json.success && json.data.is_registered }))
-          .catch(() => ({ id, registered: false })),
-      ),
+          .catch(() => ({ id, registered: false }))
+      )
     )
       .then((results) => {
         setRegisteredIds(new Set(results.filter((r) => r.registered).map((r) => r.id)));
@@ -35,6 +35,6 @@ export function useEventRegistrations(eventId: string, sessions: ApiEventSession
 
   return {
     registeredSessions: sessions.filter((s) => registeredIds.has(s.id)),
-    initializing,
+    initializing
   };
 }

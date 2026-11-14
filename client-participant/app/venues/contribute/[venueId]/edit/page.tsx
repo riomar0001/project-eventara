@@ -1,14 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
+import { useParams, useRouter } from 'next/navigation';
 import { Footer } from '@/components/footer/footer';
 import { Navbar } from '@/components/navigation/navbar';
 import { ContributeVenueForm } from '@/components/venue-hub/contribute-venue-form';
-import { useAuthStore } from '@/store/auth-store';
 import { Venues } from '@/api';
 import type { PublicVenueRecordResponse } from '@/api/types.gen';
+import { useAuthStore } from '@/store/auth-store';
 
 export default function EditVenuePage() {
   const params = useParams<{ venueId: string }>();
@@ -21,7 +21,7 @@ export default function EditVenuePage() {
   useEffect(() => {
     if (!params.venueId) return;
     Venues.getCommunityVenueVenuesPublicCommunityVenueIdGet({
-      path: { venue_id: params.venueId },
+      path: { venue_id: params.venueId }
     }).then(({ data, error: fetchError }) => {
       if (fetchError || !data?.data) {
         setError('Venue not found.');
@@ -49,10 +49,7 @@ export default function EditVenuePage() {
         ) : error || !venue ? (
           <div className="flex min-h-[50vh] flex-col items-center justify-center gap-3 px-4 text-center">
             <p className="text-text text-base font-semibold">{error ?? 'Venue not found.'}</p>
-            <button
-              onClick={() => router.push('/venues')}
-              className="text-text-mute hover:text-text font-mono text-sm transition-colors"
-            >
+            <button onClick={() => router.push('/venues')} className="text-text-mute hover:text-text font-mono text-sm transition-colors">
               Back to venues
             </button>
           </div>
@@ -71,7 +68,7 @@ export default function EditVenuePage() {
               capacity: venue.capacity,
               venue_type: venue.venue_type as 'indoor' | 'outdoor' | 'hybrid',
               amenities: venue.amenities,
-              image_url: venue.image_url ?? null,
+              image_url: venue.image_url ?? null
             }}
           />
         )}

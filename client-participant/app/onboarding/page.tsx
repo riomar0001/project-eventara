@@ -36,9 +36,7 @@ export default function OnboardingPage() {
           {step === 2 && <StepReview form={form} goToStep={goToStep} />}
           {step === 3 && <StepComplete alias={form.alias} />}
 
-          {submitError && (
-            <p className="text-destructive mt-4 text-center text-[13px] font-medium">{submitError}</p>
-          )}
+          {submitError && <p className="text-destructive mt-4 text-center text-[13px] font-medium">{submitError}</p>}
 
           <div className={`mt-6 flex gap-3 ${step > 0 && !isLastStep ? 'justify-between' : 'justify-end'}`}>
             {step > 0 && !isLastStep && (

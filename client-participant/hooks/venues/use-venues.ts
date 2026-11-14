@@ -47,7 +47,7 @@ export function useVenues({ hub, search, page, pageSize = 9 }: UseVenuesParams):
             average_rating: v.average_rating ?? null,
             rating_count: v.rating_count ?? 0,
             orb: ORBS[i % ORBS.length],
-            angle: ANGLES[i % ANGLES.length],
+            angle: ANGLES[i % ANGLES.length]
           }));
           setState({ venues, pagination: json.pagination, loading: false, error: null });
         } else {

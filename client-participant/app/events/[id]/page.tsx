@@ -1,15 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { useParams } from 'next/navigation';
-import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
+import { useParams } from 'next/navigation';
 import { EventHero } from '@/components/events/event-detail/event-hero';
 import { EventSidebar } from '@/components/events/event-detail/event-sidebar';
 import { SessionsList } from '@/components/events/event-detail/sessions-list';
+import { Footer } from '@/components/footer/footer';
 import { FeedbackModal } from '@/components/modals/feedback-modal';
 import { Navbar } from '@/components/navigation/navbar';
-import { Footer } from '@/components/footer/footer';
 import { useEventDetail } from '@/hooks/events/use-event-detail';
 
 export default function EventDetailPage() {
@@ -43,7 +43,7 @@ export default function EventDetailPage() {
         <Navbar />
         <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4">
           <p className="text-muted-foreground text-[14px]">{error ?? 'Event not found.'}</p>
-          <Link href="/events" className="text-primary hover:underline inline-flex items-center gap-1.5 text-[13px]">
+          <Link href="/events" className="text-primary inline-flex items-center gap-1.5 text-[13px] hover:underline">
             <ArrowLeft size={14} /> Back to events
           </Link>
         </div>
@@ -60,22 +60,12 @@ export default function EventDetailPage() {
             <EventHero event={event} />
             <SessionsList sessions={event.sessions} eventId={event.id} onRegistrationChange={refetch} />
           </div>
-          <EventSidebar
-            event={event}
-            totalSlots={totalSlots}
-            isFull={isFull}
-            onFeedbackClick={() => setFeedbackOpen(true)}
-          />
+          <EventSidebar event={event} totalSlots={totalSlots} isFull={isFull} onFeedbackClick={() => setFeedbackOpen(true)} />
         </div>
       </div>
       <Footer />
 
-      <FeedbackModal
-        eventId={id}
-        eventTitle={event.title}
-        isOpen={feedbackOpen}
-        onClose={() => setFeedbackOpen(false)}
-      />
+      <FeedbackModal eventId={id} eventTitle={event.title} isOpen={feedbackOpen} onClose={() => setFeedbackOpen(false)} />
     </div>
   );
 }

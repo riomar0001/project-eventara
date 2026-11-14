@@ -70,16 +70,14 @@ export function LiveEventCard({ liveEvent, loading }: LiveEventCardProps) {
               <span className="inline-block h-1.5 w-1.5 rounded-full bg-orange-400 shadow-[0_0_12px_var(--amber-glow)]" />
               ON NOW
             </div>
-            <h2 className="text-foreground my-2.5 text-[clamp(30px,3.4vw,44px)] font-semibold tracking-[-0.03em] text-balance">
-              Happening Now
-            </h2>
+            <h2 className="text-foreground my-2.5 text-[clamp(30px,3.4vw,44px)] font-semibold tracking-[-0.03em] text-balance">Happening Now</h2>
           </div>
           <p className="text-muted-foreground max-w-[46ch] text-[15px]">
             One session is live on the Eventara network. Jump in, or catch up later — sessions are archived within 24 hours.
           </p>
         </div>
 
-        <div className="border-border from-card relative grid grid-cols-1 overflow-hidden rounded-[24px] border bg-linear-[180deg] to-[oklch(0.97_0.005_150)] p-0 md:grid-cols-[1.1fr_1fr] md:min-h-[420px]">
+        <div className="border-border from-card relative grid grid-cols-1 overflow-hidden rounded-[24px] border bg-linear-[180deg] to-[oklch(0.97_0.005_150)] p-0 md:min-h-[420px] md:grid-cols-[1.1fr_1fr]">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_90%_10%,oklch(0.62_0.16_60_/_0.1),transparent_40%)]" />
 
           <div className="relative flex flex-col gap-[18px] p-6 md:py-10 md:pr-10 md:pl-9">
@@ -88,9 +86,7 @@ export function LiveEventCard({ liveEvent, loading }: LiveEventCardProps) {
               LIVE · DAY {pad(day)} OF {pad(totalDays)}
             </div>
 
-            <h3 className="text-foreground m-0 text-[clamp(26px,2.6vw,34px)] leading-[1.1] font-semibold tracking-[-0.025em]">
-              {event.title}
-            </h3>
+            <h3 className="text-foreground m-0 text-[clamp(26px,2.6vw,34px)] leading-[1.1] font-semibold tracking-[-0.025em]">{event.title}</h3>
 
             <div className="grid grid-cols-1 gap-x-[28px] gap-y-[18px] sm:grid-cols-2">
               {[
@@ -112,10 +108,16 @@ export function LiveEventCard({ liveEvent, loading }: LiveEventCardProps) {
             </div>
 
             <div className="mt-auto flex gap-2.5">
-              <Link href={`/events/${event.id}`} className="bg-primary text-primary-foreground flex flex-1 items-center justify-center gap-2.5 rounded-full px-5.5 py-3.5 text-sm font-semibold shadow-[0_8px_28px_-10px_var(--lime-glow),inset_0_-1px_0_oklch(0.7_0.2_128)] transition-all duration-180 hover:-translate-y-0.5">
+              <Link
+                href={`/events/${event.id}`}
+                className="bg-primary text-primary-foreground flex flex-1 items-center justify-center gap-2.5 rounded-full px-5.5 py-3.5 text-sm font-semibold shadow-[0_8px_28px_-10px_var(--lime-glow),inset_0_-1px_0_oklch(0.7_0.2_128)] transition-all duration-180 hover:-translate-y-0.5"
+              >
                 ▶ Join Session
               </Link>
-              <Link href={`/events/${event.id}`} className="border-border bg-muted/20 text-muted-foreground hover:border-muted-foreground hover:text-foreground inline-flex items-center justify-center gap-2.5 rounded-full border px-5.5 py-3.5 text-sm font-semibold transition-all duration-180">
+              <Link
+                href={`/events/${event.id}`}
+                className="border-border bg-muted/20 text-muted-foreground hover:border-muted-foreground hover:text-foreground inline-flex items-center justify-center gap-2.5 rounded-full border px-5.5 py-3.5 text-sm font-semibold transition-all duration-180"
+              >
                 View Event
               </Link>
             </div>
@@ -126,20 +128,14 @@ export function LiveEventCard({ liveEvent, loading }: LiveEventCardProps) {
             <div className="bg-primary absolute top-[22%] left-[18%] h-[220px] w-[220px] rounded-full opacity-30 blur-[26px]" />
             <div className="absolute right-[14%] bottom-[18%] h-[180px] w-[180px] rounded-full bg-orange-400 opacity-40 blur-[26px]" />
             {event.banner_url ? (
-              <img
-                src={event.banner_url}
-                alt={event.title}
-                className="absolute inset-0 h-full w-full object-cover opacity-60"
-              />
+              <img src={event.banner_url} alt={event.title} className="absolute inset-0 h-full w-full object-cover opacity-60" />
             ) : (
               <div className="text-muted-foreground absolute top-5 right-5 inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/40 px-[10px] py-[6px] font-mono text-[11px] tracking-[0.12em] uppercase backdrop-blur-md">
                 <span className="relative inline-block h-1.5 w-1.5 animate-[ping_1.6s_cubic-bezier(0,0,0.2,1)_infinite] rounded-full bg-orange-400" />
                 STREAM · LIVE
               </div>
             )}
-            <div className="absolute bottom-4 left-4 font-mono text-[9.5px] tracking-[0.15em] text-white/30 uppercase">
-              [ event cover · 16:9 ]
-            </div>
+            <div className="absolute bottom-4 left-4 font-mono text-[9.5px] tracking-[0.15em] text-white/30 uppercase">[ event cover · 16:9 ]</div>
           </div>
         </div>
       </div>

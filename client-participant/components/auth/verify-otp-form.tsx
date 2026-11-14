@@ -20,14 +20,12 @@ export function VerifyOtpForm() {
           </div>
           <h2 className="text-foreground text-[22px] font-bold tracking-[-0.025em]">Check your inbox</h2>
           <p className="text-muted-foreground mx-auto mt-2 max-w-[36ch] text-[13.5px]">
-            We sent a verification link to{' '}
-            {email ? <span className="text-foreground font-semibold">{email}</span> : 'your email address'}. Click the link to verify your account.
+            We sent a verification link to {email ? <span className="text-foreground font-semibold">{email}</span> : 'your email address'}. Click the link to
+            verify your account.
           </p>
         </div>
 
-        {resendSuccess && (
-          <p className="text-primary mb-4 text-center text-[13px] font-medium">Verification email resent. Check your inbox.</p>
-        )}
+        {resendSuccess && <p className="text-primary mb-4 text-center text-[13px] font-medium">Verification email resent. Check your inbox.</p>}
 
         <div className="border-border border-t pt-5 text-center">
           {countdown > 0 ? (

@@ -1,6 +1,6 @@
 'use client';
 
-import { ClipboardList, Clock, UserCheck, UserX } from 'lucide-react';
+import { Clock, UserCheck, UserX } from 'lucide-react';
 import { useVolunteerApplications } from '@/hooks/admin/volunteers/use-volunteer-applications';
 import { useVolunteerRoleList } from '@/hooks/admin/volunteers/use-volunteer-role-list';
 import { VolunteerApplicationsTable } from './volunteer-applications-table';
@@ -27,18 +27,18 @@ export function VolunteerApplicationsPage() {
           {
             label: 'Total applications',
             value: total,
-            hint: 'All applications across every status.',
+            hint: 'All applications across every status.'
           },
           {
             label: 'Pending review',
             value: pendingCount,
-            hint: 'Applications currently awaiting a decision.',
+            hint: 'Applications currently awaiting a decision.'
           },
           {
             label: 'Active roles',
             value: volunteerRoles.length,
-            hint: 'Volunteer roles available to assign on approval.',
-          },
+            hint: 'Volunteer roles available to assign on approval.'
+          }
         ]}
       />
 
@@ -47,18 +47,18 @@ export function VolunteerApplicationsPage() {
           {
             icon: Clock,
             label: 'Review in order',
-            text: 'Oldest pending applications are shown first. Clear the queue regularly to keep response times short.',
+            text: 'Oldest pending applications are shown first. Clear the queue regularly to keep response times short.'
           },
           {
             icon: UserCheck,
             label: 'Approve with a role',
-            text: 'Approving creates an active volunteer profile and assigns the applicant a role and contact phone.',
+            text: 'Approving creates an active volunteer profile and assigns the applicant a role and contact phone.'
           },
           {
             icon: UserX,
             label: 'Rejections are final',
-            text: 'Rejected applicants can submit a new application. The rejection cannot be reversed from this panel.',
-          },
+            text: 'Rejected applicants can submit a new application. The rejection cannot be reversed from this panel.'
+          }
         ].map((item) => (
           <div key={item.label} className="rounded-2xl border border-neutral-200 bg-white px-4 py-3 shadow-[0_18px_45px_-38px_rgba(15,23,42,0.45)]">
             <div className="flex items-start gap-3">

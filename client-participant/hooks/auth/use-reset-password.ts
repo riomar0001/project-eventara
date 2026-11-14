@@ -42,13 +42,15 @@ export function useResetPassword(token: string) {
 
     const { error: apiError } = await Auth.resetPasswordAuthResetPasswordTokenPost({
       path: { token },
-      body: { new_password: passwordRaw },
+      body: { new_password: passwordRaw }
     });
 
     setLoading(false);
 
     if (apiError) {
-      setError(humanizeApiError((apiError as { message?: string } | null)?.message, 'This reset link has expired or is no longer valid. Please request a new one.'));
+      setError(
+        humanizeApiError((apiError as { message?: string } | null)?.message, 'This reset link has expired or is no longer valid. Please request a new one.')
+      );
       return;
     }
 
@@ -69,6 +71,6 @@ export function useResetPassword(token: string) {
     error,
     errors,
     success,
-    handleSubmit,
+    handleSubmit
   };
 }

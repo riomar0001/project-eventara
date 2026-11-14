@@ -29,7 +29,7 @@ export function useLoginForm() {
     setError('');
 
     const { data, error: apiError } = await Auth.loginAuthLoginPost({
-      body: { email: form.email, password: form.password },
+      body: { email: form.email, password: form.password }
     });
 
     setLoading(false);

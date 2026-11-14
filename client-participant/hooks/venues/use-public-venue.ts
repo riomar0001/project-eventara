@@ -24,7 +24,7 @@ function toApiVenue(data: Record<string, unknown>): ApiVenue {
     created_at: (data.created_at as string) ?? null,
     updated_at: (data.updated_at as string) ?? null,
     orb: (data.is_partner as boolean) ? 'lime' : 'amber',
-    angle: '135deg',
+    angle: '135deg'
   };
 }
 
@@ -43,7 +43,10 @@ export function usePublicVenue(venueId: string) {
       try {
         let res = await fetch(`/api/venues/public/partners/${venueId}`);
         if (!res.ok) res = await fetch(`/api/venues/public/community/${venueId}`);
-        if (!res.ok) { if (!cancelled) setError('Venue not found.'); return; }
+        if (!res.ok) {
+          if (!cancelled) setError('Venue not found.');
+          return;
+        }
         const json = await res.json();
         if (!cancelled && json.success) setVenue(toApiVenue(json.data));
       } catch {
@@ -53,7 +56,9 @@ export function usePublicVenue(venueId: string) {
       }
     }
     load();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [venueId]);
 
   return { venue, loading, error };

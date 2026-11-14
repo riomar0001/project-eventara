@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { useAuthStore } from '@/store/auth-store';
 import { EventParticipants } from '@/api';
 import { humanizeApiError } from '@/lib/api-error';
+import { useAuthStore } from '@/store/auth-store';
 
 const COOLDOWN_MS = 5_000;
 
@@ -24,7 +24,7 @@ export function useSessionRegister(eventId: string, sessionId: string) {
       return;
     }
     fetch(`/api/events/${eventId}/session/${sessionId}/register`, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization: `Bearer ${token}` }
     })
       .then((r) => r.json())
       .then((json) => {
@@ -53,7 +53,7 @@ export function useSessionRegister(eventId: string, sessionId: string) {
     setError(null);
     setCooldownMsg(null);
     const { data, error: err } = await EventParticipants.registerForSessionEventsEventIdSessionSessionIdRegisterPost({
-      path: { event_id: eventId, session_id: sessionId },
+      path: { event_id: eventId, session_id: sessionId }
     });
     setLoading(false);
     if (err) {
@@ -78,7 +78,7 @@ export function useSessionRegister(eventId: string, sessionId: string) {
     setError(null);
     setCooldownMsg(null);
     const { data, error: err } = await EventParticipants.withdrawRegistrationEventsEventIdSessionSessionIdRegisterDelete({
-      path: { event_id: eventId, session_id: sessionId },
+      path: { event_id: eventId, session_id: sessionId }
     });
     setLoading(false);
     if (err) {

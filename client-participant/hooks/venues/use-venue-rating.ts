@@ -1,8 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { useAuthStore } from '@/store/auth-store';
 import { humanizeApiError } from '@/lib/api-error';
+import { useAuthStore } from '@/store/auth-store';
 
 interface MyRating {
   id: string;
@@ -60,7 +60,7 @@ export function useVenueRating(venueId: string | null): UseVenueRatingReturn {
     }
     setLoadingMine(true);
     fetch(`/api/venues/${venueId}/ratings/me`, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization: `Bearer ${token}` }
     })
       .then((r) => (r.status === 404 ? null : r.json()))
       .then((json) => {
@@ -74,59 +74,81 @@ export function useVenueRating(venueId: string | null): UseVenueRatingReturn {
       .finally(() => setLoadingMine(false));
   }, [venueId, token]);
 
-  const submitRating = useCallback(async (rating: number, comment: string): Promise<boolean> => {
-    if (!venueId || !token) return false;
-    setSubmitting(true);
-    setError(null);
-    try {
-      const res = await fetch(`/api/venues/${venueId}/ratings`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ rating, comment: comment.trim() || null }),
-      });
-      const json = await res.json();
-      if (!res.ok) { setError(humanizeApiError(json.message, "Couldn't submit your rating. Please try again.")); return false; }
-      setMyRating({ id: json.data.id, rating: json.data.rating, comment: json.data.comment });
-      setCount((c) => c + 1);
-      // Refresh average
-      fetch(`/api/venues/${venueId}/ratings/average`)
-        .then((r) => r.json())
-        .then((j) => { if (j.success) { setAverage(j.data.average); setCount(j.data.count); } })
-        .catch(() => {});
-      return true;
-    } catch {
-      setError('Something went wrong submitting your rating. Please try again.');
-      return false;
-    } finally {
-      setSubmitting(false);
-    }
-  }, [venueId, token]);
+  const submitRating = useCallback(
+    async (rating: number, comment: string): Promise<boolean> => {
+      if (!venueId || !token) return false;
+      setSubmitting(true);
+      setError(null);
+      try {
+        const res = await fetch(`/api/venues/${venueId}/ratings`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ rating, comment: comment.trim() || null })
+        });
+        const json = await res.json();
+        if (!res.ok) {
+          setError(humanizeApiError(json.message, "Couldn't submit your rating. Please try again."));
+          return false;
+        }
+        setMyRating({ id: json.data.id, rating: json.data.rating, comment: json.data.comment });
+        setCount((c) => c + 1);
+        // Refresh average
+        fetch(`/api/venues/${venueId}/ratings/average`)
+          .then((r) => r.json())
+          .then((j) => {
+            if (j.success) {
+              setAverage(j.data.average);
+              setCount(j.data.count);
+            }
+          })
+          .catch(() => {});
+        return true;
+      } catch {
+        setError('Something went wrong submitting your rating. Please try again.');
+        return false;
+      } finally {
+        setSubmitting(false);
+      }
+    },
+    [venueId, token]
+  );
 
-  const updateRating = useCallback(async (rating: number, comment: string): Promise<boolean> => {
-    if (!venueId || !token) return false;
-    setSubmitting(true);
-    setError(null);
-    try {
-      const res = await fetch(`/api/venues/${venueId}/ratings/me`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ rating, comment: comment.trim() || null }),
-      });
-      const json = await res.json();
-      if (!res.ok) { setError(humanizeApiError(json.message, "Couldn't update your rating. Please try again.")); return false; }
-      setMyRating({ id: json.data.id, rating: json.data.rating, comment: json.data.comment });
-      fetch(`/api/venues/${venueId}/ratings/average`)
-        .then((r) => r.json())
-        .then((j) => { if (j.success) { setAverage(j.data.average); setCount(j.data.count); } })
-        .catch(() => {});
-      return true;
-    } catch {
-      setError('Something went wrong updating your rating. Please try again.');
-      return false;
-    } finally {
-      setSubmitting(false);
-    }
-  }, [venueId, token]);
+  const updateRating = useCallback(
+    async (rating: number, comment: string): Promise<boolean> => {
+      if (!venueId || !token) return false;
+      setSubmitting(true);
+      setError(null);
+      try {
+        const res = await fetch(`/api/venues/${venueId}/ratings/me`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ rating, comment: comment.trim() || null })
+        });
+        const json = await res.json();
+        if (!res.ok) {
+          setError(humanizeApiError(json.message, "Couldn't update your rating. Please try again."));
+          return false;
+        }
+        setMyRating({ id: json.data.id, rating: json.data.rating, comment: json.data.comment });
+        fetch(`/api/venues/${venueId}/ratings/average`)
+          .then((r) => r.json())
+          .then((j) => {
+            if (j.success) {
+              setAverage(j.data.average);
+              setCount(j.data.count);
+            }
+          })
+          .catch(() => {});
+        return true;
+      } catch {
+        setError('Something went wrong updating your rating. Please try again.');
+        return false;
+      } finally {
+        setSubmitting(false);
+      }
+    },
+    [venueId, token]
+  );
 
   const deleteRating = useCallback(async (): Promise<boolean> => {
     if (!venueId || !token) return false;
@@ -135,13 +157,22 @@ export function useVenueRating(venueId: string | null): UseVenueRatingReturn {
     try {
       const res = await fetch(`/api/venues/${venueId}/ratings/me`, {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token}` }
       });
-      if (!res.ok) { const j = await res.json(); setError(humanizeApiError(j.message, "Couldn't remove your rating. Please try again.")); return false; }
+      if (!res.ok) {
+        const j = await res.json();
+        setError(humanizeApiError(j.message, "Couldn't remove your rating. Please try again."));
+        return false;
+      }
       setMyRating(null);
       fetch(`/api/venues/${venueId}/ratings/average`)
         .then((r) => r.json())
-        .then((j) => { if (j.success) { setAverage(j.data.average); setCount(j.data.count); } })
+        .then((j) => {
+          if (j.success) {
+            setAverage(j.data.average);
+            setCount(j.data.count);
+          }
+        })
         .catch(() => {});
       return true;
     } catch {

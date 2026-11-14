@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { useAuthStore } from '@/store/auth-store';
 import { Volunteers } from '@/api';
 import { humanizeApiError } from '@/lib/api-error';
+import { useAuthStore } from '@/store/auth-store';
 
 export interface VolunteerApplicationForm {
   preferred_role: string;
@@ -33,18 +33,15 @@ export function useVolunteerApplication() {
         contact_phone: form.contact_phone,
         reason: form.reason,
         skills_experience: form.skills_experience || null,
-        availability: form.availability || null,
+        availability: form.availability || null
       },
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization: `Bearer ${token}` }
     });
 
     setLoading(false);
 
     if (err) {
-      const msg = humanizeApiError(
-        (err as { message?: string })?.message,
-        "Couldn't submit your application. Please try again.",
-      );
+      const msg = humanizeApiError((err as { message?: string })?.message, "Couldn't submit your application. Please try again.");
       setError(msg);
       return false;
     }

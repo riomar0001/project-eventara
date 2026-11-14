@@ -66,10 +66,10 @@ export function useVolunteerApplications(pageSize = 20) {
             page,
             page_size: pageSize,
             ...(statusFilter !== null ? { status: statusFilter } : {}),
-            ...(debouncedSearch ? { search: debouncedSearch } : {}),
+            ...(debouncedSearch ? { search: debouncedSearch } : {})
           },
           headers: getAuthHeaders(),
-          throwOnError: false,
+          throwOnError: false
         });
 
         if (!result.data) throw result.error ?? new Error('Unable to load applications.');
@@ -111,6 +111,6 @@ export function useVolunteerApplications(pageSize = 20) {
     setPage,
     setStatusFilter,
     setSearch,
-    refetch: () => setRefreshKey((k) => k + 1),
+    refetch: () => setRefreshKey((k) => k + 1)
   };
 }

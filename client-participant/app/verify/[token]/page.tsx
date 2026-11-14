@@ -1,11 +1,11 @@
 'use client';
 
 import { use, useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { CheckCircle2, XCircle, Loader2 } from 'lucide-react';
-import { Auth } from '@/api/sdk.gen';
-import { MeshBg } from '@/components/shared/mesh-bg';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { MeshBg } from '@/components/shared/mesh-bg';
+import { Auth } from '@/api/sdk.gen';
 
 type Status = 'loading' | 'success' | 'error';
 
@@ -71,10 +71,7 @@ export default function VerifyEmailPage({ params }: { params: Promise<{ token: s
                 >
                   Resend verification email
                 </Link>
-                <Link
-                  href="/login"
-                  className="text-muted-foreground text-[13.5px] font-semibold transition-colors hover:underline"
-                >
+                <Link href="/login" className="text-muted-foreground text-[13.5px] font-semibold transition-colors hover:underline">
                   Back to sign in
                 </Link>
               </div>

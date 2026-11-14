@@ -2,10 +2,10 @@
 
 import { Calendar, Settings, Loader2, Users } from 'lucide-react';
 import Link from 'next/link';
-import { useAuthStore } from '@/store/auth-store';
-import { useUserDetails } from '@/hooks/profile/use-user-details';
 import { useAttendedEvents, type MyEventRecord } from '@/hooks/profile/use-attended-events';
+import { useUserDetails } from '@/hooks/profile/use-user-details';
 import { useMyVolunteerStatus } from '@/hooks/use-my-volunteer-status';
+import { useAuthStore } from '@/store/auth-store';
 
 function EventCard({ event }: { event: MyEventRecord }) {
   const eventDate = new Date(event.event_start_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
@@ -134,7 +134,7 @@ export function ProfileView() {
           </div>
 
           {volunteerLoading ? (
-            <div className="h-8 animate-pulse rounded-lg bg-primary/10" />
+            <div className="bg-primary/10 h-8 animate-pulse rounded-lg" />
           ) : myApplication === null || myApplication.status === 'withdrawn' ? (
             <>
               <p className="text-muted-foreground text-[12.5px] leading-relaxed">

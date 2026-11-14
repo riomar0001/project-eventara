@@ -17,11 +17,7 @@ export default function Page() {
       <Navbar />
       <HeroSection />
       <LiveEventCard liveEvent={data?.live_event ?? null} loading={loading} />
-      <EventsSection
-        events={data?.events ?? []}
-        eventsType={data?.events_type ?? 'upcoming'}
-        loading={loading}
-      />
+      <EventsSection events={data?.events ?? []} eventsType={data?.events_type ?? 'upcoming'} loading={loading} />
       <CTABanner />
       <Footer />
       <TweaksPanel />

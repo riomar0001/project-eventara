@@ -41,14 +41,16 @@ export function useRegisterForm() {
       body: {
         email: form.email,
         password: form.password,
-        accepted_terms_and_privacy_policy: true,
-      },
+        accepted_terms_and_privacy_policy: true
+      }
     });
 
     setLoading(false);
 
     if (apiError) {
-      setErrors({ email: humanizeApiError((apiError as { message?: string } | null)?.message, "Couldn't create your account. This email may already be registered.") });
+      setErrors({
+        email: humanizeApiError((apiError as { message?: string } | null)?.message, "Couldn't create your account. This email may already be registered.")
+      });
       return;
     }
 

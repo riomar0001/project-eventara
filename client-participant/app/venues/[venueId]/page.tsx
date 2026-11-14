@@ -168,32 +168,32 @@ export default function VenueDetailPage() {
               </div>
 
               <div className="relative aspect-video max-h-120 w-full overflow-hidden rounded-2xl bg-linear-to-br from-[oklch(0.18_0.01_150)] to-[oklch(0.12_0.008_150)] md:rounded-3xl">
-                  {venue.image_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={venue.image_url} alt={venue.name} className="absolute inset-0 h-full w-full object-cover" />
-                  ) : (
-                    <>
-                      <div
-                        className="absolute inset-0"
-                        style={{ backgroundImage: `repeating-linear-gradient(${venue.angle}, transparent 0 22px, oklch(1 0 0 / 0.03) 22px 24px)` }}
-                      />
-                      <div
-                        className={`absolute top-[20%] left-[15%] h-95 w-95 rounded-full blur-[60px] ${venue.orb === 'lime' ? 'bg-lime opacity-25' : 'bg-amber opacity-30'}`}
-                      />
-                    </>
-                  )}
-                  <div className="absolute inset-0 bg-[linear-gradient(180deg,oklch(0_0_0_/_0.1)_0%,oklch(0_0_0_/_0.3)_100%)]" />
+                {venue.image_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={venue.image_url} alt={venue.name} className="absolute inset-0 h-full w-full object-cover" />
+                ) : (
+                  <>
+                    <div
+                      className="absolute inset-0"
+                      style={{ backgroundImage: `repeating-linear-gradient(${venue.angle}, transparent 0 22px, oklch(1 0 0 / 0.03) 22px 24px)` }}
+                    />
+                    <div
+                      className={`absolute top-[20%] left-[15%] h-95 w-95 rounded-full blur-[60px] ${venue.orb === 'lime' ? 'bg-lime opacity-25' : 'bg-amber opacity-30'}`}
+                    />
+                  </>
+                )}
+                <div className="absolute inset-0 bg-[linear-gradient(180deg,oklch(0_0_0_/_0.1)_0%,oklch(0_0_0_/_0.3)_100%)]" />
 
-                  {/* Average rating */}
-                  {!rating.loadingAverage && rating.count > 0 && rating.average !== null && (
-                    <div className="absolute top-4 right-4 flex items-center gap-1.5 rounded-full border border-[oklch(1_0_0_/_0.15)] bg-black/60 px-3 py-1.5 backdrop-blur-[8px]">
-                      <Star size={13} className="fill-amber-400 text-amber-400" />
-                      <span className="font-mono text-[13px] font-semibold text-white">{rating.average.toFixed(1)}</span>
-                      <span className="font-mono text-[11px] text-white/50">({rating.count})</span>
-                    </div>
-                  )}
-                </div>
+                {/* Average rating */}
+                {!rating.loadingAverage && rating.count > 0 && rating.average !== null && (
+                  <div className="absolute top-4 right-4 flex items-center gap-1.5 rounded-full border border-[oklch(1_0_0_/_0.15)] bg-black/60 px-3 py-1.5 backdrop-blur-[8px]">
+                    <Star size={13} className="fill-amber-400 text-amber-400" />
+                    <span className="font-mono text-[13px] font-semibold text-white">{rating.average.toFixed(1)}</span>
+                    <span className="font-mono text-[11px] text-white/50">({rating.count})</span>
+                  </div>
+                )}
               </div>
+            </div>
             {/* Name + description card */}
             <div className="border-line-soft bg-surface rounded-xl border p-5">
               <div className="mb-2 flex flex-wrap items-center gap-2">

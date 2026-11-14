@@ -13,7 +13,7 @@ export function useVolunteerRoleList() {
     Volunteers.getAllVolunteerRolesVolunteerRolesGet({
       query: { is_active: true, page_size: 100 },
       headers: getAuthHeaders(),
-      throwOnError: false,
+      throwOnError: false
     }).then(({ data }) => {
       if (!data) return;
       const payload = data as { data?: { roles?: VolunteerRoleOption[] } };

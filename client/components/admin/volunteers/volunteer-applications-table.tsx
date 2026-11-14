@@ -8,19 +8,12 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import type { ApplicationRecord } from '@/hooks/admin/volunteers/use-volunteer-applications';
 import { Volunteers } from '@/api/sdk.gen';
 import { getApiErrorMessage, getAuthHeaders } from '@/lib/system/api-request';
-import type { ApplicationRecord } from '@/hooks/admin/volunteers/use-volunteer-applications';
 import { cn } from '@/lib/utils';
 
 const STATUS_OPTIONS = [
@@ -28,14 +21,14 @@ const STATUS_OPTIONS = [
   { label: 'Pending', value: 'pending' },
   { label: 'Approved', value: 'approved' },
   { label: 'Rejected', value: 'rejected' },
-  { label: 'Withdrawn', value: 'withdrawn' },
+  { label: 'Withdrawn', value: 'withdrawn' }
 ];
 
 const statusStyles: Record<ApplicationRecord['status'], string> = {
   pending: 'bg-amber-100 text-amber-800',
   approved: 'bg-emerald-100 text-emerald-800',
   rejected: 'bg-red-100 text-red-800',
-  withdrawn: 'bg-neutral-100 text-neutral-600',
+  withdrawn: 'bg-neutral-100 text-neutral-600'
 };
 
 function getInitials(name: string | undefined) {
@@ -80,11 +73,9 @@ function ReviewDialog({ application, open, action, volunteerRoles, onClose, onDo
     try {
       const result = await Volunteers.reviewApplicationVolunteerApplicationsApplicationIdReviewPatch({
         path: { application_id: app.id },
-        body: isApprove
-          ? { status: 'approved', contact_phone: contactPhone, volunteer_role_id: roleId }
-          : { status: 'rejected' },
+        body: isApprove ? { status: 'approved', contact_phone: contactPhone, volunteer_role_id: roleId } : { status: 'rejected' },
         headers: getAuthHeaders(),
-        throwOnError: false,
+        throwOnError: false
       });
       if (!result.data) throw result.error ?? new Error('Review failed.');
       setContactPhone('');
@@ -100,20 +91,29 @@ function ReviewDialog({ application, open, action, volunteerRoles, onClose, onDo
   const applicantName = [app.first_name, app.last_name].filter(Boolean).join(' ') || app.alias || 'this applicant';
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
+    <Dialog
+      open={open}
+      onOpenChange={(v) => {
+        if (!v) onClose();
+      }}
+    >
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            {isApprove
-              ? <><CheckCircle2 className="size-5 text-emerald-600" /> Approve application</>
-              : <><XCircle className="size-5 text-red-500" /> Reject application</>
-            }
+            {isApprove ? (
+              <>
+                <CheckCircle2 className="size-5 text-emerald-600" /> Approve application
+              </>
+            ) : (
+              <>
+                <XCircle className="size-5 text-red-500" /> Reject application
+              </>
+            )}
           </DialogTitle>
           <DialogDescription>
             {isApprove
               ? `You are approving ${applicantName}'s volunteer application. Provide a contact phone and assign a role to create their volunteer profile.`
-              : `You are rejecting ${applicantName}'s application. This action cannot be undone.`
-            }
+              : `You are rejecting ${applicantName}'s application. This action cannot be undone.`}
           </DialogDescription>
         </DialogHeader>
 
@@ -121,7 +121,9 @@ function ReviewDialog({ application, open, action, volunteerRoles, onClose, onDo
           {isApprove && (
             <>
               <div className="space-y-1.5">
-                <label htmlFor="contact_phone" className="text-sm font-medium text-neutral-700">Contact phone <span className="text-red-500">*</span></label>
+                <label htmlFor="contact_phone" className="text-sm font-medium text-neutral-700">
+                  Contact phone <span className="text-red-500">*</span>
+                </label>
                 <input
                   id="contact_phone"
                   type="tel"
@@ -134,14 +136,18 @@ function ReviewDialog({ application, open, action, volunteerRoles, onClose, onDo
               </div>
 
               <div className="space-y-1.5">
-                <label htmlFor="volunteer_role" className="text-sm font-medium text-neutral-700">Volunteer role <span className="text-red-500">*</span></label>
+                <label htmlFor="volunteer_role" className="text-sm font-medium text-neutral-700">
+                  Volunteer role <span className="text-red-500">*</span>
+                </label>
                 <Select value={roleId} onValueChange={setRoleId} required>
                   <SelectTrigger id="volunteer_role">
                     <SelectValue placeholder="Select a role…" />
                   </SelectTrigger>
                   <SelectContent>
                     {volunteerRoles.map((r) => (
-                      <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
+                      <SelectItem key={r.id} value={r.id}>
+                        {r.name}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -158,7 +164,7 @@ function ReviewDialog({ application, open, action, volunteerRoles, onClose, onDo
             <Button
               type="submit"
               disabled={submitting || (isApprove && (!contactPhone.trim() || !roleId))}
-              className={isApprove ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-red-600 hover:bg-red-700 text-white'}
+              className={isApprove ? 'bg-emerald-600 text-white hover:bg-emerald-700' : 'bg-red-600 text-white hover:bg-red-700'}
             >
               {submitting && <Loader2 className="size-4 animate-spin" />}
               {isApprove ? 'Approve & create volunteer' : 'Confirm rejection'}
@@ -183,7 +189,12 @@ function ApplicationDetailModal({ application, open, onClose }: ApplicationDetai
   const app = application;
   const name = [app.first_name, app.last_name].filter(Boolean).join(' ') || app.alias || '—';
   return (
-    <Dialog open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
+    <Dialog
+      open={open}
+      onOpenChange={(v) => {
+        if (!v) onClose();
+      }}
+    >
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -236,7 +247,9 @@ function ApplicationDetailModal({ application, open, onClose }: ApplicationDetai
           )}
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Close</Button>
+          <Button variant="outline" onClick={onClose}>
+            Close
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -258,10 +271,15 @@ function ApplicationActions({ record, onApprove, onReject, onView }: TableAction
       </Button>
       {record.status === 'pending' && (
         <>
-          <Button size="sm" variant="outline" onClick={() => onApprove(record)} className="h-7 border-emerald-200 text-emerald-700 hover:bg-emerald-50 hover:border-emerald-300">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => onApprove(record)}
+            className="h-7 border-emerald-200 text-emerald-700 hover:border-emerald-300 hover:bg-emerald-50"
+          >
             <CheckCircle2 className="size-3.5" /> Approve
           </Button>
-          <Button size="sm" variant="outline" onClick={() => onReject(record)} className="h-7 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300">
+          <Button size="sm" variant="outline" onClick={() => onReject(record)} className="h-7 border-red-200 text-red-600 hover:border-red-300 hover:bg-red-50">
             <XCircle className="size-3.5" /> Reject
           </Button>
         </>
@@ -273,7 +291,7 @@ function ApplicationActions({ record, onApprove, onReject, onView }: TableAction
 function buildColumns(
   onApprove: (r: ApplicationRecord) => void,
   onReject: (r: ApplicationRecord) => void,
-  onView: (r: ApplicationRecord) => void,
+  onView: (r: ApplicationRecord) => void
 ): ColumnDef<ApplicationRecord>[] {
   return [
     {
@@ -282,7 +300,15 @@ function buildColumns(
       cell: ({ row }) => {
         const { first_name, last_name, alias, email } = row.original;
         const name = [first_name, last_name].filter(Boolean).join(' ') || alias || '—';
-        const initials = name !== '—' ? name.split(' ').map((p: string) => p[0]).join('').slice(0, 2).toUpperCase() : '??';
+        const initials =
+          name !== '—'
+            ? name
+                .split(' ')
+                .map((p: string) => p[0])
+                .join('')
+                .slice(0, 2)
+                .toUpperCase()
+            : '??';
         return (
           <div className="flex items-center gap-3">
             <Avatar size="lg">
@@ -295,42 +321,34 @@ function buildColumns(
           </div>
         );
       },
-      meta: { headerClassName: 'pl-6', cellClassName: 'pl-6' },
+      meta: { headerClassName: 'pl-6', cellClassName: 'pl-6' }
     },
     {
       id: 'preferred_role',
       header: 'Preferred Role',
-      cell: ({ row }) => (
-        <span className="text-sm text-neutral-700">{row.original.application_data?.preferred_role ?? '—'}</span>
-      ),
+      cell: ({ row }) => <span className="text-sm text-neutral-700">{row.original.application_data?.preferred_role ?? '—'}</span>
     },
     {
       id: 'availability',
       header: 'Availability',
-      cell: ({ row }) => (
-        <span className="text-sm text-neutral-600">{row.original.application_data?.availability ?? '—'}</span>
-      ),
+      cell: ({ row }) => <span className="text-sm text-neutral-600">{row.original.application_data?.availability ?? '—'}</span>
     },
     {
       id: 'status',
       header: 'Status',
-      cell: ({ row }) => (
-        <Badge className={cn('capitalize', statusStyles[row.original.status])}>
-          {row.original.status}
-        </Badge>
-      ),
+      cell: ({ row }) => <Badge className={cn('capitalize', statusStyles[row.original.status])}>{row.original.status}</Badge>
     },
     {
       id: 'submitted',
       header: 'Submitted',
-      cell: ({ row }) => <span className="text-sm text-neutral-500">{formatDate(row.original.created_at)}</span>,
+      cell: ({ row }) => <span className="text-sm text-neutral-500">{formatDate(row.original.created_at)}</span>
     },
     {
       id: 'actions',
       header: '',
       cell: ({ row }) => <ApplicationActions record={row.original} onApprove={onApprove} onReject={onReject} onView={onView} />,
-      meta: { cellClassName: 'pr-6' },
-    },
+      meta: { cellClassName: 'pr-6' }
+    }
   ];
 }
 
@@ -363,18 +381,34 @@ export function VolunteerApplicationsTable({
   onPageChange,
   onStatusFilterChange,
   onSearchChange,
-  onRefetch,
+  onRefetch
 }: VolunteerApplicationsTableProps) {
   const [reviewTarget, setReviewTarget] = useState<ApplicationRecord | null>(null);
   const [reviewAction, setReviewAction] = useState<'approve' | 'reject' | null>(null);
   const [detailTarget, setDetailTarget] = useState<ApplicationRecord | null>(null);
 
-  function openApprove(r: ApplicationRecord) { setReviewTarget(r); setReviewAction('approve'); }
-  function openReject(r: ApplicationRecord) { setReviewTarget(r); setReviewAction('reject'); }
-  function closeDialog() { setReviewTarget(null); setReviewAction(null); }
-  function handleDone() { closeDialog(); onRefetch(); }
-  function openDetail(r: ApplicationRecord) { setDetailTarget(r); }
-  function closeDetail() { setDetailTarget(null); }
+  function openApprove(r: ApplicationRecord) {
+    setReviewTarget(r);
+    setReviewAction('approve');
+  }
+  function openReject(r: ApplicationRecord) {
+    setReviewTarget(r);
+    setReviewAction('reject');
+  }
+  function closeDialog() {
+    setReviewTarget(null);
+    setReviewAction(null);
+  }
+  function handleDone() {
+    closeDialog();
+    onRefetch();
+  }
+  function openDetail(r: ApplicationRecord) {
+    setDetailTarget(r);
+  }
+  function closeDetail() {
+    setDetailTarget(null);
+  }
 
   const columns = buildColumns(openApprove, openReject, openDetail);
 
@@ -398,19 +432,18 @@ export function VolunteerApplicationsTable({
                 value={search}
                 onChange={(e) => onSearchChange(e.target.value)}
                 placeholder="Search by name, email…"
-                className="h-9 w-full rounded-md border border-neutral-200 bg-transparent pl-8 pr-3 text-sm shadow-sm transition-colors placeholder:text-neutral-400 focus:border-neutral-400 focus:outline-none sm:w-56"
+                className="h-9 w-full rounded-md border border-neutral-200 bg-transparent pr-3 pl-8 text-sm shadow-sm transition-colors placeholder:text-neutral-400 focus:border-neutral-400 focus:outline-none sm:w-56"
               />
             </div>
-            <Select
-              value={statusFilter ?? 'all'}
-              onValueChange={(v) => onStatusFilterChange(v === 'all' ? null : (v as ApplicationRecord['status']))}
-            >
+            <Select value={statusFilter ?? 'all'} onValueChange={(v) => onStatusFilterChange(v === 'all' ? null : (v as ApplicationRecord['status']))}>
               <SelectTrigger className="w-full sm:w-44">
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent>
                 {STATUS_OPTIONS.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -503,11 +536,7 @@ export function VolunteerApplicationsTable({
         onDone={handleDone}
       />
 
-      <ApplicationDetailModal
-        application={detailTarget}
-        open={detailTarget !== null}
-        onClose={closeDetail}
-      />
+      <ApplicationDetailModal application={detailTarget} open={detailTarget !== null} onClose={closeDetail} />
     </>
   );
 }

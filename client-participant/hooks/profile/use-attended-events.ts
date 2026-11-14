@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useAuthStore } from '@/store/auth-store';
 import { AccountSettings } from '@/api/sdk.gen';
 import type { AttendedEventResponse } from '@/api/types.gen';
 import { humanizeApiError } from '@/lib/api-error';
+import { useAuthStore } from '@/store/auth-store';
 
 export type MyEventRecord = AttendedEventResponse;
 
@@ -28,15 +28,10 @@ export function useAttendedEvents(limit = 50): UseAttendedEventsReturn {
 
     AccountSettings.getMyEventsUserProfileMyEventsGet({
       query: { limit },
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization: `Bearer ${token}` }
     }).then(({ data, error: apiError }) => {
       if (apiError || !data) {
-        setError(
-          humanizeApiError(
-            (apiError as { message?: string } | null)?.message,
-            'Unable to load your events. Please try refreshing.',
-          ),
-        );
+        setError(humanizeApiError((apiError as { message?: string } | null)?.message, 'Unable to load your events. Please try refreshing.'));
       } else {
         setEvents(data.data);
       }

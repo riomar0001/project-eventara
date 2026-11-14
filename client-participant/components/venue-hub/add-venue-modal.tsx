@@ -2,12 +2,12 @@
 
 import { useState } from 'react';
 import { Icon } from '@/components/ui/icon';
+import type { Amenity } from '@/types/venue';
 import { ModalBackdrop } from './modal-backdrop';
 import { AMENITY_OPTIONS } from '@/constants/amenities';
 import { VENUE_TYPES } from '@/constants/venue-types';
 import { validateAddVenueForm } from '@/lib/validators';
 import type { AddVenueFormData } from '@/types';
-import type { Amenity } from '@/types/venue';
 
 interface AddVenueModalProps {
   isOpen: boolean;
@@ -26,7 +26,7 @@ const INITIAL: AddVenueFormData = {
   amenities: [],
   description: '',
   contact_name: '',
-  contact_email: '',
+  contact_email: ''
 };
 
 const inputCls =
@@ -40,22 +40,27 @@ export function AddVenueModal({ isOpen, onClose, onSubmit, submitting = false }:
 
   function setField<K extends keyof AddVenueFormData>(key: K, value: AddVenueFormData[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
-    setErrors((prev) => { const n = { ...prev }; delete n[key]; return n; });
+    setErrors((prev) => {
+      const n = { ...prev };
+      delete n[key];
+      return n;
+    });
   }
 
   function toggleAmenity(amenity: Amenity) {
     setForm((prev) => ({
       ...prev,
-      amenities: prev.amenities.includes(amenity)
-        ? prev.amenities.filter((a) => a !== amenity)
-        : [...prev.amenities, amenity],
+      amenities: prev.amenities.includes(amenity) ? prev.amenities.filter((a) => a !== amenity) : [...prev.amenities, amenity]
     }));
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const errs = validateAddVenueForm(form);
-    if (Object.keys(errs).length > 0) { setErrors(errs); return; }
+    if (Object.keys(errs).length > 0) {
+      setErrors(errs);
+      return;
+    }
     await onSubmit(form);
     setForm(INITIAL);
     setErrors({});
@@ -113,13 +118,7 @@ export function AddVenueModal({ isOpen, onClose, onSubmit, submitting = false }:
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className={labelCls}>City *</label>
-              <input
-                type="text"
-                value={form.city}
-                onChange={(e) => setField('city', e.target.value)}
-                className={inputCls}
-                placeholder="Davao City"
-              />
+              <input type="text" value={form.city} onChange={(e) => setField('city', e.target.value)} className={inputCls} placeholder="Davao City" />
               {errors.city && <p className={errorCls}>{errors.city}</p>}
             </div>
             <div>
@@ -151,13 +150,11 @@ export function AddVenueModal({ isOpen, onClose, onSubmit, submitting = false }:
             </div>
             <div>
               <label className={labelCls}>Type *</label>
-              <select
-                value={form.venue_type}
-                onChange={(e) => setField('venue_type', e.target.value as AddVenueFormData['venue_type'])}
-                className={inputCls}
-              >
+              <select value={form.venue_type} onChange={(e) => setField('venue_type', e.target.value as AddVenueFormData['venue_type'])} className={inputCls}>
                 {VENUE_TYPES.map((t) => (
-                  <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>
+                  <option key={t} value={t}>
+                    {t.charAt(0).toUpperCase() + t.slice(1)}
+                  </option>
                 ))}
               </select>
               {errors.venue_type && <p className={errorCls}>{errors.venue_type}</p>}
@@ -198,7 +195,7 @@ export function AddVenueModal({ isOpen, onClose, onSubmit, submitting = false }:
           </div>
 
           {/* Contact info */}
-          <div className="border-line-soft rounded-xl border p-4 space-y-3">
+          <div className="border-line-soft space-y-3 rounded-xl border p-4">
             <p className="text-text-mute font-mono text-[10px] tracking-[0.14em] uppercase">Contact info (optional)</p>
             <div>
               <label className={labelCls}>Contact name</label>
@@ -239,7 +236,7 @@ export function AddVenueModal({ isOpen, onClose, onSubmit, submitting = false }:
             form=""
             onClick={handleSubmit}
             disabled={submitting}
-            className="bg-lime flex-1 rounded-full px-4 py-2.5 text-sm font-semibold text-white shadow-[0_8px_28px_-10px_var(--lime-glow),inset_0_-1px_0_oklch(0.7_0.2_128)] transition-all hover:-translate-y-0.5 hover:shadow-[0_14px_40px_-10px_var(--lime-glow)] disabled:opacity-50 disabled:translate-y-0"
+            className="bg-lime flex-1 rounded-full px-4 py-2.5 text-sm font-semibold text-white shadow-[0_8px_28px_-10px_var(--lime-glow),inset_0_-1px_0_oklch(0.7_0.2_128)] transition-all hover:-translate-y-0.5 hover:shadow-[0_14px_40px_-10px_var(--lime-glow)] disabled:translate-y-0 disabled:opacity-50"
           >
             {submitting ? 'Submitting…' : 'Submit venue'}
           </button>

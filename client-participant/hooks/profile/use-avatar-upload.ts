@@ -2,9 +2,9 @@
 
 import { useRef, useState } from 'react';
 import { AccountSettings } from '@/api/sdk.gen';
-import { useAuthStore } from '@/store/auth-store';
-import { decodeTokenUser } from '@/lib/auth/token';
 import { humanizeApiError } from '@/lib/api-error';
+import { decodeTokenUser } from '@/lib/auth/token';
+import { useAuthStore } from '@/store/auth-store';
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 const MAX_BYTES = 2 * 1024 * 1024;
@@ -38,7 +38,7 @@ export function useAvatarUpload() {
     try {
       const { data, error: apiError } = await AccountSettings.uploadProfileAvatarUserProfileAvatarPatch({
         body: { content_type: file.type },
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token}` }
       });
 
       if (apiError || !data) {
@@ -49,7 +49,7 @@ export function useAvatarUpload() {
       const uploadResp = await fetch(data.upload.upload_url, {
         method: 'PUT',
         headers: { 'Content-Type': file.type },
-        body: file,
+        body: file
       });
 
       if (!uploadResp.ok) {
@@ -64,7 +64,7 @@ export function useAvatarUpload() {
           store.setAuth(data.access_token, store.refreshToken, {
             ...store.user,
             ...freshUser,
-            image: data.data.profile_picture_url,
+            image: data.data.profile_picture_url
           });
         }
       }

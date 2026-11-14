@@ -85,7 +85,7 @@ export function useVerifyOtp() {
     }
 
     const { data, error: apiError } = await Auth.loginVerifyAuthLoginVerifyPost({
-      body: { token: verificationToken, code },
+      body: { token: verificationToken, code }
     });
 
     setLoading(false);

@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react';
 import { X, QrCode, Loader2, AlertCircle } from 'lucide-react';
 import QRCode from 'react-qr-code';
-import { useAuthStore } from '@/store/auth-store';
 import { humanizeApiError } from '@/lib/api-error';
+import { useAuthStore } from '@/store/auth-store';
 
 interface SessionQrModalProps {
   eventId: string;
@@ -22,7 +22,7 @@ export function SessionQrModal({ eventId, sessionId, sessionTitle, onClose }: Se
   useEffect(() => {
     if (!token) return;
     fetch(`/api/events/${eventId}/session/${sessionId}/my-qr`, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization: `Bearer ${token}` }
     })
       .then((r) => r.json())
       .then((json) => {
@@ -34,19 +34,10 @@ export function SessionQrModal({ eventId, sessionId, sessionTitle, onClose }: Se
   }, [token, eventId, sessionId]);
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      onClick={onClose}
-    >
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-background/80 absolute inset-0 backdrop-blur-sm" />
-      <div
-        className="border-border bg-card relative w-full max-w-sm rounded-3xl border p-6 shadow-2xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <button
-          onClick={onClose}
-          className="text-muted-foreground hover:text-foreground absolute right-4 top-4 rounded-full p-1.5 transition-colors"
-        >
+      <div className="border-border bg-card relative w-full max-w-sm rounded-3xl border p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+        <button onClick={onClose} className="text-muted-foreground hover:text-foreground absolute top-4 right-4 rounded-full p-1.5 transition-colors">
           <X size={16} />
         </button>
 
@@ -75,12 +66,10 @@ export function SessionQrModal({ eventId, sessionId, sessionTitle, onClose }: Se
 
         {qrToken && !loading && (
           <>
-            <div className="bg-white mx-auto flex items-center justify-center rounded-2xl p-4">
+            <div className="mx-auto flex items-center justify-center rounded-2xl bg-white p-4">
               <QRCode value={qrToken} size={220} level="L" />
             </div>
-            <p className="text-muted-foreground mt-4 text-center text-[12px] leading-relaxed">
-              Present this code at the venue entrance to check in.
-            </p>
+            <p className="text-muted-foreground mt-4 text-center text-[12px] leading-relaxed">Present this code at the venue entrance to check in.</p>
           </>
         )}
       </div>

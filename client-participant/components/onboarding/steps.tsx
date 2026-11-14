@@ -158,7 +158,9 @@ export function StepReview({ form, goToStep }: ReviewProps) {
           ].map(({ label, value }) => (
             <div key={label} className="flex items-center gap-2 text-[13px]">
               <span className="text-muted-foreground w-24 shrink-0">{label}</span>
-              <span className={value ? 'text-foreground capitalize' : 'text-muted-foreground'}>{value ? value.replace(/_/g, ' ') : <em className="not-italic opacity-50">Not set</em>}</span>
+              <span className={value ? 'text-foreground capitalize' : 'text-muted-foreground'}>
+                {value ? value.replace(/_/g, ' ') : <em className="not-italic opacity-50">Not set</em>}
+              </span>
             </div>
           ))}
           {form.bio && (

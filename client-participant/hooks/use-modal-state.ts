@@ -1,5 +1,4 @@
 import { useCallback, useState } from 'react';
-
 import type { HomeEventRecord } from './events/use-home-events';
 
 export type { HomeEventRecord as UpcomingEvent };

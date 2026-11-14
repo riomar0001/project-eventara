@@ -1,10 +1,10 @@
 'use client';
 
 import { Loader2, RotateCcw, Save } from 'lucide-react';
-import { useProfileForm } from '@/hooks/profile/use-profile-form';
 import { useAvatarUpload } from '@/hooks/profile/use-avatar-upload';
-import { useAuthStore } from '@/store/auth-store';
+import { useProfileForm } from '@/hooks/profile/use-profile-form';
 import { AGE_GROUP_OPTIONS, GENDER_OPTIONS, EDUCATION_LEVEL_OPTIONS } from '@/constants/profile';
+import { useAuthStore } from '@/store/auth-store';
 
 const INPUT =
   'w-full rounded-xl border border-border bg-background px-4 py-3 text-foreground placeholder-muted-foreground transition-all focus:border-primary focus:ring-2 focus:ring-primary/10 focus:outline-none';
@@ -33,13 +33,7 @@ export function ProfileForm() {
             <p className="text-muted-foreground mt-0.5 text-xs">JPG, PNG, WebP, or GIF · max 2 MB</p>
             {uploadError && <p className="mt-1 text-xs text-red-500">{uploadError}</p>}
           </div>
-          <input
-            ref={inputRef}
-            type="file"
-            accept="image/jpeg,image/png,image/webp,image/gif"
-            className="hidden"
-            onChange={handleFileChange}
-          />
+          <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" className="hidden" onChange={handleFileChange} />
           <button
             type="button"
             disabled={uploading}

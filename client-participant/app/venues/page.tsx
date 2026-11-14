@@ -25,7 +25,7 @@ export default function VenuesPage() {
       modals.showToast('Venue updated successfully.');
       router.replace('/venues');
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Partner venues state
@@ -48,19 +48,23 @@ export default function VenuesPage() {
     return () => clearTimeout(t);
   }, [communitySearch]);
 
-  useEffect(() => { setPartnerPage(1); }, [partnerDebouncedSearch]);
-  useEffect(() => { setCommunityPage(1); }, [communityDebouncedSearch]);
+  useEffect(() => {
+    setPartnerPage(1);
+  }, [partnerDebouncedSearch]);
+  useEffect(() => {
+    setCommunityPage(1);
+  }, [communityDebouncedSearch]);
 
   const {
     venues: partnerVenues,
     pagination: partnerPagination,
-    loading: partnerLoading,
+    loading: partnerLoading
   } = useVenues({ hub: 'community', search: partnerDebouncedSearch, page: partnerPage, pageSize: PER_PAGE });
 
   const {
     venues: communityVenues,
     pagination: communityPagination,
-    loading: communityLoading,
+    loading: communityLoading
   } = useVenues({ hub: 'contribute', search: communityDebouncedSearch, page: communityPage, pageSize: PER_PAGE });
 
   function goContribute() {
@@ -126,18 +130,10 @@ export default function VenuesPage() {
 
         <main className="px-4 pb-8 md:px-8">
           <div className="mx-auto max-w-[1240px]">
-            <VenueGrid
-              venues={partnerVenues}
-              loading={partnerLoading}
-              perPage={PER_PAGE}
-            />
+            <VenueGrid venues={partnerVenues} loading={partnerLoading} perPage={PER_PAGE} />
             {!partnerLoading && (partnerPagination?.total_pages ?? 0) > 1 && (
               <div className="mt-8">
-                <Pagination
-                  currentPage={partnerPage}
-                  totalPages={partnerPagination!.total_pages}
-                  onPageChange={setPartnerPage}
-                />
+                <Pagination currentPage={partnerPage} totalPages={partnerPagination!.total_pages} onPageChange={setPartnerPage} />
               </div>
             )}
           </div>
@@ -150,7 +146,7 @@ export default function VenuesPage() {
 
         {/* ── Community Suggestions ── */}
         <div className="px-4 md:px-8">
-          <div className="mx-auto max-w-[1240px] mb-8">
+          <div className="mx-auto mb-8 max-w-[1240px]">
             <ContributionBanner onAddVenue={goContribute} />
           </div>
           <div className="mx-auto max-w-[1240px]">
@@ -181,18 +177,10 @@ export default function VenuesPage() {
 
         <main className="px-4 pb-20 md:px-8">
           <div className="mx-auto max-w-[1240px]">
-            <VenueGrid
-              venues={communityVenues}
-              loading={communityLoading}
-              perPage={PER_PAGE}
-            />
+            <VenueGrid venues={communityVenues} loading={communityLoading} perPage={PER_PAGE} />
             {!communityLoading && (communityPagination?.total_pages ?? 0) > 1 && (
               <div className="mt-8">
-                <Pagination
-                  currentPage={communityPage}
-                  totalPages={communityPagination!.total_pages}
-                  onPageChange={setCommunityPage}
-                />
+                <Pagination currentPage={communityPage} totalPages={communityPagination!.total_pages} onPageChange={setCommunityPage} />
               </div>
             )}
           </div>

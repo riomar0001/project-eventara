@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { AccountSettings } from '@/api/sdk.gen';
-import { humanizeApiError } from '@/lib/api-error';
 import type { AgeGroup, Gender, EducationLevel } from '@/api/types.gen';
+import { humanizeApiError } from '@/lib/api-error';
 import { decodeTokenUser } from '@/lib/auth/token';
 import { useAuthStore } from '@/store/auth-store';
 
@@ -27,7 +27,7 @@ function formFromUser(user: ReturnType<typeof useAuthStore.getState>['user']): P
     ageGroup: user?.ageGroup ?? '',
     gender: user?.gender ?? '',
     education: user?.educationLevel ?? '',
-    bio: user?.bio ?? '',
+    bio: user?.bio ?? ''
   };
 }
 
@@ -68,8 +68,8 @@ export function useProfileForm() {
         gender: form.gender as Gender,
         education_level: form.education as EducationLevel,
         occupation: form.occupation || null,
-        bio: form.bio || null,
-      },
+        bio: form.bio || null
+      }
     });
 
     setSaving(false);

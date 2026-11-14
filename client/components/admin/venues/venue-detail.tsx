@@ -114,7 +114,9 @@ export function VenueDetail({ venueId }: { venueId: string }) {
             </Link>
           </Button>
         ) : null}
-        {showDeleteVenue ? <DeleteVenueButton suggestedVenue={!canDeleteVenue && !isPrivilegedRole && canManageOwnSuggestion} venueId={venue.id} venueName={venue.name} /> : null}
+        {showDeleteVenue ? (
+          <DeleteVenueButton suggestedVenue={!canDeleteVenue && !isPrivilegedRole && canManageOwnSuggestion} venueId={venue.id} venueName={venue.name} />
+        ) : null}
       </div>
 
       {/* ── Hero photo panel ─────────────────────────────────────────────────── */}
@@ -198,9 +200,7 @@ export function VenueDetail({ venueId }: { venueId: string }) {
               <VenueFact label="Usage" value={`${venue.usage_count} bookings`} />
               <VenueFact label="Popularity" value={`${venue.popularity_count} interactions`} />
               <VenueFact label="Partner status" value={venue.is_partner ? 'Eventara partner venue' : 'Community suggestion'} />
-              {venue.creator_alias && (
-                <VenueFact label="Added by" value={`@${venue.creator_alias}`} />
-              )}
+              {venue.creator_alias && <VenueFact label="Added by" value={`@${venue.creator_alias}`} />}
               {venue.created_at && (
                 <VenueFact label="Created" value={new Date(venue.created_at).toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' })} />
               )}

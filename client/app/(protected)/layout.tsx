@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { useAuthStore } from '@/store/auth-store';
 import NotFound from './(admin-dashboard)/not-found';
+import { useAuthStore } from '@/store/auth-store';
 
 export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
   const [isChecking, setIsChecking] = useState(true);
