@@ -14,7 +14,7 @@ import { useEventDetail } from '@/hooks/events/use-event-detail';
 
 export default function EventDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const { event, loading, error, totalSlots, seatsFilled, capacityPct, isFull, refetch } = useEventDetail(id);
+  const { event, loading, error, totalSlots, isFull, refetch } = useEventDetail(id);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
 
   if (loading) {

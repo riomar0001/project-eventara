@@ -8,12 +8,10 @@ import { Navbar } from '@/components/navigation/navbar';
 import { ContributeVenueForm } from '@/components/venue-hub/contribute-venue-form';
 import { Venues } from '@/api';
 import type { PublicVenueRecordResponse } from '@/api/types.gen';
-import { useAuthStore } from '@/store/auth-store';
 
 export default function EditVenuePage() {
   const params = useParams<{ venueId: string }>();
   const router = useRouter();
-  const { user } = useAuthStore();
   const [venue, setVenue] = useState<PublicVenueRecordResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

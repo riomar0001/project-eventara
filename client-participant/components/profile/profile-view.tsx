@@ -46,7 +46,7 @@ function EventCard({ event }: { event: MyEventRecord }) {
 
 export function ProfileView() {
   const user = useAuthStore((s) => s.user);
-  const { userDetails, loading } = useUserDetails();
+  const { userDetails } = useUserDetails();
   const { events: attendedEvents, loading: eventsLoading } = useAttendedEvents();
   const { application: myApplication, loading: volunteerLoading } = useMyVolunteerStatus();
 
