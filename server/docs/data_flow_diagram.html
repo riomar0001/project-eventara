@@ -457,12 +457,12 @@ flowchart LR
     <div class="panel" id="accsettings">
       <div class="panel-hdr">
         <h2>Account Settings</h2>
-        <p class="panel-desc">Password changes, self-service account deletion with 30-day grace period, admin-initiated deletion, and the async finalization job.</p>
+        <p class="panel-desc">Password changes, self-service account deletion with 30-day grace period, admin-initiated deletion, and the scheduled finalization sweep.</p>
         <div class="panel-tags">
           <span class="tag tag-pg">users</span>
           <span class="tag tag-pg">user_security</span>
           <span class="tag tag-pg">refresh_tokens</span>
-          <span class="tag tag-redis">Redis: arq:queue</span>
+          <span class="tag tag-redis">SQS: jobs</span>
         </div>
       </div>
       <div class="diagram-card">
@@ -475,14 +475,15 @@ flowchart LR
 
   USER([User])
   ADMIN([Admin])
-  WORKER([Arq Worker])
+  SCHED([EventBridge Scheduler])
+  WORKER([Worker Lambda])
 
   subgraph UCASES[Use Cases]
     direction TB
     CP[change_password]
     RSD[request_self_deletion]
     RAD[request_admin_deletion]
-    FAD[finalize_account_deletion]
+    FAD[finalize_due_account_deletions]
   end
 
   subgraph PGDB[PostgreSQL]
@@ -492,7 +493,7 @@ flowchart LR
     RT[(refresh_tokens)]
   end
 
-  ARQ[(Redis: arq:queue)]
+  SQS[(SQS: jobs)]
 
   USER -->|current_password, new_password| CP
   CP -->|READ| USERS
@@ -503,21 +504,20 @@ flowchart LR
   USER -->|password, reason| RSD
   RSD -->|READ| USERS
   RSD -->|UPDATE deletion_scheduled_for| USERS
-  RSD -->|ENQUEUE finalize_deletion| ARQ
 
   ADMIN -->|target_user_id, reason| RAD
   RAD -->|READ| USERS
   RAD -->|UPDATE deletion_scheduled_for| USERS
-  RAD -->|ENQUEUE finalize_deletion| ARQ
 
-  ARQ -->|dequeue job| WORKER
-  WORKER -->|user_id, scheduled_for| FAD
-  FAD -->|UPDATE status=deleted| USERS
+  SCHED -->|every 5 min| SQS
+  SQS -->|batch| WORKER
+  WORKER --> FAD
+  FAD -->|bulk UPDATE status=deleted where grace period ended| USERS
 
-  class USER,ADMIN,WORKER ext
+  class USER,ADMIN,SCHED,WORKER ext
   class CP,RSD,RAD,FAD proc
   class USERS,US,RT pg
-  class ARQ redis
+  class SQS redis
         </div>
       </div>
     </div>
@@ -901,10 +901,10 @@ flowchart LR
     <div class="panel" id="audit">
       <div class="panel-hdr">
         <h2>Audit Log</h2>
-        <p class="panel-desc">All domain use cases emit audit events. Writes are async-first via Arq (non-blocking), with a synchronous fallback. Reads use cursor-based pagination for stability under concurrent writes.</p>
+        <p class="panel-desc">All domain use cases emit audit events. Writes are async-first via the SQS job queue (non-blocking), with a synchronous fallback. Reads use cursor-based pagination for stability under concurrent writes.</p>
         <div class="panel-tags">
           <span class="tag tag-pg">audit_logs</span>
-          <span class="tag tag-redis">Redis: arq:queue</span>
+          <span class="tag tag-redis">SQS: jobs</span>
         </div>
       </div>
       <div class="diagram-card">
@@ -917,7 +917,7 @@ flowchart LR
 
   DOMAINS([All Domain Use Cases])
   ADMIN([Admin])
-  WORKER([Arq Worker])
+  WORKER([Worker Lambda])
 
   subgraph UCASES[Use Cases]
     direction TB
@@ -926,11 +926,11 @@ flowchart LR
   end
 
   AL[(audit_logs)]
-  ARQ[(Redis: arq:queue)]
+  SQS[(SQS: jobs)]
 
   DOMAINS -->|action_type, resource_type, resource_id, ip, user_agent, old+new values| CAL
-  CAL -->|ENQUEUE persist_audit_log| ARQ
-  ARQ -->|dequeue job| WORKER
+  CAL -->|SEND persist_audit_log| SQS
+  SQS -->|batch| WORKER
   WORKER -->|INSERT| AL
   CAL -.->|sync fallback INSERT| AL
 
@@ -940,7 +940,7 @@ flowchart LR
   class DOMAINS,ADMIN,WORKER ext
   class CAL,GAL proc
   class AL pg
-  class ARQ redis
+  class SQS redis
         </div>
       </div>
     </div>
@@ -949,12 +949,12 @@ flowchart LR
     <div class="panel" id="queue">
       <div class="panel-hdr">
         <h2>Queue Management</h2>
-        <p class="panel-desc">Inspect and manage the Arq Redis queue. Retry uses a distributed SET NX EX lock to prevent concurrent double-enqueue.</p>
+        <p class="panel-desc">Inspect the SQS job queue and manage jobs that exhausted their retries (kept in Redis, since SQS cannot be browsed). Retry uses a SET NX EX lock to prevent concurrent double-enqueue.</p>
         <div class="panel-tags">
-          <span class="tag tag-redis">Redis: arq:queue</span>
-          <span class="tag tag-redis">Redis: arq:in-progress</span>
-          <span class="tag tag-redis">Redis: arq:result</span>
-          <span class="tag tag-redis">Redis: arq:dlq:retry-lock</span>
+          <span class="tag tag-redis">SQS: jobs</span>
+          <span class="tag tag-redis">Redis: jobs:dead</span>
+          <span class="tag tag-redis">Redis: jobs:stats:completed</span>
+          <span class="tag tag-redis">Redis: jobs:dead:retry-lock</span>
         </div>
       </div>
       <div class="diagram-card">
@@ -975,36 +975,37 @@ flowchart LR
     PDJ[purge_dead_jobs]
   end
 
+  QUEUE[(SQS: jobs)]
+
   subgraph REDIS[Redis]
     direction TB
-    QUEUE[(arq:queue)]
-    INPROG[(arq:in-progress)]
-    RESULTS[(arq:result)]
-    LOCK[(arq:dlq:retry-lock)]
+    DEAD[(jobs:dead)]
+    DONE[(jobs:stats:completed)]
+    LOCK[(jobs:dead:retry-lock)]
   end
 
   ADMIN --> QS
-  QS -->|SCAN| QUEUE
-  QS -->|SCAN| INPROG
-  QS -->|SCAN| RESULTS
+  QS -->|GetQueueAttributes| QUEUE
+  QS -->|ZCARD| DEAD
+  QS -->|GET| DONE
 
   ADMIN -->|page, limit| LDJ
-  LDJ -->|SCAN failed jobs| RESULTS
+  LDJ -->|ZREVRANGE + MGET| DEAD
 
   ADMIN -->|job_id| RDJ
-  RDJ -->|SET NX EX 30 dist lock| LOCK
-  RDJ -->|GETDEL job result| RESULTS
-  RDJ -->|ENQUEUE retried job| QUEUE
+  RDJ -->|SET NX EX 30 lock| LOCK
+  RDJ -->|GET + DEL record| DEAD
+  RDJ -->|SEND retried job| QUEUE
 
   ADMIN -->|job_id| DDJ
-  DDJ -->|DEL job result| RESULTS
+  DDJ -->|DEL record| DEAD
 
   ADMIN --> PDJ
-  PDJ -->|bulk DEL all failed| RESULTS
+  PDJ -->|DEL all records| DEAD
 
   class ADMIN ext
   class QS,LDJ,RDJ,DDJ,PDJ proc
-  class QUEUE,INPROG,RESULTS,LOCK redis
+  class QUEUE,DEAD,DONE,LOCK redis
         </div>
       </div>
     </div>
