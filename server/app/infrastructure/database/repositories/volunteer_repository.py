@@ -398,10 +398,8 @@ class VolunteerRepository:
         search: str | None = None,
     ) -> tuple[list[ApplicationSummaryEntity], int]:
         """Fetch a paginated slice of volunteer applications with optional status and search filter."""
-        joined = (
-            VolunteerApplicationModel.__table__
-            .join(User.__table__, VolunteerApplicationModel.user_id == User.id)
-            .outerjoin(UserProfile.__table__, User.id == UserProfile.user_id)
+        joined = VolunteerApplicationModel.__table__.join(User.__table__, VolunteerApplicationModel.user_id == User.id).outerjoin(
+            UserProfile.__table__, User.id == UserProfile.user_id
         )
         base_query = (
             select(
@@ -414,10 +412,7 @@ class VolunteerRepository:
             .join(User, VolunteerApplicationModel.user_id == User.id)
             .outerjoin(UserProfile, User.id == UserProfile.user_id)
         )
-        count_query = (
-            select(func.count())
-            .select_from(joined)
-        )
+        count_query = select(func.count()).select_from(joined)
 
         if status is not None:
             base_query = base_query.where(VolunteerApplicationModel.status == status)

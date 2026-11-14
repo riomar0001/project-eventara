@@ -513,6 +513,7 @@ class EventParticipantUseCase:
         qr_token_factory = self.qr_token_factory
         if qr_token_factory is None:
             from app.core.security.token_service import create_event_qr_token
+
             qr_token_factory = create_event_qr_token
 
         qr_token = qr_token_factory(

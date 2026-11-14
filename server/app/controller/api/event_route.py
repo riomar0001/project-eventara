@@ -256,10 +256,7 @@ async def get_home_events(
     response_model=PublicEventDetailResponse,
     status_code=status.HTTP_200_OK,
     summary="Public event detail",
-    description=(
-        "Returns a single event with all its sessions. "
-        "No authentication required."
-    ),
+    description=("Returns a single event with all its sessions. No authentication required."),
 )
 async def get_public_event_detail(
     event_id: uuid.UUID,

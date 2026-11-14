@@ -240,9 +240,7 @@ async def get_my_session_registration_status(
     use_case: EventParticipantUseCase = Depends(get_event_participant_use_case),
 ) -> MySessionRegistrationResponse:
     """Return registration status for the calling user on a given session."""
-    result = await use_case.get_session_registration_status(
-        GetSessionRegistrationStatusInput(user_id=user_id, session_id=session_id)
-    )
+    result = await use_case.get_session_registration_status(GetSessionRegistrationStatusInput(user_id=user_id, session_id=session_id))
     return MySessionRegistrationResponse(data=MySessionRegistrationData(is_registered=result.is_registered, status=result.status))
 
 

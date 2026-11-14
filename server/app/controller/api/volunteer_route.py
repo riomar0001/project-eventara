@@ -520,9 +520,7 @@ async def list_applications(
     - **403 Forbidden** — caller lacks ``read`` permission on ``volunteer-applications``.
     - **422 Unprocessable Entity** — query parameter validation failed.
     """
-    result = await use_case.list_applications(
-        ListApplicationsInput(page=page, page_size=page_size, status=app_status, search=search or None)
-    )
+    result = await use_case.list_applications(ListApplicationsInput(page=page, page_size=page_size, status=app_status, search=search or None))
     return {
         "success": True,
         "message": "Volunteer applications retrieved successfully.",

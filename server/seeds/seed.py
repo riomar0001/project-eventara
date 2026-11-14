@@ -584,11 +584,36 @@ FEATURE_ROWS = [
 
 ROLE_ROWS = [
     # (name, description, is_default, is_system)
-    ("participant", "The baseline role for attendees. Can sign in/out, view their own profile, update/edit their own details, and delete their own account.", True, False),
-    ("volunteer", "Users who assist on the ground during events. Standard member permissions plus access to event onboarding/check-in features and limited participant data viewing.", False, False),
-    ("event_organizer", "Users responsible for planning and executing specific events. Can create/manage events, venues, and view complete attendance and demographic data for events they manage.", False, False),
-    ("community_leader", "The Davao DeFi Community PH management team. Read-only or read/write access across all events with access to consolidated data, reporting, analytics, and participant demographics.", False, True),
-    ("system_administrator", "The IT personnel maintaining Eventara. Complete CRUD access to all entities including user profiles/accounts, features, roles, and permissions.", False, True),
+    (
+        "participant",
+        "The baseline role for attendees. Can sign in/out, view their own profile, update/edit their own details, and delete their own account.",
+        True,
+        False,
+    ),
+    (
+        "volunteer",
+        "Users who assist on the ground during events. Standard member permissions plus access to event onboarding/check-in features and limited participant data viewing.",
+        False,
+        False,
+    ),
+    (
+        "event_organizer",
+        "Users responsible for planning and executing specific events. Can create/manage events, venues, and view complete attendance and demographic data for events they manage.",
+        False,
+        False,
+    ),
+    (
+        "community_leader",
+        "The Davao DeFi Community PH management team. Read-only or read/write access across all events with access to consolidated data, reporting, analytics, and participant demographics.",
+        False,
+        True,
+    ),
+    (
+        "system_administrator",
+        "The IT personnel maintaining Eventara. Complete CRUD access to all entities including user profiles/accounts, features, roles, and permissions.",
+        False,
+        True,
+    ),
 ]
 
 VOLUNTEER_ROLE_ROWS = [
@@ -828,20 +853,45 @@ async def seed() -> None:  # noqa: C901
         role_permissions_matrix = {
             "system_administrator": (features, ["create", "read", "update", "delete"]),
             "event_organizer": (
-                [feature_by_slug[s] for s in (
-                    "venues", "events", "event-participants", "event-feedback",
-                    "event-volunteers", "volunteers", "volunteer-roles",
-                    "volunteer-applications", "dashboard", "analytics",
-                )],
+                [
+                    feature_by_slug[s]
+                    for s in (
+                        "venues",
+                        "events",
+                        "event-participants",
+                        "event-feedback",
+                        "event-volunteers",
+                        "volunteers",
+                        "volunteer-roles",
+                        "volunteer-applications",
+                        "dashboard",
+                        "analytics",
+                    )
+                ],
                 ["create", "read", "update", "delete"],
             ),
             "community_leader": (
-                [feature_by_slug[s] for s in (
-                    "venues", "user-roles", "user-grants", "features", "roles",
-                    "queues", "audit-logs", "events", "event-participants",
-                    "event-feedback", "event-volunteers", "volunteers",
-                    "volunteer-roles", "dashboard", "app-feedback", "analytics",
-                )],
+                [
+                    feature_by_slug[s]
+                    for s in (
+                        "venues",
+                        "user-roles",
+                        "user-grants",
+                        "features",
+                        "roles",
+                        "queues",
+                        "audit-logs",
+                        "events",
+                        "event-participants",
+                        "event-feedback",
+                        "event-volunteers",
+                        "volunteers",
+                        "volunteer-roles",
+                        "dashboard",
+                        "app-feedback",
+                        "analytics",
+                    )
+                ],
                 ["read"],
             ),
             "participant": (

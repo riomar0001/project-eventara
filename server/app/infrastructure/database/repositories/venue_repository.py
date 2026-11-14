@@ -97,9 +97,11 @@ class VenueRepository:
             .subquery()
         )
 
-        query = select(Venue, rating_subq.c.avg_rating, rating_subq.c.rating_count, UserProfile.alias).outerjoin(
-            rating_subq, rating_subq.c.venue_id == Venue.id
-        ).outerjoin(UserProfile, UserProfile.user_id == Venue.creator_id)
+        query = (
+            select(Venue, rating_subq.c.avg_rating, rating_subq.c.rating_count, UserProfile.alias)
+            .outerjoin(rating_subq, rating_subq.c.venue_id == Venue.id)
+            .outerjoin(UserProfile, UserProfile.user_id == Venue.creator_id)
+        )
         count_query = select(func.count()).select_from(Venue)
 
         if search:
@@ -146,11 +148,7 @@ class VenueRepository:
             orm = result.scalar_one_or_none()
             return self._to_entity(orm) if orm else None
 
-        query = (
-            select(Venue, UserProfile.alias)
-            .outerjoin(UserProfile, UserProfile.user_id == Venue.creator_id)
-            .where(Venue.id == venue_id)
-        )
+        query = select(Venue, UserProfile.alias).outerjoin(UserProfile, UserProfile.user_id == Venue.creator_id).where(Venue.id == venue_id)
         result = await self.db.execute(query)
         row = result.first()
         if row is None:
