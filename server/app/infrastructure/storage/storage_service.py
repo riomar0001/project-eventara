@@ -1,4 +1,5 @@
 import uuid
+from functools import lru_cache
 
 import boto3
 from botocore.config import Config
@@ -21,9 +22,6 @@ def _require_storage_settings() -> None:
     missing = [
         name
         for name, value in [
-            ("STORAGE_ENDPOINT", settings.STORAGE_ENDPOINT),
-            ("STORAGE_ACCESS_KEY_ID", settings.STORAGE_ACCESS_KEY_ID),
-            ("STORAGE_SECRET_ACCESS_KEY", settings.STORAGE_SECRET_ACCESS_KEY),
             ("STORAGE_BUCKET_NAME", settings.STORAGE_BUCKET_NAME),
             ("STORAGE_PUBLIC_URL", settings.STORAGE_PUBLIC_URL),
         ]
@@ -31,6 +29,22 @@ def _require_storage_settings() -> None:
     ]
     if missing:
         raise RuntimeError(f"Object storage is not fully configured. Missing: {', '.join(missing)}.")
+    if bool(settings.STORAGE_ACCESS_KEY_ID) != bool(settings.STORAGE_SECRET_ACCESS_KEY):
+        raise RuntimeError("Set both STORAGE_ACCESS_KEY_ID and STORAGE_SECRET_ACCESS_KEY, or neither to use the IAM role.")
+
+
+@lru_cache(maxsize=1)
+def _s3_client():
+    # boto3 clients are thread-safe and costly to build; reuse one per process.
+    # None for keys/endpoint means the default credential chain and AWS S3.
+    return boto3.client(
+        "s3",
+        endpoint_url=settings.STORAGE_ENDPOINT or None,
+        aws_access_key_id=settings.STORAGE_ACCESS_KEY_ID or None,
+        aws_secret_access_key=settings.STORAGE_SECRET_ACCESS_KEY or None,
+        config=Config(signature_version="s3v4"),
+        region_name=settings.STORAGE_REGION or ("auto" if settings.STORAGE_ENDPOINT else None),
+    )
 
 
 class StorageService:
@@ -83,14 +97,7 @@ class StorageService:
 
         _require_storage_settings()
 
-        client = boto3.client(
-            "s3",
-            endpoint_url=settings.STORAGE_ENDPOINT,
-            aws_access_key_id=settings.STORAGE_ACCESS_KEY_ID,
-            aws_secret_access_key=settings.STORAGE_SECRET_ACCESS_KEY,
-            config=Config(signature_version="s3v4"),
-            region_name="auto",
-        )
+        client = _s3_client()
 
         object_key = f"{resource_type}/{uuid.uuid4()}.{ext}"
 

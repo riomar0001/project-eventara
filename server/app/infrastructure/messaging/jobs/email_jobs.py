@@ -1,23 +1,23 @@
 """ARQ background jobs for email delivery.
 
-Separating the job definition from the SMTP transport layer means the worker
+Separating the job definition from the transport layer (SMTP or SES) means the worker
 can import this module without pulling in application-layer dependencies, and
-the job can be unit-tested by mocking ``_send_smtp`` in isolation.
+the job can be unit-tested by mocking ``deliver_email`` in isolation.
 """
 
 import asyncio
 import json
 from datetime import timedelta
 
-from app.infrastructure.messaging.email import _send_smtp
+from app.infrastructure.messaging.email import deliver_email
 
 _FAILURE_TTL = int(timedelta(days=7).total_seconds())
 
 
 async def send_email_job(ctx: dict, *, to: str, subject: str, html: str) -> None:
-    """ARQ job that delivers a single HTML email via SMTP.
+    """ARQ job that delivers a single HTML email via the configured provider.
 
-    Runs inside the ARQ worker process.  ``_send_smtp`` is synchronous, so it
+    Runs inside the ARQ worker process.  ``deliver_email`` is synchronous, so it
     is offloaded to a thread to avoid blocking the worker event loop.
 
     TTL policy:
@@ -35,7 +35,7 @@ async def send_email_job(ctx: dict, *, to: str, subject: str, html: str) -> None
         html:    HTML body of the email.
     """
     try:
-        await asyncio.to_thread(_send_smtp, to, subject, html)
+        await asyncio.to_thread(deliver_email, to, subject, html)
     except Exception as exc:
         job_id = ctx.get("job_id", "unknown")
         job_try = ctx.get("job_try", 1)
