@@ -1,7 +1,6 @@
 import asyncio
 import logging
 from contextlib import asynccontextmanager, suppress
-from functools import partial
 
 from fastapi import FastAPI
 
@@ -25,8 +24,9 @@ async def lifespan(app: FastAPI):
         app.state.jobs = SqsJobQueue(settings.JOB_QUEUE_URL)
     else:
         logger.warning("JOB_QUEUE_URL is unset: running background jobs and schedules in-process (local development)")
-        executor = partial(run_local_job, redis=app.state.redis, dead_jobs=DeadJobStore(app.state.redis))
-        app.state.jobs = LocalJobQueue(executor)
+        redis, dead_jobs = app.state.redis, DeadJobStore(app.state.redis)
+        # The executor hands the queue itself to jobs that enqueue follow-up work.
+        app.state.jobs = LocalJobQueue(lambda message: run_local_job(message, redis=redis, dead_jobs=dead_jobs, jobs=app.state.jobs))
         scheduler_task = asyncio.create_task(run_local_scheduler(app.state.jobs))
 
     try:

@@ -172,3 +172,22 @@ async def test_local_queue_runs_job_in_background(fake_job):
     fake_job.assert_awaited_once()
     assert fake_job.await_args.kwargs == {"to": "x@y.z"}
     assert (await queue.counts()).in_progress == 0
+
+
+def test_local_schedules_match_terraform_scheduler():
+    """LOCAL_SCHEDULES (local dev) and scheduler.tf (AWS) must run the same jobs."""
+    import re
+    from pathlib import Path
+
+    tf = Path(__file__).resolve().parents[3] / "infra" / "terraform" / "scheduler.tf"
+    if not tf.exists():
+        pytest.skip("infra/terraform is not available in this checkout")
+    tf_jobs = set(re.findall(r'function\s*=\s*"([a-z_]+)"', tf.read_text(encoding="utf-8")))
+    assert tf_jobs == {name for name, _ in worker.LOCAL_SCHEDULES}
+
+
+@pytest.mark.asyncio
+async def test_jobs_receive_the_queue_in_their_context(fake_job):
+    queue = AsyncMock()
+    await worker.execute_job(JobMessage(function="fake_job"), attempt=1, redis=FakeRedis(), jobs=queue)
+    assert fake_job.await_args.args[0]["jobs"] is queue

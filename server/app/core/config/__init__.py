@@ -1,5 +1,6 @@
 from datetime import timedelta
 from typing import Literal
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -69,6 +70,8 @@ class Settings(BaseSettings):
     SES_REGION: str | None = None
 
     CORS_ORIGIN: str
+    # IANA timezone used to show session times in emails.
+    DISPLAY_TIMEZONE: str = "Asia/Manila"
     # Comma-separated string in .env: https://a.com,https://b.com
     # Empty by default (no cross-origin access). "*" is only allowed with DEBUG on:
     # the API sends credentials, so Starlette would reflect any Origin back.
@@ -98,6 +101,15 @@ class Settings(BaseSettings):
         if isinstance(v, timedelta):
             return v
         return _parse_duration(str(v))
+
+    @field_validator("DISPLAY_TIMEZONE")
+    @classmethod
+    def validate_timezone(cls, v: str) -> str:
+        try:
+            ZoneInfo(v)
+        except (ZoneInfoNotFoundError, ValueError) as exc:
+            raise ValueError(f"Unknown DISPLAY_TIMEZONE {v!r}") from exc
+        return v
 
     @property
     def mail_from(self) -> str:

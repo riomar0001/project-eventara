@@ -5,7 +5,7 @@ from app.core.email_template.auth import (
     reset_password_email_html,
     verification_email_html,
 )
-from app.core.email_template.event import check_in_receipt_email_html, event_registration_qr_email_html
+from app.core.email_template.event import check_in_receipt_email_html, event_registration_qr_email_html, session_reminder_email_html
 
 __all__ = [
     "account_locked_email_html",
@@ -14,5 +14,6 @@ __all__ = [
     "event_registration_qr_email_html",
     "otp_email_html",
     "reset_password_email_html",
+    "session_reminder_email_html",
     "verification_email_html",
 ]

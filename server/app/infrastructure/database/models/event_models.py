@@ -74,6 +74,8 @@ class EventParticipant(Base):
     is_checked_in: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     checked_in_time: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     checked_in_by: Mapped[UUID | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    # Set when the pre-session reminder email is claimed; NULL means not yet reminded.
+    reminder_sent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     user = relationship("User", back_populates="event_participants", foreign_keys=[user_id])
     check_in_operator = relationship("User", foreign_keys=[checked_in_by])

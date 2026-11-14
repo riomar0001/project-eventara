@@ -6,6 +6,7 @@ locals {
     sync-event-session-statuses = { function = "sync_event_session_statuses_job", expression = "rate(1 minute)" }
     sync-event-statuses         = { function = "sync_event_statuses_job", expression = "rate(1 minute)" }
     finalize-account-deletions  = { function = "finalize_due_account_deletions_job", expression = "rate(5 minutes)" }
+    send-session-reminders      = { function = "send_session_reminders_job", expression = "rate(15 minutes)" }
     revoke-expired-tokens       = { function = "revoke_expired_tokens_job", expression = "cron(0 0 * * ? *)" }
   }
 }

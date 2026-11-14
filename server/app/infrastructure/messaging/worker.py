@@ -21,6 +21,7 @@ from datetime import UTC, datetime, timedelta
 from redis.asyncio import Redis
 
 from app.application.dto.queue_dto import DeadJobInfo
+from app.application.interfaces.job_queue_interface import IJobQueue
 from app.core.config import settings
 from app.infrastructure.messaging.dead_jobs import DeadJobStore
 from app.infrastructure.messaging.job_queue import JobMessage, LocalJobQueue, SqsJobQueue
@@ -28,6 +29,7 @@ from app.infrastructure.messaging.jobs.account_deletion_jobs import finalize_due
 from app.infrastructure.messaging.jobs.audit_log_jobs import persist_audit_log
 from app.infrastructure.messaging.jobs.email_jobs import send_email_job
 from app.infrastructure.messaging.jobs.event_status_jobs import sync_event_session_statuses_job, sync_event_statuses_job
+from app.infrastructure.messaging.jobs.session_reminder_jobs import send_session_reminders_job
 from app.infrastructure.messaging.jobs.token_jobs import revoke_expired_tokens_job
 
 logger = logging.getLogger(__name__)
@@ -39,6 +41,7 @@ JOBS: dict[str, JobFunc] = {
     "persist_audit_log": persist_audit_log,
     "revoke_expired_tokens_job": revoke_expired_tokens_job,
     "send_email_job": send_email_job,
+    "send_session_reminders_job": send_session_reminders_job,
     "sync_event_session_statuses_job": sync_event_session_statuses_job,
     "sync_event_statuses_job": sync_event_statuses_job,
 }
@@ -48,6 +51,7 @@ LOCAL_SCHEDULES: list[tuple[str, Callable[[datetime], bool]]] = [
     ("sync_event_session_statuses_job", lambda now: True),
     ("sync_event_statuses_job", lambda now: True),
     ("finalize_due_account_deletions_job", lambda now: now.minute % 5 == 0),
+    ("send_session_reminders_job", lambda now: now.minute % 15 == 0),
     ("revoke_expired_tokens_job", lambda now: now.hour == 0 and now.minute == 0),
 ]
 
@@ -62,15 +66,18 @@ def retry_delay_seconds(attempt: int) -> int:
     return min(settings.JOB_RETRY_BASE_SECONDS * 2 ** max(0, attempt - 1), 900)
 
 
-async def execute_job(message: JobMessage, *, attempt: int, redis: Redis) -> None:
-    """Run one job. Raises whatever the job raises."""
+async def execute_job(message: JobMessage, *, attempt: int, redis: Redis, jobs: IJobQueue | None = None) -> None:
+    """Run one job. Raises whatever the job raises.
+
+    ``jobs`` is exposed to jobs that enqueue follow-up work (e.g. reminder emails).
+    """
     func = JOBS.get(message.function)
     if func is None:
         raise UnknownJobError(message.function)
     if message.is_expired():
         logger.warning("Skipping expired job %s (%s)", message.job_id, message.function)
         return
-    ctx = {"job_id": message.job_id, "job_try": attempt, "redis": redis}
+    ctx = {"job_id": message.job_id, "job_try": attempt, "redis": redis, "jobs": jobs}
     await func(ctx, *message.args, **message.kwargs)
 
 
@@ -126,7 +133,7 @@ async def process_sqs_records(
 
         attempt = _receive_count(record)
         try:
-            await execute_job(message, attempt=attempt, redis=redis)
+            await execute_job(message, attempt=attempt, redis=redis, jobs=queue)
         except Exception as exc:
             logger.exception("Job %s (%s) failed on attempt %d", message.job_id, message.function, attempt)
             final = attempt >= settings.JOB_MAX_TRIES or isinstance(exc, UnknownJobError)
@@ -154,11 +161,11 @@ async def _try_record_dead(dead_jobs: DeadJobStore, message: JobMessage, attempt
         return False
 
 
-async def run_local_job(message: JobMessage, *, redis: Redis, dead_jobs: DeadJobStore) -> None:
+async def run_local_job(message: JobMessage, *, redis: Redis, dead_jobs: DeadJobStore, jobs: IJobQueue | None = None) -> None:
     """Local-dev executor with the same retry and dead-letter behaviour as SQS."""
     for attempt in range(1, settings.JOB_MAX_TRIES + 1):
         try:
-            await execute_job(message, attempt=attempt, redis=redis)
+            await execute_job(message, attempt=attempt, redis=redis, jobs=jobs)
         except asyncio.CancelledError:
             raise
         except Exception as exc:

@@ -69,6 +69,7 @@ export function EventSidebar({ event, totalSlots, isFull, onFeedbackClick }: Pro
                   </div>
                 ))}
               </div>
+              <p className="text-muted-foreground mt-3 text-[12px] leading-relaxed">We&apos;ll email you a reminder about a day before each session starts.</p>
             </>
           ) : (
             <>

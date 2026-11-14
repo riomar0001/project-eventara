@@ -14,15 +14,18 @@ Concurrency strategy — pessimistic locking (SELECT … FOR UPDATE) on mutating
 """
 
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.application.dto.session_reminder_dto import SessionReminder
 from app.domain.entities.event_entity import EventParticipant as EventParticipantEntity
-from app.domain.entities.event_entity import EventParticipantStatus
-from app.infrastructure.database.models.event_models import EventParticipant, EventSession
-from app.infrastructure.database.models.user_models import UserProfile
+from app.domain.entities.event_entity import EventParticipantStatus, EventSessionStatus
+from app.domain.entities.user_entity import UserStatus
+from app.infrastructure.database.models.event_models import Event, EventParticipant, EventSession
+from app.infrastructure.database.models.user_models import User, UserProfile
+from app.infrastructure.database.models.venue_models import Venue
 
 
 class EventParticipantRepository:
@@ -294,3 +297,93 @@ class EventParticipantRepository:
             query = query.where(EventParticipant.status == status)
         result = await self.db.execute(query)
         return result.scalar_one()
+
+    async def claim_due_reminders(
+        self,
+        *,
+        now: datetime,
+        horizon: timedelta,
+        min_notice: timedelta,
+        limit: int,
+    ) -> list[SessionReminder]:
+        """Mark up to ``limit`` registrations as reminded and return their email details.
+
+        Picks active registrations for posted sessions starting within
+        ``horizon`` that were made at least ``min_notice`` ago (newer ones just
+        received their confirmation email). ``FOR UPDATE SKIP LOCKED`` lets
+        concurrent workers claim disjoint rows, so nobody is reminded twice.
+        Commits the claim; call ``release_reminders`` if the email cannot be queued.
+        """
+        due_ids = (
+            (
+                await self.db.execute(
+                    select(EventParticipant.id)
+                    .join(EventSession, EventSession.id == EventParticipant.event_session_id)
+                    .join(User, User.id == EventParticipant.user_id)
+                    .where(
+                        EventParticipant.status == EventParticipantStatus.REGISTERED,
+                        EventParticipant.reminder_sent_at.is_(None),
+                        EventParticipant.created_at <= now - min_notice,
+                        EventSession.status == EventSessionStatus.POSTED,
+                        EventSession.start_datetime > now,
+                        EventSession.start_datetime <= now + horizon,
+                        User.status == UserStatus.ACTIVE,
+                    )
+                    .order_by(EventSession.start_datetime)
+                    .limit(limit)
+                    .with_for_update(of=EventParticipant, skip_locked=True)
+                )
+            )
+            .scalars()
+            .all()
+        )
+        if not due_ids:
+            await self.db.rollback()
+            return []
+
+        await self.db.execute(update(EventParticipant).where(EventParticipant.id.in_(due_ids)).values(reminder_sent_at=now))
+        rows = (
+            await self.db.execute(
+                select(
+                    EventParticipant.id,
+                    User.email,
+                    UserProfile.first_name,
+                    Event.id,
+                    Event.title,
+                    EventSession.title,
+                    EventSession.start_datetime,
+                    Venue.name,
+                    Venue.address_line,
+                    Venue.city,
+                )
+                .join(EventSession, EventSession.id == EventParticipant.event_session_id)
+                .join(Event, Event.id == EventSession.event_id)
+                .join(Venue, Venue.id == EventSession.venue_id)
+                .join(User, User.id == EventParticipant.user_id)
+                .outerjoin(UserProfile, UserProfile.user_id == EventParticipant.user_id)
+                .where(EventParticipant.id.in_(due_ids))
+            )
+        ).all()
+        await self.db.commit()
+
+        return [
+            SessionReminder(
+                participant_id=row[0],
+                email=row[1],
+                first_name=row[2],
+                event_id=row[3],
+                event_title=row[4],
+                session_title=row[5],
+                session_start=row[6],
+                venue_name=row[7],
+                venue_address=", ".join(part for part in (row[8], row[9]) if part),
+            )
+            for row in rows
+        ]
+
+    async def release_reminders(self, participant_ids: list[uuid.UUID]) -> None:
+        """Clear claims whose email could not be queued so a later run retries them."""
+        if not participant_ids:
+            return
+        await self.db.execute(update(EventParticipant).where(EventParticipant.id.in_(participant_ids)).values(reminder_sent_at=None))
+        await self.db.commit()

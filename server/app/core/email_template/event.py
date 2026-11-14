@@ -43,3 +43,30 @@ def event_registration_qr_email_html(
         f'<p><img src="{qr_url}" alt="Event check-in QR code" width="240" height="240" /></p>'
         f"<p>QR token: <code>{escape(qr_token)}</code></p>"
     )
+
+
+def session_reminder_email_html(
+    *,
+    first_name: str | None,
+    event_title: str,
+    session_title: str,
+    starts_at: str,
+    venue_name: str,
+    venue_address: str,
+    event_url: str,
+) -> str:
+    """Build the reminder sent about a day before a registered session starts.
+
+    Links to the event page, where the attendee's check-in QR code is shown,
+    instead of embedding the admission token in the email again.
+    """
+    greeting = f"Hi {escape(first_name)}," if first_name else "Hi,"
+    return (
+        f"<p>{greeting}</p>"
+        f"<p>This is a reminder that <strong>{escape(session_title)}</strong> "
+        f"({escape(event_title)}) starts soon.</p>"
+        f"<p><strong>When:</strong> {escape(starts_at)}<br />"
+        f"<strong>Where:</strong> {escape(venue_name)}, {escape(venue_address)}</p>"
+        f'<p><a href="{escape(event_url, quote=True)}">View the event and your check-in QR code</a></p>'
+        "<p>Can no longer make it? Withdraw from the session on the event page so someone else can take your seat.</p>"
+    )
